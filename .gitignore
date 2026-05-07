@@ -10,6 +10,7 @@ x86/
 # IDE and editor files
 .vs/
 .idea/
+.worktrees/
 *.user
 *.suo
 *.userosscache
