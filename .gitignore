@@ -29,6 +29,11 @@ project.nuget.cache
 # Reqnroll generated code-behind files
 *.feature.cs
 
+# System-level MT local artifacts
+MetBench_SystemMT.Tests/TestResults/
+MetBenchSystemMt/
+MetBenchSystemMtBdd/
+
 # Python
 __pycache__/
 *.py[cod]

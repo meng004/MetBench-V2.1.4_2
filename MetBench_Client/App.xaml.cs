@@ -12,6 +12,7 @@ using System.Windows.Threading;
 using MetBench_DAL;
 using MetBench_IDAL;
 using MetBench_BLL;
+using MetBench_BLL.SystemMT;
 using Wpf.Ui.Controls;
 using Wpf.Ui;
 using Stylet;
@@ -97,6 +98,13 @@ namespace MetBench_Client
 
                 // 蜕变测试执行
                 services.AddScoped<AutoRunMR_Await>();
+
+                // System-level metamorphic testing
+                services.AddScoped<CliProgramRunner>();
+                services.AddScoped(provider => new PythonOutputAdapter(
+                    OperatingSystem.IsWindows() ? "python" : "python3"));
+                services.AddScoped<GreaterThanAssertion>();
+                services.AddScoped<SystemMtRunner>();
 
                 // 结果可视化相关IOC配置
                 services.AddScoped<MTVisualizationSerive>();
