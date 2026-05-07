@@ -26,6 +26,9 @@ project.nuget.cache
 *.csproj.nuget.g.props
 *.csproj.nuget.g.targets
 
+# Reqnroll generated code-behind files
+*.feature.cs
+
 # Python
 __pycache__/
 *.py[cod]
