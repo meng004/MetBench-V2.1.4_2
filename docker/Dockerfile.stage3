@@ -49,7 +49,7 @@ RUN python3 -m pip install --no-cache-dir \
         numpy h5py matplotlib
 
 # -----------------------------------------------------------------------------
-# OpenMOC: clone, build with OpenMP, smoke-test the import.
+# OpenMOC: clone, build (default toolchain == gcc + OpenMP), smoke-test import.
 #   - Pinned via OPENMOC_REF (override at build time for reproducibility).
 #   - Installed system-wide (no --user) so any UID can `import openmoc`.
 #   - Build artifacts are removed afterward to keep the image lean.
@@ -57,7 +57,7 @@ RUN python3 -m pip install --no-cache-dir \
 WORKDIR /opt
 RUN git clone --depth=1 --branch ${OPENMOC_REF} https://github.com/mit-crpg/OpenMOC.git \
     && cd OpenMOC \
-    && python3 setup.py install --with-gcc --with-openmp \
+    && python3 setup.py install \
     && cd .. \
     && rm -rf OpenMOC/build OpenMOC/.git
 
