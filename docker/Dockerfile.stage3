@@ -19,11 +19,15 @@
 FROM ubuntu:24.04
 
 ARG DEBIAN_FRONTEND=noninteractive
-ARG OPENMOC_REF=develop
+ARG OPENMOC_REF=3D-MOC
 ARG DOTNET_CHANNEL=9.0
 ARG TZ=Etc/UTC
 
+# OpenMOC's setup.py installs to --user; expose that path so any process
+# (including non-login shells in CI) can import the package.
 ENV TZ=${TZ} \
+    PATH=/root/.local/bin:${PATH} \
+    PYTHONPATH=/root/.local/lib/python3.12/site-packages \
     DOTNET_ROOT=/usr/share/dotnet \
     DOTNET_NOLOGO=1 \
     DOTNET_CLI_TELEMETRY_OPTOUT=1 \
@@ -49,17 +53,23 @@ RUN python3 -m pip install --no-cache-dir \
         numpy h5py matplotlib
 
 # -----------------------------------------------------------------------------
-# OpenMOC: clone, build (default toolchain == gcc + OpenMP), smoke-test import.
-#   - Pinned via OPENMOC_REF (override at build time for reproducibility).
-#   - Installed system-wide (no --user) so any UID can `import openmoc`.
-#   - Build artifacts are removed afterward to keep the image lean.
+# OpenMOC: clone and install per the official mit-crpg/OpenMOC Dockerfile
+# convention (https://github.com/mit-crpg/OpenMOC/blob/develop/Dockerfile):
+#   - Branch 3D-MOC is the toolchain that the upstream image ships with.
+#   - `setup.py install --user` is invoked twice: the first pass builds the
+#     SWIG C extension (_openmoc) and stages files; the second pass actually
+#     installs everything reliably. Removing either invocation breaks
+#     `import openmoc` (regression seen in CI run 25526969062 with a single
+#     install: ModuleNotFoundError: No module named 'openmoc.openmoc').
+#   - .git is dropped at the end to keep the image lean; build/ is kept since
+#     the second install pass relies on it.
 # -----------------------------------------------------------------------------
 WORKDIR /opt
 RUN git clone --depth=1 --branch ${OPENMOC_REF} https://github.com/mit-crpg/OpenMOC.git \
     && cd OpenMOC \
-    && python3 setup.py install \
-    && cd .. \
-    && rm -rf OpenMOC/build OpenMOC/.git
+    && python3 setup.py install --user \
+    && python3 setup.py install --user \
+    && rm -rf .git
 
 RUN python3 -c "import openmoc; print('openmoc import OK')"
 
