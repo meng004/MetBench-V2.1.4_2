@@ -10,6 +10,7 @@ x86/
 # IDE and editor files
 .vs/
 .idea/
+.worktrees/
 *.user
 *.suo
 *.userosscache
@@ -24,6 +25,14 @@ project.nuget.cache
 *.csproj.nuget.dgspec.json
 *.csproj.nuget.g.props
 *.csproj.nuget.g.targets
+
+# Reqnroll generated code-behind files
+*.feature.cs
+
+# System-level MT local artifacts
+MetBench_SystemMT.Tests/TestResults/
+MetBenchSystemMt/
+MetBenchSystemMtBdd/
 
 # Python
 __pycache__/
