@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="MetBench_Domain.Application">
+    <Position X="14" Y="1.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="MetBench_Domain.ApplicationParameter">
+    <Position X="15.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="MetBench_Domain.Domain">
+    <Position X="17.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="MetBench_Domain.MetamorphicRelation">
+    <Position X="15.75" Y="4.25" Width="2.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="MetBench_BLL.ApplicationSerive">
+    <Position X="3.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAACAAAAQAAAAAAAAACAAAAAAAAAwAgAAAAECgABAA=</HashCode>
+      <FileName>ApplicationSerive.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MetBench_BLL.DomainSerive">
+    <Position X="5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAACAAAAAAAAAAAAAAIAAIAAAAAAAECAABAg=</HashCode>
+      <FileName>DomainSerive.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MetBench_BLL.MetamorphicRelationSerive">
+    <Position X="1.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAEAAAAAgAAACAAQAAAAAIQAQAAAAECAABAA=</HashCode>
+      <FileName>MetamorphicRelationSerive.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MetBench_DAL.MetamorphicRelationRepository">
+    <Position X="1.5" Y="6.25" Width="1.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MetBench_DAL.DbConfig">
+    <Position X="7.5" Y="6.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="MetBench_DAL.ApplicationRepository">
+    <Position X="3.25" Y="6.25" Width="1.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MetBench_DAL.DomainRepository">
+    <Position X="5" Y="6.25" Width="1.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MetBench_IDAL.MetamorphicRelations_QueryResultData">
+    <Position X="12.75" Y="7.25" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="MetBench_IDAL.Applications_QueryResultData">
+    <Position X="11" Y="7.25" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="MetBench_DAL.DatatoImage" Collapsed="true">
+    <Position X="14" Y="5.75" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="MetBench_BLL.Latextosympy_Await">
+    <Position X="4.75" Y="9.25" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAABAAAAAAQAAAABAAAAAAIAgAAAAAAAAAAEAA=</HashCode>
+      <FileName>Latextosympy_Await.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="MetBench_IDAL.IApplicationRepository">
+    <Position X="9.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="MetBench_IDAL.IMetamorphicRelationRepository">
+    <Position X="11.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="MetBench_IDAL.IDomainRepository">
+    <Position X="7" Y="4.5" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="MetBench_IDAL.IRepository&lt;T&gt;">
+    <Position X="9.25" Y="2.25" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Font Name="Microsoft YaHei UI" Size="9" />
+</ClassDiagram>

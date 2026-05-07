@@ -1,0 +1,74 @@
+# Build outputs
+bin/
+obj/
+[Bb]uild/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+
+# IDE and editor files
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# .NET
+TestResults/
+*.nupkg
+*.snupkg
+project.assets.json
+project.nuget.cache
+*.csproj.nuget.dgspec.json
+*.csproj.nuget.g.props
+*.csproj.nuget.g.targets
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+venv/
+.venv/
+env/
+.env/
+
+# Large local dependency/runtime folders
+packages/
+*.WebView2/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# Generated reports and local run artifacts
+MetBench_MTReport/
+MetBench_DataBase/
+MetBench_Python/MTResult/
+MetBench_Python/**/logs/
+MetBench_Python/**/output/
+MetBench_Python/**/output1/
+MetBench_Python/**/Results/
+*.csv
+*.xlsx
+*.xls
+*.rar
+*.npy
+*.flag
+*.class
+*.mp4
+
+# Large ML model/checkpoint artifacts
+*.pt
+*.pth
+*.bin
+*.safetensors
+checkpoint-*/

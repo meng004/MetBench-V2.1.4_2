@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="MetBench_BLL.MRRecommendationBase" Collapsed="true">
+    <Position X="5.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAABAAQAABAAAAAAAAAAAAQAAAAACAAAAAAAAAA=</HashCode>
+      <FileName>MRRecommendationBase.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MetBench_BLL.SyntaxSimilarityDetector" Collapsed="true">
+    <Position X="7.5" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgAJAAAAAAIAAAAAAAQAAAABgBAAAAAAAAAAAA=</HashCode>
+      <FileName>SyntaxSimilarityDetector.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MetBench_BLL.SyntaxMRRecommendation" Collapsed="true">
+    <Position X="5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SyntaxMRRecommendation.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MetBench_BLL.SupportRateCalculator" Collapsed="true">
+    <Position X="9" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAEABggAAQAIAEAAAAAAAAAABAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SupportRateCalculator.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MetBench_BLL.SimilarityResultFilter" Collapsed="true">
+    <Position X="9.25" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimilarityResultFilter.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MetBench_BLL.SemanticSimilarityDetector" Collapsed="true">
+    <Position X="5.5" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgAJAAAAAAIAAAAAAAQAAAABgBAAAAAAAAAAAA=</HashCode>
+      <FileName>SemanticSimilarityDetector.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MetBench_BLL.SemanticMRRecommendation" Collapsed="true">
+    <Position X="6.75" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SemanticMRRecommendation.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MetBench_BLL.MRRecommendationResult" Collapsed="true">
+    <Position X="0.5" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAgACAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>MRRecommendationResult.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MetBench_BLL.MRWithDecimal" Collapsed="true">
+    <Position X="10.5" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>MRRecommendationResult.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MetBench_BLL.MRRecommendationVIsualResult" Collapsed="true">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAgACAABABAAAAAIAAAAAAAAAAABAAAAAgAAAAAAA=</HashCode>
+      <FileName>MRRecommendationVIsualResult.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MetBench_BLL.MRRecommendationSerive" Collapsed="true">
+    <Position X="0.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAABAAEAAEiBAAAAAAAAAAQAgIAQAAAAAAAgAAA=</HashCode>
+      <FileName>MRRecommendationSerive.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MetBench_BLL.FunctionProgram" Collapsed="true">
+    <Position X="0.5" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAEAAAGAAAAAAAACAAAAAAAAAAAAAABIAAgAAgA=</HashCode>
+      <FileName>FunctionProgram.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MetBench_BLL.TargetProgram" Collapsed="true">
+    <Position X="0.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAACACAAAAAAAAAAAAAAAAAAAAIAAAIAAAAAAA=</HashCode>
+      <FileName>TargetProgram.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="MetBench_BLL.IMRRecommendation" Collapsed="true">
+    <Position X="7.75" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>IMRRecommendation.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MetBench_BLL.IPreprocessor" Collapsed="true">
+    <Position X="4.5" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAABAAAAgAAAAAAAAAAABAAAAAAAAAAAAA=</HashCode>
+      <FileName>IPreprocessor.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MetBench_BLL.ISemanticSimilarityDetector" Collapsed="true">
+    <Position X="2.25" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ISemanticSimilarityDetector.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MetBench_BLL.ISimilarityDetector" Collapsed="true">
+    <Position X="2.25" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAA=</HashCode>
+      <FileName>ISimilarityDetector.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MetBench_BLL.ISyntaxSimilarityDetector" Collapsed="true">
+    <Position X="2.25" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ISyntaxSimilarityDetector.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Microsoft YaHei UI" Size="9" />
+</ClassDiagram>

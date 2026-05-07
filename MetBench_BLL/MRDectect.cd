@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="MetBench_BLL.AutoMRAlgorithm" Collapsed="true">
+    <Position X="5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAEAAAQIAAAIAAAAAAAABAAAAAIAEAAAAQA=</HashCode>
+      <FileName>AutoMRAlgorithm.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MetBench_BLL.AutoMRParser" Collapsed="true">
+    <Position X="7" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAABQQAQABAACAAAAQAAAAABABAAAAAAAEACAA=</HashCode>
+      <FileName>AutoMRParser.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MetBench_BLL.DetectionResult" Collapsed="true">
+    <Position X="5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAEAAAAAAAAAAAAAAAQAAAAAABAAAAAAAAAAAAA=</HashCode>
+      <FileName>DelectionResult.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MetBench_BLL.MRDetectorCollection">
+    <Position X="7" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAIAAAEAAAAEAAgAAAAAAAAIAAAAIAABAAAAAA=</HashCode>
+      <FileName>MRDetectorCollection.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MetBench_BLL.TargetProgram" Collapsed="true">
+    <Position X="3.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAACACAAAAAAAAAAAAAAAAAAAAIAAAIAAAAAAA=</HashCode>
+      <FileName>TargetProgram.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MetBench_BLL.MRDetector">
+    <Position X="1.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAIICBAAAAAAAAACAAEAAACAAAAAAAAAAA=</HashCode>
+      <FileName>MRDetector.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MetBench_BLL.FunctionProgram" Collapsed="true">
+    <Position X="3.25" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAEAAAGAAAAAAAACAAAAAAAAAAAAAABIAAgAAgA=</HashCode>
+      <FileName>FunctionProgram.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="MetBench_BLL.IRecognitionAlgorithm" Collapsed="true">
+    <Position X="5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>IRecognitionAlgorithm.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MetBench_BLL.IResultParser" Collapsed="true">
+    <Position X="7" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAA=</HashCode>
+      <FileName>IResultParser.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Microsoft YaHei UI" Size="9" />
+</ClassDiagram>

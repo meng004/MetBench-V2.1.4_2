@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="MetBench_BLL.BaseDataRecord">
+    <Position X="9.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAACAAAAACAAAAAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>BaseDataRecord.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MetBench_BLL.BasePlotter&lt;TDataRecord, TDataReader&gt;" Collapsed="true">
+    <Position X="5.5" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AGAAAAAAAAAAAQAAAACQAAAAAIEAAAASAAAFAAAAAAA=</HashCode>
+      <FileName>BasePlotter.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MetBench_BLL.ColumnDefinition">
+    <Position X="13" Y="3.25" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAIAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ColumnDefinition.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MetBench_BLL.CsvDataReader" Collapsed="true">
+    <Position X="13" Y="2.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAQAAAABAACAAAAAAAAABQAAAAgAAAAAAA=</HashCode>
+      <FileName>CsvDataReader.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MetBench_BLL.CsvDataRecord" Collapsed="true">
+    <Position X="9.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>CsvDataRecord.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MetBench_BLL.LinePlotter&lt;TDataRecord, TDataReader&gt;" Collapsed="true">
+    <Position X="5.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAQAAAAAAAAABCAAAAAAAEAAAACAgAEAAAAAAA=</HashCode>
+      <FileName>LinePlotter.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MetBench_BLL.MTVisualizationEngine&lt;TDataRecord, TDataReader&gt;">
+    <Position X="0.5" Y="1.25" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAAAAAAFAAABEBAAAAAAAAAAAAAAAAAAAAAAAAACA=</HashCode>
+      <FileName>MTVisualizationEngine.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MetBench_BLL.PiePlotter&lt;TDataRecord, TDataReader&gt;" Collapsed="true">
+    <Position X="7.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAAQAQAAAAAAAACEAAAAAAkgAAACIAIEACAAEAA=</HashCode>
+      <FileName>PiePlotter.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MetBench_BLL.ScatterPlotter&lt;TDataRecord, TDataReader&gt;" Collapsed="true">
+    <Position X="3.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAQAAAAAAACABCAAAAAAAEAAAACAAAEAAAAAAA=</HashCode>
+      <FileName>ScatterPlotter.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MetBench_BLL.MTVisualizationSerive">
+    <Position X="7.25" Y="3.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAQAQAAAAAAAAAAAAAAAASEBABAAAAAAAA=</HashCode>
+      <FileName>MTVisualizationSerive.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="MetBench_BLL.IDataRecord" Collapsed="true">
+    <Position X="5.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>IDataRecord.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MetBench_BLL.IPlotter&lt;TDataRecord, TDataReader&gt;" Collapsed="true">
+    <Position X="3.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAQAAAACAAAAAAAEAAAACAAAFAAAAAAA=</HashCode>
+      <FileName>IPlotter.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MetBench_BLL.IMTDataInterface&lt;T&gt;" Collapsed="true">
+    <Position X="11.25" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAQAAAAAAAAAAAAAAAAABQAAAAAAAAAAAA=</HashCode>
+      <FileName>IMTDataInterface.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="MetBench_BLL.PlotType" Collapsed="true">
+    <Position X="3.75" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AABAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAABAAA=</HashCode>
+      <FileName>PlotType.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Microsoft YaHei UI" Size="9" />
+</ClassDiagram>

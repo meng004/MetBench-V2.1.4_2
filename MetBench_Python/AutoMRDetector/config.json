@@ -1,0 +1,6 @@
+{
+    "input_program_filename": "sin.py",
+    "input_param_count": 1,
+    "frontend_input_ranges": "(-20,20)",
+    "frontend_input_datatypes": "float"
+}

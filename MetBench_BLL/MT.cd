@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="MetBench_BLL.AbsolutePathResolver">
+    <Position X="2.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>AbsolutePathResolver.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MetBench_BLL.Latextosympy_Await">
+    <Position X="0.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAABAAAAAAQAAAABAAAAAAIAgAAAAAAAAAAEAA=</HashCode>
+      <FileName>Latextosympy_Await.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MetBench_BLL.MTParam">
+    <Position X="6" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAIAAAAAAAAAAAAACIAAAAAAAAAAAAAgAAAAAAI=</HashCode>
+      <FileName>MTParam.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MetBench_BLL.AutoRunMR_Await">
+    <Position X="4.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAAAAAAgAEAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>AutoRunMR_Await.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Microsoft YaHei UI" Size="9" />
+</ClassDiagram>
