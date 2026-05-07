@@ -1,0 +1,92 @@
+# MetBench Stage 3 dev/CI image: OpenMOC + .NET 9 SDK + Python adapter toolchain.
+#
+# Layout follows mit-crpg/OpenMOC's official Dockerfile (develop branch) but
+# pins Ubuntu / Python versions, drops the duplicated install step, and stacks
+# the .NET SDK and gh CLI on top so Stage 1+2+3 build/test commands all work
+# inside the same container.
+#
+# Build:
+#   docker build -t metbench-stage3:latest -f docker/Dockerfile.stage3 .
+#
+# Use:
+#   docker run --rm -v "$PWD":/workspace metbench-stage3 \
+#       dotnet test MetBench_SystemMT.Tests/MetBench_SystemMT.Tests.csproj
+#
+#   docker run --rm -v "$PWD":/workspace metbench-stage3 \
+#       python3 -c "import openmoc; print('ok')"
+
+# syntax=docker/dockerfile:1.7
+FROM ubuntu:24.04
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG OPENMOC_REF=develop
+ARG DOTNET_CHANNEL=9.0
+ARG TZ=Etc/UTC
+
+ENV TZ=${TZ} \
+    DOTNET_ROOT=/usr/share/dotnet \
+    DOTNET_NOLOGO=1 \
+    DOTNET_CLI_TELEMETRY_OPTOUT=1 \
+    DOTNET_ROLL_FORWARD=LatestMajor \
+    PIP_BREAK_SYSTEM_PACKAGES=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+# -----------------------------------------------------------------------------
+# Base toolchain: compilers, OpenMOC build deps, Python, gh CLI prerequisites.
+# -----------------------------------------------------------------------------
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential cmake git pkg-config ca-certificates curl gnupg tzdata \
+        swig \
+        libhdf5-dev libhdf5-serial-dev \
+        libgomp1 \
+        python3 python3-dev python3-pip python3-venv \
+    && ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime \
+    && echo "${TZ}" > /etc/timezone \
+    && rm -rf /var/lib/apt/lists/*
+
+# Python deps shared by OpenMOC and the MetBench adapter scripts.
+RUN python3 -m pip install --no-cache-dir \
+        numpy h5py matplotlib
+
+# -----------------------------------------------------------------------------
+# OpenMOC: clone, build with OpenMP, smoke-test the import.
+#   - Pinned via OPENMOC_REF (override at build time for reproducibility).
+#   - Installed system-wide (no --user) so any UID can `import openmoc`.
+#   - Build artifacts are removed afterward to keep the image lean.
+# -----------------------------------------------------------------------------
+WORKDIR /opt
+RUN git clone --depth=1 --branch ${OPENMOC_REF} https://github.com/mit-crpg/OpenMOC.git \
+    && cd OpenMOC \
+    && python3 setup.py install --with-gcc --with-openmp \
+    && cd .. \
+    && rm -rf OpenMOC/build OpenMOC/.git
+
+RUN python3 -c "import openmoc; print('openmoc import OK')"
+
+# -----------------------------------------------------------------------------
+# .NET SDK (for `dotnet test` / `dotnet build` of MetBench_BLL.Core and
+# MetBench_SystemMT.Tests). Installed via the official dotnet-install script
+# so the channel is configurable without depending on Ubuntu's apt feed.
+# -----------------------------------------------------------------------------
+RUN curl -fsSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh \
+    && bash /tmp/dotnet-install.sh --channel ${DOTNET_CHANNEL} --install-dir ${DOTNET_ROOT} \
+    && ln -s ${DOTNET_ROOT}/dotnet /usr/local/bin/dotnet \
+    && rm /tmp/dotnet-install.sh \
+    && dotnet --info
+
+# -----------------------------------------------------------------------------
+# GitHub CLI (optional; lets the container run `gh pr create` from CI).
+# -----------------------------------------------------------------------------
+RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+        | gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+        > /etc/apt/sources.list.d/github-cli.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends gh \
+    && rm -rf /var/lib/apt/lists/*
+
+# -----------------------------------------------------------------------------
+# Project workdir. Mount the repo at /workspace when running the container.
+# -----------------------------------------------------------------------------
+WORKDIR /workspace
+CMD ["bash"]

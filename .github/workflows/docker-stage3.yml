@@ -1,0 +1,49 @@
+name: docker-stage3
+
+on:
+  pull_request:
+    paths:
+      - "docker/Dockerfile.stage3"
+      - ".github/workflows/docker-stage3.yml"
+  push:
+    branches: [main]
+    paths:
+      - "docker/Dockerfile.stage3"
+      - ".github/workflows/docker-stage3.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Stage 3 image and run smoke tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.stage3
+          tags: metbench-stage3:ci
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Smoke test - openmoc import
+        run: |
+          docker run --rm metbench-stage3:ci \
+            python3 -c "import openmoc; print('openmoc import OK')"
+
+      - name: Smoke test - dotnet --info
+        run: |
+          docker run --rm metbench-stage3:ci dotnet --info
+
+      - name: Run Stage 1 BDD test suite inside the image
+        run: |
+          docker run --rm -v "$PWD":/workspace -w /workspace metbench-stage3:ci \
+            dotnet test MetBench_SystemMT.Tests/MetBench_SystemMT.Tests.csproj \
+              --logger "console;verbosity=normal"
