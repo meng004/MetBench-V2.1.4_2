@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp1", "ConsoleApp1\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MetBench_BLL", "MetBench_BLL\MetBench_BLL.csproj", "{8932CC2F-90A1-4C7B-BC7D-740E55169F9F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetBench_SystemMT.Tests", "MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj", "{7A492A8E-434A-4A52-AF06-76999E6D2EFD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -97,6 +99,18 @@ Global
 		{8932CC2F-90A1-4C7B-BC7D-740E55169F9F}.Release|x64.Build.0 = Release|x64
 		{8932CC2F-90A1-4C7B-BC7D-740E55169F9F}.Release|x86.ActiveCfg = Release|x86
 		{8932CC2F-90A1-4C7B-BC7D-740E55169F9F}.Release|x86.Build.0 = Release|x86
+		{7A492A8E-434A-4A52-AF06-76999E6D2EFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A492A8E-434A-4A52-AF06-76999E6D2EFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A492A8E-434A-4A52-AF06-76999E6D2EFD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7A492A8E-434A-4A52-AF06-76999E6D2EFD}.Debug|x64.Build.0 = Debug|Any CPU
+		{7A492A8E-434A-4A52-AF06-76999E6D2EFD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7A492A8E-434A-4A52-AF06-76999E6D2EFD}.Debug|x86.Build.0 = Debug|Any CPU
+		{7A492A8E-434A-4A52-AF06-76999E6D2EFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A492A8E-434A-4A52-AF06-76999E6D2EFD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A492A8E-434A-4A52-AF06-76999E6D2EFD}.Release|x64.ActiveCfg = Release|Any CPU
+		{7A492A8E-434A-4A52-AF06-76999E6D2EFD}.Release|x64.Build.0 = Release|Any CPU
+		{7A492A8E-434A-4A52-AF06-76999E6D2EFD}.Release|x86.ActiveCfg = Release|Any CPU
+		{7A492A8E-434A-4A52-AF06-76999E6D2EFD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
