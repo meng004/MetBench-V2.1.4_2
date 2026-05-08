@@ -39,7 +39,7 @@ public sealed class SystemLevelCliMtSteps
             TestAssetPaths.PythonExecutable(),
             $"{Path.Combine(assetRoot, "example_cli.py")} --input {{input}} --output {{output}}",
             Path.Combine(assetRoot, "example_output_adapter.py"));
-        var task = new SystemMtTask(
+        var task = SystemMtTask.WithFollowUpCase(
             program,
             _cases["source"],
             _cases["follow-up"],

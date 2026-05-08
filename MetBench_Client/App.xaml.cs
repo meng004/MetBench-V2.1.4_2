@@ -103,7 +103,15 @@ namespace MetBench_Client
                 services.AddScoped<CliProgramRunner>();
                 services.AddScoped(provider => new PythonOutputAdapter(
                     OperatingSystem.IsWindows() ? "python" : "python3"));
+                services.AddScoped(provider => new PythonInputAdapter(
+                    OperatingSystem.IsWindows() ? "python" : "python3"));
                 services.AddScoped<GreaterThanAssertion>();
+                // InputGenerator needs an adapter script path; register a factory the
+                // caller can override per-task in Stage 4. Stage 2 leaves the path
+                // resolution to whoever resolves InputGenerator at the call site.
+                services.AddScoped<InputGenerator>(provider =>
+                    throw new InvalidOperationException(
+                        "InputGenerator must be constructed with a per-task adapter path; resolve PythonInputAdapter and the adapter path from the task instead."));
                 services.AddScoped<SystemMtRunner>();
 
                 // 结果可视化相关IOC配置

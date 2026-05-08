@@ -7,4 +7,5 @@ public sealed record SystemMtResult(
     ParsedOutput FollowUpOutput,
     SystemMtAssertionResult Assertion,
     bool Passed,
-    string FailureReason);
+    string FailureReason,
+    InputGenerationResult? InputGeneration = null);
