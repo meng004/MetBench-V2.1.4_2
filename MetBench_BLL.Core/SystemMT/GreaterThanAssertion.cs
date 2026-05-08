@@ -9,7 +9,7 @@ public sealed class GreaterThanAssertion : IMrAssertion
         if (!source.Values.TryGetValue(valueName, out var sourceValue))
         {
             return new SystemMtAssertionResult(
-                "GreaterThan",
+                Name,
                 valueName,
                 double.NaN,
                 double.NaN,
@@ -20,7 +20,7 @@ public sealed class GreaterThanAssertion : IMrAssertion
         if (!followUp.Values.TryGetValue(valueName, out var followUpValue))
         {
             return new SystemMtAssertionResult(
-                "GreaterThan",
+                Name,
                 valueName,
                 sourceValue,
                 double.NaN,
@@ -30,7 +30,7 @@ public sealed class GreaterThanAssertion : IMrAssertion
 
         var passed = followUpValue > sourceValue;
         return new SystemMtAssertionResult(
-            "GreaterThan",
+            Name,
             valueName,
             sourceValue,
             followUpValue,

@@ -79,7 +79,7 @@ public sealed class OpenMocPinCellSigmaASteps
         var runner = new SystemMtRunner(
             new CliProgramRunner(),
             new PythonOutputAdapter(openmocPython),
-            new IMrAssertion[] { new GreaterThanAssertion(), new LessThanAssertion() },
+            new IMrAssertion[] { new LessThanAssertion() },
             new InputGenerator(
                 new PythonInputAdapter(openmocPython),
                 inputAdapterScript));
@@ -95,6 +95,9 @@ public sealed class OpenMocPinCellSigmaASteps
         Assert.True(_result!.Passed, _result.FailureReason);
         Assert.NotNull(_result.InputGeneration);
         Assert.True(_result.InputGeneration!.Succeeded);
+        // Output adapter encodes converged as exactly 1.0 or 0.0; tolerate
+        // any double >= 0.5 to keep this assert robust against future
+        // schema tweaks (e.g. emitting an iteration-fraction).
         Assert.True(_result.SourceOutput.Values["converged"] >= 0.5,
             $"source did not converge: converged={_result.SourceOutput.Values["converged"]}");
         Assert.True(_result.FollowUpOutput.Values["converged"] >= 0.5,

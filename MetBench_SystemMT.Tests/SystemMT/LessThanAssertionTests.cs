@@ -27,7 +27,7 @@ public sealed class LessThanAssertionTests
     }
 
     [Fact]
-    public void Evaluate_fails_when_followup_value_is_not_less()
+    public void Evaluate_fails_when_followup_value_equals_source()
     {
         var assertion = new LessThanAssertion();
         var source = new ParsedOutput(new Dictionary<string, double> { ["k_eff"] = 1.0 }, new Dictionary<string, string>());
@@ -38,6 +38,19 @@ public sealed class LessThanAssertionTests
         Assert.False(result.Passed);
         Assert.Contains("Expected follow-up value", result.FailureReason);
         Assert.Contains("less than", result.FailureReason);
+    }
+
+    [Fact]
+    public void Evaluate_fails_when_followup_value_is_strictly_greater()
+    {
+        var assertion = new LessThanAssertion();
+        var source = new ParsedOutput(new Dictionary<string, double> { ["k_eff"] = 1.0 }, new Dictionary<string, string>());
+        var followUp = new ParsedOutput(new Dictionary<string, double> { ["k_eff"] = 1.5 }, new Dictionary<string, string>());
+
+        var result = assertion.Evaluate("k_eff", source, followUp);
+
+        Assert.False(result.Passed);
+        Assert.Contains("Expected follow-up value 1.5 to be less than source value 1", result.FailureReason);
     }
 
     [Fact]

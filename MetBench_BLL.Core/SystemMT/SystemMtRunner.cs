@@ -111,7 +111,8 @@ public sealed class SystemMtRunner
             ? mrAssertion.Evaluate(valueName, sourceOutput, followUpOutput)
             : new SystemMtAssertionResult(
                 task.AssertionName, valueName, double.NaN, double.NaN, false,
-                $"Configuration failure: unsupported assertion '{task.AssertionName}'");
+                $"Configuration failure: unsupported assertion '{task.AssertionName}'. " +
+                $"Registered assertions: [{string.Join(", ", _assertions.Keys)}]");
 
         return new SystemMtResult(
             sourceRun, followUpRun, sourceOutput, followUpOutput, assertion,

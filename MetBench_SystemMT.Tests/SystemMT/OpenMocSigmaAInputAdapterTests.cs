@@ -13,8 +13,8 @@ public sealed class OpenMocSigmaAInputAdapterTests
         """
         {
           "geometry": { "x_extent_cm": 1.26, "y_extent_cm": 1.26, "z_extent_cm": 1.0, "fuel_radius_cm": 0.4 },
-          "tracking": { "num_azim": 16, "azim_spacing_cm": 0.05, "z_coord_cm": 0.0 },
-          "solver":   { "convergence_threshold": 0.0001, "max_iters": 1000, "num_threads": 1 },
+          "tracking": { "num_azim": 4, "azim_spacing_cm": 0.1, "z_coord_cm": 0.0 },
+          "solver":   { "convergence_threshold": 0.001, "max_iters": 50, "num_threads": 1 },
           "materials": {
             "fuel": {
               "num_groups": 2,
