@@ -30,5 +30,13 @@
       <Link>TestAssets\projectile\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\SUT\openmoc\*.py">
+      <Link>TestAssets\openmoc\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\SUT\openmoc\sample\*.json">
+      <Link>TestAssets\openmoc\sample\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
