@@ -1,8 +1,8 @@
 namespace MetBench_BLL.SystemMT;
 
-public sealed class GreaterThanAssertion : IMrAssertion
+public sealed class LessThanAssertion : IMrAssertion
 {
-    public string Name => "GreaterThan";
+    public string Name => "LessThan";
 
     public SystemMtAssertionResult Evaluate(string valueName, ParsedOutput source, ParsedOutput followUp)
     {
@@ -28,7 +28,7 @@ public sealed class GreaterThanAssertion : IMrAssertion
                 $"Assertion failure: Missing parsed value '{valueName}' in follow-up output");
         }
 
-        var passed = followUpValue > sourceValue;
+        var passed = followUpValue < sourceValue;
         return new SystemMtAssertionResult(
             Name,
             valueName,
@@ -37,6 +37,6 @@ public sealed class GreaterThanAssertion : IMrAssertion
             passed,
             passed
                 ? string.Empty
-                : $"Assertion failure: Expected follow-up value {followUpValue} to be greater than source value {sourceValue} for '{valueName}'");
+                : $"Assertion failure: Expected follow-up value {followUpValue} to be less than source value {sourceValue} for '{valueName}'");
     }
 }

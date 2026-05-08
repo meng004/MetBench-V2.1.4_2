@@ -36,7 +36,7 @@ public sealed class SystemMtRunnerTests
         var runner = new SystemMtRunner(
             new CliProgramRunner(),
             new PythonOutputAdapter(TestAssetPaths.PythonExecutable()),
-            new GreaterThanAssertion());
+            new IMrAssertion[] { new GreaterThanAssertion() });
 
         var result = await runner.RunAsync(task, "result", CancellationToken.None);
 

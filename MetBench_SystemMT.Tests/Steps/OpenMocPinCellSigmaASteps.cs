@@ -7,7 +7,7 @@ using Xunit;
 namespace MetBench_SystemMT.Tests.Steps;
 
 [Binding]
-public sealed class OpenMocPinCellNuSigmaFSteps
+public sealed class OpenMocPinCellSigmaASteps
 {
     private string _sourceInputPath = string.Empty;
     private string _sourceDir = string.Empty;
@@ -16,8 +16,8 @@ public sealed class OpenMocPinCellNuSigmaFSteps
     private MrTransformation? _transformation;
     private SystemMtResult? _result;
 
-    [Given("an OpenMOC pin-cell source case from {string}")]
-    public async Task GivenAnOpenMocPinCellSourceCase(string assetRelativePath)
+    [Given("an OpenMOC pin-cell sigma_a source case from {string}")]
+    public async Task GivenAnOpenMocSigmaASourceCase(string assetRelativePath)
     {
         Skip.IfNot(
             OpenMocTestPaths.OpenMocImportable(),
@@ -28,7 +28,7 @@ public sealed class OpenMocPinCellNuSigmaFSteps
         var sampleSource = Path.Combine(assetRoot, assetRelativePath);
         Assert.True(File.Exists(sampleSource), $"sample case missing: {sampleSource}");
 
-        var workRoot = Path.Combine(Path.GetTempPath(), "MetBenchOpenMocBdd", Guid.NewGuid().ToString("N"));
+        var workRoot = Path.Combine(Path.GetTempPath(), "MetBenchOpenMocSigmaABdd", Guid.NewGuid().ToString("N"));
         _sourceDir = Path.Combine(workRoot, "source");
         _followUpDir = Path.Combine(workRoot, "followup");
         Directory.CreateDirectory(_sourceDir);
@@ -39,28 +39,28 @@ public sealed class OpenMocPinCellNuSigmaFSteps
         await File.WriteAllTextAsync(_sourceInputPath, await File.ReadAllTextAsync(sampleSource), CancellationToken.None);
     }
 
-    [Given("an OpenMOC MR transformation {string} with parameter {string} set to {string}")]
-    public void GivenTheMrTransformation(string name, string parameterName, string parameterValue)
+    [Given("the OpenMOC sigma_a transformation {string} with parameter {string} set to {string}")]
+    public void GivenTheSigmaATransformation(string name, string parameterName, string parameterValue)
     {
         _transformation = new MrTransformation(
             name,
             new Dictionary<string, string> { [parameterName] = parameterValue });
     }
 
-    [When("I run source and the generated follow-up through OpenMOC")]
-    public async Task WhenIRunThroughOpenMoc()
+    [When("I run source and the generated follow-up through OpenMOC for sigma_a")]
+    public async Task WhenIRunThroughOpenMocSigmaA()
     {
         Assert.NotNull(_transformation);
 
         var assetRoot = TestAssetPaths.AssetRoot();
         var openmocPython = OpenMocTestPaths.OpenMocPython();
         var runnerScript = Path.Combine(assetRoot, "openmoc", "openmoc_runner.py");
-        var inputAdapterScript = Path.Combine(assetRoot, "openmoc", "openmoc_input_adapter.py");
+        var inputAdapterScript = Path.Combine(assetRoot, "openmoc", "openmoc_input_adapter_sigma_a.py");
         var outputAdapterScript = Path.Combine(assetRoot, "openmoc", "openmoc_output_adapter.py");
 
         var program = new SystemProgram(
             ProgramLanguage.Python,
-            "openmoc-pincell",
+            "openmoc-pincell-sigma-a",
             openmocPython,
             $"{runnerScript} --input {{input}} --output {{output}}",
             outputAdapterScript);
@@ -73,13 +73,13 @@ public sealed class OpenMocPinCellNuSigmaFSteps
             followUpWorkingDirectory: _followUpDir,
             followUpOutputPath: Path.Combine(_followUpDir, "output.json"),
             _transformation!,
-            "GreaterThan",
+            "LessThan",
             TimeSpan.FromMinutes(2));
 
         var runner = new SystemMtRunner(
             new CliProgramRunner(),
             new PythonOutputAdapter(openmocPython),
-            new IMrAssertion[] { new GreaterThanAssertion() },
+            new IMrAssertion[] { new LessThanAssertion() },
             new InputGenerator(
                 new PythonInputAdapter(openmocPython),
                 inputAdapterScript));
@@ -87,8 +87,8 @@ public sealed class OpenMocPinCellNuSigmaFSteps
         _result = await runner.RunAsync(task, "k_eff", CancellationToken.None);
     }
 
-    [Then("the OpenMOC parsed value {string} of the generated follow-up should be greater than the source")]
-    public void ThenTheOpenMocParsedValueShouldBeGreater(string valueName)
+    [Then("the OpenMOC parsed value {string} of the generated follow-up should be less than the source")]
+    public void ThenTheOpenMocParsedValueShouldBeLess(string valueName)
     {
         Assert.NotNull(_result);
         Assert.Equal("k_eff", valueName);
@@ -104,15 +104,15 @@ public sealed class OpenMocPinCellNuSigmaFSteps
             $"follow-up did not converge: converged={_result.FollowUpOutput.Values["converged"]}");
     }
 
-    [Then("the OpenMOC follow-up k_eff should be at least {double} times the source k_eff")]
-    public void ThenFollowUpKeffRatioFloor(double minimumRatio)
+    [Then("the OpenMOC follow-up k_eff should be at most {double} times the source k_eff")]
+    public void ThenFollowUpKeffRatioCeiling(double maximumRatio)
     {
         Assert.NotNull(_result);
         var sourceKeff = _result!.SourceOutput.Values["k_eff"];
         var followUpKeff = _result.FollowUpOutput.Values["k_eff"];
         Assert.True(sourceKeff > 0, $"source k_eff must be positive, got {sourceKeff}");
         var ratio = followUpKeff / sourceKeff;
-        Assert.True(ratio >= minimumRatio,
-            $"follow-up/source k_eff ratio {ratio:F4} below floor {minimumRatio} (source={sourceKeff}, follow-up={followUpKeff})");
+        Assert.True(ratio <= maximumRatio,
+            $"follow-up/source k_eff ratio {ratio:F4} above ceiling {maximumRatio} (source={sourceKeff}, follow-up={followUpKeff})");
     }
 }
