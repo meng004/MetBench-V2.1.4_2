@@ -30,9 +30,24 @@ public sealed class OpenMocSampleCaseTests
         Assert.Equal(4, fuel.GetProperty("sigma_s").GetArrayLength());
         Assert.Equal(2, fuel.GetProperty("chi").GetArrayLength());
 
+        // Fuel must be fissile (otherwise the MR has nothing to scale).
+        Assert.True(fuel.GetProperty("nu_sigma_f")[0].GetDouble() > 0,
+            "fuel.nu_sigma_f[0] must be > 0 for the MR to be meaningful");
+        Assert.True(fuel.GetProperty("nu_sigma_f")[1].GetDouble() > 0,
+            "fuel.nu_sigma_f[1] must be > 0 for the MR to be meaningful");
+        Assert.Equal(1.0, fuel.GetProperty("chi")[0].GetDouble());
+
         var moderator = root.GetProperty("materials").GetProperty("moderator");
         Assert.Equal(2, moderator.GetProperty("num_groups").GetInt32());
+        // Moderator must be non-fissile so 'ScaleNuSigmaF' on fuel really
+        // is the only thing that changes between source and follow-up.
         Assert.Equal(0.0, moderator.GetProperty("nu_sigma_f")[0].GetDouble());
         Assert.Equal(0.0, moderator.GetProperty("nu_sigma_f")[1].GetDouble());
+        Assert.Equal(0.0, moderator.GetProperty("sigma_f")[0].GetDouble());
+        Assert.Equal(0.0, moderator.GetProperty("sigma_f")[1].GetDouble());
+
+        var solver = root.GetProperty("solver");
+        Assert.True(solver.GetProperty("convergence_threshold").GetDouble() > 0);
+        Assert.True(solver.GetProperty("max_iters").GetInt32() > 0);
     }
 }

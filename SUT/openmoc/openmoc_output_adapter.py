@@ -28,10 +28,15 @@ from pathlib import Path
 def parse_output(output_file: str) -> dict:
     output_path = Path(output_file)
     payload = json.loads(output_path.read_text(encoding="utf-8"))
+    converged_raw = payload["converged"]
+    if not isinstance(converged_raw, bool):
+        raise TypeError(
+            f"'converged' must be a JSON bool, got {type(converged_raw).__name__}: {converged_raw!r}"
+        )
     values = {
         "k_eff": float(payload["k_eff"]),
         "iterations": float(payload["iterations"]),
-        "converged": 1.0 if bool(payload["converged"]) else 0.0,
+        "converged": 1.0 if converged_raw else 0.0,
     }
     return {
         "values": values,

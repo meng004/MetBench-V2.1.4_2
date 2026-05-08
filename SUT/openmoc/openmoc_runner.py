@@ -32,13 +32,17 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 from pathlib import Path
 
 
 def _build_material(name: str, mat: dict):
     import openmoc
 
+    # OpenMOC's transport equation uses sigma_t and sigma_s; absorption is
+    # derived as sigma_t - sum(sigma_s_g'). The Python Material class
+    # exposes setSigmaA only as a per-group setter, but the bulk solve does
+    # not require it - the case JSON's sigma_a is for documentation /
+    # cross-checks only.
     m = openmoc.Material(name=name)
     m.setNumEnergyGroups(int(mat["num_groups"]))
     m.setSigmaT(mat["sigma_t"])
@@ -110,13 +114,26 @@ def solve(case: dict) -> tuple[float, int, bool]:
     return float(solver.getKeff()), iters, iters < max_iters
 
 
+def _require_section(case: dict, key: str) -> dict:
+    if key not in case:
+        raise ValueError(f"Case JSON is missing required section '{key}'")
+    return case[key]
+
+
 def main() -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--input", required=True)
-    parser.add_argument("--output", required=True)
+    parser = argparse.ArgumentParser(description="OpenMOC pin-cell SUT for MetBench Stage 3")
+    parser.add_argument("--input", required=True, help="Path to the case JSON")
+    parser.add_argument("--output", required=True, help="Path to write the result JSON")
     args = parser.parse_args()
 
     case = json.loads(Path(args.input).read_text(encoding="utf-8"))
+    _require_section(case, "geometry")
+    _require_section(case, "tracking")
+    _require_section(case, "solver")
+    materials = _require_section(case, "materials")
+    if "fuel" not in materials or "moderator" not in materials:
+        raise ValueError("Case JSON 'materials' must define 'fuel' and 'moderator'")
+
     k, iters, converged = solve(case)
 
     output_path = Path(args.output)
@@ -138,4 +155,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())
