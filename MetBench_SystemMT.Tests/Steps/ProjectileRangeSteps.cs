@@ -39,7 +39,7 @@ public sealed class ProjectileRangeSteps
             TestAssetPaths.PythonExecutable(),
             $"{Path.Combine(assetRoot, "projectile.py")} --input {{input}} --output {{output}}",
             Path.Combine(assetRoot, "projectile_output_adapter.py"));
-        var task = new SystemMtTask(
+        var task = SystemMtTask.WithFollowUpCase(
             program,
             _cases["source"],
             _cases["follow-up"],
