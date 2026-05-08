@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MetBench_BLL.Core\MetBench_BLL.Core.csproj" />
+    <ProjectReference Include="..\MetBench_DAL\MetBench_DAL.csproj" />
   </ItemGroup>
 
   <ItemGroup>
