@@ -25,12 +25,15 @@ public sealed class MrTransformationTests
     }
 
     [Fact]
-    public void Parameters_are_read_only()
+    public void Parameters_cannot_be_cast_back_to_a_mutable_dictionary()
     {
         var transformation = new MrTransformation(
             "ScalarMultiply",
             new Dictionary<string, string> { ["multiplier"] = "2" });
 
-        Assert.IsAssignableFrom<IReadOnlyDictionary<string, string>>(transformation.Parameters);
+        Assert.IsNotType<Dictionary<string, string>>(transformation.Parameters);
+        Assert.Throws<NotSupportedException>(() =>
+            ((IDictionary<string, string>)transformation.Parameters)["multiplier"] = "9");
+        Assert.Equal("2", transformation.Parameters["multiplier"]);
     }
 }

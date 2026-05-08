@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+
 namespace MetBench_BLL.SystemMT;
 
 public sealed class MrTransformation
@@ -15,7 +17,8 @@ public sealed class MrTransformation
         }
 
         Name = name;
-        Parameters = new Dictionary<string, string>(parameters);
+        Parameters = new ReadOnlyDictionary<string, string>(
+            new Dictionary<string, string>(parameters));
     }
 
     public string Name { get; }
