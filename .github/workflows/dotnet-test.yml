@@ -1,0 +1,110 @@
+name: dotnet-test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancel in-progress runs of the same workflow on the same ref. Saves
+# minutes when a PR is rebased mid-build.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    env:
+      # Pin Python to the apt-installed scientific stack's ABI. The
+      # OpenMOC venv must use the same minor version or _openmoc.so won't
+      # load.
+      PY_MINOR: "3.12"
+      OPENMOC_REF: "3D-MOC"
+      VENV_DIR: /opt/openmoc-venv
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show pre-installed toolchain
+        run: |
+          dotnet --version
+          python3 --version
+          uname -a
+
+      - name: Restore OpenMOC venv from cache
+        id: cache-openmoc
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.VENV_DIR }}
+          # The OpenMOC build is determined by:
+          #   - Ubuntu image version (apt scientific stack ABI)
+          #   - Pinned Python minor version
+          #   - The OpenMOC branch ref we track
+          #   - The web-setup.sh script that encodes the install layout
+          # Bump the workflow file (or web-setup.sh) to bust the cache on
+          # purpose; trim 24h on stale cache hits via restore-keys.
+          key: openmoc-${{ runner.os }}-py${{ env.PY_MINOR }}-${{ env.OPENMOC_REF }}-${{ hashFiles('.claude/web-setup.sh', '.github/workflows/dotnet-test.yml') }}
+
+      - name: Install OpenMOC build deps and SciPy stack (apt)
+        if: steps.cache-openmoc.outputs.cache-hit != 'true'
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-recommends \
+              build-essential \
+              swig \
+              libhdf5-dev \
+              python${{ env.PY_MINOR }}-dev \
+              python${{ env.PY_MINOR }}-venv \
+              python3-numpy \
+              python3-h5py \
+              python3-matplotlib
+
+      - name: Build OpenMOC into ${{ env.VENV_DIR }}
+        if: steps.cache-openmoc.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          sudo mkdir -p "${VENV_DIR}"
+          sudo chown -R "$USER" "${VENV_DIR}"
+          # Inherit apt-installed numpy/h5py/matplotlib so we don't rebuild them
+          /usr/bin/python${PY_MINOR} -m venv --system-site-packages "${VENV_DIR}"
+          "${VENV_DIR}/bin/pip" install --upgrade pip wheel setuptools
+
+          rm -rf /tmp/OpenMOC
+          git clone --depth=1 --branch "${OPENMOC_REF}" \
+              https://github.com/mit-crpg/OpenMOC.git /tmp/OpenMOC
+
+          # Python 3.10+ removed `from collections import Iterable`
+          for f in /tmp/OpenMOC/openmoc/checkvalue.py \
+                   /tmp/OpenMOC/openmoc/plotter.py \
+                   /tmp/OpenMOC/openmoc/process.py; do
+              [ -f "$f" ] && \
+                  sed -i 's/from collections import Iterable/from collections.abc import Iterable/g' "$f"
+          done
+
+          # Build SWIG extension + pip-install in two steps (the wheel
+          # path doesn't bundle _openmoc.so; copy it in manually).
+          (
+              cd /tmp/OpenMOC
+              "${VENV_DIR}/bin/python" setup.py build_ext --inplace >/dev/null
+              "${VENV_DIR}/bin/pip" install --no-build-isolation . >/dev/null
+
+              SITE_PACKAGES="$(${VENV_DIR}/bin/python -c 'import site, sys; print(site.getsitepackages()[0])')"
+              cp /tmp/OpenMOC/openmoc/_openmoc*.so   "${SITE_PACKAGES}/openmoc/"
+              cp /tmp/OpenMOC/openmoc/openmoc.py     "${SITE_PACKAGES}/openmoc/"
+          )
+          "${VENV_DIR}/bin/python" -c "import openmoc; print('openmoc imported OK')"
+
+      - name: Restore NuGet packages
+        run: dotnet restore MetBench_SystemMT.Tests/MetBench_SystemMT.Tests.csproj
+
+      - name: Build test project
+        run: dotnet build MetBench_SystemMT.Tests/MetBench_SystemMT.Tests.csproj --no-restore --nologo
+
+      - name: Run tests
+        env:
+          METBENCH_OPENMOC_PYTHON: ${{ env.VENV_DIR }}/bin/python
+        run: |
+          dotnet test MetBench_SystemMT.Tests/MetBench_SystemMT.Tests.csproj \
+              --no-build --nologo --logger "console;verbosity=normal"
