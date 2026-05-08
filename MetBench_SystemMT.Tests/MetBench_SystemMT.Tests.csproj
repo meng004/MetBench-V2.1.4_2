@@ -38,5 +38,13 @@
       <Link>TestAssets\openmoc\sample\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\SUT\heat_equation\*.py">
+      <Link>TestAssets\heat_equation\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\SUT\heat_equation\sample\*.json">
+      <Link>TestAssets\heat_equation\sample\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
