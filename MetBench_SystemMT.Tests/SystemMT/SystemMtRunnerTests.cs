@@ -27,7 +27,7 @@ public sealed class SystemMtRunnerTests
             TestAssetPaths.PythonExecutable(),
             $"{Path.Combine(assetRoot, "example_cli.py")} --input {{input}} --output {{output}}",
             Path.Combine(assetRoot, "example_output_adapter.py"));
-        var task = new SystemMtTask(
+        var task = SystemMtTask.WithFollowUpCase(
             program,
             new SystemMtCase("source", sourceInput, sourceDir, Path.Combine(sourceDir, "output.txt")),
             new SystemMtCase("follow-up", followUpInput, followUpDir, Path.Combine(followUpDir, "output.txt")),
