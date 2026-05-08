@@ -48,7 +48,7 @@ public sealed class ProjectileRangeSteps
         var runner = new SystemMtRunner(
             new CliProgramRunner(),
             new PythonOutputAdapter(TestAssetPaths.PythonExecutable()),
-            new GreaterThanAssertion());
+            new IMrAssertion[] { new GreaterThanAssertion() });
 
         _result = await runner.RunAsync(task, "range", CancellationToken.None);
     }

@@ -38,7 +38,7 @@ public sealed class SystemMtRunnerGeneratedFollowupTests
         var runner = new SystemMtRunner(
             new CliProgramRunner(),
             new PythonOutputAdapter(TestAssetPaths.PythonExecutable()),
-            new GreaterThanAssertion(),
+            new IMrAssertion[] { new GreaterThanAssertion() },
             new InputGenerator(
                 new PythonInputAdapter(TestAssetPaths.PythonExecutable()),
                 Path.Combine(assetRoot, "example_output_adapter.py")));
@@ -85,7 +85,7 @@ public sealed class SystemMtRunnerGeneratedFollowupTests
         var runner = new SystemMtRunner(
             new CliProgramRunner(),
             new PythonOutputAdapter(TestAssetPaths.PythonExecutable()),
-            new GreaterThanAssertion(),
+            new IMrAssertion[] { new GreaterThanAssertion() },
             new InputGenerator(
                 new PythonInputAdapter(TestAssetPaths.PythonExecutable()),
                 Path.Combine(assetRoot, "example_output_adapter.py")));

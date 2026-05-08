@@ -79,7 +79,7 @@ public sealed class OpenMocPinCellNuSigmaFSteps
         var runner = new SystemMtRunner(
             new CliProgramRunner(),
             new PythonOutputAdapter(openmocPython),
-            new GreaterThanAssertion(),
+            new IMrAssertion[] { new GreaterThanAssertion() },
             new InputGenerator(
                 new PythonInputAdapter(openmocPython),
                 inputAdapterScript));
