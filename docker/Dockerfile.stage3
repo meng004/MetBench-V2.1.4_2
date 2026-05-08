@@ -23,11 +23,7 @@ ARG OPENMOC_REF=3D-MOC
 ARG DOTNET_CHANNEL=9.0
 ARG TZ=Etc/UTC
 
-# OpenMOC's setup.py installs to --user; expose that path so any process
-# (including non-login shells in CI) can import the package.
 ENV TZ=${TZ} \
-    PATH=/root/.local/bin:${PATH} \
-    PYTHONPATH=/root/.local/lib/python3.12/site-packages \
     DOTNET_ROOT=/usr/share/dotnet \
     DOTNET_NOLOGO=1 \
     DOTNET_CLI_TELEMETRY_OPTOUT=1 \
@@ -36,7 +32,9 @@ ENV TZ=${TZ} \
     PYTHONDONTWRITEBYTECODE=1
 
 # -----------------------------------------------------------------------------
-# Base toolchain: compilers, OpenMOC build deps, Python, gh CLI prerequisites.
+# Base toolchain: compilers, OpenMOC build deps, Python + scientific stack
+# (apt-installed to match the OpenMOC upstream Dockerfile and avoid pip/apt
+# numpy mixing that broke the SWIG _openmoc layout in CI run 25527157778).
 # -----------------------------------------------------------------------------
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential cmake git pkg-config ca-certificates curl gnupg tzdata \
@@ -44,34 +42,30 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libhdf5-dev libhdf5-serial-dev \
         libgomp1 \
         python3 python3-dev python3-pip python3-venv \
+        python3-numpy python3-h5py python3-matplotlib python3-setuptools \
     && ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime \
     && echo "${TZ}" > /etc/timezone \
     && rm -rf /var/lib/apt/lists/*
 
-# Python deps shared by OpenMOC and the MetBench adapter scripts.
-RUN python3 -m pip install --no-cache-dir \
-        numpy h5py matplotlib
-
 # -----------------------------------------------------------------------------
-# OpenMOC: clone and install per the official mit-crpg/OpenMOC Dockerfile
-# convention (https://github.com/mit-crpg/OpenMOC/blob/develop/Dockerfile):
-#   - Branch 3D-MOC is the toolchain that the upstream image ships with.
-#   - `setup.py install --user` is invoked twice: the first pass builds the
-#     SWIG C extension (_openmoc) and stages files; the second pass actually
-#     installs everything reliably. Removing either invocation breaks
-#     `import openmoc` (regression seen in CI run 25526969062 with a single
-#     install: ModuleNotFoundError: No module named 'openmoc.openmoc').
-#   - .git is dropped at the end to keep the image lean; build/ is kept since
-#     the second install pass relies on it.
+# OpenMOC: clone and install system-wide via setup.py (gcc + OpenMP defaults).
+#   - Branch 3D-MOC is the upstream Dockerfile's choice.
+#   - `setup.py build_ext --inplace` first compiles the SWIG _openmoc C
+#     extension into the source tree; then `setup.py install` (no --user)
+#     copies both the .so and the openmoc/ Python package to the global
+#     dist-packages directory in one consistent layer. This avoids the egg /
+#     user-site path mismatch that left _openmoc.so unreachable from
+#     openmoc/__init__.py in CI run 25527157778.
 # -----------------------------------------------------------------------------
 WORKDIR /opt
 RUN git clone --depth=1 --branch ${OPENMOC_REF} https://github.com/mit-crpg/OpenMOC.git \
     && cd OpenMOC \
-    && python3 setup.py install --user \
-    && python3 setup.py install --user \
-    && rm -rf .git
+    && python3 setup.py build_ext --inplace \
+    && python3 setup.py install \
+    && rm -rf .git build
 
-RUN python3 -c "import openmoc; print('openmoc import OK')"
+# Smoke-test from /tmp so cwd cannot shadow the installed openmoc package.
+RUN cd /tmp && python3 -c "import openmoc; print('openmoc import OK')"
 
 # -----------------------------------------------------------------------------
 # .NET SDK (for `dotnet test` / `dotnet build` of MetBench_BLL.Core and
