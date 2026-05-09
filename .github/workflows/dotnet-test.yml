@@ -1,0 +1,51 @@
+name: dotnet-test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancel in-progress runs of the same workflow on the same ref. Saves
+# minutes when a PR is rebased mid-build.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show pre-installed toolchain
+        run: |
+          dotnet --list-sdks
+          dotnet --version
+          python3 --version
+          uname -a
+
+      - name: Restore NuGet packages
+        run: dotnet restore MetBench_SystemMT.Tests/MetBench_SystemMT.Tests.csproj
+
+      - name: Build test project
+        run: dotnet build MetBench_SystemMT.Tests/MetBench_SystemMT.Tests.csproj --no-restore --nologo
+
+      - name: Run tests
+        # OpenMOC is intentionally NOT installed in this CI workflow yet.
+        # Stage 3 BDD scenarios and the OpenMOC smoke test detect this via
+        # OpenMocTestPaths.OpenMocImportable() and Skip.IfNot, so they skip
+        # cleanly. The remaining 49+ tests still gate every PR.
+        #
+        # Earlier revisions of this workflow tried to build OpenMOC inline
+        # using the same apt + SWIG layout that the cloud sandbox uses
+        # (see PR #8 / .claude/web-setup.sh). The cold build in CI failed
+        # at `setup.py build_ext --inplace` for reasons we could not diagnose
+        # from inside the cloud sandbox (workflow logs are served from
+        # productionresultssa*.blob.core.windows.net which is firewalled
+        # off here). Adding OpenMOC to CI is tracked as a follow-up - keep
+        # the gate working in the meantime.
+        run: |
+          dotnet test MetBench_SystemMT.Tests/MetBench_SystemMT.Tests.csproj \
+              --no-build --nologo --logger "console;verbosity=normal"
