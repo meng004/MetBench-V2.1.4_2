@@ -21,10 +21,12 @@ public sealed class LiteDbSystemMtResultRepository : ISystemMtResultRepository, 
 
     /// <summary>
     /// Open a repository against a LiteDB file at <paramref name="connectionString"/>.
-    /// The repository owns and disposes the database handle.
+    /// The repository owns and disposes the database handle. Uses a private
+    /// <see cref="BsonMapper"/> instance so the entity-id registration does not
+    /// mutate <see cref="BsonMapper.Global"/> for unrelated callers.
     /// </summary>
     public LiteDbSystemMtResultRepository(string connectionString)
-        : this(new LiteDatabase(connectionString), ownsDatabase: true)
+        : this(new LiteDatabase(connectionString, new BsonMapper()), ownsDatabase: true)
     {
     }
 
