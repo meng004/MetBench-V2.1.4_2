@@ -67,9 +67,13 @@ jobs:
           set -euo pipefail
           sudo mkdir -p "${VENV_DIR}"
           sudo chown -R "$USER" "${VENV_DIR}"
-          # Inherit apt-installed numpy/h5py/matplotlib so we don't rebuild them
+          # Inherit apt-installed numpy/h5py/matplotlib so we don't rebuild them.
+          # Do NOT upgrade pip/setuptools/wheel: OpenMOC ships a legacy setup.py
+          # whose `build_ext --inplace` step silently produces no _openmoc.so
+          # under setuptools >= 70 (it deprecates `setup.py install`-style
+          # workflows). Stay on the apt-shipped setuptools (68.x on Noble) that
+          # the cloud sandbox proved works.
           /usr/bin/python${PY_MINOR} -m venv --system-site-packages "${VENV_DIR}"
-          "${VENV_DIR}/bin/pip" install --upgrade pip wheel setuptools
 
           rm -rf /tmp/OpenMOC
           git clone --depth=1 --branch "${OPENMOC_REF}" \
@@ -83,12 +87,14 @@ jobs:
                   sed -i 's/from collections import Iterable/from collections.abc import Iterable/g' "$f"
           done
 
-          # Build SWIG extension + pip-install in two steps (the wheel
-          # path doesn't bundle _openmoc.so; copy it in manually).
+          # Build SWIG extension + pip-install in two steps. Don't pipe to
+          # /dev/null - if build_ext fails we want the gcc/g++ output, not
+          # silence followed by a confused `cp: cannot stat`.
           (
               cd /tmp/OpenMOC
-              "${VENV_DIR}/bin/python" setup.py build_ext --inplace >/dev/null
-              "${VENV_DIR}/bin/pip" install --no-build-isolation . >/dev/null
+              "${VENV_DIR}/bin/python" setup.py build_ext --inplace
+              ls -la openmoc/_openmoc*.so  # fail loudly if the .so wasn't produced
+              "${VENV_DIR}/bin/pip" install --no-build-isolation .
 
               SITE_PACKAGES="$(${VENV_DIR}/bin/python -c 'import site, sys; print(site.getsitepackages()[0])')"
               cp /tmp/OpenMOC/openmoc/_openmoc*.so   "${SITE_PACKAGES}/openmoc/"
