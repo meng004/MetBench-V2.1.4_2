@@ -13,6 +13,9 @@ using MetBench_DAL;
 using MetBench_IDAL;
 using MetBench_BLL;
 using MetBench_BLL.SystemMT;
+using MetBench_BLL.SystemMT.Launcher;
+using MetBench_BLL.SystemMT.Persistence;
+using MetBench_BLL.SystemMT.Reporting;
 using Wpf.Ui.Controls;
 using Wpf.Ui;
 using Stylet;
@@ -114,6 +117,28 @@ namespace MetBench_Client
                     throw new InvalidOperationException(
                         "InputGenerator must be constructed with a per-task adapter path; resolve PythonInputAdapter and the adapter path from the task instead."));
                 services.AddScoped<SystemMtRunner>();
+
+                // Stage 4 launcher facade + persistence + reporting
+                services.AddSingleton(provider => new LauncherOptions(
+                    SutRoot: Path.Combine(
+                        Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!,
+                        "SUT"),
+                    SystemPython: OperatingSystem.IsWindows() ? "python" : "python3",
+                    OpenMocPython: Environment.GetEnvironmentVariable("METBENCH_OPENMOC_PYTHON")
+                        ?? (OperatingSystem.IsWindows() ? "python" : "python3")));
+
+                services.AddSingleton<ISystemMtResultRepository>(provider =>
+                {
+                    var dataDir = Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!;
+                    var dbPath = Path.Combine(dataDir, "SystemMT.Litedb");
+                    return new LiteDbSystemMtResultRepository($"Filename={dbPath}");
+                });
+
+                services.AddSingleton<ISystemMtScenarioLauncher, SystemMtScenarioLauncher>();
+                services.AddSingleton<ISystemMtResultReportRenderer, HtmlSystemMtResultReportRenderer>();
+
+                services.AddScoped<Views.Pages.SystemMtExecutionPage>();
+                services.AddScoped<ViewModels.SystemMtExecutionViewModel>();
 
                 // 结果可视化相关IOC配置
                 services.AddScoped<MTVisualizationSerive>();
