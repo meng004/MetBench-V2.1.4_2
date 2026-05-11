@@ -40,8 +40,22 @@ import argparse
 import json
 import os
 import shutil
+import sys
 import tempfile
 from pathlib import Path
+
+
+def _resolve_openmc_exec() -> str:
+    """Find the openmc binary. Try (1) a sibling of the current python
+    (typical for conda envs), (2) PATH lookup, (3) fall back to "openmc"
+    and let subprocess raise if absent."""
+    sibling = Path(sys.executable).with_name("openmc")
+    if sibling.exists():
+        return str(sibling)
+    on_path = shutil.which("openmc")
+    if on_path:
+        return on_path
+    return "openmc"
 
 
 def _build_mgxs_library(case: dict, library_path: Path) -> None:
@@ -64,13 +78,13 @@ def _build_mgxs_library(case: dict, library_path: Path) -> None:
         xsdata.order = 0  # P0 scattering, isotropic
         xsdata.set_total(np.array(mat["sigma_t"], dtype=np.float64))
         xsdata.set_absorption(np.array(mat["sigma_a"], dtype=np.float64))
-        # OpenMOC stores sigma_s as a 4-element row-major matrix [g_in -> g_out];
-        # OpenMC wants shape (1, num_groups, num_groups) with [0, g_in, g_out].
+        # OpenMOC stores sigma_s as a 4-element row-major matrix [g_in -> g_out].
+        # OpenMC's set_scatter_matrix wants shape (num_groups, num_groups, num_legendre_moments).
+        # With xsdata.order = 0 (P0, isotropic), num_legendre_moments = 1.
         sig_s_flat = np.array(mat["sigma_s"], dtype=np.float64)
         if sig_s_flat.size != n * n:
             raise ValueError(f"sigma_s for '{name}' must have {n*n} entries, got {sig_s_flat.size}")
-        sig_s = sig_s_flat.reshape((n, n))
-        scatter_matrix = sig_s.reshape((1, n, n))
+        scatter_matrix = sig_s_flat.reshape((n, n, 1))
         xsdata.set_scatter_matrix(scatter_matrix)
         xsdata.set_fission(np.array(mat["sigma_f"], dtype=np.float64))
         xsdata.set_nu_fission(np.array(mat["nu_sigma_f"], dtype=np.float64))
@@ -141,10 +155,13 @@ def solve(case: dict) -> dict:
 
         model = _build_model(case, library_path)
 
+        openmc_exec = _resolve_openmc_exec()
         cwd = os.getcwd()
         try:
             os.chdir(tmpdir)
-            openmc.run(output=False)
+            # model.run() handles export_to_xml() + openmc.run() in one call,
+            # and respects openmc_exec for non-default conda env locations.
+            model.run(output=False, openmc_exec=openmc_exec)
             sp_files = sorted(Path(tmpdir).glob("statepoint.*.h5"))
             if not sp_files:
                 raise RuntimeError("OpenMC did not produce a statepoint file")
