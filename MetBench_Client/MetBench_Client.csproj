@@ -68,4 +68,39 @@
     </Compile>
   </ItemGroup>
 
+	<ItemGroup>
+		<Compile Update="Views\Pages\AutoDetectMRPage.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Views\Pages\MRRecommendationPage.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Views\Pages\MTReportGeneratorPage.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+	</ItemGroup>
+	<!--
+    SUT files are linked into the build output as SUT\<sut>\... so the launcher
+    facade (LauncherOptions.SutRoot = "<exe>/SUT") can locate Python runners,
+    adapters, and sample cases at runtime.
+  -->
+	<ItemGroup>
+		<None Include="..\SUT\openmoc\*.py">
+			<Link>SUT\openmoc\%(Filename)%(Extension)</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="..\SUT\openmoc\sample\*.json">
+			<Link>SUT\openmoc\sample\%(Filename)%(Extension)</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="..\SUT\heat_equation\*.py">
+			<Link>SUT\heat_equation\%(Filename)%(Extension)</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="..\SUT\heat_equation\sample\*.json">
+			<Link>SUT\heat_equation\sample\%(Filename)%(Extension)</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
 </Project>

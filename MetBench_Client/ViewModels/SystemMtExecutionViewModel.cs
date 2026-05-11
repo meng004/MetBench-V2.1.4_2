@@ -117,7 +117,7 @@ namespace MetBench_Client.ViewModels
             catch (Exception ex)
             {
                 StatusMessage = $"ERROR: {ex.Message}";
-                MessageBox.Show(ex.ToString(), "System-MT run failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Windows.MessageBox.Show(ex.ToString(), "System-MT run failed", System.Windows.MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {

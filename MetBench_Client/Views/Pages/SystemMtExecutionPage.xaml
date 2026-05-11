@@ -65,12 +65,12 @@
                             Appearance="Primary"
                             Command="{Binding ViewModel.RunCommand, Mode=OneWay}"
                             Content="Run scenario"
-                            Icon="{ui:SymbolIcon Symbol=Play24}"/>
+                            />
                         <ui:Button
                             Margin="8,0,0,0"
                             Command="{Binding ViewModel.RefreshRecentCommand, Mode=OneWay}"
                             Content="Refresh recent"
-                            Icon="{ui:SymbolIcon Symbol=ArrowClockwise24}"/>
+                            />
                     </StackPanel>
                 </StackPanel>
 
@@ -150,7 +150,7 @@
             <ui:Button
                 Command="{Binding ViewModel.ExportReportCommand, Mode=OneWay}"
                 Content="Export HTML report"
-                Icon="{ui:SymbolIcon Symbol=Document24}"/>
+                />
         </StackPanel>
     </Grid>
 </Page>
