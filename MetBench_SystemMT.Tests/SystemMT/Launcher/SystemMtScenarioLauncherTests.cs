@@ -55,10 +55,12 @@ public sealed class SystemMtScenarioLauncherTests : IDisposable
     {
         var descriptors = await _launcher.ListAvailableAsync();
 
-        Assert.Equal(3, descriptors.Count);
+        Assert.Equal(5, descriptors.Count);
         Assert.Equal("heat-equation-amplitude", descriptors[0].Id);
-        Assert.Equal("openmoc-pincell-nu-sigma-f", descriptors[1].Id);
-        Assert.Equal("openmoc-pincell-sigma-a", descriptors[2].Id);
+        Assert.Equal("openmc-pincell-nu-sigma-f", descriptors[1].Id);
+        Assert.Equal("openmc-pincell-sigma-a", descriptors[2].Id);
+        Assert.Equal("openmoc-pincell-nu-sigma-f", descriptors[3].Id);
+        Assert.Equal("openmoc-pincell-sigma-a", descriptors[4].Id);
     }
 
     [Fact]
