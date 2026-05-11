@@ -28,4 +28,22 @@ public interface ISystemMtScenarioLauncher
         string scenarioId,
         IReadOnlyDictionary<string, string>? parameterOverrides = null,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Run a sequence of scenarios. Pre-validates the whole batch (blank or
+    /// unknown ids fail fast before any scenario starts). Scenarios run
+    /// sequentially in the order given. An infrastructure exception thrown
+    /// inside one scenario (Python failure, missing SUT file, etc.) is
+    /// captured as a failed <see cref="ScenarioRunResult"/> so the remaining
+    /// scenarios continue; <see cref="OperationCanceledException"/> propagates
+    /// immediately. <paramref name="progress"/>, if provided, receives two
+    /// events per scenario (see <see cref="BatchProgress"/>).
+    /// </summary>
+    /// <exception cref="ArgumentNullException">If <paramref name="requests"/> is <c>null</c>.</exception>
+    /// <exception cref="ArgumentException">If any request has a blank or unknown scenario id.</exception>
+    /// <exception cref="OperationCanceledException">If <paramref name="cancellationToken"/> trips.</exception>
+    Task<IReadOnlyList<ScenarioRunResult>> RunBatchAsync(
+        IReadOnlyList<BatchScenarioRequest> requests,
+        IProgress<BatchProgress>? progress = null,
+        CancellationToken cancellationToken = default);
 }
