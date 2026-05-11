@@ -226,6 +226,84 @@ operational safety.
 
 ---
 
+## Stage 4 AC #6 — IR philosophy (closed by PR #22)
+
+The acceptance criterion reads:
+
+> *"Gradually support running the same MR on different programs through an
+> intermediate representation and adapter pattern."*
+
+**Realised design**: the intermediate representation is `MrTransformation(name,
+parameters)` — already defined in BLL.Core since Stage 2. No new class
+hierarchy was required. Two solvers are considered to implement the same MR
+when:
+
+1. They register scenarios with the same `TransformationName` and same
+   `ParameterOverrides` shape (e.g. `ScaleNuSigmaF` with `{factor: <positive>}`).
+2. They use a common input JSON schema (the `SUT/openmc/sample/pincell.json`
+   is byte-for-byte the OpenMOC `pincell.json`).
+3. Their assertion direction agrees (both `GreaterThan` for `NuSigmaF`, both
+   `LessThan` for `SigmaA`).
+4. Their `ScenarioDescriptor.MrFamily` tags match (e.g.
+   `NeutronTransport.Scaling.NuSigmaF`). This is the **taxonomy slug** that
+   makes the cross-program relationship explicit at the API layer; the
+   launcher's `ListAvailableAsync` groups by it.
+
+**No new abstraction class** beyond `MrFamily : string = ""` on
+`ScenarioDescriptor`. The cross-program demonstration is one `.feature` file
+(`CrossProgramNeutronTransportMrs.feature`) with two Scenario Outlines, each
+parameterised by `<solver>` ∈ {`openmoc`, `openmc`}. Step bindings dispatch
+to the per-solver adapter scripts and python interpreter; the
+`MrTransformation` flowing through is **identical** across both runs.
+
+**Demonstration evidence**:
+
+- 4 BDD scenario instances (2 MRs × 2 solvers).
+- OpenMOC scenarios pass end-to-end in environments with OpenMOC importable
+  (cloud sandbox, dev workstations with `METBENCH_OPENMOC_PYTHON` set).
+- OpenMC scenarios will pass end-to-end on machines with `METBENCH_OPENMC_PYTHON`
+  pointing at an OpenMC venv. They skip cleanly elsewhere via
+  `OpenMcTestPaths.OpenMcImportable()`.
+- The launcher's `ListAvailableAsync_groups_cross_program_scenarios_by_MrFamily`
+  test asserts that `NeutronTransport.Scaling.NuSigmaF` is shared by
+  `openmoc-pincell-nu-sigma-f` and `openmc-pincell-nu-sigma-f`, and similarly
+  for SigmaA. Same MR, two solver implementations, single taxonomy slug.
+
+**Adding a third solver** under the same MR family becomes:
+
+1. Drop new Python scripts under `SUT/<solver>/` with `<solver>_runner.py`,
+   `<solver>_input_adapter.py`, `<solver>_input_adapter_sigma_a.py`,
+   `<solver>_output_adapter.py`.
+2. Register the scenarios in `SystemMtScenarioLauncher.BuildScenarios` with
+   `MrFamily: "NeutronTransport.Scaling.NuSigmaF"`.
+3. Add `<solver>` to the `Examples` table of
+   `CrossProgramNeutronTransportMrs.feature`.
+4. Add the new asset-copy `<None Include>` blocks to the test csproj +
+   `MetBench_Client.csproj`.
+
+No BLL.Core changes required. No new interfaces. The IR is the
+`MrTransformation` record; the adapter pattern is the per-solver
+`*_input_adapter*.py` scripts; the family taxonomy is the
+`ScenarioDescriptor.MrFamily` string.
+
+---
+
+## Stage 4 AC scoreboard (final)
+
+| AC | Status | Where |
+|----|--------|-------|
+| #1 WPF launch UI | ✅ | PR #17 (SystemMtExecutionPage) |
+| #2 review surface | ✅ | PR #12 (persistence) + PR #17 (UI) |
+| #3 report | ✅ | PR #14 (HTML) |
+| #4 batch execution | ✅ | PR #20 (RunBatchAsync) |
+| #5 second SUT | ✅ | PR #13 (heat-equation) + PR #21 (OpenMC, bonus) |
+| #6 cross-program IR | ✅ | PR #22 (MrFamily + cross-program BDD) |
+
+**Stage 4 closed.** Roadmap continues per `AGENTS.md` (Stage 5 not yet drafted
+as of this PR).
+
+---
+
 ## Out of scope
 
 - OpenMOC build in CI (PR #10 follow-up).

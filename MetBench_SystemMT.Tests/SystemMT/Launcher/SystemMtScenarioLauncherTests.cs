@@ -75,6 +75,32 @@ public sealed class SystemMtScenarioLauncherTests : IDisposable
         Assert.Equal("max_u", heatEq.ValueName);
         Assert.Equal("2", heatEq.DefaultParameters["factor"]);
         Assert.Contains("linear", heatEq.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Diffusion.Scaling.Amplitude", heatEq.MrFamily);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_groups_cross_program_scenarios_by_MrFamily()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var byFamily = descriptors
+            .Where(d => !string.IsNullOrEmpty(d.MrFamily))
+            .GroupBy(d => d.MrFamily)
+            .ToDictionary(g => g.Key, g => g.Select(d => d.Id).OrderBy(s => s, StringComparer.Ordinal).ToList());
+
+        // The "NuSigmaF" MR is exercised by both OpenMOC and OpenMC.
+        Assert.Equal(
+            new[] { "openmc-pincell-nu-sigma-f", "openmoc-pincell-nu-sigma-f" },
+            byFamily["NeutronTransport.Scaling.NuSigmaF"]);
+
+        // The "SigmaA" MR is also exercised by both solvers.
+        Assert.Equal(
+            new[] { "openmc-pincell-sigma-a", "openmoc-pincell-sigma-a" },
+            byFamily["NeutronTransport.Scaling.SigmaA"]);
+
+        // The heat-equation amplitude scaling is its own family (one SUT).
+        Assert.Equal(
+            new[] { "heat-equation-amplitude" },
+            byFamily["Diffusion.Scaling.Amplitude"]);
     }
 
     [Fact]
