@@ -1,5 +1,7 @@
 namespace MetBench_BLL.SystemMT.Persistence;
 
+using MetBench_BLL.Paging;
+
 /// <summary>
 /// Persistence contract for system-level metamorphic-test runs. The interface
 /// owns the writeable scenario name (which a <see cref="SystemMtResult"/> alone
@@ -28,4 +30,17 @@ public interface ISystemMtResultRepository
     /// Most-recent runs of a specific scenario, first.
     /// </summary>
     Task<IReadOnlyList<SystemMtResultRecord>> ListByScenarioAsync(string scenarioName, int limit = 100, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// One page of results across all scenarios, most-recent first. The
+    /// returned <see cref="PagedResult{T}.TotalCount"/> reflects the full
+    /// collection size at query time, suitable for driving a pagination UI.
+    /// </summary>
+    Task<PagedResult<SystemMtResultRecord>> ListPagedAsync(PageRequest request, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// One page of results filtered to a single scenario, most-recent first.
+    /// </summary>
+    Task<PagedResult<SystemMtResultRecord>> ListPagedByScenarioAsync(string scenarioName, PageRequest request, CancellationToken cancellationToken = default);
 }
+

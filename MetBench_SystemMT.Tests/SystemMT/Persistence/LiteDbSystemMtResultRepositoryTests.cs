@@ -225,4 +225,155 @@ public sealed class LiteDbSystemMtResultRepositoryTests : IDisposable
         Assert.NotNull(record);
         Assert.Equal("PersistedScenario", record!.ScenarioName);
     }
+
+    private async Task SeedAsync(LiteDbSystemMtResultRepository repo, int count, string scenarioPrefix = "Scenario")
+    {
+        for (var i = 0; i < count; i++)
+        {
+            await repo.SaveAsync(
+                $"{scenarioPrefix}-{i % 3}",
+                MakeResult(sourceValue: i, followUpValue: i + 1));
+            // small delay so RunAt timestamps differ deterministically
+            await Task.Delay(2);
+        }
+    }
+
+    [Fact]
+    public async Task ListPagedAsync_rejects_null_request()
+    {
+        using var repo = new LiteDbSystemMtResultRepository(_dbPath);
+        await Assert.ThrowsAsync<ArgumentNullException>(() => repo.ListPagedAsync(null!));
+    }
+
+    [Fact]
+    public async Task ListPagedAsync_rejects_invalid_request()
+    {
+        using var repo = new LiteDbSystemMtResultRepository(_dbPath);
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
+            repo.ListPagedAsync(new MetBench_BLL.Paging.PageRequest(-1, 10)));
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
+            repo.ListPagedAsync(new MetBench_BLL.Paging.PageRequest(0, 0)));
+    }
+
+    [Fact]
+    public async Task ListPagedAsync_empty_repo_returns_empty_page_total_zero()
+    {
+        using var repo = new LiteDbSystemMtResultRepository(_dbPath);
+        var page = await repo.ListPagedAsync(new MetBench_BLL.Paging.PageRequest(0, 10));
+
+        Assert.Empty(page.Items);
+        Assert.Equal(0, page.TotalCount);
+        Assert.Equal(0, page.PageIndex);
+        Assert.Equal(10, page.PageSize);
+        Assert.Equal(0, page.TotalPages);
+        Assert.False(page.HasPrevious);
+        Assert.False(page.HasNext);
+    }
+
+    [Fact]
+    public async Task ListPagedAsync_first_page_returns_items_and_correct_metadata()
+    {
+        using var repo = new LiteDbSystemMtResultRepository(_dbPath);
+        await SeedAsync(repo, 25);
+
+        var page = await repo.ListPagedAsync(new MetBench_BLL.Paging.PageRequest(0, 10));
+
+        Assert.Equal(10, page.Items.Count);
+        Assert.Equal(25, page.TotalCount);
+        Assert.Equal(3, page.TotalPages);
+        Assert.False(page.HasPrevious);
+        Assert.True(page.HasNext);
+    }
+
+    [Fact]
+    public async Task ListPagedAsync_middle_page_returns_correct_slice()
+    {
+        using var repo = new LiteDbSystemMtResultRepository(_dbPath);
+        await SeedAsync(repo, 25);
+
+        var page = await repo.ListPagedAsync(new MetBench_BLL.Paging.PageRequest(1, 10));
+
+        Assert.Equal(10, page.Items.Count);
+        Assert.Equal(25, page.TotalCount);
+        Assert.True(page.HasPrevious);
+        Assert.True(page.HasNext);
+    }
+
+    [Fact]
+    public async Task ListPagedAsync_last_page_returns_partial_slice()
+    {
+        using var repo = new LiteDbSystemMtResultRepository(_dbPath);
+        await SeedAsync(repo, 25);
+
+        var page = await repo.ListPagedAsync(new MetBench_BLL.Paging.PageRequest(2, 10));
+
+        Assert.Equal(5, page.Items.Count);
+        Assert.Equal(25, page.TotalCount);
+        Assert.True(page.HasPrevious);
+        Assert.False(page.HasNext);
+    }
+
+    [Fact]
+    public async Task ListPagedAsync_page_beyond_range_returns_empty_items_with_total_preserved()
+    {
+        using var repo = new LiteDbSystemMtResultRepository(_dbPath);
+        await SeedAsync(repo, 25);
+
+        var page = await repo.ListPagedAsync(new MetBench_BLL.Paging.PageRequest(99, 10));
+
+        Assert.Empty(page.Items);
+        Assert.Equal(25, page.TotalCount);
+        Assert.Equal(3, page.TotalPages);
+    }
+
+    [Fact]
+    public async Task ListPagedAsync_orders_items_descending_by_run_at()
+    {
+        using var repo = new LiteDbSystemMtResultRepository(_dbPath);
+        await SeedAsync(repo, 5);
+
+        var page = await repo.ListPagedAsync(new MetBench_BLL.Paging.PageRequest(0, 5));
+
+        Assert.Equal(5, page.Items.Count);
+        for (var i = 1; i < page.Items.Count; i++)
+        {
+            Assert.True(page.Items[i - 1].RunAt >= page.Items[i].RunAt,
+                $"items not descending at index {i}: {page.Items[i - 1].RunAt} vs {page.Items[i].RunAt}");
+        }
+    }
+
+    [Fact]
+    public async Task ListPagedByScenarioAsync_filters_count_and_items_to_one_scenario()
+    {
+        using var repo = new LiteDbSystemMtResultRepository(_dbPath);
+        // 9 records total: 3 in each of Scenario-0, Scenario-1, Scenario-2
+        await SeedAsync(repo, 9);
+
+        var page = await repo.ListPagedByScenarioAsync(
+            "Scenario-1",
+            new MetBench_BLL.Paging.PageRequest(0, 10));
+
+        Assert.Equal(3, page.TotalCount);
+        Assert.Equal(3, page.Items.Count);
+        Assert.All(page.Items, r => Assert.Equal("Scenario-1", r.ScenarioName));
+    }
+
+    [Fact]
+    public async Task ListPagedByScenarioAsync_rejects_blank_scenario_name()
+    {
+        using var repo = new LiteDbSystemMtResultRepository(_dbPath);
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            repo.ListPagedByScenarioAsync("", new MetBench_BLL.Paging.PageRequest(0, 10)));
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            repo.ListPagedByScenarioAsync("   ", new MetBench_BLL.Paging.PageRequest(0, 10)));
+    }
+
+    [Fact]
+    public async Task ListPagedByScenarioAsync_rejects_null_request()
+    {
+        using var repo = new LiteDbSystemMtResultRepository(_dbPath);
+        await Assert.ThrowsAsync<ArgumentNullException>(() =>
+            repo.ListPagedByScenarioAsync("Scenario-0", null!));
+    }
 }
+

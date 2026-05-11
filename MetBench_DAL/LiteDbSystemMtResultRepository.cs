@@ -1,4 +1,5 @@
 using LiteDB;
+using MetBench_BLL.Paging;
 using MetBench_BLL.SystemMT;
 using MetBench_BLL.SystemMT.Persistence;
 
@@ -108,6 +109,55 @@ public sealed class LiteDbSystemMtResultRepository : ISystemMtResultRepository, 
             .Limit(limit)
             .ToList();
         return Task.FromResult<IReadOnlyList<SystemMtResultRecord>>(query);
+    }
+
+    public Task<PagedResult<SystemMtResultRecord>> ListPagedAsync(PageRequest request, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        request.Validate();
+
+        var totalCount = _collection.Count();
+        if (totalCount == 0 || request.Skip >= totalCount)
+        {
+            return Task.FromResult(PagedResult<SystemMtResultRecord>.Empty(request.PageIndex, request.PageSize) with { TotalCount = totalCount });
+        }
+
+        var items = _collection.Query()
+            .OrderByDescending(x => x.RunAt)
+            .Skip(request.Skip)
+            .Limit(request.PageSize)
+            .ToList();
+
+        return Task.FromResult(new PagedResult<SystemMtResultRecord>(
+            items, totalCount, request.PageIndex, request.PageSize));
+    }
+
+    public Task<PagedResult<SystemMtResultRecord>> ListPagedByScenarioAsync(string scenarioName, PageRequest request, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (string.IsNullOrWhiteSpace(scenarioName))
+        {
+            throw new ArgumentException("Scenario name is required", nameof(scenarioName));
+        }
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        request.Validate();
+
+        var totalCount = _collection.Count(x => x.ScenarioName == scenarioName);
+        if (totalCount == 0 || request.Skip >= totalCount)
+        {
+            return Task.FromResult(PagedResult<SystemMtResultRecord>.Empty(request.PageIndex, request.PageSize) with { TotalCount = totalCount });
+        }
+
+        var items = _collection.Query()
+            .Where(x => x.ScenarioName == scenarioName)
+            .OrderByDescending(x => x.RunAt)
+            .Skip(request.Skip)
+            .Limit(request.PageSize)
+            .ToList();
+
+        return Task.FromResult(new PagedResult<SystemMtResultRecord>(
+            items, totalCount, request.PageIndex, request.PageSize));
     }
 
     public void Dispose()
