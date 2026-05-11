@@ -6,6 +6,15 @@ namespace MetBench_BLL.SystemMT.Launcher;
 /// leak through this contract. WPF code (or any other caller) can persist
 /// <see cref="Id"/> in user state and survive future BLL.Core refactors.
 /// </summary>
+/// <param name="MrFamily">
+/// Optional taxonomy slug grouping scenarios that exercise the same
+/// metamorphic relation across different programs. Two scenarios with the
+/// same <see cref="MrFamily"/> value should produce assertion results
+/// consistent with each other under the same parameter overrides (e.g. both
+/// pass or both fail for matching MR direction). UI may use this to render
+/// "this MR runs on N solvers" groupings or to drive batch dispatch.
+/// Empty string (default) means "no cross-program relationship".
+/// </param>
 public sealed record ScenarioDescriptor(
     string Id,
     string DisplayName,
@@ -14,4 +23,5 @@ public sealed record ScenarioDescriptor(
     string AssertionName,
     string ValueName,
     IReadOnlyDictionary<string, string> DefaultParameters,
-    string Description);
+    string Description,
+    string MrFamily = "");

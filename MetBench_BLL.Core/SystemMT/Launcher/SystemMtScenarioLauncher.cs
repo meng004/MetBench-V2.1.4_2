@@ -229,7 +229,8 @@ public sealed class SystemMtScenarioLauncher : ISystemMtScenarioLauncher
                 Description:
                     "Scaling the fuel material's nu-sigma-f cross section by factor > 1 must " +
                     "monotonically increase the dominant eigenvalue k_eff of the OpenMOC " +
-                    "neutron-transport solution."),
+                    "neutron-transport solution.",
+                MrFamily: "NeutronTransport.Scaling.NuSigmaF"),
             SampleCaseRelativePath: Path.Combine("openmoc", "sample", "pincell.json"),
             RunnerScriptPath: Path.Combine(options.SutRoot, "openmoc", "openmoc_runner.py"),
             InputAdapterScriptPath: Path.Combine(options.SutRoot, "openmoc", "openmoc_input_adapter.py"),
@@ -249,7 +250,8 @@ public sealed class SystemMtScenarioLauncher : ISystemMtScenarioLauncher
                 DefaultParameters: new Dictionary<string, string> { ["factor"] = "1.5" },
                 Description:
                     "Scaling the fuel material's absorption cross section by factor > 1 must " +
-                    "monotonically decrease the dominant eigenvalue k_eff."),
+                    "monotonically decrease the dominant eigenvalue k_eff.",
+                MrFamily: "NeutronTransport.Scaling.SigmaA"),
             SampleCaseRelativePath: Path.Combine("openmoc", "sample", "pincell.json"),
             RunnerScriptPath: Path.Combine(options.SutRoot, "openmoc", "openmoc_runner.py"),
             InputAdapterScriptPath: Path.Combine(options.SutRoot, "openmoc", "openmoc_input_adapter_sigma_a.py"),
@@ -271,7 +273,8 @@ public sealed class SystemMtScenarioLauncher : ISystemMtScenarioLauncher
                     "Monte Carlo counterpart of the OpenMOC ScaleNuSigmaF MR. Scaling the " +
                     "fuel material's nu-sigma-f cross section by factor > 1 must monotonically " +
                     "increase k_eff in OpenMC's multi-group eigenvalue solve, just as it does " +
-                    "in OpenMOC's deterministic transport solve. Same MR, different solver."),
+                    "in OpenMOC's deterministic transport solve. Same MR, different solver.",
+                MrFamily: "NeutronTransport.Scaling.NuSigmaF"),
             SampleCaseRelativePath: Path.Combine("openmc", "sample", "pincell.json"),
             RunnerScriptPath: Path.Combine(options.SutRoot, "openmc", "openmc_runner.py"),
             InputAdapterScriptPath: Path.Combine(options.SutRoot, "openmc", "openmc_input_adapter.py"),
@@ -292,7 +295,8 @@ public sealed class SystemMtScenarioLauncher : ISystemMtScenarioLauncher
                 Description:
                     "Monte Carlo counterpart of the OpenMOC ScaleFuelSigmaA MR. Scaling fuel " +
                     "absorption by factor > 1 must monotonically decrease k_eff in OpenMC's " +
-                    "multi-group eigenvalue solve."),
+                    "multi-group eigenvalue solve.",
+                MrFamily: "NeutronTransport.Scaling.SigmaA"),
             SampleCaseRelativePath: Path.Combine("openmc", "sample", "pincell.json"),
             RunnerScriptPath: Path.Combine(options.SutRoot, "openmc", "openmc_runner.py"),
             InputAdapterScriptPath: Path.Combine(options.SutRoot, "openmc", "openmc_input_adapter_sigma_a.py"),
@@ -313,7 +317,8 @@ public sealed class SystemMtScenarioLauncher : ISystemMtScenarioLauncher
                 Description:
                     "1D heat equation with homogeneous Dirichlet BCs is linear in the initial " +
                     "profile. Scaling the initial amplitude by factor > 1 must scale max_u at " +
-                    "t_final by the same factor."),
+                    "t_final by the same factor.",
+                MrFamily: "Diffusion.Scaling.Amplitude"),
             SampleCaseRelativePath: Path.Combine("heat_equation", "sample", "gaussian.json"),
             RunnerScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation.py"),
             InputAdapterScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_input_adapter.py"),
