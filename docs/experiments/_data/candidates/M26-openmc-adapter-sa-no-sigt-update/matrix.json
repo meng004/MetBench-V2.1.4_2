@@ -1,0 +1,30 @@
+{
+  "mutation_id": "M26-openmc-adapter-sa-no-sigt-update",
+  "factor": 1.5,
+  "cells": [
+    {
+      "scenario_id": "openmoc-pincell-nu-sigma-f",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-nu-sigma-f",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-sigma-a",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-sigma-a",
+      "status": "ran",
+      "k_source": 1.1245000140252723,
+      "k_followup": 0.7999585688993401,
+      "k_source_std": 0.0017868522811830686,
+      "k_followup_std": 0.001242613757046611,
+      "ratio": 0.7113904481297424,
+      "assertion": "less",
+      "assertion_passed": true,
+      "outcome": "missed"
+    }
+  ]
+}

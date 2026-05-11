@@ -88,12 +88,31 @@ this README:
 - **Stage 2** (input data generation and follow-up derivation): landed.
 - **Stage 3** (OpenMOC single-program application, with two MRs in opposite
   directions): landed.
-- **Stage 4** (platform features, persistence, reporting, second SUT): in
-  progress; persistence layer and HTML report renderer landed; WPF launch
-  UI, batch execution, and cross-program MR IR are tracked in
-  [`docs/superpowers/plans/2026-05-10-stage4-remaining-acs.md`](docs/superpowers/plans/2026-05-10-stage4-remaining-acs.md).
+- **Stage 4** (platform features, persistence, reporting, second SUT): landed
+  (all six acceptance criteria closed via PRs #10–#23).
+- **Stage 5 Phase 1** (mutation-based empirical validation of the MR suite):
+  landed; see [`docs/experiments/`](docs/experiments/).
 
 Per-stage implementation plans live under `docs/superpowers/plans/`.
+
+## Experiments
+
+Empirical results from the mutation-detection study live under
+[`docs/experiments/`](docs/experiments/):
+
+- [`mutation-catalogue.md`](docs/experiments/mutation-catalogue.md) — 28
+  hand-built candidate mutations across OpenMOC + OpenMC runners and adapters.
+- [`screening-results.md`](docs/experiments/screening-results.md) — baseline
+  screening that filters equivalent mutants before the MR matrix is scored.
+- [`mutation-detection-matrix.md`](docs/experiments/mutation-detection-matrix.md)
+  — per-MR detection rate with Wilson 95% CI, cross-solver Cohen's κ, and
+  threshold-sensitivity sweep.
+- [`historical-bugs.md`](docs/experiments/historical-bugs.md) — three real
+  upstream `openmc-dev/openmc` and `mit-crpg/OpenMOC` fix commits walked
+  through against MetBench's current MR coverage.
+
+The orchestrator lives in [`tools/mutation_study.py`](tools/mutation_study.py);
+mutation patches in [`tools/mutations.py`](tools/mutations.py).
 
 ## Contributing
 

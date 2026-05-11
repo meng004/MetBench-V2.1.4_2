@@ -1,0 +1,38 @@
+{
+  "mutation_id": "M16-openmc-runner-scatter-transpose",
+  "factor": 1.5,
+  "cells": [
+    {
+      "scenario_id": "openmoc-pincell-nu-sigma-f",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-nu-sigma-f",
+      "status": "ran",
+      "k_source": 0.5823695653970348,
+      "k_followup": 0.8742993466902059,
+      "k_source_std": 0.0003833485697074262,
+      "k_followup_std": 0.00047718821080783037,
+      "ratio": 1.501279253997667,
+      "assertion": "greater",
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmoc-pincell-sigma-a",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-sigma-a",
+      "status": "ran",
+      "k_source": 0.5823695653970345,
+      "k_followup": 0.39867893205431887,
+      "k_source_std": 0.00038334856972484954,
+      "k_followup_std": 0.00024479121074327337,
+      "ratio": 0.6845806438777697,
+      "assertion": "less",
+      "assertion_passed": true,
+      "outcome": "missed"
+    }
+  ]
+}

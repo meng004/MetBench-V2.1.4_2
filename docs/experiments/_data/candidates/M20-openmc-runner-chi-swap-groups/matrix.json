@@ -1,0 +1,38 @@
+{
+  "mutation_id": "M20-openmc-runner-chi-swap-groups",
+  "factor": 1.5,
+  "cells": [
+    {
+      "scenario_id": "openmoc-pincell-nu-sigma-f",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-nu-sigma-f",
+      "status": "ran",
+      "k_source": 1.2793652413500558,
+      "k_followup": 1.917749160730391,
+      "k_source_std": 0.0016290425205950966,
+      "k_followup_std": 0.0027534079762486134,
+      "ratio": 1.4989848862133206,
+      "assertion": "greater",
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmoc-pincell-sigma-a",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-sigma-a",
+      "status": "ran",
+      "k_source": 1.27936524135007,
+      "k_followup": 0.9631040456751291,
+      "k_source_std": 0.0016290425205942476,
+      "k_followup_std": 0.0010221033386046006,
+      "ratio": 0.7527983522975805,
+      "assertion": "less",
+      "assertion_passed": true,
+      "outcome": "missed"
+    }
+  ]
+}

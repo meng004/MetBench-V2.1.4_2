@@ -1,0 +1,30 @@
+{
+  "mutation_id": "M13-openmoc-adapter-sa-inverse",
+  "factor": 1.5,
+  "cells": [
+    {
+      "scenario_id": "openmoc-pincell-nu-sigma-f",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-nu-sigma-f",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-sigma-a",
+      "status": "ran",
+      "k_source": 1.1330583459569659,
+      "k_followup": 1.5108694746662323,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": 1.3334436660366085,
+      "assertion": "less",
+      "assertion_passed": false,
+      "outcome": "detected"
+    },
+    {
+      "scenario_id": "openmc-pincell-sigma-a",
+      "status": "not-affected"
+    }
+  ]
+}

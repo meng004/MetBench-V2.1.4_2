@@ -1,0 +1,30 @@
+{
+  "mutation_id": "M23-openmc-adapter-nsf-square",
+  "factor": 1.5,
+  "cells": [
+    {
+      "scenario_id": "openmoc-pincell-nu-sigma-f",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-nu-sigma-f",
+      "status": "ran",
+      "k_source": 1.1245000140252897,
+      "k_followup": 2.535312479536827,
+      "k_source_std": 0.0017868522811444693,
+      "k_followup_std": 0.003741210900860006,
+      "ratio": 2.2546131150869053,
+      "assertion": "greater",
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmoc-pincell-sigma-a",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-sigma-a",
+      "status": "not-affected"
+    }
+  ]
+}

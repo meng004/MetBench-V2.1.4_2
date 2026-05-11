@@ -1,0 +1,30 @@
+{
+  "mutation_id": "M25-openmc-adapter-nsf-identity",
+  "factor": 1.5,
+  "cells": [
+    {
+      "scenario_id": "openmoc-pincell-nu-sigma-f",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-nu-sigma-f",
+      "status": "ran",
+      "k_source": 1.1245000140252912,
+      "k_followup": 1.1245000140252972,
+      "k_source_std": 0.0017868522811564061,
+      "k_followup_std": 0.0017868522811692446,
+      "ratio": 1.0000000000000053,
+      "assertion": "greater",
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmoc-pincell-sigma-a",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-sigma-a",
+      "status": "not-affected"
+    }
+  ]
+}

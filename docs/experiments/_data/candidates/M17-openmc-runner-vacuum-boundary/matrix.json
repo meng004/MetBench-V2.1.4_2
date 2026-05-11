@@ -1,0 +1,38 @@
+{
+  "mutation_id": "M17-openmc-runner-vacuum-boundary",
+  "factor": 1.5,
+  "cells": [
+    {
+      "scenario_id": "openmoc-pincell-nu-sigma-f",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-nu-sigma-f",
+      "status": "ran",
+      "k_source": 0.004912373254874507,
+      "k_followup": 0.007376063680188102,
+      "k_source_std": 3.56507715200606e-05,
+      "k_followup_std": 5.360794523394886e-05,
+      "ratio": 1.5015275300729427,
+      "assertion": "greater",
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmoc-pincell-sigma-a",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-sigma-a",
+      "status": "ran",
+      "k_source": 0.004912373254874499,
+      "k_followup": 0.004860527557985651,
+      "k_source_std": 3.565077152006614e-05,
+      "k_followup_std": 3.145361403268181e-05,
+      "ratio": 0.9894458962707277,
+      "assertion": "less",
+      "assertion_passed": true,
+      "outcome": "missed"
+    }
+  ]
+}

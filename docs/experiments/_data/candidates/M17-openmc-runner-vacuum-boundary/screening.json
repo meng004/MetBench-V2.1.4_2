@@ -1,0 +1,40 @@
+{
+  "mutation_id": "M17-openmc-runner-vacuum-boundary",
+  "predicted_classification": "semantic",
+  "target_file": "SUT/openmc/openmc_runner.py",
+  "solver": "openmc",
+  "patched_source": {
+    "openmoc": null,
+    "openmc": {
+      "solver": "openmc",
+      "reps": [
+        0.004912373254874515,
+        0.004912373254874518,
+        0.004912373254874514
+      ],
+      "stds": [
+        3.5650771520067755e-05,
+        3.565077152006068e-05,
+        3.565077152005673e-05
+      ],
+      "mean": 0.004912373254874516,
+      "max_std": 3.5650771520067755e-05
+    }
+  },
+  "baseline": {
+    "openmoc": 1.1330583459569659,
+    "openmc": 1.1245000140252948
+  },
+  "classifications_per_solver": {
+    "openmc": {
+      "abs_delta": 1.1195876407704202,
+      "rel_delta": 0.9956315044965717,
+      "mc_threshold_3sigma": 0.00010695231456020327,
+      "rel_threshold": 0.005622500070126474,
+      "threshold": 0.005622500070126474,
+      "semantic": true
+    }
+  },
+  "classification": "semantic",
+  "threshold_rel": 0.005
+}

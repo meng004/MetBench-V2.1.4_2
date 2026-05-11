@@ -1,0 +1,38 @@
+{
+  "mutation_id": "M01-openmoc-runner-chi-zero",
+  "factor": 1.5,
+  "cells": [
+    {
+      "scenario_id": "openmoc-pincell-nu-sigma-f",
+      "status": "ran",
+      "k_source": 0.0005913922197768902,
+      "k_followup": 0.0005913921873744718,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": 0.9999999452099345,
+      "assertion": "greater",
+      "assertion_passed": false,
+      "outcome": "detected"
+    },
+    {
+      "scenario_id": "openmc-pincell-nu-sigma-f",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-sigma-a",
+      "status": "ran",
+      "k_source": 0.0005913922197768902,
+      "k_followup": 0.0005082546029187895,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": 0.8594205096416971,
+      "assertion": "less",
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmc-pincell-sigma-a",
+      "status": "not-affected"
+    }
+  ]
+}

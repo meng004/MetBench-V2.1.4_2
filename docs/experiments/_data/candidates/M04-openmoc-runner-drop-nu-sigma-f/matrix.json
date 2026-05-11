@@ -1,0 +1,38 @@
+{
+  "mutation_id": "M04-openmoc-runner-drop-nu-sigma-f",
+  "factor": 1.5,
+  "cells": [
+    {
+      "scenario_id": "openmoc-pincell-nu-sigma-f",
+      "status": "ran",
+      "k_source": NaN,
+      "k_followup": NaN,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": NaN,
+      "assertion": "greater",
+      "assertion_passed": false,
+      "outcome": "detected"
+    },
+    {
+      "scenario_id": "openmc-pincell-nu-sigma-f",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-sigma-a",
+      "status": "ran",
+      "k_source": NaN,
+      "k_followup": NaN,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": NaN,
+      "assertion": "less",
+      "assertion_passed": false,
+      "outcome": "detected"
+    },
+    {
+      "scenario_id": "openmc-pincell-sigma-a",
+      "status": "not-affected"
+    }
+  ]
+}

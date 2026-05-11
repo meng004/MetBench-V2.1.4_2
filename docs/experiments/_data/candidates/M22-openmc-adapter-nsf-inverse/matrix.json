@@ -1,0 +1,30 @@
+{
+  "mutation_id": "M22-openmc-adapter-nsf-inverse",
+  "factor": 1.5,
+  "cells": [
+    {
+      "scenario_id": "openmoc-pincell-nu-sigma-f",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-nu-sigma-f",
+      "status": "ran",
+      "k_source": 1.1245000140253074,
+      "k_followup": 0.7503316107499512,
+      "k_source_std": 0.0017868522811834314,
+      "k_followup_std": 0.0009804351588327464,
+      "ratio": 0.6672579825624303,
+      "assertion": "greater",
+      "assertion_passed": false,
+      "outcome": "detected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-sigma-a",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-sigma-a",
+      "status": "not-affected"
+    }
+  ]
+}

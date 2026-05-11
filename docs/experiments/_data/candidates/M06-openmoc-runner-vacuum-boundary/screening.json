@@ -1,0 +1,36 @@
+{
+  "mutation_id": "M06-openmoc-runner-vacuum-boundary",
+  "predicted_classification": "semantic",
+  "target_file": "SUT/openmoc/openmoc_runner.py",
+  "solver": "openmoc",
+  "patched_source": {
+    "openmoc": {
+      "solver": "openmoc",
+      "reps": [
+        0.004699644534639953
+      ],
+      "stds": [
+        0.0
+      ],
+      "mean": 0.004699644534639953,
+      "max_std": 0.0
+    },
+    "openmc": null
+  },
+  "baseline": {
+    "openmoc": 1.1330583459569659,
+    "openmc": 1.1245000140252948
+  },
+  "classifications_per_solver": {
+    "openmoc": {
+      "abs_delta": 1.128358701422326,
+      "rel_delta": 0.9958522484288568,
+      "mc_threshold_3sigma": 0.0,
+      "rel_threshold": 0.005665291729784829,
+      "threshold": 0.005665291729784829,
+      "semantic": true
+    }
+  },
+  "classification": "semantic",
+  "threshold_rel": 0.005
+}

@@ -70,6 +70,8 @@ MetBench_Python/**/output/
 MetBench_Python/**/output1/
 MetBench_Python/**/Results/
 *.csv
+# Stage 5 experiment results are CSVs we intentionally commit:
+!docs/experiments/*.csv
 *.xlsx
 *.xls
 *.rar

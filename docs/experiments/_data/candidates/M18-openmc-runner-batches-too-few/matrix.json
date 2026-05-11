@@ -1,0 +1,38 @@
+{
+  "mutation_id": "M18-openmc-runner-batches-too-few",
+  "factor": 1.5,
+  "cells": [
+    {
+      "scenario_id": "openmoc-pincell-nu-sigma-f",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-nu-sigma-f",
+      "status": "ran",
+      "k_source": 1.091868591488576,
+      "k_followup": 1.730092483267029,
+      "k_source_std": 0.051495773431598016,
+      "k_followup_std": 0.02593701031210181,
+      "ratio": 1.5845244535410108,
+      "assertion": "greater",
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmoc-pincell-sigma-a",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-sigma-a",
+      "status": "ran",
+      "k_source": 1.0918685914885755,
+      "k_followup": 0.8612739548039311,
+      "k_source_std": 0.05149577343160125,
+      "k_followup_std": 0.028335767528934182,
+      "ratio": 0.7888073358990314,
+      "assertion": "less",
+      "assertion_passed": true,
+      "outcome": "missed"
+    }
+  ]
+}
