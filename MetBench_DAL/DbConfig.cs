@@ -54,6 +54,7 @@ namespace MetBench_DAL
                 var db_file = ConfigurationManager.ConnectionStrings["litedb"].ConnectionString;
                 //string appName = Assembly.GetEntryAssembly().GetName().Name;//获取应用程序名称
                 string appPath = $"{solutionDirPath}\\MetBench_DataBase";//获取应用程序的路径
+                Directory.CreateDirectory(appPath); //目录存在则无操作
                 var conn = db_file.Replace("|DataDirectory|", appPath);
                 return conn;
             }

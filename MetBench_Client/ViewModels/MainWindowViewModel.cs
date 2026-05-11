@@ -79,6 +79,12 @@ namespace MetBench_Client.ViewModels
             },
                      new NavigationViewItem()
             {
+                Content = "System MT",
+                Icon = new SymbolIcon { Symbol = SymbolRegular.PlayCircle24 },
+                TargetPageType = typeof(Views.Pages.SystemMtExecutionPage)
+            },
+                     new NavigationViewItem()
+            {
                 Content = "MR Detection",
                 Icon = new SymbolIcon { Symbol = SymbolRegular.CalendarSearch20 },
                 TargetPageType = typeof(Views.Pages.AutoDetectMRPage)
