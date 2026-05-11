@@ -260,6 +260,49 @@ public sealed class SystemMtScenarioLauncher : ISystemMtScenarioLauncher
 
         yield return new ScenarioBlueprint(
             new ScenarioDescriptor(
+                Id: "openmc-pincell-nu-sigma-f",
+                DisplayName: "OpenMC pin-cell — ScaleNuSigmaF (k_eff increases)",
+                SutName: "openmc",
+                TransformationName: "ScaleNuSigmaF",
+                AssertionName: "GreaterThan",
+                ValueName: "k_eff",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "1.5" },
+                Description:
+                    "Monte Carlo counterpart of the OpenMOC ScaleNuSigmaF MR. Scaling the " +
+                    "fuel material's nu-sigma-f cross section by factor > 1 must monotonically " +
+                    "increase k_eff in OpenMC's multi-group eigenvalue solve, just as it does " +
+                    "in OpenMOC's deterministic transport solve. Same MR, different solver."),
+            SampleCaseRelativePath: Path.Combine("openmc", "sample", "pincell.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "openmc", "openmc_runner.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "openmc", "openmc_input_adapter.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "openmc", "openmc_output_adapter.py"),
+            PythonExecutable: options.EffectiveOpenMcPython,
+            WorkRootName: "MetBenchOpenMcNuSigmaF",
+            Timeout: TimeSpan.FromMinutes(5));
+
+        yield return new ScenarioBlueprint(
+            new ScenarioDescriptor(
+                Id: "openmc-pincell-sigma-a",
+                DisplayName: "OpenMC pin-cell — ScaleFuelSigmaA (k_eff decreases)",
+                SutName: "openmc",
+                TransformationName: "ScaleFuelSigmaA",
+                AssertionName: "LessThan",
+                ValueName: "k_eff",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "1.5" },
+                Description:
+                    "Monte Carlo counterpart of the OpenMOC ScaleFuelSigmaA MR. Scaling fuel " +
+                    "absorption by factor > 1 must monotonically decrease k_eff in OpenMC's " +
+                    "multi-group eigenvalue solve."),
+            SampleCaseRelativePath: Path.Combine("openmc", "sample", "pincell.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "openmc", "openmc_runner.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "openmc", "openmc_input_adapter_sigma_a.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "openmc", "openmc_output_adapter.py"),
+            PythonExecutable: options.EffectiveOpenMcPython,
+            WorkRootName: "MetBenchOpenMcSigmaA",
+            Timeout: TimeSpan.FromMinutes(5));
+
+        yield return new ScenarioBlueprint(
+            new ScenarioDescriptor(
                 Id: "heat-equation-amplitude",
                 DisplayName: "1D heat equation — ScaleAmplitude (linearity)",
                 SutName: "heat-equation",
