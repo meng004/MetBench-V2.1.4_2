@@ -133,6 +133,88 @@ public sealed class SystemMtScenarioLauncher : ISystemMtScenarioLauncher
             FollowUpElapsed: result.FollowUpRun.Elapsed);
     }
 
+    public async Task<IReadOnlyList<ScenarioRunResult>> RunBatchAsync(
+        IReadOnlyList<BatchScenarioRequest> requests,
+        IProgress<BatchProgress>? progress = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (requests is null)
+        {
+            throw new ArgumentNullException(nameof(requests));
+        }
+        if (requests.Count == 0)
+        {
+            return Array.Empty<ScenarioRunResult>();
+        }
+
+        // Pre-validate every request id before running anything. A typo in
+        // request[5] should not waste four successful runs.
+        for (var i = 0; i < requests.Count; i++)
+        {
+            var req = requests[i];
+            if (req is null || string.IsNullOrWhiteSpace(req.ScenarioId))
+            {
+                throw new ArgumentException(
+                    $"Batch request at index {i} has a blank scenario id", nameof(requests));
+            }
+            if (!_scenarios.ContainsKey(req.ScenarioId))
+            {
+                throw new ArgumentException(
+                    $"Batch request at index {i} has an unknown scenario id: '{req.ScenarioId}'",
+                    nameof(requests));
+            }
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var results = new List<ScenarioRunResult>(requests.Count);
+        var total = requests.Count;
+
+        for (var i = 0; i < requests.Count; i++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var req = requests[i];
+
+            progress?.Report(new BatchProgress(
+                Completed: i, Total: total,
+                CurrentScenarioId: req.ScenarioId, LastResult: null));
+
+            ScenarioRunResult result;
+            try
+            {
+                result = await RunAsync(req.ScenarioId, req.ParameterOverrides, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                // Infrastructure failure inside one scenario (Python missing,
+                // SUT file gone, persistence I/O error). Synthesize a failed
+                // result so the remaining scenarios still execute.
+                result = new ScenarioRunResult(
+                    RecordId: string.Empty,
+                    ScenarioId: req.ScenarioId,
+                    Passed: false,
+                    FailureReason: $"Run threw {ex.GetType().Name}: {ex.Message}",
+                    ValueName: string.Empty,
+                    SourceValue: 0,
+                    FollowUpValue: 0,
+                    SourceElapsed: TimeSpan.Zero,
+                    FollowUpElapsed: TimeSpan.Zero);
+            }
+
+            results.Add(result);
+            progress?.Report(new BatchProgress(
+                Completed: i + 1, Total: total,
+                CurrentScenarioId: req.ScenarioId, LastResult: result));
+        }
+
+        return results;
+    }
+
     private static IEnumerable<ScenarioBlueprint> BuildScenarios(LauncherOptions options)
     {
         yield return new ScenarioBlueprint(
