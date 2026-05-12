@@ -224,11 +224,82 @@ def run_case_4() -> CaseResult:
                           explanation="Could not read baseline.")
 
 
+def run_case_5() -> CaseResult:
+    """OpenMC PR #3662: `borated_water(density=X)` drops the temperature argument.
+
+    When users call `openmc.model.borated_water(boron_ppm, temperature=T, density=D)`,
+    the pre-fix code only passes `temperature=T` to the Material constructor
+    if `density` is None — so any user-supplied temperature is silently dropped
+    when an explicit density is also given. Cross-sections then default to a
+    different temperature than the user asked for; k_eff is wrong.
+
+    Installed OpenMC 0.15.3 contains the **pre-fix** code (fix landed
+    2025-11-29, after 0.15.3). Triggering live is one line.
+
+    MetBench MR fit: MR-T (RaiseFuelTemperature). To plumb this into the
+    matrix as a detected case, the runner would need to build the moderator
+    via `openmc.model.borated_water` (instead of the current macroscopic
+    MGXS path). With that wiring, MR-T's source/followup pair would both
+    have `mat.temperature = None` (the bug masks the adapter's
+    temperature_kelvin change) → k_eff identical → `less` assertion fails
+    → DETECTED. SUT extension is small (~20 lines), deferred to PR-2.
+    """
+    case_id = "case-5"
+    title = "OpenMC borated_water(density=X) drops temperature argument"
+    repo = "openmc-dev/openmc"
+    fix_commit = "ef22558f4a037585c4fdd96a1a64dd2781a72c37"
+    try:
+        import openmc.model
+        # Two calls: one with density=None (works post or pre-fix), one with
+        # density set (broken pre-fix). Capture both temperatures.
+        mat_ok = openmc.model.borated_water(boron_ppm=500, temperature=600)
+        mat_buggy_path = openmc.model.borated_water(boron_ppm=500, temperature=600, density=0.7)
+        t_ok = mat_ok.temperature
+        t_buggy = mat_buggy_path.temperature
+        if t_buggy is None:
+            return CaseResult(
+                case_id=case_id, title=title, repo=repo, fix_commit=fix_commit,
+                triggered=True,
+                failure_type="silent-drop",
+                failure_message=f"borated_water(..., density=0.7) returned material with "
+                                f"temperature={t_buggy} (expected 600)",
+                metbench_match=False,  # SUT doesn't currently use borated_water
+                explanation="Bug triggers cleanly: when density is supplied, the "
+                            "user-given temperature is silently dropped from the Material. "
+                            "MetBench MR fit is MR-T (RaiseFuelTemperature); however the "
+                            "current SUT moderator is built directly via MGXS, not "
+                            "via `openmc.model.borated_water`. To turn this into a "
+                            "matrix-detected real bug, the runner needs a small SUT "
+                            "extension (~20 lines) that calls borated_water for the "
+                            "moderator material. Once wired, both source and follow-up "
+                            "MR-T runs would see temperature=None → k_eff identical → "
+                            "`less` assertion fails → detected.",
+            )
+        return CaseResult(
+            case_id=case_id, title=title, repo=repo, fix_commit=fix_commit,
+            triggered=False,
+            failure_type="bug-not-present",
+            failure_message=f"Got mat.temperature = {t_buggy}; expected None on pre-fix",
+            metbench_match=False,
+            explanation="Installed OpenMC has the post-fix code; cannot reproduce.",
+        )
+    except Exception as e:
+        return CaseResult(
+            case_id=case_id, title=title, repo=repo, fix_commit=fix_commit,
+            triggered=True,
+            failure_type=type(e).__name__,
+            failure_message=str(e),
+            metbench_match=False,
+            explanation=f"Crashed with unexpected exception: {traceback.format_exc()[:400]}",
+        )
+
+
 CASES = {
     "case-1": run_case_1,
     "case-2": run_case_2,
     "case-3": run_case_3,
     "case-4": run_case_4,
+    "case-5": run_case_5,
 }
 
 

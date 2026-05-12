@@ -130,6 +130,31 @@ new decision rules without re-running the solvers.
   added Case 4 (the OpenMOC `CPUSolver` convergence basin pathology
   Phase 2 itself discovered).
 
+## Classical vs extended MT — what we claim
+
+For honest framing of "MR finds bugs":
+
+* **Classical MT** (single-program MRs, NOETHER `m_inv`/`m_mono`/`m_conv`):
+  MR01-MR12 except MR14. Validates on synthetic mutations Mut00-Mut47;
+  real-bug patterns (Case 2 / Case 5 in `real-bugs-live-report.md`)
+  fit MR-T but the SUT does not yet call the buggy upstream entry
+  points, so live matrix-cell detection of those real bugs is
+  pending an SUT extension (one-PR scope).
+* **Extended MT** including method-comparison (`m_cmp`, MR14): adds
+  cross-program differential testing in MR clothing. Live-detected
+  one **previously-unknown** OpenMOC `CPUSolver` convergence-basin
+  bug (Case 4 in `historical-bugs.md`).
+
+The matrix today therefore demonstrates:
+* MR catches synthetic faults (high N, validated)
+* MR-pattern matches the failure mode of real upstream fixes (4/5 cases via walkthrough or live trigger)
+* Method-comparison MR caught a real, previously-unknown bug
+
+It does **not yet** demonstrate "classical single-program MR live-
+catches an unknown bug". That's the open research question Phase-3+
+should target — `tools/mr_parameter_sweep.py` (this round) is the
+infrastructure that lets us hunt for it systematically.
+
 ## Headline results
 
 ### Coverage growth: 4 MR scenarios → 21

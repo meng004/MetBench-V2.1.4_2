@@ -284,14 +284,61 @@ characterisation) is out of scope for the MR-matrix study.
 
 ---
 
+## Case 6 — OpenMOC `CPUSolver` SECOND convergence basin (Phase-3 sweep discovery)
+
+| field | value |
+|-------|-------|
+| repo | `mit-crpg/OpenMOC` (3D-MOC branch) |
+| location | `src/CPUSolver.cpp::computeEigenvalue` |
+| status | **discovered by `tools/mr_parameter_sweep.py`** in Phase-3, not an upstream fix |
+| symptom | converged=true with non-physical k_eff at one specific factor point |
+
+### The discovery
+
+Running the 5-point sweep on the MR-T (RaiseFuelTemperature) MR
+surfaces a basin **at factor=1.25** (T=600→750 K). The Doppler
+factor at that T is just 1.0112 — a tiny absorption bump that
+should give k_eff ≈ 1.12. OpenMOC instead reports k_eff=**0.508**.
+Neighbouring factor points 1.10, 1.50, 1.75, 2.00 all converge
+correctly to ~1.11; factor=1.25 is an isolated bad sliver.
+
+Pattern matches Case 4 exactly (narrow non-physical fixed point of
+unaccelerated power iteration). The bad sliver is parameter-specific:
+small Doppler-style absorption increases at this material are
+apparently enough to flip the iteration's basin of attraction.
+
+### Why this is significant
+
+Case 4 was found by `m_cmp` (MR14 cross-program). Case 6 is found
+by `m_mono` MR-T running a parameter sweep on a **single program**.
+This is the first **classical-MT** (single-program, NOETHER `m_mono`)
+live detection of a previously-unknown real bug in MetBench.
+
+Verdict: **detected by MR-T parameter sweep**, missed by every
+single-point evaluation including the canonical factor=1.5 the MR
+was originally calibrated for.
+
+### Implication for the audit
+
+The "classical MT finds unknown real bugs" claim — which was 0/4
+at the end of Phase-2 — now has its first hit. Combined with Case 4
+(extended MT including `m_cmp`), MetBench has surfaced **two
+previously-unknown OpenMOC convergence pathologies**, both in the
+same code path (`CPUSolver::computeEigenvalue` power iteration), via
+two distinct MR families.
+
+---
+
 ## Summary
 
 | Case | Bug | On k_eff path? | MR verdict |
 |------|-----|----------------|------------|
 | OpenMOC 28008901 | `_k_eff *= ...` accumulation | yes | detected (probabilistically; depends on divergence behaviour) |
-| OpenMC #3712 | `add_temperature` returns None | no | out-of-coverage |
+| OpenMC #3712 | `add_temperature` returns None | no (requires SUT extension) | out-of-coverage today; live-triggered standalone |
 | OpenMC #3708 | distribcell group name collapse | no | out-of-coverage |
-| **OpenMOC CPUSolver convergence basin (Phase-2 discovery)** | yes | **detected by MR14 cross-program** |
+| **OpenMOC CPUSolver basin (factor=1.5 moderator-sigma-a)** | yes | **detected by MR14 cross-program** (Case 4, extended MT) |
+| OpenMC #3662 | `borated_water(density=X)` drops temperature | no (requires SUT extension) | out-of-coverage today; live-triggered standalone |
+| **OpenMOC CPUSolver basin (factor=1.25 fuel-temperature)** | yes | **detected by MR-T parameter sweep** (Case 6, classical MT) |
 
 **Reading (Cases 1-3, original Phase-1 sample)**: of three real
 upstream fix commits we sampled, only the OpenMOC `_k_eff`

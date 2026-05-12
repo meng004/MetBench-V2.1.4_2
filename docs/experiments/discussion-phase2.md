@@ -290,6 +290,47 @@ findings:
   reproduces it on a new MR class. The fix (replace `<` with
   `< -3·σ`) is one line away once a tolerance plumbing is added.
 
+## Classical MT vs extended MT — what counts as "MR detection"
+
+A reader-honest distinction worth preserving:
+
+* **Classical MT** in the strict single-program sense: MR is a relation
+  on (input, transformed input) for one program; the program is correct
+  iff the relation holds. Our `m_inv` / `m_mono` / `m_conv` MRs
+  (MR01-MR12 except MR14) fit this exactly.
+* **Extended MT** including method-comparison MRs: NOETHER's `m_cmp`
+  (block E*) explicitly allows the "transformation" to be "swap to a
+  different equivalent program" and the relation to be "outputs agree
+  within budget". MR14 fits here. Structurally this is **differential
+  testing wearing an MR hat**, and pre-NOETHER MT literature would
+  often exclude it from "true MT".
+
+This affects how we should report findings:
+
+| Bug source | Detected by | Counts as classical-MT? | Counts as extended-MT (NOETHER)? |
+|------------|-------------|------------------------:|---------------------------------:|
+| Synthetic mutations Mut00-Mut47 | MR01-MR08, MR12, MR-T, MR02-tally | ✅ | ✅ |
+| OpenMC #3712 (Case 2) live | MR-T pattern (via Mut45/Mut46 today; real bug needs SUT extension) | ✅ | ✅ |
+| OpenMC #3662 (Case 5) live | MR-T pattern (via `borated_water` wiring; needs SUT extension) | ✅ | ✅ |
+| OpenMOC CPUSolver basin (Case 4) live | MR14 cross-program | ❌ (single-program MR cannot see this) | ✅ |
+
+So the honest current status:
+
+* **Classical MT finding unknown real bugs**: 0 cases so far.
+  All single-program MRs (MR01-MR08, MR12, MR-T) have validated
+  detection on synthetic Mut* and on real-bug *patterns* (Case 2
+  and Case 5 plumbing both fit MR-T's pattern — when the SUT calls
+  the buggy upstream code, both reproduce the predicted failure
+  mode). What we have not yet done: extend the SUT to call those
+  buggy upstream entry points, so the matrix can record the
+  real-bug detections as matrix cells.
+* **Extended MT (with m_cmp) finding unknown real bugs**: 1 case
+  (Case 4), live and confirmed in `cross-program-report.md`.
+
+We track this honestly in `PHASE2.md` and `real-bugs-live-report.md`;
+nothing in this discussion claims classical MT has found a real bug
+yet.
+
 ## MR14 (cross-program OpenMOC vs OpenMC) — first-class report
 
 The NOETHER catalogue's `m_cmp` block (MR14: OpenMOC vs OpenMC k_eff
