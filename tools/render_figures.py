@@ -89,6 +89,7 @@ SCENARIO_META = {
     "openmoc-pincell-fuel-temperature":         ("Phase-3", "m_mono",  "openmoc"),
     "openmc-pincell-fuel-temperature":          ("Phase-3", "m_mono",  "openmc"),
     "openmc-pincell-fuel-temperature-via-add-temperature": ("Phase-3", "m_mono", "openmc"),
+    "openmc-pincell-moderator-temperature-via-borated-water": ("Phase-3", "m_mono", "openmc"),
 }
 
 PHASE_COLORS = {

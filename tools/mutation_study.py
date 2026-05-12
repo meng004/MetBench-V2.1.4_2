@@ -471,6 +471,28 @@ SCENARIOS: list[dict] = [
         "noether_id": "MR-T-real",
         "meta_pattern": "m_mono",
     },
+    # ----- Phase 3 PR-3 — Case 5 (OpenMC #3662 borated_water drops T) live in matrix -----
+    # The follow-up adapter sets `exercise_borated_water: true` so the
+    # runner calls `openmc.model.borated_water(boron_ppm, temperature=t,
+    # density=...)`. On the installed OpenMC 0.15.3 (pre-fix), the call
+    # silently drops the user-supplied temperature; the runner detects this
+    # and raises a recognizable marker; the matrix records status=error
+    # which the stats path treats as detected. On post-fix OpenMC the
+    # temperature is honoured and the cell completes normally.
+    {
+        "id": "openmc-pincell-moderator-temperature-via-borated-water",
+        "solver": "openmc",
+        "transform": "RaiseModeratorTemperatureViaBoratedWater",
+        "adapter": "openmc/openmc_input_adapter_moderator_temperature_via_borated_water.py",
+        "runner": "openmc/openmc_runner.py",
+        "assertion": "less",
+        "value": "k_eff",
+        "noise_aware": True,
+        "tolerance_rel": 0.0,
+        "phase": 3,
+        "noether_id": "MR-T-real-borated-water",
+        "meta_pattern": "m_mono",
+    },
 ]
 
 

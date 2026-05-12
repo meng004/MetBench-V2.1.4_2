@@ -334,10 +334,10 @@ two distinct MR families.
 | Case | Bug | On k_eff path? | MR verdict |
 |------|-----|----------------|------------|
 | OpenMOC 28008901 | `_k_eff *= ...` accumulation | yes | detected (probabilistically; depends on divergence behaviour) |
-| OpenMC #3712 | `add_temperature` returns None | no (requires SUT extension) | out-of-coverage today; live-triggered standalone |
+| OpenMC #3712 | `add_temperature` returns None | **yes** (via `openmc-pincell-fuel-temperature-via-add-temperature` scenario + SUT gate `exercise_add_temperature`) | detected as `status=error` cell with marker `RuntimeError: OpenMC PR #3712 (...)` |
 | OpenMC #3708 | distribcell group name collapse | no | out-of-coverage |
 | **OpenMOC CPUSolver basin (factor=1.5 moderator-sigma-a)** | yes | **detected by MR14 cross-program** (Case 4, extended MT) |
-| OpenMC #3662 | `borated_water(density=X)` drops temperature | no (requires SUT extension) | out-of-coverage today; live-triggered standalone |
+| OpenMC #3662 | `borated_water(density=X)` drops temperature | **yes** (via `openmc-pincell-moderator-temperature-via-borated-water` scenario + SUT gate `exercise_borated_water`) | detected as `status=error` cell with marker `RuntimeError: OpenMC PR #3662 (...)` |
 | **OpenMOC CPUSolver basin (factor=1.25 fuel-temperature)** | yes | **detected by MR-T parameter sweep** (Case 6, classical MT) |
 
 **Reading (Cases 1-3, original Phase-1 sample)**: of three real

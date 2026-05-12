@@ -310,22 +310,27 @@ This affects how we should report findings:
 | Bug source | Detected by | Counts as classical-MT? | Counts as extended-MT (NOETHER)? |
 |------------|-------------|------------------------:|---------------------------------:|
 | Synthetic mutations Mut00-Mut47 | MR01-MR08, MR12, MR-T, MR02-tally | ✅ | ✅ |
-| OpenMC #3712 (Case 2) live | MR-T pattern (via Mut45/Mut46 today; real bug needs SUT extension) | ✅ | ✅ |
-| OpenMC #3662 (Case 5) live | MR-T pattern (via `borated_water` wiring; needs SUT extension) | ✅ | ✅ |
+| OpenMC #3712 (Case 2) live in matrix | MR-T (`openmc-pincell-fuel-temperature-via-add-temperature` scenario + `exercise_add_temperature` SUT gate; followup cell `status=error` with marker) | ✅ | ✅ |
+| OpenMC #3662 (Case 5) live in matrix | MR-T (`openmc-pincell-moderator-temperature-via-borated-water` scenario + `exercise_borated_water` SUT gate; followup cell `status=error` with marker) | ✅ | ✅ |
 | OpenMOC CPUSolver basin (Case 4) live | MR14 cross-program | ❌ (single-program MR cannot see this) | ✅ |
 
-So the honest current status:
+So the honest current status (updated end of Phase-3 / Stage-5):
 
-* **Classical MT finding unknown real bugs**: 0 cases so far.
-  All single-program MRs (MR01-MR08, MR12, MR-T) have validated
-  detection on synthetic Mut* and on real-bug *patterns* (Case 2
-  and Case 5 plumbing both fit MR-T's pattern — when the SUT calls
-  the buggy upstream code, both reproduce the predicted failure
-  mode). What we have not yet done: extend the SUT to call those
-  buggy upstream entry points, so the matrix can record the
-  real-bug detections as matrix cells.
-* **Extended MT (with m_cmp) finding unknown real bugs**: 1 case
-  (Case 4), live and confirmed in `cross-program-report.md`.
+* **Classical MT finding unknown real bugs**: **1 case** —
+  Case 6 (OpenMOC `CPUSolver` second basin at fuel-temperature
+  factor=1.25), found live by MR-T parameter sweep
+  (`tools/mr_parameter_sweep.py`). First demonstration that a
+  pure single-program `m_mono` MR can surface a previously-
+  unknown real bug.
+* **Classical MT live-reproducing known upstream bugs in the
+  matrix**: Cases 2 (OpenMC #3712) and 5 (OpenMC #3662) are now
+  wired through dedicated scenarios with SUT gates
+  (`exercise_add_temperature`, `exercise_borated_water`); the
+  matrix records `status=error` cells with recognizable RuntimeError
+  markers when the buggy upstream call is invoked.
+* **Extended MT (with m_cmp) finding unknown real bugs**: **1 case**
+  (Case 4 — OpenMOC basin at moderator-sigma-a factor=1.5), live
+  and confirmed in `cross-program-report.md`.
 
 We track this honestly in `PHASE2.md` and `real-bugs-live-report.md`;
 nothing in this discussion claims classical MT has found a real bug

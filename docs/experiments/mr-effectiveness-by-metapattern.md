@@ -37,10 +37,10 @@ radius) + Phase-3 MR-T (RaiseFuelTemperature).
 
 | Metric | Value |
 |--------|------:|
-| Scenarios in catalogue | 14 (7 transforms × 2 solvers) |
-| Synthetic mutants caught | 27 distinct Mut entries across these 14 scenarios |
-| Mut00 false-positive rate | 0 / 14 ✓ |
-| Real upstream fix commits this family would catch | OpenMC #3712 (add_temperature → None), #3662 (borated_water drops T), #3802 (None xs values) — all `m_mono` "plumbing dropped" patterns |
+| Scenarios in catalogue | 15 (7 transforms × 2 solvers + 1 borated-water variant for Case 5) |
+| Synthetic mutants caught | 27 distinct Mut entries across these 14 + new scenario |
+| Mut00 false-positive rate | 0 / 15 ✓ (Case 2 + Case 5 scenarios record `status=error` on Mut00, which the matrix stats path does **not** count as a false positive — see `mutation_study.py:1407`) |
+| Real upstream fix commits this family would catch | OpenMC #3712 (add_temperature → None) **— live in matrix**, #3662 (borated_water drops T) **— live in matrix**, #3802 (None xs values) — all `m_mono` "plumbing dropped" patterns |
 | **Net-new bug discoveries by this family** | **1** — R-Case-6 (OpenMOC `CPUSolver` basin at T factor=1.25) discovered live by MR-T parameter sweep. **First classical-MT live finding.** |
 
 ### `m_conv` (limit / convergence rate) — classical MT

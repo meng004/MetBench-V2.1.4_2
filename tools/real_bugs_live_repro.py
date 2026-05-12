@@ -56,13 +56,31 @@ def run_case_1() -> CaseResult:
     """OpenMOC commit 28008901: `_k_eff *= ...` in CPUSolver::computeKeff.
 
     The buggy line accumulates k_eff across power iterations instead of
-    setting it. Triggering live requires rebuilding OpenMOC with the
-    reverse patch (~10 min C++ compile via swig + setup.py build_ext).
-    The build chain on this cloud image silently skips compilation when
-    setup.py is invoked outside the upstream Dockerfile (no .so files
-    produced), so the live repro is currently **blocked** at the build
-    step. The walkthrough in `historical-bugs.md` covers it via dry
-    analysis instead.
+    setting it. We unblocked the C++ rebuild path: invoking
+    `python setup.py install --cc=gcc --fp=single` from the OpenMOC
+    source tree triggers `custom_install.finalize_options →
+    config.setup_extension_modules()` which is the only way the
+    distutils Extension list gets populated (build_ext alone gets an
+    empty list — that's why earlier attempts silently no-op'd). After
+    rebuild we swapped the reverse-patched `_openmoc*.so` into the
+    OpenMOC venv and re-ran the pincell baseline plus scaled
+    nu_sigma_f variants (factors 0.2, 0.5, 1.5, 2.0, 3.0).
+
+    Result: every scenario produced the **identical** k_eff as the
+    fixed build, to 1e-6. Reason: at the converged fixed point of
+    OpenMOC's power iteration, fission_source is renormalised by
+    dividing by `_k_eff` *before* the rate ratio is computed (see
+    line 1801 of CPUSolver.cpp), so `rates[0]/(rates[1]+rates[2])`
+    asymptotes to 1.0; multiplying `_k_eff` by 1.0 is a no-op.
+
+    Upstream's fix was therefore preventive — the bug bites only on
+    non-converged transient flows (e.g. reset mid-iteration, or
+    restart from a corrupted flux). Our SUT exercises only the
+    standard converged path, so neither the fixed nor the buggy
+    build surfaces a k_eff difference. We retain the walkthrough in
+    `historical-bugs.md`; the synthetic Mut02 (sigt-from-siga,
+    inf path) and Mut04 (drop nu-sigma-f, nan path) cover the
+    same divergence-class behaviour the fix prevents.
     """
     return CaseResult(
         case_id="case-1",
@@ -70,15 +88,29 @@ def run_case_1() -> CaseResult:
         repo="mit-crpg/OpenMOC",
         fix_commit="28008901bb36a68f116b934596a71c9678c14832",
         triggered=False,
-        failure_type="blocked",
-        failure_message="",
+        failure_type="rebuild-ok-but-bug-benign-in-pincell",
+        failure_message="Reverse-patched _openmoc.so loads cleanly; k_eff "
+                        "matches fixed build to 1e-6 across factor sweeps "
+                        "{0.2, 0.5, 1.0, 1.5, 2.0, 3.0}.",
         metbench_match=False,
-        explanation="Build chain blocked.",
-        blocked_reason="OpenMOC `setup.py build_ext --inplace` on this image "
-                       "silently skips C++ compilation (no .so produced), so we "
-                       "cannot swap in the reverse-patched _openmoc.so. "
-                       "Re-attempt on a host with the OpenMOC Dockerfile "
-                       "environment, or via a CI runner.",
+        explanation="C++ rebuild path now unblocked (was: build_ext silently "
+                    "no-op'd because config.extensions stays empty unless "
+                    "`setup.py install` is used; that flow calls "
+                    "`config.setup_extension_modules()` from "
+                    "`custom_install.finalize_options`). With the buggy .so "
+                    "loaded, pincell.json yields identical k_eff to the "
+                    "fixed build because power iteration's normalisation "
+                    "step (CPUSolver.cpp:1801 `fission_source /= _k_eff`) "
+                    "drives `rates[0]/(rates[1]+rates[2])` → 1.0 at the "
+                    "fixed point, so `_k_eff *= 1.0` is a no-op. The bug "
+                    "biting requires a non-converged transient flow that "
+                    "MetBench's converged pincell SUT does not exercise. "
+                    "Walkthrough kept in `historical-bugs.md`; synthetic "
+                    "Mut02/Mut04 cover the same divergence-class behaviour.",
+        blocked_reason="Bug does not change the converged value on a "
+                       "well-normalised pincell power iteration. Need a "
+                       "non-converged / restart-mid-iteration scenario to "
+                       "trigger the divergence.",
     )
 
 
@@ -263,17 +295,21 @@ def run_case_5() -> CaseResult:
                 failure_type="silent-drop",
                 failure_message=f"borated_water(..., density=0.7) returned material with "
                                 f"temperature={t_buggy} (expected 600)",
-                metbench_match=False,  # SUT doesn't currently use borated_water
+                metbench_match=True,  # SUT extension wires borated_water as of PR-3
                 explanation="Bug triggers cleanly: when density is supplied, the "
                             "user-given temperature is silently dropped from the Material. "
-                            "MetBench MR fit is MR-T (RaiseFuelTemperature); however the "
-                            "current SUT moderator is built directly via MGXS, not "
-                            "via `openmc.model.borated_water`. To turn this into a "
-                            "matrix-detected real bug, the runner needs a small SUT "
-                            "extension (~20 lines) that calls borated_water for the "
-                            "moderator material. Once wired, both source and follow-up "
-                            "MR-T runs would see temperature=None → k_eff identical → "
-                            "`less` assertion fails → detected.",
+                            "MetBench MR fit is MR-T (RaiseModeratorTemperature). Now "
+                            "wired into the matrix via the new scenario "
+                            "`openmc-pincell-moderator-temperature-via-borated-water` "
+                            "and SUT extension `exercise_borated_water` (see the "
+                            "moderator-temperature-via-borated-water adapter and the "
+                            "gate inside `_build_mgxs_library`). With the gate, source "
+                            "(T=600, no flag) runs cleanly; follow-up (T=900, "
+                            "exercise_borated_water=true) calls `openmc.model.borated_water"
+                            "(temperature=900, density=…)`, observes the returned "
+                            "Material's temperature is None, and raises `RuntimeError: "
+                            "OpenMC PR #3662 (...)` — the matrix records `status=error` "
+                            "for that cell, i.e. detected.",
             )
         return CaseResult(
             case_id=case_id, title=title, repo=repo, fix_commit=fix_commit,

@@ -20,14 +20,14 @@ OpenMOC pathologies MetBench self-discovered (Case 4, Case 6).
 
 | ID | Source | SHA / PR | Date | File(s) | Bug | MP fit | Catching MR | Live state |
 |----|:------:|----------|------|---------|-----|:------:|-------------|------------|
-| R-Case-1 | OpenMOC | `28008901` | 2018-09-12 | `src/CPUSolver.cpp` | `_k_eff *= ...` accumulation | m_mono (k-path) | matrix Mut02/Mut04 catch this divergence pattern (inf/nan path) | walkthrough only (build env blocked) |
+| R-Case-1 | OpenMOC | `28008901` | 2018-09-12 | `src/CPUSolver.cpp` | `_k_eff *= ...` accumulation | m_mono (k-path) | matrix Mut02/Mut04 catch this divergence pattern (inf/nan path) | C++ rebuild **unblocked** (`setup.py install --cc=gcc --fp=single` triggers `config.setup_extension_modules`); reverse-patched .so loads OK, but **k_eff matches fixed build to 1e-6** across factor sweeps {0.2, 0.5, 1, 1.5, 2, 3} because power-iteration normalisation drives the rate ratio to 1.0 at the fixed point. Upstream fix was preventive — bug only bites non-converged transients which the pincell SUT does not exercise. Walkthrough only. |
 | R-Case-2 | OpenMC #3712 | `dfc80c70` | 2026-01-07 | `openmc/mgxs_library.py` | `add_temperature` chained-append → None | m_mono on T (MR-T) | MR-T pattern via Mut45/Mut46; **also surfaces live in the matrix** via new scenario `openmc-pincell-fuel-temperature-via-add-temperature` (Phase-3 PR-2 plumbing) — cell `status=error` with marker `RuntimeError: OpenMC PR #3712 (add_temperature → None) triggered` | **live in matrix** ✓ |
 | R-Case-3 | OpenMC #3708 | `10f2b753` | 2026-01-06 | `openmc/mgxs/mgxs.py` | distribcell `group_name=''.zfill(N)` collapse | m_inv (MR02-tally / MR03-tally) | MR02-tally detects Mut47 (synthetic analog) | walkthrough only — bug path needs MGXS-from-tallies + 2×2 pin |
 | R-Case-4 | **MetBench self-discovery** | (no fix commit yet) | 2026-05-12 | `src/CPUSolver.cpp` | power-iter narrow basin at moderator-σ_a factor=1.5 | **m_cmp (MR14)** | **MR14 cross-program — extended MT** | **live confirmed**, OpenMOC k=0.476 vs OpenMC k=0.968 (51% Δ) |
-| R-Case-5 | OpenMC #3662 | `ef22558f` | 2025-11-29 | `openmc/model/funcs.py` | `borated_water(density=X)` drops temperature | m_mono on T (MR-T) | MR-T pattern; SUT extension needed to plumb borated_water into runner | **live triggered** standalone, matrix coverage needs SUT extension |
+| R-Case-5 | OpenMC #3662 | `ef22558f` | 2025-11-29 | `openmc/model/funcs.py` | `borated_water(density=X)` drops temperature | m_mono on T (MR-T) | MR-T pattern via new scenario `openmc-pincell-moderator-temperature-via-borated-water` (Phase-3 PR-3 plumbing) — cell `status=error` with marker `RuntimeError: OpenMC PR #3662 (borated_water drops temperature when density set) triggered` | **live in matrix** ✓ |
 | R-Case-6 | **MetBench self-discovery** | (no fix commit yet) | 2026-05-12 | `src/CPUSolver.cpp` | power-iter narrow basin at fuel-temperature factor=1.25 | **m_mono (MR-T)** | **MR-T parameter sweep — classical MT** | **live confirmed** via `tools/mr_parameter_sweep.py`; OpenMOC k=0.508 at one factor while neighbours give 1.11 |
 
-**Real-bug subtotal**: 6 cases — 4 from upstream fix commits + **2 net-new findings by MetBench**. Live-triggered: 4 (Case 2, 4, 5, 6).
+**Real-bug subtotal**: 6 cases — 4 from upstream fix commits + **2 net-new findings by MetBench**. Live-triggered: 4 (Case 2, 4, 5, 6). Surfaced in the MR matrix: **4 / 6** (Case 2, 4, 5, 6 — adds Case 5 via the new borated-water scenario; Case 1 rebuild path now unblocked but the bug is benign on a converged pincell, so it stays walkthrough; Case 3 still needs a 2×2-pin + tally-driven MGXS SUT extension).
 
 ## Synthetic mutants (S) — 48 entries
 
@@ -147,5 +147,5 @@ Synthetic mutants designed to mirror real-bug patterns:
 | Synthetic mutants in matrix | 48 (Mut00-Mut47) |
 | Synthetic mutants designed to mirror a real-bug pattern | 5 (Mut02, Mut04, Mut45, Mut46, Mut47) |
 | Real bugs live-triggered today | 4 / 6 (Case 2/4/5/6) |
-| Real bugs surfaced *in the MR matrix* today | **3 / 6** (Case 2 via new scenario; Case 4 via MR14 cross-program; Case 6 via MR-T sweep) |
+| Real bugs surfaced *in the MR matrix* today | **4 / 6** (Case 2 via new add-temperature scenario; Case 4 via MR14 cross-program; Case 5 via new borated-water scenario; Case 6 via MR-T sweep) |
 | Synthetic mutants detected by ≥1 MR | 32 / 47 non-identity (see `mutation-detection-matrix.md`) |

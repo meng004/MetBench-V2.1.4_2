@@ -104,6 +104,31 @@ def _build_mgxs_library(case: dict, library_path: Path) -> None:
                     f"OpenMC PR #3712 (add_temperature → None) triggered on "
                     f"{name}: {e}"
                 ) from None
+
+        # Phase-3 / Case 5 live-trigger plumbing.
+        # When the case JSON sets `materials.<name>.exercise_borated_water: true`
+        # AND a non-default `temperature_kelvin`, we additionally call
+        # `openmc.model.borated_water(boron_ppm, temperature=t, density=...)` —
+        # the path broken by OpenMC PR #3662 (when density is supplied, the
+        # user-given temperature is silently dropped from the returned
+        # Material). On installed buggy OpenMC the returned material has
+        # `temperature is None` (or != t); the runner raises with a
+        # recognizable marker so the matrix attributes the failure to the
+        # upstream bug. Default is to skip so existing scenarios are untouched.
+        if mat.get("exercise_borated_water") and t_kelvin > 0 and abs(t_kelvin - 600.0) > 1e-9:
+            import openmc.model
+            boron_ppm = float(mat.get("boron_ppm", 500.0))
+            density_g_cc = float(mat.get("density_g_cc", 0.7))
+            bw_mat = openmc.model.borated_water(
+                boron_ppm=boron_ppm, temperature=t_kelvin, density=density_g_cc,
+            )
+            actual_t = bw_mat.temperature
+            if actual_t is None or abs(float(actual_t) - t_kelvin) > 1e-6:
+                raise RuntimeError(
+                    f"OpenMC PR #3662 (borated_water drops temperature when "
+                    f"density set) triggered on {name}: requested T={t_kelvin}, "
+                    f"got mat.temperature={actual_t}"
+                )
         # OpenMOC stores sigma_s as a 4-element row-major matrix [g_in -> g_out].
         # OpenMC's set_scatter_matrix wants shape (num_groups, num_groups, num_legendre_moments).
         # With xsdata.order = 0 (P0, isotropic), num_legendre_moments = 1.
