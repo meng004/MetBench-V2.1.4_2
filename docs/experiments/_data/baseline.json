@@ -112,6 +112,30 @@
       "k_eff_std": 0.0019251225475307512,
       "factor": 1.5,
       "source_case": "SUT/openmoc/sample/pincell-asymmetric.json"
+    },
+    "openmoc-pincell-mirror-x": {
+      "k_eff": 1.1027016169736694,
+      "k_eff_std": 0.0,
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell-offcentre.json"
+    },
+    "openmc-pincell-mirror-x": {
+      "k_eff": 1.0980778782345744,
+      "k_eff_std": 0.0018005599517459008,
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell-offcentre.json"
+    },
+    "openmoc-pincell-mirror-y": {
+      "k_eff": 1.1027113849239967,
+      "k_eff_std": 0.0,
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell-offcentre.json"
+    },
+    "openmc-pincell-mirror-y": {
+      "k_eff": 1.095554069002453,
+      "k_eff_std": 0.001858624921749161,
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell-offcentre.json"
     }
   },
   "factor": 1.5,

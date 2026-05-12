@@ -8,9 +8,7 @@
     },
     {
       "scenario_id": "openmc-pincell-nu-sigma-f",
-      "status": "error",
-      "error": "Subprocess timed out after 90s: /opt/miniconda3/envs/openmc-env/bin/python /tmp/mat-Mut15-openmc-runner-chi-zero-czgvrs65/SUT/openmc/openmc_runner.py --input /home/user/MetBench-V2.1.4_2/SUT/openmoc/sample/pincell.json --output /tmp/mat-Mut15-openmc-runner-chi-zero-czgvrs65/src-openmc-openmc-pincell-nu-sigma-f.json\nstdout (partial):\n\nstderr (partial):\n",
-      "outcome": "error"
+      "status": "skipped-no-openmc"
     },
     {
       "scenario_id": "openmoc-pincell-sigma-a",
@@ -18,9 +16,59 @@
     },
     {
       "scenario_id": "openmc-pincell-sigma-a",
-      "status": "error",
-      "error": "Subprocess timed out after 90s: /opt/miniconda3/envs/openmc-env/bin/python /tmp/mat-Mut15-openmc-runner-chi-zero-czgvrs65/SUT/openmc/openmc_runner.py --input /home/user/MetBench-V2.1.4_2/SUT/openmoc/sample/pincell.json --output /tmp/mat-Mut15-openmc-runner-chi-zero-czgvrs65/src-openmc-openmc-pincell-sigma-a.json\nstdout (partial):\n\nstderr (partial):\n",
-      "outcome": "error"
+      "status": "skipped-no-openmc"
+    },
+    {
+      "scenario_id": "openmoc-pincell-group-permute",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-fuel-sigma-t",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-moderator-sigma-a",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-group-permute",
+      "status": "skipped-no-openmc"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-sigma-t",
+      "status": "skipped-no-openmc"
+    },
+    {
+      "scenario_id": "openmc-pincell-moderator-sigma-a",
+      "status": "skipped-no-openmc"
+    },
+    {
+      "scenario_id": "openmoc-pincell-fuel-sigma-s",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-sigma-s",
+      "status": "skipped-no-openmc"
+    },
+    {
+      "scenario_id": "openmoc-pincell-fuel-radius",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-radius",
+      "status": "skipped-no-openmc"
+    },
+    {
+      "scenario_id": "openmc-pincell-particles-refine",
+      "status": "skipped-no-openmc"
+    },
+    {
+      "scenario_id": "openmoc-pincell-rotate-90",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-rotate-90",
+      "status": "skipped-no-openmc"
     }
   ]
 }

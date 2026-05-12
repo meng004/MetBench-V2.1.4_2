@@ -11,10 +11,11 @@
       "status": "ran",
       "k_source": 1.091868591488576,
       "k_followup": 1.730092483267029,
-      "k_source_std": 0.051495773431598016,
-      "k_followup_std": 0.02593701031210181,
+      "k_source_std": 0.05149577343159909,
+      "k_followup_std": 0.025937010312114653,
       "ratio": 1.5845244535410108,
       "assertion": "greater",
+      "factor": 1.5,
       "assertion_passed": true,
       "outcome": "missed"
     },
@@ -25,12 +26,128 @@
     {
       "scenario_id": "openmc-pincell-sigma-a",
       "status": "ran",
-      "k_source": 1.0918685914885755,
+      "k_source": 1.091868591488576,
       "k_followup": 0.8612739548039311,
-      "k_source_std": 0.05149577343160125,
-      "k_followup_std": 0.028335767528934182,
-      "ratio": 0.7888073358990314,
+      "k_source_std": 0.051495773431598016,
+      "k_followup_std": 0.02833576752893614,
+      "ratio": 0.7888073358990311,
       "assertion": "less",
+      "factor": 1.5,
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmoc-pincell-group-permute",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-fuel-sigma-t",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-moderator-sigma-a",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-group-permute",
+      "status": "ran",
+      "k_source": 1.091868591488576,
+      "k_followup": 1.2274118186382263,
+      "k_source_std": 0.051495773431600174,
+      "k_followup_std": 0.024841326154949057,
+      "ratio": 1.124138772931329,
+      "assertion": "approx",
+      "factor": 1.5,
+      "assertion_passed": false,
+      "outcome": "detected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-sigma-t",
+      "status": "ran",
+      "k_source": 1.0918685914885757,
+      "k_followup": 0.11146190282628488,
+      "k_source_std": 0.05149577343159909,
+      "k_followup_std": 0.006251086566959248,
+      "ratio": 0.10208362406901518,
+      "assertion": "less",
+      "factor": 1.5,
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmc-pincell-moderator-sigma-a",
+      "status": "ran",
+      "k_source": 1.0918685914885757,
+      "k_followup": 0.9976349186882221,
+      "k_source_std": 0.05149577343159909,
+      "k_followup_std": 0.021782831095612507,
+      "ratio": 0.9136950421186837,
+      "assertion": "less",
+      "factor": 1.5,
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmoc-pincell-fuel-sigma-s",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-sigma-s",
+      "status": "ran",
+      "k_source": 1.091868591488576,
+      "k_followup": 1.1703358407510622,
+      "k_source_std": 0.051495773431598016,
+      "k_followup_std": 0.07173657605101312,
+      "ratio": 1.0718651034329227,
+      "assertion": "less",
+      "factor": 0.5,
+      "assertion_passed": false,
+      "outcome": "detected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-fuel-radius",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-radius",
+      "status": "ran",
+      "k_source": 1.091868591488576,
+      "k_followup": 1.1371661460879514,
+      "k_source_std": 0.051495773431598016,
+      "k_followup_std": 0.09413859949578995,
+      "ratio": 1.0414862694581406,
+      "assertion": "greater",
+      "factor": 1.05,
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmc-pincell-particles-refine",
+      "status": "ran",
+      "k_source": 1.0918685914885757,
+      "k_followup": 1.091868591488576,
+      "k_source_std": 0.05149577343159909,
+      "k_followup_std": 0.05149577343159909,
+      "ratio": 1.0000000000000002,
+      "assertion": "variance-ratio",
+      "factor": 10.0,
+      "assertion_passed": false,
+      "outcome": "detected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-rotate-90",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-rotate-90",
+      "status": "ran",
+      "k_source": 1.1927070008834662,
+      "k_followup": 1.1884777491103737,
+      "k_source_std": 0.07507207474977766,
+      "k_followup_std": 0.03058140223640102,
+      "ratio": 0.9964540731546309,
+      "assertion": "approx",
+      "factor": 1.5,
       "assertion_passed": true,
       "outcome": "missed"
     }

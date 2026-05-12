@@ -250,6 +250,61 @@ shift, Anderson, …), or it may be specific to this particular
 material configuration. Further investigation is out of scope for
 the MR-matrix study.
 
+## MR02 / MR03 (mirror x / y) on an off-centre pin-cell
+
+The same vacuous-on-symmetric-input issue that MR01 had also applies
+to MR02 / MR03 (mirror reflections about x or y). The fix is the
+same kind: an off-centre sample where the mirror is non-trivial.
+Phase-2 adds **`SUT/openmoc/sample/pincell-offcentre.json`** (fuel
+offset (+0.10, -0.08) cm, square 1.30 × 1.30 cm extent) and the
+required runner change — both `openmoc_runner.py` and
+`openmc_runner.py` now read `fuel_offset_x_cm` / `fuel_offset_y_cm`
+from the geometry block (defaulting to 0, so all earlier samples are
+unaffected).
+
+Mirror adapters flip the relevant sign:
+
+* `openmoc/openmc_input_adapter_mirror_x.py`: `y_offset → -y_offset`
+* `openmoc/openmc_input_adapter_mirror_y.py`: `x_offset → -x_offset`
+
+Mutations that break the invariance use `max(0, offset)` so negative
+offsets are silently clamped to 0:
+
+* **Mut41** OpenMOC `y = max(0, y_offset)` → breaks MR02 (mirror x)
+* **Mut42** OpenMOC `x = max(0, x_offset)` → breaks MR03 (mirror y)
+* **Mut43**, **Mut44**: OpenMC twins.
+
+Matrix outcome:
+
+| Pair | MR02 (OpenMOC) | MR03 (OpenMOC) | MR02 (OpenMC) | MR03 (OpenMC) |
+|------|----------------|----------------|---------------|---------------|
+| Mut41 / Mut43 | **DETECT** | miss (not affected) | miss (MC noise hides 2e-3 shift) | — |
+| Mut42 / Mut44 | miss (not affected) | **DETECT** | — | miss (MC noise) |
+
+OpenMOC catches both because its 1e-5 strict tolerance is plenty for
+the 1e-3 geometric shift. OpenMC's necessary 0.5%-of-k_eff tolerance
+(driven by σ ≈ 0.0018 at 5000 particles) is wider than the geometric
+shift produces, so MC misses both. **Same MC-vs-MOC strict-inequality
+fragility we documented for MR06 fuel-sigma-s** (Mut32 detected,
+Mut37 missed) reproduces here. Cohen's κ on the MR02 and MR03 pairs
+is **0.000** for the same reason.
+
+The headline is that the **MRs themselves are now correctly active
+on this SUT** — MR01 (Rotate90 on pincell-asymmetric.json), MR02 and
+MR03 (mirror x/y on pincell-offcentre.json). Closing the residual
+"vacuous-on-this-SUT" gap from the Phase-2 catalogue.
+
+**Caveat — OpenMOC pathology #2**: at `pin extent = 1.50 cm`,
+`fuel_offset = (0.15, -0.10) cm`, OpenMOC's `CPUSolver` converges to
+k=0.5356 in only 35 iters while OpenMC gives 0.959 on the same
+input. This is a SECOND example of the convergence basin pathology
+we documented at `ScaleModeratorSigmaA(factor=1.5)`. The off-centre
+sample we ship uses the tighter (1.30, 0.10, -0.08) configuration
+that stays out of OpenMOC's bad basin — but the discovery confirms
+that OpenMOC's basic power iteration has multiple narrow bad
+configurations on this material set, and MR14 cross-program would
+catch them.
+
 ## MR01 (Rotate90) on an asymmetric pin-cell
 
 The reference `SUT/openmoc/sample/pincell.json` is square (1.26 × 1.26 cm)

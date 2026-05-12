@@ -775,6 +775,78 @@ Mut38 = Mutation(
 )
 
 
+# ---------------------------------------------------------------------------
+# Phase-2 mutations targeting MR02 / MR03 (mirror reflection invariance)
+#
+# The reference off-centre pin-cell has fuel_offset_y_cm = -0.05 and
+# fuel_offset_x_cm = +0.10. clamp-y-positive replaces the runner's
+# `y=...` argument with `y=max(0, ...)`, so the source (y=-0.05) sees
+# fuel forced to y=0, while the MirrorX follow-up (y=+0.05) keeps fuel
+# at +0.05 — the two cells differ physically and MR02 detects.
+# Symmetrically for clamp-x-positive on MR03.
+# ---------------------------------------------------------------------------
+
+Mut41 = Mutation(
+    id="Mut41-openmoc-runner-clamp-y-offset-positive",
+    target_file="SUT/openmoc/openmoc_runner.py",
+    description='Replace y=...fuel_offset_y_cm with y=max(0.0, ...) inside ZCylinder.',
+    rationale="Asymmetric y-handling: negative offsets get clamped to 0, positive "
+              "ones pass through. Silent equivalent on the symmetric pin-cell "
+              "(no offset). On the off-centre sample, source (y=-0.05) sees "
+              "fuel at y=0 but the MirrorX follow-up (y=+0.05) sees fuel at "
+              "+0.05 — k_eff differs, MR02 detects. MR03 (mirror y) and "
+              "rotation MR untouched.",
+    predicted_classification="semantic",
+    predicted_detector=("mirror_x",),
+    apply=_replace_exactly_once(
+        'y=float(g.get("fuel_offset_y_cm", 0.0)),',
+        'y=max(0.0, float(g.get("fuel_offset_y_cm", 0.0))),  # MUTATION Mut41',
+    ),
+)
+
+Mut42 = Mutation(
+    id="Mut42-openmoc-runner-clamp-x-offset-positive",
+    target_file="SUT/openmoc/openmoc_runner.py",
+    description='Replace x=...fuel_offset_x_cm with x=max(0.0, ...) inside ZCylinder.',
+    rationale="Symmetric of Mut41 across the y-axis: negative x-offsets clamped "
+              "to 0, positive ones pass through. On the off-centre sample "
+              "source (x=+0.10) is unchanged, but MirrorY follow-up (x=-0.10) "
+              "becomes x=0 — k_eff differs, MR03 detects. MR02 untouched.",
+    predicted_classification="semantic",
+    predicted_detector=("mirror_y",),
+    apply=_replace_exactly_once(
+        'x=float(g.get("fuel_offset_x_cm", 0.0)),',
+        'x=max(0.0, float(g.get("fuel_offset_x_cm", 0.0))),  # MUTATION Mut42',
+    ),
+)
+
+Mut43 = Mutation(
+    id="Mut43-openmc-runner-clamp-y-offset-positive",
+    target_file="SUT/openmc/openmc_runner.py",
+    description='OpenMC twin of Mut41 (y0=max(0.0, ...)).',
+    rationale="OpenMC mirror of Mut41. Matched pair for cross-solver κ on MR02.",
+    predicted_classification="semantic",
+    predicted_detector=("mirror_x",),
+    apply=_replace_exactly_once(
+        'y0=float(g.get("fuel_offset_y_cm", 0.0)),',
+        'y0=max(0.0, float(g.get("fuel_offset_y_cm", 0.0))),  # MUTATION Mut43',
+    ),
+)
+
+Mut44 = Mutation(
+    id="Mut44-openmc-runner-clamp-x-offset-positive",
+    target_file="SUT/openmc/openmc_runner.py",
+    description='OpenMC twin of Mut42 (x0=max(0.0, ...)).',
+    rationale="OpenMC mirror of Mut42. Matched pair for cross-solver κ on MR03.",
+    predicted_classification="semantic",
+    predicted_detector=("mirror_y",),
+    apply=_replace_exactly_once(
+        'x0=float(g.get("fuel_offset_x_cm", 0.0)),',
+        'x0=max(0.0, float(g.get("fuel_offset_x_cm", 0.0))),  # MUTATION Mut44',
+    ),
+)
+
+
 ALL_MUTATIONS: tuple[Mutation, ...] = (
     Mut00,
     Mut01, Mut02, Mut03, Mut04, Mut05, Mut06,
@@ -787,6 +859,7 @@ ALL_MUTATIONS: tuple[Mutation, ...] = (
     Mut32, Mut33, Mut34,
     Mut35, Mut36, Mut37, Mut38,
     Mut39, Mut40,
+    Mut41, Mut42, Mut43, Mut44,
 )
 
 

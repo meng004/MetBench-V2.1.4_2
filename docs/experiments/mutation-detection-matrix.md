@@ -7,27 +7,31 @@ MR factor: 1.5. Status `not-affected` means the mutation patches a file the scen
 
 | Scenario | n (semantic mutants affecting it) | detected | missed | errors | rate | 95% CI |
 |---|---|---|---|---|---|---|
-| openmoc-pincell-nu-sigma-f | 13 | 7 | 6 | 0 | 53.8% | [29.1%, 76.8%] |
-| openmc-pincell-nu-sigma-f | 10 | 4 | 6 | 0 | 40.0% | [16.8%, 68.7%] |
-| openmoc-pincell-sigma-a | 11 | 4 | 7 | 0 | 36.4% | [15.2%, 64.6%] |
-| openmc-pincell-sigma-a | 7 | 2 | 5 | 0 | 28.6% | [8.2%, 64.1%] |
-| openmoc-pincell-group-permute | 9 | 4 | 5 | 0 | 44.4% | [18.9%, 73.3%] |
-| openmoc-pincell-fuel-sigma-t | 8 | 1 | 7 | 0 | 12.5% | [2.2%, 47.1%] |
-| openmoc-pincell-moderator-sigma-a | 9 | 3 | 6 | 0 | 33.3% | [12.1%, 64.6%] |
-| openmc-pincell-group-permute | 3 | 2 | 1 | 0 | 66.7% | [20.8%, 93.9%] |
-| openmc-pincell-fuel-sigma-t | 2 | 0 | 2 | 0 | 0.0% | [0.0%, 65.8%] |
-| openmc-pincell-moderator-sigma-a | 2 | 0 | 2 | 0 | 0.0% | [0.0%, 65.8%] |
-| openmoc-pincell-fuel-sigma-s | 9 | 5 | 4 | 0 | 55.6% | [26.7%, 81.1%] |
-| openmc-pincell-fuel-sigma-s | 3 | 0 | 3 | 0 | 0.0% | [0.0%, 56.2%] |
-| openmoc-pincell-fuel-radius | 9 | 5 | 4 | 0 | 55.6% | [26.7%, 81.1%] |
-| openmc-pincell-fuel-radius | 3 | 1 | 2 | 0 | 33.3% | [6.1%, 79.2%] |
-| openmc-pincell-particles-refine | 3 | 1 | 2 | 0 | 33.3% | [6.1%, 79.2%] |
-| openmoc-pincell-rotate-90 | 1 | 1 | 0 | 0 | 100.0% | [20.7%, 100.0%] |
-| openmc-pincell-rotate-90 | 1 | 1 | 0 | 0 | 100.0% | [20.7%, 100.0%] |
+| openmoc-pincell-nu-sigma-f | 15 | 7 | 8 | 0 | 46.7% | [24.8%, 69.9%] |
+| openmc-pincell-nu-sigma-f | 13 | 4 | 9 | 0 | 30.8% | [12.7%, 57.6%] |
+| openmoc-pincell-sigma-a | 13 | 4 | 9 | 0 | 30.8% | [12.7%, 57.6%] |
+| openmc-pincell-sigma-a | 10 | 2 | 8 | 0 | 20.0% | [5.7%, 51.0%] |
+| openmoc-pincell-group-permute | 11 | 4 | 7 | 0 | 36.4% | [15.2%, 64.6%] |
+| openmoc-pincell-fuel-sigma-t | 10 | 1 | 9 | 0 | 10.0% | [1.8%, 40.4%] |
+| openmoc-pincell-moderator-sigma-a | 11 | 3 | 8 | 0 | 27.3% | [9.7%, 56.6%] |
+| openmc-pincell-group-permute | 10 | 3 | 7 | 0 | 30.0% | [10.8%, 60.3%] |
+| openmc-pincell-fuel-sigma-t | 9 | 1 | 8 | 0 | 11.1% | [2.0%, 43.5%] |
+| openmc-pincell-moderator-sigma-a | 9 | 2 | 7 | 0 | 22.2% | [6.3%, 54.7%] |
+| openmoc-pincell-fuel-sigma-s | 11 | 5 | 6 | 0 | 45.5% | [21.3%, 72.0%] |
+| openmc-pincell-fuel-sigma-s | 10 | 2 | 8 | 0 | 20.0% | [5.7%, 51.0%] |
+| openmoc-pincell-fuel-radius | 11 | 5 | 6 | 0 | 45.5% | [21.3%, 72.0%] |
+| openmc-pincell-fuel-radius | 10 | 2 | 8 | 0 | 20.0% | [5.7%, 51.0%] |
+| openmc-pincell-particles-refine | 8 | 3 | 5 | 0 | 37.5% | [13.7%, 69.4%] |
+| openmoc-pincell-rotate-90 | 3 | 1 | 2 | 0 | 33.3% | [6.1%, 79.2%] |
+| openmc-pincell-rotate-90 | 8 | 2 | 6 | 0 | 25.0% | [7.1%, 59.1%] |
+| openmoc-pincell-mirror-x | 2 | 1 | 1 | 0 | 50.0% | [9.5%, 90.5%] |
+| openmc-pincell-mirror-x | 2 | 0 | 2 | 0 | 0.0% | [0.0%, 65.8%] |
+| openmoc-pincell-mirror-y | 2 | 1 | 1 | 0 | 50.0% | [9.5%, 90.5%] |
+| openmc-pincell-mirror-y | 2 | 0 | 2 | 0 | 0.0% | [0.0%, 65.8%] |
 
 ## Identity false-positive sanity
 
-Mut00 (identity) detected on 0 / 17 scenarios. Expected 0 — ✓ PASS.
+Mut00 (identity) detected on 0 / 21 scenarios. Expected 0 — ✓ PASS.
 
 
 ## Per-mutation detail
@@ -51,6 +55,10 @@ Mut00 (identity) detected on 0 / 17 scenarios. Expected 0 — ✓ PASS.
 | Mut00-identity | openmc-pincell-particles-refine | missed | 1.12450 | 1.12477 | 1.00024 |
 | Mut00-identity | openmoc-pincell-rotate-90 | missed | 1.15950 | 1.15949 | 0.99999 |
 | Mut00-identity | openmc-pincell-rotate-90 | missed | 1.15438 | 1.15354 | 0.99927 |
+| Mut00-identity | openmoc-pincell-mirror-x | missed | 1.10271 | 1.10270 | 0.99999 |
+| Mut00-identity | openmc-pincell-mirror-x | missed | 1.09602 | 1.09808 | 1.00188 |
+| Mut00-identity | openmoc-pincell-mirror-y | missed | 1.10271 | 1.10271 | 1.00000 |
+| Mut00-identity | openmc-pincell-mirror-y | missed | 1.09602 | 1.09555 | 0.99958 |
 | Mut01-openmoc-runner-chi-zero | openmoc-pincell-nu-sigma-f | detected | 0.00059 | 0.00059 | 1.00000 |
 | Mut01-openmoc-runner-chi-zero | openmc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | Mut01-openmoc-runner-chi-zero | openmoc-pincell-sigma-a | missed | 0.00059 | 0.00051 | 0.85942 |
@@ -261,26 +269,91 @@ Mut00 (identity) detected on 0 / 17 scenarios. Expected 0 — ✓ PASS.
 | Mut14-openmoc-adapter-sa-moderator | openmoc-pincell-fuel-radius | _not-affected_ |  |  |  |
 | Mut14-openmoc-adapter-sa-moderator | openmc-pincell-fuel-radius | _not-affected_ |  |  |  |
 | Mut14-openmoc-adapter-sa-moderator | openmc-pincell-particles-refine | _not-affected_ |  |  |  |
-| Mut15-openmc-runner-chi-zero | openmoc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
-| Mut15-openmc-runner-chi-zero | openmc-pincell-nu-sigma-f | _error_ |  |  |  |
-| Mut15-openmc-runner-chi-zero | openmoc-pincell-sigma-a | _not-affected_ |  |  |  |
-| Mut15-openmc-runner-chi-zero | openmc-pincell-sigma-a | _error_ |  |  |  |
-| Mut16-openmc-runner-scatter-transpose | openmoc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
-| Mut16-openmc-runner-scatter-transpose | openmc-pincell-nu-sigma-f | missed | 0.58237 | 0.87430 | 1.50128 |
-| Mut16-openmc-runner-scatter-transpose | openmoc-pincell-sigma-a | _not-affected_ |  |  |  |
-| Mut16-openmc-runner-scatter-transpose | openmc-pincell-sigma-a | missed | 0.58237 | 0.39868 | 0.68458 |
 | Mut17-openmc-runner-vacuum-boundary | openmoc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | Mut17-openmc-runner-vacuum-boundary | openmc-pincell-nu-sigma-f | missed | 0.00491 | 0.00738 | 1.50153 |
 | Mut17-openmc-runner-vacuum-boundary | openmoc-pincell-sigma-a | _not-affected_ |  |  |  |
 | Mut17-openmc-runner-vacuum-boundary | openmc-pincell-sigma-a | missed | 0.00491 | 0.00486 | 0.98945 |
+| Mut17-openmc-runner-vacuum-boundary | openmoc-pincell-group-permute | _not-affected_ |  |  |  |
+| Mut17-openmc-runner-vacuum-boundary | openmoc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
+| Mut17-openmc-runner-vacuum-boundary | openmoc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| Mut17-openmc-runner-vacuum-boundary | openmc-pincell-group-permute | missed | 0.00491 | 0.00489 | 0.99636 |
+| Mut17-openmc-runner-vacuum-boundary | openmc-pincell-fuel-sigma-t | missed | 0.00491 | 0.00434 | 0.88440 |
+| Mut17-openmc-runner-vacuum-boundary | openmc-pincell-moderator-sigma-a | detected | 0.00491 | 0.00496 | 1.00879 |
+| Mut17-openmc-runner-vacuum-boundary | openmoc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| Mut17-openmc-runner-vacuum-boundary | openmc-pincell-fuel-sigma-s | missed | 0.00491 | 0.00436 | 0.88847 |
+| Mut17-openmc-runner-vacuum-boundary | openmoc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| Mut17-openmc-runner-vacuum-boundary | openmc-pincell-fuel-radius | missed | 0.00491 | 0.00515 | 1.04906 |
+| Mut17-openmc-runner-vacuum-boundary | openmc-pincell-particles-refine | detected | 0.00491 | 0.00489 | 0.99474 |
+| Mut17-openmc-runner-vacuum-boundary | openmoc-pincell-rotate-90 | _not-affected_ |  |  |  |
+| Mut17-openmc-runner-vacuum-boundary | openmc-pincell-rotate-90 | detected | 0.00478 | 0.00485 | 1.01362 |
+| Mut18-openmc-runner-batches-too-few | openmoc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
+| Mut18-openmc-runner-batches-too-few | openmc-pincell-nu-sigma-f | missed | 1.09187 | 1.73009 | 1.58452 |
+| Mut18-openmc-runner-batches-too-few | openmoc-pincell-sigma-a | _not-affected_ |  |  |  |
+| Mut18-openmc-runner-batches-too-few | openmc-pincell-sigma-a | missed | 1.09187 | 0.86127 | 0.78881 |
+| Mut18-openmc-runner-batches-too-few | openmoc-pincell-group-permute | _not-affected_ |  |  |  |
+| Mut18-openmc-runner-batches-too-few | openmoc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
+| Mut18-openmc-runner-batches-too-few | openmoc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| Mut18-openmc-runner-batches-too-few | openmc-pincell-group-permute | detected | 1.09187 | 1.22741 | 1.12414 |
+| Mut18-openmc-runner-batches-too-few | openmc-pincell-fuel-sigma-t | missed | 1.09187 | 0.11146 | 0.10208 |
+| Mut18-openmc-runner-batches-too-few | openmc-pincell-moderator-sigma-a | missed | 1.09187 | 0.99763 | 0.91370 |
+| Mut18-openmc-runner-batches-too-few | openmoc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| Mut18-openmc-runner-batches-too-few | openmc-pincell-fuel-sigma-s | detected | 1.09187 | 1.17034 | 1.07187 |
+| Mut18-openmc-runner-batches-too-few | openmoc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| Mut18-openmc-runner-batches-too-few | openmc-pincell-fuel-radius | missed | 1.09187 | 1.13717 | 1.04149 |
+| Mut18-openmc-runner-batches-too-few | openmc-pincell-particles-refine | detected | 1.09187 | 1.09187 | 1.00000 |
+| Mut18-openmc-runner-batches-too-few | openmoc-pincell-rotate-90 | _not-affected_ |  |  |  |
+| Mut18-openmc-runner-batches-too-few | openmc-pincell-rotate-90 | missed | 1.19271 | 1.18848 | 0.99645 |
 | Mut19-openmc-runner-hardcode-keff | openmoc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | Mut19-openmc-runner-hardcode-keff | openmc-pincell-nu-sigma-f | detected | 1.00000 | 1.00000 | 1.00000 |
 | Mut19-openmc-runner-hardcode-keff | openmoc-pincell-sigma-a | _not-affected_ |  |  |  |
 | Mut19-openmc-runner-hardcode-keff | openmc-pincell-sigma-a | detected | 1.00000 | 1.00000 | 1.00000 |
+| Mut19-openmc-runner-hardcode-keff | openmoc-pincell-group-permute | _not-affected_ |  |  |  |
+| Mut19-openmc-runner-hardcode-keff | openmoc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
+| Mut19-openmc-runner-hardcode-keff | openmoc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| Mut19-openmc-runner-hardcode-keff | openmc-pincell-group-permute | missed | 1.00000 | 1.00000 | 1.00000 |
+| Mut19-openmc-runner-hardcode-keff | openmc-pincell-fuel-sigma-t | detected | 1.00000 | 1.00000 | 1.00000 |
+| Mut19-openmc-runner-hardcode-keff | openmc-pincell-moderator-sigma-a | detected | 1.00000 | 1.00000 | 1.00000 |
+| Mut19-openmc-runner-hardcode-keff | openmoc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| Mut19-openmc-runner-hardcode-keff | openmc-pincell-fuel-sigma-s | detected | 1.00000 | 1.00000 | 1.00000 |
+| Mut19-openmc-runner-hardcode-keff | openmoc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| Mut19-openmc-runner-hardcode-keff | openmc-pincell-fuel-radius | detected | 1.00000 | 1.00000 | 1.00000 |
+| Mut19-openmc-runner-hardcode-keff | openmc-pincell-particles-refine | missed | 1.00000 | 1.00000 | 1.00000 |
+| Mut19-openmc-runner-hardcode-keff | openmoc-pincell-rotate-90 | _not-affected_ |  |  |  |
+| Mut19-openmc-runner-hardcode-keff | openmc-pincell-rotate-90 | missed | 1.00000 | 1.00000 | 1.00000 |
 | Mut20-openmc-runner-chi-swap-groups | openmoc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | Mut20-openmc-runner-chi-swap-groups | openmc-pincell-nu-sigma-f | missed | 1.27937 | 1.91775 | 1.49898 |
 | Mut20-openmc-runner-chi-swap-groups | openmoc-pincell-sigma-a | _not-affected_ |  |  |  |
 | Mut20-openmc-runner-chi-swap-groups | openmc-pincell-sigma-a | missed | 1.27937 | 0.96310 | 0.75280 |
+| Mut20-openmc-runner-chi-swap-groups | openmoc-pincell-group-permute | _not-affected_ |  |  |  |
+| Mut20-openmc-runner-chi-swap-groups | openmoc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
+| Mut20-openmc-runner-chi-swap-groups | openmoc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| Mut20-openmc-runner-chi-swap-groups | openmc-pincell-group-permute | missed | 1.27937 | 1.27735 | 0.99843 |
+| Mut20-openmc-runner-chi-swap-groups | openmc-pincell-fuel-sigma-t | missed | 1.27937 | 0.29025 | 0.22687 |
+| Mut20-openmc-runner-chi-swap-groups | openmc-pincell-moderator-sigma-a | missed | 1.27937 | 1.09434 | 0.85538 |
+| Mut20-openmc-runner-chi-swap-groups | openmoc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| Mut20-openmc-runner-chi-swap-groups | openmc-pincell-fuel-sigma-s | missed | 1.27937 | 1.27837 | 0.99922 |
+| Mut20-openmc-runner-chi-swap-groups | openmoc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| Mut20-openmc-runner-chi-swap-groups | openmc-pincell-fuel-radius | missed | 1.27937 | 1.33994 | 1.04735 |
+| Mut20-openmc-runner-chi-swap-groups | openmc-pincell-particles-refine | missed | 1.27937 | 1.27814 | 0.99905 |
+| Mut20-openmc-runner-chi-swap-groups | openmoc-pincell-rotate-90 | _not-affected_ |  |  |  |
+| Mut20-openmc-runner-chi-swap-groups | openmc-pincell-rotate-90 | missed | 1.31484 | 1.31881 | 1.00302 |
+| Mut21-openmc-runner-fission-zero | openmoc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
+| Mut21-openmc-runner-fission-zero | openmc-pincell-nu-sigma-f | missed | 1.12450 | 1.68996 | 1.50286 |
+| Mut21-openmc-runner-fission-zero | openmoc-pincell-sigma-a | _not-affected_ |  |  |  |
+| Mut21-openmc-runner-fission-zero | openmc-pincell-sigma-a | missed | 1.12450 | 0.80272 | 0.71384 |
+| Mut21-openmc-runner-fission-zero | openmoc-pincell-group-permute | _not-affected_ |  |  |  |
+| Mut21-openmc-runner-fission-zero | openmoc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
+| Mut21-openmc-runner-fission-zero | openmoc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| Mut21-openmc-runner-fission-zero | openmc-pincell-group-permute | missed | 1.12450 | 1.12601 | 1.00134 |
+| Mut21-openmc-runner-fission-zero | openmc-pincell-fuel-sigma-t | missed | 1.12450 | 0.11292 | 0.10042 |
+| Mut21-openmc-runner-fission-zero | openmc-pincell-moderator-sigma-a | missed | 1.12450 | 0.96831 | 0.86110 |
+| Mut21-openmc-runner-fission-zero | openmoc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| Mut21-openmc-runner-fission-zero | openmc-pincell-fuel-sigma-s | missed | 1.12450 | 1.09326 | 0.97222 |
+| Mut21-openmc-runner-fission-zero | openmoc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| Mut21-openmc-runner-fission-zero | openmc-pincell-fuel-radius | missed | 1.12450 | 1.17086 | 1.04123 |
+| Mut21-openmc-runner-fission-zero | openmc-pincell-particles-refine | _error_ |  |  |  |
+| Mut21-openmc-runner-fission-zero | openmoc-pincell-rotate-90 | _not-affected_ |  |  |  |
+| Mut21-openmc-runner-fission-zero | openmc-pincell-rotate-90 | missed | 1.15438 | 1.15354 | 0.99927 |
 | Mut22-openmc-adapter-nsf-inverse | openmoc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | Mut22-openmc-adapter-nsf-inverse | openmc-pincell-nu-sigma-f | detected | 1.12450 | 0.75033 | 0.66726 |
 | Mut22-openmc-adapter-nsf-inverse | openmoc-pincell-sigma-a | _not-affected_ |  |  |  |
@@ -540,6 +613,90 @@ Mut00 (identity) detected on 0 / 17 scenarios. Expected 0 — ✓ PASS.
 | Mut40-openmc-runner-hardcode-y-from-x | openmc-pincell-particles-refine | missed | 1.12450 | 1.12477 | 1.00024 |
 | Mut40-openmc-runner-hardcode-y-from-x | openmoc-pincell-rotate-90 | _not-affected_ |  |  |  |
 | Mut40-openmc-runner-hardcode-y-from-x | openmc-pincell-rotate-90 | detected | 1.31933 | 0.95812 | 0.72621 |
+| Mut41-openmoc-runner-clamp-y-offset-positive | openmoc-pincell-nu-sigma-f | missed | 1.13306 | 1.69990 | 1.50028 |
+| Mut41-openmoc-runner-clamp-y-offset-positive | openmc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
+| Mut41-openmoc-runner-clamp-y-offset-positive | openmoc-pincell-sigma-a | missed | 1.13306 | 0.80690 | 0.71215 |
+| Mut41-openmoc-runner-clamp-y-offset-positive | openmc-pincell-sigma-a | _not-affected_ |  |  |  |
+| Mut41-openmoc-runner-clamp-y-offset-positive | openmoc-pincell-group-permute | missed | 1.13306 | 1.13306 | 1.00000 |
+| Mut41-openmoc-runner-clamp-y-offset-positive | openmoc-pincell-fuel-sigma-t | missed | 1.13306 | 0.11127 | 0.09821 |
+| Mut41-openmoc-runner-clamp-y-offset-positive | openmoc-pincell-moderator-sigma-a | missed | 1.13306 | 0.47635 | 0.42041 |
+| Mut41-openmoc-runner-clamp-y-offset-positive | openmc-pincell-group-permute | _not-affected_ |  |  |  |
+| Mut41-openmoc-runner-clamp-y-offset-positive | openmc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
+| Mut41-openmoc-runner-clamp-y-offset-positive | openmc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| Mut41-openmoc-runner-clamp-y-offset-positive | openmoc-pincell-fuel-sigma-s | missed | 1.13306 | 1.09185 | 0.96363 |
+| Mut41-openmoc-runner-clamp-y-offset-positive | openmc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| Mut41-openmoc-runner-clamp-y-offset-positive | openmoc-pincell-fuel-radius | missed | 1.13306 | 1.17476 | 1.03681 |
+| Mut41-openmoc-runner-clamp-y-offset-positive | openmc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| Mut41-openmoc-runner-clamp-y-offset-positive | openmc-pincell-particles-refine | _not-affected_ |  |  |  |
+| Mut41-openmoc-runner-clamp-y-offset-positive | openmoc-pincell-rotate-90 | missed | 1.15950 | 1.15949 | 0.99999 |
+| Mut41-openmoc-runner-clamp-y-offset-positive | openmc-pincell-rotate-90 | _not-affected_ |  |  |  |
+| Mut41-openmoc-runner-clamp-y-offset-positive | openmoc-pincell-mirror-x | detected | 1.10371 | 1.10270 | 0.99908 |
+| Mut41-openmoc-runner-clamp-y-offset-positive | openmc-pincell-mirror-x | _not-affected_ |  |  |  |
+| Mut41-openmoc-runner-clamp-y-offset-positive | openmoc-pincell-mirror-y | missed | 1.10371 | 1.10371 | 1.00000 |
+| Mut41-openmoc-runner-clamp-y-offset-positive | openmc-pincell-mirror-y | _not-affected_ |  |  |  |
+| Mut42-openmoc-runner-clamp-x-offset-positive | openmoc-pincell-nu-sigma-f | missed | 1.13306 | 1.69990 | 1.50028 |
+| Mut42-openmoc-runner-clamp-x-offset-positive | openmc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
+| Mut42-openmoc-runner-clamp-x-offset-positive | openmoc-pincell-sigma-a | missed | 1.13306 | 0.80690 | 0.71215 |
+| Mut42-openmoc-runner-clamp-x-offset-positive | openmc-pincell-sigma-a | _not-affected_ |  |  |  |
+| Mut42-openmoc-runner-clamp-x-offset-positive | openmoc-pincell-group-permute | missed | 1.13306 | 1.13306 | 1.00000 |
+| Mut42-openmoc-runner-clamp-x-offset-positive | openmoc-pincell-fuel-sigma-t | missed | 1.13306 | 0.11127 | 0.09821 |
+| Mut42-openmoc-runner-clamp-x-offset-positive | openmoc-pincell-moderator-sigma-a | missed | 1.13306 | 0.47635 | 0.42041 |
+| Mut42-openmoc-runner-clamp-x-offset-positive | openmc-pincell-group-permute | _not-affected_ |  |  |  |
+| Mut42-openmoc-runner-clamp-x-offset-positive | openmc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
+| Mut42-openmoc-runner-clamp-x-offset-positive | openmc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| Mut42-openmoc-runner-clamp-x-offset-positive | openmoc-pincell-fuel-sigma-s | missed | 1.13306 | 1.09185 | 0.96363 |
+| Mut42-openmoc-runner-clamp-x-offset-positive | openmc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| Mut42-openmoc-runner-clamp-x-offset-positive | openmoc-pincell-fuel-radius | missed | 1.13306 | 1.17476 | 1.03681 |
+| Mut42-openmoc-runner-clamp-x-offset-positive | openmc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| Mut42-openmoc-runner-clamp-x-offset-positive | openmc-pincell-particles-refine | _not-affected_ |  |  |  |
+| Mut42-openmoc-runner-clamp-x-offset-positive | openmoc-pincell-rotate-90 | missed | 1.15950 | 1.15949 | 0.99999 |
+| Mut42-openmoc-runner-clamp-x-offset-positive | openmc-pincell-rotate-90 | _not-affected_ |  |  |  |
+| Mut42-openmoc-runner-clamp-x-offset-positive | openmoc-pincell-mirror-x | missed | 1.10271 | 1.10270 | 0.99999 |
+| Mut42-openmoc-runner-clamp-x-offset-positive | openmc-pincell-mirror-x | _not-affected_ |  |  |  |
+| Mut42-openmoc-runner-clamp-x-offset-positive | openmoc-pincell-mirror-y | detected | 1.10271 | 1.10484 | 1.00193 |
+| Mut42-openmoc-runner-clamp-x-offset-positive | openmc-pincell-mirror-y | _not-affected_ |  |  |  |
+| Mut43-openmc-runner-clamp-y-offset-positive | openmoc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
+| Mut43-openmc-runner-clamp-y-offset-positive | openmc-pincell-nu-sigma-f | missed | 1.12450 | 1.68996 | 1.50286 |
+| Mut43-openmc-runner-clamp-y-offset-positive | openmoc-pincell-sigma-a | _not-affected_ |  |  |  |
+| Mut43-openmc-runner-clamp-y-offset-positive | openmc-pincell-sigma-a | missed | 1.12450 | 0.80272 | 0.71384 |
+| Mut43-openmc-runner-clamp-y-offset-positive | openmoc-pincell-group-permute | _not-affected_ |  |  |  |
+| Mut43-openmc-runner-clamp-y-offset-positive | openmoc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
+| Mut43-openmc-runner-clamp-y-offset-positive | openmoc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| Mut43-openmc-runner-clamp-y-offset-positive | openmc-pincell-group-permute | missed | 1.12450 | 1.12601 | 1.00134 |
+| Mut43-openmc-runner-clamp-y-offset-positive | openmc-pincell-fuel-sigma-t | missed | 1.12450 | 0.11292 | 0.10042 |
+| Mut43-openmc-runner-clamp-y-offset-positive | openmc-pincell-moderator-sigma-a | missed | 1.12450 | 0.96831 | 0.86110 |
+| Mut43-openmc-runner-clamp-y-offset-positive | openmoc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| Mut43-openmc-runner-clamp-y-offset-positive | openmc-pincell-fuel-sigma-s | missed | 1.12450 | 1.09326 | 0.97222 |
+| Mut43-openmc-runner-clamp-y-offset-positive | openmoc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| Mut43-openmc-runner-clamp-y-offset-positive | openmc-pincell-fuel-radius | missed | 1.12450 | 1.17086 | 1.04123 |
+| Mut43-openmc-runner-clamp-y-offset-positive | openmc-pincell-particles-refine | missed | 1.12450 | 1.12477 | 1.00024 |
+| Mut43-openmc-runner-clamp-y-offset-positive | openmoc-pincell-rotate-90 | _not-affected_ |  |  |  |
+| Mut43-openmc-runner-clamp-y-offset-positive | openmc-pincell-rotate-90 | missed | 1.15438 | 1.15354 | 0.99927 |
+| Mut43-openmc-runner-clamp-y-offset-positive | openmoc-pincell-mirror-x | _not-affected_ |  |  |  |
+| Mut43-openmc-runner-clamp-y-offset-positive | openmc-pincell-mirror-x | missed | 1.09673 | 1.09808 | 1.00123 |
+| Mut43-openmc-runner-clamp-y-offset-positive | openmoc-pincell-mirror-y | _not-affected_ |  |  |  |
+| Mut43-openmc-runner-clamp-y-offset-positive | openmc-pincell-mirror-y | missed | 1.09673 | 1.09575 | 0.99910 |
+| Mut44-openmc-runner-clamp-x-offset-positive | openmoc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
+| Mut44-openmc-runner-clamp-x-offset-positive | openmc-pincell-nu-sigma-f | missed | 1.12450 | 1.68996 | 1.50286 |
+| Mut44-openmc-runner-clamp-x-offset-positive | openmoc-pincell-sigma-a | _not-affected_ |  |  |  |
+| Mut44-openmc-runner-clamp-x-offset-positive | openmc-pincell-sigma-a | missed | 1.12450 | 0.80272 | 0.71384 |
+| Mut44-openmc-runner-clamp-x-offset-positive | openmoc-pincell-group-permute | _not-affected_ |  |  |  |
+| Mut44-openmc-runner-clamp-x-offset-positive | openmoc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
+| Mut44-openmc-runner-clamp-x-offset-positive | openmoc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| Mut44-openmc-runner-clamp-x-offset-positive | openmc-pincell-group-permute | missed | 1.12450 | 1.12601 | 1.00134 |
+| Mut44-openmc-runner-clamp-x-offset-positive | openmc-pincell-fuel-sigma-t | missed | 1.12450 | 0.11292 | 0.10042 |
+| Mut44-openmc-runner-clamp-x-offset-positive | openmc-pincell-moderator-sigma-a | missed | 1.12450 | 0.96831 | 0.86110 |
+| Mut44-openmc-runner-clamp-x-offset-positive | openmoc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| Mut44-openmc-runner-clamp-x-offset-positive | openmc-pincell-fuel-sigma-s | missed | 1.12450 | 1.09326 | 0.97222 |
+| Mut44-openmc-runner-clamp-x-offset-positive | openmoc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| Mut44-openmc-runner-clamp-x-offset-positive | openmc-pincell-fuel-radius | missed | 1.12450 | 1.17086 | 1.04123 |
+| Mut44-openmc-runner-clamp-x-offset-positive | openmc-pincell-particles-refine | _error_ |  |  |  |
+| Mut44-openmc-runner-clamp-x-offset-positive | openmoc-pincell-rotate-90 | _not-affected_ |  |  |  |
+| Mut44-openmc-runner-clamp-x-offset-positive | openmc-pincell-rotate-90 | missed | 1.15438 | 1.15354 | 0.99927 |
+| Mut44-openmc-runner-clamp-x-offset-positive | openmoc-pincell-mirror-x | _not-affected_ |  |  |  |
+| Mut44-openmc-runner-clamp-x-offset-positive | openmc-pincell-mirror-x | missed | 1.09602 | 1.09808 | 1.00188 |
+| Mut44-openmc-runner-clamp-x-offset-positive | openmoc-pincell-mirror-y | _not-affected_ |  |  |  |
+| Mut44-openmc-runner-clamp-x-offset-positive | openmc-pincell-mirror-y | missed | 1.09602 | 1.09443 | 0.99855 |
 
 ## Cross-solver agreement (Cohen's κ)
 
@@ -571,12 +728,11 @@ Pairs evaluated: 1 / 2. Cohen's κ = **1.000** (almost perfect).
 
 ### Runner-level pairs (chi/boundary) — NuSigmaF scenarios
 
-Pairs evaluated: 3 / 3. Cohen's κ = **1.000** (almost perfect).
+Pairs evaluated: 2 / 3. Cohen's κ = **1.000** (almost perfect).
 
 
 | OpenMOC mutant | OpenMC mutant | OpenMOC outcome | OpenMC outcome |
 |---|---|---|---|
-| Mut01-openmoc-runner-chi-zero | Mut15-openmc-runner-chi-zero | detected | detected |
 | Mut05-openmoc-runner-chi-swap-groups | Mut20-openmc-runner-chi-swap-groups | missed | missed |
 | Mut06-openmoc-runner-vacuum-boundary | Mut17-openmc-runner-vacuum-boundary | missed | missed |
 
@@ -629,6 +785,26 @@ Pairs evaluated: 1 / 1. Cohen's κ = **1.000** (almost perfect).
 | OpenMOC mutant | OpenMC mutant | OpenMOC outcome | OpenMC outcome |
 |---|---|---|---|
 | Mut39-openmoc-runner-hardcode-y-from-x | Mut40-openmc-runner-hardcode-y-from-x | detected | detected |
+
+
+### Phase-2 MR02 MirrorX (clamp-y-offset-positive)
+
+Pairs evaluated: 1 / 1. Cohen's κ = **0.000** (slight).
+
+
+| OpenMOC mutant | OpenMC mutant | OpenMOC outcome | OpenMC outcome |
+|---|---|---|---|
+| Mut41-openmoc-runner-clamp-y-offset-positive | Mut43-openmc-runner-clamp-y-offset-positive | detected | missed |
+
+
+### Phase-2 MR03 MirrorY (clamp-x-offset-positive)
+
+Pairs evaluated: 1 / 1. Cohen's κ = **0.000** (slight).
+
+
+| OpenMOC mutant | OpenMC mutant | OpenMOC outcome | OpenMC outcome |
+|---|---|---|---|
+| Mut42-openmoc-runner-clamp-x-offset-positive | Mut44-openmc-runner-clamp-x-offset-positive | detected | missed |
 
 
 ## Threshold sensitivity

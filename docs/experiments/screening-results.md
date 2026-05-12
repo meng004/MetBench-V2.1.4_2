@@ -18,10 +18,10 @@ as a transparency artifact. The discrepancy between the two columns below shows
 exactly which mutations would have been miss-classified by the source-only rule.
 
 
-**Discard rate**: 4 of 41 candidates (9.8%) classified equivalent under the matrix rule.
+**Discard rate**: 4 of 45 candidates (8.9%) classified equivalent under the matrix rule.
 
 
-Classification counts: semantic=36, equivalent=4, error=1, unknown=0
+Classification counts: semantic=39, equivalent=4, error=2, unknown=0
 
 
 | mutation | predicted | source-only signal | matrix signal | source shifted? | follow-up shifted? | err cells |
@@ -41,13 +41,13 @@ Classification counts: semantic=36, equivalent=4, error=1, unknown=0
 | Mut12-openmoc-adapter-sa-no-sigt-update | solver-dependent | equivalent | semantic | False | True | 0 |
 | Mut13-openmoc-adapter-sa-inverse | semantic | equivalent | semantic | False | True | 0 |
 | Mut14-openmoc-adapter-sa-moderator | semantic | equivalent | semantic | False | True | 0 |
-| Mut15-openmc-runner-chi-zero | semantic | error | error | False | False | 2 |
-| Mut16-openmc-runner-scatter-transpose | semantic | semantic | semantic | True | True | 0 |
+| Mut15-openmc-runner-chi-zero | semantic | error | equivalent | False | False | 0 |
+| Mut16-openmc-runner-scatter-transpose | semantic | semantic | equivalent | False | False | 0 |
 | Mut17-openmc-runner-vacuum-boundary | semantic | semantic | semantic | True | True | 0 |
-| Mut18-openmc-runner-batches-too-few | semantic | equivalent | equivalent | False | False | 0 |
+| Mut18-openmc-runner-batches-too-few | semantic | equivalent | semantic | False | False | 0 |
 | Mut19-openmc-runner-hardcode-keff | semantic | semantic | semantic | True | True | 0 |
 | Mut20-openmc-runner-chi-swap-groups | semantic | semantic | semantic | True | True | 0 |
-| Mut21-openmc-runner-fission-zero | semantic | equivalent | equivalent | False | False | 0 |
+| Mut21-openmc-runner-fission-zero | semantic | equivalent | error | True | False | 1 |
 | Mut22-openmc-adapter-nsf-inverse | semantic | equivalent | semantic | False | True | 0 |
 | Mut23-openmc-adapter-nsf-square | semantic | equivalent | semantic | False | True | 0 |
 | Mut24-openmc-adapter-nsf-moderator | equivalent | equivalent | semantic | False | True | 0 |
@@ -67,44 +67,32 @@ Classification counts: semantic=36, equivalent=4, error=1, unknown=0
 | Mut38-openmc-adapter-fuel-radius-shrink | semantic | — | semantic | False | True | 0 |
 | Mut39-openmoc-runner-hardcode-y-from-x | semantic | — | semantic | True | True | 0 |
 | Mut40-openmc-runner-hardcode-y-from-x | semantic | — | semantic | True | True | 0 |
+| Mut41-openmoc-runner-clamp-y-offset-positive | semantic | — | semantic | True | False | 0 |
+| Mut42-openmoc-runner-clamp-x-offset-positive | semantic | — | semantic | True | False | 0 |
+| Mut43-openmc-runner-clamp-y-offset-positive | semantic | — | semantic | True | False | 0 |
+| Mut44-openmc-runner-clamp-x-offset-positive | semantic | — | error | True | False | 1 |
 
 ## Discarded (equivalent) mutants — why?
 
-### Mut18-openmc-runner-batches-too-few
+### Mut15-openmc-runner-chi-zero
 
-*Hard-code batches=5, inactive=2, particles=200 (very noisy MC).*
-
-
-**Predicted**: semantic.
-
-
-**Rationale**: Massive statistical-noise injection. Tests whether the MR's GreaterThan/LessThan assertion is robust to MC noise at low particle counts.
-
-
-Observed per-scenario shifts:
-
-| scenario | Δsource | Δfollow-up | threshold |
-|---|---|---|---|
-| openmc-pincell-nu-sigma-f | 0.032631 | 0.040132 | 0.154487 |
-| openmc-pincell-sigma-a | 0.032631 | 0.058557 | 0.154487 |
-
-### Mut21-openmc-runner-fission-zero
-
-*Zero out fission cross section but keep nu_sigma_f.*
+*Zero out chi for every material in the MGXS library.*
 
 
 **Predicted**: semantic.
 
 
-**Rationale**: Inconsistent fission data. OpenMC may warn / refuse / silently proceed; documents observed behaviour either way.
+**Rationale**: OpenMC mirror of Mut01. Same logic: kills fission source. Expected to drive baseline k_eff toward zero.
+
+### Mut16-openmc-runner-scatter-transpose
+
+*Transpose the scatter matrix (swap g_in and g_out axes).*
 
 
-Observed per-scenario shifts:
+**Predicted**: semantic.
 
-| scenario | Δsource | Δfollow-up | threshold |
-|---|---|---|---|
-| openmc-pincell-nu-sigma-f | 0.000000 | 0.000000 | 0.007550 |
-| openmc-pincell-sigma-a | 0.000000 | 0.000000 | 0.005623 |
+
+**Rationale**: Scattering matrix S[g_in, g_out] becomes S[g_out, g_in]. Up- and down-scattering swap places, which fundamentally changes the thermal spectrum. Realistic indexing bug. Expected baseline shift.
 
 ### Mut26-openmc-adapter-sa-no-sigt-update
 

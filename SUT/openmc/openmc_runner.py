@@ -115,7 +115,13 @@ def _build_model(case: dict, library_path: Path) -> "openmc.Model":
     materials.cross_sections = str(library_path)
 
     # Geometry: 2D pin cell with reflective boundaries.
-    fuel_outer = openmc.ZCylinder(r=g["fuel_radius_cm"])
+    # Phase-2 MR02/MR03: optional fuel-offset (defaults to 0 → centred fuel,
+    # backward compatible with all existing samples).
+    fuel_outer = openmc.ZCylinder(
+        x0=float(g.get("fuel_offset_x_cm", 0.0)),
+        y0=float(g.get("fuel_offset_y_cm", 0.0)),
+        r=float(g["fuel_radius_cm"]),
+    )
     xmin = openmc.XPlane(x0=-half_x, boundary_type="reflective")
     xmax = openmc.XPlane(x0=+half_x, boundary_type="reflective")
     ymin = openmc.YPlane(y0=-half_y, boundary_type="reflective")

@@ -14,13 +14,13 @@ Mut11-openmoc-adapter-nsf-fast-only,semantic,equivalent,semantic,False,True,0
 Mut12-openmoc-adapter-sa-no-sigt-update,solver-dependent,equivalent,semantic,False,True,0
 Mut13-openmoc-adapter-sa-inverse,semantic,equivalent,semantic,False,True,0
 Mut14-openmoc-adapter-sa-moderator,semantic,equivalent,semantic,False,True,0
-Mut15-openmc-runner-chi-zero,semantic,error,error,False,False,2
-Mut16-openmc-runner-scatter-transpose,semantic,semantic,semantic,True,True,0
+Mut15-openmc-runner-chi-zero,semantic,error,equivalent,False,False,0
+Mut16-openmc-runner-scatter-transpose,semantic,semantic,equivalent,False,False,0
 Mut17-openmc-runner-vacuum-boundary,semantic,semantic,semantic,True,True,0
-Mut18-openmc-runner-batches-too-few,semantic,equivalent,equivalent,False,False,0
+Mut18-openmc-runner-batches-too-few,semantic,equivalent,semantic,False,False,0
 Mut19-openmc-runner-hardcode-keff,semantic,semantic,semantic,True,True,0
 Mut20-openmc-runner-chi-swap-groups,semantic,semantic,semantic,True,True,0
-Mut21-openmc-runner-fission-zero,semantic,equivalent,equivalent,False,False,0
+Mut21-openmc-runner-fission-zero,semantic,equivalent,error,True,False,1
 Mut22-openmc-adapter-nsf-inverse,semantic,equivalent,semantic,False,True,0
 Mut23-openmc-adapter-nsf-square,semantic,equivalent,semantic,False,True,0
 Mut24-openmc-adapter-nsf-moderator,equivalent,equivalent,semantic,False,True,0
@@ -40,3 +40,7 @@ Mut37-openmc-adapter-fuel-sigma-s-identity,semantic,—,semantic,False,True,0
 Mut38-openmc-adapter-fuel-radius-shrink,semantic,—,semantic,False,True,0
 Mut39-openmoc-runner-hardcode-y-from-x,semantic,—,semantic,True,True,0
 Mut40-openmc-runner-hardcode-y-from-x,semantic,—,semantic,True,True,0
+Mut41-openmoc-runner-clamp-y-offset-positive,semantic,—,semantic,True,False,0
+Mut42-openmoc-runner-clamp-x-offset-positive,semantic,—,semantic,True,False,0
+Mut43-openmc-runner-clamp-y-offset-positive,semantic,—,semantic,True,False,0
+Mut44-openmc-runner-clamp-x-offset-positive,semantic,—,error,True,False,1

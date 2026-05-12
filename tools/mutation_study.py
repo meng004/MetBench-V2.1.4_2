@@ -293,6 +293,63 @@ SCENARIOS: list[dict] = [
         "noether_id": "MR01",
         "meta_pattern": "m_inv",
     },
+    # ----- Phase 2 (NOETHER) extension: MR02 / MR03 mirror on off-centre pin-cell -----
+    {
+        "id": "openmoc-pincell-mirror-x",
+        "solver": "openmoc",
+        "transform": "MirrorX",
+        "adapter": "openmoc/openmoc_input_adapter_mirror_x.py",
+        "runner": "openmoc/openmoc_runner.py",
+        "source_case": "openmoc/sample/pincell-offcentre.json",
+        "assertion": "approx",
+        "tolerance_rel": 1e-5,
+        "value": "k_eff",
+        "phase": 2,
+        "noether_id": "MR02",
+        "meta_pattern": "m_inv",
+    },
+    {
+        "id": "openmc-pincell-mirror-x",
+        "solver": "openmc",
+        "transform": "MirrorX",
+        "adapter": "openmc/openmc_input_adapter_mirror_x.py",
+        "runner": "openmc/openmc_runner.py",
+        "source_case": "openmoc/sample/pincell-offcentre.json",
+        "assertion": "approx",
+        "tolerance_rel": 0.005,
+        "value": "k_eff",
+        "phase": 2,
+        "noether_id": "MR02",
+        "meta_pattern": "m_inv",
+    },
+    {
+        "id": "openmoc-pincell-mirror-y",
+        "solver": "openmoc",
+        "transform": "MirrorY",
+        "adapter": "openmoc/openmoc_input_adapter_mirror_y.py",
+        "runner": "openmoc/openmoc_runner.py",
+        "source_case": "openmoc/sample/pincell-offcentre.json",
+        "assertion": "approx",
+        "tolerance_rel": 1e-5,
+        "value": "k_eff",
+        "phase": 2,
+        "noether_id": "MR03",
+        "meta_pattern": "m_inv",
+    },
+    {
+        "id": "openmc-pincell-mirror-y",
+        "solver": "openmc",
+        "transform": "MirrorY",
+        "adapter": "openmc/openmc_input_adapter_mirror_y.py",
+        "runner": "openmc/openmc_runner.py",
+        "source_case": "openmoc/sample/pincell-offcentre.json",
+        "assertion": "approx",
+        "tolerance_rel": 0.005,
+        "value": "k_eff",
+        "phase": 2,
+        "noether_id": "MR03",
+        "meta_pattern": "m_inv",
+    },
 ]
 
 
@@ -1193,6 +1250,12 @@ MATCHED_PAIRS = [
                                                                                           "fuel-sigma-s-identity"),
     ("Mut33-openmoc-adapter-fuel-radius-shrink", "Mut38-openmc-adapter-fuel-radius-shrink", "fuel-radius-shrink"),
     ("Mut39-openmoc-runner-hardcode-y-from-x",   "Mut40-openmc-runner-hardcode-y-from-x",   "hardcode-y-from-x"),
+    ("Mut41-openmoc-runner-clamp-y-offset-positive",
+                                                  "Mut43-openmc-runner-clamp-y-offset-positive",
+                                                                                            "clamp-y-offset-positive"),
+    ("Mut42-openmoc-runner-clamp-x-offset-positive",
+                                                  "Mut44-openmc-runner-clamp-x-offset-positive",
+                                                                                            "clamp-x-offset-positive"),
 ]
 
 
@@ -1232,6 +1295,10 @@ def _emit_kappa_and_sensitivity_md(rows: list[dict], args: argparse.Namespace) -
                     if kind == "fuel-radius-shrink"]
     rotate_pairs = [(moc, mc) for moc, mc, kind in MATCHED_PAIRS
                     if kind == "hardcode-y-from-x"]
+    mirror_x_pairs = [(moc, mc) for moc, mc, kind in MATCHED_PAIRS
+                      if kind == "clamp-y-offset-positive"]
+    mirror_y_pairs = [(moc, mc) for moc, mc, kind in MATCHED_PAIRS
+                      if kind == "clamp-x-offset-positive"]
 
     def kappa_block(label: str, pairs: list[tuple[str, str]], moc_sc: str, mc_sc: str) -> str:
         a, b, paired_ids = [], [], []
@@ -1279,6 +1346,12 @@ def _emit_kappa_and_sensitivity_md(rows: list[dict], args: argparse.Namespace) -
     out.append(kappa_block("Phase-2 MR01 Rotate90 (hardcode-y-from-x)",
                            rotate_pairs,
                            "openmoc-pincell-rotate-90", "openmc-pincell-rotate-90"))
+    out.append(kappa_block("Phase-2 MR02 MirrorX (clamp-y-offset-positive)",
+                           mirror_x_pairs,
+                           "openmoc-pincell-mirror-x", "openmc-pincell-mirror-x"))
+    out.append(kappa_block("Phase-2 MR03 MirrorY (clamp-x-offset-positive)",
+                           mirror_y_pairs,
+                           "openmoc-pincell-mirror-y", "openmc-pincell-mirror-y"))
     out.append("\n## Threshold sensitivity\n")
     out.append("Re-classify candidates at tightened and relaxed relative thresholds using the matrix data;\n")
     out.append("how many flip relative to the 0.5% baseline?\n\n")

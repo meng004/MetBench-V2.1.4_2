@@ -35,10 +35,11 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 BASELINE_PATH = REPO_ROOT / "docs" / "experiments" / "_data" / "baseline.json"
+CANDIDATES_DIR = REPO_ROOT / "docs" / "experiments" / "_data" / "candidates"
 REPORT_PATH = REPO_ROOT / "docs" / "experiments" / "cross-program-report.md"
 
 sys.path.insert(0, str(REPO_ROOT / "tools"))
-from mutation_study import SCENARIOS  # noqa: E402
+from mutation_study import SCENARIOS, MATCHED_PAIRS  # noqa: E402
 
 MOC_DISC_BUDGET_REL = 0.01  # ε_MOC ≈ 1%·k (empirical on this SUT — 0.5%
 # from the paper Table 3 is too tight in practice and flags routine 16-azim
@@ -154,11 +155,116 @@ def main() -> int:
               "(in particular the OpenMOC power-iteration convergence pathology "
               "at the moderator-sigma-a follow-up, which this report quantifies).\n")
 
+    # -------------------------------------------------------------------
+    # Per-matched-pair MR14: same logical bug applied to both solvers,
+    # compare k_followup of (OpenMOC mutant, OpenMC twin) cells.
+    # -------------------------------------------------------------------
+    md.append("\n# Per-matched-pair MR14 (mutated follow-up agreement)\n")
+    md.append("\nFor each matched-pair index (`MATCHED_PAIRS` in "
+              "`mutation_study.py`), compares the follow-up k_eff of the OpenMOC "
+              "mutant against its OpenMC twin on the corresponding MR scenario. "
+              "Same MR, same logical bug, both solvers — disagreement signals a "
+              "fault class that bites the two solvers asymmetrically.\n")
+    md.append(f"\nBudget rule unchanged: `max(3·σ_OpenMC, {MOC_DISC_BUDGET_REL*100:.1f}%·k_OpenMC)`.\n")
+
+    # Add Mut00 as a virtual pair against itself for a control row.
+    pair_rows: list[dict] = []
+    pairs_to_check = [("Mut00-identity", "Mut00-identity", "identity-control")]
+    pairs_to_check += [(moc, mc, kind) for moc, mc, kind in MATCHED_PAIRS]
+
+    for moc_id, mc_id, kind in pairs_to_check:
+        moc_path = CANDIDATES_DIR / moc_id / "matrix.json"
+        mc_path = CANDIDATES_DIR / mc_id / "matrix.json"
+        if not (moc_path.exists() and mc_path.exists()):
+            pair_rows.append({"kind": kind, "moc_mut": moc_id, "mc_mut": mc_id,
+                              "scenario": "—", "verdict": "missing-matrix"})
+            continue
+        moc_data = json.loads(moc_path.read_text())
+        mc_data = json.loads(mc_path.read_text())
+
+        # For each transform that has both an openmoc-* and openmc-* scenario,
+        # check whether both mutants have a "ran" cell.
+        for sc in SCENARIOS:
+            if sc["solver"] != "openmoc":
+                continue
+            twin = find_twin(sc)
+            if twin is None:
+                continue
+            moc_cell = next((c for c in moc_data["cells"] if c["scenario_id"] == sc["id"]), None)
+            mc_cell = next((c for c in mc_data["cells"] if c["scenario_id"] == twin["id"]), None)
+            if not moc_cell or not mc_cell:
+                continue
+            if moc_cell.get("status") != "ran" or mc_cell.get("status") != "ran":
+                continue
+            k_moc = float(moc_cell["k_followup"])
+            k_mc = float(mc_cell["k_followup"])
+            sigma_mc = float(mc_cell.get("k_followup_std", 0.0) or 0.0)
+            if any(map(lambda x: x != x or x in (float("inf"), float("-inf")), (k_moc, k_mc))):
+                # NaN or inf — automatically disagreement (pathological)
+                pair_rows.append({
+                    "kind": kind, "moc_mut": moc_id, "mc_mut": mc_id,
+                    "scenario": sc.get("transform", "?"),
+                    "k_moc": k_moc, "k_mc": k_mc, "sigma_mc": sigma_mc,
+                    "delta": float("nan"), "budget": float("nan"),
+                    "verdict": "DISAGREE (pathological NaN/Inf)",
+                })
+                continue
+            delta = abs(k_moc - k_mc)
+            budget = max(3.0 * sigma_mc, MOC_DISC_BUDGET_REL * abs(k_mc))
+            verdict = "DISAGREE" if delta > budget else "agree"
+            pair_rows.append({
+                "kind": kind, "moc_mut": moc_id, "mc_mut": mc_id,
+                "scenario": sc.get("transform", "?"),
+                "k_moc": k_moc, "k_mc": k_mc, "sigma_mc": sigma_mc,
+                "delta": delta, "budget": budget, "verdict": verdict,
+            })
+
+    pair_disagrees = sum(1 for r in pair_rows if "DISAGREE" in r["verdict"])
+    pair_evaluated = sum(1 for r in pair_rows if r["verdict"] not in ("missing-matrix",))
+    md.append(f"\n**Summary**: {pair_evaluated} matched-pair-scenario rows, "
+              f"**{pair_disagrees} disagreement**.\n")
+    md.append("\n| pair kind | scenario (transform) | OpenMOC mut | OpenMC mut | "
+              "k(MOC mut) | k(MC mut) | σ(MC) | |Δk| | budget | verdict |")
+    md.append("|---|---|---|---|--:|--:|--:|--:|--:|--:|")
+    for r in pair_rows:
+        if r["verdict"] == "missing-matrix":
+            md.append(f"| {r['kind']} | — | {r['moc_mut']} | {r['mc_mut']} | "
+                      f"— | — | — | — | — | _matrix.json missing_ |")
+            continue
+        kmoc = f"{r['k_moc']:.5f}" if r["k_moc"] == r["k_moc"] else "nan"  # NaN-safe
+        kmc = f"{r['k_mc']:.5f}" if r["k_mc"] == r["k_mc"] else "nan"
+        sig = f"{r['sigma_mc']:.5f}"
+        d = f"{r['delta']:.5f}" if r["delta"] == r["delta"] else "nan"
+        b = f"{r['budget']:.5f}" if r["budget"] == r["budget"] else "nan"
+        marker = "**" + r["verdict"] + "**" if "DISAGREE" in r["verdict"] else "agree"
+        md.append(f"| {r['kind']} | {r['scenario']} | {r['moc_mut']} | {r['mc_mut']} | "
+                  f"{kmoc} | {kmc} | {sig} | {d} | {b} | {marker} |")
+
+    if pair_disagrees > 0:
+        md.append("\n## Per-pair disagreements — interpretation\n")
+        for r in pair_rows:
+            if "DISAGREE" not in r["verdict"]:
+                continue
+            md.append(f"\n### {r['kind']} on {r['scenario']}\n")
+            md.append(f"* OpenMOC mutant: `{r['moc_mut']}` → k_followup = {r.get('k_moc')}\n")
+            md.append(f"* OpenMC mutant:  `{r['mc_mut']}` → k_followup = {r.get('k_mc')} ± {r.get('sigma_mc')}\n")
+            if "pathological" in r["verdict"]:
+                md.append("* NaN / Inf on at least one side — the bug class drives the\n"
+                          "  affected solver into a divergent state. Easy disagreement.\n")
+            else:
+                md.append(f"* |Δk| = {r['delta']} ; budget = {r['budget']}.\n")
+
+    md.append("\n---\n")
+    md.append("See `discussion-phase2.md` for the qualitative analysis. The baseline\n"
+              "section above probes the unpatched cross-solver gap (notably the\n"
+              "OpenMOC moderator-sigma-a convergence pathology); this section probes\n"
+              "whether the SAME logical bug applied to both solvers produces "
+              "physically-comparable damage.\n")
+
     REPORT_PATH.write_text("\n".join(md) + "\n")
     print(f"Wrote {REPORT_PATH.relative_to(REPO_ROOT)}")
-    print(f"  pairs evaluated: {n_pairs}")
-    print(f"  disagreements:   {n_disagree}")
-    print(f"  skipped:         {n_skipped}")
+    print(f"  baseline pairs evaluated: {n_pairs}, disagreements: {n_disagree}, skipped: {n_skipped}")
+    print(f"  matched-pair rows evaluated: {pair_evaluated}, disagreements: {pair_disagrees}")
     return 0
 
 

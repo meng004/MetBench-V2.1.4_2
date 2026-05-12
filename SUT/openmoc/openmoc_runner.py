@@ -77,7 +77,13 @@ def solve(case: dict) -> tuple[float, int, bool]:
     zmax = openmoc.ZPlane(z=half_z)
     for s in (xmin, xmax, ymin, ymax, zmin, zmax):
         s.setBoundaryType(openmoc.REFLECTIVE)
-    fuel_cyl = openmoc.ZCylinder(x=0.0, y=0.0, radius=g["fuel_radius_cm"])
+    # Phase-2 MR02/MR03: optional fuel-offset (defaults to 0 → centred fuel,
+    # backward compatible with all existing samples).
+    fuel_cyl = openmoc.ZCylinder(
+        x=float(g.get("fuel_offset_x_cm", 0.0)),
+        y=float(g.get("fuel_offset_y_cm", 0.0)),
+        radius=float(g["fuel_radius_cm"]),
+    )
 
     fuel_cell = openmoc.Cell(name="fuel")
     fuel_cell.setFill(fuel_mat)
