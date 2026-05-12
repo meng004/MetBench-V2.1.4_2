@@ -34,10 +34,11 @@ MR factor: 1.5. Status `not-affected` means the mutation patches a file the scen
 | openmc-pincell-mirror-y-tally | 0 | 0 | 0 | 0 | — | — |
 | openmoc-pincell-fuel-temperature | 2 | 1 | 1 | 0 | 50.0% | [9.5%, 90.5%] |
 | openmc-pincell-fuel-temperature | 1 | 1 | 0 | 0 | 100.0% | [20.7%, 100.0%] |
+| openmc-pincell-fuel-temperature-via-add-temperature | 0 | 0 | 0 | 0 | — | — |
 
 ## Identity false-positive sanity
 
-Mut00 (identity) detected on 0 / 27 scenarios. Expected 0 — ✓ PASS.
+Mut00 (identity) detected on 0 / 28 scenarios. Expected 0 — ✓ PASS.
 
 
 ## Per-mutation detail
@@ -71,6 +72,7 @@ Mut00 (identity) detected on 0 / 27 scenarios. Expected 0 — ✓ PASS.
 | Mut00-identity | openmc-pincell-mirror-y-tally | missed | 1.09602 | 1.09555 | 0.99958 |
 | Mut00-identity | openmoc-pincell-fuel-temperature | missed | 1.13306 | 1.11566 | 0.98464 |
 | Mut00-identity | openmc-pincell-fuel-temperature | missed | 1.12450 | 1.10966 | 0.98680 |
+| Mut00-identity | openmc-pincell-fuel-temperature-via-add-temperature | _error_ |  |  |  |
 | Mut01-openmoc-runner-chi-zero | openmoc-pincell-nu-sigma-f | detected | 0.00059 | 0.00059 | 1.00000 |
 | Mut01-openmoc-runner-chi-zero | openmc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | Mut01-openmoc-runner-chi-zero | openmoc-pincell-sigma-a | missed | 0.00059 | 0.00051 | 0.85942 |

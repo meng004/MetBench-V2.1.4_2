@@ -11,6 +11,9 @@
 >   Structurally these are differential testing wrapped in an MR
 >   shell; pre-NOETHER MT literature usually excludes them.
 
+![Per-MR detection rate by MetaPattern](figures/fig1_per_mr_detection_rate.png)
+![Cohen's κ heatmap](figures/fig3_kappa_heatmap.png)
+
 ## Per-MetaPattern scorecard
 
 ### `m_inv` (symmetry) — classical MT

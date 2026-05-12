@@ -12,6 +12,8 @@ just at one cherry-picked point, and (b) surface factor-dependent
 solver pathologies (the way Phase-2 found the OpenMOC moderator-
 sigma-a basin at factor=1.5).
 
+![Parameter sweep trajectory](figures/fig2_parameter_sweep_trajectory.png)
+
 ## Headline findings from this run
 
 Two findings emerged purely from running the sweep — neither

@@ -212,6 +212,13 @@
           15.014361033569736
         ]
       }
+    },
+    "openmc-pincell-fuel-temperature-via-add-temperature": {
+      "k_eff": NaN,
+      "k_eff_std": 0.0,
+      "factor": 1.5,
+      "error": "OpenMC PR #3712 add_temperature \u2192 None triggered on this followup; baseline cannot be computed against the installed (buggy) OpenMC 0.15.3.",
+      "upstream_bug_triggered": "openmc-pr-3712"
     }
   },
   "factor": 1.5,

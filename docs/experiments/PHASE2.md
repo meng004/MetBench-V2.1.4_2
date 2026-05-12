@@ -155,6 +155,22 @@ catches an unknown bug". That's the open research question Phase-3+
 should target — `tools/mr_parameter_sweep.py` (this round) is the
 infrastructure that lets us hunt for it systematically.
 
+## Visual summary
+
+![Per-MR detection rate (Wilson 95% CI), grouped by MetaPattern](figures/fig1_per_mr_detection_rate.png)
+
+![Parameter sweep — 6 MRs × 5 sample points; Case 4 / Case 6 OpenMOC basins surfaced](figures/fig2_parameter_sweep_trajectory.png)
+
+![Cross-solver Cohen's κ on matched-pair mutations](figures/fig3_kappa_heatmap.png)
+
+(Figures rendered by `tools/render_figures.py`. PNG + SVG vector
+versions in `figures/`. The Fig 2 bottom-right panel — MR-T
+`RaiseFuelTemperature` — is the live visualization of **Case 6**:
+OpenMOC `CPUSolver` collapses to k=0.51 at factor=1.25 while
+neighbouring factors and OpenMC behave smoothly. Discovered by
+parameter sweep in this round; the first classical-MT live detection
+of a previously-unknown OpenMOC bug.)
+
 ## Headline results
 
 ### Coverage growth: 4 MR scenarios → 21

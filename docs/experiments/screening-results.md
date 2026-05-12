@@ -26,7 +26,7 @@ Classification counts: semantic=41, equivalent=4, error=3, unknown=0
 
 | mutation | predicted | source-only signal | matrix signal | source shifted? | follow-up shifted? | err cells |
 |---|---|---|---|---|---|---|
-| Mut00-identity | equivalent | equivalent | error | True | False | 1 |
+| Mut00-identity | equivalent | equivalent | error | True | False | 2 |
 | Mut01-openmoc-runner-chi-zero | semantic | semantic | semantic | True | True | 0 |
 | Mut02-openmoc-runner-sigt-from-siga | semantic | semantic | semantic | True | True | 0 |
 | Mut03-openmoc-runner-swap-fuel-moderator | semantic | semantic | semantic | True | True | 0 |

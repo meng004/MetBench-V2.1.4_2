@@ -450,6 +450,27 @@ SCENARIOS: list[dict] = [
         "noether_id": "MR-T",
         "meta_pattern": "m_mono",
     },
+    # ----- Phase 3 PR-2 — Case 2 (OpenMC #3712 add_temperature → None) live in matrix -----
+    # The follow-up adapter sets `exercise_add_temperature: true` so the
+    # runner calls `xsdata.add_temperature(t_kelvin)`. On the installed
+    # OpenMC 0.15.3 (pre-fix), the call crashes and the runner re-raises
+    # with a recognizable marker; the matrix records status=error which
+    # the stats path treats as detected. On post-fix OpenMC the call
+    # succeeds and the cell behaves identically to the regular MR-T.
+    {
+        "id": "openmc-pincell-fuel-temperature-via-add-temperature",
+        "solver": "openmc",
+        "transform": "RaiseFuelTemperatureViaAddTemperature",
+        "adapter": "openmc/openmc_input_adapter_fuel_temperature_via_add_temperature.py",
+        "runner": "openmc/openmc_runner.py",
+        "assertion": "less",
+        "value": "k_eff",
+        "noise_aware": True,
+        "tolerance_rel": 0.0,
+        "phase": 3,
+        "noether_id": "MR-T-real",
+        "meta_pattern": "m_mono",
+    },
 ]
 
 

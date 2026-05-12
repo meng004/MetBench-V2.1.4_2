@@ -85,6 +85,25 @@ def _build_mgxs_library(case: dict, library_path: Path) -> None:
         xsdata.order = 0  # P0 scattering, isotropic
         xsdata.set_total(np.array(mat["sigma_t"], dtype=np.float64) * doppler)
         xsdata.set_absorption(np.array(mat["sigma_a"], dtype=np.float64) * doppler)
+
+        # Phase-3 / Case 2 live-trigger plumbing.
+        # When the case JSON sets `materials.<name>.exercise_add_temperature: true`
+        # AND a non-default `temperature_kelvin`, we additionally call
+        # `xsdata.add_temperature(t_kelvin)` — exactly the upstream code path
+        # broken by OpenMC PR #3712 (`temperatures.tolist().append(T)` returns
+        # None). On installed buggy OpenMC the call crashes with TypeError;
+        # the runner re-raises with a recognizable marker so the matrix can
+        # attribute the failure to the upstream bug rather than to a synthetic
+        # mutation. Default is to skip this call so existing scenarios remain
+        # untouched.
+        if mat.get("exercise_add_temperature") and t_kelvin > 0 and abs(t_kelvin - 600.0) > 1e-9:
+            try:
+                xsdata.add_temperature(t_kelvin)
+            except TypeError as e:
+                raise RuntimeError(
+                    f"OpenMC PR #3712 (add_temperature → None) triggered on "
+                    f"{name}: {e}"
+                ) from None
         # OpenMOC stores sigma_s as a 4-element row-major matrix [g_in -> g_out].
         # OpenMC's set_scatter_matrix wants shape (num_groups, num_groups, num_legendre_moments).
         # With xsdata.order = 0 (P0, isotropic), num_legendre_moments = 1.

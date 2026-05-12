@@ -1,5 +1,5 @@
 mutation_id,predicted,source_only_observed,matrix_observed,any_source_shift,any_followup_shift,errors
-Mut00-identity,equivalent,equivalent,error,True,False,1
+Mut00-identity,equivalent,equivalent,error,True,False,2
 Mut01-openmoc-runner-chi-zero,semantic,semantic,semantic,True,True,0
 Mut02-openmoc-runner-sigt-from-siga,semantic,semantic,semantic,True,True,0
 Mut03-openmoc-runner-swap-fuel-moderator,semantic,semantic,semantic,True,True,0

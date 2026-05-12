@@ -26,6 +26,7 @@ Mut00-identity,openmoc-pincell-mirror-y-tally,ran,missed,1.102712,1.102711,0.999
 Mut00-identity,openmc-pincell-mirror-y-tally,ran,missed,1.096015,1.095554,0.999579,flux-pointwise-approx
 Mut00-identity,openmoc-pincell-fuel-temperature,ran,missed,1.133058,1.115657,0.984642,less
 Mut00-identity,openmc-pincell-fuel-temperature,ran,missed,1.124500,1.109656,0.986800,less
+Mut00-identity,openmc-pincell-fuel-temperature-via-add-temperature,error,error,,,,
 Mut01-openmoc-runner-chi-zero,openmoc-pincell-nu-sigma-f,ran,detected,0.000591,0.000591,1.000000,greater
 Mut01-openmoc-runner-chi-zero,openmc-pincell-nu-sigma-f,not-affected,,,,,
 Mut01-openmoc-runner-chi-zero,openmoc-pincell-sigma-a,ran,missed,0.000591,0.000508,0.859421,less
