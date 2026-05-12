@@ -1,5 +1,5 @@
 {
-  "mutation_id": "M12-openmoc-adapter-sa-no-sigt-update",
+  "mutation_id": "M32-openmoc-adapter-fuel-sigma-s-identity",
   "factor": 1.5,
   "cells": [
     {
@@ -12,16 +12,7 @@
     },
     {
       "scenario_id": "openmoc-pincell-sigma-a",
-      "status": "ran",
-      "k_source": 1.1330583459569659,
-      "k_followup": 1.1330583459569659,
-      "k_source_std": 0.0,
-      "k_followup_std": 0.0,
-      "ratio": 1.0,
-      "assertion": "less",
-      "factor": 1.5,
-      "assertion_passed": false,
-      "outcome": "detected"
+      "status": "not-affected"
     },
     {
       "scenario_id": "openmc-pincell-sigma-a",
@@ -53,7 +44,16 @@
     },
     {
       "scenario_id": "openmoc-pincell-fuel-sigma-s",
-      "status": "not-affected"
+      "status": "ran",
+      "k_source": 1.1330583459569659,
+      "k_followup": 1.1330583459569659,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": 1.0,
+      "assertion": "less",
+      "factor": 0.5,
+      "assertion_passed": false,
+      "outcome": "detected"
     },
     {
       "scenario_id": "openmc-pincell-fuel-sigma-s",

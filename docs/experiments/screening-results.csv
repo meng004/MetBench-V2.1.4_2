@@ -31,3 +31,6 @@ M28-openmoc-runner-chi-fast-only,semantic,—,semantic,False,True,0
 M29-openmoc-adapter-fuel-sigt-no-siga-update,equivalent,—,equivalent,False,False,0
 M30-openmoc-adapter-moderator-sigma-a-no-sigt-update,semantic,—,semantic,False,True,0
 M31-openmoc-adapter-group-permute-fuel-only,semantic,—,semantic,False,True,0
+M32-openmoc-adapter-fuel-sigma-s-identity,semantic,—,semantic,False,True,0
+M33-openmoc-adapter-fuel-radius-shrink,semantic,—,semantic,False,True,0
+M34-openmc-adapter-particles-no-op,semantic,—,equivalent,False,False,0

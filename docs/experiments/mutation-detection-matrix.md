@@ -17,10 +17,15 @@ MR factor: 1.5. Status `not-affected` means the mutation patches a file the scen
 | openmc-pincell-group-permute | 0 | 0 | 0 | 0 | — | — |
 | openmc-pincell-fuel-sigma-t | 0 | 0 | 0 | 0 | — | — |
 | openmc-pincell-moderator-sigma-a | 0 | 0 | 0 | 0 | — | — |
+| openmoc-pincell-fuel-sigma-s | 8 | 5 | 3 | 0 | 62.5% | [30.6%, 86.3%] |
+| openmc-pincell-fuel-sigma-s | 0 | 0 | 0 | 0 | — | — |
+| openmoc-pincell-fuel-radius | 8 | 5 | 3 | 0 | 62.5% | [30.6%, 86.3%] |
+| openmc-pincell-fuel-radius | 0 | 0 | 0 | 0 | — | — |
+| openmc-pincell-particles-refine | 0 | 0 | 0 | 0 | — | — |
 
 ## Identity false-positive sanity
 
-M00 (identity) detected on 0 / 10 scenarios. Expected 0 — ✓ PASS.
+M00 (identity) detected on 0 / 15 scenarios. Expected 0 — ✓ PASS.
 
 
 ## Per-mutation detail
@@ -37,6 +42,11 @@ M00 (identity) detected on 0 / 10 scenarios. Expected 0 — ✓ PASS.
 | M00-identity | openmc-pincell-group-permute | _skipped-no-openmc_ |  |  |  |
 | M00-identity | openmc-pincell-fuel-sigma-t | _skipped-no-openmc_ |  |  |  |
 | M00-identity | openmc-pincell-moderator-sigma-a | _skipped-no-openmc_ |  |  |  |
+| M00-identity | openmoc-pincell-fuel-sigma-s | missed | 1.13306 | 1.09185 | 0.96363 |
+| M00-identity | openmc-pincell-fuel-sigma-s | _skipped-no-openmc_ |  |  |  |
+| M00-identity | openmoc-pincell-fuel-radius | missed | 1.13306 | 1.17476 | 1.03681 |
+| M00-identity | openmc-pincell-fuel-radius | _skipped-no-openmc_ |  |  |  |
+| M00-identity | openmc-pincell-particles-refine | _skipped-no-openmc_ |  |  |  |
 | M01-openmoc-runner-chi-zero | openmoc-pincell-nu-sigma-f | detected | 0.00059 | 0.00059 | 1.00000 |
 | M01-openmoc-runner-chi-zero | openmc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | M01-openmoc-runner-chi-zero | openmoc-pincell-sigma-a | missed | 0.00059 | 0.00051 | 0.85942 |
@@ -47,6 +57,11 @@ M00 (identity) detected on 0 / 10 scenarios. Expected 0 — ✓ PASS.
 | M01-openmoc-runner-chi-zero | openmc-pincell-group-permute | _not-affected_ |  |  |  |
 | M01-openmoc-runner-chi-zero | openmc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
 | M01-openmoc-runner-chi-zero | openmc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| M01-openmoc-runner-chi-zero | openmoc-pincell-fuel-sigma-s | detected | 0.00059 | 0.00065 | 1.10388 |
+| M01-openmoc-runner-chi-zero | openmc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M01-openmoc-runner-chi-zero | openmoc-pincell-fuel-radius | detected | 0.00059 | 0.00058 | 0.97244 |
+| M01-openmoc-runner-chi-zero | openmc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M01-openmoc-runner-chi-zero | openmc-pincell-particles-refine | _not-affected_ |  |  |  |
 | M02-openmoc-runner-sigt-from-siga | openmoc-pincell-nu-sigma-f | detected | inf | inf | nan |
 | M02-openmoc-runner-sigt-from-siga | openmc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | M02-openmoc-runner-sigt-from-siga | openmoc-pincell-sigma-a | detected | inf | inf | nan |
@@ -57,6 +72,11 @@ M00 (identity) detected on 0 / 10 scenarios. Expected 0 — ✓ PASS.
 | M02-openmoc-runner-sigt-from-siga | openmc-pincell-group-permute | _not-affected_ |  |  |  |
 | M02-openmoc-runner-sigt-from-siga | openmc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
 | M02-openmoc-runner-sigt-from-siga | openmc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| M02-openmoc-runner-sigt-from-siga | openmoc-pincell-fuel-sigma-s | detected | inf | inf | nan |
+| M02-openmoc-runner-sigt-from-siga | openmc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M02-openmoc-runner-sigt-from-siga | openmoc-pincell-fuel-radius | detected | inf | inf | nan |
+| M02-openmoc-runner-sigt-from-siga | openmc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M02-openmoc-runner-sigt-from-siga | openmc-pincell-particles-refine | _not-affected_ |  |  |  |
 | M03-openmoc-runner-swap-fuel-moderator | openmoc-pincell-nu-sigma-f | missed | 1.43300 | 2.14972 | 1.50015 |
 | M03-openmoc-runner-swap-fuel-moderator | openmc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | M03-openmoc-runner-swap-fuel-moderator | openmoc-pincell-sigma-a | missed | 1.43300 | 0.91350 | 0.63747 |
@@ -67,6 +87,11 @@ M00 (identity) detected on 0 / 10 scenarios. Expected 0 — ✓ PASS.
 | M03-openmoc-runner-swap-fuel-moderator | openmc-pincell-group-permute | _not-affected_ |  |  |  |
 | M03-openmoc-runner-swap-fuel-moderator | openmc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
 | M03-openmoc-runner-swap-fuel-moderator | openmc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| M03-openmoc-runner-swap-fuel-moderator | openmoc-pincell-fuel-sigma-s | missed | 1.43300 | 1.28766 | 0.89858 |
+| M03-openmoc-runner-swap-fuel-moderator | openmc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M03-openmoc-runner-swap-fuel-moderator | openmoc-pincell-fuel-radius | detected | 1.43300 | 0.48497 | 0.33843 |
+| M03-openmoc-runner-swap-fuel-moderator | openmc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M03-openmoc-runner-swap-fuel-moderator | openmc-pincell-particles-refine | _not-affected_ |  |  |  |
 | M04-openmoc-runner-drop-nu-sigma-f | openmoc-pincell-nu-sigma-f | detected | nan | nan | nan |
 | M04-openmoc-runner-drop-nu-sigma-f | openmc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | M04-openmoc-runner-drop-nu-sigma-f | openmoc-pincell-sigma-a | detected | nan | nan | nan |
@@ -77,6 +102,11 @@ M00 (identity) detected on 0 / 10 scenarios. Expected 0 — ✓ PASS.
 | M04-openmoc-runner-drop-nu-sigma-f | openmc-pincell-group-permute | _not-affected_ |  |  |  |
 | M04-openmoc-runner-drop-nu-sigma-f | openmc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
 | M04-openmoc-runner-drop-nu-sigma-f | openmc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| M04-openmoc-runner-drop-nu-sigma-f | openmoc-pincell-fuel-sigma-s | detected | nan | nan | nan |
+| M04-openmoc-runner-drop-nu-sigma-f | openmc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M04-openmoc-runner-drop-nu-sigma-f | openmoc-pincell-fuel-radius | detected | nan | nan | nan |
+| M04-openmoc-runner-drop-nu-sigma-f | openmc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M04-openmoc-runner-drop-nu-sigma-f | openmc-pincell-particles-refine | _not-affected_ |  |  |  |
 | M05-openmoc-runner-chi-swap-groups | openmoc-pincell-nu-sigma-f | missed | 1.27800 | 1.91687 | 1.49990 |
 | M05-openmoc-runner-chi-swap-groups | openmc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | M05-openmoc-runner-chi-swap-groups | openmoc-pincell-sigma-a | missed | 1.27800 | 0.96468 | 0.75484 |
@@ -87,6 +117,11 @@ M00 (identity) detected on 0 / 10 scenarios. Expected 0 — ✓ PASS.
 | M05-openmoc-runner-chi-swap-groups | openmc-pincell-group-permute | _not-affected_ |  |  |  |
 | M05-openmoc-runner-chi-swap-groups | openmc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
 | M05-openmoc-runner-chi-swap-groups | openmc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| M05-openmoc-runner-chi-swap-groups | openmoc-pincell-fuel-sigma-s | detected | 1.27800 | 1.27814 | 1.00011 |
+| M05-openmoc-runner-chi-swap-groups | openmc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M05-openmoc-runner-chi-swap-groups | openmoc-pincell-fuel-radius | missed | 1.27800 | 1.33609 | 1.04546 |
+| M05-openmoc-runner-chi-swap-groups | openmc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M05-openmoc-runner-chi-swap-groups | openmc-pincell-particles-refine | _not-affected_ |  |  |  |
 | M06-openmoc-runner-vacuum-boundary | openmoc-pincell-nu-sigma-f | missed | 0.00470 | 0.00704 | 1.49898 |
 | M06-openmoc-runner-vacuum-boundary | openmc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | M06-openmoc-runner-vacuum-boundary | openmoc-pincell-sigma-a | missed | 0.00470 | 0.00466 | 0.99057 |
@@ -97,6 +132,11 @@ M00 (identity) detected on 0 / 10 scenarios. Expected 0 — ✓ PASS.
 | M06-openmoc-runner-vacuum-boundary | openmc-pincell-group-permute | _not-affected_ |  |  |  |
 | M06-openmoc-runner-vacuum-boundary | openmc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
 | M06-openmoc-runner-vacuum-boundary | openmc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| M06-openmoc-runner-vacuum-boundary | openmoc-pincell-fuel-sigma-s | missed | 0.00470 | 0.00419 | 0.89221 |
+| M06-openmoc-runner-vacuum-boundary | openmc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M06-openmoc-runner-vacuum-boundary | openmoc-pincell-fuel-radius | missed | 0.00470 | 0.00497 | 1.05813 |
+| M06-openmoc-runner-vacuum-boundary | openmc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M06-openmoc-runner-vacuum-boundary | openmc-pincell-particles-refine | _not-affected_ |  |  |  |
 | M07-openmoc-adapter-nsf-inverse | openmoc-pincell-nu-sigma-f | detected | 1.13306 | 0.75516 | 0.66648 |
 | M07-openmoc-adapter-nsf-inverse | openmc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | M07-openmoc-adapter-nsf-inverse | openmoc-pincell-sigma-a | _not-affected_ |  |  |  |
@@ -107,6 +147,11 @@ M00 (identity) detected on 0 / 10 scenarios. Expected 0 — ✓ PASS.
 | M07-openmoc-adapter-nsf-inverse | openmc-pincell-group-permute | _not-affected_ |  |  |  |
 | M07-openmoc-adapter-nsf-inverse | openmc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
 | M07-openmoc-adapter-nsf-inverse | openmc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| M07-openmoc-adapter-nsf-inverse | openmoc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M07-openmoc-adapter-nsf-inverse | openmc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M07-openmoc-adapter-nsf-inverse | openmoc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M07-openmoc-adapter-nsf-inverse | openmc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M07-openmoc-adapter-nsf-inverse | openmc-pincell-particles-refine | _not-affected_ |  |  |  |
 | M08-openmoc-adapter-nsf-square | openmoc-pincell-nu-sigma-f | missed | 1.13306 | 2.55018 | 2.25071 |
 | M08-openmoc-adapter-nsf-square | openmc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | M08-openmoc-adapter-nsf-square | openmoc-pincell-sigma-a | _not-affected_ |  |  |  |
@@ -117,6 +162,11 @@ M00 (identity) detected on 0 / 10 scenarios. Expected 0 — ✓ PASS.
 | M08-openmoc-adapter-nsf-square | openmc-pincell-group-permute | _not-affected_ |  |  |  |
 | M08-openmoc-adapter-nsf-square | openmc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
 | M08-openmoc-adapter-nsf-square | openmc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| M08-openmoc-adapter-nsf-square | openmoc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M08-openmoc-adapter-nsf-square | openmc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M08-openmoc-adapter-nsf-square | openmoc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M08-openmoc-adapter-nsf-square | openmc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M08-openmoc-adapter-nsf-square | openmc-pincell-particles-refine | _not-affected_ |  |  |  |
 | M09-openmoc-adapter-nsf-moderator | openmoc-pincell-nu-sigma-f | detected | 1.13306 | 1.13306 | 1.00000 |
 | M09-openmoc-adapter-nsf-moderator | openmc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | M09-openmoc-adapter-nsf-moderator | openmoc-pincell-sigma-a | _not-affected_ |  |  |  |
@@ -127,6 +177,11 @@ M00 (identity) detected on 0 / 10 scenarios. Expected 0 — ✓ PASS.
 | M09-openmoc-adapter-nsf-moderator | openmc-pincell-group-permute | _not-affected_ |  |  |  |
 | M09-openmoc-adapter-nsf-moderator | openmc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
 | M09-openmoc-adapter-nsf-moderator | openmc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| M09-openmoc-adapter-nsf-moderator | openmoc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M09-openmoc-adapter-nsf-moderator | openmc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M09-openmoc-adapter-nsf-moderator | openmoc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M09-openmoc-adapter-nsf-moderator | openmc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M09-openmoc-adapter-nsf-moderator | openmc-pincell-particles-refine | _not-affected_ |  |  |  |
 | M10-openmoc-adapter-nsf-identity | openmoc-pincell-nu-sigma-f | detected | 1.13306 | 1.13306 | 1.00000 |
 | M10-openmoc-adapter-nsf-identity | openmc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | M10-openmoc-adapter-nsf-identity | openmoc-pincell-sigma-a | _not-affected_ |  |  |  |
@@ -137,6 +192,11 @@ M00 (identity) detected on 0 / 10 scenarios. Expected 0 — ✓ PASS.
 | M10-openmoc-adapter-nsf-identity | openmc-pincell-group-permute | _not-affected_ |  |  |  |
 | M10-openmoc-adapter-nsf-identity | openmc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
 | M10-openmoc-adapter-nsf-identity | openmc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| M10-openmoc-adapter-nsf-identity | openmoc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M10-openmoc-adapter-nsf-identity | openmc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M10-openmoc-adapter-nsf-identity | openmoc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M10-openmoc-adapter-nsf-identity | openmc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M10-openmoc-adapter-nsf-identity | openmc-pincell-particles-refine | _not-affected_ |  |  |  |
 | M11-openmoc-adapter-nsf-fast-only | openmoc-pincell-nu-sigma-f | detected | 1.13306 | 0.52376 | 0.46226 |
 | M11-openmoc-adapter-nsf-fast-only | openmc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | M11-openmoc-adapter-nsf-fast-only | openmoc-pincell-sigma-a | _not-affected_ |  |  |  |
@@ -147,6 +207,11 @@ M00 (identity) detected on 0 / 10 scenarios. Expected 0 — ✓ PASS.
 | M11-openmoc-adapter-nsf-fast-only | openmc-pincell-group-permute | _not-affected_ |  |  |  |
 | M11-openmoc-adapter-nsf-fast-only | openmc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
 | M11-openmoc-adapter-nsf-fast-only | openmc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| M11-openmoc-adapter-nsf-fast-only | openmoc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M11-openmoc-adapter-nsf-fast-only | openmc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M11-openmoc-adapter-nsf-fast-only | openmoc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M11-openmoc-adapter-nsf-fast-only | openmc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M11-openmoc-adapter-nsf-fast-only | openmc-pincell-particles-refine | _not-affected_ |  |  |  |
 | M12-openmoc-adapter-sa-no-sigt-update | openmoc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | M12-openmoc-adapter-sa-no-sigt-update | openmc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | M12-openmoc-adapter-sa-no-sigt-update | openmoc-pincell-sigma-a | detected | 1.13306 | 1.13306 | 1.00000 |
@@ -157,6 +222,11 @@ M00 (identity) detected on 0 / 10 scenarios. Expected 0 — ✓ PASS.
 | M12-openmoc-adapter-sa-no-sigt-update | openmc-pincell-group-permute | _not-affected_ |  |  |  |
 | M12-openmoc-adapter-sa-no-sigt-update | openmc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
 | M12-openmoc-adapter-sa-no-sigt-update | openmc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| M12-openmoc-adapter-sa-no-sigt-update | openmoc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M12-openmoc-adapter-sa-no-sigt-update | openmc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M12-openmoc-adapter-sa-no-sigt-update | openmoc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M12-openmoc-adapter-sa-no-sigt-update | openmc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M12-openmoc-adapter-sa-no-sigt-update | openmc-pincell-particles-refine | _not-affected_ |  |  |  |
 | M13-openmoc-adapter-sa-inverse | openmoc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | M13-openmoc-adapter-sa-inverse | openmc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | M13-openmoc-adapter-sa-inverse | openmoc-pincell-sigma-a | detected | 1.13306 | 1.51087 | 1.33344 |
@@ -167,6 +237,11 @@ M00 (identity) detected on 0 / 10 scenarios. Expected 0 — ✓ PASS.
 | M13-openmoc-adapter-sa-inverse | openmc-pincell-group-permute | _not-affected_ |  |  |  |
 | M13-openmoc-adapter-sa-inverse | openmc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
 | M13-openmoc-adapter-sa-inverse | openmc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| M13-openmoc-adapter-sa-inverse | openmoc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M13-openmoc-adapter-sa-inverse | openmc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M13-openmoc-adapter-sa-inverse | openmoc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M13-openmoc-adapter-sa-inverse | openmc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M13-openmoc-adapter-sa-inverse | openmc-pincell-particles-refine | _not-affected_ |  |  |  |
 | M14-openmoc-adapter-sa-moderator | openmoc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | M14-openmoc-adapter-sa-moderator | openmc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | M14-openmoc-adapter-sa-moderator | openmoc-pincell-sigma-a | missed | 1.13306 | 0.47635 | 0.42041 |
@@ -177,6 +252,11 @@ M00 (identity) detected on 0 / 10 scenarios. Expected 0 — ✓ PASS.
 | M14-openmoc-adapter-sa-moderator | openmc-pincell-group-permute | _not-affected_ |  |  |  |
 | M14-openmoc-adapter-sa-moderator | openmc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
 | M14-openmoc-adapter-sa-moderator | openmc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| M14-openmoc-adapter-sa-moderator | openmoc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M14-openmoc-adapter-sa-moderator | openmc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M14-openmoc-adapter-sa-moderator | openmoc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M14-openmoc-adapter-sa-moderator | openmc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M14-openmoc-adapter-sa-moderator | openmc-pincell-particles-refine | _not-affected_ |  |  |  |
 | M15-openmc-runner-chi-zero | openmoc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | M15-openmc-runner-chi-zero | openmc-pincell-nu-sigma-f | _error_ |  |  |  |
 | M15-openmc-runner-chi-zero | openmoc-pincell-sigma-a | _not-affected_ |  |  |  |
@@ -227,6 +307,11 @@ M00 (identity) detected on 0 / 10 scenarios. Expected 0 — ✓ PASS.
 | M28-openmoc-runner-chi-fast-only | openmc-pincell-group-permute | _not-affected_ |  |  |  |
 | M28-openmoc-runner-chi-fast-only | openmc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
 | M28-openmoc-runner-chi-fast-only | openmc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| M28-openmoc-runner-chi-fast-only | openmoc-pincell-fuel-sigma-s | missed | 1.13306 | 1.09185 | 0.96363 |
+| M28-openmoc-runner-chi-fast-only | openmc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M28-openmoc-runner-chi-fast-only | openmoc-pincell-fuel-radius | missed | 1.13306 | 1.17476 | 1.03681 |
+| M28-openmoc-runner-chi-fast-only | openmc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M28-openmoc-runner-chi-fast-only | openmc-pincell-particles-refine | _not-affected_ |  |  |  |
 | M30-openmoc-adapter-moderator-sigma-a-no-sigt-update | openmoc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | M30-openmoc-adapter-moderator-sigma-a-no-sigt-update | openmc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | M30-openmoc-adapter-moderator-sigma-a-no-sigt-update | openmoc-pincell-sigma-a | _not-affected_ |  |  |  |
@@ -237,6 +322,11 @@ M00 (identity) detected on 0 / 10 scenarios. Expected 0 — ✓ PASS.
 | M30-openmoc-adapter-moderator-sigma-a-no-sigt-update | openmc-pincell-group-permute | _not-affected_ |  |  |  |
 | M30-openmoc-adapter-moderator-sigma-a-no-sigt-update | openmc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
 | M30-openmoc-adapter-moderator-sigma-a-no-sigt-update | openmc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| M30-openmoc-adapter-moderator-sigma-a-no-sigt-update | openmoc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M30-openmoc-adapter-moderator-sigma-a-no-sigt-update | openmc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M30-openmoc-adapter-moderator-sigma-a-no-sigt-update | openmoc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M30-openmoc-adapter-moderator-sigma-a-no-sigt-update | openmc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M30-openmoc-adapter-moderator-sigma-a-no-sigt-update | openmc-pincell-particles-refine | _not-affected_ |  |  |  |
 | M31-openmoc-adapter-group-permute-fuel-only | openmoc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | M31-openmoc-adapter-group-permute-fuel-only | openmc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | M31-openmoc-adapter-group-permute-fuel-only | openmoc-pincell-sigma-a | _not-affected_ |  |  |  |
@@ -247,6 +337,41 @@ M00 (identity) detected on 0 / 10 scenarios. Expected 0 — ✓ PASS.
 | M31-openmoc-adapter-group-permute-fuel-only | openmc-pincell-group-permute | _not-affected_ |  |  |  |
 | M31-openmoc-adapter-group-permute-fuel-only | openmc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
 | M31-openmoc-adapter-group-permute-fuel-only | openmc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| M31-openmoc-adapter-group-permute-fuel-only | openmoc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M31-openmoc-adapter-group-permute-fuel-only | openmc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M31-openmoc-adapter-group-permute-fuel-only | openmoc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M31-openmoc-adapter-group-permute-fuel-only | openmc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M31-openmoc-adapter-group-permute-fuel-only | openmc-pincell-particles-refine | _not-affected_ |  |  |  |
+| M32-openmoc-adapter-fuel-sigma-s-identity | openmoc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
+| M32-openmoc-adapter-fuel-sigma-s-identity | openmc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
+| M32-openmoc-adapter-fuel-sigma-s-identity | openmoc-pincell-sigma-a | _not-affected_ |  |  |  |
+| M32-openmoc-adapter-fuel-sigma-s-identity | openmc-pincell-sigma-a | _not-affected_ |  |  |  |
+| M32-openmoc-adapter-fuel-sigma-s-identity | openmoc-pincell-group-permute | _not-affected_ |  |  |  |
+| M32-openmoc-adapter-fuel-sigma-s-identity | openmoc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
+| M32-openmoc-adapter-fuel-sigma-s-identity | openmoc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| M32-openmoc-adapter-fuel-sigma-s-identity | openmc-pincell-group-permute | _not-affected_ |  |  |  |
+| M32-openmoc-adapter-fuel-sigma-s-identity | openmc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
+| M32-openmoc-adapter-fuel-sigma-s-identity | openmc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| M32-openmoc-adapter-fuel-sigma-s-identity | openmoc-pincell-fuel-sigma-s | detected | 1.13306 | 1.13306 | 1.00000 |
+| M32-openmoc-adapter-fuel-sigma-s-identity | openmc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M32-openmoc-adapter-fuel-sigma-s-identity | openmoc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M32-openmoc-adapter-fuel-sigma-s-identity | openmc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M32-openmoc-adapter-fuel-sigma-s-identity | openmc-pincell-particles-refine | _not-affected_ |  |  |  |
+| M33-openmoc-adapter-fuel-radius-shrink | openmoc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
+| M33-openmoc-adapter-fuel-radius-shrink | openmc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
+| M33-openmoc-adapter-fuel-radius-shrink | openmoc-pincell-sigma-a | _not-affected_ |  |  |  |
+| M33-openmoc-adapter-fuel-radius-shrink | openmc-pincell-sigma-a | _not-affected_ |  |  |  |
+| M33-openmoc-adapter-fuel-radius-shrink | openmoc-pincell-group-permute | _not-affected_ |  |  |  |
+| M33-openmoc-adapter-fuel-radius-shrink | openmoc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
+| M33-openmoc-adapter-fuel-radius-shrink | openmoc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| M33-openmoc-adapter-fuel-radius-shrink | openmc-pincell-group-permute | _not-affected_ |  |  |  |
+| M33-openmoc-adapter-fuel-radius-shrink | openmc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
+| M33-openmoc-adapter-fuel-radius-shrink | openmc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| M33-openmoc-adapter-fuel-radius-shrink | openmoc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M33-openmoc-adapter-fuel-radius-shrink | openmc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| M33-openmoc-adapter-fuel-radius-shrink | openmoc-pincell-fuel-radius | detected | 1.13306 | 1.09021 | 0.96218 |
+| M33-openmoc-adapter-fuel-radius-shrink | openmc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| M33-openmoc-adapter-fuel-radius-shrink | openmc-pincell-particles-refine | _not-affected_ |  |  |  |
 
 ## Cross-solver agreement (Cohen's κ)
 

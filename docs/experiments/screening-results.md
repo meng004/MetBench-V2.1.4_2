@@ -18,10 +18,10 @@ as a transparency artifact. The discrepancy between the two columns below shows
 exactly which mutations would have been miss-classified by the source-only rule.
 
 
-**Discard rate**: 5 of 32 candidates (15.6%) classified equivalent under the matrix rule.
+**Discard rate**: 6 of 35 candidates (17.1%) classified equivalent under the matrix rule.
 
 
-Classification counts: semantic=26, equivalent=5, error=1, unknown=0
+Classification counts: semantic=28, equivalent=6, error=1, unknown=0
 
 
 | mutation | predicted | source-only signal | matrix signal | source shifted? | follow-up shifted? | err cells |
@@ -58,6 +58,9 @@ Classification counts: semantic=26, equivalent=5, error=1, unknown=0
 | M29-openmoc-adapter-fuel-sigt-no-siga-update | equivalent | — | equivalent | False | False | 0 |
 | M30-openmoc-adapter-moderator-sigma-a-no-sigt-update | semantic | — | semantic | False | True | 0 |
 | M31-openmoc-adapter-group-permute-fuel-only | semantic | — | semantic | False | True | 0 |
+| M32-openmoc-adapter-fuel-sigma-s-identity | semantic | — | semantic | False | True | 0 |
+| M33-openmoc-adapter-fuel-radius-shrink | semantic | — | semantic | False | True | 0 |
+| M34-openmc-adapter-particles-no-op | semantic | — | equivalent | False | False | 0 |
 
 ## Discarded (equivalent) mutants — why?
 
@@ -81,6 +84,8 @@ Observed per-scenario shifts:
 | openmoc-pincell-group-permute | 0.000000 | 0.000000 | 0.005665 |
 | openmoc-pincell-fuel-sigma-t | 0.000000 | 0.000000 | 0.005665 |
 | openmoc-pincell-moderator-sigma-a | 0.000000 | 0.000000 | 0.005665 |
+| openmoc-pincell-fuel-sigma-s | 0.000000 | 0.000000 | 0.005665 |
+| openmoc-pincell-fuel-radius | 0.000000 | 0.000000 | 0.005665 |
 
 ### M18-openmc-runner-batches-too-few
 
@@ -151,4 +156,14 @@ Observed per-scenario shifts:
 | scenario | Δsource | Δfollow-up | threshold |
 |---|---|---|---|
 | openmoc-pincell-fuel-sigma-t | 0.000000 | 0.000000 | 0.005665 |
+
+### M34-openmc-adapter-particles-no-op
+
+*Ignore the factor — leave solver.particles unchanged.*
+
+
+**Predicted**: semantic.
+
+
+**Rationale**: Adapter doesn't change particle count, so the follow-up MC run has the same statistical noise as the source. Observed σ ratio ≈ 1.0, but N12's variance-ratio assertion expects 1/√10 ≈ 0.316. Detected by N12 (variance-ratio). Inert in deterministic OpenMOC; OpenMC-only mutation.
 

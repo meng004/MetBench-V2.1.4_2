@@ -11,6 +11,7 @@
       "k_followup_std": 0.0,
       "ratio": 0.9999999452099345,
       "assertion": "greater",
+      "factor": 1.5,
       "assertion_passed": false,
       "outcome": "detected"
     },
@@ -27,6 +28,7 @@
       "k_followup_std": 0.0,
       "ratio": 0.8594205096416971,
       "assertion": "less",
+      "factor": 1.5,
       "assertion_passed": true,
       "outcome": "missed"
     },
@@ -43,6 +45,7 @@
       "k_followup_std": 0.0,
       "ratio": 1.0,
       "assertion": "approx",
+      "factor": 1.5,
       "assertion_passed": true,
       "outcome": "missed"
     },
@@ -55,6 +58,7 @@
       "k_followup_std": 0.0,
       "ratio": 0.28481573907526314,
       "assertion": "less",
+      "factor": 1.5,
       "assertion_passed": true,
       "outcome": "missed"
     },
@@ -67,6 +71,7 @@
       "k_followup_std": 0.0,
       "ratio": 0.9404541488903199,
       "assertion": "less",
+      "factor": 1.5,
       "assertion_passed": true,
       "outcome": "missed"
     },
@@ -80,6 +85,44 @@
     },
     {
       "scenario_id": "openmc-pincell-moderator-sigma-a",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-fuel-sigma-s",
+      "status": "ran",
+      "k_source": 0.0005913922197768902,
+      "k_followup": 0.0006528239552141509,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": 1.1038764687510372,
+      "assertion": "less",
+      "factor": 0.5,
+      "assertion_passed": false,
+      "outcome": "detected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-sigma-s",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-fuel-radius",
+      "status": "ran",
+      "k_source": 0.0005913922197768902,
+      "k_followup": 0.000575093637317045,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": 0.9724403164011964,
+      "assertion": "greater",
+      "factor": 1.05,
+      "assertion_passed": false,
+      "outcome": "detected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-radius",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-particles-refine",
       "status": "not-affected"
     }
   ]

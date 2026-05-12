@@ -68,6 +68,31 @@
       "k_eff": NaN,
       "k_eff_std": 0.0,
       "skipped": true
+    },
+    "openmoc-pincell-fuel-sigma-s": {
+      "k_eff": 1.0918528592930699,
+      "k_eff_std": 0.0,
+      "factor": 0.5
+    },
+    "openmc-pincell-fuel-sigma-s": {
+      "k_eff": NaN,
+      "k_eff_std": 0.0,
+      "skipped": true
+    },
+    "openmoc-pincell-fuel-radius": {
+      "k_eff": 1.1747611153388409,
+      "k_eff_std": 0.0,
+      "factor": 1.05
+    },
+    "openmc-pincell-fuel-radius": {
+      "k_eff": NaN,
+      "k_eff_std": 0.0,
+      "skipped": true
+    },
+    "openmc-pincell-particles-refine": {
+      "k_eff": NaN,
+      "k_eff_std": 0.0,
+      "skipped": true
     }
   },
   "factor": 1.5,

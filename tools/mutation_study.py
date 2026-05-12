@@ -181,6 +181,74 @@ SCENARIOS: list[dict] = [
         "noether_id": "N07",
         "meta_pattern": "m_mono",
     },
+    # ----- Phase 2 (NOETHER) extension: N06, N08, N12 -----
+    {
+        "id": "openmoc-pincell-fuel-sigma-s",
+        "solver": "openmoc",
+        "transform": "ScaleFuelSigmaS",
+        "adapter": "openmoc/openmoc_input_adapter_fuel_sigma_s.py",
+        "runner": "openmoc/openmoc_runner.py",
+        "assertion": "less",
+        "value": "k_eff",
+        "factor_override": 0.5,  # scale scattering DOWN to drop k_eff
+        "phase": 2,
+        "noether_id": "N06",
+        "meta_pattern": "m_mono",
+    },
+    {
+        "id": "openmc-pincell-fuel-sigma-s",
+        "solver": "openmc",
+        "transform": "ScaleFuelSigmaS",
+        "adapter": "openmc/openmc_input_adapter_fuel_sigma_s.py",
+        "runner": "openmc/openmc_runner.py",
+        "assertion": "less",
+        "value": "k_eff",
+        "factor_override": 0.5,
+        "phase": 2,
+        "noether_id": "N06",
+        "meta_pattern": "m_mono",
+    },
+    {
+        "id": "openmoc-pincell-fuel-radius",
+        "solver": "openmoc",
+        "transform": "ScaleFuelRadius",
+        "adapter": "openmoc/openmoc_input_adapter_fuel_radius.py",
+        "runner": "openmoc/openmoc_runner.py",
+        "assertion": "greater",
+        "value": "k_eff",
+        "factor_override": 1.05,  # small perturbation; large factors flip the regime
+        "phase": 2,
+        "noether_id": "N08",
+        "meta_pattern": "m_mono",
+    },
+    {
+        "id": "openmc-pincell-fuel-radius",
+        "solver": "openmc",
+        "transform": "ScaleFuelRadius",
+        "adapter": "openmc/openmc_input_adapter_fuel_radius.py",
+        "runner": "openmc/openmc_runner.py",
+        "assertion": "greater",
+        "value": "k_eff",
+        "factor_override": 1.05,
+        "phase": 2,
+        "noether_id": "N08",
+        "meta_pattern": "m_mono",
+    },
+    {
+        "id": "openmc-pincell-particles-refine",
+        "solver": "openmc",
+        "transform": "RefineParticles",
+        "adapter": "openmc/openmc_input_adapter_refine_particles.py",
+        "runner": "openmc/openmc_runner.py",
+        "assertion": "variance-ratio",
+        "value": "k_eff_std",
+        "factor_override": 10.0,  # 10x particles ⇒ σ scales by 1/√10 ≈ 0.316
+        "target_ratio": 0.31623,  # 1/sqrt(10)
+        "tolerance_rel": 0.30,    # ±30% of target ratio (MC noise on a single statepoint)
+        "phase": 2,
+        "noether_id": "N12",
+        "meta_pattern": "m_conv",
+    },
 ]
 
 
@@ -249,6 +317,21 @@ def run_solver(sut_root: Path, scenario: dict, input_json: Path, output_json: Pa
     runner = sut_root / scenario["runner"]
     run_subprocess([python_exec, str(runner), "--input", str(input_json), "--output", str(output_json)])
     return json.loads(output_json.read_text(encoding="utf-8"))
+
+
+def scenario_factor(scenario: dict, default_factor: float) -> float:
+    """Per-scenario factor override.
+
+    Some MRs are only valid in a small-perturbation regime (e.g.
+    ScaleFuelRadius — large radius growth flips the monotonicity sign
+    once the cell crosses into over-moderation). Such scenarios declare
+    `factor_override` in their SCENARIOS row, which wins over the CLI
+    --factor default. Used both by `apply_transformation` (to choose
+    the multiplier) and recorded in matrix cells for traceability.
+    """
+    if "factor_override" in scenario:
+        return float(scenario["factor_override"])
+    return float(default_factor)
 
 
 def apply_transformation(sut_root: Path, scenario: dict, source: Path, output: Path, factor: float, python_exec: str) -> None:
@@ -389,11 +472,13 @@ def cmd_baseline(args: argparse.Namespace) -> int:
             python_exec = openmoc_python if sc["solver"] == "openmoc" else openmc_python
             flw_in = tmp_path / f"flw-in-{sc['id']}.json"
             flw_out = tmp_path / f"flw-out-{sc['id']}.json"
-            apply_transformation(SUT_DIR, sc, SOURCE_CASE, flw_in, DEFAULT_FACTOR, python_exec)
+            effective_factor = scenario_factor(sc, DEFAULT_FACTOR)
+            apply_transformation(SUT_DIR, sc, SOURCE_CASE, flw_in, effective_factor, python_exec)
             result = run_solver(SUT_DIR, sc, flw_in, flw_out, python_exec)
             followups[sc["id"]] = {
                 "k_eff": float(result["k_eff"]),
                 "k_eff_std": float(result.get("k_eff_std", 0.0)),
+                "factor": effective_factor,
             }
     for sid in skipped_scenarios:
         followups[sid] = {"k_eff": float("nan"), "k_eff_std": 0.0, "skipped": True}
@@ -532,18 +617,52 @@ def cmd_screen(args: argparse.Namespace) -> int:
 # MR matrix
 # ---------------------------------------------------------------------------
 
-def evaluate_mr(k_source: float, k_followup: float, assertion: str, tolerance_rel: float = 1e-6) -> bool:
+def evaluate_mr(cell: dict, scenario: dict) -> bool:
+    """Evaluate the scenario's MR assertion against a populated matrix cell.
+
+    Cell must already have `k_source`, `k_followup`, and (for the
+    `variance-ratio` assertion only) `k_source_std` and `k_followup_std`.
+    The cell-and-scenario signature replaces the older
+    (k_source, k_followup, assertion, tolerance_rel) form so the new
+    Phase-2 assertions can read everything they need without further
+    plumbing changes.
+
+    Recognised assertions:
+
+    * `greater`         — k_followup > k_source.
+    * `less`            — k_followup < k_source.
+    * `approx`          — |Δk| ≤ tolerance_rel · |k_source|. Used by
+                          symmetry MRs (m_inv) where the eigenvalue
+                          must be invariant under the transformation.
+    * `variance-ratio`  — observed σ_followup / σ_source within
+                          tolerance_rel of `target_ratio`. Used by
+                          MC convergence MRs (m_conv) such as N12
+                          RefineParticles, which predicts the
+                          1/√factor scaling of the MC standard error.
+    """
+    assertion = scenario["assertion"]
+    k_src = float(cell["k_source"])
+    k_flw = float(cell["k_followup"])
     if assertion == "greater":
-        return k_followup > k_source
+        return k_flw > k_src
     if assertion == "less":
-        return k_followup < k_source
+        return k_flw < k_src
     if assertion == "approx":
-        # Pass iff |Δk| / |k_source| ≤ tolerance_rel. Used by Phase-2 m_inv MRs
-        # (PermuteEnergyGroups), where the eigenvalue must be invariant under
-        # the symmetry transformation modulo solver noise.
-        if k_source == 0:
-            return k_followup == 0
-        return abs(k_followup - k_source) <= tolerance_rel * abs(k_source)
+        tol = float(scenario.get("tolerance_rel", 1e-6))
+        if k_src == 0:
+            return k_flw == 0
+        return abs(k_flw - k_src) <= tol * abs(k_src)
+    if assertion == "variance-ratio":
+        target = float(scenario["target_ratio"])
+        tol = float(scenario.get("tolerance_rel", 0.30))
+        sigma_src = float(cell.get("k_source_std", 0.0) or 0.0)
+        sigma_flw = float(cell.get("k_followup_std", 0.0) or 0.0)
+        if sigma_src == 0.0:
+            # Deterministic source — the only consistent follow-up is
+            # also zero-σ. Anything else is a fault.
+            return sigma_flw == 0.0
+        observed = sigma_flw / sigma_src
+        return abs(observed - target) <= tol * abs(target)
     raise ValueError(f"Unknown assertion: {assertion}")
 
 
@@ -583,17 +702,15 @@ def matrix_one(mutation: Mutation, args: argparse.Namespace) -> dict:
                 src = run_solver(sut_copy, sc, SOURCE_CASE, source_out, python_exec)
                 k_src = float(src["k_eff"])
 
-                # Build follow-up via patched adapter.
-                apply_transformation(sut_copy, sc, SOURCE_CASE, followup_in, args.factor, python_exec)
+                # Build follow-up via patched adapter, honouring per-scenario
+                # factor overrides (e.g. ScaleFuelRadius wants 1.05, not 1.5).
+                effective_factor = scenario_factor(sc, args.factor)
+                apply_transformation(sut_copy, sc, SOURCE_CASE, followup_in, effective_factor, python_exec)
 
                 # Follow-up run.
                 flw = run_solver(sut_copy, sc, followup_in, followup_out, python_exec)
                 k_flw = float(flw["k_eff"])
 
-                passed = evaluate_mr(
-                    k_src, k_flw, sc["assertion"],
-                    tolerance_rel=float(sc.get("tolerance_rel", 1e-6)),
-                )
                 cell.update({
                     "status": "ran",
                     "k_source": k_src,
@@ -602,9 +719,11 @@ def matrix_one(mutation: Mutation, args: argparse.Namespace) -> dict:
                     "k_followup_std": float(flw.get("k_eff_std", 0.0)),
                     "ratio": k_flw / k_src if k_src else float("nan"),
                     "assertion": sc["assertion"],
-                    "assertion_passed": passed,
-                    "outcome": "missed" if passed else "detected",
+                    "factor": effective_factor,
                 })
+                passed = evaluate_mr(cell, sc)
+                cell["assertion_passed"] = passed
+                cell["outcome"] = "missed" if passed else "detected"
             except RuntimeError as e:
                 cell["status"] = "error"
                 cell["error"] = str(e)[:1500]

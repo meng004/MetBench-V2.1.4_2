@@ -11,6 +11,7 @@
       "k_followup_std": 0.0,
       "ratio": NaN,
       "assertion": "greater",
+      "factor": 1.5,
       "assertion_passed": false,
       "outcome": "detected"
     },
@@ -27,6 +28,7 @@
       "k_followup_std": 0.0,
       "ratio": NaN,
       "assertion": "less",
+      "factor": 1.5,
       "assertion_passed": false,
       "outcome": "detected"
     },
@@ -43,6 +45,7 @@
       "k_followup_std": 0.0,
       "ratio": NaN,
       "assertion": "approx",
+      "factor": 1.5,
       "assertion_passed": false,
       "outcome": "detected"
     },
@@ -55,6 +58,7 @@
       "k_followup_std": 0.0,
       "ratio": NaN,
       "assertion": "less",
+      "factor": 1.5,
       "assertion_passed": false,
       "outcome": "detected"
     },
@@ -67,6 +71,7 @@
       "k_followup_std": 0.0,
       "ratio": NaN,
       "assertion": "less",
+      "factor": 1.5,
       "assertion_passed": false,
       "outcome": "detected"
     },
@@ -80,6 +85,44 @@
     },
     {
       "scenario_id": "openmc-pincell-moderator-sigma-a",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-fuel-sigma-s",
+      "status": "ran",
+      "k_source": NaN,
+      "k_followup": NaN,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": NaN,
+      "assertion": "less",
+      "factor": 0.5,
+      "assertion_passed": false,
+      "outcome": "detected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-sigma-s",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-fuel-radius",
+      "status": "ran",
+      "k_source": NaN,
+      "k_followup": NaN,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": NaN,
+      "assertion": "greater",
+      "factor": 1.05,
+      "assertion_passed": false,
+      "outcome": "detected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-radius",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-particles-refine",
       "status": "not-affected"
     }
   ]

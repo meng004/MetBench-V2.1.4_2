@@ -605,6 +605,69 @@ M31 = Mutation(
 )
 
 
+# ---------------------------------------------------------------------------
+# Phase 2 (NOETHER) extension: mutations targeting N06, N08, N12 MRs
+# ---------------------------------------------------------------------------
+
+M32 = Mutation(
+    id="M32-openmoc-adapter-fuel-sigma-s-identity",
+    target_file="SUT/openmoc/openmoc_input_adapter_fuel_sigma_s.py",
+    description="Ignore the factor — copy fuel.sigma_s unchanged.",
+    rationale="Adapter no-op: classic 'forgot to apply factor' bug analogous to "
+              "M10 (nsf-identity). The follow-up case is bit-equivalent to the "
+              "source, so k_followup == k_source. The N06 MR's strict 'less' "
+              "assertion fails. Phase-1 MRs do not exercise this adapter; "
+              "predicted detection by N06 only.",
+    predicted_classification="semantic",
+    predicted_detector=("fuel_sigma_s",),
+    apply=_chain(
+        _replace_exactly_once(
+            'new_sigma_s = [factor * v for v in old_sigma_s]',
+            'new_sigma_s = list(old_sigma_s)  # MUTATION M32',
+        ),
+        # Also skip the sigma_t recomputation so the source case is byte-identical.
+        _replace_exactly_once(
+            '    fuel["sigma_t"] = new_sigma_t',
+            '    # fuel["sigma_t"] = new_sigma_t  # MUTATION M32',
+        ),
+    ),
+)
+
+M33 = Mutation(
+    id="M33-openmoc-adapter-fuel-radius-shrink",
+    target_file="SUT/openmoc/openmoc_input_adapter_fuel_radius.py",
+    description="Divide fuel_radius by factor instead of multiplying.",
+    rationale="Direction inversion. Scenario factor is 1.05 (factor > 1), so "
+              "the bug shrinks the fuel by ~5%. With less fuel volume the cell "
+              "is more moderated and k_eff drops, violating N08's 'greater' "
+              "assertion. Predicted detection by N08; invisible to all Phase-1 "
+              "MRs because they do not touch geometry.",
+    predicted_classification="semantic",
+    predicted_detector=("fuel_radius",),
+    apply=_replace_exactly_once(
+        'new_radius = old_radius * factor',
+        'new_radius = old_radius / factor  # MUTATION M33',
+    ),
+)
+
+M34 = Mutation(
+    id="M34-openmc-adapter-particles-no-op",
+    target_file="SUT/openmc/openmc_input_adapter_refine_particles.py",
+    description="Ignore the factor — leave solver.particles unchanged.",
+    rationale="Adapter doesn't change particle count, so the follow-up MC run "
+              "has the same statistical noise as the source. Observed σ ratio "
+              "≈ 1.0, but N12's variance-ratio assertion expects 1/√10 ≈ 0.316. "
+              "Detected by N12 (variance-ratio). Inert in deterministic OpenMOC; "
+              "OpenMC-only mutation.",
+    predicted_classification="semantic",
+    predicted_detector=("particles_refine",),
+    apply=_replace_exactly_once(
+        'new_particles = max(1, int(round(old_particles * factor)))',
+        'new_particles = old_particles  # MUTATION M34',
+    ),
+)
+
+
 ALL_MUTATIONS: tuple[Mutation, ...] = (
     M00,
     M01, M02, M03, M04, M05, M06,
@@ -614,6 +677,7 @@ ALL_MUTATIONS: tuple[Mutation, ...] = (
     M22, M23, M24, M25,
     M26, M27,
     M28, M29, M30, M31,
+    M32, M33, M34,
 )
 
 

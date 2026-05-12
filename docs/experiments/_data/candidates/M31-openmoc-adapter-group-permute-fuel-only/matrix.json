@@ -27,6 +27,7 @@
       "k_followup_std": 0.0,
       "ratio": 0.4748699342507142,
       "assertion": "approx",
+      "factor": 1.5,
       "assertion_passed": false,
       "outcome": "detected"
     },
@@ -48,6 +49,26 @@
     },
     {
       "scenario_id": "openmc-pincell-moderator-sigma-a",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-fuel-sigma-s",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-sigma-s",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-fuel-radius",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-radius",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-particles-refine",
       "status": "not-affected"
     }
   ]
