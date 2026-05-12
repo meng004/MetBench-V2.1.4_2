@@ -1,5 +1,5 @@
 {
-  "mutation_id": "M00-identity",
+  "mutation_id": "M28-openmoc-runner-chi-fast-only",
   "factor": 1.5,
   "cells": [
     {
@@ -16,7 +16,7 @@
     },
     {
       "scenario_id": "openmc-pincell-nu-sigma-f",
-      "status": "skipped-no-openmc"
+      "status": "not-affected"
     },
     {
       "scenario_id": "openmoc-pincell-sigma-a",
@@ -32,19 +32,19 @@
     },
     {
       "scenario_id": "openmc-pincell-sigma-a",
-      "status": "skipped-no-openmc"
+      "status": "not-affected"
     },
     {
       "scenario_id": "openmoc-pincell-group-permute",
       "status": "ran",
       "k_source": 1.1330583459569659,
-      "k_followup": 1.1330583459569659,
+      "k_followup": 1.277997986996206,
       "k_source_std": 0.0,
       "k_followup_std": 0.0,
-      "ratio": 1.0,
+      "ratio": 1.1279189562977237,
       "assertion": "approx",
-      "assertion_passed": true,
-      "outcome": "missed"
+      "assertion_passed": false,
+      "outcome": "detected"
     },
     {
       "scenario_id": "openmoc-pincell-fuel-sigma-t",
@@ -72,15 +72,15 @@
     },
     {
       "scenario_id": "openmc-pincell-group-permute",
-      "status": "skipped-no-openmc"
+      "status": "not-affected"
     },
     {
       "scenario_id": "openmc-pincell-fuel-sigma-t",
-      "status": "skipped-no-openmc"
+      "status": "not-affected"
     },
     {
       "scenario_id": "openmc-pincell-moderator-sigma-a",
-      "status": "skipped-no-openmc"
+      "status": "not-affected"
     }
   ]
 }

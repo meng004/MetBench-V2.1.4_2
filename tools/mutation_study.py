@@ -63,6 +63,12 @@ DEFAULT_FACTOR = 1.5
 OPENMC_REPS = 3  # screening replicate count for OpenMC (deterministic OpenMOC needs only 1)
 
 # Scenarios: (id, solver, transform, adapter_filename, assertion, value_name)
+#
+# Phase 1 scenarios: rows 1-4 (ScaleNuSigmaF and ScaleFuelSigmaA × 2 solvers).
+# Phase 2 (NOETHER) additions: rows 5+ — PermuteEnergyGroups (m_inv) and the
+# per-material monotonicity MRs (m_mono). The "approx" assertion uses the
+# scenario's `tolerance_rel` field; "greater"/"less" use the existing
+# strict comparison.
 SCENARIOS: list[dict] = [
     {
         "id": "openmoc-pincell-nu-sigma-f",
@@ -100,6 +106,81 @@ SCENARIOS: list[dict] = [
         "assertion": "less",
         "value": "k_eff",
     },
+    # ----- Phase 2 (NOETHER) -----
+    {
+        "id": "openmoc-pincell-group-permute",
+        "solver": "openmoc",
+        "transform": "PermuteEnergyGroups",
+        "adapter": "openmoc/openmoc_input_adapter_group_permute.py",
+        "runner": "openmoc/openmoc_runner.py",
+        "assertion": "approx",
+        "tolerance_rel": 1e-6,  # OpenMOC is deterministic; permutation should be bit-stable
+        "value": "k_eff",
+        "phase": 2,
+        "noether_id": "N04",
+        "meta_pattern": "m_inv",
+    },
+    {
+        "id": "openmoc-pincell-fuel-sigma-t",
+        "solver": "openmoc",
+        "transform": "ScaleFuelSigmaT",
+        "adapter": "openmoc/openmoc_input_adapter_fuel_sigma_t.py",
+        "runner": "openmoc/openmoc_runner.py",
+        "assertion": "less",
+        "value": "k_eff",
+        "phase": 2,
+        "noether_id": "N05",
+        "meta_pattern": "m_mono",
+    },
+    {
+        "id": "openmoc-pincell-moderator-sigma-a",
+        "solver": "openmoc",
+        "transform": "ScaleModeratorSigmaA",
+        "adapter": "openmoc/openmoc_input_adapter_moderator_sigma_a.py",
+        "runner": "openmoc/openmoc_runner.py",
+        "assertion": "less",
+        "value": "k_eff",
+        "phase": 2,
+        "noether_id": "N07",
+        "meta_pattern": "m_mono",
+    },
+    {
+        "id": "openmc-pincell-group-permute",
+        "solver": "openmc",
+        "transform": "PermuteEnergyGroups",
+        "adapter": "openmc/openmc_input_adapter_group_permute.py",
+        "runner": "openmc/openmc_runner.py",
+        "assertion": "approx",
+        "tolerance_rel": 0.005,  # OpenMC: relax to 3·σ scale
+        "value": "k_eff",
+        "phase": 2,
+        "noether_id": "N04",
+        "meta_pattern": "m_inv",
+    },
+    {
+        "id": "openmc-pincell-fuel-sigma-t",
+        "solver": "openmc",
+        "transform": "ScaleFuelSigmaT",
+        "adapter": "openmc/openmc_input_adapter_fuel_sigma_t.py",
+        "runner": "openmc/openmc_runner.py",
+        "assertion": "less",
+        "value": "k_eff",
+        "phase": 2,
+        "noether_id": "N05",
+        "meta_pattern": "m_mono",
+    },
+    {
+        "id": "openmc-pincell-moderator-sigma-a",
+        "solver": "openmc",
+        "transform": "ScaleModeratorSigmaA",
+        "adapter": "openmc/openmc_input_adapter_moderator_sigma_a.py",
+        "runner": "openmc/openmc_runner.py",
+        "assertion": "less",
+        "value": "k_eff",
+        "phase": 2,
+        "noether_id": "N07",
+        "meta_pattern": "m_mono",
+    },
 ]
 
 
@@ -116,6 +197,28 @@ def resolve_pythons() -> tuple[str, str]:
         os.environ.get("OPENMOC_PYTHON", DEFAULT_OPENMOC_PYTHON),
         os.environ.get("OPENMC_PYTHON", DEFAULT_OPENMC_PYTHON),
     )
+
+
+def openmc_available() -> bool:
+    """OpenMC is considered available iff the resolved python can `import openmc`.
+
+    Used by orchestrator commands to gracefully skip OpenMC scenarios on cloud
+    sessions where only the OpenMOC venv was provisioned. Set the env var
+    `METBENCH_FORCE_OPENMC=1` to fail loudly instead of skipping.
+    """
+    if os.environ.get("METBENCH_FORCE_OPENMC") == "1":
+        return True
+    _, openmc_python = resolve_pythons()
+    if not Path(openmc_python).exists():
+        return False
+    try:
+        proc = subprocess.run(
+            [openmc_python, "-c", "import openmc"],
+            capture_output=True, text=True, timeout=10,
+        )
+        return proc.returncode == 0
+    except Exception:
+        return False
 
 
 SUBPROCESS_TIMEOUT_S = 90  # generous: normal OpenMC source case is ~7s, OpenMOC ~0.6s
@@ -252,6 +355,7 @@ def run_source(sut_root: Path, solver: str, openmoc_python: str, openmc_python: 
 def cmd_baseline(args: argparse.Namespace) -> int:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     openmoc_python, openmc_python = resolve_pythons()
+    has_openmc = openmc_available()
 
     if BASELINE_PATH.exists() and not args.force:
         print(f"baseline.json already exists; pass --force to recompute", file=sys.stderr)
@@ -259,18 +363,29 @@ def cmd_baseline(args: argparse.Namespace) -> int:
         return 0
 
     print("Running unpatched baseline:", file=sys.stderr)
-    print("  source case: OpenMOC (1 rep) + OpenMC (3 reps) ...", file=sys.stderr)
+    if has_openmc:
+        print("  source case: OpenMOC (1 rep) + OpenMC (3 reps) ...", file=sys.stderr)
+    else:
+        print("  source case: OpenMOC (1 rep); OpenMC SKIPPED (not available)", file=sys.stderr)
     openmoc_base = run_source(SUT_DIR, "openmoc", openmoc_python, openmc_python, reps=1)
-    openmc_base = run_source(SUT_DIR, "openmc", openmoc_python, openmc_python, reps=OPENMC_REPS)
+    openmc_base = (
+        run_source(SUT_DIR, "openmc", openmoc_python, openmc_python, reps=OPENMC_REPS)
+        if has_openmc else
+        {"solver": "openmc", "reps": [], "stds": [], "mean": float("nan"),
+         "max_std": 0.0, "skipped": True}
+    )
 
     # Per-scenario follow-up baselines (unpatched, factor=1.5). Used by the
     # final classification step in `stats` to detect adapter-only mutations
     # that don't shift the source case but do shift the follow-up.
-    print(f"  follow-up cases (factor={DEFAULT_FACTOR}): 4 scenarios ...", file=sys.stderr)
+    eligible_scenarios = [sc for sc in SCENARIOS if has_openmc or sc["solver"] != "openmc"]
+    skipped_scenarios = [sc["id"] for sc in SCENARIOS if not has_openmc and sc["solver"] == "openmc"]
+    print(f"  follow-up cases (factor={DEFAULT_FACTOR}): {len(eligible_scenarios)} scenarios "
+          f"({len(skipped_scenarios)} OpenMC skipped) ...", file=sys.stderr)
     followups: dict[str, dict] = {}
     with tempfile.TemporaryDirectory(prefix="baseline-flw-") as tmp:
         tmp_path = Path(tmp)
-        for sc in SCENARIOS:
+        for sc in eligible_scenarios:
             python_exec = openmoc_python if sc["solver"] == "openmoc" else openmc_python
             flw_in = tmp_path / f"flw-in-{sc['id']}.json"
             flw_out = tmp_path / f"flw-out-{sc['id']}.json"
@@ -280,12 +395,15 @@ def cmd_baseline(args: argparse.Namespace) -> int:
                 "k_eff": float(result["k_eff"]),
                 "k_eff_std": float(result.get("k_eff_std", 0.0)),
             }
+    for sid in skipped_scenarios:
+        followups[sid] = {"k_eff": float("nan"), "k_eff_std": 0.0, "skipped": True}
 
     payload = {
         "openmoc": openmoc_base,
         "openmc": openmc_base,
         "followups": followups,
         "factor": DEFAULT_FACTOR,
+        "openmc_available": has_openmc,
     }
     BASELINE_PATH.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     print(f"Wrote {BASELINE_PATH}", file=sys.stderr)
@@ -324,6 +442,7 @@ def classify(mut_mean: float, mut_max_std: float, baseline_mean: float, threshol
 
 def screen_one(mutation: Mutation, args: argparse.Namespace) -> dict:
     openmoc_python, openmc_python = resolve_pythons()
+    has_openmc = openmc_available()
     baseline = load_baseline()
 
     cand_dir = CANDIDATES_DIR / mutation.id
@@ -343,7 +462,7 @@ def screen_one(mutation: Mutation, args: argparse.Namespace) -> dict:
                 mut_moc = run_source(sut_copy, "openmoc", openmoc_python, openmc_python, reps=1)
             else:
                 mut_moc = None
-            if solver in ("openmc", "both"):
+            if solver in ("openmc", "both") and has_openmc:
                 mut_mc = run_source(sut_copy, "openmc", openmoc_python, openmc_python, reps=OPENMC_REPS)
             else:
                 mut_mc = None
@@ -413,16 +532,24 @@ def cmd_screen(args: argparse.Namespace) -> int:
 # MR matrix
 # ---------------------------------------------------------------------------
 
-def evaluate_mr(k_source: float, k_followup: float, assertion: str) -> bool:
+def evaluate_mr(k_source: float, k_followup: float, assertion: str, tolerance_rel: float = 1e-6) -> bool:
     if assertion == "greater":
         return k_followup > k_source
     if assertion == "less":
         return k_followup < k_source
+    if assertion == "approx":
+        # Pass iff |Δk| / |k_source| ≤ tolerance_rel. Used by Phase-2 m_inv MRs
+        # (PermuteEnergyGroups), where the eigenvalue must be invariant under
+        # the symmetry transformation modulo solver noise.
+        if k_source == 0:
+            return k_followup == 0
+        return abs(k_followup - k_source) <= tolerance_rel * abs(k_source)
     raise ValueError(f"Unknown assertion: {assertion}")
 
 
 def matrix_one(mutation: Mutation, args: argparse.Namespace) -> dict:
     openmoc_python, openmc_python = resolve_pythons()
+    has_openmc = openmc_available()
     cand_dir = CANDIDATES_DIR / mutation.id
     cand_dir.mkdir(parents=True, exist_ok=True)
     matrix_path = cand_dir / "matrix.json"
@@ -442,6 +569,10 @@ def matrix_one(mutation: Mutation, args: argparse.Namespace) -> dict:
                 cell["status"] = "not-affected"
                 cells.append(cell)
                 continue
+            if sc["solver"] == "openmc" and not has_openmc:
+                cell["status"] = "skipped-no-openmc"
+                cells.append(cell)
+                continue
             try:
                 source_out = tmp_path / f"src-{sc['solver']}-{sc['id']}.json"
                 followup_in = tmp_path / f"flw-in-{sc['id']}.json"
@@ -459,7 +590,10 @@ def matrix_one(mutation: Mutation, args: argparse.Namespace) -> dict:
                 flw = run_solver(sut_copy, sc, followup_in, followup_out, python_exec)
                 k_flw = float(flw["k_eff"])
 
-                passed = evaluate_mr(k_src, k_flw, sc["assertion"])
+                passed = evaluate_mr(
+                    k_src, k_flw, sc["assertion"],
+                    tolerance_rel=float(sc.get("tolerance_rel", 1e-6)),
+                )
                 cell.update({
                     "status": "ran",
                     "k_source": k_src,

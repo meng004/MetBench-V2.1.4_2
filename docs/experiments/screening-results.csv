@@ -27,3 +27,7 @@ M24-openmc-adapter-nsf-moderator,equivalent,equivalent,semantic,False,True,0
 M25-openmc-adapter-nsf-identity,semantic,equivalent,semantic,False,True,0
 M26-openmc-adapter-sa-no-sigt-update,semantic,equivalent,equivalent,False,False,0
 M27-openmc-adapter-sa-inverse,semantic,equivalent,semantic,False,True,0
+M28-openmoc-runner-chi-fast-only,semantic,—,semantic,False,True,0
+M29-openmoc-adapter-fuel-sigt-no-siga-update,equivalent,—,equivalent,False,False,0
+M30-openmoc-adapter-moderator-sigma-a-no-sigt-update,semantic,—,semantic,False,True,0
+M31-openmoc-adapter-group-permute-fuel-only,semantic,—,semantic,False,True,0

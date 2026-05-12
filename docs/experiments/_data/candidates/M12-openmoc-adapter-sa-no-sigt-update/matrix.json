@@ -25,6 +25,30 @@
     {
       "scenario_id": "openmc-pincell-sigma-a",
       "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-group-permute",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-fuel-sigma-t",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-moderator-sigma-a",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-group-permute",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-sigma-t",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-moderator-sigma-a",
+      "status": "not-affected"
     }
   ]
 }

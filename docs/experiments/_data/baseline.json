@@ -41,7 +41,35 @@
     "openmc-pincell-sigma-a": {
       "k_eff": 0.8027171860617912,
       "k_eff_std": 0.001319322308304122
+    },
+    "openmoc-pincell-group-permute": {
+      "k_eff": 1.1330583459569659,
+      "k_eff_std": 0.0
+    },
+    "openmoc-pincell-fuel-sigma-t": {
+      "k_eff": 0.11127219735430455,
+      "k_eff_std": 0.0
+    },
+    "openmoc-pincell-moderator-sigma-a": {
+      "k_eff": 0.47635343316499984,
+      "k_eff_std": 0.0
+    },
+    "openmc-pincell-group-permute": {
+      "k_eff": NaN,
+      "k_eff_std": 0.0,
+      "skipped": true
+    },
+    "openmc-pincell-fuel-sigma-t": {
+      "k_eff": NaN,
+      "k_eff_std": 0.0,
+      "skipped": true
+    },
+    "openmc-pincell-moderator-sigma-a": {
+      "k_eff": NaN,
+      "k_eff_std": 0.0,
+      "skipped": true
     }
   },
-  "factor": 1.5
+  "factor": 1.5,
+  "openmc_available": false
 }

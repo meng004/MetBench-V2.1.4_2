@@ -1,18 +1,10 @@
 {
-  "mutation_id": "M08-openmoc-adapter-nsf-square",
+  "mutation_id": "M30-openmoc-adapter-moderator-sigma-a-no-sigt-update",
   "factor": 1.5,
   "cells": [
     {
       "scenario_id": "openmoc-pincell-nu-sigma-f",
-      "status": "ran",
-      "k_source": 1.1330583459569659,
-      "k_followup": 2.550180234338274,
-      "k_source_std": 0.0,
-      "k_followup_std": 0.0,
-      "ratio": 2.250705132209609,
-      "assertion": "greater",
-      "assertion_passed": true,
-      "outcome": "missed"
+      "status": "not-affected"
     },
     {
       "scenario_id": "openmc-pincell-nu-sigma-f",
@@ -36,7 +28,15 @@
     },
     {
       "scenario_id": "openmoc-pincell-moderator-sigma-a",
-      "status": "not-affected"
+      "status": "ran",
+      "k_source": 1.1330583459569659,
+      "k_followup": 1.1330583459569659,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": 1.0,
+      "assertion": "less",
+      "assertion_passed": false,
+      "outcome": "detected"
     },
     {
       "scenario_id": "openmc-pincell-group-permute",

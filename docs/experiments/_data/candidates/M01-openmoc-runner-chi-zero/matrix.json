@@ -33,6 +33,54 @@
     {
       "scenario_id": "openmc-pincell-sigma-a",
       "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-group-permute",
+      "status": "ran",
+      "k_source": 0.0005913922197768902,
+      "k_followup": 0.0005913922197768902,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": 1.0,
+      "assertion": "approx",
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmoc-pincell-fuel-sigma-t",
+      "status": "ran",
+      "k_source": 0.0005913922197768902,
+      "k_followup": 0.00016843781215911542,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": 0.28481573907526314,
+      "assertion": "less",
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmoc-pincell-moderator-sigma-a",
+      "status": "ran",
+      "k_source": 0.0005913922197768902,
+      "k_followup": 0.0005561772667106322,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": 0.9404541488903199,
+      "assertion": "less",
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmc-pincell-group-permute",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-sigma-t",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-moderator-sigma-a",
+      "status": "not-affected"
     }
   ]
 }

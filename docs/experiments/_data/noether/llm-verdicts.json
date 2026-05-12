@@ -1,0 +1,302 @@
+[
+  {
+    "id": "N01-inv-quarter-rotation-90",
+    "meta_pattern": "m_inv",
+    "block": "G",
+    "parameter": "geometry.rotation.90deg",
+    "verdict": "valid",
+    "confidence": 0.95,
+    "suggested_assertion": "approx",
+    "reasoning": "A square pin-cell with centred circular fuel and reflective boundaries has C4 rotational symmetry. The 90\u00b0 rotation swaps x and y extents (which are equal anyway) and leaves the fuel annulus unchanged because it is axisymmetric. Thus the follow-up geometry is identical to the source geometry. Any eigenvalue solver must therefore produce the same k_eff within numerical reproducibility. For deterministic (OpenMOC) this is exact up to floating-point; for Monte Carlo (OpenMC) it is a consistency check of statistical reproducibility (with appropriate tolerance). The MR is therefore physically correct and testable, though it reduces to an identity transformation and only exercises repeatability rather than a genuine symmetry-breaking fault.",
+    "caveats": "If the source input uses non-square x/y extents the symmetry is broken and the MR would be incorrect; the test must be restricted to square cells. The transformation is trivial (follow-up input identical to source) and will not detect faults that are insensitive to multiple runs.",
+    "implementation_hint": "Make a copy of the source JSON, swap x_extent_cm and y_extent_cm (no effect if equal), and optionally assign a different random seed for the Monte-Carlo solver to test reproducibility.",
+    "elapsed_s": 87.924,
+    "tokens": {
+      "input": 29,
+      "output": 2568,
+      "cache_read": 768,
+      "cache_creation": 0
+    },
+    "raw_response": "{\n  \"verdict\": \"valid\",\n  \"confidence\": 0.95,\n  \"suggested_assertion\": \"approx\",\n  \"reasoning\": \"A square pin-cell with centred circular fuel and reflective boundaries has C4 rotational symmetry. The 90\u00b0 rotation swaps x and y extents (which are equal anyway) and leaves the fuel annulus unchanged because it is axisymmetric. Thus the follow-up geometry is identical to the source geometry. Any eigenvalue solver must therefore produce the same k_eff within numerical reproducibility. For deterministic (OpenMOC) this is exact up to floating-point; for Monte Carlo (OpenMC) it is a consistency check of statistical reproducibility (with appropriate tolerance). The MR is therefore physically correct and testable, though it reduces to an identity transformation and only exercises repeatability rather than a genuine symmetry-breaking fault.\",\n  \"caveats\": \"If the source input uses non-square x/y extents the symmetry is broken and the MR would be incorrect; the test must be restricted to square cells. The transformation is trivial (follow-up input identical to source) and will not detect faults that are insensitive to multiple runs.\",\n  \"implementation_hint\": \"Make a copy of the source JSON, swap x_extent_cm and y_extent_cm (no effect if equal), and optionally assign a different random seed for the Monte-Carlo solver to test reproducibility.\"\n}"
+  },
+  {
+    "id": "N02-inv-mirror-x",
+    "meta_pattern": "m_inv",
+    "block": "G",
+    "parameter": "geometry.reflection.x",
+    "verdict": "valid",
+    "confidence": 0.99,
+    "suggested_assertion": "approx",
+    "reasoning": "The 2D pin-cell with reflective boundary conditions and a centrally located fuel pin is symmetric under reflection across the x-axis (y \u2192 -y). The geometry and material distribution are invariant under this transformation, so the effective multiplication factor k_eff must be identical (within numerical tolerance) for the original and reflected configurations. For a deterministic solver (OpenMOC) the result should agree to machine precision; for a Monte Carlo solver (OpenMC) the results should be statistically compatible.",
+    "caveats": "If the fuel pin is not exactly centred or the cell is not perfectly symmetric in y (e.g., geometric origin offset), the invariance would be broken. However, the standard pin-cell input places the fuel at the centre of a rectangular cell, making the reflection an identity transformation of the geometry. The MR thus reduces to a repeatability check rather than a genuinely altered geometry.",
+    "implementation_hint": "Copy the source input JSON and, if needed, apply the transformation y \u2192 -y to all geometry coordinates. Since the pin-cell geometry is symmetric, the transformed input is identical to the source; the test essentially repeats the same input and compares k_eff.",
+    "elapsed_s": 52.584,
+    "tokens": {
+      "input": 8,
+      "output": 1499,
+      "cache_read": 768,
+      "cache_creation": 0
+    },
+    "raw_response": "{\n  \"verdict\": \"valid\",\n  \"confidence\": 0.99,\n  \"suggested_assertion\": \"approx\",\n  \"reasoning\": \"The 2D pin-cell with reflective boundary conditions and a centrally located fuel pin is symmetric under reflection across the x-axis (y \u2192 -y). The geometry and material distribution are invariant under this transformation, so the effective multiplication factor k_eff must be identical (within numerical tolerance) for the original and reflected configurations. For a deterministic solver (OpenMOC) the result should agree to machine precision; for a Monte Carlo solver (OpenMC) the results should be statistically compatible.\",\n  \"caveats\": \"If the fuel pin is not exactly centred or the cell is not perfectly symmetric in y (e.g., geometric origin offset), the invariance would be broken. However, the standard pin-cell input places the fuel at the centre of a rectangular cell, making the reflection an identity transformation of the geometry. The MR thus reduces to a repeatability check rather than a genuinely altered geometry.\",\n  \"implementation_hint\": \"Copy the source input JSON and, if needed, apply the transformation y \u2192 -y to all geometry coordinates. Since the pin-cell geometry is symmetric, the transformed input is identical to the source; the test essentially repeats the same input and compares k_eff.\"\n}"
+  },
+  {
+    "id": "N03-inv-mirror-y",
+    "meta_pattern": "m_inv",
+    "block": "G",
+    "parameter": "geometry.reflection.y",
+    "verdict": "valid",
+    "confidence": 0.95,
+    "suggested_assertion": "approx",
+    "reasoning": "The 2D pin-cell geometry (square with centered cylindrical fuel) is symmetric under reflection across the y-axis (x \u2192 -x). The neutron transport equation with reflective boundary conditions is invariant under this coordinate transformation, so the multiplication factor k_eff must remain unchanged. Comparing the output of the original and mirrored geometry provides a test of geometric-symmetry handling in the code.",
+    "caveats": "",
+    "implementation_hint": "Transform the input geometry by negating all x-coordinates (e.g., in the surface/region definitions) while leaving y-coordinates and material properties unchanged.",
+    "elapsed_s": 42.272,
+    "tokens": {
+      "input": 100,
+      "output": 1221,
+      "cache_read": 640,
+      "cache_creation": 0
+    },
+    "raw_response": "{\n  \"verdict\": \"valid\",\n  \"confidence\": 0.95,\n  \"suggested_assertion\": \"approx\",\n  \"reasoning\": \"The 2D pin-cell geometry (square with centered cylindrical fuel) is symmetric under reflection across the y-axis (x \u2192 -x). The neutron transport equation with reflective boundary conditions is invariant under this coordinate transformation, so the multiplication factor k_eff must remain unchanged. Comparing the output of the original and mirrored geometry provides a test of geometric-symmetry handling in the code.\",\n  \"caveats\": \"\",\n  \"implementation_hint\": \"Transform the input geometry by negating all x-coordinates (e.g., in the surface/region definitions) while leaving y-coordinates and material properties unchanged.\"\n}"
+  },
+  {
+    "id": "N04-inv-energy-group-relabel",
+    "meta_pattern": "m_inv",
+    "block": "G",
+    "parameter": "materials.group_relabel",
+    "verdict": "valid",
+    "confidence": 0.99,
+    "suggested_assertion": "approx",
+    "reasoning": "The neutron-transport eigenvalue problem is independent of the arbitrary integer index assigned to each energy group, provided all group-dependent cross-section arrays (\u03c3_t, \u03c3_a, scattering matrix, \u03bd\u03a3_f, \u03a3_f, \u03c7) are permuted identically (i.e., groups 0\u21941 swapped consistently). The resulting k_eff should be exactly the same mathematically, and numerically equal within solver tolerance. This invariance can detect hard-coded group-index assumptions.",
+    "caveats": "The permutation must be applied to all arrays: total, absorption, each element of the 4-element scattering matrix (g\u2192g' swapped in both rows and columns), fission spectrum \u03c7, \u03bd\u03a3_f, and \u03a3_f. Omitting any one breaks the invariance. The output flux will be permuted accordingly, but the scalar k_eff remains unaffected. Slight floating-point differences may arise from changed ordering of unknowns in the linear solver.",
+    "implementation_hint": "Swap group index in all cross-section arrays of both materials: for each of sigma_t, sigma_a, sigma_f, nu_sigma_f, chi, and for the scattering matrix (flattened, interpret as 2x2, swap both row and column indices). Re-run and compare k_eff.",
+    "elapsed_s": 36.587,
+    "tokens": {
+      "input": 24,
+      "output": 1004,
+      "cache_read": 768,
+      "cache_creation": 0
+    },
+    "raw_response": "{\n  \"verdict\": \"valid\",\n  \"confidence\": 0.99,\n  \"suggested_assertion\": \"approx\",\n  \"reasoning\": \"The neutron-transport eigenvalue problem is independent of the arbitrary integer index assigned to each energy group, provided all group-dependent cross-section arrays (\u03c3_t, \u03c3_a, scattering matrix, \u03bd\u03a3_f, \u03a3_f, \u03c7) are permuted identically (i.e., groups 0\u21941 swapped consistently). The resulting k_eff should be exactly the same mathematically, and numerically equal within solver tolerance. This invariance can detect hard-coded group-index assumptions.\",\n  \"caveats\": \"The permutation must be applied to all arrays: total, absorption, each element of the 4-element scattering matrix (g\u2192g' swapped in both rows and columns), fission spectrum \u03c7, \u03bd\u03a3_f, and \u03a3_f. Omitting any one breaks the invariance. The output flux will be permuted accordingly, but the scalar k_eff remains unaffected. Slight floating-point differences may arise from changed ordering of unknowns in the linear solver.\",\n  \"implementation_hint\": \"Swap group index in all cross-section arrays of both materials: for each of sigma_t, sigma_a, sigma_f, nu_sigma_f, chi, and for the scattering matrix (flattened, interpret as 2x2, swap both row and column indices). Re-run and compare k_eff.\"\n}"
+  },
+  {
+    "id": "N05-mono-fuel-sigma-t-up",
+    "meta_pattern": "m_mono",
+    "block": "O\u2264",
+    "parameter": "fuel.sigma_t",
+    "verdict": "valid",
+    "confidence": 0.95,
+    "suggested_assertion": "less",
+    "reasoning": "Increasing fuel total cross section while keeping the scattering matrix unchanged (i.e., preserving scattering) raises the absorption cross section (sigma_a = sigma_t - sum(sigma_s)) in each group. Higher absorption reduces neutron economy, so the infinite multiplication factor k_inf (and thus k_eff under reflective boundaries) decreases monotonically. The direction k_eff_followup < k_eff_source is physically correct for a PWR pin-cell and matches m_mono (parameter-monotonicity).",
+    "caveats": "If scattering cross sections were also scaled proportionally (uniform scaling of all fuel cross sections), the monotonicity direction could become uncertain due to changes in optical thickness and disadvantage factors; however, the MR explicitly preserves scattering, so the absorption increase is guaranteed. For OpenMC, statistical noise may obscure strict inequality; an approximate assertion with a small tolerance is recommended in practice.",
+    "implementation_hint": "Multiply the fuel sigma_t for each group by a factor >1 (e.g., 1.1) while leaving the 4-element scattering matrix untouched, ensuring the new sigma_t still exceeds the sum of scattering-out for each group.",
+    "elapsed_s": 95.435,
+    "tokens": {
+      "input": 127,
+      "output": 2843,
+      "cache_read": 640,
+      "cache_creation": 0
+    },
+    "raw_response": "{\n  \"verdict\": \"valid\",\n  \"confidence\": 0.95,\n  \"suggested_assertion\": \"less\",\n  \"reasoning\": \"Increasing fuel total cross section while keeping the scattering matrix unchanged (i.e., preserving scattering) raises the absorption cross section (sigma_a = sigma_t - sum(sigma_s)) in each group. Higher absorption reduces neutron economy, so the infinite multiplication factor k_inf (and thus k_eff under reflective boundaries) decreases monotonically. The direction k_eff_followup < k_eff_source is physically correct for a PWR pin-cell and matches m_mono (parameter-monotonicity).\",\n  \"caveats\": \"If scattering cross sections were also scaled proportionally (uniform scaling of all fuel cross sections), the monotonicity direction could become uncertain due to changes in optical thickness and disadvantage factors; however, the MR explicitly preserves scattering, so the absorption increase is guaranteed. For OpenMC, statistical noise may obscure strict inequality; an approximate assertion with a small tolerance is recommended in practice.\",\n  \"implementation_hint\": \"Multiply the fuel sigma_t for each group by a factor >1 (e.g., 1.1) while leaving the 4-element scattering matrix untouched, ensuring the new sigma_t still exceeds the sum of scattering-out for each group.\"\n}"
+  },
+  {
+    "id": "N06-mono-fuel-sigma-s-down",
+    "meta_pattern": "m_mono",
+    "block": "O\u2264",
+    "parameter": "fuel.sigma_s",
+    "verdict": "valid",
+    "confidence": 0.85,
+    "suggested_assertion": "less",
+    "reasoning": "In a thermal-reactor pin-cell (reflective boundaries, 2-group), the infinite multiplication factor k\u221e is k_eff. The analytically derived k\u221e(f) for the two-group infinite-medium system (which neglects spatial effects but gives the leading trend) is (a + b\u00b7f)/(c + d\u00b7f), where f scales the down\u2011scattering cross section \u03a3s12 (self\u2011scattering cancels in the homogeneous limit). The derivative sign is constant and, using typical LWR group constants (\u03bd\u03a3f\u2082 \u226b \u03bd\u03a3f\u2081, \u03a3a\u2082 > \u03a3a\u2081), it is positive. Thus decreasing f (scaling fuel scattering matrix down) reduces k_eff. The assertion 'less' (k_eff_followup < k_eff_source) matches this physical expectation.",
+    "caveats": "The monotonic direction depends on the sign of (\u03bd\u03a3f\u2082\u00b7\u03a3a\u2081/\u03a3a\u2082 \u2013 \u03bd\u03a3f\u2081); for unusual sets of cross\u2011sections (e.g., fast\u2011reactor with high \u03bd\u03a3f\u2081) the inequality could reverse. The test\u2011bench JSON, however, describes a standard LWR pin cell, where the sign is positive.",
+    "implementation_hint": "Multiply all elements of the fuel.sigma_s scattering matrix by a constant factor 0 < \u03b1 < 1 (e.g., 0.9) to produce the follow\u2011up case.",
+    "elapsed_s": 132.964,
+    "tokens": {
+      "input": 235,
+      "output": 3913,
+      "cache_read": 512,
+      "cache_creation": 0
+    },
+    "raw_response": "{\n  \"verdict\": \"valid\",\n  \"confidence\": 0.85,\n  \"suggested_assertion\": \"less\",\n  \"reasoning\": \"In a thermal-reactor pin-cell (reflective boundaries, 2-group), the infinite multiplication factor k\u221e is k_eff. The analytically derived k\u221e(f) for the two-group infinite-medium system (which neglects spatial effects but gives the leading trend) is (a + b\u00b7f)/(c + d\u00b7f), where f scales the down\u2011scattering cross section \u03a3s12 (self\u2011scattering cancels in the homogeneous limit). The derivative sign is constant and, using typical LWR group constants (\u03bd\u03a3f\u2082 \u226b \u03bd\u03a3f\u2081, \u03a3a\u2082 > \u03a3a\u2081), it is positive. Thus decreasing f (scaling fuel scattering matrix down) reduces k_eff. The assertion 'less' (k_eff_followup < k_eff_source) matches this physical expectation.\",\n  \"caveats\": \"The monotonic direction depends on the sign of (\u03bd\u03a3f\u2082\u00b7\u03a3a\u2081/\u03a3a\u2082 \u2013 \u03bd\u03a3f\u2081); for unusual sets of cross\u2011sections (e.g., fast\u2011reactor with high \u03bd\u03a3f\u2081) the inequality could reverse. The test\u2011bench JSON, however, describes a standard LWR pin cell, where the sign is positive.\",\n  \"implementation_hint\": \"Multiply all elements of the fuel.sigma_s scattering matrix by a constant factor 0 < \u03b1 < 1 (e.g., 0.9) to produce the follow\u2011up case.\"\n}"
+  },
+  {
+    "id": "N07-mono-moderator-sigma-a-up",
+    "meta_pattern": "m_mono",
+    "block": "O\u2264",
+    "parameter": "moderator.sigma_a",
+    "verdict": "valid",
+    "confidence": 0.95,
+    "suggested_assertion": "less",
+    "reasoning": "Increasing moderator absorption removes thermal neutrons that would otherwise induce fission, so k_eff must decrease in a thermal pin-cell with reflective boundaries.",
+    "caveats": "Ensure that moderator.sigma_t is adjusted consistently: sigma_t_new = sigma_a_new + sigma_s (scattering unchanged). The scaling factor should be >1 but not so large that the cross sections become unphysical.",
+    "implementation_hint": "Multiply moderator.sigma_a values in both groups by a factor >1; then set moderator.sigma_t to sigma_a_new + sigma_s for each group, leaving the scattering matrix unchanged.",
+    "elapsed_s": 42.071,
+    "tokens": {
+      "input": 247,
+      "output": 1190,
+      "cache_read": 512,
+      "cache_creation": 0
+    },
+    "raw_response": "{\n  \"verdict\": \"valid\",\n  \"confidence\": 0.95,\n  \"suggested_assertion\": \"less\",\n  \"reasoning\": \"Increasing moderator absorption removes thermal neutrons that would otherwise induce fission, so k_eff must decrease in a thermal pin-cell with reflective boundaries.\",\n  \"caveats\": \"Ensure that moderator.sigma_t is adjusted consistently: sigma_t_new = sigma_a_new + sigma_s (scattering unchanged). The scaling factor should be >1 but not so large that the cross sections become unphysical.\",\n  \"implementation_hint\": \"Multiply moderator.sigma_a values in both groups by a factor >1; then set moderator.sigma_t to sigma_a_new + sigma_s for each group, leaving the scattering matrix unchanged.\"\n}"
+  },
+  {
+    "id": "N08-mono-fuel-radius-up",
+    "meta_pattern": "m_mono",
+    "block": "O\u2264",
+    "parameter": "geometry.fuel_radius_cm",
+    "verdict": "valid",
+    "confidence": 0.9,
+    "suggested_assertion": "less",
+    "reasoning": "In a typical pin-cell with fixed pitch, increasing fuel radius reduces the moderator-to-fuel ratio. For a standard under-moderated LWR lattice (the usual case), this decreases reactivity and therefore k_eff. The monotonic relationship exists, but the assertion direction should be reversed from 'greater' to 'less'. Thus the MR is valid as a monotonicity test with the corrected direction.",
+    "caveats": "If the SUT configuration is over-moderated (e.g., very high enrichment or fast spectrum), the direction could be 'greater'. However, the description refers to 'usual under-moderated regime', so the corrected direction is less.",
+    "implementation_hint": "Create follow-up case by multiplying fuel_radius_cm by a small factor (e.g., 1.02) while retaining original x_extent_cm and y_extent_cm. Run both source and follow-up; assert k_eff_followup < k_eff_source.",
+    "elapsed_s": 80.314,
+    "tokens": {
+      "input": 267,
+      "output": 2339,
+      "cache_read": 512,
+      "cache_creation": 0
+    },
+    "raw_response": "{\n  \"verdict\": \"valid\",\n  \"confidence\": 0.9,\n  \"suggested_assertion\": \"less\",\n  \"reasoning\": \"In a typical pin-cell with fixed pitch, increasing fuel radius reduces the moderator-to-fuel ratio. For a standard under-moderated LWR lattice (the usual case), this decreases reactivity and therefore k_eff. The monotonic relationship exists, but the assertion direction should be reversed from 'greater' to 'less'. Thus the MR is valid as a monotonicity test with the corrected direction.\",\n  \"caveats\": \"If the SUT configuration is over-moderated (e.g., very high enrichment or fast spectrum), the direction could be 'greater'. However, the description refers to 'usual under-moderated regime', so the corrected direction is less.\",\n  \"implementation_hint\": \"Create follow-up case by multiplying fuel_radius_cm by a small factor (e.g., 1.02) while retaining original x_extent_cm and y_extent_cm. Run both source and follow-up; assert k_eff_followup < k_eff_source.\"\n}"
+  },
+  {
+    "id": "N09-mono-fuel-chi-thermal-up",
+    "meta_pattern": "m_mono",
+    "block": "O\u2264",
+    "parameter": "fuel.chi[1]",
+    "verdict": "valid",
+    "confidence": 0.95,
+    "suggested_assertion": "greater",
+    "reasoning": "Increasing the fraction of fission neutrons born directly into the thermal group (fuel.chi[thermal] > 0) reduces moderation losses, making more neutrons immediately available for thermal fission, which monotonically raises k_eff in a thermal spectrum system. The direction is physically correct regardless of real fission spectrum realism.",
+    "caveats": "Ensure the shift is not so extreme that the spectrum becomes unrealistic, but the monotonic trend should hold for any increase in thermal chi.",
+    "implementation_hint": "For the follow-up input, set fuel.chi from [1.0, 0.0] to [0.7, 0.3] (or any value with thermal chi > 0) and verify k_eff_followup > k_eff_source.",
+    "elapsed_s": 29.95,
+    "tokens": {
+      "input": 282,
+      "output": 830,
+      "cache_read": 512,
+      "cache_creation": 0
+    },
+    "raw_response": "{\n  \"verdict\": \"valid\",\n  \"confidence\": 0.95,\n  \"suggested_assertion\": \"greater\",\n  \"reasoning\": \"Increasing the fraction of fission neutrons born directly into the thermal group (fuel.chi[thermal] > 0) reduces moderation losses, making more neutrons immediately available for thermal fission, which monotonically raises k_eff in a thermal spectrum system. The direction is physically correct regardless of real fission spectrum realism.\",\n  \"caveats\": \"Ensure the shift is not so extreme that the spectrum becomes unrealistic, but the monotonic trend should hold for any increase in thermal chi.\",\n  \"implementation_hint\": \"For the follow-up input, set fuel.chi from [1.0, 0.0] to [0.7, 0.3] (or any value with thermal chi > 0) and verify k_eff_followup > k_eff_source.\"\n}"
+  },
+  {
+    "id": "N10-conv-num-azim-refine",
+    "meta_pattern": "m_conv",
+    "block": "L*",
+    "parameter": "tracking.num_azim",
+    "verdict": "uncertain",
+    "confidence": 0.0,
+    "suggested_assertion": "approx",
+    "reasoning": "(could not extract JSON from response)",
+    "caveats": "",
+    "implementation_hint": "",
+    "elapsed_s": 144.698,
+    "tokens": {
+      "input": 290,
+      "output": 4096,
+      "cache_read": 512,
+      "cache_creation": 0
+    },
+    "raw_response": "{\n  \"verdict\": \"uncertain\",\n  \"confidence\": 0.4,\n  \"suggested_assertion\": \"approx\",\n  \"reasoning\": \"The MR proposes a bound on the eigenvalue correction using a truth value. Its validity hinges on the assumption that k_eff converges monotonically towards the continuum limit as the azimuthal angle count increases. While MOC error often decreases smoothly, monotonicity is not guaranteed for all quadratures or problem configurations; a correct implementation could produce a small oscillation without being faulty, causing false positives. Moreover, the truth value is not uniquely specified \u2013 it would need to be an external reference (e.g., a highly refined run) that itself introduces practical complications. A more robust convergence MR would check that successive differences decrease without invoking a truth.\",\n  \"caveats\": \"Monotonic convergence is not a theorem of the MOC discretisation; the inequality could fail even for a correct code. The \u2018truth\u2019 must be defined (e.g., a very fine 256-azimuth solution) and its own numerical"
+  },
+  {
+    "id": "N11-conv-azim-spacing-refine",
+    "meta_pattern": "m_conv",
+    "block": "L*",
+    "parameter": "tracking.azim_spacing_cm",
+    "verdict": "valid",
+    "confidence": 0.9,
+    "suggested_assertion": "bound",
+    "reasoning": "Reducing the azimuthal track spacing refines the angular discretization of the method of characteristics, leading to a more accurate k_eff. The difference between the k_eff values obtained with 0.05 cm and 0.025 cm spacing should be small and bounded by a tolerance derived from the expected convergence order (e.g., O(\u0394^p)). This tests that the solver converges towards the exact solution as the grid is refined.",
+    "caveats": "Convergence may not be strictly monotonic if other discretization parameters (e.g., ray spacing, number of polar angles) are too coarse, but under standard settings it should hold. The assertion is valid only for the OpenMOC deterministic solver; it is not applicable to OpenMC Monte Carlo.",
+    "implementation_hint": "Run OpenMOC with tracking.azim_spacing_cm set to 0.05 and 0.025, extract k_eff from both, compute abs(k_eff_0.05 - k_eff_0.025) and assert it is below a pre-computed tolerance (e.g., 1e-5 for a first-order convergence rate).",
+    "elapsed_s": 99.524,
+    "tokens": {
+      "input": 245,
+      "output": 2541,
+      "cache_read": 512,
+      "cache_creation": 0
+    },
+    "raw_response": "{\n  \"verdict\": \"valid\",\n  \"confidence\": 0.9,\n  \"suggested_assertion\": \"bound\",\n  \"reasoning\": \"Reducing the azimuthal track spacing refines the angular discretization of the method of characteristics, leading to a more accurate k_eff. The difference between the k_eff values obtained with 0.05 cm and 0.025 cm spacing should be small and bounded by a tolerance derived from the expected convergence order (e.g., O(\u0394^p)). This tests that the solver converges towards the exact solution as the grid is refined.\",\n  \"caveats\": \"Convergence may not be strictly monotonic if other discretization parameters (e.g., ray spacing, number of polar angles) are too coarse, but under standard settings it should hold. The assertion is valid only for the OpenMOC deterministic solver; it is not applicable to OpenMC Monte Carlo.\",\n  \"implementation_hint\": \"Run OpenMOC with tracking.azim_spacing_cm set to 0.05 and 0.025, extract k_eff from both, compute abs(k_eff_0.05 - k_eff_0.025) and assert it is below a pre-computed tolerance (e.g., 1e-5 for a first-order convergence rate).\"\n}"
+  },
+  {
+    "id": "N12-conv-particles-refine",
+    "meta_pattern": "m_conv",
+    "block": "L*",
+    "parameter": "solver.particles",
+    "verdict": "valid",
+    "confidence": 0.95,
+    "suggested_assertion": "approx",
+    "reasoning": "The standard error of the Monte Carlo eigenvalue estimator scales as 1/sqrt(N) with total neutron histories N. Increasing particles by factor 10 raises N by 10, so the ratio of reported k_eff standard deviations should be approximately 1/sqrt(10) \u2248 0.316. This tests the fundamental Monte Carlo convergence law and can detect errors in standard-deviation estimation, batching, or random-number scaling.",
+    "caveats": "The ratio of two estimated standard deviations is itself subject to statistical noise; the 'approx' tolerance must account for finite-batch variability. The MR also assumes that active cycles and other run parameters are kept identical and that cycle-to-cycle correlations are negligible.",
+    "implementation_hint": "Run OpenMC with solver.particles = 5000 and 50000 while keeping all other inputs (geometry, materials, batches, inactive cycles) fixed; extract k_eff_std from both outputs; check that |(k_eff_std_50000 / k_eff_std_5000) - 0.316| is below a suitable tolerance (e.g., 20% relative).",
+    "elapsed_s": 66.53,
+    "tokens": {
+      "input": 273,
+      "output": 1868,
+      "cache_read": 512,
+      "cache_creation": 0
+    },
+    "raw_response": "{\n  \"verdict\": \"valid\",\n  \"confidence\": 0.95,\n  \"suggested_assertion\": \"approx\",\n  \"reasoning\": \"The standard error of the Monte Carlo eigenvalue estimator scales as 1/sqrt(N) with total neutron histories N. Increasing particles by factor 10 raises N by 10, so the ratio of reported k_eff standard deviations should be approximately 1/sqrt(10) \u2248 0.316. This tests the fundamental Monte Carlo convergence law and can detect errors in standard-deviation estimation, batching, or random-number scaling.\",\n  \"caveats\": \"The ratio of two estimated standard deviations is itself subject to statistical noise; the 'approx' tolerance must account for finite-batch variability. The MR also assumes that active cycles and other run parameters are kept identical and that cycle-to-cycle correlations are negligible.\",\n  \"implementation_hint\": \"Run OpenMC with solver.particles = 5000 and 50000 while keeping all other inputs (geometry, materials, batches, inactive cycles) fixed; extract k_eff_std from both outputs; check that |(k_eff_std_50000 / k_eff_std_5000) - 0.316| is below a suitable tolerance (e.g., 20% relative).\"\n}"
+  },
+  {
+    "id": "N13-conv-batches-refine",
+    "meta_pattern": "m_conv",
+    "block": "L*",
+    "parameter": "solver.batches",
+    "verdict": "valid",
+    "confidence": 0.75,
+    "suggested_assertion": "less",
+    "reasoning": "As the number of active batches increases, the Monte Carlo standard error of the mean k-eff should decrease (on average), so the reported k_eff_std is expected to be smaller with 200 active batches than with 40. This tests correct scaling of the error estimation, a convergence property. The relation is statistical, not logically necessary, but with a factor of 5 increase the probability of inversion is negligible, making it a useful sanity check.",
+    "caveats": "The strict 'less' assertion can fail in a single realization if the sample variance rises unexpectedly; for a robust regression test consider multiple seed pairs and require the average decrease. Alternatively, check that k_eff_std_followup <= k_eff_std_source * sqrt(40/200) within a tolerance.",
+    "implementation_hint": "Using the same random seed, run two OpenMC simulations with identical geometry and materials, keeping inactive batches equal, one with total batches giving 40 active, the other with 200 active; compare the reported k_eff_std.",
+    "elapsed_s": 111.709,
+    "tokens": {
+      "input": 245,
+      "output": 3192,
+      "cache_read": 512,
+      "cache_creation": 0
+    },
+    "raw_response": "{\n  \"verdict\": \"valid\",\n  \"confidence\": 0.75,\n  \"suggested_assertion\": \"less\",\n  \"reasoning\": \"As the number of active batches increases, the Monte Carlo standard error of the mean k-eff should decrease (on average), so the reported k_eff_std is expected to be smaller with 200 active batches than with 40. This tests correct scaling of the error estimation, a convergence property. The relation is statistical, not logically necessary, but with a factor of 5 increase the probability of inversion is negligible, making it a useful sanity check.\",\n  \"caveats\": \"The strict 'less' assertion can fail in a single realization if the sample variance rises unexpectedly; for a robust regression test consider multiple seed pairs and require the average decrease. Alternatively, check that k_eff_std_followup <= k_eff_std_source * sqrt(40/200) within a tolerance.\",\n  \"implementation_hint\": \"Using the same random seed, run two OpenMC simulations with identical geometry and materials, keeping inactive batches equal, one with total batches giving 40 active, the other with 200 active; compare the reported k_eff_std.\"\n}"
+  },
+  {
+    "id": "N14-cmp-openmoc-vs-openmc",
+    "meta_pattern": "m_cmp",
+    "block": "E*",
+    "parameter": "solver.OpenMOC_vs_OpenMC",
+    "verdict": "valid",
+    "confidence": 0.9,
+    "suggested_assertion": "bound",
+    "reasoning": "Two solvers that both discretise the same multi-group transport equation must agree on the multiplication factor within the sum of their numerical errors. The proposed tolerance (3\u03c3_MC + 0.005\u00b7k) accounts for Monte Carlo statistical noise and a conservative estimate of deterministic MOC error. This is a code-to-code comparison, a classic method-comparison metamorphic relation, and is physically sound for the 2-group pin-cell with isotropic scattering and reflective BCs.",
+    "caveats": "The MC uncertainty \u03c3_MC must be reliably estimated (sufficient histories) and the deterministic error budget of 0.5% k is nominal; the actual MOC discretisation error depends on ray spacing, polar/azimuthal quadrature, and may exceed the budget if coarse parameters are used. The relation assumes both solvers are given identical multi-group cross sections and no angular truncation differences beyond flat scattering. In reflective cells the MC eigenvalue can converge slowly, requiring careful tally statistics.",
+    "implementation_hint": "Execute the same case JSON with OpenMOC and OpenMC; extract k_eff and the MC standard deviation \u03c3, then assert |k_OpenMOC \u2013 k_OpenMC| < 3\u03c3 + 0.005\u00b7k_OpenMOC.",
+    "elapsed_s": 76.553,
+    "tokens": {
+      "input": 301,
+      "output": 2167,
+      "cache_read": 512,
+      "cache_creation": 0
+    },
+    "raw_response": "{\n  \"verdict\": \"valid\",\n  \"confidence\": 0.9,\n  \"suggested_assertion\": \"bound\",\n  \"reasoning\": \"Two solvers that both discretise the same multi-group transport equation must agree on the multiplication factor within the sum of their numerical errors. The proposed tolerance (3\u03c3_MC + 0.005\u00b7k) accounts for Monte Carlo statistical noise and a conservative estimate of deterministic MOC error. This is a code-to-code comparison, a classic method-comparison metamorphic relation, and is physically sound for the 2-group pin-cell with isotropic scattering and reflective BCs.\",\n  \"caveats\": \"The MC uncertainty \u03c3_MC must be reliably estimated (sufficient histories) and the deterministic error budget of 0.5% k is nominal; the actual MOC discretisation error depends on ray spacing, polar/azimuthal quadrature, and may exceed the budget if coarse parameters are used. The relation assumes both solvers are given identical multi-group cross sections and no angular truncation differences beyond flat scattering. In reflective cells the MC eigenvalue can converge slowly, requiring careful tally statistics.\",\n  \"implementation_hint\": \"Execute the same case JSON with OpenMOC and OpenMC; extract k_eff and the MC standard deviation \u03c3, then assert |k_OpenMOC \u2013 k_OpenMC| < 3\u03c3 + 0.005\u00b7k_OpenMOC.\"\n}"
+  },
+  {
+    "id": "N15-cmp-p0-vs-p1-scattering",
+    "meta_pattern": "m_cmp",
+    "block": "E*",
+    "parameter": "solver.scattering_order",
+    "verdict": "valid",
+    "confidence": 0.9,
+    "suggested_assertion": "greater",
+    "reasoning": "Valid MR: P0 isotropic scattering approximation is known to overpredict k-effective in thermal reactor lattices compared to the more accurate P1 anisotropic scattering. The inequality k_P0 >= k_P1 is a well-established trend, supported by nuclear reactor physics textbooks (e.g., Duderstadt & Hamilton). Implementation would require cross-section data containing both P0 and P1 moments; the runner can be extended to accept such data without major code changes. The assertion is directional (greater).",
+    "caveats": "The trend holds for moderated systems with thermal spectra; may not hold for fast or highly absorbing media. The magnitude of difference may be small (\u223c tens of pcm) requiring high statistical precision in OpenMC to resolve. The pin-cell has reflective boundaries, so k is k-inf; no leakage effect.",
+    "implementation_hint": "Generate two multi-group cross-section libraries for the pin-cell materials\u2014one with only the P0 scattering moment and another with both P0 and P1 moments\u2014and compare OpenMC k-eff estimates using otherwise identical settings.",
+    "elapsed_s": 77.624,
+    "tokens": {
+      "input": 290,
+      "output": 2300,
+      "cache_read": 512,
+      "cache_creation": 0
+    },
+    "raw_response": "{\n  \"verdict\": \"valid\",\n  \"confidence\": 0.9,\n  \"suggested_assertion\": \"greater\",\n  \"reasoning\": \"Valid MR: P0 isotropic scattering approximation is known to overpredict k-effective in thermal reactor lattices compared to the more accurate P1 anisotropic scattering. The inequality k_P0 >= k_P1 is a well-established trend, supported by nuclear reactor physics textbooks (e.g., Duderstadt & Hamilton). Implementation would require cross-section data containing both P0 and P1 moments; the runner can be extended to accept such data without major code changes. The assertion is directional (greater).\",\n  \"caveats\": \"The trend holds for moderated systems with thermal spectra; may not hold for fast or highly absorbing media. The magnitude of difference may be small (\u223c tens of pcm) requiring high statistical precision in OpenMC to resolve. The pin-cell has reflective boundaries, so k is k-inf; no leakage effect.\",\n  \"implementation_hint\": \"Generate two multi-group cross-section libraries for the pin-cell materials\u2014one with only the P0 scattering moment and another with both P0 and P1 moments\u2014and compare OpenMC k-eff estimates using otherwise identical settings.\"\n}"
+  }
+]

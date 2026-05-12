@@ -521,6 +521,90 @@ M27 = Mutation(
 )
 
 
+# ---------------------------------------------------------------------------
+# Phase 2 (NOETHER) mutations — designed to break the new MRs
+#
+# M28-M31 each targets the algebraic invariant of one new NOETHER MR. The
+# expectation is that the *new* MR catches its target mutant while the
+# Phase-1 MRs (ScaleNuSigmaF, ScaleFuelSigmaA) miss it. A successful
+# matrix run will show new diagonal hits with off-diagonal misses,
+# quantifying coverage growth.
+# ---------------------------------------------------------------------------
+
+M28 = Mutation(
+    id="M28-openmoc-runner-chi-fast-only",
+    target_file="SUT/openmoc/openmoc_runner.py",
+    description='Hard-code chi to [1.0, 0.0] regardless of mat["chi"].',
+    rationale="Hard-coded fast-only fission emission. Equivalent for the source case "
+              "(reference fuel.chi == [1, 0] already), but breaks PermuteEnergyGroups "
+              "(N04): the permuted JSON has chi == [0, 1] yet the runner still emits "
+              "into group 0. Phase-1 monotonicity MRs scale nu_sigma_f / sigma_a only, "
+              "so they are insensitive to chi handling — this fault should be invisible "
+              "to Phase 1 and visible to Phase 2 N04.",
+    predicted_classification="semantic",
+    predicted_detector=("group_permute",),
+    apply=_replace_exactly_once(
+        'm.setChi(mat["chi"])',
+        'm.setChi([1.0, 0.0])  # MUTATION M28',
+    ),
+)
+
+M29 = Mutation(
+    id="M29-openmoc-adapter-fuel-sigt-no-siga-update",
+    target_file="SUT/openmoc/openmoc_input_adapter_fuel_sigma_t.py",
+    description="Update fuel.sigma_t but skip the matching fuel.sigma_a bump.",
+    rationale="Adapter inconsistency analogous to M12 but for the new fuel-sigma_t MR. "
+              "OpenMOC reads sigma_t directly and derives sigma_a from "
+              "sigma_t − Σ sigma_s, so missing the JSON sigma_a write is silent on "
+              "OpenMOC: the runner still sees the correct effective absorption. Pure "
+              "documentation-vs-runtime split — predicted equivalent for OpenMOC and "
+              "semantic only when a downstream consumer actually reads sigma_a from "
+              "the JSON (none currently does, so this is in the catalogue mostly to "
+              "document the parity with M12 — important when OpenMC support lands).",
+    predicted_classification="equivalent",
+    predicted_detector=(),
+    apply=_replace_exactly_once(
+        'fuel["sigma_a"] = new_sigma_a',
+        '# fuel["sigma_a"] = new_sigma_a  # MUTATION M29',
+    ),
+)
+
+M30 = Mutation(
+    id="M30-openmoc-adapter-moderator-sigma-a-no-sigt-update",
+    target_file="SUT/openmoc/openmoc_input_adapter_moderator_sigma_a.py",
+    description="Update moderator.sigma_a but skip the matching moderator.sigma_t bump.",
+    rationale="Adapter inconsistency for the new moderator-sigma_a MR. Because OpenMOC "
+              "derives moderator absorption from sigma_t (not from sigma_a in the JSON), "
+              "the runner only sees the original moderator.sigma_t, so the follow-up "
+              "k_eff is unchanged from the source — that violates "
+              "ScaleModeratorSigmaA's Less assertion. Predicted detected by N07 on "
+              "OpenMOC; missed by Phase-1 MRs (which never touch moderator).",
+    predicted_classification="semantic",
+    predicted_detector=("moderator_sigma_a",),
+    apply=_replace_exactly_once(
+        'moderator["sigma_t"] = new_sigma_t',
+        '# moderator["sigma_t"] = new_sigma_t  # MUTATION M30',
+    ),
+)
+
+M31 = Mutation(
+    id="M31-openmoc-adapter-group-permute-fuel-only",
+    target_file="SUT/openmoc/openmoc_input_adapter_group_permute.py",
+    description="Permute energy groups in fuel only; leave moderator unchanged.",
+    rationale="Adapter does only half of the symmetry transformation. The follow-up "
+              "JSON has fuel with groups 0<->1 but moderator unchanged — a physically "
+              "meaningless mixed state. The runner produces a different k_eff than the "
+              "source, violating PermuteEnergyGroups' approx assertion. Pure Phase-2 "
+              "MR target; Phase-1 MRs do not exercise this adapter.",
+    predicted_classification="semantic",
+    predicted_detector=("group_permute",),
+    apply=_replace_exactly_once(
+        'materials["moderator"] = _permute_material(materials["moderator"])',
+        '# materials["moderator"] = _permute_material(materials["moderator"])  # MUTATION M31',
+    ),
+)
+
+
 ALL_MUTATIONS: tuple[Mutation, ...] = (
     M00,
     M01, M02, M03, M04, M05, M06,
@@ -529,6 +613,7 @@ ALL_MUTATIONS: tuple[Mutation, ...] = (
     M15, M16, M17, M18, M19, M20, M21,
     M22, M23, M24, M25,
     M26, M27,
+    M28, M29, M30, M31,
 )
 
 

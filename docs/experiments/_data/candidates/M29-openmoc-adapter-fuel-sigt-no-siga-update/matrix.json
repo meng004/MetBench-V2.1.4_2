@@ -1,18 +1,10 @@
 {
-  "mutation_id": "M08-openmoc-adapter-nsf-square",
+  "mutation_id": "M29-openmoc-adapter-fuel-sigt-no-siga-update",
   "factor": 1.5,
   "cells": [
     {
       "scenario_id": "openmoc-pincell-nu-sigma-f",
-      "status": "ran",
-      "k_source": 1.1330583459569659,
-      "k_followup": 2.550180234338274,
-      "k_source_std": 0.0,
-      "k_followup_std": 0.0,
-      "ratio": 2.250705132209609,
-      "assertion": "greater",
-      "assertion_passed": true,
-      "outcome": "missed"
+      "status": "not-affected"
     },
     {
       "scenario_id": "openmc-pincell-nu-sigma-f",
@@ -32,7 +24,15 @@
     },
     {
       "scenario_id": "openmoc-pincell-fuel-sigma-t",
-      "status": "not-affected"
+      "status": "ran",
+      "k_source": 1.1330583459569659,
+      "k_followup": 0.11127219735430455,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": 0.09820517871065637,
+      "assertion": "less",
+      "assertion_passed": true,
+      "outcome": "missed"
     },
     {
       "scenario_id": "openmoc-pincell-moderator-sigma-a",

@@ -18,10 +18,10 @@ as a transparency artifact. The discrepancy between the two columns below shows
 exactly which mutations would have been miss-classified by the source-only rule.
 
 
-**Discard rate**: 4 of 28 candidates (14.3%) classified equivalent under the matrix rule.
+**Discard rate**: 5 of 32 candidates (15.6%) classified equivalent under the matrix rule.
 
 
-Classification counts: semantic=23, equivalent=4, error=1, unknown=0
+Classification counts: semantic=26, equivalent=5, error=1, unknown=0
 
 
 | mutation | predicted | source-only signal | matrix signal | source shifted? | follow-up shifted? | err cells |
@@ -54,6 +54,10 @@ Classification counts: semantic=23, equivalent=4, error=1, unknown=0
 | M25-openmc-adapter-nsf-identity | semantic | equivalent | semantic | False | True | 0 |
 | M26-openmc-adapter-sa-no-sigt-update | semantic | equivalent | equivalent | False | False | 0 |
 | M27-openmc-adapter-sa-inverse | semantic | equivalent | semantic | False | True | 0 |
+| M28-openmoc-runner-chi-fast-only | semantic | — | semantic | False | True | 0 |
+| M29-openmoc-adapter-fuel-sigt-no-siga-update | equivalent | — | equivalent | False | False | 0 |
+| M30-openmoc-adapter-moderator-sigma-a-no-sigt-update | semantic | — | semantic | False | True | 0 |
+| M31-openmoc-adapter-group-permute-fuel-only | semantic | — | semantic | False | True | 0 |
 
 ## Discarded (equivalent) mutants — why?
 
@@ -73,9 +77,10 @@ Observed per-scenario shifts:
 | scenario | Δsource | Δfollow-up | threshold |
 |---|---|---|---|
 | openmoc-pincell-nu-sigma-f | 0.000000 | 0.000000 | 0.005665 |
-| openmc-pincell-nu-sigma-f | 0.000000 | 0.000000 | 0.007550 |
 | openmoc-pincell-sigma-a | 0.000000 | 0.000000 | 0.005665 |
-| openmc-pincell-sigma-a | 0.000000 | 0.000000 | 0.005623 |
+| openmoc-pincell-group-permute | 0.000000 | 0.000000 | 0.005665 |
+| openmoc-pincell-fuel-sigma-t | 0.000000 | 0.000000 | 0.005665 |
+| openmoc-pincell-moderator-sigma-a | 0.000000 | 0.000000 | 0.005665 |
 
 ### M18-openmc-runner-batches-too-few
 
@@ -129,4 +134,21 @@ Observed per-scenario shifts:
 | scenario | Δsource | Δfollow-up | threshold |
 |---|---|---|---|
 | openmc-pincell-sigma-a | 0.000000 | 0.002759 | 0.005623 |
+
+### M29-openmoc-adapter-fuel-sigt-no-siga-update
+
+*Update fuel.sigma_t but skip the matching fuel.sigma_a bump.*
+
+
+**Predicted**: equivalent.
+
+
+**Rationale**: Adapter inconsistency analogous to M12 but for the new fuel-sigma_t MR. OpenMOC reads sigma_t directly and derives sigma_a from sigma_t − Σ sigma_s, so missing the JSON sigma_a write is silent on OpenMOC: the runner still sees the correct effective absorption. Pure documentation-vs-runtime split — predicted equivalent for OpenMOC and semantic only when a downstream consumer actually reads sigma_a from the JSON (none currently does, so this is in the catalogue mostly to document the parity with M12 — important when OpenMC support lands).
+
+
+Observed per-scenario shifts:
+
+| scenario | Δsource | Δfollow-up | threshold |
+|---|---|---|---|
+| openmoc-pincell-fuel-sigma-t | 0.000000 | 0.000000 | 0.005665 |
 

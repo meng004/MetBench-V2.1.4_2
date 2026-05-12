@@ -169,9 +169,12 @@ Evaluate per the system prompt. Return only the JSON object.
 def call_llm(client, model: str, system_prompt: str, candidate_text: str) -> tuple[dict, dict]:
     """Send one candidate through the API; return (parsed_verdict, telemetry)."""
     t0 = time.monotonic()
+    # max_tokens budget covers both thinking-block content (for extended-thinking
+    # models like deepseek-v4-pro) AND the actual text answer. 1024 was too tight —
+    # the thinking block alone consumed the budget and no text block was emitted.
     msg = client.messages.create(
         model=model,
-        max_tokens=1024,
+        max_tokens=4096,
         system=[
             {
                 "type": "text",
