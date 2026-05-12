@@ -847,6 +847,49 @@ Mut44 = Mutation(
 )
 
 
+# ---------------------------------------------------------------------------
+# Phase-3 stub mutation: closes the historical-bug Case 2 coverage gap by
+# exercising the temperature-plumbing code path. The bug pattern (Mut45)
+# mirrors OpenMC PR #3712 — chained construction returns the wrong value
+# (or here: the runner ignores the field entirely), so any MR that exercises
+# the temperature parameter notices the bypass.
+# ---------------------------------------------------------------------------
+
+Mut45 = Mutation(
+    id="Mut45-openmoc-runner-ignore-temperature",
+    target_file="SUT/openmoc/openmoc_runner.py",
+    description='Force doppler factor = 1.0 in _build_material (ignore mat["temperature_kelvin"]).',
+    rationale="Plumbing bypass analogous to upstream OpenMC PR #3712 (chained "
+              "Material.add_temperature returns None). Runner reads the "
+              "temperature field from JSON but discards it, so source and "
+              "follow-up of MR-T (RaiseFuelTemperature) run with the same "
+              "factor=1.0 (no Doppler scaling) and produce identical k_eff. "
+              "MR-T's `less` assertion fails strictly → DETECTED. All "
+              "non-temperature MRs are unaffected (their adapters never "
+              "touch temperature_kelvin).",
+    predicted_classification="semantic",
+    predicted_detector=("fuel_temperature",),
+    apply=_replace_exactly_once(
+        'doppler = _doppler_factor(t_kelvin)',
+        'doppler = 1.0  # MUTATION Mut45 — plumbing bypass',
+    ),
+)
+
+Mut46 = Mutation(
+    id="Mut46-openmc-runner-ignore-temperature",
+    target_file="SUT/openmc/openmc_runner.py",
+    description='Force doppler = 1.0 in OpenMC MGXS-library construction.',
+    rationale="OpenMC twin of Mut45. Same logical bug, same MR detection "
+              "prediction. Matched-pair entry for MR-T cross-solver κ.",
+    predicted_classification="semantic",
+    predicted_detector=("fuel_temperature",),
+    apply=_replace_exactly_once(
+        'doppler = 1.0 + 0.05 * _math.log(t_kelvin / 600.0) if t_kelvin > 0 else 1.0',
+        'doppler = 1.0  # MUTATION Mut46 — plumbing bypass',
+    ),
+)
+
+
 ALL_MUTATIONS: tuple[Mutation, ...] = (
     Mut00,
     Mut01, Mut02, Mut03, Mut04, Mut05, Mut06,
@@ -860,6 +903,7 @@ ALL_MUTATIONS: tuple[Mutation, ...] = (
     Mut35, Mut36, Mut37, Mut38,
     Mut39, Mut40,
     Mut41, Mut42, Mut43, Mut44,
+    Mut45, Mut46,
 )
 
 

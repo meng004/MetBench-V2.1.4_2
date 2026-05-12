@@ -136,6 +136,18 @@
       "k_eff_std": 0.001858624921749161,
       "factor": 1.5,
       "source_case": "SUT/openmoc/sample/pincell-offcentre.json"
+    },
+    "openmoc-pincell-fuel-temperature": {
+      "k_eff": 1.115656937810513,
+      "k_eff_std": 0.0,
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell.json"
+    },
+    "openmc-pincell-fuel-temperature": {
+      "k_eff": 1.1096562568751973,
+      "k_eff_std": 0.0014905864482547826,
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell.json"
     }
   },
   "factor": 1.5,

@@ -35,6 +35,22 @@ import json
 from pathlib import Path
 
 
+def _doppler_factor(temperature_kelvin: float) -> float:
+    """Phase-3 Doppler-style absorption-broadening factor.
+
+    Real Doppler broadening requires resonance cross-section data we don't
+    carry in the multi-group library; this is a fictitious-but-monotone
+    surrogate that exercises the temperature plumbing code path so MRs in
+    the m_mono(T) family have something physical to assert. T_ref = 600 K
+    so existing samples (which omit the field and default to 600) get
+    factor = 1.0 and behave identically to before.
+    """
+    import math
+    if temperature_kelvin <= 0:
+        return 1.0
+    return 1.0 + 0.05 * math.log(temperature_kelvin / 600.0)
+
+
 def _build_material(name: str, mat: dict):
     import openmoc
 
@@ -43,9 +59,30 @@ def _build_material(name: str, mat: dict):
     # exposes setSigmaA only as a per-group setter, but the bulk solve does
     # not require it - the case JSON's sigma_a is for documentation /
     # cross-checks only.
+    #
+    # Phase-3 Doppler: scale **only** the absorption part of sigma_t
+    # (i.e. the difference sigma_t - row_sum_sigma_s) by the Doppler
+    # factor, not all of sigma_t. Scaling raw sigma_t amplifies through
+    # the sigma_a derivation (a 2% sigma_t bump becomes a ~40% sigma_a
+    # bump because most of sigma_t is scattering), which puts OpenMOC's
+    # CPUSolver into one of its narrow non-physical convergence basins
+    # documented in historical-bugs.md Case 4.
+    t_kelvin = float(mat.get("temperature_kelvin", 600.0))
+    doppler = _doppler_factor(t_kelvin)
+    n = int(mat["num_groups"])
+    sigma_s_flat = list(mat["sigma_s"])
+    if doppler != 1.0:
+        sigma_t = []
+        for g_in in range(n):
+            row_sum = sum(sigma_s_flat[g_in * n + g_out] for g_out in range(n))
+            old_sigma_a = float(mat["sigma_t"][g_in]) - row_sum
+            sigma_t.append(doppler * old_sigma_a + row_sum)
+    else:
+        sigma_t = list(mat["sigma_t"])
+
     m = openmoc.Material(name=name)
-    m.setNumEnergyGroups(int(mat["num_groups"]))
-    m.setSigmaT(mat["sigma_t"])
+    m.setNumEnergyGroups(n)
+    m.setSigmaT(sigma_t)
     m.setSigmaS(mat["sigma_s"])
     m.setNuSigmaF(mat["nu_sigma_f"])
     m.setSigmaF(mat["sigma_f"])

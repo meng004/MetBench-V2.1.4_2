@@ -44,3 +44,5 @@ Mut41-openmoc-runner-clamp-y-offset-positive,semantic,—,semantic,True,False,0
 Mut42-openmoc-runner-clamp-x-offset-positive,semantic,—,semantic,True,False,0
 Mut43-openmc-runner-clamp-y-offset-positive,semantic,—,semantic,True,False,0
 Mut44-openmc-runner-clamp-x-offset-positive,semantic,—,error,True,False,1
+Mut45-openmoc-runner-ignore-temperature,semantic,—,semantic,True,True,0
+Mut46-openmc-runner-ignore-temperature,semantic,—,semantic,True,True,0

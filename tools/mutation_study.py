@@ -362,6 +362,33 @@ SCENARIOS: list[dict] = [
         "noether_id": "MR03",
         "meta_pattern": "m_inv",
     },
+    # ----- Phase 3 stub: temperature MR family (closes historical Case 2 gap) -----
+    {
+        "id": "openmoc-pincell-fuel-temperature",
+        "solver": "openmoc",
+        "transform": "RaiseFuelTemperature",
+        "adapter": "openmoc/openmoc_input_adapter_fuel_temperature.py",
+        "runner": "openmoc/openmoc_runner.py",
+        "assertion": "less",
+        "value": "k_eff",
+        "phase": 3,
+        "noether_id": "MR-T",
+        "meta_pattern": "m_mono",
+    },
+    {
+        "id": "openmc-pincell-fuel-temperature",
+        "solver": "openmc",
+        "transform": "RaiseFuelTemperature",
+        "adapter": "openmc/openmc_input_adapter_fuel_temperature.py",
+        "runner": "openmc/openmc_runner.py",
+        "assertion": "less",
+        "value": "k_eff",
+        "noise_aware": True,
+        "tolerance_rel": 0.0,
+        "phase": 3,
+        "noether_id": "MR-T",
+        "meta_pattern": "m_mono",
+    },
 ]
 
 
@@ -1285,6 +1312,7 @@ MATCHED_PAIRS = [
     ("Mut42-openmoc-runner-clamp-x-offset-positive",
                                                   "Mut44-openmc-runner-clamp-x-offset-positive",
                                                                                             "clamp-x-offset-positive"),
+    ("Mut45-openmoc-runner-ignore-temperature", "Mut46-openmc-runner-ignore-temperature", "ignore-temperature"),
 ]
 
 

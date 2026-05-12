@@ -18,10 +18,10 @@ as a transparency artifact. The discrepancy between the two columns below shows
 exactly which mutations would have been miss-classified by the source-only rule.
 
 
-**Discard rate**: 4 of 45 candidates (8.9%) classified equivalent under the matrix rule.
+**Discard rate**: 4 of 47 candidates (8.5%) classified equivalent under the matrix rule.
 
 
-Classification counts: semantic=39, equivalent=4, error=2, unknown=0
+Classification counts: semantic=41, equivalent=4, error=2, unknown=0
 
 
 | mutation | predicted | source-only signal | matrix signal | source shifted? | follow-up shifted? | err cells |
@@ -71,6 +71,8 @@ Classification counts: semantic=39, equivalent=4, error=2, unknown=0
 | Mut42-openmoc-runner-clamp-x-offset-positive | semantic | — | semantic | True | False | 0 |
 | Mut43-openmc-runner-clamp-y-offset-positive | semantic | — | semantic | True | False | 0 |
 | Mut44-openmc-runner-clamp-x-offset-positive | semantic | — | error | True | False | 1 |
+| Mut45-openmoc-runner-ignore-temperature | semantic | — | semantic | True | True | 0 |
+| Mut46-openmc-runner-ignore-temperature | semantic | — | semantic | True | True | 0 |
 
 ## Discarded (equivalent) mutants — why?
 

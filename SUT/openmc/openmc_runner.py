@@ -74,10 +74,17 @@ def _build_mgxs_library(case: dict, library_path: Path) -> None:
         if n != 2:
             raise ValueError(f"OpenMC runner expects num_groups=2, got {n} for material '{name}'")
 
+        # Phase-3: optional Doppler-style absorption broadening. T_ref = 600 K
+        # so existing samples (no field) get factor = 1.0 and behave identically.
+        # Mirrors the formula in SUT/openmoc/openmoc_runner.py::_doppler_factor.
+        import math as _math
+        t_kelvin = float(mat.get("temperature_kelvin", 600.0))
+        doppler = 1.0 + 0.05 * _math.log(t_kelvin / 600.0) if t_kelvin > 0 else 1.0
+
         xsdata = openmc.XSdata(name, library.energy_groups)
         xsdata.order = 0  # P0 scattering, isotropic
-        xsdata.set_total(np.array(mat["sigma_t"], dtype=np.float64))
-        xsdata.set_absorption(np.array(mat["sigma_a"], dtype=np.float64))
+        xsdata.set_total(np.array(mat["sigma_t"], dtype=np.float64) * doppler)
+        xsdata.set_absorption(np.array(mat["sigma_a"], dtype=np.float64) * doppler)
         # OpenMOC stores sigma_s as a 4-element row-major matrix [g_in -> g_out].
         # OpenMC's set_scatter_matrix wants shape (num_groups, num_groups, num_legendre_moments).
         # With xsdata.order = 0 (P0, isotropic), num_legendre_moments = 1.

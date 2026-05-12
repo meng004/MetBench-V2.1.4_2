@@ -5,7 +5,7 @@ unpatched (Mut00-equivalent) k_eff for every MR scenario that has
 matched OpenMOC and OpenMC twins.
 
 
-**Summary**: 10 evaluable pairs, **2 disagreement**, 0 skipped. Budget = `max(3·σ_OpenMC, 1.0%·k_OpenMC)`.
+**Summary**: 11 evaluable pairs, **2 disagreement**, 0 skipped. Budget = `max(3·σ_OpenMC, 1.0%·k_OpenMC)`.
 
 
 | Transform | k(OpenMOC) | k(OpenMC) | σ(OpenMC) | |Δk| | budget | verdict |
@@ -20,6 +20,7 @@ matched OpenMOC and OpenMC twins.
 | Rotate90 | 1.15949 | 1.15354 | 0.00193 | 0.00596 | 0.01154 | agree |
 | MirrorX | 1.10270 | 1.09808 | 0.00180 | 0.00462 | 0.01098 | agree |
 | MirrorY | 1.10271 | 1.09555 | 0.00186 | 0.00716 | 0.01096 | agree |
+| RaiseFuelTemperature | 1.11566 | 1.10966 | 0.00149 | 0.00600 | 0.01110 | agree |
 
 ## Disagreements
 
@@ -60,11 +61,22 @@ For each matched-pair index (`MATCHED_PAIRS` in `mutation_study.py`), compares t
 Budget rule unchanged: `max(3·σ_OpenMC, 1.0%·k_OpenMC)`.
 
 
-**Summary**: 58 matched-pair-scenario rows, **17 disagreement**.
+**Summary**: 80 matched-pair-scenario rows, **21 disagreement**.
 
 
 | pair kind | scenario (transform) | OpenMOC mut | OpenMC mut | k(MOC mut) | k(MC mut) | σ(MC) | |Δk| | budget | verdict |
 |---|---|---|---|--:|--:|--:|--:|--:|--:|
+| identity-control | ScaleNuSigmaF | Mut00-identity | Mut00-identity | 1.69990 | 1.68996 | 0.00252 | 0.00994 | 0.01690 | agree |
+| identity-control | ScaleFuelSigmaA | Mut00-identity | Mut00-identity | 0.80690 | 0.80272 | 0.00132 | 0.00419 | 0.00803 | agree |
+| identity-control | PermuteEnergyGroups | Mut00-identity | Mut00-identity | 1.13306 | 1.12601 | 0.00178 | 0.00705 | 0.01126 | agree |
+| identity-control | ScaleFuelSigmaT | Mut00-identity | Mut00-identity | 0.11127 | 0.11292 | 0.00022 | 0.00165 | 0.00113 | **DISAGREE** |
+| identity-control | ScaleModeratorSigmaA | Mut00-identity | Mut00-identity | 0.47635 | 0.96831 | 0.00166 | 0.49196 | 0.00968 | **DISAGREE** |
+| identity-control | ScaleFuelSigmaS | Mut00-identity | Mut00-identity | 1.09185 | 1.09326 | 0.00195 | 0.00140 | 0.01093 | agree |
+| identity-control | ScaleFuelRadius | Mut00-identity | Mut00-identity | 1.17476 | 1.17086 | 0.00171 | 0.00390 | 0.01171 | agree |
+| identity-control | Rotate90 | Mut00-identity | Mut00-identity | 1.15949 | 1.15354 | 0.00193 | 0.00596 | 0.01154 | agree |
+| identity-control | MirrorX | Mut00-identity | Mut00-identity | 1.10270 | 1.09808 | 0.00180 | 0.00462 | 0.01098 | agree |
+| identity-control | MirrorY | Mut00-identity | Mut00-identity | 1.10271 | 1.09555 | 0.00186 | 0.00716 | 0.01096 | agree |
+| identity-control | RaiseFuelTemperature | Mut00-identity | Mut00-identity | 1.11566 | 1.10966 | 0.00149 | 0.00600 | 0.01110 | agree |
 | chi-swap | ScaleNuSigmaF | Mut05-openmoc-runner-chi-swap-groups | Mut20-openmc-runner-chi-swap-groups | 1.91687 | 1.91775 | 0.00275 | 0.00088 | 0.01918 | agree |
 | chi-swap | ScaleFuelSigmaA | Mut05-openmoc-runner-chi-swap-groups | Mut20-openmc-runner-chi-swap-groups | 0.96468 | 0.96310 | 0.00102 | 0.00157 | 0.00963 | agree |
 | chi-swap | PermuteEnergyGroups | Mut05-openmoc-runner-chi-swap-groups | Mut20-openmc-runner-chi-swap-groups | 1.27800 | 1.27735 | 0.00174 | 0.00065 | 0.01277 | agree |
@@ -123,8 +135,37 @@ Budget rule unchanged: `max(3·σ_OpenMC, 1.0%·k_OpenMC)`.
 | clamp-x-offset-positive | Rotate90 | Mut42-openmoc-runner-clamp-x-offset-positive | Mut44-openmc-runner-clamp-x-offset-positive | 1.15949 | 1.15354 | 0.00193 | 0.00596 | 0.01154 | agree |
 | clamp-x-offset-positive | MirrorX | Mut42-openmoc-runner-clamp-x-offset-positive | Mut44-openmc-runner-clamp-x-offset-positive | 1.10270 | 1.09808 | 0.00180 | 0.00462 | 0.01098 | agree |
 | clamp-x-offset-positive | MirrorY | Mut42-openmoc-runner-clamp-x-offset-positive | Mut44-openmc-runner-clamp-x-offset-positive | 1.10484 | 1.09443 | 0.00183 | 0.01041 | 0.01094 | agree |
+| ignore-temperature | ScaleNuSigmaF | Mut45-openmoc-runner-ignore-temperature | Mut46-openmc-runner-ignore-temperature | 1.69990 | 1.68996 | 0.00252 | 0.00994 | 0.01690 | agree |
+| ignore-temperature | ScaleFuelSigmaA | Mut45-openmoc-runner-ignore-temperature | Mut46-openmc-runner-ignore-temperature | 0.80690 | 0.80272 | 0.00132 | 0.00419 | 0.00803 | agree |
+| ignore-temperature | PermuteEnergyGroups | Mut45-openmoc-runner-ignore-temperature | Mut46-openmc-runner-ignore-temperature | 1.13306 | 1.12601 | 0.00178 | 0.00705 | 0.01126 | agree |
+| ignore-temperature | ScaleFuelSigmaT | Mut45-openmoc-runner-ignore-temperature | Mut46-openmc-runner-ignore-temperature | 0.11127 | 0.11292 | 0.00022 | 0.00165 | 0.00113 | **DISAGREE** |
+| ignore-temperature | ScaleModeratorSigmaA | Mut45-openmoc-runner-ignore-temperature | Mut46-openmc-runner-ignore-temperature | 0.47635 | 0.96831 | 0.00166 | 0.49196 | 0.00968 | **DISAGREE** |
+| ignore-temperature | ScaleFuelSigmaS | Mut45-openmoc-runner-ignore-temperature | Mut46-openmc-runner-ignore-temperature | 1.09185 | 1.09326 | 0.00195 | 0.00140 | 0.01093 | agree |
+| ignore-temperature | ScaleFuelRadius | Mut45-openmoc-runner-ignore-temperature | Mut46-openmc-runner-ignore-temperature | 1.17476 | 1.17086 | 0.00171 | 0.00390 | 0.01171 | agree |
+| ignore-temperature | Rotate90 | Mut45-openmoc-runner-ignore-temperature | Mut46-openmc-runner-ignore-temperature | 1.15949 | 1.15354 | 0.00193 | 0.00596 | 0.01154 | agree |
+| ignore-temperature | MirrorX | Mut45-openmoc-runner-ignore-temperature | Mut46-openmc-runner-ignore-temperature | 1.10270 | 1.09808 | 0.00180 | 0.00462 | 0.01098 | agree |
+| ignore-temperature | MirrorY | Mut45-openmoc-runner-ignore-temperature | Mut46-openmc-runner-ignore-temperature | 1.10271 | 1.09555 | 0.00186 | 0.00716 | 0.01096 | agree |
+| ignore-temperature | RaiseFuelTemperature | Mut45-openmoc-runner-ignore-temperature | Mut46-openmc-runner-ignore-temperature | 1.13306 | 1.12450 | 0.00179 | 0.00856 | 0.01125 | agree |
 
 ## Per-pair disagreements — interpretation
+
+
+### identity-control on ScaleFuelSigmaT
+
+* OpenMOC mutant: `Mut00-identity` → k_followup = 0.11127219735430455
+
+* OpenMC mutant:  `Mut00-identity` → k_followup = 0.1129234843229035 ± 0.00021529635848054591
+
+* |Δk| = 0.0016512869685989529 ; budget = 0.001129234843229035.
+
+
+### identity-control on ScaleModeratorSigmaA
+
+* OpenMOC mutant: `Mut00-identity` → k_followup = 0.47635343316499984
+
+* OpenMC mutant:  `Mut00-identity` → k_followup = 0.9683112180449326 ± 0.0016647893052120976
+
+* |Δk| = 0.49195778487993275 ; budget = 0.009683112180449326.
 
 
 ### vacuum-bc on ScaleNuSigmaF
@@ -278,6 +319,24 @@ Budget rule unchanged: `max(3·σ_OpenMC, 1.0%·k_OpenMC)`.
 * OpenMC mutant:  `Mut44-openmc-runner-clamp-x-offset-positive` → k_followup = 0.9683112180449136 ± 0.0016647893052097996
 
 * |Δk| = 0.49195778487991376 ; budget = 0.009683112180449135.
+
+
+### ignore-temperature on ScaleFuelSigmaT
+
+* OpenMOC mutant: `Mut45-openmoc-runner-ignore-temperature` → k_followup = 0.11127219735430455
+
+* OpenMC mutant:  `Mut46-openmc-runner-ignore-temperature` → k_followup = 0.11292348432290203 ± 0.0002152963584811987
+
+* |Δk| = 0.0016512869685974818 ; budget = 0.0011292348432290203.
+
+
+### ignore-temperature on ScaleModeratorSigmaA
+
+* OpenMOC mutant: `Mut45-openmoc-runner-ignore-temperature` → k_followup = 0.47635343316499984
+
+* OpenMC mutant:  `Mut46-openmc-runner-ignore-temperature` → k_followup = 0.9683112180449214 ± 0.0016647893052133688
+
+* |Δk| = 0.49195778487992153 ; budget = 0.009683112180449214.
 
 
 ---
