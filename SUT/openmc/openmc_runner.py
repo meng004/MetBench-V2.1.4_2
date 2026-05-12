@@ -139,6 +139,16 @@ def _build_model(case: dict, library_path: Path) -> "openmc.Model":
     mod_cell = openmc.Cell(name="moderator", fill=moderator, region=+fuel_outer & box)
     geometry = openmc.Geometry(openmc.Universe(cells=[fuel_cell, mod_cell]))
 
+    # Phase-3: per-cell scalar flux tally for tally-symmetry MRs.
+    # Two energy groups (matching the MGXS library cutoff at 0.625 eV).
+    import numpy as np
+    cell_filter = openmc.CellFilter([fuel_cell, mod_cell])
+    energy_filter = openmc.EnergyFilter(np.array([1e-5, 0.625, 2.0e7], dtype=np.float64))
+    flux_tally = openmc.Tally(name="flux_per_cell")
+    flux_tally.filters = [cell_filter, energy_filter]
+    flux_tally.scores = ["flux"]
+    tallies = openmc.Tallies([flux_tally])
+
     # Settings: multi-group mode, eigenvalue calculation.
     sv = case.get("solver", {})
     settings = openmc.Settings()
@@ -153,7 +163,12 @@ def _build_model(case: dict, library_path: Path) -> "openmc.Model":
     settings.output = {"summary": False, "tallies": False}
     settings.verbosity = 1  # warnings only; MetBench captures stdout separately
 
-    return openmc.Model(geometry=geometry, materials=materials, settings=settings)
+    model = openmc.Model(geometry=geometry, materials=materials, settings=settings)
+    model.tallies = tallies
+    # Stash cell IDs so solve() can resolve them in the statepoint tally.
+    model._fuel_cell_id = fuel_cell.id  # type: ignore[attr-defined]
+    model._mod_cell_id = mod_cell.id    # type: ignore[attr-defined]
+    return model
 
 
 def solve(case: dict) -> dict:
@@ -183,6 +198,28 @@ def solve(case: dict) -> dict:
                 k_mean = float(k.nominal_value)
                 k_std = float(k.std_dev)
                 batches = int(sp.n_batches)
+
+                # Per-cell flux from the Phase-3 tally. The tally has two
+                # filters (cell × energy-group) and a single "flux" score.
+                # OpenMC reports energy filter bins in ascending-energy order
+                # (group 0 = thermal, group 1 = fast). MetBench's convention
+                # everywhere else (matching OpenMOC) is group 0 = fast,
+                # group 1 = thermal — so we reverse the energy axis here.
+                flux_per_cell = {}
+                try:
+                    t = sp.get_tally(name="flux_per_cell")
+                    arr = t.mean.reshape(2, 2)  # (cell, energy) — order matches filter declaration
+                    bins = t.filters[0].bins
+                    fuel_cell_id = getattr(model, "_fuel_cell_id", None)
+                    mod_cell_id = getattr(model, "_mod_cell_id", None)
+                    for i, cell_id in enumerate(bins):
+                        cid = int(cell_id)
+                        bucket = ("fuel" if cid == fuel_cell_id else
+                                  "moderator" if cid == mod_cell_id else f"cell_{cid}")
+                        # reverse: bin[0] is thermal, bin[1] is fast; MetBench wants [fast, thermal]
+                        flux_per_cell[bucket] = [float(arr[i, 1]), float(arr[i, 0])]
+                except Exception as e:  # don't kill the run if tally extraction fails
+                    flux_per_cell = {"error": f"tally extraction failed: {type(e).__name__}: {e}"}
         finally:
             os.chdir(cwd)
             # Clean up any large data files OpenMC may have written outside tmpdir.
@@ -204,6 +241,7 @@ def solve(case: dict) -> dict:
         "batches": batches,
         "particles": int(sv.get("particles", 5000)),
         "converged": True,
+        "flux_per_cell": flux_per_cell,
         "metadata": {"runner": "openmc", "energy_mode": "multi-group"},
     }
 

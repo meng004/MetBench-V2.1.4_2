@@ -90,7 +90,7 @@ def _build_material(name: str, mat: dict):
     return m
 
 
-def solve(case: dict) -> tuple[float, int, bool]:
+def solve(case: dict) -> tuple[float, int, bool, dict]:
     import openmoc
     import openmoc.log as omlog
 
@@ -154,7 +154,33 @@ def solve(case: dict) -> tuple[float, int, bool]:
     solver.computeEigenvalue(max_iters)
 
     iters = int(solver.getNumIterations())
-    return float(solver.getKeff()), iters, iters < max_iters
+
+    # Phase-3: per-cell scalar flux export for tally-symmetry MRs.
+    # For our 2-cell geometry (fuel + moderator) the geometry's
+    # `initializeFlatSourceRegions()` produces one FSR per cell, so we walk
+    # all FSRs and sum-by-cell. `findCellContainingFSR(fsr)` returns the
+    # Cell object; we tag fuel vs moderator by the cell IDs we recorded at
+    # construction time.
+    n_fsr = geom.getNumFSRs()
+    num_groups = int(case["materials"]["fuel"]["num_groups"])
+    fuel_id, mod_id = fuel_cell.getId(), mod_cell.getId()
+    flux_by_cell: dict[str, list[float]] = {
+        "fuel":      [0.0] * num_groups,
+        "moderator": [0.0] * num_groups,
+    }
+    for fsr in range(n_fsr):
+        cell = geom.findCellContainingFSR(fsr)
+        if cell is None:
+            continue
+        bucket = "fuel" if cell.getId() == fuel_id else (
+                 "moderator" if cell.getId() == mod_id else None)
+        if bucket is None:
+            continue
+        for g in range(num_groups):
+            # OpenMOC API: getFlux takes 1-indexed group.
+            flux_by_cell[bucket][g] += float(solver.getFlux(fsr, g + 1))
+
+    return float(solver.getKeff()), iters, iters < max_iters, flux_by_cell
 
 
 def _require_section(case: dict, key: str) -> dict:
@@ -177,7 +203,7 @@ def main() -> int:
     if "fuel" not in materials or "moderator" not in materials:
         raise ValueError("Case JSON 'materials' must define 'fuel' and 'moderator'")
 
-    k, iters, converged = solve(case)
+    k, iters, converged, flux_per_cell = solve(case)
 
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -187,6 +213,7 @@ def main() -> int:
                 "k_eff": k,
                 "iterations": iters,
                 "converged": converged,
+                "flux_per_cell": flux_per_cell,
                 "metadata": {"runner": "openmoc"},
             },
             indent=2,

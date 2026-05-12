@@ -1,5 +1,5 @@
 mutation_id,predicted,source_only_observed,matrix_observed,any_source_shift,any_followup_shift,errors
-Mut00-identity,equivalent,equivalent,semantic,True,False,0
+Mut00-identity,equivalent,equivalent,error,True,False,1
 Mut01-openmoc-runner-chi-zero,semantic,semantic,semantic,True,True,0
 Mut02-openmoc-runner-sigt-from-siga,semantic,semantic,semantic,True,True,0
 Mut03-openmoc-runner-swap-fuel-moderator,semantic,semantic,semantic,True,True,0
@@ -46,3 +46,4 @@ Mut43-openmc-runner-clamp-y-offset-positive,semantic,—,semantic,True,False,0
 Mut44-openmc-runner-clamp-x-offset-positive,semantic,—,error,True,False,1
 Mut45-openmoc-runner-ignore-temperature,semantic,—,semantic,True,True,0
 Mut46-openmc-runner-ignore-temperature,semantic,—,semantic,True,True,0
+Mut47-openmoc-runner-tally-y-sign-bucket,semantic,—,semantic,True,False,0

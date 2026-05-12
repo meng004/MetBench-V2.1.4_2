@@ -148,6 +148,70 @@
       "k_eff_std": 0.0014905864482547826,
       "factor": 1.5,
       "source_case": "SUT/openmoc/sample/pincell.json"
+    },
+    "openmoc-pincell-mirror-x-tally": {
+      "k_eff": 1.1027016169736694,
+      "k_eff_std": 0.0,
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell-offcentre.json",
+      "flux_per_cell": {
+        "fuel": [
+          64.86702728271484,
+          22.795103073120117
+        ],
+        "moderator": [
+          64.50758361816406,
+          23.014171600341797
+        ]
+      }
+    },
+    "openmc-pincell-mirror-x-tally": {
+      "k_eff": 1.098077878234572,
+      "k_eff_std": 0.0018005599517480543,
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell-offcentre.json",
+      "flux_per_cell": {
+        "fuel": [
+          17.936419618980516,
+          6.271595336081807
+        ],
+        "moderator": [
+          41.94968803396489,
+          14.987361033544364
+        ]
+      }
+    },
+    "openmoc-pincell-mirror-y-tally": {
+      "k_eff": 1.1027113849239967,
+      "k_eff_std": 0.0,
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell-offcentre.json",
+      "flux_per_cell": {
+        "fuel": [
+          64.86653900146484,
+          22.79512596130371
+        ],
+        "moderator": [
+          64.50711059570312,
+          23.014196395874023
+        ]
+      }
+    },
+    "openmc-pincell-mirror-y-tally": {
+      "k_eff": 1.0955540690024426,
+      "k_eff_std": 0.001858624921764335,
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell-offcentre.json",
+      "flux_per_cell": {
+        "fuel": [
+          17.918908225409147,
+          6.280864583744124
+        ],
+        "moderator": [
+          41.89847195498548,
+          15.014361033569736
+        ]
+      }
     }
   },
   "factor": 1.5,

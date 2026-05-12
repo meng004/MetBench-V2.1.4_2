@@ -307,17 +307,34 @@ OpenMOC's `CPUSolver` power iteration (narrow non-physical
 convergence basins under specific moderator-absorption / cell-extent
 configurations). Phase-2 catches it via the new MR14 cross-program
 report — exactly the NOETHER `m_cmp` MetaPattern slot the original
-Phase-1 catalogue did not exercise. So the historical-bug detection
-record has improved from **1/3** (Phase-1) to **2/4** (Phase-2),
-with the new detection being a previously-unknown bug rather than a
-known fix commit.
+Phase-1 catalogue did not exercise.
 
-Phase 2 has not yet covered:
+**Phase-3 PR-1 update (Family A tally-symmetry)**: per-cell flux
+tally output added to both runners, plus `flux-pointwise-approx`
+assertion and four mirror-tally scenarios. Mut47 (OpenMOC y-sign
+bucketing of FSR fluxes) is invisible to every k_eff-based MR but
+detected by MR02-tally. Covers the Case-3 "tally-export corruption
+invisible to eigenvalue MRs" pattern; the OpenMC twin slot is
+documented as deferred (the simplest CellFilter swap mutations turn
+out tally-symmetric).
 
-1. **MaterialTemperatureScaling** MR family — would cover Case 2.
-2. **Tally-symmetry** MR family (rotation / reflection on distribcell
-   outputs) — would cover Case 3.
+**Phase-3 PR-2 candidate (Family B temperature)**: MR-T
+`RaiseFuelTemperature` already landed; Mut45/Mut46 close the
+Case-2 "plumbing-bypass" pattern with a `less` assertion that
+catches "runner reads JSON field but discards it."
 
-Both fit MetBench's `MrTransformation(name, parameters)` taxonomy and
-would land entirely in `SUT/*` + new input adapters; no changes to
-the launcher facade or C# layer are required.
+Historical-bug detection record:
+
+| Stage | Detected | Reason for the others |
+|-------|---------:|-----------------------|
+| Phase-1 | 1 / 3 | Cases 2, 3 out-of-coverage |
+| Phase-2 | 2 / 4 | Case 2, 3 still uncovered; Case 4 (new finding) detected |
+| **Phase-3 PR-1 (this commit)** | **3 / 4** | Case 2 plumbing covered by MR-T; Case 3 tally-style covered by MR02-tally; Case 4 by MR14 |
+
+Closing 4/4 needs either (a) the full B.2 multi-temperature OpenMC
+integration (covers a stricter form of Case 2), or (b) a
+2×2-pin-assembly distribcell MR (covers Case 3's exact code path).
+Both are net-new SUT-capability extensions rather than coverage
+remediation — see
+[`docs/superpowers/plans/2026-05-13-stage5-phase3-tallies-and-temperature.md`](../superpowers/plans/2026-05-13-stage5-phase3-tallies-and-temperature.md)
+for the design.

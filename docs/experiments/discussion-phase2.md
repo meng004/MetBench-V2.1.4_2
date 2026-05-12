@@ -121,6 +121,80 @@ real value is in catching mutations that *invert* this monotonicity
 direction (e.g., a future "scale wrong material" bug analogous to Mut14
 but on sigma_t) rather than as a high-rate detector.
 
+## Phase-3 Family A — Tally-symmetry MRs (Case 3 coverage)
+
+Phase-3 plan delivered: per-cell scalar flux tally output and a
+mirror-invariance MR family that catches tally-export bugs which
+preserve k_eff. The Phase-2 hand-off doc spelled out the design;
+this commit lands the implementation.
+
+### Runner changes (backward-compatible)
+
+Both runners now emit `flux_per_cell` in the result JSON:
+
+```json
+"flux_per_cell": {
+  "fuel":      [<group-0-flux>, <group-1-flux>],
+  "moderator": [<group-0-flux>, <group-1-flux>]
+}
+```
+
+* OpenMOC: walks the FSR list, dispatches by `cell.getId()`, sums
+  scalar flux per group via `solver.getFlux(fsr, group_index)`.
+* OpenMC: builds `openmc.Tally` with `CellFilter([fuel, mod])` ×
+  `EnergyFilter([1e-5, 0.625, 2e7])`, reads from the statepoint
+  post-run, reverses energy axis so MetBench's [fast, thermal]
+  convention matches OpenMOC's.
+
+Existing samples / scenarios pass through identically — the flux
+field is additive, not replacing anything.
+
+### New scenarios + assertion
+
+Four scenarios on `pincell-offcentre.json`:
+
+| ID | Solver | Transform |
+|---|---|---|
+| openmoc-pincell-mirror-x-tally | openmoc | MirrorX |
+| openmc-pincell-mirror-x-tally | openmc | MirrorX |
+| openmoc-pincell-mirror-y-tally | openmoc | MirrorY |
+| openmc-pincell-mirror-y-tally | openmc | MirrorY |
+
+Assertion: **`flux-pointwise-approx`** — `max |Δflux| / max(|src|,
+|flw|, ε) ≤ tolerance_rel` over every (cell, group) entry.
+OpenMOC tolerance 1e-3 (deterministic); OpenMC 0.05 (3·σ on per-
+cell flux estimates at 5000 particles).
+
+### Mut47 — tally-only OpenMOC bug
+
+Replaces the cell-ID dispatch in OpenMOC's tally extraction with
+y-sign bucketing. Source case (fuel at y=-0.08) buckets fuel
+correctly; MirrorX follow-up (fuel at y=+0.08) swaps fuel and
+moderator in the output dict. **k_eff is unaffected** (mutation
+runs post-solve), so no Phase-1/Phase-2 MR sees the bug.
+
+Matrix outcome:
+
+| MR | Mut47 verdict |
+|----|---------------|
+| All Phase-1 + Phase-2 k_eff-based MRs | miss (every single one) |
+| **MR02-tally (openmoc-pincell-mirror-x-tally)** | **detected** |
+| MR03-tally (openmoc-pincell-mirror-y-tally) | miss (the y-sign bucketing is invariant under MirrorY, which only flips x_offset) |
+
+Historical-bug coverage now reaches **3/4**: the Case-3-class
+"tally-export bug invisible to eigenvalue MRs" pattern is now
+detected by an actual MR scenario. Mut00 false-positive rate stays
+**0/27**.
+
+OpenMC twin of Mut47 deferred: the simplest swap-the-CellFilter
+patches turn out to be tally-symmetric (the post-statepoint
+extraction matches by cell ID rather than filter index, so the
+output dict ends up correct regardless). A real OpenMC tally-export
+bug analog would need either (a) plumbing fuel-cell geometric
+position into the post-statepoint loop, or (b) mutating the openmc
+binary itself — both out of MetBench's MR-matrix scope. Phase-3
+PR-1 ships the OpenMOC-only demo.
+
 ## Tolerance-aware greater/less assertions (Phase-1 hand-off completed)
 
 Phase-1's discussion file flagged "tolerance-aware GreaterThan /

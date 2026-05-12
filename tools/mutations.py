@@ -890,6 +890,50 @@ Mut46 = Mutation(
 )
 
 
+# ---------------------------------------------------------------------------
+# Phase-3 Family A: tally-only mutations (closes historical Case 3 coverage gap)
+#
+# Both mutants below break per-cell flux tally export without touching the
+# eigenvalue calculation. The MR they break is `flux-pointwise-approx`
+# on the mirror MRs (MR02-tally / MR03-tally). Phase-1 / Phase-2 MRs that
+# only watch k_eff cannot see them — exactly the structural gap that the
+# upstream OpenMC PR #3708 bug exhibits (distribcell tally group-name
+# collision silently overwrites subdomains while k_eff stays correct).
+# ---------------------------------------------------------------------------
+
+Mut47 = Mutation(
+    id="Mut47-openmoc-runner-tally-y-sign-bucket",
+    target_file="SUT/openmoc/openmoc_runner.py",
+    description="Replace cell-id-based tally bucketing with y-sign-based bucketing.",
+    rationale="Tally-export bug analogous to OpenMC PR #3708 distribcell "
+              "group-name collision: assigns FSR fluxes to fuel/moderator "
+              "buckets based on FSR centroid y-sign instead of containing "
+              "cell ID. Source case (fuel offset y=-0.08) buckets correctly; "
+              "MirrorX follow-up (fuel offset y=+0.08) gets fuel and "
+              "moderator swapped in the output dict. k_eff unaffected. "
+              "Caught by `flux-pointwise-approx` on MR02-tally / MR03-tally, "
+              "invisible to every other MR.",
+    predicted_classification="semantic",
+    predicted_detector=("tally_mirror",),
+    apply=_replace_exactly_once(
+        '        bucket = "fuel" if cell.getId() == fuel_id else (\n'
+        '                 "moderator" if cell.getId() == mod_id else None)',
+        '        # MUTATION Mut47 — bucket by FSR centroid y-sign instead of cell id\n'
+        '        _centroid = geom.getFSRCentroid(fsr)\n'
+        '        bucket = "fuel" if _centroid.getY() <= 0 else "moderator"',
+    ),
+)
+
+# Note: an OpenMC twin of Mut47 is genuinely hard to construct without
+# either (a) extending the runner to plumb fuel-cell geometric position
+# into the post-statepoint extraction, or (b) mutating the openmc-binary
+# side which is out of MetBench's scope. The simplest swap-the-CellFilter
+# patches turn out to be tally-symmetric (extraction matches by cell ID,
+# not by filter index), so they don't surface as MR violations either.
+# Phase-3 PR-1 ships the OpenMOC-only Family-A demo; the OpenMC twin
+# slot is documented as deferred in PHASE2.md / discussion-phase2.md.
+
+
 ALL_MUTATIONS: tuple[Mutation, ...] = (
     Mut00,
     Mut01, Mut02, Mut03, Mut04, Mut05, Mut06,
@@ -904,6 +948,7 @@ ALL_MUTATIONS: tuple[Mutation, ...] = (
     Mut39, Mut40,
     Mut41, Mut42, Mut43, Mut44,
     Mut45, Mut46,
+    Mut47,
 )
 
 

@@ -362,6 +362,67 @@ SCENARIOS: list[dict] = [
         "noether_id": "MR03",
         "meta_pattern": "m_inv",
     },
+    # ----- Phase 3 Family A: tally-symmetry MRs (closes historical Case 3 gap) -----
+    # Re-uses the off-centre pin-cell + MirrorX/MirrorY adapters from Phase 2.
+    # Same physical transformation, different assertion: instead of testing
+    # k_eff invariance, we test that the per-cell scalar flux dict the
+    # runners now emit is pointwise invariant under the mirror.
+    {
+        "id": "openmoc-pincell-mirror-x-tally",
+        "solver": "openmoc",
+        "transform": "MirrorX",
+        "adapter": "openmoc/openmoc_input_adapter_mirror_x.py",
+        "runner": "openmoc/openmoc_runner.py",
+        "source_case": "openmoc/sample/pincell-offcentre.json",
+        "assertion": "flux-pointwise-approx",
+        "tolerance_rel": 1e-3,    # OpenMOC: tracking-discretization spread on rotated/mirrored grid
+        "value": "flux_per_cell",
+        "phase": 3,
+        "noether_id": "MR02-tally",
+        "meta_pattern": "m_inv",
+    },
+    {
+        "id": "openmc-pincell-mirror-x-tally",
+        "solver": "openmc",
+        "transform": "MirrorX",
+        "adapter": "openmc/openmc_input_adapter_mirror_x.py",
+        "runner": "openmc/openmc_runner.py",
+        "source_case": "openmoc/sample/pincell-offcentre.json",
+        "assertion": "flux-pointwise-approx",
+        "tolerance_rel": 0.05,    # OpenMC: 3·σ on per-cell flux estimates at 5k particles
+        "value": "flux_per_cell",
+        "phase": 3,
+        "noether_id": "MR02-tally",
+        "meta_pattern": "m_inv",
+    },
+    {
+        "id": "openmoc-pincell-mirror-y-tally",
+        "solver": "openmoc",
+        "transform": "MirrorY",
+        "adapter": "openmoc/openmoc_input_adapter_mirror_y.py",
+        "runner": "openmoc/openmoc_runner.py",
+        "source_case": "openmoc/sample/pincell-offcentre.json",
+        "assertion": "flux-pointwise-approx",
+        "tolerance_rel": 1e-3,
+        "value": "flux_per_cell",
+        "phase": 3,
+        "noether_id": "MR03-tally",
+        "meta_pattern": "m_inv",
+    },
+    {
+        "id": "openmc-pincell-mirror-y-tally",
+        "solver": "openmc",
+        "transform": "MirrorY",
+        "adapter": "openmc/openmc_input_adapter_mirror_y.py",
+        "runner": "openmc/openmc_runner.py",
+        "source_case": "openmoc/sample/pincell-offcentre.json",
+        "assertion": "flux-pointwise-approx",
+        "tolerance_rel": 0.05,
+        "value": "flux_per_cell",
+        "phase": 3,
+        "noether_id": "MR03-tally",
+        "meta_pattern": "m_inv",
+    },
     # ----- Phase 3 stub: temperature MR family (closes historical Case 2 gap) -----
     {
         "id": "openmoc-pincell-fuel-temperature",
@@ -839,6 +900,31 @@ def evaluate_mr(cell: dict, scenario: dict) -> bool:
         if k_src == 0:
             return k_flw == 0
         return abs(k_flw - k_src) <= tol * abs(k_src)
+    if assertion == "flux-pointwise-approx":
+        # Phase-3 tally-symmetry MRs. Cell stores `flux_per_cell` dicts at
+        # `k_source_flux` and `k_followup_flux` (set by matrix_one from the
+        # runner output). Pass iff every (cell, group) entry satisfies
+        # |Δflux| / max(|src|, |flw|, ε) ≤ tolerance_rel. Targets tally-export
+        # bugs that don't shift k_eff (e.g. cell-name collisions à la
+        # OpenMC PR #3708) but corrupt per-cell flux distributions.
+        src_flux = cell.get("k_source_flux") or {}
+        flw_flux = cell.get("k_followup_flux") or {}
+        if not src_flux or not flw_flux:
+            # No flux export available — treat as "MR cannot evaluate" → fail
+            # safely so the user notices the missing data.
+            return False
+        tol = float(scenario.get("tolerance_rel", 1e-4) or 1e-4)
+        for cell_name, src_groups in src_flux.items():
+            if cell_name == "error" or cell_name not in flw_flux:
+                return False
+            flw_groups = flw_flux[cell_name]
+            if not isinstance(src_groups, list) or not isinstance(flw_groups, list):
+                continue
+            for s, f in zip(src_groups, flw_groups):
+                denom = max(abs(s), abs(f), 1e-12)
+                if abs(f - s) / denom > tol:
+                    return False
+        return True
     if assertion == "variance-ratio":
         target = float(scenario["target_ratio"])
         tol = float(scenario.get("tolerance_rel", 0.30))
@@ -909,6 +995,14 @@ def matrix_one(mutation: Mutation, args: argparse.Namespace) -> dict:
                     "assertion": sc["assertion"],
                     "factor": effective_factor,
                 })
+                # Phase-3 tally-symmetry: stash per-cell flux dicts when the
+                # runners emit them. Only cost is a few hundred bytes per
+                # cell; pays off because `evaluate_mr` reads them for the
+                # `flux-pointwise-approx` assertion.
+                if "flux_per_cell" in src:
+                    cell["k_source_flux"] = src["flux_per_cell"]
+                if "flux_per_cell" in flw:
+                    cell["k_followup_flux"] = flw["flux_per_cell"]
                 passed = evaluate_mr(cell, sc)
                 cell["assertion_passed"] = passed
                 cell["outcome"] = "missed" if passed else "detected"

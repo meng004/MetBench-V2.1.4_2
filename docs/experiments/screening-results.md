@@ -18,15 +18,15 @@ as a transparency artifact. The discrepancy between the two columns below shows
 exactly which mutations would have been miss-classified by the source-only rule.
 
 
-**Discard rate**: 4 of 47 candidates (8.5%) classified equivalent under the matrix rule.
+**Discard rate**: 4 of 48 candidates (8.3%) classified equivalent under the matrix rule.
 
 
-Classification counts: semantic=41, equivalent=4, error=2, unknown=0
+Classification counts: semantic=41, equivalent=4, error=3, unknown=0
 
 
 | mutation | predicted | source-only signal | matrix signal | source shifted? | follow-up shifted? | err cells |
 |---|---|---|---|---|---|---|
-| Mut00-identity | equivalent | equivalent | semantic | True | False | 0 |
+| Mut00-identity | equivalent | equivalent | error | True | False | 1 |
 | Mut01-openmoc-runner-chi-zero | semantic | semantic | semantic | True | True | 0 |
 | Mut02-openmoc-runner-sigt-from-siga | semantic | semantic | semantic | True | True | 0 |
 | Mut03-openmoc-runner-swap-fuel-moderator | semantic | semantic | semantic | True | True | 0 |
@@ -73,6 +73,7 @@ Classification counts: semantic=41, equivalent=4, error=2, unknown=0
 | Mut44-openmc-runner-clamp-x-offset-positive | semantic | — | error | True | False | 1 |
 | Mut45-openmoc-runner-ignore-temperature | semantic | — | semantic | True | True | 0 |
 | Mut46-openmc-runner-ignore-temperature | semantic | — | semantic | True | True | 0 |
+| Mut47-openmoc-runner-tally-y-sign-bucket | semantic | — | semantic | True | False | 0 |
 
 ## Discarded (equivalent) mutants — why?
 

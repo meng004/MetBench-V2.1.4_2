@@ -7,33 +7,37 @@ MR factor: 1.5. Status `not-affected` means the mutation patches a file the scen
 
 | Scenario | n (semantic mutants affecting it) | detected | missed | errors | rate | 95% CI |
 |---|---|---|---|---|---|---|
-| openmoc-pincell-nu-sigma-f | 16 | 7 | 9 | 0 | 43.8% | [23.1%, 66.8%] |
+| openmoc-pincell-nu-sigma-f | 17 | 7 | 10 | 0 | 41.2% | [21.6%, 64.0%] |
 | openmc-pincell-nu-sigma-f | 14 | 4 | 10 | 0 | 28.6% | [11.7%, 54.6%] |
-| openmoc-pincell-sigma-a | 14 | 4 | 10 | 0 | 28.6% | [11.7%, 54.6%] |
+| openmoc-pincell-sigma-a | 15 | 4 | 11 | 0 | 26.7% | [10.9%, 52.0%] |
 | openmc-pincell-sigma-a | 11 | 3 | 8 | 0 | 27.3% | [9.7%, 56.6%] |
-| openmoc-pincell-group-permute | 12 | 4 | 8 | 0 | 33.3% | [13.8%, 60.9%] |
-| openmoc-pincell-fuel-sigma-t | 11 | 1 | 10 | 0 | 9.1% | [1.6%, 37.7%] |
-| openmoc-pincell-moderator-sigma-a | 12 | 3 | 9 | 0 | 25.0% | [8.9%, 53.2%] |
+| openmoc-pincell-group-permute | 13 | 4 | 9 | 0 | 30.8% | [12.7%, 57.6%] |
+| openmoc-pincell-fuel-sigma-t | 12 | 1 | 11 | 0 | 8.3% | [1.5%, 35.4%] |
+| openmoc-pincell-moderator-sigma-a | 13 | 3 | 10 | 0 | 23.1% | [8.2%, 50.3%] |
 | openmc-pincell-group-permute | 11 | 3 | 8 | 0 | 27.3% | [9.7%, 56.6%] |
 | openmc-pincell-fuel-sigma-t | 10 | 1 | 9 | 0 | 10.0% | [1.8%, 40.4%] |
 | openmc-pincell-moderator-sigma-a | 10 | 3 | 7 | 0 | 30.0% | [10.8%, 60.3%] |
-| openmoc-pincell-fuel-sigma-s | 12 | 5 | 7 | 0 | 41.7% | [19.3%, 68.0%] |
+| openmoc-pincell-fuel-sigma-s | 13 | 5 | 8 | 0 | 38.5% | [17.7%, 64.5%] |
 | openmc-pincell-fuel-sigma-s | 11 | 4 | 7 | 0 | 36.4% | [15.2%, 64.6%] |
-| openmoc-pincell-fuel-radius | 12 | 5 | 7 | 0 | 41.7% | [19.3%, 68.0%] |
+| openmoc-pincell-fuel-radius | 13 | 5 | 8 | 0 | 38.5% | [17.7%, 64.5%] |
 | openmc-pincell-fuel-radius | 11 | 3 | 8 | 0 | 27.3% | [9.7%, 56.6%] |
 | openmc-pincell-particles-refine | 9 | 3 | 6 | 0 | 33.3% | [12.1%, 64.6%] |
-| openmoc-pincell-rotate-90 | 4 | 1 | 3 | 0 | 25.0% | [4.6%, 69.9%] |
+| openmoc-pincell-rotate-90 | 5 | 1 | 4 | 0 | 20.0% | [3.6%, 62.4%] |
 | openmc-pincell-rotate-90 | 9 | 2 | 7 | 0 | 22.2% | [6.3%, 54.7%] |
-| openmoc-pincell-mirror-x | 3 | 1 | 2 | 0 | 33.3% | [6.1%, 79.2%] |
+| openmoc-pincell-mirror-x | 4 | 1 | 3 | 0 | 25.0% | [4.6%, 69.9%] |
 | openmc-pincell-mirror-x | 3 | 0 | 3 | 0 | 0.0% | [0.0%, 56.2%] |
-| openmoc-pincell-mirror-y | 3 | 1 | 2 | 0 | 33.3% | [6.1%, 79.2%] |
+| openmoc-pincell-mirror-y | 4 | 1 | 3 | 0 | 25.0% | [4.6%, 69.9%] |
 | openmc-pincell-mirror-y | 3 | 0 | 3 | 0 | 0.0% | [0.0%, 56.2%] |
-| openmoc-pincell-fuel-temperature | 1 | 1 | 0 | 0 | 100.0% | [20.7%, 100.0%] |
+| openmoc-pincell-mirror-x-tally | 1 | 1 | 0 | 0 | 100.0% | [20.7%, 100.0%] |
+| openmc-pincell-mirror-x-tally | 0 | 0 | 0 | 0 | — | — |
+| openmoc-pincell-mirror-y-tally | 1 | 0 | 1 | 0 | 0.0% | [0.0%, 79.3%] |
+| openmc-pincell-mirror-y-tally | 0 | 0 | 0 | 0 | — | — |
+| openmoc-pincell-fuel-temperature | 2 | 1 | 1 | 0 | 50.0% | [9.5%, 90.5%] |
 | openmc-pincell-fuel-temperature | 1 | 1 | 0 | 0 | 100.0% | [20.7%, 100.0%] |
 
 ## Identity false-positive sanity
 
-Mut00 (identity) detected on 0 / 23 scenarios. Expected 0 — ✓ PASS.
+Mut00 (identity) detected on 0 / 27 scenarios. Expected 0 — ✓ PASS.
 
 
 ## Per-mutation detail
@@ -54,13 +58,17 @@ Mut00 (identity) detected on 0 / 23 scenarios. Expected 0 — ✓ PASS.
 | Mut00-identity | openmc-pincell-fuel-sigma-s | missed | 1.12450 | 1.09326 | 0.97222 |
 | Mut00-identity | openmoc-pincell-fuel-radius | missed | 1.13306 | 1.17476 | 1.03681 |
 | Mut00-identity | openmc-pincell-fuel-radius | missed | 1.12450 | 1.17086 | 1.04123 |
-| Mut00-identity | openmc-pincell-particles-refine | missed | 1.12450 | 1.12477 | 1.00024 |
+| Mut00-identity | openmc-pincell-particles-refine | _error_ |  |  |  |
 | Mut00-identity | openmoc-pincell-rotate-90 | missed | 1.15950 | 1.15949 | 0.99999 |
 | Mut00-identity | openmc-pincell-rotate-90 | missed | 1.15438 | 1.15354 | 0.99927 |
 | Mut00-identity | openmoc-pincell-mirror-x | missed | 1.10271 | 1.10270 | 0.99999 |
 | Mut00-identity | openmc-pincell-mirror-x | missed | 1.09602 | 1.09808 | 1.00188 |
 | Mut00-identity | openmoc-pincell-mirror-y | missed | 1.10271 | 1.10271 | 1.00000 |
 | Mut00-identity | openmc-pincell-mirror-y | missed | 1.09602 | 1.09555 | 0.99958 |
+| Mut00-identity | openmoc-pincell-mirror-x-tally | missed | 1.10271 | 1.10270 | 0.99999 |
+| Mut00-identity | openmc-pincell-mirror-x-tally | missed | 1.09602 | 1.09808 | 1.00188 |
+| Mut00-identity | openmoc-pincell-mirror-y-tally | missed | 1.10271 | 1.10271 | 1.00000 |
+| Mut00-identity | openmc-pincell-mirror-y-tally | missed | 1.09602 | 1.09555 | 0.99958 |
 | Mut00-identity | openmoc-pincell-fuel-temperature | missed | 1.13306 | 1.11566 | 0.98464 |
 | Mut00-identity | openmc-pincell-fuel-temperature | missed | 1.12450 | 1.10966 | 0.98680 |
 | Mut01-openmoc-runner-chi-zero | openmoc-pincell-nu-sigma-f | detected | 0.00059 | 0.00059 | 1.00000 |
@@ -753,6 +761,33 @@ Mut00 (identity) detected on 0 / 23 scenarios. Expected 0 — ✓ PASS.
 | Mut46-openmc-runner-ignore-temperature | openmc-pincell-mirror-y | missed | 1.09602 | 1.09555 | 0.99958 |
 | Mut46-openmc-runner-ignore-temperature | openmoc-pincell-fuel-temperature | _not-affected_ |  |  |  |
 | Mut46-openmc-runner-ignore-temperature | openmc-pincell-fuel-temperature | detected | 1.12450 | 1.12450 | 1.00000 |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmoc-pincell-nu-sigma-f | missed | 1.13306 | 1.69990 | 1.50028 |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmoc-pincell-sigma-a | missed | 1.13306 | 0.80690 | 0.71215 |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmc-pincell-sigma-a | _not-affected_ |  |  |  |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmoc-pincell-group-permute | missed | 1.13306 | 1.13306 | 1.00000 |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmoc-pincell-fuel-sigma-t | missed | 1.13306 | 0.11127 | 0.09821 |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmoc-pincell-moderator-sigma-a | missed | 1.13306 | 0.47635 | 0.42041 |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmc-pincell-group-permute | _not-affected_ |  |  |  |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmoc-pincell-fuel-sigma-s | missed | 1.13306 | 1.09185 | 0.96363 |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmoc-pincell-fuel-radius | missed | 1.13306 | 1.17476 | 1.03681 |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmc-pincell-fuel-radius | _not-affected_ |  |  |  |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmc-pincell-particles-refine | _not-affected_ |  |  |  |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmoc-pincell-rotate-90 | missed | 1.15950 | 1.15949 | 0.99999 |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmc-pincell-rotate-90 | _not-affected_ |  |  |  |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmoc-pincell-mirror-x | missed | 1.10271 | 1.10270 | 0.99999 |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmc-pincell-mirror-x | _not-affected_ |  |  |  |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmoc-pincell-mirror-y | missed | 1.10271 | 1.10271 | 1.00000 |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmc-pincell-mirror-y | _not-affected_ |  |  |  |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmoc-pincell-mirror-x-tally | detected | 1.10271 | 1.10270 | 0.99999 |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmc-pincell-mirror-x-tally | _not-affected_ |  |  |  |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmoc-pincell-mirror-y-tally | missed | 1.10271 | 1.10271 | 1.00000 |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmc-pincell-mirror-y-tally | _not-affected_ |  |  |  |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmoc-pincell-fuel-temperature | missed | 1.13306 | 1.11566 | 0.98464 |
+| Mut47-openmoc-runner-tally-y-sign-bucket | openmc-pincell-fuel-temperature | _not-affected_ |  |  |  |
 
 ## Cross-solver agreement (Cohen's κ)
 
