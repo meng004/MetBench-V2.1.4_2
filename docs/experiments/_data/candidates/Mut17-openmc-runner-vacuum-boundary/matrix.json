@@ -33,8 +33,8 @@
       "ratio": 0.9894458962707238,
       "assertion": "less",
       "factor": 1.5,
-      "assertion_passed": true,
-      "outcome": "missed"
+      "assertion_passed": false,
+      "outcome": "detected"
     },
     {
       "scenario_id": "openmoc-pincell-group-permute",

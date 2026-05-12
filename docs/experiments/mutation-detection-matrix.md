@@ -10,17 +10,17 @@ MR factor: 1.5. Status `not-affected` means the mutation patches a file the scen
 | openmoc-pincell-nu-sigma-f | 15 | 7 | 8 | 0 | 46.7% | [24.8%, 69.9%] |
 | openmc-pincell-nu-sigma-f | 13 | 4 | 9 | 0 | 30.8% | [12.7%, 57.6%] |
 | openmoc-pincell-sigma-a | 13 | 4 | 9 | 0 | 30.8% | [12.7%, 57.6%] |
-| openmc-pincell-sigma-a | 10 | 2 | 8 | 0 | 20.0% | [5.7%, 51.0%] |
+| openmc-pincell-sigma-a | 10 | 3 | 7 | 0 | 30.0% | [10.8%, 60.3%] |
 | openmoc-pincell-group-permute | 11 | 4 | 7 | 0 | 36.4% | [15.2%, 64.6%] |
 | openmoc-pincell-fuel-sigma-t | 10 | 1 | 9 | 0 | 10.0% | [1.8%, 40.4%] |
 | openmoc-pincell-moderator-sigma-a | 11 | 3 | 8 | 0 | 27.3% | [9.7%, 56.6%] |
 | openmc-pincell-group-permute | 10 | 3 | 7 | 0 | 30.0% | [10.8%, 60.3%] |
 | openmc-pincell-fuel-sigma-t | 9 | 1 | 8 | 0 | 11.1% | [2.0%, 43.5%] |
-| openmc-pincell-moderator-sigma-a | 9 | 2 | 7 | 0 | 22.2% | [6.3%, 54.7%] |
+| openmc-pincell-moderator-sigma-a | 9 | 3 | 6 | 0 | 33.3% | [12.1%, 64.6%] |
 | openmoc-pincell-fuel-sigma-s | 11 | 5 | 6 | 0 | 45.5% | [21.3%, 72.0%] |
-| openmc-pincell-fuel-sigma-s | 10 | 2 | 8 | 0 | 20.0% | [5.7%, 51.0%] |
+| openmc-pincell-fuel-sigma-s | 10 | 4 | 6 | 0 | 40.0% | [16.8%, 68.7%] |
 | openmoc-pincell-fuel-radius | 11 | 5 | 6 | 0 | 45.5% | [21.3%, 72.0%] |
-| openmc-pincell-fuel-radius | 10 | 2 | 8 | 0 | 20.0% | [5.7%, 51.0%] |
+| openmc-pincell-fuel-radius | 10 | 3 | 7 | 0 | 30.0% | [10.8%, 60.3%] |
 | openmc-pincell-particles-refine | 8 | 3 | 5 | 0 | 37.5% | [13.7%, 69.4%] |
 | openmoc-pincell-rotate-90 | 3 | 1 | 2 | 0 | 33.3% | [6.1%, 79.2%] |
 | openmc-pincell-rotate-90 | 8 | 2 | 6 | 0 | 25.0% | [7.1%, 59.1%] |
@@ -39,26 +39,26 @@ Mut00 (identity) detected on 0 / 21 scenarios. Expected 0 — ✓ PASS.
 | mutation | scenario | outcome | k_source | k_followup | ratio |
 |---|---|---|---|---|---|
 | Mut00-identity | openmoc-pincell-nu-sigma-f | missed | 1.13306 | 1.69990 | 1.50028 |
-| Mut00-identity | openmc-pincell-nu-sigma-f | missed | 1.12450 | 1.68996 | 1.50286 |
+| Mut00-identity | openmc-pincell-nu-sigma-f | _skipped-no-openmc_ |  |  |  |
 | Mut00-identity | openmoc-pincell-sigma-a | missed | 1.13306 | 0.80690 | 0.71215 |
-| Mut00-identity | openmc-pincell-sigma-a | missed | 1.12450 | 0.80272 | 0.71384 |
+| Mut00-identity | openmc-pincell-sigma-a | _skipped-no-openmc_ |  |  |  |
 | Mut00-identity | openmoc-pincell-group-permute | missed | 1.13306 | 1.13306 | 1.00000 |
 | Mut00-identity | openmoc-pincell-fuel-sigma-t | missed | 1.13306 | 0.11127 | 0.09821 |
 | Mut00-identity | openmoc-pincell-moderator-sigma-a | missed | 1.13306 | 0.47635 | 0.42041 |
-| Mut00-identity | openmc-pincell-group-permute | missed | 1.12450 | 1.12601 | 1.00134 |
-| Mut00-identity | openmc-pincell-fuel-sigma-t | missed | 1.12450 | 0.11292 | 0.10042 |
-| Mut00-identity | openmc-pincell-moderator-sigma-a | missed | 1.12450 | 0.96831 | 0.86110 |
+| Mut00-identity | openmc-pincell-group-permute | _skipped-no-openmc_ |  |  |  |
+| Mut00-identity | openmc-pincell-fuel-sigma-t | _skipped-no-openmc_ |  |  |  |
+| Mut00-identity | openmc-pincell-moderator-sigma-a | _skipped-no-openmc_ |  |  |  |
 | Mut00-identity | openmoc-pincell-fuel-sigma-s | missed | 1.13306 | 1.09185 | 0.96363 |
-| Mut00-identity | openmc-pincell-fuel-sigma-s | missed | 1.12450 | 1.09326 | 0.97222 |
+| Mut00-identity | openmc-pincell-fuel-sigma-s | _skipped-no-openmc_ |  |  |  |
 | Mut00-identity | openmoc-pincell-fuel-radius | missed | 1.13306 | 1.17476 | 1.03681 |
-| Mut00-identity | openmc-pincell-fuel-radius | missed | 1.12450 | 1.17086 | 1.04123 |
-| Mut00-identity | openmc-pincell-particles-refine | missed | 1.12450 | 1.12477 | 1.00024 |
+| Mut00-identity | openmc-pincell-fuel-radius | _skipped-no-openmc_ |  |  |  |
+| Mut00-identity | openmc-pincell-particles-refine | _skipped-no-openmc_ |  |  |  |
 | Mut00-identity | openmoc-pincell-rotate-90 | missed | 1.15950 | 1.15949 | 0.99999 |
-| Mut00-identity | openmc-pincell-rotate-90 | missed | 1.15438 | 1.15354 | 0.99927 |
+| Mut00-identity | openmc-pincell-rotate-90 | _skipped-no-openmc_ |  |  |  |
 | Mut00-identity | openmoc-pincell-mirror-x | missed | 1.10271 | 1.10270 | 0.99999 |
-| Mut00-identity | openmc-pincell-mirror-x | missed | 1.09602 | 1.09808 | 1.00188 |
+| Mut00-identity | openmc-pincell-mirror-x | _skipped-no-openmc_ |  |  |  |
 | Mut00-identity | openmoc-pincell-mirror-y | missed | 1.10271 | 1.10271 | 1.00000 |
-| Mut00-identity | openmc-pincell-mirror-y | missed | 1.09602 | 1.09555 | 0.99958 |
+| Mut00-identity | openmc-pincell-mirror-y | _skipped-no-openmc_ |  |  |  |
 | Mut01-openmoc-runner-chi-zero | openmoc-pincell-nu-sigma-f | detected | 0.00059 | 0.00059 | 1.00000 |
 | Mut01-openmoc-runner-chi-zero | openmc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | Mut01-openmoc-runner-chi-zero | openmoc-pincell-sigma-a | missed | 0.00059 | 0.00051 | 0.85942 |
@@ -272,7 +272,7 @@ Mut00 (identity) detected on 0 / 21 scenarios. Expected 0 — ✓ PASS.
 | Mut17-openmc-runner-vacuum-boundary | openmoc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | Mut17-openmc-runner-vacuum-boundary | openmc-pincell-nu-sigma-f | missed | 0.00491 | 0.00738 | 1.50153 |
 | Mut17-openmc-runner-vacuum-boundary | openmoc-pincell-sigma-a | _not-affected_ |  |  |  |
-| Mut17-openmc-runner-vacuum-boundary | openmc-pincell-sigma-a | missed | 0.00491 | 0.00486 | 0.98945 |
+| Mut17-openmc-runner-vacuum-boundary | openmc-pincell-sigma-a | detected | 0.00491 | 0.00486 | 0.98945 |
 | Mut17-openmc-runner-vacuum-boundary | openmoc-pincell-group-permute | _not-affected_ |  |  |  |
 | Mut17-openmc-runner-vacuum-boundary | openmoc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
 | Mut17-openmc-runner-vacuum-boundary | openmoc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
@@ -295,11 +295,11 @@ Mut00 (identity) detected on 0 / 21 scenarios. Expected 0 — ✓ PASS.
 | Mut18-openmc-runner-batches-too-few | openmoc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
 | Mut18-openmc-runner-batches-too-few | openmc-pincell-group-permute | detected | 1.09187 | 1.22741 | 1.12414 |
 | Mut18-openmc-runner-batches-too-few | openmc-pincell-fuel-sigma-t | missed | 1.09187 | 0.11146 | 0.10208 |
-| Mut18-openmc-runner-batches-too-few | openmc-pincell-moderator-sigma-a | missed | 1.09187 | 0.99763 | 0.91370 |
+| Mut18-openmc-runner-batches-too-few | openmc-pincell-moderator-sigma-a | detected | 1.09187 | 0.99763 | 0.91370 |
 | Mut18-openmc-runner-batches-too-few | openmoc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
 | Mut18-openmc-runner-batches-too-few | openmc-pincell-fuel-sigma-s | detected | 1.09187 | 1.17034 | 1.07187 |
 | Mut18-openmc-runner-batches-too-few | openmoc-pincell-fuel-radius | _not-affected_ |  |  |  |
-| Mut18-openmc-runner-batches-too-few | openmc-pincell-fuel-radius | missed | 1.09187 | 1.13717 | 1.04149 |
+| Mut18-openmc-runner-batches-too-few | openmc-pincell-fuel-radius | detected | 1.09187 | 1.13717 | 1.04149 |
 | Mut18-openmc-runner-batches-too-few | openmc-pincell-particles-refine | detected | 1.09187 | 1.09187 | 1.00000 |
 | Mut18-openmc-runner-batches-too-few | openmoc-pincell-rotate-90 | _not-affected_ |  |  |  |
 | Mut18-openmc-runner-batches-too-few | openmc-pincell-rotate-90 | missed | 1.19271 | 1.18848 | 0.99645 |
@@ -331,7 +331,7 @@ Mut00 (identity) detected on 0 / 21 scenarios. Expected 0 — ✓ PASS.
 | Mut20-openmc-runner-chi-swap-groups | openmc-pincell-fuel-sigma-t | missed | 1.27937 | 0.29025 | 0.22687 |
 | Mut20-openmc-runner-chi-swap-groups | openmc-pincell-moderator-sigma-a | missed | 1.27937 | 1.09434 | 0.85538 |
 | Mut20-openmc-runner-chi-swap-groups | openmoc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
-| Mut20-openmc-runner-chi-swap-groups | openmc-pincell-fuel-sigma-s | missed | 1.27937 | 1.27837 | 0.99922 |
+| Mut20-openmc-runner-chi-swap-groups | openmc-pincell-fuel-sigma-s | detected | 1.27937 | 1.27837 | 0.99922 |
 | Mut20-openmc-runner-chi-swap-groups | openmoc-pincell-fuel-radius | _not-affected_ |  |  |  |
 | Mut20-openmc-runner-chi-swap-groups | openmc-pincell-fuel-radius | missed | 1.27937 | 1.33994 | 1.04735 |
 | Mut20-openmc-runner-chi-swap-groups | openmc-pincell-particles-refine | missed | 1.27937 | 1.27814 | 0.99905 |
@@ -560,10 +560,16 @@ Mut00 (identity) detected on 0 / 21 scenarios. Expected 0 — ✓ PASS.
 | Mut37-openmc-adapter-fuel-sigma-s-identity | openmc-pincell-fuel-sigma-t | _not-affected_ |  |  |  |
 | Mut37-openmc-adapter-fuel-sigma-s-identity | openmc-pincell-moderator-sigma-a | _not-affected_ |  |  |  |
 | Mut37-openmc-adapter-fuel-sigma-s-identity | openmoc-pincell-fuel-sigma-s | _not-affected_ |  |  |  |
-| Mut37-openmc-adapter-fuel-sigma-s-identity | openmc-pincell-fuel-sigma-s | missed | 1.12450 | 1.12450 | 1.00000 |
+| Mut37-openmc-adapter-fuel-sigma-s-identity | openmc-pincell-fuel-sigma-s | detected | 1.12450 | 1.12450 | 1.00000 |
 | Mut37-openmc-adapter-fuel-sigma-s-identity | openmoc-pincell-fuel-radius | _not-affected_ |  |  |  |
 | Mut37-openmc-adapter-fuel-sigma-s-identity | openmc-pincell-fuel-radius | _not-affected_ |  |  |  |
 | Mut37-openmc-adapter-fuel-sigma-s-identity | openmc-pincell-particles-refine | _not-affected_ |  |  |  |
+| Mut37-openmc-adapter-fuel-sigma-s-identity | openmoc-pincell-rotate-90 | _not-affected_ |  |  |  |
+| Mut37-openmc-adapter-fuel-sigma-s-identity | openmc-pincell-rotate-90 | _not-affected_ |  |  |  |
+| Mut37-openmc-adapter-fuel-sigma-s-identity | openmoc-pincell-mirror-x | _not-affected_ |  |  |  |
+| Mut37-openmc-adapter-fuel-sigma-s-identity | openmc-pincell-mirror-x | _not-affected_ |  |  |  |
+| Mut37-openmc-adapter-fuel-sigma-s-identity | openmoc-pincell-mirror-y | _not-affected_ |  |  |  |
+| Mut37-openmc-adapter-fuel-sigma-s-identity | openmc-pincell-mirror-y | _not-affected_ |  |  |  |
 | Mut38-openmc-adapter-fuel-radius-shrink | openmoc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | Mut38-openmc-adapter-fuel-radius-shrink | openmc-pincell-nu-sigma-f | _not-affected_ |  |  |  |
 | Mut38-openmc-adapter-fuel-radius-shrink | openmoc-pincell-sigma-a | _not-affected_ |  |  |  |
@@ -759,12 +765,12 @@ Pairs evaluated: 1 / 1. Cohen's κ = **1.000** (almost perfect).
 
 ### Phase-2 MR06 fuel-sigma-s identity adapter
 
-Pairs evaluated: 1 / 1. Cohen's κ = **0.000** (slight).
+Pairs evaluated: 1 / 1. Cohen's κ = **1.000** (almost perfect).
 
 
 | OpenMOC mutant | OpenMC mutant | OpenMOC outcome | OpenMC outcome |
 |---|---|---|---|
-| Mut32-openmoc-adapter-fuel-sigma-s-identity | Mut37-openmc-adapter-fuel-sigma-s-identity | detected | missed |
+| Mut32-openmoc-adapter-fuel-sigma-s-identity | Mut37-openmc-adapter-fuel-sigma-s-identity | detected | detected |
 
 
 ### Phase-2 MR08 fuel-radius direction inversion

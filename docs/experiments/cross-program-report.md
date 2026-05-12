@@ -60,21 +60,11 @@ For each matched-pair index (`MATCHED_PAIRS` in `mutation_study.py`), compares t
 Budget rule unchanged: `max(3·σ_OpenMC, 1.0%·k_OpenMC)`.
 
 
-**Summary**: 68 matched-pair-scenario rows, **19 disagreement**.
+**Summary**: 58 matched-pair-scenario rows, **17 disagreement**.
 
 
 | pair kind | scenario (transform) | OpenMOC mut | OpenMC mut | k(MOC mut) | k(MC mut) | σ(MC) | |Δk| | budget | verdict |
 |---|---|---|---|--:|--:|--:|--:|--:|--:|
-| identity-control | ScaleNuSigmaF | Mut00-identity | Mut00-identity | 1.69990 | 1.68996 | 0.00252 | 0.00994 | 0.01690 | agree |
-| identity-control | ScaleFuelSigmaA | Mut00-identity | Mut00-identity | 0.80690 | 0.80272 | 0.00132 | 0.00419 | 0.00803 | agree |
-| identity-control | PermuteEnergyGroups | Mut00-identity | Mut00-identity | 1.13306 | 1.12601 | 0.00178 | 0.00705 | 0.01126 | agree |
-| identity-control | ScaleFuelSigmaT | Mut00-identity | Mut00-identity | 0.11127 | 0.11292 | 0.00022 | 0.00165 | 0.00113 | **DISAGREE** |
-| identity-control | ScaleModeratorSigmaA | Mut00-identity | Mut00-identity | 0.47635 | 0.96831 | 0.00166 | 0.49196 | 0.00968 | **DISAGREE** |
-| identity-control | ScaleFuelSigmaS | Mut00-identity | Mut00-identity | 1.09185 | 1.09326 | 0.00195 | 0.00140 | 0.01093 | agree |
-| identity-control | ScaleFuelRadius | Mut00-identity | Mut00-identity | 1.17476 | 1.17086 | 0.00171 | 0.00390 | 0.01171 | agree |
-| identity-control | Rotate90 | Mut00-identity | Mut00-identity | 1.15949 | 1.15354 | 0.00193 | 0.00596 | 0.01154 | agree |
-| identity-control | MirrorX | Mut00-identity | Mut00-identity | 1.10270 | 1.09808 | 0.00180 | 0.00462 | 0.01098 | agree |
-| identity-control | MirrorY | Mut00-identity | Mut00-identity | 1.10271 | 1.09555 | 0.00186 | 0.00716 | 0.01096 | agree |
 | chi-swap | ScaleNuSigmaF | Mut05-openmoc-runner-chi-swap-groups | Mut20-openmc-runner-chi-swap-groups | 1.91687 | 1.91775 | 0.00275 | 0.00088 | 0.01918 | agree |
 | chi-swap | ScaleFuelSigmaA | Mut05-openmoc-runner-chi-swap-groups | Mut20-openmc-runner-chi-swap-groups | 0.96468 | 0.96310 | 0.00102 | 0.00157 | 0.00963 | agree |
 | chi-swap | PermuteEnergyGroups | Mut05-openmoc-runner-chi-swap-groups | Mut20-openmc-runner-chi-swap-groups | 1.27800 | 1.27735 | 0.00174 | 0.00065 | 0.01277 | agree |
@@ -135,24 +125,6 @@ Budget rule unchanged: `max(3·σ_OpenMC, 1.0%·k_OpenMC)`.
 | clamp-x-offset-positive | MirrorY | Mut42-openmoc-runner-clamp-x-offset-positive | Mut44-openmc-runner-clamp-x-offset-positive | 1.10484 | 1.09443 | 0.00183 | 0.01041 | 0.01094 | agree |
 
 ## Per-pair disagreements — interpretation
-
-
-### identity-control on ScaleFuelSigmaT
-
-* OpenMOC mutant: `Mut00-identity` → k_followup = 0.11127219735430455
-
-* OpenMC mutant:  `Mut00-identity` → k_followup = 0.1129234843229034 ± 0.00021529635848066306
-
-* |Δk| = 0.0016512869685988557 ; budget = 0.0011292348432290341.
-
-
-### identity-control on ScaleModeratorSigmaA
-
-* OpenMOC mutant: `Mut00-identity` → k_followup = 0.47635343316499984
-
-* OpenMC mutant:  `Mut00-identity` → k_followup = 0.9683112180449192 ± 0.0016647893051999869
-
-* |Δk| = 0.4919577848799193 ; budget = 0.009683112180449191.
 
 
 ### vacuum-bc on ScaleNuSigmaF

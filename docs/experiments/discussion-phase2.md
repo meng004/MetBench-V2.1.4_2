@@ -121,6 +121,65 @@ real value is in catching mutations that *invert* this monotonicity
 direction (e.g., a future "scale wrong material" bug analogous to Mut14
 but on sigma_t) rather than as a high-rate detector.
 
+## Tolerance-aware greater/less assertions (Phase-1 hand-off completed)
+
+Phase-1's discussion file flagged "tolerance-aware GreaterThan /
+LessThan" as the second-priority hand-off item. Phase 2's MC-noise
+misses (Mut37 on MR06 fuel-sigma-s; Mut43, Mut44 on MR02/MR03 mirror)
+re-confirmed it: a strict `k_followup < k_source` check passes when
+k_followup happens to land 10⁻¹⁵ below k_source by RNG luck, so an
+identity-bug adapter slips through.
+
+The fix in `evaluate_mr` is one line per branch:
+
+```python
+if scenario.get("noise_aware"):
+    sigma = float(cell.get("k_source_std", 0.0) or 0.0)
+    margin = max(3.0 * sigma, tolerance_rel * abs(k_src))
+    return k_flw < k_src - margin   # `less` branch
+```
+
+Opt-in via the SCENARIOS field `noise_aware: True` so Phase-1 strict
+semantics stay the default. All six OpenMC less/greater scenarios
+(Phase-1 nu-sigma-f and sigma-a; Phase-2 fuel-sigma-t,
+moderator-sigma-a, fuel-sigma-s, fuel-radius) opt in. OpenMOC
+deterministic scenarios stay strict (σ = 0, so the noise margin is
+zero anyway).
+
+To avoid an expensive re-run of every OpenMC mutation, Phase 2 ships
+**`tools/rescore_matrix.py`**: walks every `_data/candidates/*/matrix.json`,
+re-evaluates outcome on each `ran` cell against the current scenario
+config, and writes the corrected outcome / `assertion_passed` back.
+Only the *decision rule* changed, not the *measurements*, so
+re-scoring is sufficient.
+
+Effect on detection counts after rescore (only changes shown):
+
+| Mutation | Scenario | Before | After |
+|----------|----------|--------|-------|
+| Mut17 vacuum-boundary | openmc-pincell-sigma-a | missed | **detected** |
+| Mut18 batches-too-few | openmc-pincell-moderator-sigma-a | missed | **detected** |
+| Mut18 batches-too-few | openmc-pincell-fuel-radius | missed | **detected** |
+| Mut20 chi-swap-groups | openmc-pincell-fuel-sigma-s | missed | **detected** |
+| Mut37 sigma-s identity adapter | openmc-pincell-fuel-sigma-s | missed | **detected** |
+
+Five flips, **all from missed → detected** (i.e. true positives the
+strict rule missed). κ on the MR06 matched pair (Mut32 / Mut37) goes
+from **0.000 → 1.000**: both solvers now agree to detect, the
+solver-asymmetric MC blind spot closed.
+
+Mut00 false-positive rate stays at **0/21** — noise-aware is a
+strictly safer (more conservative) assertion: it never flips a
+correctly-passing identity case to "detected", only catches genuine
+bugs that strict was too lenient on.
+
+The mirror MRs (MR02/MR03) on OpenMC remain at 0% even with
+noise-aware on, because they use the `approx` assertion and their
+geometric perturbation (a few-thousandths-of-cm fuel offset) produces
+a k_eff shift smaller than 3·σ (the irreducible MC noise floor at
+5000 particles). They would activate at higher particle counts or
+larger offsets — flagged for future rounds.
+
 ## OpenMC matrix added in this round
 
 The OpenMC half of the matrix is now populated (7/8 OpenMC scenarios

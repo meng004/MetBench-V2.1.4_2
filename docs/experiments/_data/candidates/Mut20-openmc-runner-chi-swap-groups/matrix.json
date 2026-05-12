@@ -101,8 +101,8 @@
       "ratio": 0.9992220467665736,
       "assertion": "less",
       "factor": 0.5,
-      "assertion_passed": true,
-      "outcome": "missed"
+      "assertion_passed": false,
+      "outcome": "detected"
     },
     {
       "scenario_id": "openmoc-pincell-fuel-radius",

@@ -84,8 +84,8 @@
       "ratio": 0.9136950421186837,
       "assertion": "less",
       "factor": 1.5,
-      "assertion_passed": true,
-      "outcome": "missed"
+      "assertion_passed": false,
+      "outcome": "detected"
     },
     {
       "scenario_id": "openmoc-pincell-fuel-sigma-s",
@@ -118,8 +118,8 @@
       "ratio": 1.0414862694581406,
       "assertion": "greater",
       "factor": 1.05,
-      "assertion_passed": true,
-      "outcome": "missed"
+      "assertion_passed": false,
+      "outcome": "detected"
     },
     {
       "scenario_id": "openmc-pincell-particles-refine",

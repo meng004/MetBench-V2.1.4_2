@@ -102,6 +102,8 @@ SCENARIOS: list[dict] = [
         "runner": "openmc/openmc_runner.py",
         "assertion": "greater",
         "value": "k_eff",
+        "noise_aware": True,  # require k_flw > k_src + 3·σ
+        "tolerance_rel": 0.0,
     },
     {
         "id": "openmoc-pincell-sigma-a",
@@ -120,6 +122,8 @@ SCENARIOS: list[dict] = [
         "runner": "openmc/openmc_runner.py",
         "assertion": "less",
         "value": "k_eff",
+        "noise_aware": True,
+        "tolerance_rel": 0.0,
     },
     # ----- Phase 2 (NOETHER) -----
     {
@@ -180,6 +184,8 @@ SCENARIOS: list[dict] = [
         "runner": "openmc/openmc_runner.py",
         "assertion": "less",
         "value": "k_eff",
+        "noise_aware": True,
+        "tolerance_rel": 0.0,
         "phase": 2,
         "noether_id": "MR05",
         "meta_pattern": "m_mono",
@@ -192,6 +198,8 @@ SCENARIOS: list[dict] = [
         "runner": "openmc/openmc_runner.py",
         "assertion": "less",
         "value": "k_eff",
+        "noise_aware": True,
+        "tolerance_rel": 0.0,
         "phase": 2,
         "noether_id": "MR07",
         "meta_pattern": "m_mono",
@@ -219,6 +227,8 @@ SCENARIOS: list[dict] = [
         "assertion": "less",
         "value": "k_eff",
         "factor_override": 0.5,
+        "noise_aware": True,        # k_followup must be less by ≥ 3·σ
+        "tolerance_rel": 0.0,       # σ-only margin
         "phase": 2,
         "noether_id": "MR06",
         "meta_pattern": "m_mono",
@@ -245,6 +255,8 @@ SCENARIOS: list[dict] = [
         "assertion": "greater",
         "value": "k_eff",
         "factor_override": 1.05,
+        "noise_aware": True,
+        "tolerance_rel": 0.0,
         "phase": 2,
         "noether_id": "MR08",
         "meta_pattern": "m_mono",
@@ -775,8 +787,25 @@ def evaluate_mr(cell: dict, scenario: dict) -> bool:
     k_src = float(cell["k_source"])
     k_flw = float(cell["k_followup"])
     if assertion == "greater":
+        # Strict by default; if scenario opts into `noise_aware: true`,
+        # require k_followup to exceed k_source by at least
+        # max(3·σ, tolerance_rel · |k_source|). This catches mutations
+        # that produce bit-fractional differences floating MC noise can
+        # randomly satisfy strict inequality with — see Mut37 on OpenMC
+        # fuel-sigma-s, where k_followup ended up 10⁻¹⁵ below k_source
+        # purely by RNG luck and the strict `less` assertion missed it.
+        if scenario.get("noise_aware"):
+            sigma = float(cell.get("k_source_std", 0.0) or 0.0)
+            tol_rel = float(scenario.get("tolerance_rel", 0.0) or 0.0)
+            margin = max(3.0 * sigma, tol_rel * abs(k_src))
+            return k_flw > k_src + margin
         return k_flw > k_src
     if assertion == "less":
+        if scenario.get("noise_aware"):
+            sigma = float(cell.get("k_source_std", 0.0) or 0.0)
+            tol_rel = float(scenario.get("tolerance_rel", 0.0) or 0.0)
+            margin = max(3.0 * sigma, tol_rel * abs(k_src))
+            return k_flw < k_src - margin
         return k_flw < k_src
     if assertion == "approx":
         tol = float(scenario.get("tolerance_rel", 1e-6))
