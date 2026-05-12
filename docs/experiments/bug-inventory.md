@@ -1,5 +1,8 @@
 # MetBench bug inventory — real fix commits + synthetic mutants
 
+> 👉 **Interactive view**: [`dashboard.html`](dashboard.html) — sortable
+> bug table + linked figures (Plotly).
+
 > Single-table consolidation of all bugs MetBench's MR matrix evaluates.
 > Two sources:
 >

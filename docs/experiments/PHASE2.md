@@ -1,5 +1,9 @@
 # Stage 5 Phase 2 — NOETHER MR catalogue + matrix
 
+> 👉 **Interactive dashboard**: [`dashboard.html`](dashboard.html) —
+> single-file Plotly view (bug inventory + per-MR detection rate +
+> parameter sweep + κ heatmap). Open in a browser; no server needed.
+
 > Top-level summary of Phase-2 work on the MetBench MR catalogue.
 > Companion to [`discussion-phase2.md`](discussion-phase2.md) (analysis),
 > [`mutation-detection-matrix.md`](mutation-detection-matrix.md) (auto-generated
