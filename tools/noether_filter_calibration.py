@@ -1,0 +1,184 @@
+"""LLM-filter calibration: run the Phase-2 prompt against deliberately-
+bogus MR candidates and measure rejection rate.
+
+The Phase-2 verdict file (`_data/noether/llm-verdicts.json`) shows 14
+valid + 1 uncertain + 0 invalid on the real 15-candidate catalogue.
+Either the catalogue is genuinely strong (probable for hand-picked
+MetaPattern derivations) or the filter has no rejection power.
+
+This tool resolves the ambiguity by feeding the same filter the
+five adversarial candidates in `tools/noether_adversarial.py` — each
+designed to be rejected by any competent reviewer.
+
+Output:
+    docs/experiments/_data/noether/calibration-verdicts.json
+    docs/experiments/_data/noether/calibration-report.md
+
+A filter that rejects 4+ of 5 adversarial candidates is calibrated;
+anything less suggests rubber-stamping behaviour worth flagging.
+
+Usage:
+    python3 tools/noether_filter_calibration.py            # run all 5
+    python3 tools/noether_filter_calibration.py --dry-run  # print prompts only
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sys
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+TOOLS = REPO_ROOT / "tools"
+sys.path.insert(0, str(TOOLS))
+from noether_adversarial import ADVERSARIAL_CANDIDATES  # noqa: E402
+from noether_llm_filter import (  # noqa: E402
+    SYSTEM_PROMPT,
+    candidate_block,
+    call_llm,
+    load_dotenv,
+)
+
+DATA_DIR = REPO_ROOT / "docs" / "experiments" / "_data" / "noether"
+VERDICTS_PATH = DATA_DIR / "calibration-verdicts.json"
+REPORT_PATH = REPO_ROOT / "docs" / "experiments" / "calibration-report.md"
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Print the candidates that would be sent; no API call.")
+    parser.add_argument("--force", action="store_true",
+                        help="Re-run even if cached verdicts exist.")
+    args = parser.parse_args()
+
+    load_dotenv()
+
+    if args.dry_run:
+        for c in ADVERSARIAL_CANDIDATES:
+            print("=" * 80)
+            print(candidate_block(c))
+        return 0
+
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    cache: dict[str, dict] = {}
+    if VERDICTS_PATH.exists() and not args.force:
+        cache = {v["id"]: v for v in json.loads(VERDICTS_PATH.read_text())}
+
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    base_url = os.environ.get("ANTHROPIC_BASE_URL")
+    model = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-6")
+    if not api_key:
+        print("ANTHROPIC_API_KEY not set; populate .env.", file=sys.stderr)
+        return 2
+
+    import anthropic  # type: ignore
+    kwargs: dict = {"api_key": api_key}
+    if base_url:
+        kwargs["base_url"] = base_url
+    client = anthropic.Anthropic(**kwargs)
+
+    print(f"Endpoint: {base_url or 'https://api.anthropic.com'}", file=sys.stderr)
+    print(f"Model:    {model}", file=sys.stderr)
+    print(f"Adversarial candidates: {len(ADVERSARIAL_CANDIDATES)}", file=sys.stderr)
+
+    results: list[dict] = []
+    for c in ADVERSARIAL_CANDIDATES:
+        if c.id in cache and not args.force:
+            results.append(cache[c.id])
+            print(f"  {c.id}: cached verdict={cache[c.id].get('verdict', '?')} (skipped)", file=sys.stderr)
+            continue
+        try:
+            parsed, telem = call_llm(client, model, SYSTEM_PROMPT, candidate_block(c))
+        except Exception as e:
+            results.append({
+                "id": c.id, "verdict": "error",
+                "reasoning": f"API error: {type(e).__name__}: {e}",
+                "elapsed_s": 0.0, "tokens": {},
+            })
+            continue
+        record = {
+            "id": c.id,
+            "meta_pattern": c.meta_pattern,
+            "expected": "invalid",
+            "verdict": parsed.get("verdict", "uncertain"),
+            "confidence": float(parsed.get("confidence", 0.0) or 0.0),
+            "reasoning": parsed.get("reasoning", ""),
+            "raw_response": telem["raw_response"],
+            "elapsed_s": telem["elapsed_s"],
+            "tokens": telem["tokens"],
+        }
+        results.append(record)
+        cache[c.id] = record
+        VERDICTS_PATH.write_text(json.dumps(list(cache.values()), indent=2) + "\n")
+        print(f"  {c.id}: verdict={record['verdict']:9s} confidence={record['confidence']:.2f} "
+              f"({record['elapsed_s']:.1f}s)", file=sys.stderr)
+
+    # Calibration scorecard.
+    n = len(results)
+    n_invalid = sum(1 for r in results if r.get("verdict") == "invalid")
+    n_uncertain = sum(1 for r in results if r.get("verdict") == "uncertain")
+    n_valid = sum(1 for r in results if r.get("verdict") == "valid")
+    rejection_rate = (n_invalid + n_uncertain) / n if n else 0.0
+
+    md = ["# LLM-filter calibration\n"]
+    md.append("Auto-generated by `tools/noether_filter_calibration.py`. Feeds\n"
+              "the Phase-2 filter prompt (`SYSTEM_PROMPT` in\n"
+              "`tools/noether_llm_filter.py`) deliberately-bogus MR candidates\n"
+              "(direction-inverted, vacuous, impossible budget, …) and reports\n"
+              "how many the filter actually rejects.\n")
+    md.append(f"\n**Scorecard** ({n} adversarial candidates):\n\n")
+    md.append(f"* invalid:   **{n_invalid} / {n}**\n")
+    md.append(f"* uncertain: {n_uncertain} / {n}\n")
+    md.append(f"* valid:     {n_valid} / {n} ← false positives (filter rubber-stamping)\n")
+    md.append(f"* rejection rate (invalid ∪ uncertain): **{rejection_rate*100:.0f}%**\n")
+
+    md.append("\n## Per-candidate breakdown\n")
+    md.append("\n| id | meta_pattern | expected | verdict | confidence | one-line reasoning |")
+    md.append("|---|---|---|---|---|---|")
+    for r in results:
+        reasoning = (r.get("reasoning") or "").replace("\n", " ").replace("|", "\\|")
+        if len(reasoning) > 120:
+            reasoning = reasoning[:117] + "..."
+        verdict_label = r.get("verdict", "?")
+        marker = "" if verdict_label in ("invalid", "uncertain") else " ⚠"
+        md.append(f"| {r['id']} | {r.get('meta_pattern', '?')} | invalid | "
+                  f"{verdict_label}{marker} | {r.get('confidence', 0.0):.2f} | {reasoning} |")
+
+    md.append("\n## Interpretation\n")
+    if rejection_rate >= 0.8:
+        md.append("Filter behaves correctly on adversarial input: it rejects\n"
+                  "(invalid or uncertain) ≥ 80% of the bogus candidates. The\n"
+                  "main run's 100% survival rate is therefore evidence the\n"
+                  "real candidates are physically sound, not evidence of\n"
+                  "rubber-stamping.\n")
+    elif rejection_rate >= 0.4:
+        md.append("Filter shows partial discrimination — it catches some\n"
+                  "obvious errors but misses others. The main-run survival\n"
+                  "rate should be interpreted with caution; survivors that\n"
+                  "look similar to the missed adversarial cases warrant\n"
+                  "hand review.\n")
+    else:
+        md.append("Filter shows little discrimination on adversarial input —\n"
+                  "this is consistent with rubber-stamping behaviour. The\n"
+                  "main-run verdicts should be treated as plausibility\n"
+                  "checks at best, not as physical validation. Consider\n"
+                  "tightening the system prompt or adding a second-pass\n"
+                  "stricter reviewer.\n")
+
+    md.append("\n---\n")
+    md.append("Raw verdicts (including reasoning text) live in "
+              "`_data/noether/calibration-verdicts.json`.\n")
+
+    REPORT_PATH.write_text("\n".join(md) + "\n")
+    print(f"\nWrote {REPORT_PATH.relative_to(REPO_ROOT)}", file=sys.stderr)
+    print(f"Wrote {VERDICTS_PATH.relative_to(REPO_ROOT)}", file=sys.stderr)
+    print(f"Rejection rate: {n_invalid + n_uncertain}/{n} = {rejection_rate*100:.0f}%", file=sys.stderr)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

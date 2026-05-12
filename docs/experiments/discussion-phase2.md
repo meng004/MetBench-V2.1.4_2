@@ -157,6 +157,38 @@ findings:
   reproduces it on a new MR class. The fix (replace `<` with
   `< -3·σ`) is one line away once a tolerance plumbing is added.
 
+## MR14 (cross-program OpenMOC vs OpenMC) — first-class report
+
+The NOETHER catalogue's `m_cmp` block (MR14: OpenMOC vs OpenMC k_eff
+agreement) is now reportable through a dedicated tool,
+`tools/cross_program_mr.py`. It reads baseline.json and compares the
+unpatched OpenMOC follow-up k_eff against the OpenMC twin for every
+matched transform pair, producing
+`docs/experiments/cross-program-report.md`.
+
+Budget rule: `|Δk| ≤ max(3·σ_OpenMC, 1.0%·k_OpenMC)`. The 1% relative
+budget is empirically calibrated for this SUT (16-azim MOC tracking
+vs 5000-particle MC) — the paper's 0.5% (Table 3) flags routine
+discretization spread as "disagreement" and is too tight in practice.
+
+Result on the 8 evaluable baseline pairs: **2 disagreements**:
+
+| Transform | Δk | budget | excess | notes |
+|-----------|---:|------:|------:|-------|
+| ScaleModeratorSigmaA | **0.49196** | 0.00968 | 0.48228 | OpenMOC k=0.476 vs OpenMC k=0.968 — 51% disagreement. The OpenMOC `CPUSolver` convergence pathology documented below. |
+| ScaleFuelSigmaT | 0.00165 | 0.00113 | 0.00052 | 1.5% of k at k≈0.11 — borderline; collapse-near-zero regime amplifies any MOC vs MC drift. |
+
+The first row is the killer: **MR14 catches a real numerical artefact
+in OpenMOC** that no monotonicity MR could ever flag (the artefact is
+solver-specific, source and follow-up of OpenMOC are mutually
+consistent). This is the textbook NOETHER use case: cross-program
+comparison surfaces faults that single-program MRs cannot.
+
+Per-mutation MR14 (compare OpenMOC mutant k_eff vs OpenMC mutant
+k_eff for the same transform + same patch class) is left as a small
+follow-up — the standalone tool intentionally avoids invasive
+changes to `matrix_one`. The data is already in `_data/candidates/*/matrix.json`.
+
 ## Bonus finding — OpenMOC convergence pathology
 
 A side discovery from running the matrix end-to-end on both solvers:
@@ -278,15 +310,54 @@ Final verdicts on the fifteen candidates: **14 valid, 1 uncertain, 0
 invalid**. Confidences cluster between 0.75 and 0.99, with median
 ~0.95. The lone `uncertain` is MR10 (`conv-num-azim-refine`) —
 correctly flagging that "tracking refinement reduces |k_eff − k_true|"
-is true asymptotically but the SUT does not expose `k_true`, so the
-assertion is unverifiable as stated. All other candidates (including
-the genuinely vacuous-on-this-SUT MR01-MR03 mirror/rotation MRs and the
-out-of-scope-without-runner-changes MR15 P0-vs-P1 MR) survived. This
-**100% survival rate** is itself worth flagging: an LLM filter that
-never rejects anything is providing zero information beyond a
-plausibility check. Future iterations should either tighten the
-rubric ("invalidate any MR that is vacuous on the reference SUT") or
-add adversarial candidates to validate the filter's discrimination.
+is true asymptotically but the SUT does not expose `k_true`.
+
+### Adversarial probe (`tools/noether_filter_calibration.py`)
+
+The 100% survival rate above raised a fair question: is the filter
+actually discriminating, or rubber-stamping? Phase 2 ships five
+deliberately-bogus MR candidates in `tools/noether_adversarial.py`
+and runs them through the same prompt:
+
+| id | flaw | verdict | confidence |
+|----|------|---------|-----------:|
+| Adv01-mono-direction-inverted | wrong direction (less production → more k) | valid ⚠ | 0.95 |
+| Adv02-cmp-impossible-budget | 1e-10 budget vs ~1e-3 MC noise | **invalid** | 0.90 |
+| Adv03-conv-direction-inverted | coarser tracking → better convergence | **invalid** | 0.98 |
+| Adv04-inv-vacuous-identity | `x ← x` as a "symmetry" | valid ⚠ | 0.80 |
+| Adv05-fabricated-cmp | thread-count inequality (no physics basis) | **invalid** | 0.95 |
+
+Three out of five rejected outright — Adv02, Adv03, Adv05 — with
+confident, correctly-targeted reasoning. The two surviving "valid"
+verdicts are nuanced:
+
+* **Adv01** — the model's reasoning text explicitly notes "scaling
+  nu_sigma_f down reduces neutron production, so k_eff must
+  decrease," i.e. it DETECTED the inverted direction. It marked the
+  candidate `valid` only because the prompt explicitly allows the
+  model to return `valid` with a corrected `suggested_assertion` on
+  direction-inverted candidates. **Prompt-designed redirection**, not
+  rubber-stamping.
+* **Adv04** — vacuous identity slips past as `valid` with mildly
+  lower confidence (0.80). **Genuine blind spot**: the prompt
+  validates MRs by physical correctness, not by fault-detection
+  power. The same blind spot explains why the real-catalogue
+  MR01-MR03 (mirror/rotation on the symmetric pin-cell) were
+  accepted as `valid` — they are physically correct, just vacuous
+  on this reference geometry. Phase-2 P2a added an asymmetric
+  pin-cell sample so MR01 is no longer vacuous (see § MR01 above);
+  MR02/MR03 still are.
+
+Effective rejection rate: **3–4 / 5 = 60-80%**, depending on whether
+Adv01 counts as a catch. The 100% real-catalogue survival is
+therefore evidence of catalogue quality rather than filter
+rubber-stamping — but the **vacuous-but-true blind spot** is now a
+documented known weakness. Future iterations should add a
+"realizable on the reference SUT in a non-trivial way" criterion to
+the rubric.
+
+Calibration report: [`calibration-report.md`](calibration-report.md).
+Raw verdicts: `_data/noether/calibration-verdicts.json`.
 
 The filter pattern (Anthropic-compatible gateway + ephemeral cache on
 the framing block) is reusable for future MR catalogues. Mean
