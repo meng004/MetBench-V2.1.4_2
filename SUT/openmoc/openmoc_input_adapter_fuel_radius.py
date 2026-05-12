@@ -1,6 +1,6 @@
 """Input adapter for the OpenMOC pin-cell SUT — ScaleFuelRadius.
 
-Implements NOETHER candidate N08 (m_mono / B2 order, parameter
+Implements NOETHER candidate MR08 (m_mono / B2 order, parameter
 monotonicity in fuel volume fraction). Multiplies the fuel
 cylinder's radius by `factor`. The pin-cell pitch (x_extent_cm,
 y_extent_cm) is held constant, so the fuel/moderator volume ratio

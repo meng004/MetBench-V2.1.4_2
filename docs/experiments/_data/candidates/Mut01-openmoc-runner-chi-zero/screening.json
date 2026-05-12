@@ -1,0 +1,36 @@
+{
+  "mutation_id": "Mut01-openmoc-runner-chi-zero",
+  "predicted_classification": "semantic",
+  "target_file": "SUT/openmoc/openmoc_runner.py",
+  "solver": "openmoc",
+  "patched_source": {
+    "openmoc": {
+      "solver": "openmoc",
+      "reps": [
+        0.0005913922197768902
+      ],
+      "stds": [
+        0.0
+      ],
+      "mean": 0.0005913922197768902,
+      "max_std": 0.0
+    },
+    "openmc": null
+  },
+  "baseline": {
+    "openmoc": 1.1330583459569659,
+    "openmc": 1.1245000140252948
+  },
+  "classifications_per_solver": {
+    "openmoc": {
+      "abs_delta": 1.132466953737189,
+      "rel_delta": 0.9994780566932964,
+      "mc_threshold_3sigma": 0.0,
+      "rel_threshold": 0.005665291729784829,
+      "threshold": 0.005665291729784829,
+      "semantic": true
+    }
+  },
+  "classification": "semantic",
+  "threshold_rel": 0.005
+}

@@ -100,6 +100,18 @@
       "k_eff": 1.1247657626517267,
       "k_eff_std": 0.0005489853886409126,
       "factor": 10.0
+    },
+    "openmoc-pincell-rotate-90": {
+      "k_eff": 1.1594917385615202,
+      "k_eff_std": 0.0,
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell-asymmetric.json"
+    },
+    "openmc-pincell-rotate-90": {
+      "k_eff": 1.1535361614026634,
+      "k_eff_std": 0.0019251225475307512,
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell-asymmetric.json"
     }
   },
   "factor": 1.5,

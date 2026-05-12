@@ -56,6 +56,21 @@ DATA_DIR = REPO_ROOT / "docs" / "experiments" / "_data"
 BASELINE_PATH = DATA_DIR / "baseline.json"
 CANDIDATES_DIR = DATA_DIR / "candidates"
 
+
+def scenario_source(scenario: dict) -> Path:
+    """Per-scenario source-case override.
+
+    Most scenarios share the symmetric `pincell.json` reference, but MRs
+    that require an asymmetric geometry (e.g. MR01 Rotate90) declare
+    `source_case` in their SCENARIOS row pointing at a different sample
+    under `SUT/openmoc/sample/`. The override applies to both source and
+    follow-up runs of that scenario.
+    """
+    rel = scenario.get("source_case")
+    if rel:
+        return REPO_ROOT / "SUT" / rel
+    return SOURCE_CASE
+
 DEFAULT_OPENMOC_PYTHON = "/opt/openmoc-venv/bin/python"
 DEFAULT_OPENMC_PYTHON = "/opt/miniconda3/envs/openmc-env/bin/python"
 DEFAULT_FACTOR = 1.5
@@ -117,7 +132,7 @@ SCENARIOS: list[dict] = [
         "tolerance_rel": 1e-6,  # OpenMOC is deterministic; permutation should be bit-stable
         "value": "k_eff",
         "phase": 2,
-        "noether_id": "N04",
+        "noether_id": "MR04",
         "meta_pattern": "m_inv",
     },
     {
@@ -129,7 +144,7 @@ SCENARIOS: list[dict] = [
         "assertion": "less",
         "value": "k_eff",
         "phase": 2,
-        "noether_id": "N05",
+        "noether_id": "MR05",
         "meta_pattern": "m_mono",
     },
     {
@@ -141,7 +156,7 @@ SCENARIOS: list[dict] = [
         "assertion": "less",
         "value": "k_eff",
         "phase": 2,
-        "noether_id": "N07",
+        "noether_id": "MR07",
         "meta_pattern": "m_mono",
     },
     {
@@ -154,7 +169,7 @@ SCENARIOS: list[dict] = [
         "tolerance_rel": 0.005,  # OpenMC: relax to 3·σ scale
         "value": "k_eff",
         "phase": 2,
-        "noether_id": "N04",
+        "noether_id": "MR04",
         "meta_pattern": "m_inv",
     },
     {
@@ -166,7 +181,7 @@ SCENARIOS: list[dict] = [
         "assertion": "less",
         "value": "k_eff",
         "phase": 2,
-        "noether_id": "N05",
+        "noether_id": "MR05",
         "meta_pattern": "m_mono",
     },
     {
@@ -178,10 +193,10 @@ SCENARIOS: list[dict] = [
         "assertion": "less",
         "value": "k_eff",
         "phase": 2,
-        "noether_id": "N07",
+        "noether_id": "MR07",
         "meta_pattern": "m_mono",
     },
-    # ----- Phase 2 (NOETHER) extension: N06, N08, N12 -----
+    # ----- Phase 2 (NOETHER) extension: MR06, MR08, MR12 -----
     {
         "id": "openmoc-pincell-fuel-sigma-s",
         "solver": "openmoc",
@@ -192,7 +207,7 @@ SCENARIOS: list[dict] = [
         "value": "k_eff",
         "factor_override": 0.5,  # scale scattering DOWN to drop k_eff
         "phase": 2,
-        "noether_id": "N06",
+        "noether_id": "MR06",
         "meta_pattern": "m_mono",
     },
     {
@@ -205,7 +220,7 @@ SCENARIOS: list[dict] = [
         "value": "k_eff",
         "factor_override": 0.5,
         "phase": 2,
-        "noether_id": "N06",
+        "noether_id": "MR06",
         "meta_pattern": "m_mono",
     },
     {
@@ -218,7 +233,7 @@ SCENARIOS: list[dict] = [
         "value": "k_eff",
         "factor_override": 1.05,  # small perturbation; large factors flip the regime
         "phase": 2,
-        "noether_id": "N08",
+        "noether_id": "MR08",
         "meta_pattern": "m_mono",
     },
     {
@@ -231,7 +246,7 @@ SCENARIOS: list[dict] = [
         "value": "k_eff",
         "factor_override": 1.05,
         "phase": 2,
-        "noether_id": "N08",
+        "noether_id": "MR08",
         "meta_pattern": "m_mono",
     },
     {
@@ -246,8 +261,37 @@ SCENARIOS: list[dict] = [
         "target_ratio": 0.31623,  # 1/sqrt(10)
         "tolerance_rel": 0.30,    # ±30% of target ratio (MC noise on a single statepoint)
         "phase": 2,
-        "noether_id": "N12",
+        "noether_id": "MR12",
         "meta_pattern": "m_conv",
+    },
+    # ----- Phase 2 (NOETHER) extension: MR01 Rotate90 on asymmetric pin-cell -----
+    {
+        "id": "openmoc-pincell-rotate-90",
+        "solver": "openmoc",
+        "transform": "Rotate90",
+        "adapter": "openmoc/openmoc_input_adapter_rotate_90.py",
+        "runner": "openmoc/openmoc_runner.py",
+        "source_case": "openmoc/sample/pincell-asymmetric.json",
+        "assertion": "approx",
+        "tolerance_rel": 1e-4,  # MOC tracking-angle discretization on rotated grid
+        "value": "k_eff",
+        "phase": 2,
+        "noether_id": "MR01",
+        "meta_pattern": "m_inv",
+    },
+    {
+        "id": "openmc-pincell-rotate-90",
+        "solver": "openmc",
+        "transform": "Rotate90",
+        "adapter": "openmc/openmc_input_adapter_rotate_90.py",
+        "runner": "openmc/openmc_runner.py",
+        "source_case": "openmoc/sample/pincell-asymmetric.json",
+        "assertion": "approx",
+        "tolerance_rel": 0.005,  # OpenMC MC noise budget (3·σ scale)
+        "value": "k_eff",
+        "phase": 2,
+        "noether_id": "MR01",
+        "meta_pattern": "m_inv",
     },
 ]
 
@@ -374,8 +418,8 @@ def apply_transformation(sut_root: Path, scenario: dict, source: Path, output: P
 
 def affected_scenarios(mutation: Mutation) -> list[dict]:
     """Return the subset of SCENARIOS whose adapter or runner is the
-    mutation's target. M00 (identity) returns the full list."""
-    if mutation.id == "M00-identity":
+    mutation's target. Mut00 (identity) returns the full list."""
+    if mutation.id == "Mut00-identity":
         return list(SCENARIOS)
     target = mutation.target_file
     # Strip leading "SUT/" since adapter/runner keys are relative to SUT_DIR.
@@ -388,7 +432,7 @@ def affected_scenarios(mutation: Mutation) -> list[dict]:
 
 
 def mutation_solver(mutation: Mutation) -> str:
-    if mutation.id == "M00-identity":
+    if mutation.id == "Mut00-identity":
         return "both"
     if mutation.target_file.startswith("SUT/openmoc/"):
         return "openmoc"
@@ -410,7 +454,7 @@ def stage_sut(mutation: Mutation, dest_root: Path) -> Path:
     if sut_copy.exists():
         shutil.rmtree(sut_copy)
     shutil.copytree(SUT_DIR, sut_copy)
-    if mutation.id == "M00-identity":
+    if mutation.id == "Mut00-identity":
         return sut_copy
     target = dest_root / mutation.target_file
     text = target.read_text(encoding="utf-8")
@@ -501,12 +545,14 @@ def cmd_baseline(args: argparse.Namespace) -> int:
             flw_in = tmp_path / f"flw-in-{sc['id']}.json"
             flw_out = tmp_path / f"flw-out-{sc['id']}.json"
             effective_factor = scenario_factor(sc, DEFAULT_FACTOR)
-            apply_transformation(SUT_DIR, sc, SOURCE_CASE, flw_in, effective_factor, python_exec)
+            sc_source = scenario_source(sc)
+            apply_transformation(SUT_DIR, sc, sc_source, flw_in, effective_factor, python_exec)
             result = run_solver(SUT_DIR, sc, flw_in, flw_out, python_exec)
             followups[sc["id"]] = {
                 "k_eff": float(result["k_eff"]),
                 "k_eff_std": float(result.get("k_eff_std", 0.0)),
                 "factor": effective_factor,
+                "source_case": str(sc_source.relative_to(REPO_ROOT)),
             }
     for sid in skipped_scenarios:
         followups[sid] = {"k_eff": float("nan"), "k_eff_std": 0.0, "skipped": True}
@@ -664,7 +710,7 @@ def evaluate_mr(cell: dict, scenario: dict) -> bool:
                           must be invariant under the transformation.
     * `variance-ratio`  — observed σ_followup / σ_source within
                           tolerance_rel of `target_ratio`. Used by
-                          MC convergence MRs (m_conv) such as N12
+                          MC convergence MRs (m_conv) such as MR12
                           RefineParticles, which predicts the
                           1/√factor scaling of the MC standard error.
     """
@@ -712,7 +758,7 @@ def matrix_one(mutation: Mutation, args: argparse.Namespace) -> dict:
 
         for sc in SCENARIOS:
             cell: dict = {"scenario_id": sc["id"]}
-            if sc not in affected and mutation.id != "M00-identity":
+            if sc not in affected and mutation.id != "Mut00-identity":
                 cell["status"] = "not-affected"
                 cells.append(cell)
                 continue
@@ -725,15 +771,16 @@ def matrix_one(mutation: Mutation, args: argparse.Namespace) -> dict:
                 followup_in = tmp_path / f"flw-in-{sc['id']}.json"
                 followup_out = tmp_path / f"flw-out-{sc['id']}.json"
                 python_exec = openmoc_python if sc["solver"] == "openmoc" else openmc_python
+                sc_source = scenario_source(sc)
 
                 # Source run (with patched SUT — this is k_source for the MR).
-                src = run_solver(sut_copy, sc, SOURCE_CASE, source_out, python_exec)
+                src = run_solver(sut_copy, sc, sc_source, source_out, python_exec)
                 k_src = float(src["k_eff"])
 
                 # Build follow-up via patched adapter, honouring per-scenario
                 # factor overrides (e.g. ScaleFuelRadius wants 1.05, not 1.5).
                 effective_factor = scenario_factor(sc, args.factor)
-                apply_transformation(sut_copy, sc, SOURCE_CASE, followup_in, effective_factor, python_exec)
+                apply_transformation(sut_copy, sc, sc_source, followup_in, effective_factor, python_exec)
 
                 # Follow-up run.
                 flw = run_solver(sut_copy, sc, followup_in, followup_out, python_exec)
@@ -911,7 +958,7 @@ def classify_from_matrix(mutation: Mutation, matrix: dict | None, baseline: dict
         flw_shifted = flw_pathological or (
             (not math.isnan(d_flw)) and d_flw > thr_flw
         )
-        # Variance-ratio MRs (e.g. N12 RefineParticles) do not shift k_eff
+        # Variance-ratio MRs (e.g. MR12 RefineParticles) do not shift k_eff
         # significantly when broken — the bug is in σ scaling. Trust the
         # MR's own assertion outcome here so such mutations land in the
         # matrix-stats counts.
@@ -1070,7 +1117,7 @@ def _emit_matrix_csv_md(rows: list[dict]) -> None:
         post = row.get("post") or {}
         if not mat:
             continue
-        if post.get("classification") not in ("semantic", "error") and m.id != "M00-identity":
+        if post.get("classification") not in ("semantic", "error") and m.id != "Mut00-identity":
             continue
         for cell in mat["cells"]:
             csv_lines.append(",".join([
@@ -1081,7 +1128,7 @@ def _emit_matrix_csv_md(rows: list[dict]) -> None:
                 f"{cell.get('ratio', float('nan')):.6f}" if "ratio" in cell else "",
                 cell.get("assertion", ""),
             ]))
-            if cell.get("status") == "ran" and m.id != "M00-identity":
+            if cell.get("status") == "ran" and m.id != "Mut00-identity":
                 outcome = cell["outcome"]
                 per_scenario_counts[cell["scenario_id"]]["n"] += 1
                 per_scenario_counts[cell["scenario_id"]][outcome] += 1
@@ -1107,10 +1154,10 @@ def _emit_matrix_csv_md(rows: list[dict]) -> None:
         md.append(f"| {sc['id']} | {c['n']} | {c['detected']} | {c['missed']} | {c['error']} | {rate_str} | {ci_str} |")
     md.append("")
     md.append("## Identity false-positive sanity\n")
-    m00 = next((r for r in rows if r["mutation"].id == "M00-identity"), None)
+    m00 = next((r for r in rows if r["mutation"].id == "Mut00-identity"), None)
     if m00 and m00["matrix"]:
         fp = sum(1 for c in m00["matrix"]["cells"] if c.get("outcome") == "detected")
-        md.append(f"M00 (identity) detected on {fp} / {len(m00['matrix']['cells'])} scenarios. "
+        md.append(f"Mut00 (identity) detected on {fp} / {len(m00['matrix']['cells'])} scenarios. "
                   f"Expected 0 — {'✓ PASS' if fp == 0 else '✗ FAIL'}.\n")
     md.append("\n## Per-mutation detail\n")
     md.append("| mutation | scenario | outcome | k_source | k_followup | ratio |")
@@ -1127,24 +1174,25 @@ def _emit_matrix_csv_md(rows: list[dict]) -> None:
 
 # Matched-pair index for cross-solver κ (see mutation-catalogue.md)
 MATCHED_PAIRS = [
-    ("M01-openmoc-runner-chi-zero",            "M15-openmc-runner-chi-zero",            "chi-zero"),
-    ("M05-openmoc-runner-chi-swap-groups",     "M20-openmc-runner-chi-swap-groups",     "chi-swap"),
-    ("M06-openmoc-runner-vacuum-boundary",     "M17-openmc-runner-vacuum-boundary",     "vacuum-bc"),
-    ("M07-openmoc-adapter-nsf-inverse",        "M22-openmc-adapter-nsf-inverse",        "nsf-inverse"),
-    ("M08-openmoc-adapter-nsf-square",         "M23-openmc-adapter-nsf-square",         "nsf-square"),
-    ("M09-openmoc-adapter-nsf-moderator",      "M24-openmc-adapter-nsf-moderator",      "nsf-moderator"),
-    ("M10-openmoc-adapter-nsf-identity",       "M25-openmc-adapter-nsf-identity",       "nsf-identity"),
-    ("M12-openmoc-adapter-sa-no-sigt-update",  "M26-openmc-adapter-sa-no-sigt-update",  "sa-no-sigt"),
-    ("M13-openmoc-adapter-sa-inverse",         "M27-openmc-adapter-sa-inverse",         "sa-inverse"),
+    ("Mut01-openmoc-runner-chi-zero",            "Mut15-openmc-runner-chi-zero",            "chi-zero"),
+    ("Mut05-openmoc-runner-chi-swap-groups",     "Mut20-openmc-runner-chi-swap-groups",     "chi-swap"),
+    ("Mut06-openmoc-runner-vacuum-boundary",     "Mut17-openmc-runner-vacuum-boundary",     "vacuum-bc"),
+    ("Mut07-openmoc-adapter-nsf-inverse",        "Mut22-openmc-adapter-nsf-inverse",        "nsf-inverse"),
+    ("Mut08-openmoc-adapter-nsf-square",         "Mut23-openmc-adapter-nsf-square",         "nsf-square"),
+    ("Mut09-openmoc-adapter-nsf-moderator",      "Mut24-openmc-adapter-nsf-moderator",      "nsf-moderator"),
+    ("Mut10-openmoc-adapter-nsf-identity",       "Mut25-openmc-adapter-nsf-identity",       "nsf-identity"),
+    ("Mut12-openmoc-adapter-sa-no-sigt-update",  "Mut26-openmc-adapter-sa-no-sigt-update",  "sa-no-sigt"),
+    ("Mut13-openmoc-adapter-sa-inverse",         "Mut27-openmc-adapter-sa-inverse",         "sa-inverse"),
     # Phase-2 matched pairs (chi runner / group-permute / sigma_s / radius)
-    ("M28-openmoc-runner-chi-fast-only",       "M35-openmc-runner-chi-fast-only",       "chi-fast-only"),
-    ("M31-openmoc-adapter-group-permute-fuel-only",
-                                                "M36-openmc-adapter-group-permute-fuel-only",
+    ("Mut28-openmoc-runner-chi-fast-only",       "Mut35-openmc-runner-chi-fast-only",       "chi-fast-only"),
+    ("Mut31-openmoc-adapter-group-permute-fuel-only",
+                                                "Mut36-openmc-adapter-group-permute-fuel-only",
                                                                                           "group-permute-fuel-only"),
-    ("M32-openmoc-adapter-fuel-sigma-s-identity",
-                                                "M37-openmc-adapter-fuel-sigma-s-identity",
+    ("Mut32-openmoc-adapter-fuel-sigma-s-identity",
+                                                "Mut37-openmc-adapter-fuel-sigma-s-identity",
                                                                                           "fuel-sigma-s-identity"),
-    ("M33-openmoc-adapter-fuel-radius-shrink", "M38-openmc-adapter-fuel-radius-shrink", "fuel-radius-shrink"),
+    ("Mut33-openmoc-adapter-fuel-radius-shrink", "Mut38-openmc-adapter-fuel-radius-shrink", "fuel-radius-shrink"),
+    ("Mut39-openmoc-runner-hardcode-y-from-x",   "Mut40-openmc-runner-hardcode-y-from-x",   "hardcode-y-from-x"),
 ]
 
 
@@ -1182,6 +1230,8 @@ def _emit_kappa_and_sensitivity_md(rows: list[dict], args: argparse.Namespace) -
                      if kind == "fuel-sigma-s-identity"]
     radius_pairs = [(moc, mc) for moc, mc, kind in MATCHED_PAIRS
                     if kind == "fuel-radius-shrink"]
+    rotate_pairs = [(moc, mc) for moc, mc, kind in MATCHED_PAIRS
+                    if kind == "hardcode-y-from-x"]
 
     def kappa_block(label: str, pairs: list[tuple[str, str]], moc_sc: str, mc_sc: str) -> str:
         a, b, paired_ids = [], [], []
@@ -1214,18 +1264,21 @@ def _emit_kappa_and_sensitivity_md(rows: list[dict], args: argparse.Namespace) -
     out.append(kappa_block("Runner-level pairs (chi/boundary) — NuSigmaF scenarios",
                            other_pairs, "openmoc-pincell-nu-sigma-f", "openmc-pincell-nu-sigma-f"))
     # Phase-2 categories — each evaluates the pair on the matched MR scenario.
-    out.append(kappa_block("Phase-2 N04 group-permute (chi-fast-only runner)",
+    out.append(kappa_block("Phase-2 MR04 group-permute (chi-fast-only runner)",
                            chi_fast_pairs,
                            "openmoc-pincell-group-permute", "openmc-pincell-group-permute"))
-    out.append(kappa_block("Phase-2 N04 group-permute (fuel-only adapter)",
+    out.append(kappa_block("Phase-2 MR04 group-permute (fuel-only adapter)",
                            group_permute_pairs,
                            "openmoc-pincell-group-permute", "openmc-pincell-group-permute"))
-    out.append(kappa_block("Phase-2 N06 fuel-sigma-s identity adapter",
+    out.append(kappa_block("Phase-2 MR06 fuel-sigma-s identity adapter",
                            sigma_s_pairs,
                            "openmoc-pincell-fuel-sigma-s", "openmc-pincell-fuel-sigma-s"))
-    out.append(kappa_block("Phase-2 N08 fuel-radius direction inversion",
+    out.append(kappa_block("Phase-2 MR08 fuel-radius direction inversion",
                            radius_pairs,
                            "openmoc-pincell-fuel-radius", "openmc-pincell-fuel-radius"))
+    out.append(kappa_block("Phase-2 MR01 Rotate90 (hardcode-y-from-x)",
+                           rotate_pairs,
+                           "openmoc-pincell-rotate-90", "openmc-pincell-rotate-90"))
     out.append("\n## Threshold sensitivity\n")
     out.append("Re-classify candidates at tightened and relaxed relative thresholds using the matrix data;\n")
     out.append("how many flip relative to the 0.5% baseline?\n\n")

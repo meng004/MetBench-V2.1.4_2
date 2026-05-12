@@ -1,6 +1,6 @@
 """Input adapter for the OpenMOC pin-cell SUT — ScaleFuelSigmaT.
 
-Implements NOETHER candidate N05 (m_mono / B2 order, parameter
+Implements NOETHER candidate MR05 (m_mono / B2 order, parameter
 monotonicity in fuel total cross section). Multiplies fuel sigma_t by
 `factor`, **without** rescaling sigma_s. The arithmetic identity
 

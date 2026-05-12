@@ -7,9 +7,9 @@
 
 ## Headline result
 
-Of 28 candidates, **23 classified semantic**, **4 equivalent** (M00 +
-M18 noisy + M21 OpenMC-only-uses-nu_sigma_f + M26 OpenMC-absorbs-the-
-inconsistency), and **1 errored** (M15 chi-zero in OpenMC aborts before
+Of 28 candidates, **23 classified semantic**, **4 equivalent** (Mut00 +
+Mut18 noisy + Mut21 OpenMC-only-uses-nu_sigma_f + Mut26 OpenMC-absorbs-the-
+inconsistency), and **1 errored** (Mut15 chi-zero in OpenMC aborts before
 producing a statepoint). False-positive rate on the identity control:
 **0/4 = 0%**.
 
@@ -30,14 +30,14 @@ to drop that gate in favour of CI-reporting is vindicated.
 
 ## What worked
 
-- **Catastrophic numerics** are reliably caught. M02 (`sigma_t := sigma_a`)
-  produces `k_eff = inf`; M04 (drop `setNuSigmaF`) produces `nan`; M19
+- **Catastrophic numerics** are reliably caught. Mut02 (`sigma_t := sigma_a`)
+  produces `k_eff = inf`; Mut04 (drop `setNuSigmaF`) produces `nan`; Mut19
   (hardcode `k_eff = 1.0`) makes source == follow-up. Strict `>` / `<`
   fails on every such case → detected on every affected scenario.
-- **Direction-flipping adapters** are caught. M07/M22 (`× 1/factor`)
-  and M13/M27 (sigma_a inverse) all detected.
-- **Identity / no-op adapters** are mostly caught (M10 detected,
-  M12 detected on OpenMOC, M09 detected). The float-precision caveat
+- **Direction-flipping adapters** are caught. Mut07/Mut22 (`× 1/factor`)
+  and Mut13/Mut27 (sigma_a inverse) all detected.
+- **Identity / no-op adapters** are mostly caught (Mut10 detected,
+  Mut12 detected on OpenMOC, Mut09 detected). The float-precision caveat
   (next section) is the exception.
 
 ## Coverage gaps — semantic faults no MR caught
@@ -51,12 +51,12 @@ structural weakness of the current MR suite:
 
 | Mutation | What shifts | Why MR misses |
 |----------|-------------|---------------|
-| `M03-openmoc-runner-swap-fuel-moderator` | baseline jumps to 1.43 | ratio still 1.50 |
-| `M05` / `M20` (chi-swap-groups) | baseline shifts (1.28 / 1.28) | ratio preserved |
-| `M06` / `M17` (vacuum boundary) | k collapses (0.0047 / 0.0049) | ratio still 1.50 |
-| `M08` / `M23` (factor squared) | follow-up over-shoots (2.55 / 2.54) | direction still right |
-| `M14` (moderator-sa) | baseline depressed | ratio direction holds |
-| `M16` (scatter-transpose) | OpenMC k drops 50% | ratio holds |
+| `Mut03-openmoc-runner-swap-fuel-moderator` | baseline jumps to 1.43 | ratio still 1.50 |
+| `Mut05` / `Mut20` (chi-swap-groups) | baseline shifts (1.28 / 1.28) | ratio preserved |
+| `Mut06` / `Mut17` (vacuum boundary) | k collapses (0.0047 / 0.0049) | ratio still 1.50 |
+| `Mut08` / `Mut23` (factor squared) | follow-up over-shoots (2.55 / 2.54) | direction still right |
+| `Mut14` (moderator-sa) | baseline depressed | ratio direction holds |
+| `Mut16` (scatter-transpose) | OpenMC k drops 50% | ratio holds |
 
 This is a precise and useful finding: **the MR is doing exactly what
 it was designed to do**, and what it was designed to do is blind to
@@ -69,25 +69,25 @@ Computed on matched-pair mutations (one OpenMOC twin + one OpenMC
 twin of the same conceptual fault):
 
 - **NuSigmaF adapter pairs (4 evaluable)**: κ = **0.500** (moderate).
-  3/4 agree, 1 disagrees (M10 det vs M25 miss — float-noise edge
+  3/4 agree, 1 disagrees (Mut10 det vs Mut25 miss — float-noise edge
   case, see below). With only 4 pairs κ is not stable, but the
   qualitative pattern — *the same adapter bug produces the same MR
   outcome across solvers, with one float-precision exception* — is
   solid.
-- **SigmaA adapter pairs (1 evaluable)**: κ = **1.000**. M13/M27
-  both detected. M12/M26 dropped from the κ pool because M26 was
+- **SigmaA adapter pairs (1 evaluable)**: κ = **1.000**. Mut13/Mut27
+  both detected. Mut12/Mut26 dropped from the κ pool because Mut26 was
   classified equivalent under the 0.5% threshold — a real
   cross-solver asymmetry (OpenMOC ignores sigma_a so the missed-
   sigma_t-update is detected as a "follow-up identical to source"
   case; OpenMC absorbs the inconsistency at the 0.3% level).
 - **Runner-level chi / boundary pairs (3 evaluable)**: κ = **1.000**.
-  M01/M15 both detected (M15 via runtime error), M05/M20 both
-  missed, M06/M17 both missed. The MR's behaviour on chi-zero and
+  Mut01/Mut15 both detected (Mut15 via runtime error), Mut05/Mut20 both
+  missed, Mut06/Mut17 both missed. The MR's behaviour on chi-zero and
   boundary faults is solver-independent.
 
 ## Two solver-specific surprises worth documenting
 
-1. **M11 OpenMOC partial-scaling artefact**: Scaling only the
+1. **Mut11 OpenMOC partial-scaling artefact**: Scaling only the
    fast-group `nu_sigma_f` by 1.5 (`nu_sigma_f = [0.0096, 0.1565]`)
    makes the OpenMOC eigenvalue iteration terminate at iter=22 with
    `k_eff = 0.524`, reproducibly. This is much farther from the
@@ -97,12 +97,12 @@ twin of the same conceptual fault):
    non-physical mode under asymmetric source distribution". The
    matrix records a real detection; the cause is an OpenMOC quirk,
    not an MR feature. Worth filing upstream.
-2. **M25 OpenMC float drift**: M25 (identity OpenMC NuSigmaF
+2. **Mut25 OpenMC float drift**: Mut25 (identity OpenMC NuSigmaF
    adapter) makes the follow-up case file byte-identical to source.
    Yet `k_source = 1.1245000140252912` and `k_followup =
    1.1245000140252972` — a ~6×10⁻¹⁵ difference, well below MC σ ≈
    1.8×10⁻³ but enough for strict `>` to evaluate True. The MR misses
-   M25 by float precision while its OpenMOC twin M10 catches it on
+   Mut25 by float precision while its OpenMOC twin Mut10 catches it on
    exact equality. **The strict-inequality MR is unstable at the
    float-noise scale for stochastic solvers.** Recommendation:
    replace `k_followup > k_source` with `k_followup > k_source +
@@ -123,7 +123,7 @@ these choices.
 See [`historical-bugs.md`](historical-bugs.md). Of three real
 upstream fix commits we sampled, one (OpenMOC 28008901 — `_k_eff *=
 ...`) lives on the k_eff path and would likely have been caught the
-same way M02/M04 are (divergent k_eff → MR direction fails). Two
+same way Mut02/Mut04 are (divergent k_eff → MR direction fails). Two
 (OpenMC PR #3712 multi-temperature, PR #3708 distribcell tally
 group names) are on paths the current MR suite does not exercise —
 **out of coverage**, motivating Phase 2.
@@ -134,12 +134,12 @@ Three concrete next steps, in priority order:
 
 1. **`MagnitudeBound` MR family** — assert `k_eff` lies inside a
    calibrated envelope, not just on the right side of source.
-   Closes M03, M05, M06, M16, M17, and likely M14, M20 (≥ 5
+   Closes Mut03, Mut05, Mut06, Mut16, Mut17, and likely Mut14, Mut20 (≥ 5
    currently-missed rows). Smallest implementation: one new
    `IMrAssertion` + one new transformation; no IR refactor.
 2. **Tolerance-aware `GreaterThan` / `LessThan`** — replace strict
    inequality with `k_followup > k_source + 3·σ` (or configurable
-   relative tolerance). Closes the M25 float-noise miss and
+   relative tolerance). Closes the Mut25 float-noise miss and
    stabilises matched-pair κ. One-line C# change plus migrating
    existing scenarios to pass the tolerance parameter.
 3. **`MaterialTemperatureScaling` MR family** — exercise OpenMC's

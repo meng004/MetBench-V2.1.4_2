@@ -1,0 +1,38 @@
+{
+  "mutation_id": "Mut19-openmc-runner-hardcode-keff",
+  "factor": 1.5,
+  "cells": [
+    {
+      "scenario_id": "openmoc-pincell-nu-sigma-f",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-nu-sigma-f",
+      "status": "ran",
+      "k_source": 1.0,
+      "k_followup": 1.0,
+      "k_source_std": 0.0017868522812004915,
+      "k_followup_std": 0.0025165741998401316,
+      "ratio": 1.0,
+      "assertion": "greater",
+      "assertion_passed": false,
+      "outcome": "detected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-sigma-a",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-sigma-a",
+      "status": "ran",
+      "k_source": 1.0,
+      "k_followup": 1.0,
+      "k_source_std": 0.001786852281187232,
+      "k_followup_std": 0.0013193223083096048,
+      "ratio": 1.0,
+      "assertion": "less",
+      "assertion_passed": false,
+      "outcome": "detected"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 """Input adapter for the OpenMOC pin-cell SUT — ScaleModeratorSigmaA.
 
-Implements NOETHER candidate N07 (m_mono / B2 order, parameter
+Implements NOETHER candidate MR07 (m_mono / B2 order, parameter
 monotonicity in moderator absorption — the classic "soluble boron"
 poison response). Multiplies moderator sigma_a by `factor`, with a
 matching adjustment to moderator sigma_t so that

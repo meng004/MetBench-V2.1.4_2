@@ -4,7 +4,7 @@ Mirror of `SUT/openmoc/openmoc_input_adapter_group_permute.py` —
 identical transformation and parameter shape so cross-program AC #6
 can drive both solvers from the same MR.
 
-Implements NOETHER candidate N04 (m_inv / B1 symmetry on energy-group
+Implements NOETHER candidate MR04 (m_inv / B1 symmetry on energy-group
 relabelling): swaps groups 0<->1 across all per-group cross-section
 arrays (`sigma_t`, `sigma_a`, `nu_sigma_f`, `sigma_f`, `chi`, plus the
 2x2 scattering matrix). Limited to num_groups=2 — the only case the

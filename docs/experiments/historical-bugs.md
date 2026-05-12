@@ -75,7 +75,7 @@ Effect on the MR (`k_followup > k_source` for ScaleNuSigmaF, factor=1.5):
 
 - If both source and follow-up diverge to `inf`: `inf > inf` is **false**
   → MR reports `detected`. The mutation row most analogous to this in
-  our catalogue is `M02-openmoc-runner-sigt-from-siga` (reported
+  our catalogue is `Mut02-openmoc-runner-sigt-from-siga` (reported
   `k_src=inf k_flw=inf`, both MRs `DETECT`).
 - If source and follow-up both converge to finite-but-wrong values, the
   ratio `k_followup / k_source` may still be roughly the correct 1.5×
@@ -86,7 +86,7 @@ Effect on the MR (`k_followup > k_source` for ScaleNuSigmaF, factor=1.5):
 
 **Detected (probabilistically)**. The MR assertion is qualitative
 (direction only). The bug typically causes `_k_eff` to diverge — in our
-catalogue M02 and M04 ("sigt-from-siga", "drop nu_sigma_f") which
+catalogue Mut02 and Mut04 ("sigt-from-siga", "drop nu_sigma_f") which
 produce `inf`/`nan` k_eff both show DETECT in the matrix. The same
 mechanism would catch this 2018 bug.
 
@@ -198,7 +198,7 @@ under symmetry transformations) — also a Phase 2 candidate.
 **Reading**: of three real upstream fix commits we sampled, only the
 OpenMOC `_k_eff` accumulation bug lives on the code path our 2-group
 pin-cell + ScaleNuSigmaF/ScaleFuelSigmaA MR exercises. That bug would
-likely be caught (matrix M02 / M04 show the same `inf`/`nan` →
+likely be caught (matrix Mut02 / Mut04 show the same `inf`/`nan` →
 detected pattern). The other two are real, severe bugs in OpenMC's
 multi-group plumbing, but they affect tally outputs and temperature
 handling — not eigenvalue computation under a single-temperature

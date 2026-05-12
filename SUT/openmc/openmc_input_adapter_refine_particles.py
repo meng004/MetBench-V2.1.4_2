@@ -1,6 +1,6 @@
 """Input adapter for the OpenMC pin-cell SUT — RefineParticles.
 
-Implements NOETHER candidate N12 (m_conv / B5 limit, Monte-Carlo
+Implements NOETHER candidate MR12 (m_conv / B5 limit, Monte-Carlo
 convergence rate). Multiplies `solver.particles` by `factor`. Also
 ensures the relevant solver section exists (the SUT runner falls back
 to defaults if the JSON is silent).

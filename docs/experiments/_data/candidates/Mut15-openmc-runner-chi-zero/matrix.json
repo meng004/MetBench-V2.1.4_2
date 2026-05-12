@@ -1,0 +1,26 @@
+{
+  "mutation_id": "Mut15-openmc-runner-chi-zero",
+  "factor": 1.5,
+  "cells": [
+    {
+      "scenario_id": "openmoc-pincell-nu-sigma-f",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-nu-sigma-f",
+      "status": "error",
+      "error": "Subprocess timed out after 90s: /opt/miniconda3/envs/openmc-env/bin/python /tmp/mat-Mut15-openmc-runner-chi-zero-czgvrs65/SUT/openmc/openmc_runner.py --input /home/user/MetBench-V2.1.4_2/SUT/openmoc/sample/pincell.json --output /tmp/mat-Mut15-openmc-runner-chi-zero-czgvrs65/src-openmc-openmc-pincell-nu-sigma-f.json\nstdout (partial):\n\nstderr (partial):\n",
+      "outcome": "error"
+    },
+    {
+      "scenario_id": "openmoc-pincell-sigma-a",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-sigma-a",
+      "status": "error",
+      "error": "Subprocess timed out after 90s: /opt/miniconda3/envs/openmc-env/bin/python /tmp/mat-Mut15-openmc-runner-chi-zero-czgvrs65/SUT/openmc/openmc_runner.py --input /home/user/MetBench-V2.1.4_2/SUT/openmoc/sample/pincell.json --output /tmp/mat-Mut15-openmc-runner-chi-zero-czgvrs65/src-openmc-openmc-pincell-sigma-a.json\nstdout (partial):\n\nstderr (partial):\n",
+      "outcome": "error"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "mutation_id": "Mut04-openmoc-runner-drop-nu-sigma-f",
+  "predicted_classification": "semantic",
+  "target_file": "SUT/openmoc/openmoc_runner.py",
+  "solver": "openmoc",
+  "patched_source": {
+    "openmoc": {
+      "solver": "openmoc",
+      "reps": [
+        NaN
+      ],
+      "stds": [
+        0.0
+      ],
+      "mean": NaN,
+      "max_std": 0.0
+    },
+    "openmc": null
+  },
+  "baseline": {
+    "openmoc": 1.1330583459569659,
+    "openmc": 1.1245000140252948
+  },
+  "classifications_per_solver": {
+    "openmoc": {
+      "abs_delta": NaN,
+      "rel_delta": NaN,
+      "mc_threshold_3sigma": 0.0,
+      "rel_threshold": 0.005665291729784829,
+      "threshold": 0.005665291729784829,
+      "semantic": false
+    }
+  },
+  "classification": "equivalent",
+  "threshold_rel": 0.005
+}

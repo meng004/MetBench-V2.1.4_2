@@ -18,88 +18,59 @@ as a transparency artifact. The discrepancy between the two columns below shows
 exactly which mutations would have been miss-classified by the source-only rule.
 
 
-**Discard rate**: 5 of 39 candidates (12.8%) classified equivalent under the matrix rule.
+**Discard rate**: 4 of 41 candidates (9.8%) classified equivalent under the matrix rule.
 
 
-Classification counts: semantic=33, equivalent=5, error=1, unknown=0
+Classification counts: semantic=36, equivalent=4, error=1, unknown=0
 
 
 | mutation | predicted | source-only signal | matrix signal | source shifted? | follow-up shifted? | err cells |
 |---|---|---|---|---|---|---|
-| M00-identity | equivalent | equivalent | equivalent | False | False | 0 |
-| M01-openmoc-runner-chi-zero | semantic | semantic | semantic | True | True | 0 |
-| M02-openmoc-runner-sigt-from-siga | semantic | semantic | semantic | True | True | 0 |
-| M03-openmoc-runner-swap-fuel-moderator | semantic | semantic | semantic | True | True | 0 |
-| M04-openmoc-runner-drop-nu-sigma-f | semantic | equivalent | semantic | True | True | 0 |
-| M05-openmoc-runner-chi-swap-groups | semantic | semantic | semantic | True | True | 0 |
-| M06-openmoc-runner-vacuum-boundary | semantic | semantic | semantic | True | True | 0 |
-| M07-openmoc-adapter-nsf-inverse | semantic | equivalent | semantic | False | True | 0 |
-| M08-openmoc-adapter-nsf-square | semantic | equivalent | semantic | False | True | 0 |
-| M09-openmoc-adapter-nsf-moderator | equivalent | equivalent | semantic | False | True | 0 |
-| M10-openmoc-adapter-nsf-identity | semantic | equivalent | semantic | False | True | 0 |
-| M11-openmoc-adapter-nsf-fast-only | semantic | equivalent | semantic | False | True | 0 |
-| M12-openmoc-adapter-sa-no-sigt-update | solver-dependent | equivalent | semantic | False | True | 0 |
-| M13-openmoc-adapter-sa-inverse | semantic | equivalent | semantic | False | True | 0 |
-| M14-openmoc-adapter-sa-moderator | semantic | equivalent | semantic | False | True | 0 |
-| M15-openmc-runner-chi-zero | semantic | error | error | False | False | 2 |
-| M16-openmc-runner-scatter-transpose | semantic | semantic | semantic | True | True | 0 |
-| M17-openmc-runner-vacuum-boundary | semantic | semantic | semantic | True | True | 0 |
-| M18-openmc-runner-batches-too-few | semantic | equivalent | equivalent | False | False | 0 |
-| M19-openmc-runner-hardcode-keff | semantic | semantic | semantic | True | True | 0 |
-| M20-openmc-runner-chi-swap-groups | semantic | semantic | semantic | True | True | 0 |
-| M21-openmc-runner-fission-zero | semantic | equivalent | equivalent | False | False | 0 |
-| M22-openmc-adapter-nsf-inverse | semantic | equivalent | semantic | False | True | 0 |
-| M23-openmc-adapter-nsf-square | semantic | equivalent | semantic | False | True | 0 |
-| M24-openmc-adapter-nsf-moderator | equivalent | equivalent | semantic | False | True | 0 |
-| M25-openmc-adapter-nsf-identity | semantic | equivalent | semantic | False | True | 0 |
-| M26-openmc-adapter-sa-no-sigt-update | semantic | equivalent | equivalent | False | False | 0 |
-| M27-openmc-adapter-sa-inverse | semantic | equivalent | semantic | False | True | 0 |
-| M28-openmoc-runner-chi-fast-only | semantic | — | semantic | False | True | 0 |
-| M29-openmoc-adapter-fuel-sigt-no-siga-update | equivalent | — | equivalent | False | False | 0 |
-| M30-openmoc-adapter-moderator-sigma-a-no-sigt-update | semantic | — | semantic | False | True | 0 |
-| M31-openmoc-adapter-group-permute-fuel-only | semantic | — | semantic | False | True | 0 |
-| M32-openmoc-adapter-fuel-sigma-s-identity | semantic | — | semantic | False | True | 0 |
-| M33-openmoc-adapter-fuel-radius-shrink | semantic | — | semantic | False | True | 0 |
-| M34-openmc-adapter-particles-no-op | semantic | — | semantic | False | False | 0 |
-| M35-openmc-runner-chi-fast-only | semantic | — | semantic | False | True | 0 |
-| M36-openmc-adapter-group-permute-fuel-only | semantic | — | semantic | False | True | 0 |
-| M37-openmc-adapter-fuel-sigma-s-identity | semantic | — | semantic | False | True | 0 |
-| M38-openmc-adapter-fuel-radius-shrink | semantic | — | semantic | False | True | 0 |
+| Mut00-identity | equivalent | equivalent | semantic | True | False | 0 |
+| Mut01-openmoc-runner-chi-zero | semantic | semantic | semantic | True | True | 0 |
+| Mut02-openmoc-runner-sigt-from-siga | semantic | semantic | semantic | True | True | 0 |
+| Mut03-openmoc-runner-swap-fuel-moderator | semantic | semantic | semantic | True | True | 0 |
+| Mut04-openmoc-runner-drop-nu-sigma-f | semantic | equivalent | semantic | True | True | 0 |
+| Mut05-openmoc-runner-chi-swap-groups | semantic | semantic | semantic | True | True | 0 |
+| Mut06-openmoc-runner-vacuum-boundary | semantic | semantic | semantic | True | True | 0 |
+| Mut07-openmoc-adapter-nsf-inverse | semantic | equivalent | semantic | False | True | 0 |
+| Mut08-openmoc-adapter-nsf-square | semantic | equivalent | semantic | False | True | 0 |
+| Mut09-openmoc-adapter-nsf-moderator | equivalent | equivalent | semantic | False | True | 0 |
+| Mut10-openmoc-adapter-nsf-identity | semantic | equivalent | semantic | False | True | 0 |
+| Mut11-openmoc-adapter-nsf-fast-only | semantic | equivalent | semantic | False | True | 0 |
+| Mut12-openmoc-adapter-sa-no-sigt-update | solver-dependent | equivalent | semantic | False | True | 0 |
+| Mut13-openmoc-adapter-sa-inverse | semantic | equivalent | semantic | False | True | 0 |
+| Mut14-openmoc-adapter-sa-moderator | semantic | equivalent | semantic | False | True | 0 |
+| Mut15-openmc-runner-chi-zero | semantic | error | error | False | False | 2 |
+| Mut16-openmc-runner-scatter-transpose | semantic | semantic | semantic | True | True | 0 |
+| Mut17-openmc-runner-vacuum-boundary | semantic | semantic | semantic | True | True | 0 |
+| Mut18-openmc-runner-batches-too-few | semantic | equivalent | equivalent | False | False | 0 |
+| Mut19-openmc-runner-hardcode-keff | semantic | semantic | semantic | True | True | 0 |
+| Mut20-openmc-runner-chi-swap-groups | semantic | semantic | semantic | True | True | 0 |
+| Mut21-openmc-runner-fission-zero | semantic | equivalent | equivalent | False | False | 0 |
+| Mut22-openmc-adapter-nsf-inverse | semantic | equivalent | semantic | False | True | 0 |
+| Mut23-openmc-adapter-nsf-square | semantic | equivalent | semantic | False | True | 0 |
+| Mut24-openmc-adapter-nsf-moderator | equivalent | equivalent | semantic | False | True | 0 |
+| Mut25-openmc-adapter-nsf-identity | semantic | equivalent | semantic | False | True | 0 |
+| Mut26-openmc-adapter-sa-no-sigt-update | semantic | equivalent | equivalent | False | False | 0 |
+| Mut27-openmc-adapter-sa-inverse | semantic | equivalent | semantic | False | True | 0 |
+| Mut28-openmoc-runner-chi-fast-only | semantic | — | semantic | False | True | 0 |
+| Mut29-openmoc-adapter-fuel-sigt-no-siga-update | equivalent | — | equivalent | False | False | 0 |
+| Mut30-openmoc-adapter-moderator-sigma-a-no-sigt-update | semantic | — | semantic | False | True | 0 |
+| Mut31-openmoc-adapter-group-permute-fuel-only | semantic | — | semantic | False | True | 0 |
+| Mut32-openmoc-adapter-fuel-sigma-s-identity | semantic | — | semantic | False | True | 0 |
+| Mut33-openmoc-adapter-fuel-radius-shrink | semantic | — | semantic | False | True | 0 |
+| Mut34-openmc-adapter-particles-no-op | semantic | — | semantic | False | False | 0 |
+| Mut35-openmc-runner-chi-fast-only | semantic | — | semantic | False | True | 0 |
+| Mut36-openmc-adapter-group-permute-fuel-only | semantic | — | semantic | False | True | 0 |
+| Mut37-openmc-adapter-fuel-sigma-s-identity | semantic | — | semantic | False | True | 0 |
+| Mut38-openmc-adapter-fuel-radius-shrink | semantic | — | semantic | False | True | 0 |
+| Mut39-openmoc-runner-hardcode-y-from-x | semantic | — | semantic | True | True | 0 |
+| Mut40-openmc-runner-hardcode-y-from-x | semantic | — | semantic | True | True | 0 |
 
 ## Discarded (equivalent) mutants — why?
 
-### M00-identity
-
-*Identity (no change).*
-
-
-**Predicted**: equivalent.
-
-
-**Rationale**: False-positive control. Any MR reporting `detected` on M00 is a bug in the MR or the harness, not in the SUT.
-
-
-Observed per-scenario shifts:
-
-| scenario | Δsource | Δfollow-up | threshold |
-|---|---|---|---|
-| openmoc-pincell-nu-sigma-f | 0.000000 | 0.000000 | 0.005665 |
-| openmc-pincell-nu-sigma-f | 0.000000 | 0.000000 | 0.007550 |
-| openmoc-pincell-sigma-a | 0.000000 | 0.000000 | 0.005665 |
-| openmc-pincell-sigma-a | 0.000000 | 0.000000 | 0.005623 |
-| openmoc-pincell-group-permute | 0.000000 | 0.000000 | 0.005665 |
-| openmoc-pincell-fuel-sigma-t | 0.000000 | 0.000000 | 0.005665 |
-| openmoc-pincell-moderator-sigma-a | 0.000000 | 0.000000 | 0.005665 |
-| openmc-pincell-group-permute | 0.000000 | 0.000000 | 0.005623 |
-| openmc-pincell-fuel-sigma-t | 0.000000 | 0.000000 | 0.005623 |
-| openmc-pincell-moderator-sigma-a | 0.000000 | 0.000000 | 0.005623 |
-| openmoc-pincell-fuel-sigma-s | 0.000000 | 0.000000 | 0.005665 |
-| openmc-pincell-fuel-sigma-s | 0.000000 | 0.000000 | 0.005864 |
-| openmoc-pincell-fuel-radius | 0.000000 | 0.000000 | 0.005665 |
-| openmc-pincell-fuel-radius | 0.000000 | 0.000000 | 0.005623 |
-| openmc-pincell-particles-refine | 0.000000 | 0.000000 | 0.005623 |
-
-### M18-openmc-runner-batches-too-few
+### Mut18-openmc-runner-batches-too-few
 
 *Hard-code batches=5, inactive=2, particles=200 (very noisy MC).*
 
@@ -117,7 +88,7 @@ Observed per-scenario shifts:
 | openmc-pincell-nu-sigma-f | 0.032631 | 0.040132 | 0.154487 |
 | openmc-pincell-sigma-a | 0.032631 | 0.058557 | 0.154487 |
 
-### M21-openmc-runner-fission-zero
+### Mut21-openmc-runner-fission-zero
 
 *Zero out fission cross section but keep nu_sigma_f.*
 
@@ -135,15 +106,15 @@ Observed per-scenario shifts:
 | openmc-pincell-nu-sigma-f | 0.000000 | 0.000000 | 0.007550 |
 | openmc-pincell-sigma-a | 0.000000 | 0.000000 | 0.005623 |
 
-### M26-openmc-adapter-sa-no-sigt-update
+### Mut26-openmc-adapter-sa-no-sigt-update
 
-*Update fuel.sigma_a but leave sigma_t unchanged (OpenMC twin of M12).*
+*Update fuel.sigma_a but leave sigma_t unchanged (OpenMC twin of Mut12).*
 
 
 **Predicted**: semantic.
 
 
-**Rationale**: Matched pair with M12. OpenMC twin is semantic (OpenMC reads sigma_t and sigma_a independently). Together with M12 this documents the cross-solver split clearly.
+**Rationale**: Matched pair with Mut12. OpenMC twin is semantic (OpenMC reads sigma_t and sigma_a independently). Together with Mut12 this documents the cross-solver split clearly.
 
 
 Observed per-scenario shifts:
@@ -152,7 +123,7 @@ Observed per-scenario shifts:
 |---|---|---|---|
 | openmc-pincell-sigma-a | 0.000000 | 0.002759 | 0.005623 |
 
-### M29-openmoc-adapter-fuel-sigt-no-siga-update
+### Mut29-openmoc-adapter-fuel-sigt-no-siga-update
 
 *Update fuel.sigma_t but skip the matching fuel.sigma_a bump.*
 
@@ -160,7 +131,7 @@ Observed per-scenario shifts:
 **Predicted**: equivalent.
 
 
-**Rationale**: Adapter inconsistency analogous to M12 but for the new fuel-sigma_t MR. OpenMOC reads sigma_t directly and derives sigma_a from sigma_t − Σ sigma_s, so missing the JSON sigma_a write is silent on OpenMOC: the runner still sees the correct effective absorption. Pure documentation-vs-runtime split — predicted equivalent for OpenMOC and semantic only when a downstream consumer actually reads sigma_a from the JSON (none currently does, so this is in the catalogue mostly to document the parity with M12 — important when OpenMC support lands).
+**Rationale**: Adapter inconsistency analogous to Mut12 but for the new fuel-sigma_t MR. OpenMOC reads sigma_t directly and derives sigma_a from sigma_t − Σ sigma_s, so missing the JSON sigma_a write is silent on OpenMOC: the runner still sees the correct effective absorption. Pure documentation-vs-runtime split — predicted equivalent for OpenMOC and semantic only when a downstream consumer actually reads sigma_a from the JSON (none currently does, so this is in the catalogue mostly to document the parity with Mut12 — important when OpenMC support lands).
 
 
 Observed per-scenario shifts:

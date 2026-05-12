@@ -54,7 +54,7 @@ class CandidateMR:
 
 M_INV = (
     CandidateMR(
-        id="N01-inv-quarter-rotation-90",
+        id="MR01-inv-quarter-rotation-90",
         meta_pattern="m_inv",
         block="G",
         parameter="geometry.rotation.90deg",
@@ -64,7 +64,7 @@ M_INV = (
         physical_rationale="2D square pin-cell with reflective BCs and a centred circular fuel rod has discrete C4 rotational symmetry. Any genuine eigenvalue solver must commute with this rotation; the follow-up k_eff must equal the source k_eff modulo Monte-Carlo noise and tracking discretisation.",
     ),
     CandidateMR(
-        id="N02-inv-mirror-x",
+        id="MR02-inv-mirror-x",
         meta_pattern="m_inv",
         block="G",
         parameter="geometry.reflection.x",
@@ -74,17 +74,17 @@ M_INV = (
         physical_rationale="Pin-cell + reflective BC + centred fuel is invariant under reflection across either axis. k_eff is a scalar invariant of the underlying operator, so it must be preserved bit-equivalently in a deterministic solver and within MC σ for a stochastic one.",
     ),
     CandidateMR(
-        id="N03-inv-mirror-y",
+        id="MR03-inv-mirror-y",
         meta_pattern="m_inv",
         block="G",
         parameter="geometry.reflection.y",
         description="Mirror the geometry along the y-axis (x → -x).",
         hypothesis="k_eff_followup == k_eff_source within tolerance",
         assertion="approx",
-        physical_rationale="Same mirror-symmetry argument as N02 with the orthogonal axis.",
+        physical_rationale="Same mirror-symmetry argument as MR02 with the orthogonal axis.",
     ),
     CandidateMR(
-        id="N04-inv-energy-group-relabel",
+        id="MR04-inv-energy-group-relabel",
         meta_pattern="m_inv",
         block="G",
         parameter="materials.group_relabel",
@@ -105,7 +105,7 @@ M_INV = (
 
 M_MONO = (
     CandidateMR(
-        id="N05-mono-fuel-sigma-t-up",
+        id="MR05-mono-fuel-sigma-t-up",
         meta_pattern="m_mono",
         block="O≤",
         parameter="fuel.sigma_t",
@@ -115,7 +115,7 @@ M_MONO = (
         physical_rationale="Total cross section being increased without proportional scattering increases effective absorption per path length; k_eff drops. PWR textbook monotonicity.",
     ),
     CandidateMR(
-        id="N06-mono-fuel-sigma-s-down",
+        id="MR06-mono-fuel-sigma-s-down",
         meta_pattern="m_mono",
         block="O≤",
         parameter="fuel.sigma_s",
@@ -125,7 +125,7 @@ M_MONO = (
         physical_rationale="Reducing scattering in fuel reduces the chance of slow-down to thermal where fission is most likely; k_eff drops.",
     ),
     CandidateMR(
-        id="N07-mono-moderator-sigma-a-up",
+        id="MR07-mono-moderator-sigma-a-up",
         meta_pattern="m_mono",
         block="O≤",
         parameter="moderator.sigma_a",
@@ -135,7 +135,7 @@ M_MONO = (
         physical_rationale="Increasing moderator absorption removes neutrons from the thermal flux that would otherwise drive fission; k_eff drops. Standard PWR poison response.",
     ),
     CandidateMR(
-        id="N08-mono-fuel-radius-up",
+        id="MR08-mono-fuel-radius-up",
         meta_pattern="m_mono",
         block="O≤",
         parameter="geometry.fuel_radius_cm",
@@ -145,7 +145,7 @@ M_MONO = (
         physical_rationale="Larger fuel volume fraction in a fixed-pitch pin-cell raises fission rate per unit volume; k_eff rises. Valid for small perturbations that don't change the moderator/fuel ratio enough to flip the usual under-moderated regime.",
     ),
     CandidateMR(
-        id="N09-mono-fuel-chi-thermal-up",
+        id="MR09-mono-fuel-chi-thermal-up",
         meta_pattern="m_mono",
         block="O≤",
         parameter="fuel.chi[1]",
@@ -163,7 +163,7 @@ M_MONO = (
 
 M_CONV = (
     CandidateMR(
-        id="N10-conv-num-azim-refine",
+        id="MR10-conv-num-azim-refine",
         meta_pattern="m_conv",
         block="L*",
         parameter="tracking.num_azim",
@@ -173,7 +173,7 @@ M_CONV = (
         physical_rationale="Method-of-characteristics discretisation error in OpenMOC scales as O(1/num_azim). Refining must move k_eff monotonically toward the continuum value. Realisable on OpenMOC only.",
     ),
     CandidateMR(
-        id="N11-conv-azim-spacing-refine",
+        id="MR11-conv-azim-spacing-refine",
         meta_pattern="m_conv",
         block="L*",
         parameter="tracking.azim_spacing_cm",
@@ -183,7 +183,7 @@ M_CONV = (
         physical_rationale="Track-spacing is the other half of MOC discretisation; standard Richardson-extrapolation argument.",
     ),
     CandidateMR(
-        id="N12-conv-particles-refine",
+        id="MR12-conv-particles-refine",
         meta_pattern="m_conv",
         block="L*",
         parameter="solver.particles",
@@ -193,7 +193,7 @@ M_CONV = (
         physical_rationale="Monte-Carlo statistical error scales as 1/√N. The reported k_eff standard deviation must shrink by √10 when N grows by 10. Direct test of the MC convergence law.",
     ),
     CandidateMR(
-        id="N13-conv-batches-refine",
+        id="MR13-conv-batches-refine",
         meta_pattern="m_conv",
         block="L*",
         parameter="solver.batches",
@@ -210,7 +210,7 @@ M_CONV = (
 
 M_CMP = (
     CandidateMR(
-        id="N14-cmp-openmoc-vs-openmc",
+        id="MR14-cmp-openmoc-vs-openmc",
         meta_pattern="m_cmp",
         block="E*",
         parameter="solver.OpenMOC_vs_OpenMC",
@@ -220,7 +220,7 @@ M_CMP = (
         physical_rationale="Two physically equivalent solvers (MOC deterministic vs MC Monte-Carlo) discretising the same operator must agree within the sum of their respective discretisation budgets. Generalises the existing `cross_program_comparison.py` to an MR.",
     ),
     CandidateMR(
-        id="N15-cmp-p0-vs-p1-scattering",
+        id="MR15-cmp-p0-vs-p1-scattering",
         meta_pattern="m_cmp",
         block="E*",
         parameter="solver.scattering_order",

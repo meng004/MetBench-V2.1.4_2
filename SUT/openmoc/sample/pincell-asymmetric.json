@@ -1,0 +1,39 @@
+{
+  "_comment": "Asymmetric pin-cell variant for MR01 (rotate 90°). x_extent and y_extent differ so the rotation transformation is non-trivial; fuel remains centred so MR02/MR03 (mirror x/y) are still no-ops on this geometry. Cross sections match SUT/openmoc/sample/pincell.json so k_eff stays in the ~1.0 range.",
+  "geometry": {
+    "x_extent_cm": 1.00,
+    "y_extent_cm": 1.50,
+    "z_extent_cm": 1.0,
+    "fuel_radius_cm": 0.4
+  },
+  "tracking": {
+    "num_azim": 16,
+    "azim_spacing_cm": 0.05,
+    "z_coord_cm": 0.0
+  },
+  "solver": {
+    "convergence_threshold": 0.0001,
+    "max_iters": 1000,
+    "num_threads": 1
+  },
+  "materials": {
+    "fuel": {
+      "num_groups": 2,
+      "sigma_t":    [0.222222, 0.833333],
+      "sigma_a":    [0.010120, 0.080032],
+      "sigma_s":    [0.192423, 0.020000, 0.000000, 0.753300],
+      "nu_sigma_f": [0.006400, 0.156500],
+      "sigma_f":    [0.002500, 0.066600],
+      "chi":        [1.000000, 0.000000]
+    },
+    "moderator": {
+      "num_groups": 2,
+      "sigma_t":    [0.230000, 1.530000],
+      "sigma_a":    [0.000400, 0.020000],
+      "sigma_s":    [0.219000, 0.010600, 0.000000, 1.510000],
+      "nu_sigma_f": [0.000000, 0.000000],
+      "sigma_f":    [0.000000, 0.000000],
+      "chi":        [0.000000, 0.000000]
+    }
+  }
+}

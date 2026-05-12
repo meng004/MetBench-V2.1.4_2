@@ -38,7 +38,7 @@ Output schema
 `llm-verdicts.json` is a list of objects, one per candidate:
 
     {
-      "id":                 "N01-inv-quarter-rotation-90",
+      "id":                 "MR01-inv-quarter-rotation-90",
       "verdict":            "valid" | "invalid" | "uncertain",
       "confidence":         0.0-1.0,
       "suggested_assertion": "approx" | "greater" | "less" | "bound" | "<custom>",

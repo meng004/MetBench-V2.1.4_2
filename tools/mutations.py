@@ -70,11 +70,11 @@ def _chain(*patches: Callable[[str], str]) -> Callable[[str], str]:
 # Identity control
 # ---------------------------------------------------------------------------
 
-M00 = Mutation(
-    id="M00-identity",
+Mut00 = Mutation(
+    id="Mut00-identity",
     target_file="SUT/openmoc/openmoc_runner.py",  # arbitrary; not actually patched
     description="Identity (no change).",
-    rationale="False-positive control. Any MR reporting `detected` on M00 is a bug "
+    rationale="False-positive control. Any MR reporting `detected` on Mut00 is a bug "
               "in the MR or the harness, not in the SUT.",
     predicted_classification="equivalent",
     predicted_detector=(),
@@ -85,8 +85,8 @@ M00 = Mutation(
 # OpenMOC runner mutations
 # ---------------------------------------------------------------------------
 
-M01 = Mutation(
-    id="M01-openmoc-runner-chi-zero",
+Mut01 = Mutation(
+    id="Mut01-openmoc-runner-chi-zero",
     target_file="SUT/openmoc/openmoc_runner.py",
     description="Zero out chi (fission spectrum) for every material.",
     rationale="With chi = 0 the fission source vanishes; k_eff collapses to ~0. "
@@ -101,8 +101,8 @@ M01 = Mutation(
     ),
 )
 
-M02 = Mutation(
-    id="M02-openmoc-runner-sigt-from-siga",
+Mut02 = Mutation(
+    id="Mut02-openmoc-runner-sigt-from-siga",
     target_file="SUT/openmoc/openmoc_runner.py",
     description='Pass mat["sigma_a"] to setSigmaT instead of mat["sigma_t"].',
     rationale="Realistic indexing slip: sigma_a < sigma_t by physics, so the runner "
@@ -117,8 +117,8 @@ M02 = Mutation(
     ),
 )
 
-M03 = Mutation(
-    id="M03-openmoc-runner-swap-fuel-moderator",
+Mut03 = Mutation(
+    id="Mut03-openmoc-runner-swap-fuel-moderator",
     target_file="SUT/openmoc/openmoc_runner.py",
     description="Fill fuel cell with moderator material and vice versa.",
     rationale="Material/geometry swap — fuel sits where moderator should and vice "
@@ -138,8 +138,8 @@ M03 = Mutation(
     ),
 )
 
-M04 = Mutation(
-    id="M04-openmoc-runner-drop-nu-sigma-f",
+Mut04 = Mutation(
+    id="Mut04-openmoc-runner-drop-nu-sigma-f",
     target_file="SUT/openmoc/openmoc_runner.py",
     description="Drop the setNuSigmaF call entirely.",
     rationale="Missing fission production cross section. k_eff drops drastically. "
@@ -148,12 +148,12 @@ M04 = Mutation(
     predicted_detector=(),
     apply=_replace_exactly_once(
         '    m.setNuSigmaF(mat["nu_sigma_f"])\n',
-        '    # m.setNuSigmaF(mat["nu_sigma_f"])  # MUTATION M04\n',
+        '    # m.setNuSigmaF(mat["nu_sigma_f"])  # MUTATION Mut04\n',
     ),
 )
 
-M05 = Mutation(
-    id="M05-openmoc-runner-chi-swap-groups",
+Mut05 = Mutation(
+    id="Mut05-openmoc-runner-chi-swap-groups",
     target_file="SUT/openmoc/openmoc_runner.py",
     description="Replace setChi(mat['chi']) with setChi(reversed(mat['chi'])).",
     rationale="Fast/thermal swap of fission spectrum. Fuel chi = [1, 0] becomes "
@@ -167,8 +167,8 @@ M05 = Mutation(
     ),
 )
 
-M06 = Mutation(
-    id="M06-openmoc-runner-vacuum-boundary",
+Mut06 = Mutation(
+    id="Mut06-openmoc-runner-vacuum-boundary",
     target_file="SUT/openmoc/openmoc_runner.py",
     description="Change boundary type from REFLECTIVE to VACUUM.",
     rationale="Pin-cell with leakage. k_eff drops because neutrons escape instead "
@@ -186,8 +186,8 @@ M06 = Mutation(
 # OpenMOC input adapter (ScaleNuSigmaF)
 # ---------------------------------------------------------------------------
 
-M07 = Mutation(
-    id="M07-openmoc-adapter-nsf-inverse",
+Mut07 = Mutation(
+    id="Mut07-openmoc-adapter-nsf-inverse",
     target_file="SUT/openmoc/openmoc_input_adapter.py",
     description="Scale fuel.nu_sigma_f by 1/factor instead of factor.",
     rationale="Sign/direction inversion. The MR expects k_followup > k_source; "
@@ -201,8 +201,8 @@ M07 = Mutation(
     ),
 )
 
-M08 = Mutation(
-    id="M08-openmoc-adapter-nsf-square",
+Mut08 = Mutation(
+    id="Mut08-openmoc-adapter-nsf-square",
     target_file="SUT/openmoc/openmoc_input_adapter.py",
     description="Apply the scaling factor twice (factor**2).",
     rationale="Realistic copy-paste error: scaling line duplicated. k_followup is "
@@ -216,8 +216,8 @@ M08 = Mutation(
     ),
 )
 
-M09 = Mutation(
-    id="M09-openmoc-adapter-nsf-moderator",
+Mut09 = Mutation(
+    id="Mut09-openmoc-adapter-nsf-moderator",
     target_file="SUT/openmoc/openmoc_input_adapter.py",
     description="Scale moderator.nu_sigma_f instead of fuel.nu_sigma_f.",
     rationale="Moderator nu_sigma_f is exactly [0, 0] in the pin-cell case. "
@@ -232,8 +232,8 @@ M09 = Mutation(
     ),
 )
 
-M10 = Mutation(
-    id="M10-openmoc-adapter-nsf-identity",
+Mut10 = Mutation(
+    id="Mut10-openmoc-adapter-nsf-identity",
     target_file="SUT/openmoc/openmoc_input_adapter.py",
     description="Ignore factor; copy nu_sigma_f unchanged.",
     rationale="Bug: factor parsed but not applied. Source and follow-up are "
@@ -247,8 +247,8 @@ M10 = Mutation(
     ),
 )
 
-M11 = Mutation(
-    id="M11-openmoc-adapter-nsf-fast-only",
+Mut11 = Mutation(
+    id="Mut11-openmoc-adapter-nsf-fast-only",
     target_file="SUT/openmoc/openmoc_input_adapter.py",
     description="Scale only the fast-group nu_sigma_f; leave thermal group untouched.",
     rationale="Partial scaling. k_followup increases but less than expected. "
@@ -266,8 +266,8 @@ M11 = Mutation(
 # OpenMOC input adapter (ScaleFuelSigmaA)
 # ---------------------------------------------------------------------------
 
-M12 = Mutation(
-    id="M12-openmoc-adapter-sa-no-sigt-update",
+Mut12 = Mutation(
+    id="Mut12-openmoc-adapter-sa-no-sigt-update",
     target_file="SUT/openmoc/openmoc_input_adapter_sigma_a.py",
     description="Update fuel.sigma_a but leave sigma_t unchanged.",
     rationale="Inconsistent input. OpenMOC reads sigma_t directly (sigma_a is "
@@ -278,12 +278,12 @@ M12 = Mutation(
     predicted_detector=("sigma_a",),
     apply=_replace_exactly_once(
         'fuel["sigma_t"] = new_sigma_t',
-        '# fuel["sigma_t"] = new_sigma_t  # MUTATION M12',
+        '# fuel["sigma_t"] = new_sigma_t  # MUTATION Mut12',
     ),
 )
 
-M13 = Mutation(
-    id="M13-openmoc-adapter-sa-inverse",
+Mut13 = Mutation(
+    id="Mut13-openmoc-adapter-sa-inverse",
     target_file="SUT/openmoc/openmoc_input_adapter_sigma_a.py",
     description="Scale fuel.sigma_a by 1/factor instead of factor.",
     rationale="Direction inversion. With factor > 1 the bug *decreases* "
@@ -303,8 +303,8 @@ M13 = Mutation(
     ),
 )
 
-M14 = Mutation(
-    id="M14-openmoc-adapter-sa-moderator",
+Mut14 = Mutation(
+    id="Mut14-openmoc-adapter-sa-moderator",
     target_file="SUT/openmoc/openmoc_input_adapter_sigma_a.py",
     description="Scale moderator.sigma_a (and moderator.sigma_t) instead of fuel.",
     rationale="Moderator sigma_a is non-zero (unlike its nu_sigma_f). Scaling "
@@ -324,11 +324,11 @@ M14 = Mutation(
 # OpenMC runner mutations
 # ---------------------------------------------------------------------------
 
-M15 = Mutation(
-    id="M15-openmc-runner-chi-zero",
+Mut15 = Mutation(
+    id="Mut15-openmc-runner-chi-zero",
     target_file="SUT/openmc/openmc_runner.py",
     description="Zero out chi for every material in the MGXS library.",
-    rationale="OpenMC mirror of M01. Same logic: kills fission source. Expected "
+    rationale="OpenMC mirror of Mut01. Same logic: kills fission source. Expected "
               "to drive baseline k_eff toward zero.",
     predicted_classification="semantic",
     predicted_detector=(),
@@ -338,8 +338,8 @@ M15 = Mutation(
     ),
 )
 
-M16 = Mutation(
-    id="M16-openmc-runner-scatter-transpose",
+Mut16 = Mutation(
+    id="Mut16-openmc-runner-scatter-transpose",
     target_file="SUT/openmc/openmc_runner.py",
     description="Transpose the scatter matrix (swap g_in and g_out axes).",
     rationale="Scattering matrix S[g_in, g_out] becomes S[g_out, g_in]. Up- and "
@@ -353,19 +353,19 @@ M16 = Mutation(
     ),
 )
 
-M17 = Mutation(
-    id="M17-openmc-runner-vacuum-boundary",
+Mut17 = Mutation(
+    id="Mut17-openmc-runner-vacuum-boundary",
     target_file="SUT/openmc/openmc_runner.py",
     description="Change boundary_type from reflective to vacuum on all four planes.",
-    rationale="OpenMC mirror of M06. Neutrons escape; k_eff drops. Useful to "
+    rationale="OpenMC mirror of Mut06. Neutrons escape; k_eff drops. Useful to "
               "compare against the OpenMOC reflective→vacuum baseline shift.",
     predicted_classification="semantic",
     predicted_detector=(),
     apply=lambda text: text.replace('boundary_type="reflective"', 'boundary_type="vacuum"'),
 )
 
-M18 = Mutation(
-    id="M18-openmc-runner-batches-too-few",
+Mut18 = Mutation(
+    id="Mut18-openmc-runner-batches-too-few",
     target_file="SUT/openmc/openmc_runner.py",
     description="Hard-code batches=5, inactive=2, particles=200 (very noisy MC).",
     rationale="Massive statistical-noise injection. Tests whether the MR's "
@@ -389,8 +389,8 @@ M18 = Mutation(
     ),
 )
 
-M19 = Mutation(
-    id="M19-openmc-runner-hardcode-keff",
+Mut19 = Mutation(
+    id="Mut19-openmc-runner-hardcode-keff",
     target_file="SUT/openmc/openmc_runner.py",
     description="Hardcode k_mean = 1.0 regardless of statepoint contents.",
     rationale="Worst-case bug: solver bypassed. k_eff identical across source "
@@ -399,15 +399,15 @@ M19 = Mutation(
     predicted_detector=("nu_sigma_f", "sigma_a"),
     apply=_replace_exactly_once(
         'k_mean = float(k.nominal_value)',
-        'k_mean = 1.0  # MUTATION M19',
+        'k_mean = 1.0  # MUTATION Mut19',
     ),
 )
 
-M20 = Mutation(
-    id="M20-openmc-runner-chi-swap-groups",
+Mut20 = Mutation(
+    id="Mut20-openmc-runner-chi-swap-groups",
     target_file="SUT/openmc/openmc_runner.py",
     description="Reverse chi array before passing to set_chi.",
-    rationale="OpenMC mirror of M05. Fast-to-thermal fission shift.",
+    rationale="OpenMC mirror of Mut05. Fast-to-thermal fission shift.",
     predicted_classification="semantic",
     predicted_detector=(),
     apply=_replace_exactly_once(
@@ -416,8 +416,8 @@ M20 = Mutation(
     ),
 )
 
-M21 = Mutation(
-    id="M21-openmc-runner-fission-zero",
+Mut21 = Mutation(
+    id="Mut21-openmc-runner-fission-zero",
     target_file="SUT/openmc/openmc_runner.py",
     description="Zero out fission cross section but keep nu_sigma_f.",
     rationale="Inconsistent fission data. OpenMC may warn / refuse / silently "
@@ -434,11 +434,11 @@ M21 = Mutation(
 # OpenMC input adapters (mirror of OpenMOC ones for cross-solver matched pairs)
 # ---------------------------------------------------------------------------
 
-M22 = Mutation(
-    id="M22-openmc-adapter-nsf-inverse",
+Mut22 = Mutation(
+    id="Mut22-openmc-adapter-nsf-inverse",
     target_file="SUT/openmc/openmc_input_adapter.py",
-    description="Scale fuel.nu_sigma_f by 1/factor (OpenMC twin of M07).",
-    rationale="Matched pair with M07. Used for cross-solver Cohen's κ.",
+    description="Scale fuel.nu_sigma_f by 1/factor (OpenMC twin of Mut07).",
+    rationale="Matched pair with Mut07. Used for cross-solver Cohen's κ.",
     predicted_classification="semantic",
     predicted_detector=("nu_sigma_f",),
     apply=_replace_exactly_once(
@@ -447,11 +447,11 @@ M22 = Mutation(
     ),
 )
 
-M23 = Mutation(
-    id="M23-openmc-adapter-nsf-square",
+Mut23 = Mutation(
+    id="Mut23-openmc-adapter-nsf-square",
     target_file="SUT/openmc/openmc_input_adapter.py",
-    description="Apply factor twice (OpenMC twin of M08).",
-    rationale="Matched pair with M08.",
+    description="Apply factor twice (OpenMC twin of Mut08).",
+    rationale="Matched pair with Mut08.",
     predicted_classification="semantic",
     predicted_detector=(),
     apply=_replace_exactly_once(
@@ -460,11 +460,11 @@ M23 = Mutation(
     ),
 )
 
-M24 = Mutation(
-    id="M24-openmc-adapter-nsf-moderator",
+Mut24 = Mutation(
+    id="Mut24-openmc-adapter-nsf-moderator",
     target_file="SUT/openmc/openmc_input_adapter.py",
-    description="Scale moderator nu_sigma_f (OpenMC twin of M09).",
-    rationale="Matched pair with M09; equivalent-mutant control on the OpenMC side.",
+    description="Scale moderator nu_sigma_f (OpenMC twin of Mut09).",
+    rationale="Matched pair with Mut09; equivalent-mutant control on the OpenMC side.",
     predicted_classification="equivalent",
     predicted_detector=(),
     apply=_replace_exactly_once(
@@ -473,11 +473,11 @@ M24 = Mutation(
     ),
 )
 
-M25 = Mutation(
-    id="M25-openmc-adapter-nsf-identity",
+Mut25 = Mutation(
+    id="Mut25-openmc-adapter-nsf-identity",
     target_file="SUT/openmc/openmc_input_adapter.py",
-    description="Ignore factor; copy unchanged (OpenMC twin of M10).",
-    rationale="Matched pair with M10.",
+    description="Ignore factor; copy unchanged (OpenMC twin of Mut10).",
+    rationale="Matched pair with Mut10.",
     predicted_classification="semantic",
     predicted_detector=("nu_sigma_f",),
     apply=_replace_exactly_once(
@@ -486,26 +486,26 @@ M25 = Mutation(
     ),
 )
 
-M26 = Mutation(
-    id="M26-openmc-adapter-sa-no-sigt-update",
+Mut26 = Mutation(
+    id="Mut26-openmc-adapter-sa-no-sigt-update",
     target_file="SUT/openmc/openmc_input_adapter_sigma_a.py",
-    description="Update fuel.sigma_a but leave sigma_t unchanged (OpenMC twin of M12).",
-    rationale="Matched pair with M12. OpenMC twin is semantic (OpenMC reads "
-              "sigma_t and sigma_a independently). Together with M12 this "
+    description="Update fuel.sigma_a but leave sigma_t unchanged (OpenMC twin of Mut12).",
+    rationale="Matched pair with Mut12. OpenMC twin is semantic (OpenMC reads "
+              "sigma_t and sigma_a independently). Together with Mut12 this "
               "documents the cross-solver split clearly.",
     predicted_classification="semantic",
     predicted_detector=("sigma_a",),
     apply=_replace_exactly_once(
         'fuel["sigma_t"] = new_st',
-        '# fuel["sigma_t"] = new_st  # MUTATION M26',
+        '# fuel["sigma_t"] = new_st  # MUTATION Mut26',
     ),
 )
 
-M27 = Mutation(
-    id="M27-openmc-adapter-sa-inverse",
+Mut27 = Mutation(
+    id="Mut27-openmc-adapter-sa-inverse",
     target_file="SUT/openmc/openmc_input_adapter_sigma_a.py",
-    description="Scale fuel.sigma_a by 1/factor (OpenMC twin of M13).",
-    rationale="Matched pair with M13.",
+    description="Scale fuel.sigma_a by 1/factor (OpenMC twin of Mut13).",
+    rationale="Matched pair with Mut13.",
     predicted_classification="semantic",
     predicted_detector=("sigma_a",),
     apply=_chain(
@@ -524,71 +524,71 @@ M27 = Mutation(
 # ---------------------------------------------------------------------------
 # Phase 2 (NOETHER) mutations — designed to break the new MRs
 #
-# M28-M31 each targets the algebraic invariant of one new NOETHER MR. The
+# Mut28-Mut31 each targets the algebraic invariant of one new NOETHER MR. The
 # expectation is that the *new* MR catches its target mutant while the
 # Phase-1 MRs (ScaleNuSigmaF, ScaleFuelSigmaA) miss it. A successful
 # matrix run will show new diagonal hits with off-diagonal misses,
 # quantifying coverage growth.
 # ---------------------------------------------------------------------------
 
-M28 = Mutation(
-    id="M28-openmoc-runner-chi-fast-only",
+Mut28 = Mutation(
+    id="Mut28-openmoc-runner-chi-fast-only",
     target_file="SUT/openmoc/openmoc_runner.py",
     description='Hard-code chi to [1.0, 0.0] regardless of mat["chi"].',
     rationale="Hard-coded fast-only fission emission. Equivalent for the source case "
               "(reference fuel.chi == [1, 0] already), but breaks PermuteEnergyGroups "
-              "(N04): the permuted JSON has chi == [0, 1] yet the runner still emits "
+              "(MR04): the permuted JSON has chi == [0, 1] yet the runner still emits "
               "into group 0. Phase-1 monotonicity MRs scale nu_sigma_f / sigma_a only, "
               "so they are insensitive to chi handling — this fault should be invisible "
-              "to Phase 1 and visible to Phase 2 N04.",
+              "to Phase 1 and visible to Phase 2 MR04.",
     predicted_classification="semantic",
     predicted_detector=("group_permute",),
     apply=_replace_exactly_once(
         'm.setChi(mat["chi"])',
-        'm.setChi([1.0, 0.0])  # MUTATION M28',
+        'm.setChi([1.0, 0.0])  # MUTATION Mut28',
     ),
 )
 
-M29 = Mutation(
-    id="M29-openmoc-adapter-fuel-sigt-no-siga-update",
+Mut29 = Mutation(
+    id="Mut29-openmoc-adapter-fuel-sigt-no-siga-update",
     target_file="SUT/openmoc/openmoc_input_adapter_fuel_sigma_t.py",
     description="Update fuel.sigma_t but skip the matching fuel.sigma_a bump.",
-    rationale="Adapter inconsistency analogous to M12 but for the new fuel-sigma_t MR. "
+    rationale="Adapter inconsistency analogous to Mut12 but for the new fuel-sigma_t MR. "
               "OpenMOC reads sigma_t directly and derives sigma_a from "
               "sigma_t − Σ sigma_s, so missing the JSON sigma_a write is silent on "
               "OpenMOC: the runner still sees the correct effective absorption. Pure "
               "documentation-vs-runtime split — predicted equivalent for OpenMOC and "
               "semantic only when a downstream consumer actually reads sigma_a from "
               "the JSON (none currently does, so this is in the catalogue mostly to "
-              "document the parity with M12 — important when OpenMC support lands).",
+              "document the parity with Mut12 — important when OpenMC support lands).",
     predicted_classification="equivalent",
     predicted_detector=(),
     apply=_replace_exactly_once(
         'fuel["sigma_a"] = new_sigma_a',
-        '# fuel["sigma_a"] = new_sigma_a  # MUTATION M29',
+        '# fuel["sigma_a"] = new_sigma_a  # MUTATION Mut29',
     ),
 )
 
-M30 = Mutation(
-    id="M30-openmoc-adapter-moderator-sigma-a-no-sigt-update",
+Mut30 = Mutation(
+    id="Mut30-openmoc-adapter-moderator-sigma-a-no-sigt-update",
     target_file="SUT/openmoc/openmoc_input_adapter_moderator_sigma_a.py",
     description="Update moderator.sigma_a but skip the matching moderator.sigma_t bump.",
     rationale="Adapter inconsistency for the new moderator-sigma_a MR. Because OpenMOC "
               "derives moderator absorption from sigma_t (not from sigma_a in the JSON), "
               "the runner only sees the original moderator.sigma_t, so the follow-up "
               "k_eff is unchanged from the source — that violates "
-              "ScaleModeratorSigmaA's Less assertion. Predicted detected by N07 on "
+              "ScaleModeratorSigmaA's Less assertion. Predicted detected by MR07 on "
               "OpenMOC; missed by Phase-1 MRs (which never touch moderator).",
     predicted_classification="semantic",
     predicted_detector=("moderator_sigma_a",),
     apply=_replace_exactly_once(
         'moderator["sigma_t"] = new_sigma_t',
-        '# moderator["sigma_t"] = new_sigma_t  # MUTATION M30',
+        '# moderator["sigma_t"] = new_sigma_t  # MUTATION Mut30',
     ),
 )
 
-M31 = Mutation(
-    id="M31-openmoc-adapter-group-permute-fuel-only",
+Mut31 = Mutation(
+    id="Mut31-openmoc-adapter-group-permute-fuel-only",
     target_file="SUT/openmoc/openmoc_input_adapter_group_permute.py",
     description="Permute energy groups in fuel only; leave moderator unchanged.",
     rationale="Adapter does only half of the symmetry transformation. The follow-up "
@@ -600,70 +600,70 @@ M31 = Mutation(
     predicted_detector=("group_permute",),
     apply=_replace_exactly_once(
         'materials["moderator"] = _permute_material(materials["moderator"])',
-        '# materials["moderator"] = _permute_material(materials["moderator"])  # MUTATION M31',
+        '# materials["moderator"] = _permute_material(materials["moderator"])  # MUTATION Mut31',
     ),
 )
 
 
 # ---------------------------------------------------------------------------
-# Phase 2 (NOETHER) extension: mutations targeting N06, N08, N12 MRs
+# Phase 2 (NOETHER) extension: mutations targeting MR06, MR08, MR12 MRs
 # ---------------------------------------------------------------------------
 
-M32 = Mutation(
-    id="M32-openmoc-adapter-fuel-sigma-s-identity",
+Mut32 = Mutation(
+    id="Mut32-openmoc-adapter-fuel-sigma-s-identity",
     target_file="SUT/openmoc/openmoc_input_adapter_fuel_sigma_s.py",
     description="Ignore the factor — copy fuel.sigma_s unchanged.",
     rationale="Adapter no-op: classic 'forgot to apply factor' bug analogous to "
-              "M10 (nsf-identity). The follow-up case is bit-equivalent to the "
-              "source, so k_followup == k_source. The N06 MR's strict 'less' "
+              "Mut10 (nsf-identity). The follow-up case is bit-equivalent to the "
+              "source, so k_followup == k_source. The MR06 MR's strict 'less' "
               "assertion fails. Phase-1 MRs do not exercise this adapter; "
-              "predicted detection by N06 only.",
+              "predicted detection by MR06 only.",
     predicted_classification="semantic",
     predicted_detector=("fuel_sigma_s",),
     apply=_chain(
         _replace_exactly_once(
             'new_sigma_s = [factor * v for v in old_sigma_s]',
-            'new_sigma_s = list(old_sigma_s)  # MUTATION M32',
+            'new_sigma_s = list(old_sigma_s)  # MUTATION Mut32',
         ),
         # Also skip the sigma_t recomputation so the source case is byte-identical.
         _replace_exactly_once(
             '    fuel["sigma_t"] = new_sigma_t',
-            '    # fuel["sigma_t"] = new_sigma_t  # MUTATION M32',
+            '    # fuel["sigma_t"] = new_sigma_t  # MUTATION Mut32',
         ),
     ),
 )
 
-M33 = Mutation(
-    id="M33-openmoc-adapter-fuel-radius-shrink",
+Mut33 = Mutation(
+    id="Mut33-openmoc-adapter-fuel-radius-shrink",
     target_file="SUT/openmoc/openmoc_input_adapter_fuel_radius.py",
     description="Divide fuel_radius by factor instead of multiplying.",
     rationale="Direction inversion. Scenario factor is 1.05 (factor > 1), so "
               "the bug shrinks the fuel by ~5%. With less fuel volume the cell "
-              "is more moderated and k_eff drops, violating N08's 'greater' "
-              "assertion. Predicted detection by N08; invisible to all Phase-1 "
+              "is more moderated and k_eff drops, violating MR08's 'greater' "
+              "assertion. Predicted detection by MR08; invisible to all Phase-1 "
               "MRs because they do not touch geometry.",
     predicted_classification="semantic",
     predicted_detector=("fuel_radius",),
     apply=_replace_exactly_once(
         'new_radius = old_radius * factor',
-        'new_radius = old_radius / factor  # MUTATION M33',
+        'new_radius = old_radius / factor  # MUTATION Mut33',
     ),
 )
 
-M34 = Mutation(
-    id="M34-openmc-adapter-particles-no-op",
+Mut34 = Mutation(
+    id="Mut34-openmc-adapter-particles-no-op",
     target_file="SUT/openmc/openmc_input_adapter_refine_particles.py",
     description="Ignore the factor — leave solver.particles unchanged.",
     rationale="Adapter doesn't change particle count, so the follow-up MC run "
               "has the same statistical noise as the source. Observed σ ratio "
-              "≈ 1.0, but N12's variance-ratio assertion expects 1/√10 ≈ 0.316. "
-              "Detected by N12 (variance-ratio). Inert in deterministic OpenMOC; "
+              "≈ 1.0, but MR12's variance-ratio assertion expects 1/√10 ≈ 0.316. "
+              "Detected by MR12 (variance-ratio). Inert in deterministic OpenMOC; "
               "OpenMC-only mutation.",
     predicted_classification="semantic",
     predicted_detector=("particles_refine",),
     apply=_replace_exactly_once(
         'new_particles = max(1, int(round(old_particles * factor)))',
-        'new_particles = old_particles  # MUTATION M34',
+        'new_particles = old_particles  # MUTATION Mut34',
     ),
 )
 
@@ -672,81 +672,121 @@ M34 = Mutation(
 # OpenMC twins of Phase-2 mutations (matched pairs for cross-solver κ)
 # ---------------------------------------------------------------------------
 
-M35 = Mutation(
-    id="M35-openmc-runner-chi-fast-only",
+Mut35 = Mutation(
+    id="Mut35-openmc-runner-chi-fast-only",
     target_file="SUT/openmc/openmc_runner.py",
-    description="Hard-code chi to [1.0, 0.0] regardless of mat['chi']. OpenMC twin of M28.",
-    rationale="OpenMC twin of M28. Same logic: chi[0]=1 hardcoded so fission "
+    description="Hard-code chi to [1.0, 0.0] regardless of mat['chi']. OpenMC twin of Mut28.",
+    rationale="OpenMC twin of Mut28. Same logic: chi[0]=1 hardcoded so fission "
               "always emits into group 0, regardless of the JSON. Permuted JSON "
-              "(N04) has chi=[0,1] but runner still emits to 0 → N04 detects.",
+              "(MR04) has chi=[0,1] but runner still emits to 0 → MR04 detects.",
     predicted_classification="semantic",
     predicted_detector=("group_permute",),
     apply=_replace_exactly_once(
         'xsdata.set_chi(np.array(mat["chi"], dtype=np.float64))',
-        'xsdata.set_chi(np.array([1.0, 0.0], dtype=np.float64))  # MUTATION M35',
+        'xsdata.set_chi(np.array([1.0, 0.0], dtype=np.float64))  # MUTATION Mut35',
     ),
 )
 
-M36 = Mutation(
-    id="M36-openmc-adapter-group-permute-fuel-only",
+Mut36 = Mutation(
+    id="Mut36-openmc-adapter-group-permute-fuel-only",
     target_file="SUT/openmc/openmc_input_adapter_group_permute.py",
-    description="Permute groups in fuel only; leave moderator unchanged. OpenMC twin of M31.",
-    rationale="OpenMC twin of M31. Half-permutes the JSON, producing a mixed "
-              "state that violates N04's approx assertion.",
+    description="Permute groups in fuel only; leave moderator unchanged. OpenMC twin of Mut31.",
+    rationale="OpenMC twin of Mut31. Half-permutes the JSON, producing a mixed "
+              "state that violates MR04's approx assertion.",
     predicted_classification="semantic",
     predicted_detector=("group_permute",),
     apply=_replace_exactly_once(
         'materials["moderator"] = _permute_material(materials["moderator"])',
-        '# materials["moderator"] = _permute_material(materials["moderator"])  # MUTATION M36',
+        '# materials["moderator"] = _permute_material(materials["moderator"])  # MUTATION Mut36',
     ),
 )
 
-M37 = Mutation(
-    id="M37-openmc-adapter-fuel-sigma-s-identity",
+Mut37 = Mutation(
+    id="Mut37-openmc-adapter-fuel-sigma-s-identity",
     target_file="SUT/openmc/openmc_input_adapter_fuel_sigma_s.py",
-    description="Ignore the factor — copy fuel.sigma_s unchanged. OpenMC twin of M32.",
-    rationale="OpenMC twin of M32. Adapter no-op, so follow-up == source, "
-              "violating N06's strict less assertion.",
+    description="Ignore the factor — copy fuel.sigma_s unchanged. OpenMC twin of Mut32.",
+    rationale="OpenMC twin of Mut32. Adapter no-op, so follow-up == source, "
+              "violating MR06's strict less assertion.",
     predicted_classification="semantic",
     predicted_detector=("fuel_sigma_s",),
     apply=_chain(
         _replace_exactly_once(
             'new_sigma_s = [factor * v for v in old_sigma_s]',
-            'new_sigma_s = list(old_sigma_s)  # MUTATION M37',
+            'new_sigma_s = list(old_sigma_s)  # MUTATION Mut37',
         ),
         _replace_exactly_once(
             '    fuel["sigma_t"] = new_sigma_t',
-            '    # fuel["sigma_t"] = new_sigma_t  # MUTATION M37',
+            '    # fuel["sigma_t"] = new_sigma_t  # MUTATION Mut37',
         ),
     ),
 )
 
-M38 = Mutation(
-    id="M38-openmc-adapter-fuel-radius-shrink",
+Mut39 = Mutation(
+    id="Mut39-openmoc-runner-hardcode-y-from-x",
+    target_file="SUT/openmoc/openmoc_runner.py",
+    description='Use g["x_extent_cm"] for half_y instead of g["y_extent_cm"].',
+    rationale="Hard-codes y-extent to x-extent — geometry is correct only when "
+              "x == y. On the asymmetric pin-cell (1.0 × 1.5 cm) the runner "
+              "constructs a 1.0 × 0.5 cell from the source JSON and a 1.5 × "
+              "0.75 cell from the 90°-rotated JSON; k_eff differs noticeably "
+              "between them, so MR01 (Rotate90) detects. Both source and "
+              "follow-up of Phase-1 MRs use the symmetric sample, where this "
+              "patch is silently equivalent — exactly the MR-coverage gap "
+              "MR01 was designed to fill.",
+    predicted_classification="semantic",
+    predicted_detector=("rotate_90",),
+    apply=_replace_exactly_once(
+        'half_y = g["y_extent_cm"] / 2.0',
+        'half_y = g["x_extent_cm"] / 2.0  # MUTATION Mut39',
+    ),
+)
+
+Mut40 = Mutation(
+    id="Mut40-openmc-runner-hardcode-y-from-x",
+    target_file="SUT/openmc/openmc_runner.py",
+    description='OpenMC twin of Mut39: half_y = g["x_extent_cm"] / 2.0.',
+    rationale="OpenMC mirror of Mut39. Same logical bug, same MR01 detection "
+              "prediction. Matched pair entry for cross-solver κ.",
+    predicted_classification="semantic",
+    predicted_detector=("rotate_90",),
+    apply=_replace_exactly_once(
+        'half_y = g["y_extent_cm"] / 2.0',
+        'half_y = g["x_extent_cm"] / 2.0  # MUTATION Mut40',
+    ),
+)
+
+
+# ---------------------------------------------------------------------------
+# Earlier Phase-2 OpenMC twin (kept here for symmetric ordering)
+# ---------------------------------------------------------------------------
+
+Mut38 = Mutation(
+    id="Mut38-openmc-adapter-fuel-radius-shrink",
     target_file="SUT/openmc/openmc_input_adapter_fuel_radius.py",
-    description="Divide fuel_radius by factor instead of multiplying. OpenMC twin of M33.",
-    rationale="OpenMC twin of M33. Direction inversion; shrinks the fuel, "
-              "drops k_eff, violates N08's greater assertion.",
+    description="Divide fuel_radius by factor instead of multiplying. OpenMC twin of Mut33.",
+    rationale="OpenMC twin of Mut33. Direction inversion; shrinks the fuel, "
+              "drops k_eff, violates MR08's greater assertion.",
     predicted_classification="semantic",
     predicted_detector=("fuel_radius",),
     apply=_replace_exactly_once(
         'new_radius = old_radius * factor',
-        'new_radius = old_radius / factor  # MUTATION M38',
+        'new_radius = old_radius / factor  # MUTATION Mut38',
     ),
 )
 
 
 ALL_MUTATIONS: tuple[Mutation, ...] = (
-    M00,
-    M01, M02, M03, M04, M05, M06,
-    M07, M08, M09, M10, M11,
-    M12, M13, M14,
-    M15, M16, M17, M18, M19, M20, M21,
-    M22, M23, M24, M25,
-    M26, M27,
-    M28, M29, M30, M31,
-    M32, M33, M34,
-    M35, M36, M37, M38,
+    Mut00,
+    Mut01, Mut02, Mut03, Mut04, Mut05, Mut06,
+    Mut07, Mut08, Mut09, Mut10, Mut11,
+    Mut12, Mut13, Mut14,
+    Mut15, Mut16, Mut17, Mut18, Mut19, Mut20, Mut21,
+    Mut22, Mut23, Mut24, Mut25,
+    Mut26, Mut27,
+    Mut28, Mut29, Mut30, Mut31,
+    Mut32, Mut33, Mut34,
+    Mut35, Mut36, Mut37, Mut38,
+    Mut39, Mut40,
 )
 
 

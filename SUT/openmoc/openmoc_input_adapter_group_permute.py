@@ -1,6 +1,6 @@
 """Input adapter for the OpenMOC pin-cell SUT — PermuteEnergyGroups.
 
-Implements NOETHER candidate N04 (m_inv / B1 symmetry on the energy-group
+Implements NOETHER candidate MR04 (m_inv / B1 symmetry on the energy-group
 index permutation group). Swaps the per-group entries of every cross
 section array in `materials.fuel` and `materials.moderator`:
 
