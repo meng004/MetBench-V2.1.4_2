@@ -121,6 +121,103 @@ real value is in catching mutations that *invert* this monotonicity
 direction (e.g., a future "scale wrong material" bug analogous to M14
 but on sigma_t) rather than as a high-rate detector.
 
+## OpenMC matrix added in this round
+
+The OpenMC half of the matrix is now populated (7/8 OpenMC scenarios
+ran; M15/M19/M21 — chi-zero, hardcode-keff, fission-zero — produce
+pathological OpenMC subprocesses, 60s timeout caps them). Key OpenMC
+findings:
+
+* **N12 variance-ratio empirically validated**: source σ at 5000
+  particles = 0.001787; followup σ at 50000 particles = 0.000549.
+  Observed ratio = 0.307. Predicted (1/√10) = 0.316. Relative
+  deviation = **2.8%** — well inside the 30% MR tolerance. The
+  textbook MC convergence law holds. M34 (adapter no-op on particles)
+  is correctly detected by this MR.
+
+* **Cross-solver κ on Phase-2 matched pairs**:
+  | Pair class | κ | Note |
+  |-----------|--:|------|
+  | N04 chi-fast-only (M28/M35) | **1.000** | both detect |
+  | N04 group-permute-fuel-only (M31/M36) | **1.000** | both detect |
+  | N06 fuel-sigma-s-identity (M32/M37) | **0.000** | **MOC detects, MC misses** |
+  | N08 fuel-radius-shrink (M33/M38) | **1.000** | both detect |
+
+* **M37 (OpenMC twin of M32) is the lone Phase-2 disagreement**.
+  Same logical bug (adapter no-op on sigma_s scaling), same MR, but
+  M37 is missed on OpenMC. The reason is MC seed-noise: OpenMC's
+  k_eff at 5000 particles fluctuates by ~σ = 0.0018 between runs,
+  and the followup happened to land **bit-for-bit fractionally below**
+  the source (1.124500014025275**9** vs 1.124500014025276**0**). The
+  strict `k_followup < k_source` assertion passes by ~10⁻¹⁵, masking
+  the bug. OpenMOC's deterministic k_eff is bit-equivalent across
+  identical inputs, so the same assertion strictly fails and the
+  bug is detected. **This is exactly the "tolerance-aware GreaterThan
+  / LessThan" hand-off note Phase 1 already raised**; Phase 2
+  reproduces it on a new MR class. The fix (replace `<` with
+  `< -3·σ`) is one line away once a tolerance plumbing is added.
+
+## Bonus finding — OpenMOC convergence pathology
+
+A side discovery from running the matrix end-to-end on both solvers:
+**OpenMOC's `CPUSolver` converges to a wrong eigenvalue when the
+moderator absorption is scaled by 1.5**, while OpenMC on the same
+JSON produces a physically sensible answer.
+
+Reproduction (factor 1.5 ScaleModeratorSigmaA on the reference
+`SUT/openmoc/sample/pincell.json`):
+
+| Solver | k_eff | Iterations | Comment |
+|--------|------:|-----------:|---------|
+| OpenMOC `CPUSolver` | **0.4764** | **30** | converged=true, but stuck on wrong fixed point |
+| OpenMC multi-group (5000 particles, 60 batches) | **0.9683 ± 0.0017** | (n/a, MC) | physically expected k for ~17% absorption increase |
+
+A factor sweep on OpenMOC alone exposes the discontinuity:
+
+| factor | OpenMOC k_eff | iters |
+|-------:|--------------:|------:|
+| 1.01 | 1.12935 | 552 |
+| 1.05 | 1.11476 | 548 |
+| 1.10 | 1.09710 | 544 |
+| 1.20 | 1.06352 | 535 |
+| **1.50** | **0.47635** | **30** ← discontinuity |
+
+The fuel-sigma-a Phase-1 scenario shows a *different* bad basin: at
+factor 1.01 OpenMOC converges in 26 iters to k=0.508 (wildly wrong);
+at factor 1.05 it correctly returns k=1.091 in 542 iters.
+
+Tightening `convergence_threshold` from 1e-4 to 1e-7 does **not**
+fix it — the solver still claims converged at iter 30 with
+`k_eff=0.47635`. So this is "power iteration converges to a
+non-physical eigenvalue under certain parameter combinations,"
+not "needs more iterations."
+
+The implications:
+
+1. **Our matrix evaluation is unaffected**: the assertion check
+   operates on whatever k OpenMOC reports; both the source and
+   follow-up runs of any given mutant go through the same
+   `CPUSolver` path, so the pathology is internally consistent
+   within each cell. The boolean detected/missed verdict is
+   correct.
+2. **The magnitude numbers in the per-MR detail table are not
+   physical** for the OpenMOC moderator-sigma-a rows. Readers
+   should consult the OpenMC twin scenarios for physical realism.
+3. **This is exactly the kind of fault N14 (cross-program OpenMOC
+   vs OpenMC) is designed to surface**: a 51% k_eff disagreement
+   on the same JSON between two physically-equivalent solvers is
+   well outside any MC noise or MOC discretisation budget. Folding
+   the existing `tools/cross_program_comparison.py` into a matrix
+   cell would make this a first-class report. The bug found by
+   that comparison is a *real* upstream OpenMOC weakness, not an
+   MR artefact.
+
+We have not filed a bug upstream — the issue may be a known
+limitation of basic power iteration without acceleration (Wielandt
+shift, Anderson, …), or it may be specific to this particular
+material configuration. Further investigation is out of scope for
+the MR-matrix study.
+
 ## Symmetry interaction note (M05)
 
 A non-obvious result worth flagging: M05 (`runner-chi-swap-groups`,

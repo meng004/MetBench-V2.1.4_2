@@ -13,61 +13,68 @@
   "openmc": {
     "solver": "openmc",
     "reps": [
-      1.1245000140252912,
-      1.1245000140252772,
-      1.124500014025292
+      1.1245000140252919,
+      1.1245000140252905,
+      1.124500014025276
     ],
     "stds": [
-      0.0017868522811680771,
-      0.0017868522811578878,
-      0.0017868522811549283
+      0.0017868522811834808,
+      0.0017868522811717534,
+      0.001786852281194857
     ],
-    "mean": 1.124500014025287,
-    "max_std": 0.0017868522811680771
+    "mean": 1.124500014025286,
+    "max_std": 0.001786852281194857
   },
   "followups": {
     "openmoc-pincell-nu-sigma-f": {
       "k_eff": 1.6999039264109281,
-      "k_eff_std": 0.0
+      "k_eff_std": 0.0,
+      "factor": 1.5
     },
     "openmc-pincell-nu-sigma-f": {
-      "k_eff": 1.6899608591871311,
-      "k_eff_std": 0.0025165741998519403
+      "k_eff": 1.6899608591871385,
+      "k_eff_std": 0.002516574199836923,
+      "factor": 1.5
     },
     "openmoc-pincell-sigma-a": {
       "k_eff": 0.8069041098845144,
-      "k_eff_std": 0.0
+      "k_eff_std": 0.0,
+      "factor": 1.5
     },
     "openmc-pincell-sigma-a": {
-      "k_eff": 0.8027171860617912,
-      "k_eff_std": 0.001319322308304122
+      "k_eff": 0.8027171860617847,
+      "k_eff_std": 0.0013193223083113582,
+      "factor": 1.5
     },
     "openmoc-pincell-group-permute": {
       "k_eff": 1.1330583459569659,
-      "k_eff_std": 0.0
+      "k_eff_std": 0.0,
+      "factor": 1.5
     },
     "openmoc-pincell-fuel-sigma-t": {
       "k_eff": 0.11127219735430455,
-      "k_eff_std": 0.0
+      "k_eff_std": 0.0,
+      "factor": 1.5
     },
     "openmoc-pincell-moderator-sigma-a": {
       "k_eff": 0.47635343316499984,
-      "k_eff_std": 0.0
+      "k_eff_std": 0.0,
+      "factor": 1.5
     },
     "openmc-pincell-group-permute": {
-      "k_eff": NaN,
-      "k_eff_std": 0.0,
-      "skipped": true
+      "k_eff": 1.126009504111914,
+      "k_eff_std": 0.0017763420637616286,
+      "factor": 1.5
     },
     "openmc-pincell-fuel-sigma-t": {
-      "k_eff": NaN,
-      "k_eff_std": 0.0,
-      "skipped": true
+      "k_eff": 0.1129234843229024,
+      "k_eff_std": 0.00021529635848134622,
+      "factor": 1.5
     },
     "openmc-pincell-moderator-sigma-a": {
-      "k_eff": NaN,
-      "k_eff_std": 0.0,
-      "skipped": true
+      "k_eff": 0.9683112180448833,
+      "k_eff_std": 0.0016647893051874828,
+      "factor": 1.5
     },
     "openmoc-pincell-fuel-sigma-s": {
       "k_eff": 1.0918528592930699,
@@ -75,9 +82,9 @@
       "factor": 0.5
     },
     "openmc-pincell-fuel-sigma-s": {
-      "k_eff": NaN,
-      "k_eff_std": 0.0,
-      "skipped": true
+      "k_eff": 1.0932569778147136,
+      "k_eff_std": 0.0019547208762928903,
+      "factor": 0.5
     },
     "openmoc-pincell-fuel-radius": {
       "k_eff": 1.1747611153388409,
@@ -85,16 +92,16 @@
       "factor": 1.05
     },
     "openmc-pincell-fuel-radius": {
-      "k_eff": NaN,
-      "k_eff_std": 0.0,
-      "skipped": true
+      "k_eff": 1.1708592074426414,
+      "k_eff_std": 0.0017145646357927774,
+      "factor": 1.05
     },
     "openmc-pincell-particles-refine": {
-      "k_eff": NaN,
-      "k_eff_std": 0.0,
-      "skipped": true
+      "k_eff": 1.1247657626517267,
+      "k_eff_std": 0.0005489853886409126,
+      "factor": 10.0
     }
   },
   "factor": 1.5,
-  "openmc_available": false
+  "openmc_available": true
 }

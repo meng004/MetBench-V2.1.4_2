@@ -289,28 +289,56 @@ def openmc_available() -> bool:
         return False
 
 
-SUBPROCESS_TIMEOUT_S = 90  # generous: normal OpenMC source case is ~7s, OpenMOC ~0.6s
+SUBPROCESS_TIMEOUT_S = 60  # normal OpenMC source case is ~7s, OpenMOC ~0.6s.
+# 60s accommodates the slowest legitimate case (10x particle refinement
+# at 50000 particles ≈ 50s) while still capping pathological mutants
+# (chi-zero, fission-zero) that drive the OpenMC binary into long
+# fruitless transport loops. Failing cells land as status="error",
+# which the screening + stats paths already handle. Combined with
+# `start_new_session=True` + killpg in run_subprocess, timeouts release
+# the full subprocess tree (otherwise the openmc binary becomes an
+# orphan owned by init and keeps burning CPU).
 
 
 def run_subprocess(cmd: list[str], cwd: Path | None = None) -> str:
+    """Run cmd and return stdout. Kills the full process tree on timeout.
+
+    OpenMC runners spawn an `openmc` binary subprocess of their own; a plain
+    `subprocess.run(timeout=...)` only SIGKILLs the immediate child (the
+    Python wrapper) and leaves the openmc binary as an orphan owned by init.
+    The orphan keeps burning CPU and slows down subsequent cells. Using
+    `start_new_session=True` puts the child in its own process group; on
+    timeout we send SIGKILL to the whole group via `os.killpg`.
+    """
+    import os
+    import signal
+    proc = subprocess.Popen(
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd,
+        text=True, start_new_session=True,
+    )
     try:
-        proc = subprocess.run(
-            cmd, capture_output=True, text=True, check=False, cwd=cwd,
-            timeout=SUBPROCESS_TIMEOUT_S,
-        )
-    except subprocess.TimeoutExpired as e:
+        stdout, stderr = proc.communicate(timeout=SUBPROCESS_TIMEOUT_S)
+    except subprocess.TimeoutExpired:
+        try:
+            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+        except (ProcessLookupError, PermissionError):
+            pass
+        try:
+            stdout, stderr = proc.communicate(timeout=5)
+        except subprocess.TimeoutExpired:
+            stdout, stderr = "", ""
         raise RuntimeError(
             f"Subprocess timed out after {SUBPROCESS_TIMEOUT_S}s: {' '.join(cmd)}\n"
-            f"stdout (partial):\n{e.stdout or ''}\n"
-            f"stderr (partial):\n{e.stderr or ''}"
+            f"stdout (partial):\n{stdout or ''}\n"
+            f"stderr (partial):\n{stderr or ''}"
         )
     if proc.returncode != 0:
         raise RuntimeError(
             f"Subprocess failed (exit {proc.returncode}): {' '.join(cmd)}\n"
-            f"stdout:\n{proc.stdout}\n"
-            f"stderr:\n{proc.stderr}"
+            f"stdout:\n{stdout}\n"
+            f"stderr:\n{stderr}"
         )
-    return proc.stdout
+    return stdout
 
 
 def run_solver(sut_root: Path, scenario: dict, input_json: Path, output_json: Path, python_exec: str) -> dict:
@@ -883,7 +911,12 @@ def classify_from_matrix(mutation: Mutation, matrix: dict | None, baseline: dict
         flw_shifted = flw_pathological or (
             (not math.isnan(d_flw)) and d_flw > thr_flw
         )
-        scenario_semantic = src_shifted or flw_shifted
+        # Variance-ratio MRs (e.g. N12 RefineParticles) do not shift k_eff
+        # significantly when broken — the bug is in σ scaling. Trust the
+        # MR's own assertion outcome here so such mutations land in the
+        # matrix-stats counts.
+        mr_detected = cell.get("outcome") == "detected"
+        scenario_semantic = src_shifted or flw_shifted or mr_detected
         if scenario_semantic:
             any_semantic = True
         detail.append({
@@ -1103,6 +1136,15 @@ MATCHED_PAIRS = [
     ("M10-openmoc-adapter-nsf-identity",       "M25-openmc-adapter-nsf-identity",       "nsf-identity"),
     ("M12-openmoc-adapter-sa-no-sigt-update",  "M26-openmc-adapter-sa-no-sigt-update",  "sa-no-sigt"),
     ("M13-openmoc-adapter-sa-inverse",         "M27-openmc-adapter-sa-inverse",         "sa-inverse"),
+    # Phase-2 matched pairs (chi runner / group-permute / sigma_s / radius)
+    ("M28-openmoc-runner-chi-fast-only",       "M35-openmc-runner-chi-fast-only",       "chi-fast-only"),
+    ("M31-openmoc-adapter-group-permute-fuel-only",
+                                                "M36-openmc-adapter-group-permute-fuel-only",
+                                                                                          "group-permute-fuel-only"),
+    ("M32-openmoc-adapter-fuel-sigma-s-identity",
+                                                "M37-openmc-adapter-fuel-sigma-s-identity",
+                                                                                          "fuel-sigma-s-identity"),
+    ("M33-openmoc-adapter-fuel-radius-shrink", "M38-openmc-adapter-fuel-radius-shrink", "fuel-radius-shrink"),
 ]
 
 
@@ -1128,9 +1170,18 @@ def _emit_kappa_and_sensitivity_md(rows: list[dict], args: argparse.Namespace) -
         return None
 
     nsf_pairs = [(moc, mc) for moc, mc, kind in MATCHED_PAIRS if "nsf" in kind]
-    sa_pairs = [(moc, mc) for moc, mc, kind in MATCHED_PAIRS if "sa" in kind]
+    sa_pairs = [(moc, mc) for moc, mc, kind in MATCHED_PAIRS
+                if "sa" in kind and "fuel-sigma-s" not in kind]
     other_pairs = [(moc, mc) for moc, mc, kind in MATCHED_PAIRS
                    if kind in ("chi-zero", "chi-swap", "vacuum-bc")]
+    # Phase-2 pair classes (one matched pair each)
+    chi_fast_pairs = [(moc, mc) for moc, mc, kind in MATCHED_PAIRS if kind == "chi-fast-only"]
+    group_permute_pairs = [(moc, mc) for moc, mc, kind in MATCHED_PAIRS
+                           if kind == "group-permute-fuel-only"]
+    sigma_s_pairs = [(moc, mc) for moc, mc, kind in MATCHED_PAIRS
+                     if kind == "fuel-sigma-s-identity"]
+    radius_pairs = [(moc, mc) for moc, mc, kind in MATCHED_PAIRS
+                    if kind == "fuel-radius-shrink"]
 
     def kappa_block(label: str, pairs: list[tuple[str, str]], moc_sc: str, mc_sc: str) -> str:
         a, b, paired_ids = [], [], []
@@ -1162,6 +1213,19 @@ def _emit_kappa_and_sensitivity_md(rows: list[dict], args: argparse.Namespace) -
     out.append(kappa_block("ScaleFuelSigmaA pairs", sa_pairs, "openmoc-pincell-sigma-a", "openmc-pincell-sigma-a"))
     out.append(kappa_block("Runner-level pairs (chi/boundary) — NuSigmaF scenarios",
                            other_pairs, "openmoc-pincell-nu-sigma-f", "openmc-pincell-nu-sigma-f"))
+    # Phase-2 categories — each evaluates the pair on the matched MR scenario.
+    out.append(kappa_block("Phase-2 N04 group-permute (chi-fast-only runner)",
+                           chi_fast_pairs,
+                           "openmoc-pincell-group-permute", "openmc-pincell-group-permute"))
+    out.append(kappa_block("Phase-2 N04 group-permute (fuel-only adapter)",
+                           group_permute_pairs,
+                           "openmoc-pincell-group-permute", "openmc-pincell-group-permute"))
+    out.append(kappa_block("Phase-2 N06 fuel-sigma-s identity adapter",
+                           sigma_s_pairs,
+                           "openmoc-pincell-fuel-sigma-s", "openmc-pincell-fuel-sigma-s"))
+    out.append(kappa_block("Phase-2 N08 fuel-radius direction inversion",
+                           radius_pairs,
+                           "openmoc-pincell-fuel-radius", "openmc-pincell-fuel-radius"))
     out.append("\n## Threshold sensitivity\n")
     out.append("Re-classify candidates at tightened and relaxed relative thresholds using the matrix data;\n")
     out.append("how many flip relative to the 0.5% baseline?\n\n")

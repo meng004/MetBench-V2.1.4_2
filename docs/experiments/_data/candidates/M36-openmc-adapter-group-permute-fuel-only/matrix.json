@@ -1,5 +1,5 @@
 {
-  "mutation_id": "M22-openmc-adapter-nsf-inverse",
+  "mutation_id": "M36-openmc-adapter-group-permute-fuel-only",
   "factor": 1.5,
   "cells": [
     {
@@ -8,16 +8,7 @@
     },
     {
       "scenario_id": "openmc-pincell-nu-sigma-f",
-      "status": "ran",
-      "k_source": 1.1245000140252823,
-      "k_followup": 0.75033161074996,
-      "k_source_std": 0.0017868522811538454,
-      "k_followup_std": 0.0009804351588310308,
-      "ratio": 0.6672579825624531,
-      "assertion": "greater",
-      "factor": 1.5,
-      "assertion_passed": false,
-      "outcome": "detected"
+      "status": "not-affected"
     },
     {
       "scenario_id": "openmoc-pincell-sigma-a",
@@ -41,7 +32,16 @@
     },
     {
       "scenario_id": "openmc-pincell-group-permute",
-      "status": "not-affected"
+      "status": "ran",
+      "k_source": 1.124500014025287,
+      "k_followup": 0.536778340505108,
+      "k_source_std": 0.001786852281155658,
+      "k_followup_std": 0.0015790479236781035,
+      "ratio": 0.4773484515875135,
+      "assertion": "approx",
+      "factor": 1.5,
+      "assertion_passed": false,
+      "outcome": "detected"
     },
     {
       "scenario_id": "openmc-pincell-fuel-sigma-t",

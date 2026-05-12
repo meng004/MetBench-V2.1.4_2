@@ -668,6 +668,74 @@ M34 = Mutation(
 )
 
 
+# ---------------------------------------------------------------------------
+# OpenMC twins of Phase-2 mutations (matched pairs for cross-solver κ)
+# ---------------------------------------------------------------------------
+
+M35 = Mutation(
+    id="M35-openmc-runner-chi-fast-only",
+    target_file="SUT/openmc/openmc_runner.py",
+    description="Hard-code chi to [1.0, 0.0] regardless of mat['chi']. OpenMC twin of M28.",
+    rationale="OpenMC twin of M28. Same logic: chi[0]=1 hardcoded so fission "
+              "always emits into group 0, regardless of the JSON. Permuted JSON "
+              "(N04) has chi=[0,1] but runner still emits to 0 → N04 detects.",
+    predicted_classification="semantic",
+    predicted_detector=("group_permute",),
+    apply=_replace_exactly_once(
+        'xsdata.set_chi(np.array(mat["chi"], dtype=np.float64))',
+        'xsdata.set_chi(np.array([1.0, 0.0], dtype=np.float64))  # MUTATION M35',
+    ),
+)
+
+M36 = Mutation(
+    id="M36-openmc-adapter-group-permute-fuel-only",
+    target_file="SUT/openmc/openmc_input_adapter_group_permute.py",
+    description="Permute groups in fuel only; leave moderator unchanged. OpenMC twin of M31.",
+    rationale="OpenMC twin of M31. Half-permutes the JSON, producing a mixed "
+              "state that violates N04's approx assertion.",
+    predicted_classification="semantic",
+    predicted_detector=("group_permute",),
+    apply=_replace_exactly_once(
+        'materials["moderator"] = _permute_material(materials["moderator"])',
+        '# materials["moderator"] = _permute_material(materials["moderator"])  # MUTATION M36',
+    ),
+)
+
+M37 = Mutation(
+    id="M37-openmc-adapter-fuel-sigma-s-identity",
+    target_file="SUT/openmc/openmc_input_adapter_fuel_sigma_s.py",
+    description="Ignore the factor — copy fuel.sigma_s unchanged. OpenMC twin of M32.",
+    rationale="OpenMC twin of M32. Adapter no-op, so follow-up == source, "
+              "violating N06's strict less assertion.",
+    predicted_classification="semantic",
+    predicted_detector=("fuel_sigma_s",),
+    apply=_chain(
+        _replace_exactly_once(
+            'new_sigma_s = [factor * v for v in old_sigma_s]',
+            'new_sigma_s = list(old_sigma_s)  # MUTATION M37',
+        ),
+        _replace_exactly_once(
+            '    fuel["sigma_t"] = new_sigma_t',
+            '    # fuel["sigma_t"] = new_sigma_t  # MUTATION M37',
+        ),
+    ),
+)
+
+M38 = Mutation(
+    id="M38-openmc-adapter-fuel-radius-shrink",
+    target_file="SUT/openmc/openmc_input_adapter_fuel_radius.py",
+    description="Divide fuel_radius by factor instead of multiplying. OpenMC twin of M33.",
+    rationale="OpenMC twin of M33. Direction inversion; shrinks the fuel, "
+              "drops k_eff, violates N08's greater assertion.",
+    predicted_classification="semantic",
+    predicted_detector=("fuel_radius",),
+    apply=_replace_exactly_once(
+        'new_radius = old_radius * factor',
+        'new_radius = old_radius / factor  # MUTATION M38',
+    ),
+)
+
+
 ALL_MUTATIONS: tuple[Mutation, ...] = (
     M00,
     M01, M02, M03, M04, M05, M06,
@@ -678,6 +746,7 @@ ALL_MUTATIONS: tuple[Mutation, ...] = (
     M26, M27,
     M28, M29, M30, M31,
     M32, M33, M34,
+    M35, M36, M37, M38,
 )
 
 

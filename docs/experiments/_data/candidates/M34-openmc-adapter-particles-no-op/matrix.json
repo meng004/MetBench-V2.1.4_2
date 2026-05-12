@@ -60,7 +60,16 @@
     },
     {
       "scenario_id": "openmc-pincell-particles-refine",
-      "status": "skipped-no-openmc"
+      "status": "ran",
+      "k_source": 1.124500014025282,
+      "k_followup": 1.124500014025282,
+      "k_source_std": 0.0017868522811674483,
+      "k_followup_std": 0.0017868522811644182,
+      "ratio": 1.0,
+      "assertion": "variance-ratio",
+      "factor": 10.0,
+      "assertion_passed": false,
+      "outcome": "detected"
     }
   ]
 }
