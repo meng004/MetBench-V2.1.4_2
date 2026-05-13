@@ -1,0 +1,628 @@
+{
+  "source": "mutation_study.SCENARIOS",
+  "total_scenarios": 29,
+  "schemas": [
+    {
+      "code": "MR-NuSigmaF",
+      "name": "ScaleNuSigmaF",
+      "meta_pattern_code": "m_mono",
+      "transformation_name": "ScaleNuSigmaF",
+      "assertion_type_code": "greater",
+      "value_name": "k_eff",
+      "noise_aware": false,
+      "tolerance_rel": 0.0,
+      "description": "Migrated from mutation_study.SCENARIOS id=openmoc-pincell-nu-sigma-f"
+    },
+    {
+      "code": "MR-SigmaA",
+      "name": "ScaleFuelSigmaA",
+      "meta_pattern_code": "m_mono",
+      "transformation_name": "ScaleFuelSigmaA",
+      "assertion_type_code": "less",
+      "value_name": "k_eff",
+      "noise_aware": false,
+      "tolerance_rel": 0.0,
+      "description": "Migrated from mutation_study.SCENARIOS id=openmoc-pincell-sigma-a"
+    },
+    {
+      "code": "MR-PermuteEnergyGroups",
+      "name": "PermuteEnergyGroups",
+      "meta_pattern_code": "m_inv",
+      "transformation_name": "PermuteEnergyGroups",
+      "assertion_type_code": "approx-invariant",
+      "value_name": "k_eff",
+      "noise_aware": false,
+      "tolerance_rel": 1e-06,
+      "description": "Migrated from mutation_study.SCENARIOS id=openmoc-pincell-group-permute"
+    },
+    {
+      "code": "MR-SigmaT",
+      "name": "ScaleFuelSigmaT",
+      "meta_pattern_code": "m_mono",
+      "transformation_name": "ScaleFuelSigmaT",
+      "assertion_type_code": "less",
+      "value_name": "k_eff",
+      "noise_aware": false,
+      "tolerance_rel": 0.0,
+      "description": "Migrated from mutation_study.SCENARIOS id=openmoc-pincell-fuel-sigma-t"
+    },
+    {
+      "code": "MR-ModSigmaA",
+      "name": "ScaleModeratorSigmaA",
+      "meta_pattern_code": "m_mono",
+      "transformation_name": "ScaleModeratorSigmaA",
+      "assertion_type_code": "less",
+      "value_name": "k_eff",
+      "noise_aware": false,
+      "tolerance_rel": 0.0,
+      "description": "Migrated from mutation_study.SCENARIOS id=openmoc-pincell-moderator-sigma-a"
+    },
+    {
+      "code": "MR-SigmaS",
+      "name": "ScaleFuelSigmaS",
+      "meta_pattern_code": "m_mono",
+      "transformation_name": "ScaleFuelSigmaS",
+      "assertion_type_code": "less",
+      "value_name": "k_eff",
+      "noise_aware": false,
+      "tolerance_rel": 0.0,
+      "description": "Migrated from mutation_study.SCENARIOS id=openmoc-pincell-fuel-sigma-s"
+    },
+    {
+      "code": "MR-FuelRadius",
+      "name": "ScaleFuelRadius",
+      "meta_pattern_code": "m_mono",
+      "transformation_name": "ScaleFuelRadius",
+      "assertion_type_code": "greater",
+      "value_name": "k_eff",
+      "noise_aware": false,
+      "tolerance_rel": 0.0,
+      "description": "Migrated from mutation_study.SCENARIOS id=openmoc-pincell-fuel-radius"
+    },
+    {
+      "code": "MR-RefineParticles",
+      "name": "RefineParticles",
+      "meta_pattern_code": "m_conv",
+      "transformation_name": "RefineParticles",
+      "assertion_type_code": "variance-ratio",
+      "value_name": "k_eff_std",
+      "noise_aware": false,
+      "tolerance_rel": 0.3,
+      "description": "Migrated from mutation_study.SCENARIOS id=openmc-pincell-particles-refine"
+    },
+    {
+      "code": "MR-Rot90",
+      "name": "Rotate90",
+      "meta_pattern_code": "m_inv",
+      "transformation_name": "Rotate90",
+      "assertion_type_code": "approx-invariant",
+      "value_name": "k_eff",
+      "noise_aware": false,
+      "tolerance_rel": 0.0001,
+      "description": "Migrated from mutation_study.SCENARIOS id=openmoc-pincell-rotate-90"
+    },
+    {
+      "code": "MR-MirrorX",
+      "name": "MirrorX",
+      "meta_pattern_code": "m_inv",
+      "transformation_name": "MirrorX",
+      "assertion_type_code": "approx-invariant",
+      "value_name": "k_eff",
+      "noise_aware": false,
+      "tolerance_rel": 1e-05,
+      "description": "Migrated from mutation_study.SCENARIOS id=openmoc-pincell-mirror-x"
+    },
+    {
+      "code": "MR-MirrorY",
+      "name": "MirrorY",
+      "meta_pattern_code": "m_inv",
+      "transformation_name": "MirrorY",
+      "assertion_type_code": "approx-invariant",
+      "value_name": "k_eff",
+      "noise_aware": false,
+      "tolerance_rel": 1e-05,
+      "description": "Migrated from mutation_study.SCENARIOS id=openmoc-pincell-mirror-y"
+    },
+    {
+      "code": "MR-T",
+      "name": "RaiseFuelTemperature",
+      "meta_pattern_code": "m_mono",
+      "transformation_name": "RaiseFuelTemperature",
+      "assertion_type_code": "less",
+      "value_name": "k_eff",
+      "noise_aware": false,
+      "tolerance_rel": 0.0,
+      "description": "Migrated from mutation_study.SCENARIOS id=openmoc-pincell-fuel-temperature"
+    },
+    {
+      "code": "MR-T-AddTemp",
+      "name": "RaiseFuelTemperatureViaAddTemperature",
+      "meta_pattern_code": "m_mono",
+      "transformation_name": "RaiseFuelTemperatureViaAddTemperature",
+      "assertion_type_code": "less-noise-aware",
+      "value_name": "k_eff",
+      "noise_aware": true,
+      "tolerance_rel": 0.0,
+      "description": "Migrated from mutation_study.SCENARIOS id=openmc-pincell-fuel-temperature-via-add-temperature"
+    },
+    {
+      "code": "MR-T-BoratedWater",
+      "name": "RaiseModeratorTemperatureViaBoratedWater",
+      "meta_pattern_code": "m_mono",
+      "transformation_name": "RaiseModeratorTemperatureViaBoratedWater",
+      "assertion_type_code": "less-noise-aware",
+      "value_name": "k_eff",
+      "noise_aware": true,
+      "tolerance_rel": 0.0,
+      "description": "Migrated from mutation_study.SCENARIOS id=openmc-pincell-moderator-temperature-via-borated-water"
+    }
+  ],
+  "bindings": [
+    {
+      "mr_code": "MR-NuSigmaF",
+      "sut": "openmoc",
+      "input_adapter_path": "openmoc/openmoc_input_adapter.py",
+      "runner_path": "openmoc/openmoc_runner.py",
+      "scenario_id_v1": "openmoc-pincell-nu-sigma-f",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-NuSigmaF",
+      "sut": "openmc",
+      "input_adapter_path": "openmc/openmc_input_adapter.py",
+      "runner_path": "openmc/openmc_runner.py",
+      "scenario_id_v1": "openmc-pincell-nu-sigma-f",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-SigmaA",
+      "sut": "openmoc",
+      "input_adapter_path": "openmoc/openmoc_input_adapter_sigma_a.py",
+      "runner_path": "openmoc/openmoc_runner.py",
+      "scenario_id_v1": "openmoc-pincell-sigma-a",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-SigmaA",
+      "sut": "openmc",
+      "input_adapter_path": "openmc/openmc_input_adapter_sigma_a.py",
+      "runner_path": "openmc/openmc_runner.py",
+      "scenario_id_v1": "openmc-pincell-sigma-a",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-PermuteEnergyGroups",
+      "sut": "openmoc",
+      "input_adapter_path": "openmoc/openmoc_input_adapter_group_permute.py",
+      "runner_path": "openmoc/openmoc_runner.py",
+      "scenario_id_v1": "openmoc-pincell-group-permute",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-SigmaT",
+      "sut": "openmoc",
+      "input_adapter_path": "openmoc/openmoc_input_adapter_fuel_sigma_t.py",
+      "runner_path": "openmoc/openmoc_runner.py",
+      "scenario_id_v1": "openmoc-pincell-fuel-sigma-t",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-ModSigmaA",
+      "sut": "openmoc",
+      "input_adapter_path": "openmoc/openmoc_input_adapter_moderator_sigma_a.py",
+      "runner_path": "openmoc/openmoc_runner.py",
+      "scenario_id_v1": "openmoc-pincell-moderator-sigma-a",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-PermuteEnergyGroups",
+      "sut": "openmc",
+      "input_adapter_path": "openmc/openmc_input_adapter_group_permute.py",
+      "runner_path": "openmc/openmc_runner.py",
+      "scenario_id_v1": "openmc-pincell-group-permute",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-SigmaT",
+      "sut": "openmc",
+      "input_adapter_path": "openmc/openmc_input_adapter_fuel_sigma_t.py",
+      "runner_path": "openmc/openmc_runner.py",
+      "scenario_id_v1": "openmc-pincell-fuel-sigma-t",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-ModSigmaA",
+      "sut": "openmc",
+      "input_adapter_path": "openmc/openmc_input_adapter_moderator_sigma_a.py",
+      "runner_path": "openmc/openmc_runner.py",
+      "scenario_id_v1": "openmc-pincell-moderator-sigma-a",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-SigmaS",
+      "sut": "openmoc",
+      "input_adapter_path": "openmoc/openmoc_input_adapter_fuel_sigma_s.py",
+      "runner_path": "openmoc/openmoc_runner.py",
+      "scenario_id_v1": "openmoc-pincell-fuel-sigma-s",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-SigmaS",
+      "sut": "openmc",
+      "input_adapter_path": "openmc/openmc_input_adapter_fuel_sigma_s.py",
+      "runner_path": "openmc/openmc_runner.py",
+      "scenario_id_v1": "openmc-pincell-fuel-sigma-s",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-FuelRadius",
+      "sut": "openmoc",
+      "input_adapter_path": "openmoc/openmoc_input_adapter_fuel_radius.py",
+      "runner_path": "openmoc/openmoc_runner.py",
+      "scenario_id_v1": "openmoc-pincell-fuel-radius",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-FuelRadius",
+      "sut": "openmc",
+      "input_adapter_path": "openmc/openmc_input_adapter_fuel_radius.py",
+      "runner_path": "openmc/openmc_runner.py",
+      "scenario_id_v1": "openmc-pincell-fuel-radius",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-RefineParticles",
+      "sut": "openmc",
+      "input_adapter_path": "openmc/openmc_input_adapter_refine_particles.py",
+      "runner_path": "openmc/openmc_runner.py",
+      "scenario_id_v1": "openmc-pincell-particles-refine",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-Rot90",
+      "sut": "openmoc",
+      "input_adapter_path": "openmoc/openmoc_input_adapter_rotate_90.py",
+      "runner_path": "openmoc/openmoc_runner.py",
+      "scenario_id_v1": "openmoc-pincell-rotate-90",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-Rot90",
+      "sut": "openmc",
+      "input_adapter_path": "openmc/openmc_input_adapter_rotate_90.py",
+      "runner_path": "openmc/openmc_runner.py",
+      "scenario_id_v1": "openmc-pincell-rotate-90",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-MirrorX",
+      "sut": "openmoc",
+      "input_adapter_path": "openmoc/openmoc_input_adapter_mirror_x.py",
+      "runner_path": "openmoc/openmoc_runner.py",
+      "scenario_id_v1": "openmoc-pincell-mirror-x",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-MirrorX",
+      "sut": "openmc",
+      "input_adapter_path": "openmc/openmc_input_adapter_mirror_x.py",
+      "runner_path": "openmc/openmc_runner.py",
+      "scenario_id_v1": "openmc-pincell-mirror-x",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-MirrorY",
+      "sut": "openmoc",
+      "input_adapter_path": "openmoc/openmoc_input_adapter_mirror_y.py",
+      "runner_path": "openmoc/openmoc_runner.py",
+      "scenario_id_v1": "openmoc-pincell-mirror-y",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-MirrorY",
+      "sut": "openmc",
+      "input_adapter_path": "openmc/openmc_input_adapter_mirror_y.py",
+      "runner_path": "openmc/openmc_runner.py",
+      "scenario_id_v1": "openmc-pincell-mirror-y",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-MirrorX",
+      "sut": "openmoc",
+      "input_adapter_path": "openmoc/openmoc_input_adapter_mirror_x.py",
+      "runner_path": "openmoc/openmoc_runner.py",
+      "scenario_id_v1": "openmoc-pincell-mirror-x-tally",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-MirrorX",
+      "sut": "openmc",
+      "input_adapter_path": "openmc/openmc_input_adapter_mirror_x.py",
+      "runner_path": "openmc/openmc_runner.py",
+      "scenario_id_v1": "openmc-pincell-mirror-x-tally",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-MirrorY",
+      "sut": "openmoc",
+      "input_adapter_path": "openmoc/openmoc_input_adapter_mirror_y.py",
+      "runner_path": "openmoc/openmoc_runner.py",
+      "scenario_id_v1": "openmoc-pincell-mirror-y-tally",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-MirrorY",
+      "sut": "openmc",
+      "input_adapter_path": "openmc/openmc_input_adapter_mirror_y.py",
+      "runner_path": "openmc/openmc_runner.py",
+      "scenario_id_v1": "openmc-pincell-mirror-y-tally",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-T",
+      "sut": "openmoc",
+      "input_adapter_path": "openmoc/openmoc_input_adapter_fuel_temperature.py",
+      "runner_path": "openmoc/openmoc_runner.py",
+      "scenario_id_v1": "openmoc-pincell-fuel-temperature",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-T",
+      "sut": "openmc",
+      "input_adapter_path": "openmc/openmc_input_adapter_fuel_temperature.py",
+      "runner_path": "openmc/openmc_runner.py",
+      "scenario_id_v1": "openmc-pincell-fuel-temperature",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-T-AddTemp",
+      "sut": "openmc",
+      "input_adapter_path": "openmc/openmc_input_adapter_fuel_temperature_via_add_temperature.py",
+      "runner_path": "openmc/openmc_runner.py",
+      "scenario_id_v1": "openmc-pincell-fuel-temperature-via-add-temperature",
+      "is_active": true
+    },
+    {
+      "mr_code": "MR-T-BoratedWater",
+      "sut": "openmc",
+      "input_adapter_path": "openmc/openmc_input_adapter_moderator_temperature_via_borated_water.py",
+      "runner_path": "openmc/openmc_runner.py",
+      "scenario_id_v1": "openmc-pincell-moderator-temperature-via-borated-water",
+      "is_active": true
+    }
+  ],
+  "instances": [
+    {
+      "mr_binding_v1_id": "openmoc-pincell-nu-sigma-f",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmoc-pincell-nu-sigma-f@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmc-pincell-nu-sigma-f",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmc-pincell-nu-sigma-f@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmoc-pincell-sigma-a",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmoc-pincell-sigma-a@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmc-pincell-sigma-a",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmc-pincell-sigma-a@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmoc-pincell-group-permute",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmoc-pincell-group-permute@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmoc-pincell-fuel-sigma-t",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmoc-pincell-fuel-sigma-t@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmoc-pincell-moderator-sigma-a",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmoc-pincell-moderator-sigma-a@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmc-pincell-group-permute",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmc-pincell-group-permute@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmc-pincell-fuel-sigma-t",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmc-pincell-fuel-sigma-t@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmc-pincell-moderator-sigma-a",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmc-pincell-moderator-sigma-a@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmoc-pincell-fuel-sigma-s",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmoc-pincell-fuel-sigma-s@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmc-pincell-fuel-sigma-s",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmc-pincell-fuel-sigma-s@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmoc-pincell-fuel-radius",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmoc-pincell-fuel-radius@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmc-pincell-fuel-radius",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmc-pincell-fuel-radius@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmc-pincell-particles-refine",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmc-pincell-particles-refine@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmoc-pincell-rotate-90",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmoc-pincell-rotate-90@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmc-pincell-rotate-90",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmc-pincell-rotate-90@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmoc-pincell-mirror-x",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmoc-pincell-mirror-x@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmc-pincell-mirror-x",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmc-pincell-mirror-x@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmoc-pincell-mirror-y",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmoc-pincell-mirror-y@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmc-pincell-mirror-y",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmc-pincell-mirror-y@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmoc-pincell-mirror-x-tally",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmoc-pincell-mirror-x-tally@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmc-pincell-mirror-x-tally",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmc-pincell-mirror-x-tally@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmoc-pincell-mirror-y-tally",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmoc-pincell-mirror-y-tally@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmc-pincell-mirror-y-tally",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmc-pincell-mirror-y-tally@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmoc-pincell-fuel-temperature",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmoc-pincell-fuel-temperature@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmc-pincell-fuel-temperature",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmc-pincell-fuel-temperature@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmc-pincell-fuel-temperature-via-add-temperature",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmc-pincell-fuel-temperature-via-add-temperature@factor=1.5"
+    },
+    {
+      "mr_binding_v1_id": "openmc-pincell-moderator-temperature-via-borated-water",
+      "parameter_overrides": {
+        "factor": "1.5"
+      },
+      "is_reusable": false,
+      "name": "openmc-pincell-moderator-temperature-via-borated-water@factor=1.5"
+    }
+  ]
+}
