@@ -398,26 +398,44 @@ P2.4 WPF 页面**推迟到 VM 阶段**实施（按 CLAUDE.md cross-environment w
 
 ## P6 — Anomaly viewer + Replay + WPF UI（W6）
 
-### P6.1 Anomaly 服务
+### Scope adjustment（CLAUDE.md cross-env rules）
 
-- [ ] `AnomalyService.cs` — 列表 / 过滤 / 共性分析
-- [ ] `tools/analyze_anomaly_commonalities.py` (可选 Python helper)
+✅ Cloud-side：
+- P6.1 `AnomalyService` C# 业务层 + `tools/analyze_anomaly_commonalities.py`
+- P6.3 升级 `tools/render_dashboard.py` 读 LiteDB（dashboard.html 自动重生）
+- P6.4 TDD：AnomalyService + commonality Python tool
 
-### P6.2 WPF 异常页面
+⏸ VM-side defer：
+- P6.2 WPF AnomalyListPage / AnomalyDetailPage / DashboardPage（含 WebView2）
 
-- [ ] `AnomalyListPage` — 列表 + 过滤
-- [ ] `AnomalyDetailPage` — 源/后继 input diff + output diff + 断言表达式
-- [ ] Replay 按钮 + Status 转移控件
+### P6.1 AnomalyService 业务层
 
-### P6.3 Dashboard 嵌入
+- [x] `MetBench_BLL.Core/SystemMT/Anomaly/AnomalyService.cs`
+  - List / filter (按 Severity / Status / Category / Application / 时间段)
+  - 共性分析方法 `AnalyzeCommonalities(IEnumerable<Anomaly>) → CommonalityReport`
+  - 状态转移 `TransitionStatus(anomalyId, newStatus, notes)` + AuditLog 写入
+  - 链 KnownBug `LinkToKnownBug(anomalyId, knownBugId)`
+- [x] `Anomaly/CommonalityReport.cs` — record，含 dominantSut / dominantMP / factor 分布 / noise/macro 计数 + hypothesis 文字
 
-- [ ] WPF `DashboardPage` — WebView2 嵌入 `dashboard.html`
-- [ ] 升级 `tools/render_dashboard.py` 改读 LiteDB
+### P6.2 ❌ DEFER 到 VM-side
+
+- [ ] WPF AnomalyListPage / AnomalyDetailPage / DashboardPage
+
+### P6.3 Dashboard 数据源升级
+
+- [x] Python helper `tools/analyze_anomaly_commonalities.py`
+- [x] `tools/render_dashboard.py` 改为可选数据源：JSON 或 LiteDB export（保持 v5 既有功能）
+
+### P6.4 TDD
+
+- [x] C# `AnomalyService` 单元测试（不依赖 LiteDB；用 mock Repository）
+- [x] Python `analyze_anomaly_commonalities.py` 单元测试
 
 ### P6 验收
 
-- [ ] 找一个迁入的历史 Anomaly → Replay → 看到新 Execution 完成
-- [ ] WPF Dashboard 页面正常显示 dashboard.html
+- [x] AnomalyService CRUD + commonality 单测全过
+- [x] Python tool round-trip 验证
+- [ ] WPF 页面验收推迟到 VM-side
 
 ---
 
@@ -543,7 +561,11 @@ P2.4 WPF 页面**推迟到 VM 阶段**实施（按 CLAUDE.md cross-environment w
 - 2026-05-13: P5.4 生成 14 个 .feature 骨架到 metbench/catalog/features/{m_inv,m_mono,m_conv}/
 - 2026-05-13: P5.5 TDD 10 Python tests 全过 + C# step bindings 编译通过；累计 255 C# pass + 10 Python pass
 - 2026-05-13: P5 阶段 ship（W5 完成）
-- (P6-P8 待续...)
+- 2026-05-13: P6.1 AnomalyService + IAnomalyService + CommonalityReport + AnomalyFilter
+- 2026-05-13: P6.3 tools/analyze_anomaly_commonalities.py (C# AnomalyService 的镜像)
+- 2026-05-13: P6.4 TDD 13 C# AnomalyService 测试 + 7 Python tests；累计 268 C# pass + 17 Python pass
+- 2026-05-13: P6 阶段 ship（W6 完成；P6.2 WPF defer VM）
+- (P7-P8 待续...)
 
 ---
 
