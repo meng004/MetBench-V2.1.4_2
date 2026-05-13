@@ -1,0 +1,110 @@
+classDiagram
+    class ISystemMtPipeline {
+        <<interface>>
+        +ExecuteAsync(PipelineContext, IProgress, CT) Task~PipelineOutcome~
+    }
+
+    class SystemMtPipeline {
+        -IProcessExecutor _processExecutor
+        -AssertionEvaluator _assertionEvaluator
+        +ExecuteAsync(...) Task~PipelineOutcome~
+        -ConvertJsonValue(JsonElement) object
+        -ParseOutputDict(...) Dict
+        -ExtractMetrics(Dict) Dict~string,double~
+    }
+
+    class IProcessExecutor {
+        <<interface>>
+        +RunAsync(string cmd, string wd, int timeout, CT) Task~ProcessResult~
+    }
+
+    class DefaultProcessExecutor {
+        +RunAsync(...) Task~ProcessResult~
+        -PlatformShell(string) tuple
+    }
+
+    class ProcessResult {
+        +int ExitCode
+        +string Stdout / Stderr
+        +TimeSpan Elapsed
+        +bool TimedOut
+    }
+
+    class PipelineContext {
+        <<record>>
+        +string MrCode / TransformationName
+        +string AssertionTypeCode / ValueName
+        +string TargetFieldPath / PathSyntax
+        +Dict Parameters
+        +AssertionTolerance Tolerance
+        +Dict? ExtraAssertionValues
+        +string SutName / SourceCasePath
+        +string WorkingDirectory
+        +string InputParserCommand
+        +string OutputParserCommand
+        +string RunnerCommand
+        +int TimeoutSeconds
+        +string CatalogVersionSha
+        +string SutVersionSnapshot
+        +string MetbenchVersion
+        +string TriggeredBy
+    }
+
+    class PipelineOutcome {
+        <<record>>
+        +string FinalStatus
+        +string? ErrorMessage
+        +DateTime StartedAt / FinishedAt
+        +string ArtifactsDirectory
+        +string SourceInputPath / FollowupInputPath
+        +string SourceOutputPath / FollowupOutputPath
+        +Dict? SourceMetrics / FollowupMetrics
+        +SystemMtAssertionResultV2? AssertionResult
+        +TimeSpan SourceElapsed / FollowupElapsed
+        +int SourceExitCode / FollowupExitCode
+    }
+
+    class PipelineStatus {
+        <<constants>>
+        +Queued / ParsingSource / Transforming
+        +WritingFollowup / RunningSource / RunningFollowup
+        +ParsingOutputs / Asserting
+        +Ok / Anomaly / Error / Timeout / Cancelled
+        +IsTerminal(string) bool
+    }
+
+    class ReplayService {
+        -ISystemMtPipeline _pipeline
+        +ReplayAsync(PipelineContext, PipelineOutcome, ...) Task~ReplayResult~
+        -Classify(orig, new, ctx) ReplayClassification
+    }
+
+    class ReplayClassification {
+        <<enum>>
+        Reproduced
+        FixedOrFlaky
+        RegressionOnReplay
+        StillPassing
+        MismatchedFailure
+        NotComparable
+    }
+
+    class ReplayResult {
+        <<record>>
+        +PipelineOutcome OriginalOutcome
+        +PipelineOutcome ReplayOutcome
+        +ReplayClassification Classification
+    }
+
+    ISystemMtPipeline <|.. SystemMtPipeline : implements
+    IProcessExecutor <|.. DefaultProcessExecutor
+    SystemMtPipeline o-- IProcessExecutor : uses
+    SystemMtPipeline o-- AssertionEvaluator : uses
+    SystemMtPipeline ..> PipelineContext : reads
+    SystemMtPipeline ..> PipelineOutcome : returns
+    SystemMtPipeline ..> PipelineStatus : reports state
+    DefaultProcessExecutor ..> ProcessResult : returns
+
+    ReplayService o-- ISystemMtPipeline : uses
+    ReplayService ..> ReplayResult : returns
+    ReplayResult --> ReplayClassification

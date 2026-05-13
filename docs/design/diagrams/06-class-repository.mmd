@@ -1,0 +1,89 @@
+classDiagram
+    class IRepository~T~ {
+        <<interface>>
+        +ObservableCollection~T~ GetAll()
+        +T Get(int id)
+        +ObservableCollection~T~ Get(T template)
+        +bool Add(T)
+        +bool Modify(T)
+        +bool Remove(T)
+    }
+    note for IRepository "v1: int PK"
+
+    class IGuidRepository~T~ {
+        <<interface>>
+        +ObservableCollection~T~ GetAll()
+        +T? Get(Guid id)
+        +bool Add(T)
+        +bool Modify(T)
+        +bool Remove(T)
+        +ObservableCollection~T~ GetPage(int, int)
+        +int Count()
+    }
+    note for IGuidRepository "v2 新增: Guid PK"
+
+    class IRuntimeRepository {
+        <<interface>>
+        +Runtime? GetByName(string)
+    }
+
+    class IMRBindingRepository {
+        <<interface>>
+        +ObservableCollection GetByMR(int)
+        +ObservableCollection GetByApplication(int)
+        +ObservableCollection GetActive()
+    }
+
+    class IExecutionRepository {
+        <<interface>>
+        +ObservableCollection GetByMRInstance(int)
+        +ObservableCollection GetByBatch(Guid)
+        +ObservableCollection GetByStatus(string, int, int)
+        +ObservableCollection GetByDateRange(DateTime, DateTime)
+    }
+
+    class IAnomalyRepository {
+        <<interface>>
+        +Anomaly? GetByResult(Guid)
+        +ObservableCollection GetByStatus(string)
+        +ObservableCollection GetByLinkedBug(int)
+    }
+
+    class LiteDbIntPkRepositoryBase~T~ {
+        <<abstract>>
+        #DbConfig _dbConfig
+        #string _conn
+        #string CollectionKey «abstract»
+        +GetAll() / Get(int) / Add / Modify / Remove
+    }
+
+    class LiteDbGuidPkRepositoryBase~T~ {
+        <<abstract>>
+        #DbConfig _dbConfig
+        #string _conn
+        #string CollectionKey
+        +GetAll() / Get(Guid) / Add / Modify / Remove
+        +GetPage(int, int) / Count()
+    }
+
+    class LiteDbRuntimeRepository {
+        +Runtime? GetByName(string)
+    }
+
+    class LiteDbExecutionRepository {
+        +GetByMRInstance(int)
+        +GetByBatch(Guid)
+        +GetByStatus(string, int, int)
+        +GetByDateRange(DateTime, DateTime)
+    }
+
+    IRepository <|-- IRuntimeRepository
+    IRepository <|-- IMRBindingRepository
+    IGuidRepository <|-- IExecutionRepository
+    IGuidRepository <|-- IAnomalyRepository
+
+    LiteDbIntPkRepositoryBase <|-- LiteDbRuntimeRepository
+    LiteDbGuidPkRepositoryBase <|-- LiteDbExecutionRepository
+
+    LiteDbRuntimeRepository ..|> IRuntimeRepository : implements
+    LiteDbExecutionRepository ..|> IExecutionRepository : implements

@@ -1,0 +1,41 @@
+flowchart TB
+    subgraph L3["L3 — 表现层 (Windows only)"]
+        direction LR
+        WPF["MetBench_Client (WPF)<br/>• SUT/MR/Adapter 管理页<br/>• Execution 启动 + 进度<br/>• Anomaly 列表/详情/Replay<br/>• Coverage + Trend Dashboard"]
+        WebView2["WebView2 嵌入<br/>dashboard.html (Plotly)"]
+        WPF -.embeds.-> WebView2
+    end
+
+    subgraph L2["L2 — 业务编排层 (MetBench_BLL.Core, net8.0 跨平台)"]
+        direction TB
+        Pipeline["SystemMtPipeline<br/>9 状态机"]
+        Discovery["Discovery 子系统<br/>(IMRDiscoverer + 2 实现 + 3 Validator)"]
+        Mutation["Mutation 子系统<br/>(Campaign + Result 分析)"]
+        Replay["ReplayService"]
+        Coverage["Coverage / Trend / Reports"]
+        Pipeline --> |feeds| Replay
+        Pipeline --> |feeds| Mutation
+    end
+
+    subgraph L1Data["L1 — 数据层"]
+        direction LR
+        LiteDB[("LiteDB<br/>23 collections (3NF)<br/>MR/Application/Runtime/<br/>Execution/Result/Anomaly/<br/>Mutation/Discovery/...")]
+        FS[("Artifacts 文件系统<br/>runtime/artifacts/<br/>yyyy/mm/dd/&lt;exec_id&gt;/")]
+    end
+
+    subgraph L1SUT["L1 — SUT 边界"]
+        direction LR
+        Python["Python Parsers + Runners<br/>SUT/openmoc/<br/>SUT/openmc/<br/>SUT/heat_equation/"]
+        SUTs["实际 SUT 进程<br/>OpenMOC / OpenMC /<br/>heat_equation / 未来 MATLAB/C++/<br/>Java/Fortran"]
+        Python -->|subprocess| SUTs
+    end
+
+    WPF -->|in-proc call| L2
+    L2 -->|Repository CRUD| LiteDB
+    L2 -->|read/write artifacts| FS
+    L2 -->|subprocess invoke| Python
+
+    style WPF fill:#dde7f7
+    style Pipeline fill:#fde6c4
+    style LiteDB fill:#d6f5dd
+    style Python fill:#fbe5e5

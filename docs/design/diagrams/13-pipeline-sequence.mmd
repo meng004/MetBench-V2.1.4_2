@@ -1,0 +1,54 @@
+sequenceDiagram
+    autonumber
+    actor User as 用户 (WPF)
+    participant Service as Service Layer
+    participant Pipeline as SystemMtPipeline
+    participant InputParser as Python Input Parser
+    participant Transform as IMRTransformation (C#)
+    participant SUT as SUT runner
+    participant OutputParser as Python Output Parser
+    participant Eval as AssertionEvaluator
+    participant DB as LiteDB
+
+    User->>Service: ExecuteScenario(mrInstanceId)
+    Service->>DB: Load MRInstance + Binding + Schema
+    DB-->>Service: PipelineContext
+    Service->>Pipeline: ExecuteAsync(ctx)
+
+    Pipeline->>InputParser: parse source.in.json
+    InputParser-->>Pipeline: source dict (JSON)
+    Note over Pipeline: 状态: parsing-source → transforming
+
+    Pipeline->>Transform: Apply(source dict, fieldPath, params)
+    Note over Transform: IMRTransformation.Apply<br/>(纯内存操作，不接触文件)
+    Transform-->>Pipeline: followup dict
+    Note over Pipeline: 状态: transforming → writing-followup
+
+    Pipeline->>InputParser: write followup dict
+    InputParser-->>Pipeline: followup.in.json
+    Note over Pipeline: 状态: → running-source
+
+    Pipeline->>SUT: run source.in.json
+    SUT-->>Pipeline: source.out.json
+    Pipeline->>SUT: run followup.in.json
+    SUT-->>Pipeline: followup.out.json
+    Note over Pipeline: 状态: → parsing-outputs
+
+    Pipeline->>OutputParser: parse source.out.json
+    OutputParser-->>Pipeline: source values
+    Pipeline->>OutputParser: parse followup.out.json
+    OutputParser-->>Pipeline: followup values
+    Note over Pipeline: 状态: → asserting
+
+    Pipeline->>Eval: Evaluate(AssertionInput, ToleranceConfig, AssertionTypeCode)
+    Note over Eval: FA 扩展方法 BeLessThanWithNoiseFloor 等
+    Eval-->>Pipeline: SystemMtAssertionResultV2
+
+    alt Passed
+        Pipeline->>DB: persist Execution.Status=ok + Result
+    else Failed
+        Pipeline->>DB: persist Execution.Status=anomaly + Result + Anomaly
+    end
+
+    Pipeline-->>Service: PipelineOutcome
+    Service-->>User: display Result + Replay button

@@ -1,0 +1,64 @@
+classDiagram
+    class IMRTransformation {
+        <<interface>>
+        +string Name
+        +string ParametersSchema
+        +Apply(IReadOnlyDict source, string fieldPath, IReadOnlyDict params) Dict
+    }
+
+    class IdentityTransform {
+        +Name = "Identity"
+    }
+    note for IdentityTransform "Mut00 控制 (false-positive)"
+
+    class ScaleField {
+        +Name = "ScaleField"
+        -IFieldPathResolver _resolver
+        -ScaleAny(value, factor) object?
+        -ScaleList(list, factor) List
+    }
+
+    class TranslateField {
+        +Name = "TranslateField"
+        -TranslateAny / TranslateList
+    }
+
+    class PermuteIndices {
+        +Name = "PermuteIndices"
+        -验证 permutation 合法性
+    }
+
+    class MirrorAxis {
+        +Name = "MirrorAxis"
+    }
+    note for MirrorAxis "符号反转（m_inv geometry）"
+
+    class CompositeTransform {
+        +Name «runtime»
+        -List~Step~ _steps
+        +Step «record» (Transformation, FieldPath, Params)
+    }
+
+    class TransformationRegistry {
+        <<static>>
+        -Dict factories
+        +Get(string name) IMRTransformation
+        +Register(string, factory)
+        +RegisterIfMissing(string, factory)
+        +AvailableNames
+    }
+
+    IMRTransformation <|.. IdentityTransform
+    IMRTransformation <|.. ScaleField
+    IMRTransformation <|.. TranslateField
+    IMRTransformation <|.. PermuteIndices
+    IMRTransformation <|.. MirrorAxis
+    IMRTransformation <|.. CompositeTransform
+
+    CompositeTransform *-- IMRTransformation : N Step.Transformation
+    TransformationRegistry ..> IMRTransformation : creates
+
+    ScaleField o-- IFieldPathResolver
+    TranslateField o-- IFieldPathResolver
+    PermuteIndices o-- IFieldPathResolver
+    MirrorAxis o-- IFieldPathResolver

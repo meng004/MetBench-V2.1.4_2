@@ -1,0 +1,17 @@
+flowchart TD
+    L1["Level 1: MetaPattern<br/>m_inv / m_mono / m_conv / m_cmp<br/>NOETHER 框架代数性质"]
+    L2["Level 2: MRSchema<br/>RaiseFuelTemperature / ScaleNuSigmaF<br/>已选择 transformation + value + direction<br/>仍然 SUT 无关"]
+    L3["Level 3: MRBinding<br/>MR-T @ OpenMOC<br/>已配置 adapter + ParameterMapping<br/>仍无具体参数值"]
+    L4["Level 4: MRInstance<br/>factor=1.5 + seed=42 + particles=5000<br/>可执行配置"]
+    L5["Level 5: Execution<br/>2026-05-13 15:30:00 跑了一次<br/>结果落盘"]
+
+    L1 -->|实例化（指定 transform / value / direction）| L2
+    L2 -->|绑定到 SUT（adapter + ParameterMapping）| L3
+    L3 -->|实例化（参数 + 超参 + 采样）| L4
+    L4 -->|执行（在某时刻）| L5
+
+    style L1 fill:#ffeb3b
+    style L2 fill:#cddc39
+    style L3 fill:#8bc34a
+    style L4 fill:#4caf50
+    style L5 fill:#009688
