@@ -51,7 +51,7 @@ public sealed class McnpCardResolver : IFieldPathResolver
     /// "card:m1::tmp" → "/cards/m1/tmp"。
     /// 支持的语法：<c>card:&lt;name&gt;::&lt;field&gt;</c>
     /// </summary>
-    internal static string ToJsonPointer(string mcnpPath)
+    public static string ToJsonPointer(string mcnpPath)
     {
         if (string.IsNullOrWhiteSpace(mcnpPath))
             throw new ArgumentException("MCNP path cannot be empty");

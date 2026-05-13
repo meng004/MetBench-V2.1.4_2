@@ -34,7 +34,7 @@ public sealed class NamelistKeyResolver : IFieldPathResolver
         => new JsonPointerResolver().Set(data, ToJsonPointer(path), value);
 
     /// <summary>"&amp;material/T" → "/namelists/material/T"。</summary>
-    internal static string ToJsonPointer(string namelistPath)
+    public static string ToJsonPointer(string namelistPath)
     {
         if (string.IsNullOrWhiteSpace(namelistPath))
             throw new ArgumentException("NAMELIST path cannot be empty");
