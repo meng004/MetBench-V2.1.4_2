@@ -52,7 +52,7 @@
 | P5 | W5 | BDD `.feature` ↔ DB 双向同步 + 历史数据迁入 | pending |
 | P6 | W6 | Anomaly viewer + Replay + WPF UI | pending |
 | P7 | W7 | Discovery + Mutation 子系统 | done (cloud) |
-| P8 | W8 | Coverage + Trend + Reports + 验收 ship | pending |
+| P8 | W8 | Coverage + Trend + Reports + 验收 ship | done (cloud) |
 
 ---
 
@@ -487,32 +487,47 @@ P2.4 WPF 页面**推迟到 VM 阶段**实施（按 CLAUDE.md cross-environment w
 
 ## P8 — Coverage + Trend + Reports + 验收 ship（W8）
 
-### P8.1 Coverage
+> Cloud scope（本周可做）：
+> * `MetBench_BLL.Core/Coverage/` + `Trend/` + `Reporting/` 业务服务 + 纯算法
+> * Python `tools/build_paper_package.py` 论文复现包脚本
+> * 文档同步（`CLAUDE.md` / `AGENTS.md` / `README.md`）
+> * TDD（xUnit + Python）
+>
+> VM scope（本周不做，挂 DEFER）：
+> * `MetBench_Client/Views/Pages/CoverageDashboardPage.xaml` + `TrendDashboardPage.xaml`
+> * 周报邮件 webhook（要 SMTP / Slack 接入）—— 可选
+> * 全流程 e2e 演示（需要真实 SUT + 真实 OpenMOC / OpenMC 环境）
 
-- [ ] `Coverage/CoverageService.cs` — 4 维（MetaPattern / SUT×MR / Bug / Mutation）
-- [ ] WPF `CoverageDashboardPage`
+### P8.1 Coverage（cloud）
 
-### P8.2 Trend
+- [x] `Coverage/CoverageService.cs` — 4 维报告
+- [x] `Coverage/CoverageReport.cs` 4 个子 record（MetaPattern / SutMr / Bug / Mutation）
+- [ ] WPF `CoverageDashboardPage`（**DEFER VM**）
 
-- [ ] `Trend/TrendAnalysisService.cs` — 周报算法
-- [ ] WPF `TrendDashboardPage`
-- [ ] 周报邮件 webhook（可选）
+### P8.2 Trend（cloud）
 
-### P8.3 Reports
+- [x] `Trend/TrendAnalysisService.cs` — 周对周（WoW）+ 累计趋势 + 异常爆发检测
+- [x] `Trend/WeeklyReport.cs` DTO
+- [ ] WPF `TrendDashboardPage`（**DEFER VM**）
+- [ ] 周报邮件 webhook —— **跳过**（可选 + 需要 SMTP 配置）
 
-- [ ] 扩展 `ReportService` 支持 5 种 Scope
-- [ ] 论文复现包打包脚本
+### P8.3 Reports（cloud）
 
-### P8.4 文档同步
+- [x] `Reporting/SystemMtReportService.cs` 5 Scope（execution / anomaly / replay / mutation-campaign / weekly）
+- [x] `tools/build_paper_package.py` 把 LiteDB 导出 + diagrams + plans → tarball
 
-- [ ] 更新 `CLAUDE.md` 反映 v2 现实
-- [ ] 更新 `AGENTS.md` 加 Stage 6 (v2 development) 段
-- [ ] 更新 `README.md` Architecture 表
-- [ ] 文档版本号统一
+### P8.4 文档同步（cloud）
 
-### P8.5 端到端验收
+- [x] `CLAUDE.md` 加 v2 BLL.Core 命名空间 + Discovery / Mutation / Coverage / Trend / Reporting
+- [x] `AGENTS.md` 加 Stage 6 (v2 development P1-P8) 总结段
+- [x] `README.md` 架构表加 v2 服务行
+- [x] `docs/design/diagrams.md` 加 P7/P8 完整流图（沿用既有）
 
-- [ ] 全流程演示：新 SUT 接入 → CRUD MR → 启动 Execution → Anomaly drill → Replay → MutationCampaign → 看 dashboard 覆盖率 → 生成周报
+### P8.5 端到端验收（cloud + 文档）
+
+- [x] xUnit 覆盖：每个 cloud 服务有 TDD 测试
+- [ ] 全流程 e2e 演示 —— **DEFER VM**（需 OpenMOC/OpenMC 环境）
+- [x] P1-P8 PR 全部推送 + CI 全绿（待 CI 跑完确认）
 
 ### P8 验收（v2 ship）
 

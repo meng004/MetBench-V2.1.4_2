@@ -195,8 +195,30 @@ OpenMOC tests skip cleanly without the OpenMOC venv (`OpenMocTestPaths.OpenMocIm
 
 Tracks coordinate via the launcher facade: Cloud owns the contract; VM consumes it. Cloud agents must not modify `*.xaml*` files in `MetBench_Client/` or `MetBench_BLL/` without explicit user direction (they cannot compile them locally to verify the change). VM agents must not modify `MetBench_BLL.Core/SystemMT/*` public types without first proposing a Cloud-side change (CI catches breakage).
 
+## v2 BLL.Core namespaces (P1-P8 ship)
+
+Once a feature has been cloud-side TDD-tested, it lives in one of these
+`MetBench_BLL.Core/` subtrees:
+
+| Namespace | Purpose | Key types |
+|-----------|---------|-----------|
+| `MetBench_BLL.SystemMT.*` | Pipeline + Launcher + Persistence + Reporting | `SystemMtPipeline`, `ISystemMtScenarioLauncher`, `HtmlSystemMtResultReportRenderer` |
+| `MetBench_BLL.SystemMT.Anomaly` | Anomaly viewer + commonality | `AnomalyService`, `CommonalityReport` |
+| `MetBench_BLL.Discovery` | MR Discovery + Validation | `IMRDiscoverer`, `DiscoveryService`, `ValidationService`, `ILlmGateway` |
+| `MetBench_BLL.Discovery.Validators` | Day-1 validators | `EmpiricalValidator`, `TheoreticalLlmValidator`, `AdversarialMutmutValidator` |
+| `MetBench_BLL.Mutation` | Mutation campaign matrix | `MutationCampaignService`, `MutationCellRunner` |
+| `MetBench_BLL.Coverage` | 4-dim coverage report | `CoverageService`, `CoverageReport` |
+| `MetBench_BLL.Trend` | Weekly trend + WoW + burst detection | `TrendAnalysisService`, `WeeklyReport` |
+| `MetBench_BLL.Reporting` | 5-scope report generator | `SystemMtReportService` |
+
+All services are stateless and inject only IDAL repository interfaces +
+optional gateway abstractions (`ILlmGateway`, `MutationCellRunner`,
+`IProcessExecutor`). Tests inject fakes, prod injects LiteDB + real
+process / LLM.
+
 ## Roadmap pointers
 
 - Staged plan: [`AGENTS.md`](AGENTS.md)
 - Per-stage implementation plans: [`docs/superpowers/plans/`](docs/superpowers/plans/)
 - Active Stage 4 cross-env plan: [`docs/superpowers/plans/2026-05-10-stage4-remaining-acs.md`](docs/superpowers/plans/2026-05-10-stage4-remaining-acs.md)
+- v2 P1-P8 development plan: [`docs/superpowers/plans/2026-05-13-v2-development-plan.md`](docs/superpowers/plans/2026-05-13-v2-development-plan.md)

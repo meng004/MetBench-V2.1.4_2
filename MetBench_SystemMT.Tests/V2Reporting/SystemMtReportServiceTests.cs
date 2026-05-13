@@ -1,0 +1,228 @@
+using System.Collections.ObjectModel;
+using MetBench_BLL.Coverage;
+using MetBench_BLL.Reporting;
+using MetBench_BLL.Trend;
+using MetBench_Domain;
+using MetBench_IDAL;
+using Xunit;
+
+namespace MetBench_SystemMT.Tests.V2Reporting;
+
+public sealed class SystemMtReportServiceTests : IDisposable
+{
+    private readonly string _tmpDir = Path.Combine(Path.GetTempPath(),
+        $"metbench-report-tests-{Guid.NewGuid():N}");
+
+    public SystemMtReportServiceTests() => Directory.CreateDirectory(_tmpDir);
+    public void Dispose() => Directory.Delete(_tmpDir, recursive: true);
+
+    [Fact]
+    public void GenerateExecution_writes_markdown_and_persists_report()
+    {
+        var (svc, fakes) = MakeService();
+        var execId = Guid.NewGuid();
+        fakes.Executions.Add(new Execution
+        {
+            IdExecution = execId, MRInstanceId = 5, Status = "ok",
+            TriggeredBy = "alice", QueuedAt = DateTime.UtcNow,
+            SutVersionSnapshot = "v1.2", MetbenchVersion = "v2.1",
+        });
+        var path = Path.Combine(_tmpDir, "exec.md");
+
+        var result = svc.GenerateExecution(execId, path);
+
+        Assert.True(File.Exists(path));
+        var content = File.ReadAllText(path);
+        Assert.Contains("Execution Report", content);
+        Assert.Contains("alice", content);
+        Assert.Single(fakes.Reports.Data);
+        Assert.Equal("single-execution", fakes.Reports.Data[0].Scope);
+    }
+
+    [Fact]
+    public void GenerateAnomaly_writes_markdown()
+    {
+        var (svc, fakes) = MakeService();
+        var anomalyId = Guid.NewGuid();
+        fakes.Anomalies.Add(new MetBench_Domain.Anomaly
+        {
+            IdAnomaly = anomalyId, Severity = "major", Category = "basin",
+            Status = "investigating", DiscoveredAt = DateTime.UtcNow, Notes = "note",
+        });
+        var path = Path.Combine(_tmpDir, "anomaly.md");
+
+        var result = svc.GenerateAnomaly(anomalyId, path);
+
+        var content = File.ReadAllText(path);
+        Assert.Contains("Anomaly Report", content);
+        Assert.Contains("basin", content);
+        Assert.Equal("anomaly", fakes.Reports.Data[0].Scope);
+    }
+
+    [Fact]
+    public void GenerateMutationCampaign_renders_detection_rate()
+    {
+        var (svc, fakes) = MakeService();
+        var campaignId = Guid.NewGuid();
+        fakes.Campaigns.Add(new MutationCampaign
+        {
+            IdCampaign = campaignId, Name = "smoke", Status = "ok",
+            StartedAt = DateTime.UtcNow,
+        });
+        for (int i = 0; i < 3; i++)
+            fakes.Cells.Add(new MutationResult { IdMutationResult = Guid.NewGuid(), CampaignId = campaignId, MutantId = i + 1, MRBindingId = 1, Outcome = "detected" });
+        fakes.Cells.Add(new MutationResult { IdMutationResult = Guid.NewGuid(), CampaignId = campaignId, MutantId = 99, MRBindingId = 1, Outcome = "missed" });
+        var path = Path.Combine(_tmpDir, "campaign.md");
+
+        var result = svc.GenerateMutationCampaign(campaignId, path);
+
+        var content = File.ReadAllText(path);
+        Assert.Contains("Mutation Campaign", content);
+        Assert.Contains("Detection rate: 75", content);
+    }
+
+    [Fact]
+    public void GenerateWeekly_writes_headline_into_report()
+    {
+        var (svc, fakes) = MakeService();
+        var weekly = new WeeklyReport(
+            DateTime.UtcNow.Date, DateTime.UtcNow.Date.AddDays(7),
+            10, 8, 2, 1, 0, 1, 0.2, 0.125, Array.Empty<AnomalyBurst>(),
+            "headline goes here");
+        var path = Path.Combine(_tmpDir, "weekly.md");
+
+        var result = svc.GenerateWeekly(weekly, path);
+
+        var content = File.ReadAllText(path);
+        Assert.Contains("Weekly Report", content);
+        Assert.Contains("headline goes here", content);
+        Assert.Equal("weekly", fakes.Reports.Data[0].Scope);
+    }
+
+    [Fact]
+    public void GenerateCoverage_renders_each_dimension()
+    {
+        var (svc, _) = MakeService();
+        var report = new CoverageReport(
+            DateTime.UtcNow,
+            new MetaPatternCoverage(8, 4, new[] { "m_inv", "m_mono", "m_conv", "m_cmp" }, new[] { "m_adj", "m_rev", "m_dyn", "m_rel" }),
+            new SutMrCoverage(2, 5, 7, Array.Empty<UnboundCell>()),
+            new BugCoverage(6, 4, new[] { "R-Case-1", "R-Case-2", "R-Case-3", "R-Case-4" }, new[] { "R-Case-5", "R-Case-6" }),
+            new MutationCoverage(2, 10, 7, 2));
+        var path = Path.Combine(_tmpDir, "coverage.md");
+
+        var result = svc.GenerateCoverage(report, path);
+
+        var content = File.ReadAllText(path);
+        Assert.Contains("MetaPattern coverage", content);
+        Assert.Contains("4/8", content);
+        Assert.Contains("SUT × MR coverage", content);
+        Assert.Contains("Known-bug reproduction", content);
+        Assert.Contains("Mutation detection", content);
+    }
+
+    [Fact]
+    public void GenerateExecution_missing_id_throws()
+    {
+        var (svc, _) = MakeService();
+        var path = Path.Combine(_tmpDir, "ex.md");
+        Assert.Throws<InvalidOperationException>(() =>
+            svc.GenerateExecution(Guid.NewGuid(), path));
+    }
+
+    private static (SystemMtReportService, FakeBundle) MakeService()
+    {
+        var fakes = new FakeBundle();
+        return (new SystemMtReportService(fakes.Reports, fakes.Executions,
+            fakes.Anomalies, fakes.Campaigns, fakes.Cells), fakes);
+    }
+}
+
+internal sealed class FakeBundle
+{
+    public FakeReportRepo Reports { get; } = new();
+    public FakeExecRepo Executions { get; } = new();
+    public FakeAnomalyRepo Anomalies { get; } = new();
+    public FakeCampaignRepo Campaigns { get; } = new();
+    public FakeMutationCellRepo Cells { get; } = new();
+}
+
+internal sealed class FakeReportRepo : IReportRepository
+{
+    public List<Report> Data { get; } = new();
+    public ObservableCollection<Report> GetAll() => new(Data);
+    public Report? Get(Guid id) => Data.FirstOrDefault(r => r.IdReport == id);
+    public ObservableCollection<Report> Get(Report e) => new(Data);
+    public bool Add(Report e) { Data.Add(e); return true; }
+    public bool Modify(Report e) => true;
+    public bool Remove(Report e) => Data.Remove(e);
+    public ObservableCollection<Report> GetPage(int p, int s) => new(Data.Skip(p * s).Take(s).ToList());
+    public int Count() => Data.Count;
+    public ObservableCollection<Report> GetByScope(string s) => new(Data.Where(r => r.Scope == s).ToList());
+    public ObservableCollection<Report> GetByDateRange(DateTime f, DateTime t)
+        => new(Data.Where(r => r.GeneratedAt >= f && r.GeneratedAt < t).ToList());
+}
+
+internal sealed class FakeExecRepo : IExecutionRepository
+{
+    public List<Execution> Data { get; } = new();
+    public ObservableCollection<Execution> GetAll() => new(Data);
+    public Execution? Get(Guid id) => Data.FirstOrDefault(e => e.IdExecution == id);
+    public ObservableCollection<Execution> Get(Execution e) => new(Data);
+    public bool Add(Execution e) { Data.Add(e); return true; }
+    public bool Modify(Execution e) => true;
+    public bool Remove(Execution e) => Data.Remove(e);
+    public ObservableCollection<Execution> GetPage(int p, int s) => new(Data.Skip(p * s).Take(s).ToList());
+    public int Count() => Data.Count;
+    public ObservableCollection<Execution> GetByMRInstance(int id) => new();
+    public ObservableCollection<Execution> GetByBatch(Guid id) => new();
+    public ObservableCollection<Execution> GetByStatus(string s, int p, int sz) => new();
+    public ObservableCollection<Execution> GetByDateRange(DateTime f, DateTime t) => new();
+}
+
+internal sealed class FakeAnomalyRepo : IAnomalyRepository
+{
+    public List<MetBench_Domain.Anomaly> Data { get; } = new();
+    public ObservableCollection<MetBench_Domain.Anomaly> GetAll() => new(Data);
+    public MetBench_Domain.Anomaly? Get(Guid id) => Data.FirstOrDefault(a => a.IdAnomaly == id);
+    public ObservableCollection<MetBench_Domain.Anomaly> Get(MetBench_Domain.Anomaly e) => new(Data);
+    public bool Add(MetBench_Domain.Anomaly e) { Data.Add(e); return true; }
+    public bool Modify(MetBench_Domain.Anomaly e) => true;
+    public bool Remove(MetBench_Domain.Anomaly e) => Data.Remove(e);
+    public ObservableCollection<MetBench_Domain.Anomaly> GetPage(int p, int s) => new(Data.Skip(p * s).Take(s).ToList());
+    public int Count() => Data.Count;
+    public MetBench_Domain.Anomaly? GetByResult(Guid id) => null;
+    public ObservableCollection<MetBench_Domain.Anomaly> GetByStatus(string s) => new();
+    public ObservableCollection<MetBench_Domain.Anomaly> GetByLinkedBug(int id) => new();
+}
+
+internal sealed class FakeCampaignRepo : IMutationCampaignRepository
+{
+    public List<MutationCampaign> Data { get; } = new();
+    public ObservableCollection<MutationCampaign> GetAll() => new(Data);
+    public MutationCampaign? Get(Guid id) => Data.FirstOrDefault(c => c.IdCampaign == id);
+    public ObservableCollection<MutationCampaign> Get(MutationCampaign e) => new(Data);
+    public bool Add(MutationCampaign e) { Data.Add(e); return true; }
+    public bool Modify(MutationCampaign e) => true;
+    public bool Remove(MutationCampaign e) => Data.Remove(e);
+    public ObservableCollection<MutationCampaign> GetPage(int p, int s) => new(Data.Skip(p * s).Take(s).ToList());
+    public int Count() => Data.Count;
+    public ObservableCollection<MutationCampaign> GetByStatus(string s) => new();
+    public ObservableCollection<MutationCampaign> GetRecent(int n) => new();
+}
+
+internal sealed class FakeMutationCellRepo : IMutationResultRepository
+{
+    public List<MutationResult> Data { get; } = new();
+    public ObservableCollection<MutationResult> GetAll() => new(Data);
+    public MutationResult? Get(Guid id) => Data.FirstOrDefault(r => r.IdMutationResult == id);
+    public ObservableCollection<MutationResult> Get(MutationResult e) => new(Data);
+    public bool Add(MutationResult e) { Data.Add(e); return true; }
+    public bool Modify(MutationResult e) => true;
+    public bool Remove(MutationResult e) => Data.Remove(e);
+    public ObservableCollection<MutationResult> GetPage(int p, int s) => new(Data.Skip(p * s).Take(s).ToList());
+    public int Count() => Data.Count;
+    public ObservableCollection<MutationResult> GetByCampaign(Guid id) => new(Data.Where(r => r.CampaignId == id).ToList());
+    public MutationResult? GetByMutantBinding(int m, int b) => null;
+    public ObservableCollection<MutationResult> GetByOutcome(Guid id, string o) => new();
+}
