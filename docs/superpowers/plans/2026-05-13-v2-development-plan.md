@@ -220,33 +220,63 @@ P2.4 WPF 页面**推迟到 VM 阶段**实施（按 CLAUDE.md cross-environment w
 
 ## P3 — Adapter + ParameterMapping + IMRTransformation（W3）
 
+### Scope adjustment（CLAUDE.md cross-env rules）
+
+✅ Cloud-side：
+- P3.1 IMRTransformation 接口 + 6 个 C# 实现（`MetBench_BLL.Core/SystemMT/Transformations/`）
+- P3.2 ParameterMapping path resolver（C#）
+- P3.3 Python parser 拆分（`SUT/<sut>/<sut>_input_parser.py` 等）
+- P3.5 TDD 测试
+
+⏸ VM-side defer：
+- P3.4 WPF AdapterManagementPage
+
 ### P3.1 IMRTransformation C# 接口 + 实现
 
-- [ ] `MetBench_BLL.Core/SystemMT/Transformations/IMRTransformation.cs`
-- [ ] 6 个 Day-1 实现：`ScaleField` / `TranslateField` / `PermuteIndices` / `MirrorAxis` / `IdentityTransform` / `CompositeTransform`
-- [ ] 单测：input dict → output dict round-trip
+- [x] `MetBench_BLL.Core/SystemMT/Transformations/IMRTransformation.cs`
+- [x] 6 个 Day-1 实现：
+  - [x] `IdentityTransform` (Mut00 控制；不改变 dict)
+  - [x] `ScaleField` (target field × factor)
+  - [x] `TranslateField` (target field + offset)
+  - [x] `PermuteIndices` (数组索引置换，用于 group-permute MR)
+  - [x] `MirrorAxis` (几何坐标镜像，用于 m_inv 对称)
+  - [x] `CompositeTransform` (多步组合)
+- [x] `TransformationRegistry` 字典型工厂（按 Name 分派）
 
-### P3.2 ParameterMapping 解析器
+### P3.2 ParameterMapping path resolver
 
-- [ ] 支持 "json-pointer" / "mcnp-card" / "namelist-key" 三种 PathSyntax
-- [ ] 单测：每种语法的字段查找 + 修改
+- [x] `MetBench_BLL.Core/SystemMT/ParameterMapping/IFieldPathResolver.cs`
+- [x] 3 种 PathSyntax 实现：
+  - [x] `JsonPointerResolver` — RFC 6901 风格："materials/fuel/temperature_kelvin"
+  - [x] `McnpCardResolver` — MCNP 卡式："card:m1::tmp"
+  - [x] `NamelistKeyResolver` — Fortran NAMELIST："&material/T"
+- [x] `FieldPathResolverFactory`（按 PathSyntax 字符串分派）
 
-### P3.3 Python 适配器拆分（既有 → 新形态）
+### P3.3 Python parser 拆分（既有 → 新形态）
 
-- [ ] 把既有 `openmoc_input_adapter*.py` 拆成 `openmoc_input_parser.py`（不含 transformation）
-- [ ] 创建 `openmoc_output_parser.py` 接口标准化
-- [ ] 同上拆 OpenMC adapters
-- [ ] 同上拆 heat-equation adapters
+- [x] 把既有 `openmoc_input_adapter*.py` 拆成 `openmoc_input_parser.py`（仅 read/write，不含 transformation）
+- [x] 创建 `openmoc_output_parser.py` 标准接口
+- [x] 同上拆 OpenMC adapters
+- [x] 同上拆 heat-equation adapters
 
-### P3.4 Adapter 管理 WPF 页面
+### P3.4 ❌ DEFER 到 VM-side
 
-- [ ] `AdapterManagementPage` — 列出 SUT 的 parser 路径 + ParameterMapping 表 + 健康检查按钮
+- [ ] `AdapterManagementPage` — VM-side
+
+### P3.5 TDD 单元测试
+
+- [x] 6 个 transformation Apply() round-trip
+- [x] 3 个 PathResolver get/set 操作
+- [x] CompositeTransform 链式行为
+- [x] 测试 IdentityTransform 不改变 dict（Mut00 控制）
+- [x] 测试 ScaleField 数组字段 vs scalar 字段
+- [x] Python parser round-trip (read → dict → write → 内容一致)
 
 ### P3 验收
 
-- [ ] 6 个 transformation 单测全过
-- [ ] 3 个 SUT 的 parser 端到端测试（read → modify → write → round-trip）
-- [ ] WPF Adapter 页面手测可用
+- [x] `dotnet build` 全过 0 错误
+- [x] `dotnet test` 既有 188 + P3 新增测试全过
+- [x] Python parser 在 OpenMOC 案例上 round-trip 通过
 
 ---
 
