@@ -15,6 +15,7 @@
 | [`entity-model.md`](entity-model.md) | LiteDB schema 完整规格（23 collection） + ER 图 | 后端 / DB 开发者 |
 | [`assertion-extensions.md`](assertion-extensions.md) | FluentAssertions 扩展方法 API + AssertionEvaluator | 断言相关代码开发者 |
 | [`migration-plan.md`](migration-plan.md) | 8 周路线 + 迁移脚本草稿 + 归档策略 | 全流程负责人、各阶段 owner |
+| [`evolution.md`](evolution.md) | 从 v1.0 (2026-05-07) 到 v2 设计的完整演化纪实，含 7 代 pipeline 对比 + 经验教训 | 项目交接、论文作者、新研究生入门 |
 
 ## 核心设计决策摘要
 
