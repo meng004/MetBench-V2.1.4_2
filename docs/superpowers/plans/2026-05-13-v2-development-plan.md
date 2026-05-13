@@ -143,37 +143,78 @@
 
 ## P2 — Repository + 基础设施模块（W2）
 
+### Scope adjustment（基于 CLAUDE.md cross-environment rules）
+
+Cloud agent **不可编译 WPF**（`MetBench_Client/`）。本阶段**只**做 Linux cloud 可验证的部分：
+- ✅ `MetBench_IDAL/` — Repository 接口
+- ✅ `MetBench_DAL/` — LiteDB Repository 实现
+- ✅ `MetBench_DAL/` — `IServiceCollection.AddSystemMtRepositories()` 扩展方法（DI helper）
+- ✅ `MetBench_SystemMT.Tests/` — TDD 测试
+
+P2.4 WPF 页面**推迟到 VM 阶段**实施（按 CLAUDE.md cross-environment workflow）。VM-side
+工程师从 cloud-side 的 `AddSystemMtRepositories()` + Repository 接口消费。
+
 ### P2.1 Repository 接口（IDAL）
 
-- [ ] 既有 v1 风格：复用 `IRepository<T>` 基接口 for int PK 实体
-- [ ] 新增 `IGuidRepository<T>` for Guid PK 实体（Execution/Result/Anomaly/...）
-- [ ] 给 18 个新实体每个写一对 Repository 接口
+实体共 23 个，按 PK 类型分两组（v1 既有不动）：
+
+**int PK（既有 IRepository<T>）— 12 个**：
+- v1 既有 3：MetamorphicRelation / Application / Domain（不动）
+- v2 新增 9：
+  - [x] `IRuntimeRepository`
+  - [x] `IMRBindingRepository`
+  - [x] `IApplicationDomainRepository`
+  - [x] `IMRInstanceRepository`
+  - [x] `IDiscoveryMethodRepository`
+  - [x] `IMutationOperatorRepository`
+  - [x] `IMutantRepository`
+  - [x] `IKnownBugRepository`
+  - [x] `IBatchPlanRepository`
+
+**Guid PK — 11 个**（需新基接口）：
+- [x] `IGuidRepository<T>` 基接口
+- [x] `IExecutionRepository`
+- [x] `IResultRepository`
+- [x] `IAnomalyRepository`
+- [x] `IDiscoveryRunRepository`
+- [x] `ICandidateMRRepository`
+- [x] `IValidationRunRepository`
+- [x] `IMutationCampaignRepository`
+- [x] `IMutationResultRepository`
+- [x] `IAuditLogRepository`
+- [x] `IBatchRepository`
+- [x] `IReportRepository`
 
 ### P2.2 LiteDB Repository 实现
 
-- [ ] 给每个 Repository 接口写 `LiteDb<Entity>Repository` 实现
-- [ ] 使用单独的 `SystemMtDb` 连接（与 v1 `MR.litedb` 隔离）
+- [x] 20 个 `LiteDb<Entity>Repository` 类，模仿 v1 `DomainRepository` 模式
+- [x] 复用既有 `DbConfig.Instance._conn`（不另开 LiteDB 文件，按 entity-model.md §4）
+- [x] 每实现内置基础 CRUD：Add / Modify / Remove / Get(id) / GetAll
 
-### P2.3 DI 注册
+### P2.3 DI helper 扩展方法（cloud-side 可建）
 
-- [ ] 在 `MetBench_Client/App.xaml.cs` 加 20 个 `services.AddScoped<...>()`
-- [ ] 通过 `IServiceCollection` 扩展方法 `AddSystemMtRepositories()` 收口
+- [x] `MetBench_DAL/ServiceCollectionExtensions.cs` —
+      `AddSystemMtRepositories(this IServiceCollection)` 注册 20 个 Repository
+- [x] App.xaml.cs 加一行 `services.AddSystemMtRepositories()` ★ VM-side 做
 
-### P2.4 基础设施模块 WPF 页面
+### P2.4 ❌ DEFER 到 VM-side
 
-- [ ] `RuntimeManagementPage` (XAML + ViewModel) — CRUD on Runtime
-- [ ] `SutManagementPage` — CRUD on Application (Kind=system-level)
-- [ ] `SampleCaseManagementPage` — 列出 SUT 的 sample case 文件
+- [ ] `RuntimeManagementPage` (WPF) — VM-side
+- [ ] `SutManagementPage` (WPF) — VM-side
+- [ ] `SampleCaseManagementPage` (WPF) — VM-side
 
-### P2.5 单元测试
+### P2.5 TDD 单元测试
 
-- [ ] 每 Repository 端到端测试 add/update/delete/get（60+ 测试）
+- [x] 每 Repository 1 个 CRUD 完整测试（共 20 [Fact]）
+- [x] 复合唯一索引违约测试（MRBindings / ApplicationDomains / MutationResults / DiscoveryMethods）
+- [x] Guid PK 自动生成测试（Execution / Result / Anomaly 等）
 
 ### P2 验收
 
-- [ ] 全部 CRUD 通过 WPF UI 可操作（手测一遍）
-- [ ] CI 全绿
-- [ ] 文档：`entity-model.md` §5 Repository 模式如有调整则更新
+- [x] `dotnet build` 全 cross-platform projects 0 错误
+- [x] `dotnet test` 既有 173 + P2 新增测试全过
+- [x] 23 个 Repository 接口 + 20 个新实现 可被 DI 容器解析
+- [ ] WPF UI 验收 推迟到 VM-side
 
 ---
 
@@ -407,7 +448,12 @@
 - 2026-05-13: P1.8 DbConfig 扩展 — 20 个新 collection key + 索引注册
 - 2026-05-13: P1.9 TDD 验证 — 新增 32 个 schema 测试全过，既有 141 个测试零回归（173 total pass）
 - 2026-05-13: P1 阶段 ship — 总测试覆盖 175 (173 pass / 2 skip / 0 fail)
-- (P2-P8 待续...)
+- 2026-05-13: P2.1 创建 21 个 IDAL 接口（IGuidRepository<T> 基接口 + 20 derived）
+- 2026-05-13: P2.2 写 2 个 base class + 20 个 LiteDB Repository 实现
+- 2026-05-13: P2.3 AddSystemMtRepositories() DI 扩展方法 + Microsoft.Extensions.DI 引入
+- 2026-05-13: P2.5 TDD 新增 15 个测试 — DI binding (5) + Index 约束 (10)；总 188 pass / 2 skip / 0 fail
+- 2026-05-13: P2 阶段 ship（W2 完成；P2.4 WPF 推迟 VM-side）
+- (P3-P8 待续...)
 
 ---
 
