@@ -1,20 +1,19 @@
 ﻿using LiveChartsCore;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Drawing.Geometries;
 using LiveChartsCore.SkiaSharpView.Painting;
-using LiveChartsCore.SkiaSharpView.Painting.Effects;
 using LiveChartsCore.SkiaSharpView.WPF;
 using SkiaSharp;
 using System.Diagnostics;
 
-namespace MetBench_BLL
+namespace MetBench_Client.Services.Plotting
 {
-    public class LinePlotter<TDataRecord, TDataReader> : BasePlotter<TDataRecord, TDataReader>
+    public class ScatterPlotter<TDataRecord, TDataReader> : BasePlotter<TDataRecord, TDataReader>
        where TDataRecord : IDataRecord
        where TDataReader : IMTDataInterface<TDataRecord>
     {
-       
-        public override PlotType PlotType => PlotType.Line;
+        public override PlotType PlotType => PlotType.Scatter;
 
         public override void Plot()
         {
@@ -58,7 +57,7 @@ namespace MetBench_BLL
                     NameTextSize = 12,
                     TextSize = 10,
                     LabelsRotation = 0,
-                    SeparatorsPaint = new SolidColorPaint(SKColors.LightGray, 1)
+                    SeparatorsPaint = new SolidColorPaint(SKColors.LightBlue, 1)
                 }
             };
         }
@@ -108,55 +107,65 @@ namespace MetBench_BLL
             }
 
             var series = new List<ISeries>();
-
+            // 蓝色正方形系列（Y2数据）
             if (y2Points.Count > 0)
             {
-                var fill = new SolidColorPaint(SKColors.Blue.WithAlpha(90));
-                series.Add(CreateLineSeries(
-                    y2Points,
-                    "(Y1,Y2)",
-                    SKColors.Blue,
-                    3,
-                    null,
-                    null));
-
+                series.Add(new ScatterSeries<ObservablePoint, RectangleGeometry>
+                {
+                    Values = y2Points,
+                    Name = "(Y1,Y2)",
+                    Fill = new SolidColorPaint(SKColors.Transparent),
+                    Stroke = new SolidColorPaint(SKColors.Blue, 1),
+                    GeometrySize = 10
+                });
             }
 
+            // 红色圆形系列（Actual数据）
             if (actualPoints.Count > 0)
             {
-                var fill = new SolidColorPaint(SKColors.Red.WithAlpha(90));
-                series.Add(CreateLineSeries(
-                    actualPoints,
-                    "(Y1,Actual)",
-                    SKColors.Red,
-                    2,
-                    null,
-                    new DashEffect(new float[] { 6, 6 }, 0)));
+                series.Add(new ScatterSeries<ObservablePoint, CircleGeometry>
+                {
+                    Values = actualPoints,
+                    Name = "(Y1,Actual)",
+                    Fill = new SolidColorPaint(SKColors.Red.WithAlpha(20)),
+                    Stroke = new SolidColorPaint(SKColors.Red, 2),
+                    GeometrySize = 20
+                });
             }
 
             return series;
         }
 
-        private LineSeries<ObservablePoint> CreateLineSeries(
-            IEnumerable<ObservablePoint> points,
-            string name,
-            SKColor color,
-            float strokeWidth,
-            SolidColorPaint solidColorPaint,
-            DashEffect dashEffect)
+ 
+
+        private ISeries CreateScatterSeries(
+      IEnumerable<ObservablePoint> points,
+      string name,
+      SKColor borderColor,
+      float size,
+      bool isRectangle = false)
         {
-            return new LineSeries<ObservablePoint>
-            {
-                Values = points.ToList(),
-                Name = name,
-                Stroke = new SolidColorPaint(color, strokeWidth) { PathEffect = dashEffect },
-                LineSmoothness = 10,
-                Fill = solidColorPaint,
-                GeometrySize = 10,
-                GeometryStroke = new SolidColorPaint(color, 2),
-                GeometryFill = new SolidColorPaint(SKColors.White),
-                
-            };
+            // 创建只有边框的绘制配置
+            var borderPaint = new SolidColorPaint(borderColor, 2); // 边框宽度2px
+            var transparentFill = new SolidColorPaint(SKColors.Transparent); // 透明填充
+
+            return isRectangle
+                ? new ScatterSeries<ObservablePoint, RectangleGeometry>
+                {
+                    Values = points.ToList(),
+                    Name = name,
+                    Fill = transparentFill,    // 透明填充
+                    Stroke = borderPaint,     // 边框颜色
+                    GeometrySize = size       // 点的大小
+                }
+                : new ScatterSeries<ObservablePoint, CircleGeometry>
+                {
+                    Values = points.ToList(),
+                    Name = name,
+                    Fill = transparentFill,    // 透明填充
+                    Stroke = borderPaint,     // 边框颜色
+                    GeometrySize = size       // 点的大小
+                };
         }
 
         private void ConfigureAxes()
@@ -170,4 +179,5 @@ namespace MetBench_BLL
             }
         }
     }
+
 }

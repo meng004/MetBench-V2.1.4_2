@@ -3,7 +3,7 @@ using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.WPF;
 using System.Windows;
 
-namespace MetBench_BLL
+namespace MetBench_Client.Services.Plotting
 {
     public abstract class BasePlotter<TDataRecord, TDataReader> : IPlotter<TDataRecord, TDataReader>
        where TDataRecord : IDataRecord

@@ -1,64 +1,57 @@
-﻿using LiveChartsCore;
+using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
+using MetBench_BLL.Visualization;
 
 namespace MetBench_BLL
 {
+    /// <summary>
+    /// 跨平台可视化数据服务 —— 读 CSV → 返回 <see cref="ISeries"/>[] + <see cref="Axis"/>[]。
+    /// UI 侧（WPF / Web）拿这三个数组自己塞进 chart 控件，不再经过 WPF-only Engine。
+    /// </summary>
     public class MTVisualizationSerive
     {
-        private ISeries[] _series;
-        private Axis[] _xAxes;
-        private Axis[] _yAxes;
-        private MTVisualizationEngine<CsvDataRecord, CsvDataReader> _visualizationEngine;
+        private ISeries[]? _series;
+        private Axis[]? _xAxes;
+        private Axis[]? _yAxes;
 
-        // 定义列结构（可配置化）
+        // 列结构（可后续抽到配置文件）
         private static readonly List<ColumnDefinition> ColumnDefinitions = new()
-    {
-        new ColumnDefinition("Y1", typeof(float)),
-        new ColumnDefinition("Y2", typeof(float)),
-        new ColumnDefinition("Actual", typeof(float)),
-        new ColumnDefinition("IsPass", typeof(int)),
-    };
+        {
+            new ColumnDefinition("Y1", typeof(float)),
+            new ColumnDefinition("Y2", typeof(float)),
+            new ColumnDefinition("Actual", typeof(float)),
+            new ColumnDefinition("IsPass", typeof(int)),
+        };
 
-        /// <summary>
-        /// 初始化可视化引擎并加载数据
-        /// </summary>
+        /// <summary>读 CSV → 按 plotType 构造 series/axes。失败抛异常给上层处理。</summary>
         public void Initialize(string csvFilePath, PlotType plotType = PlotType.Line)
         {
-            // 也可以修改为IOC依赖注入
-            try
+            var csvReader = new CsvDataReader(csvFilePath, ColumnDefinitions);
+            csvReader.LoadData();
+
+            (_series, _xAxes, _yAxes) = plotType switch
             {
-                // 1. 创建数据读取器
-                var csvReader = new CsvDataReader(csvFilePath, ColumnDefinitions);
-
-                // 2. 创建可视化引擎
-                _visualizationEngine = new MTVisualizationEngine<CsvDataRecord, CsvDataReader>(
-                    csvReader,
-                    plotType);
-
-                // 3. 渲染数据
-                _visualizationEngine.Visualize();
-
-                // 4. 获取绘图组件
-                var plotter = _visualizationEngine.GetPlotter();
-                _xAxes = plotter.GetXAxes();
-                _yAxes = plotter.GetYAxes();
-                _series = plotter.GetSeries();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                throw; // 抛出异常供 ViewModel 处理
-            }
+                PlotType.Line => (
+                    SeriesBuilder.BuildLineSeries(csvReader, ColumnDefinitions),
+                    SeriesBuilder.BuildLineXAxes(),
+                    SeriesBuilder.BuildLineYAxes()),
+                PlotType.Scatter => (
+                    SeriesBuilder.BuildScatterSeries(csvReader, ColumnDefinitions),
+                    SeriesBuilder.BuildScatterXAxes(),
+                    SeriesBuilder.BuildScatterYAxes()),
+                PlotType.Pie => (
+                    SeriesBuilder.BuildPieSeries(csvReader, ColumnDefinitions),
+                    SeriesBuilder.BuildPieXAxes(),
+                    SeriesBuilder.BuildPieYAxes()),
+                _ => throw new NotSupportedException($"Plotter for {plotType} is not supported"),
+            };
         }
 
-        /// <summary>
-        /// 获取可视化数据（供 ViewModel 调用）
-        /// </summary>
+        /// <summary>取构造好的 series + axes 三元组（ViewModel 调）。</summary>
         public (ISeries[] Series, Axis[] XAxes, Axis[] YAxes) GetVisualizationData()
         {
             if (_series == null || _xAxes == null || _yAxes == null)
                 throw new InvalidOperationException("Visualization data is not initialized. Call Initialize() first.");
-
             return (_series, _xAxes, _yAxes);
         }
     }

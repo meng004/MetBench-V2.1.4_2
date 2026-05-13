@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace MetBench_BLL
+namespace MetBench_Client.Services.Plotting
 {
     public class MTVisualizationEngine<TDataRecord, TDataReader>
         where TDataRecord : IDataRecord

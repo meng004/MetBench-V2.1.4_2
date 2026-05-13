@@ -7,7 +7,7 @@ using LiveChartsCore.SkiaSharpView.VisualElements;
 using SkiaSharp;
 using System.Diagnostics;
 
-namespace MetBench_BLL
+namespace MetBench_Client.Services.Plotting
 {
 
 
