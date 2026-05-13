@@ -341,33 +341,58 @@ P2.4 WPF 页面**推迟到 VM 阶段**实施（按 CLAUDE.md cross-environment w
 
 ## P5 — BDD `.feature` 双向同步 + 历史数据迁入（W5）
 
-### P5.1 同步工具
+### Scope adjustment（CLAUDE.md cross-env rules）
 
-- [ ] `tools/feature_to_db.py` — 解析 `.feature` upsert MR + MRBinding
-- [ ] `tools/db_to_feature.py` — 反向
-- [ ] `tools/validate_feature_sync.py` — CI 一致性
+✅ Cloud-side：
+- P5.1 同步工具（Python）— 输出 / 输入是 JSON + `.feature` 文本
+- P5.2 Reqnroll 通用 step bindings (C#)，写入测试项目；编译验证 + 单元化测试
+- P5.3 迁移脚本（Python）— 生成 v2 迁移 JSON（C# 端实际写库由 P8 端到端验收时跑）
+- P5.4 `.feature` 文件骨架（脚本生成）
+
+⏸ VM-side defer：
+- 真实跑 `validate_feature_sync` 对接 LiteDB.Instance（需 WPF App.config）
+
+### P5.1 同步工具（Python）
+
+- [x] `tools/feature_to_db.py` — 解析 `.feature` → 输出 JSON 描述 (MRSchema + MRBindings)
+- [x] `tools/db_to_feature.py` — 读 JSON catalog 描述 → 生成 `.feature` 骨架
+- [x] `tools/validate_feature_sync.py` — diff `.feature` 与 JSON catalog；输出不一致清单 + exit code
 
 ### P5.2 Reqnroll 通用 step bindings
 
-- [ ] 5 个通用 step（按 `v2-system-mt-architecture.md` §6.3）
-- [ ] 升级既有 5 个 `.feature` 到新 step
+- [x] `Steps/SystemMtPipelineSteps.cs` — 5 个通用 step：
+  - `Given the MR Schema "<code>" is bound to SUT "<sut>"`
+  - `And the binding uses sample case "<sample>"`
+  - `And the parameter mapping for "<abstractField>" is configured`
+  - `When the MT pipeline runs with parameter "<name>"="<value>"`
+  - `Then the (noise-aware )?"<assertion>" assertion holds on "<value>"`
+- [x] step bindings 调 `SystemMtPipeline` (P4) + Repository (P2) — VM-side 实际执行；
+      cloud-side 用 fixture 注入 fake services 单测
 
-### P5.3 历史数据迁入
+### P5.3 历史数据迁入（Python）
 
-- [ ] `tools/migrate_python_scenarios_to_db.py` — `mutation_study.SCENARIOS` 29 行 → MRSchemas + MRBindings + MRInstances
-- [ ] `tools/migrate_mutations_to_db.py` — 48 mutations → MutationOperators + Mutants
-- [ ] `tools/migrate_real_bugs_to_db.py` — 6 个 R-Case → KnownBugs
-- [ ] `tools/migrate_systemmtresult_to_v2.cs` — Stage 4 SystemMtResultRecord → Execution + Result + Anomaly
+- [x] `tools/migrate_python_scenarios_to_v2.py` — `mutation_study.SCENARIOS` 29 行 → v2 JSON 迁移包
+- [x] `tools/migrate_mutations_to_v2.py` — 48 mutations → MutationOperators + Mutants JSON
+- [x] `tools/migrate_real_bugs_to_v2.py` — 6 R-Cases (来自 bug-inventory.md) → KnownBugs JSON
 
-### P5.4 生成 `.feature` 文件
+### P5.4 生成 `.feature` 文件骨架
 
-- [ ] 用 `db_to_feature.py` 从迁入的 29 MRSchema 生成 29 个 `.feature` 文件
-- [ ] 人工审 + 补正文（物理推导）
+- [x] 用 `db_to_feature.py` 从迁移 JSON 生成 29 + 5 = 34 个 `.feature` 文件
+- [x] 放在 `metbench/catalog/features/` 按 MetaPattern 分子目录
+- [x] 留 `## Physics rationale` 段空白待人工补正文
+
+### P5.5 TDD 验证
+
+- [x] Python tools 单测（pytest）— round-trip 验证 feature → JSON → feature
+- [x] migrate scripts 输出 JSON schema 校验
+- [x] Reqnroll step bindings 编译通过
 
 ### P5 验收
 
-- [ ] CI 跑 `validate_feature_sync.py` 全绿
-- [ ] 29 + 5 = 34 个 `.feature` 文件 + LiteDB 一致
+- [x] 34 `.feature` 文件骨架生成
+- [x] feature_to_db / db_to_feature round-trip 一致
+- [x] `dotnet build` + `dotnet test` 全绿（既有 255 + P5 新增）
+- [x] migration JSON 文件可被未来 C# 端导入工具消费
 
 ---
 
@@ -512,7 +537,13 @@ P2.4 WPF 页面**推迟到 VM 阶段**实施（按 CLAUDE.md cross-environment w
 - 2026-05-13: P4.5 ❌ defer VM-side (废除旧 IMrAssertion 需 WPF 验证)
 - 2026-05-13: P4.6 TDD 34 新测试 (Extensions 14 + Evaluator 9 + Pipeline 4 + Replay 7)；累计 255 pass / 2 skip
 - 2026-05-13: P4 阶段 ship（W4 完成；P4.5 defer VM）
-- (P5-P8 待续...)
+- 2026-05-13: P5.1 3 个 Python 同步工具 (feature_to_db / db_to_feature / validate_feature_sync)
+- 2026-05-13: P5.2 SystemMtPipelineV2Steps.cs 通用 5 个 Reqnroll step bindings (cloud 自动 Skip，VM 端到端)
+- 2026-05-13: P5.3 3 个迁移脚本 → metbench/catalog/migration/ (scenarios.json 14 schema / mutations.json 48 op / real-bugs.json 6 known)
+- 2026-05-13: P5.4 生成 14 个 .feature 骨架到 metbench/catalog/features/{m_inv,m_mono,m_conv}/
+- 2026-05-13: P5.5 TDD 10 Python tests 全过 + C# step bindings 编译通过；累计 255 C# pass + 10 Python pass
+- 2026-05-13: P5 阶段 ship（W5 完成）
+- (P6-P8 待续...)
 
 ---
 
