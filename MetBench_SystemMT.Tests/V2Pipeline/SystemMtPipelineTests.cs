@@ -185,7 +185,10 @@ public sealed class SystemMtPipelineTests : IDisposable
         var pipeline = new SystemMtPipeline(fake);
 
         var states = new List<string>();
-        await pipeline.ExecuteAsync(MakeContext(), new Progress<string>(s => states.Add(s)));
+        // synchronous IProgress<T> impl —— Progress<T> 的回调走 SyncContext 异步派发，
+        // 在 xUnit 并行 runner 下断言可能先于回调跑到，导致 race
+        var progress = new SyncProgress(s => states.Add(s));
+        await pipeline.ExecuteAsync(MakeContext(), progress);
 
         // 至少 parsing-source 触发了；后续因 fake 失败而中断
         Assert.Contains(PipelineStatus.ParsingSource, states);
@@ -210,6 +213,13 @@ public sealed class SystemMtPipelineTests : IDisposable
         var end = cmd.IndexOf('"', start);
         return cmd.Substring(start, end - start);
     }
+}
+
+internal sealed class SyncProgress : IProgress<string>
+{
+    private readonly Action<string> _action;
+    public SyncProgress(Action<string> action) { _action = action; }
+    public void Report(string value) => _action(value);
 }
 
 internal sealed class FakeProcessExecutor : IProcessExecutor

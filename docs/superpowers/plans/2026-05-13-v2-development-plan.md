@@ -51,7 +51,7 @@
 | P4 | W4 | Pipeline + FA 扩展方法 + AssertionEvaluator | pending |
 | P5 | W5 | BDD `.feature` ↔ DB 双向同步 + 历史数据迁入 | pending |
 | P6 | W6 | Anomaly viewer + Replay + WPF UI | pending |
-| P7 | W7 | Discovery + Mutation 子系统 | pending |
+| P7 | W7 | Discovery + Mutation 子系统 | done (cloud) |
 | P8 | W8 | Coverage + Trend + Reports + 验收 ship | pending |
 
 ---
@@ -441,23 +441,47 @@ P2.4 WPF 页面**推迟到 VM 阶段**实施（按 CLAUDE.md cross-environment w
 
 ## P7 — Discovery + Mutation 子系统（W7）
 
-### P7.1 Discovery
+> Cloud scope（本仓库本周可做）：
+> * `MetBench_BLL.Core/Discovery/` + `MetBench_BLL.Core/Mutation/` 业务服务
+> * 抽象 LLM 调用为 `ILlmGateway`（可 fake，避免真实 API 依赖锁死 CI）
+> * `MetBench_BLL.Core/Discovery/External/` 把 Python `noether_candidates.py` 当作可调用 sidecar
+> * Reqnroll / xUnit TDD
+>
+> VM scope（本周不做，挂 DEFER）：
+> * `MetBench_Client/Views/Pages/DiscoveryPage.xaml` + `CandidateReviewPage.xaml` + `MutationCampaignPage.xaml`
+> * 真实 LLM provider (Anthropic / DeepSeek) 落地 — 端到端 smoke test 在 VM 跑
 
-- [ ] `Discovery/IMRDiscoverer.cs` 接口
-- [ ] `MetaPatternDiscoverer.cs` 实现（C# wrapper，调既有 Python `noether_candidates.py`）
-- [ ] `LlmNativeDiscoverer.cs` 实现（调 Anthropic API + prompt）
-- [ ] 3 个 Validator：Empirical / TheoreticalLlm / AdversarialMutmut
-- [ ] WPF `DiscoveryPage` + `CandidateReviewPage`
+### P7.1 Discovery（cloud）
 
-### P7.2 Mutation
+- [x] `Discovery/IMRDiscoverer.cs` 接口（return DiscoveryRunOutcome with candidates）
+- [x] `Discovery/Candidates/CandidateMrProposal.cs` 纯 DTO（不写库的中间值）
+- [x] `Discovery/MetaPatternDiscoverer.cs` — 进程外调 `tools/noether_candidates.py`，解析 JSON → CandidateMrProposal
+- [x] `Discovery/LlmNativeDiscoverer.cs` — 依赖 `ILlmGateway` 接口（注入 fake 即可在 CI 跑）
+- [x] `Discovery/ILlmGateway.cs` + `Discovery/NullLlmGateway.cs`（生产由 VM 接 DeepSeek/Anthropic）
+- [x] `Discovery/DiscoveryService.cs` orchestrator — 写 DiscoveryRun + CandidateMR 表
+- [ ] WPF `DiscoveryPage` + `CandidateReviewPage`（**DEFER VM**）
 
-- [ ] `Mutation/MutationCampaignService.cs` — 跑 mutants × MRBindings 矩阵
-- [ ] WPF `MutationCampaignPage`
+### P7.2 Validator（cloud）
 
-### P7 验收
+- [x] `Discovery/Validators/IMRValidator.cs` 接口
+- [x] `Discovery/Validators/EmpiricalValidator.cs` — baseline pass-rate（fake repo 注入）
+- [x] `Discovery/Validators/TheoreticalLlmValidator.cs` — 依赖 `ILlmGateway`
+- [x] `Discovery/Validators/AdversarialMutmutValidator.cs` — 看 MR 能否检出 mutant
+- [x] `Discovery/ValidationService.cs` — 跑 validator 写 ValidationRun + 自动 promote（≥2 通过）
 
-- [ ] 跑一次 MetaPattern discovery → 看 ≥3 个 CandidateMR
-- [ ] 跑一次小型 MutationCampaign（5 mutants × 5 MRBindings）→ 看 detection rate
+### P7.3 Mutation（cloud）
+
+- [x] `Mutation/MutationCampaignService.cs` — 矩阵 (mutants × mrBindings × sampleCases) + 调 ISystemMtPipeline
+- [x] `Mutation/MutationCampaignSpec.cs` DTO
+- [x] `Mutation/MutationCampaignSummary.cs` DTO (detection rate / false positive rate / coverage)
+- [ ] WPF `MutationCampaignPage`（**DEFER VM**）
+
+### P7 验收（cloud）
+
+- [x] xUnit `DiscoveryServiceTests`：MetaPattern discoverer 产 ≥3 proposal + 写 DB
+- [x] xUnit `ValidationServiceTests`：≥2 validator 通过自动 promote → 写 MetamorphicRelation 表
+- [x] xUnit `MutationCampaignServiceTests`：5×5 矩阵 + 验证 detection-rate 算式
+- [x] Python: `tools/noether_candidates.py` 的 JSON 输出契约测试（防 C# wrapper 解析漂移）
 
 ---
 

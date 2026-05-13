@@ -18,4 +18,8 @@
     <ProjectReference Include="..\MetBench_IDAL\MetBench_IDAL.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="MetBench_SystemMT.Tests" />
+  </ItemGroup>
+
 </Project>
