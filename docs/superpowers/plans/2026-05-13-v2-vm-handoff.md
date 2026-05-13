@@ -124,11 +124,15 @@ public sealed partial class AnomalyListViewModel
 
 #### 1.0.B 完整 XAML 示例（页面分页条 —— 可直接抄）
 
+> **已封装为 UserControl**: `MetBench_Client/Views/Controls/PagingBar.xaml`。
+> 调用方只需引入 namespace + 1 行就够，不必复制 40 行分页 XAML。
+
 ```xml
 <Page x:Class="MetBench_Client.Views.Pages.AnomalyListPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:controls="clr-namespace:MetBench_Client.Views.Controls"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
@@ -177,51 +181,27 @@ public sealed partial class AnomalyListViewModel
       </ui:DataGrid.Columns>
     </ui:DataGrid>
 
-    <!-- 分页条 -->
-    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="8">
-      <ui:Button Appearance="Secondary" Margin="0,0,4,0"
-                 Command="{Binding ViewModel.FirstPageCommand}"
-                 Icon="{ui:SymbolIcon ChevronDoubleLeft20}" />
-      <ui:Button Appearance="Secondary" Margin="0,0,8,0"
-                 Command="{Binding ViewModel.PreviousPageCommand}"
-                 Icon="{ui:SymbolIcon ChevronLeft20}" />
-
-      <TextBlock VerticalAlignment="Center" Margin="0,0,4,0">
-        <Run Text="Page" />
-        <Run Text="{Binding ViewModel.PageIndex, StringFormat='{}{0}'}" />
-        <Run Text="/" />
-        <Run Text="{Binding ViewModel.TotalPages, Mode=OneWay}" />
-        <Run Text="  (" />
-        <Run Text="{Binding ViewModel.TotalCount, Mode=OneWay}" />
-        <Run Text=" total)" />
-      </TextBlock>
-
-      <ui:Button Appearance="Secondary" Margin="8,0,4,0"
-                 Command="{Binding ViewModel.NextPageCommand}"
-                 Icon="{ui:SymbolIcon ChevronRight20}" />
-      <ui:Button Appearance="Secondary" Margin="0,0,12,0"
-                 Command="{Binding ViewModel.LastPageCommand}"
-                 Icon="{ui:SymbolIcon ChevronDoubleRight20}" />
-
-      <TextBlock Text="Page size:" VerticalAlignment="Center" Margin="0,0,4,0" />
-      <ComboBox SelectedItem="{Binding ViewModel.PageSize}" Width="64">
-        <ComboBoxItem Content="10"  />
-        <ComboBoxItem Content="25"  />
-        <ComboBoxItem Content="50"  />
-        <ComboBoxItem Content="100" />
-      </ComboBox>
-
-      <ui:Button Appearance="Primary" Margin="12,0,0,0"
-                 Command="{Binding ViewModel.RefreshCommand}"
-                 Content="Refresh" />
-
-      <!-- IsLoading 指示器 -->
-      <ProgressBar IsIndeterminate="True" Width="80" Height="4" Margin="12,0,0,0"
-                   Visibility="{Binding ViewModel.IsLoading, Converter={StaticResource BoolToVisibilityConverter}}" />
-    </StackPanel>
+    <!-- 分页条 (UserControl) -->
+    <controls:PagingBar Grid.Row="2" DataContext="{Binding ViewModel}" />
   </Grid>
 </Page>
 ```
+
+**PagingBar 内部细节**（如果要改样式，改下面这一个文件，所有页面同步生效）:
+
+`MetBench_Client/Views/Controls/PagingBar.xaml`:
+- 包含 First / Previous / Next / Last 四个图标按钮 (`ui:Button` + `SymbolIcon`)
+- 中间 `Page X / Y (Z total)` 文本
+- 右侧 `PageSize` 下拉 (10 / 25 / 50 / 100) + `Refresh` 按钮 + 加载指示 ProgressBar
+- 所有 binding 走继承的 `DataContext` —— 调用方写 `DataContext="{Binding ViewModel}"` 把 `PagingViewModel<T>` 喂进来即可
+- 命令 `CanExecute` 自动随 `IsLoading` / `HasPrevious` / `HasNext` 联动（基类已做）
+
+**多张表同页**:
+```xml
+<controls:PagingBar DataContext="{Binding ViewModel.LeftPagingVm}" />
+<controls:PagingBar DataContext="{Binding ViewModel.RightPagingVm}" />
+```
+不需要 DependencyProperty；DataContext 注入足够。
 
 #### 1.0.C 异步路径示例（SystemMtResultRepository —— typed PagedResult）
 
@@ -242,7 +222,18 @@ public sealed partial class SystemMtResultListViewModel : PagingViewModel<System
 }
 ```
 
-#### 1.0.D 验收（分页通用）
+#### 1.0.C-bis PagingBar UserControl 验收
+
+cloud 端已写好 `MetBench_Client/Views/Controls/PagingBar.xaml` + `.cs`，但
+**没法在 Linux 编译 WPF**，VM 端首次集成要确认：
+
+- [ ] `MetBench_Client.csproj` 自动把 `Views/Controls/*.xaml` 当 Page 编译 —— 检查 `dotnet build MetBench_Client` 通过
+- [ ] 任一列表页加上 `xmlns:controls="clr-namespace:MetBench_Client.Views.Controls"` + `<controls:PagingBar DataContext="{Binding ViewModel}" />`，启动后分页条正确渲染
+- [ ] 命令绑定生效（点 Next 真的换页）
+- [ ] `IsLoading` 期间 ProgressBar 显示
+- [ ] `SymbolIcon` 资源全部加载（如有缺失换成 `SymbolRegular.ArrowLeft20` / `ArrowRight20` 等已确认存在的 enum）
+
+
 
 每个继承 `PagingViewModel<T>` 的页面都要满足：
 
