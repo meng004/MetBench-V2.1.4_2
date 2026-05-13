@@ -446,7 +446,84 @@ classDiagram
 
 ---
 
-## 5. 类图 — 值对象 (Value Objects，嵌入式)
+## 5. 类图 — Adapter 概念分解（重要）
+
+> v2 设计里**没有单独的 Adapter 实体**。"Adapter" 的职责被显式拆解到 3 个独立位置：
+
+```mermaid
+classDiagram
+    class Adapter概念 {
+        <<deprecated as single entity>>
+        在 v2 拆解为三层
+    }
+    note for Adapter概念 "v1 'Adapter' = 文件解析 + 字段映射 + MR 变换 三件套.\nv2 设计把这三件事拆开存放，避免反模式."
+
+    class Application {
+        <<L1 — 文件 IO 解析>>
+        +string InputParserPath
+        +string OutputParserPath
+        +string RunnerEntryPath
+        +int RuntimeId
+        每 SUT 一份；不感知 MR 含义
+    }
+    note for Application "Layer 1: Parser\n• Python 脚本，read/write SUT 原生文件\n• per-SUT 共享（同 SUT 的所有 MR 复用同一 parser）"
+
+    class MRBinding {
+        <<L2 — 抽象 → 具体字段映射>>
+        +List~ParameterMapping~ ParameterMappings
+        per-MR-per-SUT
+    }
+    note for MRBinding "Layer 2: ParameterMapping\n• 数据驱动（存 LiteDB，可在 UI 编辑）\n• 不知道 SUT 文件格式\n• 不知道变换逻辑"
+
+    class ParameterMapping {
+        +string AbstractParamName
+        +string ConcreteFieldPath
+        +string PathSyntax
+        +ValueRange? ValueRange
+        +string Unit
+    }
+    note for ParameterMapping "embedded record:\nMR 视角 'fuel.temperature' →\nSUT 视角 'materials.fuel.temperature_kelvin'"
+
+    class IMRTransformation {
+        <<L3 — MR 输入变换>>
+        +string Name
+        +Apply(dict, fieldPath, params) Dict
+        per-transformation-type
+    }
+    note for IMRTransformation "Layer 3: Transformation\n• C# 内存 dict 操作\n• 不接触文件，不知道 SUT 格式\n• 跨 SUT 复用（Identity/ScaleField/Permute/Mirror/...）"
+
+    class Pipeline协作 {
+        <<编排 — SystemMtPipeline>>
+        1. Parser.parse(source.file) → source_dict
+        2. Transformation.Apply(source_dict, fieldPath, params) → followup_dict
+        3. Parser.write(followup_dict) → followup.file
+        4. Runtime.invoke(SUT) → output.file
+        5. Parser.parse(output.file) → values
+        6. AssertionEvaluator.Evaluate(values)
+    }
+    note for Pipeline协作 "Pipeline 通过 ParameterMapping 把 abstract field path\n解析成 concrete path 传给 Transformation"
+
+    Application ..> ParameterMapping : "Application 提供 Parser；\nParameterMapping 提供字段定位"
+    MRBinding *-- ParameterMapping : embeds
+    Pipeline协作 ..> Application : "调 Input/Output Parser"
+    Pipeline协作 ..> IMRTransformation : "调 Apply"
+    Pipeline协作 ..> ParameterMapping : "读字段路径"
+```
+
+**为什么不要单独 Adapter 实体**：
+
+| 反模式（v1 风格） | v2 设计 |
+|---------------|--------|
+| `Adapter` 同时承担 read/write + 字段映射 + MR 变换 | 三件事分离到 3 层 |
+| 每个 (SUT × MR) 一个 adapter .py 文件 | Parser 仅按 SUT 一份；MR 变换是 C# |
+| `openmoc_input_adapter_fuel_temperature.py` (~50 行) | `openmoc_input_parser.py` (~20 行通用) + `ScaleField` C# (复用全部 m_mono MR) |
+| 加新 MR 加 1 新 .py 文件 | 加新 MR 加 1 行 ParameterMapping JSON |
+
+详见 [`glossary.md`](glossary.md) §2 与 [`v2-system-mt-architecture.md`](v2-system-mt-architecture.md) §3.2。
+
+---
+
+## 6. 类图 — 值对象 (Value Objects，嵌入式)
 
 ```mermaid
 classDiagram
@@ -512,7 +589,7 @@ classDiagram
 
 ---
 
-## 6. 类图 — Repository 模式（CRUD 层）
+## 7. 类图 — Repository 模式（CRUD 层）
 
 ```mermaid
 classDiagram
@@ -608,7 +685,7 @@ classDiagram
 
 ---
 
-## 7. 类图 — Pipeline 子系统（MT 编排核心）
+## 8. 类图 — Pipeline 子系统（MT 编排核心）
 
 ```mermaid
 classDiagram
@@ -725,7 +802,7 @@ classDiagram
 
 ---
 
-## 8. 类图 — 断言子系统（FluentAssertions 扩展）
+## 9. 类图 — 断言子系统（FluentAssertions 扩展）
 
 ```mermaid
 classDiagram
@@ -796,7 +873,7 @@ classDiagram
 
 ---
 
-## 9. 类图 — Transformation 子系统（MR 输入变换）
+## 10. 类图 — Transformation 子系统（MR 输入变换）
 
 ```mermaid
 classDiagram
@@ -867,7 +944,7 @@ classDiagram
 
 ---
 
-## 10. 类图 — ParameterMapping 子系统（路径解析）
+## 11. 类图 — ParameterMapping 子系统（路径解析）
 
 ```mermaid
 classDiagram
@@ -925,7 +1002,7 @@ classDiagram
 
 ---
 
-## 11. 类图 — Discovery 子系统（MR 识别工作流）
+## 12. 类图 — Discovery 子系统（MR 识别工作流）
 
 ```mermaid
 classDiagram
@@ -985,7 +1062,7 @@ classDiagram
 
 ---
 
-## 12. 类图 — Mutation 子系统（变异分析）
+## 13. 类图 — Mutation 子系统（变异分析）
 
 ```mermaid
 classDiagram
@@ -1040,7 +1117,7 @@ classDiagram
 
 ---
 
-## 13. MT Pipeline 数据流（顺序图）
+## 14. MT Pipeline 数据流（顺序图）
 
 ```mermaid
 sequenceDiagram
@@ -1101,7 +1178,7 @@ sequenceDiagram
 
 ---
 
-## 14. .feature ↔ LiteDB 双向同步流程图
+## 15. .feature ↔ LiteDB 双向同步流程图
 
 ```mermaid
 flowchart LR
@@ -1143,7 +1220,7 @@ flowchart LR
     MM -->|生成| JM
     MR -->|生成| JR
 
-    JS & JM & JR -->|C# import (P8)| DB1 & DB2 & DB3 & DB4
+    JS & JM & JR -->|CSharp import - P8| DB1 & DB2 & DB3 & DB4
 
     DB1 & DB2 -->|export JSON| DBtoF
     DBtoF -->|生成| F1 & F2 & F3
@@ -1157,7 +1234,7 @@ flowchart LR
 
 ---
 
-## 15. 4 级 MR 语义层次（概念视图）
+## 16. 4 级 MR 语义层次（概念视图）
 
 ```mermaid
 flowchart TD
@@ -1181,7 +1258,7 @@ flowchart TD
 
 ---
 
-## 16. v1 ↔ v2 实体演化对照
+## 17. v1 ↔ v2 实体演化对照
 
 ```mermaid
 flowchart LR
@@ -1204,11 +1281,11 @@ flowchart LR
         V2Misc["KnownBug / AuditLog /<br/>Batch / BatchPlan / Report"]
     end
 
-    V1MR -.-> V2Bind : "通过 M:N junction 引用"
+    V1MR -.->|"M:N junction"| V2Bind
     V1App -.-> V2Bind
     V1App -.-> V2AppDom
     V1Dom -.-> V2AppDom
-    V1App -.-> V2RT : RuntimeId
+    V1App -.->|"RuntimeId"| V2RT
     V2Bind -.-> V2Inst
     V2Inst -.-> V2Exec
     V2Exec -.-> V2Res
