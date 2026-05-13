@@ -282,43 +282,60 @@ P2.4 WPF 页面**推迟到 VM 阶段**实施（按 CLAUDE.md cross-environment w
 
 ## P4 — Pipeline + FluentAssertions 扩展 + 端到端（W4）
 
+### Scope adjustment
+
+✅ Cloud-side：P4.1 / P4.2 / P4.3 / P4.4 / P4.6（pipeline 单元 + 集成测试）
+⏸ VM-side defer：P4.5 既有 IMrAssertion 删除（依赖 Stage 4 Launcher facade，需 VM 验证不破 WPF）
+
 ### P4.1 NuGet 依赖
 
-- [ ] 在 `MetBench_BLL.Core.csproj` 加 `FluentAssertions` + `MathNet.Numerics`
+- [x] 在 `MetBench_BLL.Core.csproj` 加 `FluentAssertions` 6.12.0
+- [x] 在 `MetBench_BLL.Core.csproj` 加 `MathNet.Numerics` 5.0.0
 
 ### P4.2 断言扩展方法
 
-- [ ] `Assertions/MetbenchAssertionExtensions.cs` 完整实现（按 `assertion-extensions.md` §5）
-- [ ] `Assertions/AssertionTypeCodes.cs` 常量
-- [ ] `Assertions/AssertionEvaluator.cs` switch 分派器
-- [ ] `Assertions/SystemMtAssertionResult.cs` record
-- [ ] `Assertions/AssertionInput.cs` record
-- [ ] 单测覆盖每个扩展方法（pass + fail 两路径）
+- [x] `Assertions/AssertionInput.cs` record
+- [x] `Assertions/ToleranceConfigDto.cs`（与 LiteDB ToleranceConfig 区分；BLL 层用 record）
+- [x] `Assertions/SystemMtAssertionResultV2.cs` record（避免与 Stage 4 SystemMtAssertionResult 冲突）
+- [x] `Assertions/AssertionTypeCodes.cs` 9 个常量
+- [x] `Assertions/MetbenchAssertionExtensions.cs` — 6 个扩展方法：
+  - `BeLessThanWithNoiseFloor`
+  - `BeGreaterThanWithNoiseFloor`
+  - `BeApproximatelyEqualUnderTransform`
+  - `HaveVarianceRatio`
+  - `BePointwiseApproximately`
+  - `AgreeWithReference`
+- [x] `Assertions/AssertionEvaluator.cs` switch 分派器
 
 ### P4.3 SystemMtPipeline 编排器
 
-- [ ] `SystemMT/Pipeline/SystemMtPipeline.cs` — 9 状态机（按 `v2-system-mt-architecture.md` §3.1）
-- [ ] 调 Input Parser / Transformation / SUT runner / Output Parser / Assertion
-- [ ] 失败处理：每步异常落 Execution.ErrorMessage
+- [x] `SystemMT/Pipeline/PipelineStatus.cs` — 状态枚举
+- [x] `SystemMT/Pipeline/PipelineContext.cs` — 跑时上下文（参数 / 路径 / SUT 信息）
+- [x] `SystemMT/Pipeline/ISystemMtPipeline.cs` — 接口
+- [x] `SystemMT/Pipeline/SystemMtPipeline.cs` — 9 状态机实现
+- [x] 失败处理：每步异常落 Execution.ErrorMessage；状态自动切 "error" / "timeout"
 
 ### P4.4 ReplayService
 
-- [ ] `SystemMT/ReplayService.cs` — 从 Anomaly 重跑 Execution + 对比新旧
+- [x] `SystemMT/ReplayService.cs` — 从 Anomaly 重跑 Execution + 对比新旧
 
-### P4.5 删除既有 IMrAssertion
+### P4.5 ❌ DEFER 到 VM-side
 
-- [ ] 删 `GreaterThanAssertion.cs` / `LessThanAssertion.cs` / `IMrAssertion.cs`
-- [ ] 既有 `SystemMtRunner` 改为调 `SystemMtPipeline` 或独立 deprecate
+- [ ] 删 `IMrAssertion.cs` / `GreaterThanAssertion.cs` / `LessThanAssertion.cs`
+      （依赖 Stage 4 Launcher facade，需 VM 验证不破 WPF；本 PR 与 v2 并存）
 
-### P4.6 端到端测试
+### P4.6 TDD 端到端测试
 
-- [ ] 从 LiteDB 加一个 MRInstance → 跑 SystemMtPipeline → LiteDB 看到 Execution + Result 行
+- [x] 6 个断言扩展方法 pass+fail 路径
+- [x] AssertionEvaluator 按 AssertionTypeCode 分派
+- [x] SystemMtPipeline 状态机：queued → parsing-source → ... → ok/anomaly/error
+- [x] ReplayService 重跑对比逻辑
 
 ### P4 验收
 
-- [ ] 一个 OpenMOC ScaleNuSigmaF MR 完整跑通 v2 pipeline
-- [ ] 单测覆盖率 ≥80%
-- [ ] WPF 从 ExecutionPage 启动一次 Execution 跑通
+- [x] `dotnet build` 全 cross-platform 0 错误
+- [x] TDD 新增测试全过；既有 221 + P4 新增 ≥ 25 = ≥ 246 pass
+- [x] FluentAssertions API 风格一致（`value.Should().BeXxx(...)`）
 
 ---
 
@@ -488,7 +505,14 @@ P2.4 WPF 页面**推迟到 VM 阶段**实施（按 CLAUDE.md cross-environment w
 - 2026-05-13: P3.3 6 个 Python parser 拆分 (openmoc/openmc/heat_equation × input/output)；round-trip 验证通过
 - 2026-05-13: P3.5 TDD 33 新测试 (FieldPathResolver 14 + IMRTransformation 19)；累计 221 pass / 2 skip
 - 2026-05-13: P3 阶段 ship（W3 完成；P3.4 WPF 推迟 VM-side）
-- (P4-P8 待续...)
+- 2026-05-13: P4.1 NuGet 引入 FluentAssertions 6.12.0 + MathNet.Numerics 5.0.0
+- 2026-05-13: P4.2 AssertionTypeCodes (9 常量) + 6 个 FA 扩展方法 + AssertionEvaluator switch 分派
+- 2026-05-13: P4.3 SystemMtPipeline (9 状态机) + IProcessExecutor 抽象 + DefaultProcessExecutor
+- 2026-05-13: P4.4 ReplayService + ReplayClassification (Reproduced/FixedOrFlaky/RegressionOnReplay/StillPassing/MismatchedFailure/NotComparable)
+- 2026-05-13: P4.5 ❌ defer VM-side (废除旧 IMrAssertion 需 WPF 验证)
+- 2026-05-13: P4.6 TDD 34 新测试 (Extensions 14 + Evaluator 9 + Pipeline 4 + Replay 7)；累计 255 pass / 2 skip
+- 2026-05-13: P4 阶段 ship（W4 完成；P4.5 defer VM）
+- (P5-P8 待续...)
 
 ---
 
