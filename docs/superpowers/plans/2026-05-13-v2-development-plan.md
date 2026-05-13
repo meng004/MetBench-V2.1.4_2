@@ -483,7 +483,12 @@ P2.4 WPF 页面**推迟到 VM 阶段**实施（按 CLAUDE.md cross-environment w
 - 2026-05-13: P2.3 AddSystemMtRepositories() DI 扩展方法 + Microsoft.Extensions.DI 引入
 - 2026-05-13: P2.5 TDD 新增 15 个测试 — DI binding (5) + Index 约束 (10)；总 188 pass / 2 skip / 0 fail
 - 2026-05-13: P2 阶段 ship（W2 完成；P2.4 WPF 推迟 VM-side）
-- (P3-P8 待续...)
+- 2026-05-13: P3.1 IMRTransformation 接口 + 6 实现 + TransformationRegistry
+- 2026-05-13: P3.2 IFieldPathResolver + 3 语法 (JsonPointer/McnpCard/NamelistKey) + Factory
+- 2026-05-13: P3.3 6 个 Python parser 拆分 (openmoc/openmc/heat_equation × input/output)；round-trip 验证通过
+- 2026-05-13: P3.5 TDD 33 新测试 (FieldPathResolver 14 + IMRTransformation 19)；累计 221 pass / 2 skip
+- 2026-05-13: P3 阶段 ship（W3 完成；P3.4 WPF 推迟 VM-side）
+- (P4-P8 待续...)
 
 ---
 
