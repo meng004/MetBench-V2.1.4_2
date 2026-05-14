@@ -85,6 +85,12 @@ namespace MetBench_Client.ViewModels
             },
                      new NavigationViewItem()
             {
+                Content = "Anomalies",
+                Icon = new SymbolIcon { Symbol = SymbolRegular.Warning24 },
+                TargetPageType = typeof(Views.Pages.AnomalyListPage)
+            },
+                     new NavigationViewItem()
+            {
                 Content = "MR Detection",
                 Icon = new SymbolIcon { Symbol = SymbolRegular.CalendarSearch20 },
                 TargetPageType = typeof(Views.Pages.AutoDetectMRPage)

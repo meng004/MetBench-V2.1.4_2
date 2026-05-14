@@ -1,0 +1,139 @@
+<Page x:Class="MetBench_Client.Views.Pages.AnomalyListPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:controls="clr-namespace:MetBench_Client.Views.Controls"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      Title="AnomalyListPage"
+      d:DesignHeight="700" d:DesignWidth="1100"
+      ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+      Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+      mc:Ignorable="d">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Row 0: filter bar -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
+            <TextBlock Text="Severity:" VerticalAlignment="Center" Margin="0,0,4,0" />
+            <ComboBox SelectedValue="{Binding ViewModel.SeverityFilter, Mode=TwoWay}"
+                      SelectedValuePath="Content"
+                      Width="120" Margin="0,0,12,0">
+                <ComboBoxItem Content="" />
+                <ComboBoxItem Content="noise" />
+                <ComboBoxItem Content="minor" />
+                <ComboBoxItem Content="major" />
+                <ComboBoxItem Content="critical" />
+            </ComboBox>
+
+            <TextBlock Text="Status:" VerticalAlignment="Center" Margin="0,0,4,0" />
+            <ComboBox SelectedValue="{Binding ViewModel.StatusFilter, Mode=TwoWay}"
+                      SelectedValuePath="Content"
+                      Width="160" Margin="0,0,12,0">
+                <ComboBoxItem Content="" />
+                <ComboBoxItem Content="new" />
+                <ComboBoxItem Content="investigating" />
+                <ComboBoxItem Content="known" />
+                <ComboBoxItem Content="confirmed-bug" />
+                <ComboBoxItem Content="false-positive" />
+                <ComboBoxItem Content="fixed-upstream" />
+            </ComboBox>
+
+            <ui:Button Appearance="Primary"
+                       Content="Analyze commonality"
+                       Margin="12,0,0,0"
+                       Icon="{ui:SymbolIcon ChartMultiple24}"
+                       Command="{Binding ViewModel.AnalyzeCommonalityCommand}" />
+        </StackPanel>
+
+        <!-- Row 1: data grid -->
+        <ui:DataGrid Grid.Row="1"
+                     ItemsSource="{Binding ViewModel.Items}"
+                     SelectedItem="{Binding ViewModel.SelectedAnomaly, Mode=TwoWay}"
+                     AutoGenerateColumns="False"
+                     IsReadOnly="True"
+                     HeadersVisibility="Column"
+                     CanUserAddRows="False"
+                     BorderThickness="1"
+                     BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}">
+            <ui:DataGrid.Columns>
+                <DataGridTextColumn Header="Id"           Binding="{Binding IdAnomaly}"      Width="240" />
+                <DataGridTextColumn Header="Severity"     Binding="{Binding Severity}"       Width="80" />
+                <DataGridTextColumn Header="Status"       Binding="{Binding Status}"         Width="120" />
+                <DataGridTextColumn Header="Category"     Binding="{Binding Category}"       Width="140" />
+                <DataGridTextColumn Header="Discovered"   Binding="{Binding DiscoveredAt, StringFormat=yyyy-MM-dd HH:mm}" Width="140" />
+                <DataGridTextColumn Header="Linked Bug"   Binding="{Binding LinkedKnownBugId}" Width="100" />
+                <DataGridTextColumn Header="Replay #"     Binding="{Binding ReplayCount}"    Width="80" />
+                <DataGridTextColumn Header="Notes"        Binding="{Binding Notes}"          Width="*" />
+            </ui:DataGrid.Columns>
+        </ui:DataGrid>
+
+        <!-- Row 2: paging bar -->
+        <controls:PagingBar Grid.Row="2" Margin="0,8,0,0"
+                            DataContext="{Binding ViewModel}" />
+
+        <!-- Row 3: transition bar -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,8,0,0">
+            <TextBlock Text="Transition selected to:" VerticalAlignment="Center" Margin="0,0,8,0" />
+            <ComboBox SelectedValue="{Binding ViewModel.TransitionTarget, Mode=TwoWay}"
+                      SelectedValuePath="Content"
+                      Width="180" Margin="0,0,8,0">
+                <ComboBoxItem Content="investigating" />
+                <ComboBoxItem Content="known" />
+                <ComboBoxItem Content="confirmed-bug" />
+                <ComboBoxItem Content="false-positive" />
+                <ComboBoxItem Content="fixed-upstream" />
+            </ComboBox>
+            <ui:Button Appearance="Primary"
+                       Content="Apply transition"
+                       Icon="{ui:SymbolIcon ArrowSwap24}"
+                       Command="{Binding ViewModel.TransitionCommand}" />
+            <TextBlock Text="{Binding ViewModel.ErrorMessage}"
+                       Foreground="OrangeRed"
+                       VerticalAlignment="Center"
+                       Margin="16,0,0,0"
+                       TextWrapping="Wrap" />
+        </StackPanel>
+
+        <!-- Row 4: commonality summary -->
+        <Border Grid.Row="4"
+                Margin="0,8,0,0"
+                Padding="12"
+                BorderThickness="1"
+                BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                CornerRadius="4">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ViewModel.Commonality}" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <StackPanel>
+                <TextBlock FontWeight="Bold" Text="Commonality Report" />
+                <TextBlock Margin="0,4,0,0"
+                           Text="{Binding ViewModel.Commonality.Hypothesis}"
+                           TextWrapping="Wrap" />
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                    <TextBlock Text="Total: " />
+                    <TextBlock Text="{Binding ViewModel.Commonality.Total}" Margin="0,0,16,0" />
+                    <TextBlock Text="Dominant severity: " />
+                    <TextBlock Text="{Binding ViewModel.Commonality.DominantSeverity}" Margin="0,0,16,0" />
+                    <TextBlock Text="Dominant category: " />
+                    <TextBlock Text="{Binding ViewModel.Commonality.DominantCategory}" Margin="0,0,16,0" />
+                    <TextBlock Text="Linked to known bug: " />
+                    <TextBlock Text="{Binding ViewModel.Commonality.LinkedToKnownBugCount}" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Page>

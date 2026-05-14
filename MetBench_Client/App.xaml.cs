@@ -13,6 +13,7 @@ using MetBench_DAL;
 using MetBench_IDAL;
 using MetBench_BLL;
 using MetBench_BLL.SystemMT;
+using MetBench_BLL.SystemMT.Anomaly;
 using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Persistence;
 using MetBench_BLL.SystemMT.Reporting;
@@ -139,6 +140,14 @@ namespace MetBench_Client
 
                 services.AddScoped<Views.Pages.SystemMtExecutionPage>();
                 services.AddScoped<ViewModels.SystemMtExecutionViewModel>();
+
+                // === v2 SystemMT repositories (LiteDB) + Anomaly stack ===
+                services.AddSystemMtRepositories();
+                services.AddScoped<IAnomalyService, AnomalyService>();
+
+                // === v2 Anomaly list page ===
+                services.AddScoped<Views.Pages.AnomalyListPage>();
+                services.AddScoped<ViewModels.AnomalyListViewModel>();
 
                 // 结果可视化相关IOC配置
                 services.AddScoped<MTVisualizationSerive>();

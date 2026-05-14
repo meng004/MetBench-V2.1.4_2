@@ -3,6 +3,9 @@ using MetBench_BLL;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.WPF;
+using MetBench_BLL;
+using System;
+using System.Collections.Generic;
 using System.Windows;
 
 namespace MetBench_Client.Services.Plotting

@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using MetBench_BLL;
+﻿using MetBench_BLL;
+using System;
 using System.Windows;
 
 namespace MetBench_Client.Services.Plotting
