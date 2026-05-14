@@ -7,8 +7,10 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MetBench_BLL.Paging;
 using MetBench_BLL.SystemMT.Anomaly;
+using MetBench_Client.Services;
 using MetBench_Domain;
 using MetBench_IDAL;
+using Wpf.Ui;
 using Wpf.Ui.Controls;
 
 namespace MetBench_Client.ViewModels
@@ -22,6 +24,8 @@ namespace MetBench_Client.ViewModels
     {
         private readonly IAnomalyService _service;
         private readonly IAnomalyRepository _repo;
+        private readonly ReplayInbox _replayInbox;
+        private readonly INavigationService _navigationService;
 
         [ObservableProperty]
         private string? _severityFilter;
@@ -41,10 +45,16 @@ namespace MetBench_Client.ViewModels
         [ObservableProperty]
         private string? _errorMessage;
 
-        public AnomalyListViewModel(IAnomalyService service, IAnomalyRepository repo)
+        public AnomalyListViewModel(
+            IAnomalyService service,
+            IAnomalyRepository repo,
+            ReplayInbox replayInbox,
+            INavigationService navigationService)
         {
             _service = service;
             _repo = repo;
+            _replayInbox = replayInbox;
+            _navigationService = navigationService;
             PageSize = 25;
         }
 
@@ -145,7 +155,31 @@ namespace MetBench_Client.ViewModels
         private bool CanTransition() =>
             !IsLoading && SelectedAnomaly is not null && !string.IsNullOrEmpty(TransitionTarget);
 
-        partial void OnSelectedAnomalyChanged(Anomaly? value) => TransitionCommand.NotifyCanExecuteChanged();
+        [RelayCommand(CanExecute = nameof(CanReplay))]
+        private void Replay()
+        {
+            if (SelectedAnomaly is null) return;
+            try
+            {
+                _replayInbox.PendingAnomaly = SelectedAnomaly;
+                _replayInbox.LastResult = null;
+                _navigationService.Navigate(typeof(Views.Pages.ReplayResultPage));
+                ErrorMessage = null;
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = ex.Message;
+            }
+        }
+
+        private bool CanReplay() => SelectedAnomaly is not null;
+
+        partial void OnSelectedAnomalyChanged(Anomaly? value)
+        {
+            TransitionCommand.NotifyCanExecuteChanged();
+            ReplayCommand.NotifyCanExecuteChanged();
+        }
+
         partial void OnTransitionTargetChanged(string? value) => TransitionCommand.NotifyCanExecuteChanged();
     }
 }

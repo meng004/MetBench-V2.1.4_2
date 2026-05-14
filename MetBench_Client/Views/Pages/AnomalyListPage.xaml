@@ -94,6 +94,11 @@
                        Content="Apply transition"
                        Icon="{ui:SymbolIcon ArrowSwap24}"
                        Command="{Binding ViewModel.TransitionCommand}" />
+            <ui:Button Appearance="Secondary"
+                       Margin="12,0,0,0"
+                       Content="Replay this anomaly"
+                       Icon="{ui:SymbolIcon ArrowCounterclockwise24}"
+                       Command="{Binding ViewModel.ReplayCommand}" />
             <TextBlock Text="{Binding ViewModel.ErrorMessage}"
                        Foreground="OrangeRed"
                        VerticalAlignment="Center"

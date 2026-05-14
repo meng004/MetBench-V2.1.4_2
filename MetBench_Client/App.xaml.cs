@@ -16,6 +16,7 @@ using MetBench_BLL.SystemMT;
 using MetBench_BLL.SystemMT.Anomaly;
 using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Persistence;
+using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_BLL.SystemMT.Reporting;
 using Wpf.Ui.Controls;
 using Wpf.Ui;
@@ -148,6 +149,13 @@ namespace MetBench_Client
                 // === v2 Anomaly list page ===
                 services.AddScoped<Views.Pages.AnomalyListPage>();
                 services.AddScoped<ViewModels.AnomalyListViewModel>();
+
+                // === v2 Replay result page (§1.2) ===
+                services.AddSingleton<MetBench_Client.Services.ReplayInbox>();
+                services.AddScoped<ISystemMtPipeline, SystemMtPipeline>();
+                services.AddScoped<ReplayService>();
+                services.AddScoped<Views.Pages.ReplayResultPage>();
+                services.AddScoped<ViewModels.ReplayResultViewModel>();
 
                 // 结果可视化相关IOC配置
                 services.AddScoped<MTVisualizationSerive>();
