@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System.Collections.Generic;
+using MetBench_BLL;
+using System.Windows;
 
 namespace MetBench_Client.Services.Plotting
 {

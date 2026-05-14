@@ -1,4 +1,6 @@
-﻿using LiveChartsCore;
+﻿using System.Collections.Generic;
+using MetBench_BLL;
+using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.WPF;
 using System.Windows;
