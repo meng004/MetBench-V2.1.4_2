@@ -8,7 +8,7 @@ Feature: MR-NuSigmaF — ScaleNuSigmaF
   Scenario Outline: Apply MR-NuSigmaF to <sut> with factor <factor>
     Given the MR Schema "MR-NuSigmaF" is bound to SUT "<sut>"
     And the binding uses sample case "<sample>"
-    And the parameter mapping for "<TODO-abstract-field>" is configured
+    And the parameter mapping for "physics.fuel.nu_sigma_f" is configured
     When the MT pipeline runs with parameter "factor"="<factor>"
     Then the "greater" assertion holds on "k_eff"
 

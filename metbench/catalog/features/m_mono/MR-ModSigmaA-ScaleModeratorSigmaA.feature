@@ -8,7 +8,7 @@ Feature: MR-ModSigmaA — ScaleModeratorSigmaA
   Scenario Outline: Apply MR-ModSigmaA to <sut> with factor <factor>
     Given the MR Schema "MR-ModSigmaA" is bound to SUT "<sut>"
     And the binding uses sample case "<sample>"
-    And the parameter mapping for "<TODO-abstract-field>" is configured
+    And the parameter mapping for "physics.moderator.sigma_a" is configured
     When the MT pipeline runs with parameter "factor"="<factor>"
     Then the "less" assertion holds on "k_eff"
 

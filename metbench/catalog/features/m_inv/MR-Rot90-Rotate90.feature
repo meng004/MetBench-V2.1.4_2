@@ -8,7 +8,7 @@ Feature: MR-Rot90 — Rotate90
   Scenario Outline: Apply MR-Rot90 to <sut> with factor <factor>
     Given the MR Schema "MR-Rot90" is bound to SUT "<sut>"
     And the binding uses sample case "<sample>"
-    And the parameter mapping for "<TODO-abstract-field>" is configured
+    And the parameter mapping for "geometry.rotation_deg" is configured
     When the MT pipeline runs with parameter "factor"="<factor>"
     Then the "approx-invariant" assertion holds on "k_eff"
 

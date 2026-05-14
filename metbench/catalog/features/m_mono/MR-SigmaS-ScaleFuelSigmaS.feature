@@ -8,7 +8,7 @@ Feature: MR-SigmaS — ScaleFuelSigmaS
   Scenario Outline: Apply MR-SigmaS to <sut> with factor <factor>
     Given the MR Schema "MR-SigmaS" is bound to SUT "<sut>"
     And the binding uses sample case "<sample>"
-    And the parameter mapping for "<TODO-abstract-field>" is configured
+    And the parameter mapping for "physics.fuel.sigma_s" is configured
     When the MT pipeline runs with parameter "factor"="<factor>"
     Then the "less" assertion holds on "k_eff"
 

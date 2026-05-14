@@ -8,7 +8,7 @@ Feature: MR-MirrorX — MirrorX
   Scenario Outline: Apply MR-MirrorX to <sut> with factor <factor>
     Given the MR Schema "MR-MirrorX" is bound to SUT "<sut>"
     And the binding uses sample case "<sample>"
-    And the parameter mapping for "<TODO-abstract-field>" is configured
+    And the parameter mapping for "geometry.mirror_axis" is configured
     When the MT pipeline runs with parameter "factor"="<factor>"
     Then the "approx-invariant" assertion holds on "k_eff"
 

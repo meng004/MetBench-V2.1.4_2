@@ -8,7 +8,7 @@ Feature: MR-FuelRadius — ScaleFuelRadius
   Scenario Outline: Apply MR-FuelRadius to <sut> with factor <factor>
     Given the MR Schema "MR-FuelRadius" is bound to SUT "<sut>"
     And the binding uses sample case "<sample>"
-    And the parameter mapping for "<TODO-abstract-field>" is configured
+    And the parameter mapping for "geometry.fuel.radius" is configured
     When the MT pipeline runs with parameter "factor"="<factor>"
     Then the "greater" assertion holds on "k_eff"
 

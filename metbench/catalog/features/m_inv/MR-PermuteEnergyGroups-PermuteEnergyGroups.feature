@@ -8,7 +8,7 @@ Feature: MR-PermuteEnergyGroups — PermuteEnergyGroups
   Scenario Outline: Apply MR-PermuteEnergyGroups to <sut> with factor <factor>
     Given the MR Schema "MR-PermuteEnergyGroups" is bound to SUT "<sut>"
     And the binding uses sample case "<sample>"
-    And the parameter mapping for "<TODO-abstract-field>" is configured
+    And the parameter mapping for "physics.energy_group_permutation" is configured
     When the MT pipeline runs with parameter "factor"="<factor>"
     Then the "approx-invariant" assertion holds on "k_eff"
 

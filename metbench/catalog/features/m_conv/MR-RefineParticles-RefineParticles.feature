@@ -8,7 +8,7 @@ Feature: MR-RefineParticles — RefineParticles
   Scenario Outline: Apply MR-RefineParticles to <sut> with factor <factor>
     Given the MR Schema "MR-RefineParticles" is bound to SUT "<sut>"
     And the binding uses sample case "<sample>"
-    And the parameter mapping for "<TODO-abstract-field>" is configured
+    And the parameter mapping for "numerics.particles" is configured
     When the MT pipeline runs with parameter "factor"="<factor>"
     Then the "variance-ratio" assertion holds on "k_eff_std"
 
