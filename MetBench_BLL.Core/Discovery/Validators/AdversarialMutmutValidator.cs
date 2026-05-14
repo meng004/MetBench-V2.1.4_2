@@ -20,12 +20,10 @@ public sealed class AdversarialMutmutValidator : IMRValidator
 {
     public string Name => "adversarial-mutmut";
 
-    private readonly Func<CandidateMR, CancellationToken, Task<IReadOnlyList<MutantProbe>>> _sampler;
+    private readonly MutantProbeSampler _sampler;
     private readonly double _minDetectionRate;
 
-    public AdversarialMutmutValidator(
-        Func<CandidateMR, CancellationToken, Task<IReadOnlyList<MutantProbe>>> sampler,
-        double minDetectionRate = 0.2)
+    public AdversarialMutmutValidator(MutantProbeSampler sampler, double minDetectionRate = 0.2)
     {
         _sampler = sampler;
         _minDetectionRate = minDetectionRate;
@@ -47,3 +45,9 @@ public sealed class AdversarialMutmutValidator : IMRValidator
 
 /// <summary>AdversarialMutmutValidator 采样单元 —— 一个 mutant 应用后该候选 MR 的成立状态。</summary>
 public sealed record MutantProbe(int MutantId, bool AssertionStillHolds);
+
+/// <summary>
+/// AdversarialMutmutValidator 采样委托 —— 拉一组 (mutant, assertion-still-holds) 元组。
+/// </summary>
+public delegate Task<IReadOnlyList<MutantProbe>> MutantProbeSampler(
+    CandidateMR candidate, CancellationToken ct);

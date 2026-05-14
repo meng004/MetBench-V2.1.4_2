@@ -19,12 +19,10 @@ public sealed class EmpiricalValidator : IMRValidator
 {
     public string Name => "empirical";
 
-    private readonly Func<CandidateMR, CancellationToken, Task<IReadOnlyList<EmpiricalSample>>> _sampler;
+    private readonly EmpiricalSampler _sampler;
     private readonly double _passThreshold;
 
-    public EmpiricalValidator(
-        Func<CandidateMR, CancellationToken, Task<IReadOnlyList<EmpiricalSample>>> sampler,
-        double passThreshold = 0.9)
+    public EmpiricalValidator(EmpiricalSampler sampler, double passThreshold = 0.9)
     {
         _sampler = sampler;
         _passThreshold = passThreshold;
@@ -46,3 +44,9 @@ public sealed class EmpiricalValidator : IMRValidator
 
 /// <summary>EmpiricalValidator 采样单元 —— 一个 baseline (source, followup) pair 的判定结果。</summary>
 public sealed record EmpiricalSample(double SourceValue, double FollowupValue, bool AssertionHeld);
+
+/// <summary>
+/// EmpiricalValidator 采样委托 —— 拉一组 baseline (source, followup) 对的判定结果。
+/// </summary>
+public delegate Task<IReadOnlyList<EmpiricalSample>> EmpiricalSampler(
+    CandidateMR candidate, CancellationToken ct);

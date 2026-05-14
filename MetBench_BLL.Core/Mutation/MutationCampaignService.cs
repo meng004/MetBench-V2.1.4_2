@@ -75,6 +75,11 @@ public sealed class MutationCampaignService
                         MRBindingId: bindingId,
                         SampleCasePath: samplePath), ct);
                 }
+                catch (OperationCanceledException) when (ct.IsCancellationRequested)
+                {
+                    // cell-level cancel == campaign cancel; let outer handler mark "cancelled"
+                    throw;
+                }
                 catch (Exception ex)
                 {
                     outcome = new MutationCellOutcome(Guid.Empty, "error",

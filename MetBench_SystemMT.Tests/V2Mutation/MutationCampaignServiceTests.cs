@@ -173,6 +173,43 @@ public sealed class MutationCampaignServiceTests
     }
 
     [Fact]
+    public async Task RunAsync_cellRunner_throwing_oce_due_to_token_marks_cancelled_not_error()
+    {
+        // R1 regression: 之前 cellRunner 内部抛 OperationCanceledException 会被
+        // catch(Exception) 吞为 outcome="error"，campaign.Status 仍为 "ok"。
+        // 期望：取消信号外抛 → campaign.Status="cancelled"。
+        var (svc, campaigns, results, _) = MakeService();
+        var spec = new MutationCampaignSpec(
+            Name: "oce-bubble",
+            MutantIds: new[] { 1, 2, 3 },
+            MRBindingIds: new[] { 1 },
+            SampleCasePaths: new[] { "/tmp/c.in" });
+        using var cts = new CancellationTokenSource();
+
+        var i = 0;
+        await svc.RunAsync(spec,
+            cellRunner: (input, ct) =>
+            {
+                if (i++ == 1)
+                {
+                    cts.Cancel();
+                    ct.ThrowIfCancellationRequested();   // matches the documented Cancellation contract
+                }
+                return Task.FromResult(new MutationCellOutcome(Guid.NewGuid(), "detected", 0.0, 0.0, null));
+            },
+            actor: "alice",
+            ct: cts.Token);
+
+        Assert.Single(campaigns.Data);
+        Assert.Equal("cancelled", campaigns.Data[0].Status);
+        // 第 2 个 cell 没机会落 MutationResults
+        Assert.True(results.Data.Count < spec.MutantIds.Count,
+            $"expected < {spec.MutantIds.Count} cells persisted, got {results.Data.Count}");
+        // 并且没有 "error" cell（取消不应被误归为 error）
+        Assert.DoesNotContain(results.Data, r => r.Outcome == "error");
+    }
+
+    [Fact]
     public async Task RunAsync_writes_audit_log_on_completion()
     {
         var (svc, _, _, audit) = MakeService();

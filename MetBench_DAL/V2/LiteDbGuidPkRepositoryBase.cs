@@ -74,6 +74,11 @@ public abstract class LiteDbGuidPkRepositoryBase<T> where T : class
         return col.Delete(id);
     }
 
+    /// <remarks>
+    /// LiteDB 的 <c>Skip(N)</c> 是 in-memory 线性扫描而非索引偏移：每页都从头跳 N 行。
+    /// 集合 ≤ 10k 行时可忽略；超大集合（Executions / MutationResults）做深翻页前应改成
+    /// keyset pagination（按 IdXxx &gt; lastSeenId）。
+    /// </remarks>
     public virtual ObservableCollection<T> GetPage(int pageIndex, int pageSize)
     {
         using var db = new LiteDatabase(_conn);

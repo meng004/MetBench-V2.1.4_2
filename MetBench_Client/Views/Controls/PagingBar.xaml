@@ -26,7 +26,7 @@
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
     </UserControl.Resources>
 
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="4">
+    <StackPanel x:Name="Root" Orientation="Horizontal" HorizontalAlignment="Center" Margin="4">
         <!-- First / Previous -->
         <ui:Button Appearance="Secondary" Margin="0,0,4,0"
                    ToolTip="First page"

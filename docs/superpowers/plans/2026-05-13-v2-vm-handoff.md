@@ -196,12 +196,14 @@ public sealed partial class AnomalyListViewModel
 - 所有 binding 走继承的 `DataContext` —— 调用方写 `DataContext="{Binding ViewModel}"` 把 `PagingViewModel<T>` 喂进来即可
 - 命令 `CanExecute` 自动随 `IsLoading` / `HasPrevious` / `HasNext` 联动（基类已做）
 
-**多张表同页**:
+**多张表同页（用 `Target` DependencyProperty 显式指定）**:
 ```xml
-<controls:PagingBar DataContext="{Binding ViewModel.LeftPagingVm}" />
-<controls:PagingBar DataContext="{Binding ViewModel.RightPagingVm}" />
+<controls:PagingBar Target="{Binding ViewModel.LeftPagingVm}" />
+<controls:PagingBar Target="{Binding ViewModel.RightPagingVm}" />
 ```
-不需要 DependencyProperty；DataContext 注入足够。
+`Target` 的 `PropertyChangedCallback` 把控件内 Root 的 DataContext 切到 Target，
+两条分页条互不串扰。**单表场景仍推荐 `DataContext="{Binding ViewModel}"`**
+（更直观、不依赖 DP）。
 
 #### 1.0.C 异步路径示例（SystemMtResultRepository —— typed PagedResult）
 
@@ -439,7 +441,21 @@ cloud 端默认绑 `NullLlmGateway`（返回空字符串）。VM 端要实现一
 
 ### 推荐位置
 
-`MetBench_BLL/Discovery/DeepSeekLlmGateway.cs`（**MetBench_BLL** 是 WPF-only 项目，可以放 Windows 专属代码 / `HttpClient`）
+`MetBench_BLL/Discovery/DeepSeekLlmGateway.cs`（BLL TFM 已是 `net8.0` 纯 .NET Core，
+可以放 `HttpClient`；Client 端 DI Replace `NullLlmGateway`）
+
+> ⚠️ **接入前必做：先用 curl 实测 endpoint + header**，下面骨架基于 DeepSeek
+> 的 `/anthropic` 兼容路径，但具体 endpoint（`/v1/messages` vs `/v1/chat/completions`）
+> 与 header（`x-api-key` vs `Authorization: Bearer`）需根据**官方文档 + 真实
+> 200-OK 响应**校验后再回写本文档。下面是占位骨架。
+>
+> 验证命令模板：
+> ```bash
+> curl -X POST https://api.deepseek.com/anthropic/v1/messages \
+>   -H "x-api-key: $DEEPSEEK_KEY" -H "anthropic-version: 2023-06-01" \
+>   -H "content-type: application/json" \
+>   -d '{"model":"deepseek-v4-pro","max_tokens":64,"messages":[{"role":"user","content":"ping"}]}'
+> ```
 
 ### 骨架
 
@@ -591,6 +607,18 @@ cloud 端 `SystemMtReportService.GenerateWeekly()` 输出 markdown。VM 端可�
 - [ ] 截图存到 `docs/screenshots/v2-ship-{date}/` 共 ≥10 张
 - [ ] 把本 doc 中每个"验收"项打勾后，把本文件 `[ ]` 改 `[x]`，commit 推送
 - [ ] 在 PR description 中链接录屏 + 截图
+
+---
+
+## 7b Known issues / 已知限制
+
+| 现象 | 范围 | 处理时机 |
+|---|---|---|
+| **LiteDB `GetPage` 深翻页 O(n)** —— `Skip(N)` 是 in-memory 线性扫描，1k 行无感、10k+ 行翻第 100 页明显卡顿 | `IGuidRepository<T>.GetPage` 的全部 23 collection | v2 ship 后大数据测试时改 keyset pagination：`Where(x => x.Id > lastSeenId).Limit(N)` |
+| **`MTVisualizationSerive` / `ApplicationSerive` / `DomainSerive` 等命名拼写**（应为 Service） | `MetBench_BLL/` + 全部 ViewModel 引用 | 下个独立 cleanup PR 统一改名 + 加 type alias 兼容 |
+| **DeepSeek `/anthropic` endpoint 字段映射未跑通真实 HTTP** | `DeepSeekLlmGateway` 文档样例 | VM 端首次接入时用 curl 实测 endpoint + header，再回写 §3 |
+| **`TrendAnalysisService.DetectBursts` 仅用 `Category` 分组** | `Trend/TrendAnalysisService.cs` | 后续需加 sut_id / mr_code 维度 |
+| **`CoverageService.ComputeBug` 不过滤 false-positive anomaly** | `Coverage/CoverageService.cs` | 待用户决策是否过滤 `Status != "false-positive"` |
 
 ---
 
