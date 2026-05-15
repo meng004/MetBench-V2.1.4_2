@@ -125,16 +125,39 @@ def _extract_examples(text: str) -> list[dict[str, str]]:
 
 
 def parse_directory(features_dir: Path) -> dict[str, Any]:
-    """扫描目录下所有 .feature 文件 → catalog 字典。"""
+    """扫描目录下所有 .feature 文件 → catalog 字典。
+
+    去重规则：MRBinding 的逻辑主键是 (mr_code, sut)。
+    Examples 表里同一 SUT 出现多行（不同 sample / factor / scenario_id_v1）
+    应折叠为一条 binding，多个 sample 进 ``sample_cases`` 数组。
+
+    m_cmp 类 MR 的 Examples 表无 ``sut`` 列（一份 MR 同时绑两个 SUT 对比），
+    保留行作为 case 维度行，标记 ``sut="(cross-program)"``，避免 (None, ...) 键。
+    """
     catalog: dict[str, Any] = {"schemas": [], "bindings": []}
+    seen: dict[tuple[str, str], dict[str, Any]] = {}
     for feature_path in sorted(features_dir.rglob("*.feature")):
         parsed = parse_feature_file(feature_path)
         catalog["schemas"].append(parsed["schema"])
         for binding in parsed["bindings"]:
-            catalog["bindings"].append({
-                "mr_code": parsed["schema"]["code"],
-                **binding,
-            })
+            mr_code = parsed["schema"]["code"]
+            sut = binding.get("sut") or "(cross-program)"
+            key = (mr_code, sut)
+            sample_keys = ("scenario_id_v1", "sample", "case", "factor")
+            sample_token = "|".join(str(binding.get(k, "")) for k in sample_keys if binding.get(k))
+
+            if key in seen:
+                # 折叠到已存在 binding，把 sample 信息加入 sample_cases
+                existing = seen[key]
+                if sample_token and sample_token not in existing.setdefault("sample_cases", []):
+                    existing["sample_cases"].append(sample_token)
+            else:
+                merged = {"mr_code": mr_code, **binding}
+                merged["sut"] = sut
+                if sample_token:
+                    merged["sample_cases"] = [sample_token]
+                seen[key] = merged
+                catalog["bindings"].append(merged)
     return catalog
 
 

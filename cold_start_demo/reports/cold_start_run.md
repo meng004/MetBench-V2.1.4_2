@@ -1,0 +1,268 @@
+# Cold-Start Demo Report
+Generated: 2026-05-15
+
+## Summary
+
+| # | Phase | Status | Summary |
+|---|-------|--------|---------|
+| 0 environment |  | ✅ ok | py=3.11.15 dotnet=True |
+| 1 catalog-migration |  | ✅ ok | 16 schemas / 27 bindings / 4 metapatterns |
+| 2 anchor-integrity |  | ✅ ok | 5/5 anchors clean |
+| 3 noether-discovery |  | ✅ ok | 14 realizable / 15 total |
+| 4 mutation-stub |  | ✅ ok | 5×5 = 25 cells, detection-rate 40.0% |
+| 5 coverage-report |  | ✅ ok | MetaPattern 4/8 | SUT×MR density=78% |
+| 6 trend-report |  | ✅ ok | this=8 prev=5 Δ=+60% burst=True |
+| 7.5 naming-consistency |  | ✅ ok | 2 exact / 0 aliased / 14 catalog-only / 13 noether-only |
+| 7 paper-package |  | ✅ ok | 5.98 MB tarball |
+
+**9/9** phases ok
+
+## Issues found
+
+_(none)_
+
+## Detail per phase
+
+### 0 environment
+- status: **ok**
+- summary: py=3.11.15 dotnet=True
+- details:
+  ```json
+{
+  "python": "3.11.15",
+  "repo_root": "/home/user/MetBench-V2.1.4_2",
+  "anchors": true,
+  "catalog_dir": true,
+  "dotnet": true
+}
+  ```
+
+### 1 catalog-migration
+- status: **ok**
+- summary: 16 schemas / 27 bindings / 4 metapatterns
+- details:
+  ```json
+{
+  "rc": 0,
+  "output_path": "/tmp/cold-start-8j4q8wp5/catalog.json",
+  "schemas": 16,
+  "bindings": 27,
+  "metapatterns": [
+    "m_cmp",
+    "m_conv",
+    "m_inv",
+    "m_mono"
+  ]
+}
+  ```
+
+### 2 anchor-integrity
+- status: **ok**
+- summary: 5/5 anchors clean
+- details:
+  ```json
+{
+  "total": 5,
+  "checked": [
+    {
+      "id": "A1",
+      "feature_exists": true,
+      "metapattern_tag_ok": true,
+      "suts_present": true
+    },
+    {
+      "id": "A2",
+      "feature_exists": true,
+      "metapattern_tag_ok": true,
+      "suts_present": true
+    },
+    {
+      "id": "A3",
+      "feature_exists": true,
+      "metapattern_tag_ok": true,
+      "suts_present": true
+    },
+    {
+      "id": "A4",
+      "feature_exists": true,
+      "metapattern_tag_ok": true,
+      "suts_present": true
+    },
+    {
+      "id": "A5",
+      "feature_exists": true,
+      "metapattern_tag_ok": true,
+      "suts_present": true
+    }
+  ]
+}
+  ```
+
+### 3 noether-discovery
+- status: **ok**
+- summary: 14 realizable / 15 total
+- details:
+  ```json
+{
+  "rc": 0,
+  "total": 15,
+  "realizable": 14,
+  "by_metapattern": {
+    "m_inv": 4,
+    "m_mono": 5,
+    "m_conv": 4,
+    "m_cmp": 1
+  }
+}
+  ```
+
+### 4 mutation-stub
+- status: **ok**
+- summary: 5×5 = 25 cells, detection-rate 40.0%
+- details:
+  ```json
+{
+  "mutants": 5,
+  "bindings": 5,
+  "cells": 25,
+  "detected": 10,
+  "missed": 15,
+  "detection_rate": 0.4
+}
+  ```
+
+### 5 coverage-report
+- status: **ok**
+- summary: MetaPattern 4/8 | SUT×MR density=78%
+- details:
+  ```json
+{
+  "metapattern": {
+    "total": 8,
+    "covered": 4,
+    "covered_codes": [
+      "m_cmp",
+      "m_conv",
+      "m_inv",
+      "m_mono"
+    ],
+    "uncovered_codes": [
+      "m_adj",
+      "m_dyn",
+      "m_rel",
+      "m_rev"
+    ],
+    "ratio": 0.5
+  },
+  "sut_mr": {
+    "total_suts": 2,
+    "suts": [
+      "openmc",
+      "openmoc"
+    ],
+    "total_mrs": 16,
+    "unique_bindings": 25,
+    "possible_cells": 32,
+    "density": 0.781,
+    "cross_program_bindings_excluded": 2
+  }
+}
+  ```
+
+### 6 trend-report
+- status: **ok**
+- summary: this=8 prev=5 Δ=+60% burst=True
+- details:
+  ```json
+{
+  "executions": 100,
+  "anomalies_this_week": 8,
+  "anomalies_prev_week": 5,
+  "delta_pct": 60.0,
+  "burst": {
+    "dimension": "category",
+    "key": "basin",
+    "count": 6,
+    "baseline": 1.0,
+    "sigmas": 10.0,
+    "flagged": true
+  }
+}
+  ```
+
+### 7.5 naming-consistency
+- status: **ok**
+- summary: 2 exact / 0 aliased / 14 catalog-only / 13 noether-only
+- details:
+  ```json
+{
+  "catalog_codes": [
+    "MR-FuelRadius",
+    "MR-MirrorX",
+    "MR-MirrorY",
+    "MR-ModSigmaA",
+    "MR-NuSigmaF",
+    "MR-PermuteEnergyGroups",
+    "MR-RefineParticles",
+    "MR-Rot90",
+    "MR-SigmaA",
+    "MR-SigmaS",
+    "MR-SigmaT",
+    "MR-T",
+    "MR-T-AddTemp",
+    "MR-T-BoratedWater",
+    "MR14-cmp-openmoc-vs-openmc",
+    "MR15-cmp-p0-vs-p1-scattering"
+  ],
+  "noether_codes_total": 15,
+  "exact_matches": [
+    "MR14-cmp-openmoc-vs-openmc",
+    "MR15-cmp-p0-vs-p1-scattering"
+  ],
+  "aliased": [],
+  "catalog_only": [
+    "MR-FuelRadius",
+    "MR-MirrorX",
+    "MR-MirrorY",
+    "MR-ModSigmaA",
+    "MR-NuSigmaF",
+    "MR-PermuteEnergyGroups",
+    "MR-RefineParticles",
+    "MR-Rot90",
+    "MR-SigmaA",
+    "MR-SigmaS",
+    "MR-SigmaT",
+    "MR-T",
+    "MR-T-AddTemp",
+    "MR-T-BoratedWater"
+  ],
+  "noether_only": [
+    "MR01-inv-quarter-rotation-90",
+    "MR02-inv-mirror-x",
+    "MR03-inv-mirror-y",
+    "MR04-inv-energy-group-relabel",
+    "MR05-mono-fuel-sigma-t-up",
+    "MR06-mono-fuel-sigma-s-down",
+    "MR07-mono-moderator-sigma-a-up",
+    "MR08-mono-fuel-radius-up",
+    "MR09-mono-fuel-chi-thermal-up",
+    "MR10-conv-num-azim-refine",
+    "MR11-conv-azim-spacing-refine",
+    "MR12-conv-particles-refine",
+    "MR13-conv-batches-refine"
+  ]
+}
+  ```
+
+### 7 paper-package
+- status: **ok**
+- summary: 5.98 MB tarball
+- details:
+  ```json
+{
+  "rc": 0,
+  "output": "/tmp/cold-start-8j4q8wp5/metbench-paper.tar.gz",
+  "size_bytes": 6265655,
+  "size_mb": 5.98
+}
+  ```
