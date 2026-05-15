@@ -1,6 +1,6 @@
 @metapattern:m_cmp @assertion:bound @value:k_eff
 @noise_aware:true @tolerance_rel:0.005
-Feature: MR15-cmp — P0 vs P1 scattering order agreement
+Feature: MR15-cmp-p0-vs-p1-scattering — P0 vs P1 scattering order agreement
 
   m_cmp / B7 cross-program: 同一 OpenMC 案例改 xsdata.order=0 (isotropic, P0)
   vs xsdata.order=1 (linearly anisotropic, P1)，期望 k_P0 ≥ k_P1 within

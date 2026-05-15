@@ -1,6 +1,6 @@
 @metapattern:m_cmp @assertion:bound @value:k_eff
 @noise_aware:true @tolerance_rel:0.005
-Feature: MR14-cmp — OpenMOC vs OpenMC k_eff agreement
+Feature: MR14-cmp-openmoc-vs-openmc — OpenMOC vs OpenMC k_eff agreement
 
   m_cmp / B7 cross-program: 同一案例分别在 OpenMOC 和 OpenMC 跑得到的
   k_eff 之差应被 σ_MC + ε_MOC 预算控制；超过即报告为跨求解器异议
@@ -16,6 +16,8 @@ Feature: MR14-cmp — OpenMOC vs OpenMC k_eff agreement
   Scenario Outline: Compare <case> across OpenMOC and OpenMC
     Given the MR Schema "MR14-cmp-openmoc-vs-openmc" is bound to SUT "openmoc"
     And the MR Schema "MR14-cmp-openmoc-vs-openmc" is also bound to SUT "openmc"
+    # (Steps reference the long-form noether code MR14-cmp-openmoc-vs-openmc;
+    # this matches the noether candidate id 1:1 for Discovery→promote alignment.)
     And the binding uses sample case "<case>"
     And the parameter mapping for "scenario.case_path" is configured
     When the MT pipeline runs OpenMOC and OpenMC on the same case

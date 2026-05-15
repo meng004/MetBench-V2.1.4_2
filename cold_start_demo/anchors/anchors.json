@@ -1,0 +1,64 @@
+{
+  "anchors": [
+    {
+      "id": "A1",
+      "feature_path": "metbench/catalog/features/m_inv/MR-Rot90-Rotate90.feature",
+      "metapattern": "m_inv",
+      "mr_code": "MR-Rot90",
+      "suts": ["openmoc", "openmc"],
+      "rationale": "几何对称性最快验证 — Rot90 + reflective BC + 圆形 fuel 满足 C4 对称",
+      "expected_assertion": "approx-invariant",
+      "expected_outcome": "ok",
+      "physics": "2D pin-cell with reflective BCs and centred fuel has discrete C4 rotational symmetry"
+    },
+    {
+      "id": "A2",
+      "feature_path": "metbench/catalog/features/m_mono/MR-NuSigmaF-ScaleNuSigmaF.feature",
+      "metapattern": "m_mono",
+      "mr_code": "MR-NuSigmaF",
+      "suts": ["openmoc", "openmc"],
+      "rationale": "物理单调性 — ν·Σ_f 上调 ⇒ k_eff 上升，覆盖率最高 MR",
+      "expected_assertion": "greater",
+      "expected_outcome": "ok",
+      "physics": "k_eff = ν·Σ_f / (Σ_a + DB²)，分子线性放大 ⇒ k_eff 单调增"
+    },
+    {
+      "id": "A3",
+      "feature_path": "metbench/catalog/features/m_conv/MR-RefineParticles-RefineParticles.feature",
+      "metapattern": "m_conv",
+      "mr_code": "MR-RefineParticles",
+      "suts": ["openmc"],
+      "rationale": "蒙卡收敛 — particles × 4 ⇒ σ_MC 减半",
+      "expected_assertion": "bound",
+      "expected_outcome": "ok",
+      "physics": "MC central-limit theorem: σ ∝ 1/√N"
+    },
+    {
+      "id": "A4",
+      "feature_path": "metbench/catalog/features/m_cmp/MR14-cmp-openmoc-vs-openmc.feature",
+      "metapattern": "m_cmp",
+      "mr_code": "MR14-cmp-openmoc-vs-openmc",
+      "suts": ["openmoc", "openmc"],
+      "rationale": "跨求解器一致 — k_OpenMOC ≈ k_OpenMC within budget",
+      "expected_assertion": "bound",
+      "expected_outcome": "ok",
+      "physics": "Same operator, different discretisations: |Δk| ≤ 3·σ_MC + ε_MOC"
+    },
+    {
+      "id": "A5",
+      "feature_path": "metbench/catalog/features/m_cmp/MR14-cmp-openmoc-vs-openmc.feature",
+      "metapattern": "m_cmp",
+      "mr_code": "MR14-cmp-openmoc-vs-openmc",
+      "suts": ["openmoc", "openmc"],
+      "specific_case": "pincell-mod-sigma-a-1.5",
+      "rationale": "R-Case-4 已知 narrow basin 复现",
+      "expected_assertion": "bound",
+      "expected_outcome": "anomaly",
+      "known_bug": "R-Case-4",
+      "physics": "OpenMOC k_eff=0.4764 vs OpenMC k_eff=0.9683 (51% Δ) — narrow convergence basin"
+    }
+  ],
+  "version": "1.0",
+  "selected_at": "2026-05-15",
+  "selected_by": "metbench-cold-start-demo"
+}
