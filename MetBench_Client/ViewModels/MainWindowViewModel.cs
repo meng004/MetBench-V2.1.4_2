@@ -91,6 +91,12 @@ namespace MetBench_Client.ViewModels
             },
                      new NavigationViewItem()
             {
+                Content = "Discovery",
+                Icon = new SymbolIcon { Symbol = SymbolRegular.Lightbulb24 },
+                TargetPageType = typeof(Views.Pages.DiscoveryPage)
+            },
+                     new NavigationViewItem()
+            {
                 Content = "Replay",
                 Icon = new SymbolIcon { Symbol = SymbolRegular.ArrowCounterclockwise24 },
                 TargetPageType = typeof(Views.Pages.ReplayResultPage)

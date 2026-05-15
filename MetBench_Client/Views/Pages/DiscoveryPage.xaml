@@ -1,0 +1,95 @@
+<Page x:Class="MetBench_Client.Views.Pages.DiscoveryPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      Title="DiscoveryPage"
+      d:DesignHeight="700" d:DesignWidth="1100"
+      ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+      Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+      mc:Ignorable="d">
+
+    <Grid Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Row 0: controls bar -->
+        <Border Grid.Row="0"
+                BorderThickness="1"
+                BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                CornerRadius="4"
+                Padding="12"
+                Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Discoverer:" VerticalAlignment="Center" Margin="0,0,6,0"
+                           FontWeight="SemiBold" />
+                <ComboBox ItemsSource="{Binding ViewModel.DiscovererList}"
+                          SelectedItem="{Binding ViewModel.SelectedDiscoverer, Mode=TwoWay}"
+                          DisplayMemberPath="Name"
+                          Width="200" Margin="0,0,16,0" />
+
+                <TextBlock Text="Target SUT:" VerticalAlignment="Center" Margin="0,0,6,0"
+                           FontWeight="SemiBold" />
+                <ComboBox ItemsSource="{Binding ViewModel.Applications}"
+                          SelectedItem="{Binding ViewModel.SelectedApplication, Mode=TwoWay}"
+                          DisplayMemberPath="Name"
+                          Width="200" Margin="0,0,16,0" />
+
+                <ui:Button Appearance="Primary"
+                           Content="Run discovery"
+                           Icon="{ui:SymbolIcon Search24}"
+                           Command="{Binding ViewModel.RunDiscoveryCommand}" />
+
+                <ProgressBar IsIndeterminate="True" Width="120" Height="4"
+                             Margin="12,0,0,0" VerticalAlignment="Center">
+                    <ProgressBar.Style>
+                        <Style TargetType="ProgressBar">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ViewModel.IsBusy}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ProgressBar.Style>
+                </ProgressBar>
+            </StackPanel>
+        </Border>
+
+        <!-- Row 1: status / error row -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,8">
+            <TextBlock Text="{Binding ViewModel.StatusMessage}"
+                       Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                       VerticalAlignment="Center"
+                       Margin="0,0,16,0" />
+            <TextBlock Text="{Binding ViewModel.ErrorMessage}"
+                       Foreground="OrangeRed"
+                       VerticalAlignment="Center"
+                       TextWrapping="Wrap" />
+        </StackPanel>
+
+        <!-- Row 2: candidate MR results DataGrid -->
+        <ui:DataGrid Grid.Row="2"
+                     ItemsSource="{Binding ViewModel.CandidateItems}"
+                     AutoGenerateColumns="False"
+                     IsReadOnly="True"
+                     HeadersVisibility="Column"
+                     CanUserAddRows="False"
+                     BorderThickness="1"
+                     BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}">
+            <ui:DataGrid.Columns>
+                <DataGridTextColumn Header="Code"       Binding="{Binding ProposedCode}"                 Width="160" />
+                <DataGridTextColumn Header="Name"       Binding="{Binding ProposedName}"                 Width="*" />
+                <DataGridTextColumn Header="Assertion"  Binding="{Binding SuggestedAssertionTypeCode}"   Width="100" />
+                <DataGridTextColumn Header="Value"      Binding="{Binding ProposedValueName}"            Width="80" />
+                <DataGridTextColumn Header="Confidence" Binding="{Binding Confidence, StringFormat=F2}"  Width="90" />
+                <DataGridTextColumn Header="Status"     Binding="{Binding Status}"                       Width="80" />
+                <DataGridTextColumn Header="Created"    Binding="{Binding CreatedAt, StringFormat=yyyy-MM-dd HH:mm}" Width="130" />
+            </ui:DataGrid.Columns>
+        </ui:DataGrid>
+    </Grid>
+</Page>

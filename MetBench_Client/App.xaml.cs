@@ -18,6 +18,7 @@ using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Persistence;
 using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_BLL.SystemMT.Reporting;
+using MetBench_BLL.Discovery;
 using Wpf.Ui.Controls;
 using Wpf.Ui;
 using Stylet;
@@ -159,6 +160,19 @@ namespace MetBench_Client
 
                 // 结果可视化相关IOC配置
                 services.AddScoped<MTVisualizationSerive>();
+
+                // === v2 Discovery stack (P7) ===
+                services.AddScoped<DiscoveryService>();
+                services.AddSingleton<ILlmGateway, NullLlmGateway>();
+                services.AddSingleton<MetaPatternDiscoverer>(provider => new MetaPatternDiscoverer(
+                    OperatingSystem.IsWindows() ? "python" : "python3",
+                    Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!, "tools", "noether_candidates.py")));
+                services.AddSingleton<LlmNativeDiscoverer>(provider =>
+                    new LlmNativeDiscoverer(provider.GetRequiredService<ILlmGateway>()));
+                services.AddSingleton<IMRDiscoverer>(provider => provider.GetRequiredService<MetaPatternDiscoverer>());
+                services.AddSingleton<IMRDiscoverer>(provider => provider.GetRequiredService<LlmNativeDiscoverer>());
+                services.AddScoped<Views.Pages.DiscoveryPage>();
+                services.AddScoped<ViewModels.DiscoveryViewModel>();
 
                 // 蜕变关系识别相关IOC配置
                 services.AddScoped<MRDetector>();
