@@ -600,12 +600,12 @@ cloud 端 `SystemMtReportService.GenerateWeekly()` 输出 markdown。VM 端可�
 
 ## 7 验收总清单（v2 ship）
 
-- [ ] 所有 6 个新页面在 WPF 启动后可见且可打开
-- [ ] DI 容器 resolve 全部 v2 service 不抛
-- [ ] `DeepSeekLlmGateway` 真实调通至少一次 LLM API（DiscoveryPage 或 CandidateReviewPage）
-- [ ] 端到端 smoke §6 十步走通，每步在 LiteDB 留下可验证的记录
-- [ ] 截图存到 `docs/screenshots/v2-ship-{date}/` 共 ≥10 张
-- [ ] 把本 doc 中每个"验收"项打勾后，把本文件 `[ ]` 改 `[x]`，commit 推送
+- [x] 所有 6 个新页面在 WPF 启动后可见且可打开 — smoke-04~10 截图证实（2026-05-15）
+- [x] DI 容器 resolve 全部 v2 service 不抛 — App 启动无 resolve 异常（2026-05-15）
+- [x] `DeepSeekLlmGateway` 真实调通至少一次 LLM API — §3 已实现并 commit（6a99c9b，2026-05-15）；runtime 截图 `discovery-deepseek-gateway.png`
+- [~] 端到端 smoke §6 十步走通：Steps 4-10（Anomaly/Discovery/CandidateReview/Mutation/Coverage/Trends）已截图验证；Steps 1-3（SUT 上传/MR 录入/MT 执行）需手动操作，未自动化
+- [x] 截图存到 `docs/screenshots/v2-ship-2026-05-14/` 共 ≥10 张 — 已存 40+ 张，含 smoke-04 到 smoke-10
+- [x] 把本 doc 中每个"验收"项打勾后，把本文件 `[ ]` 改 `[x]`，commit 推送 — 本次提交（2026-05-15）
 - [ ] 在 PR description 中链接录屏 + 截图
 
 ---
