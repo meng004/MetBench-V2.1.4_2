@@ -85,6 +85,48 @@ namespace MetBench_Client.ViewModels
             },
                      new NavigationViewItem()
             {
+                Content = "Anomalies",
+                Icon = new SymbolIcon { Symbol = SymbolRegular.Warning24 },
+                TargetPageType = typeof(Views.Pages.AnomalyListPage)
+            },
+                     new NavigationViewItem()
+            {
+                Content = "Discovery",
+                Icon = new SymbolIcon { Symbol = SymbolRegular.Lightbulb24 },
+                TargetPageType = typeof(Views.Pages.DiscoveryPage)
+            },
+                     new NavigationViewItem()
+            {
+                Content = "Candidate Review",
+                Icon = new SymbolIcon { Symbol = SymbolRegular.ClipboardCheckmark24 },
+                TargetPageType = typeof(Views.Pages.CandidateReviewPage)
+            },
+                     new NavigationViewItem()
+            {
+                Content = "Mutation",
+                Icon = new SymbolIcon { Symbol = SymbolRegular.Bug24 },
+                TargetPageType = typeof(Views.Pages.MutationCampaignPage)
+            },
+                     new NavigationViewItem()
+            {
+                Content = "Replay",
+                Icon = new SymbolIcon { Symbol = SymbolRegular.ArrowCounterclockwise24 },
+                TargetPageType = typeof(Views.Pages.ReplayResultPage)
+            },
+                     new NavigationViewItem()
+            {
+                Content = "Coverage",
+                Icon = new SymbolIcon { Symbol = SymbolRegular.DataPie20 },
+                TargetPageType = typeof(Views.Pages.CoverageDashboardPage)
+            },
+                     new NavigationViewItem()
+            {
+                Content = "Trends",
+                Icon = new SymbolIcon { Symbol = SymbolRegular.DataTrending20 },
+                TargetPageType = typeof(Views.Pages.TrendDashboardPage)
+            },
+                     new NavigationViewItem()
+            {
                 Content = "MR Detection",
                 Icon = new SymbolIcon { Symbol = SymbolRegular.CalendarSearch20 },
                 TargetPageType = typeof(Views.Pages.AutoDetectMRPage)

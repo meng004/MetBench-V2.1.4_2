@@ -1,0 +1,54 @@
+{
+  "source": "docs/experiments/bug-inventory.md",
+  "total": 6,
+  "known_bugs": [
+    {
+      "code": "R-Case-1",
+      "title": "OpenMOC CPUSolver `_k_eff *=` accumulation",
+      "related_application": "openmoc",
+      "upstream_fix_commit": "28008901",
+      "status": "fixed-upstream",
+      "description": "`_k_eff *= ...` accumulation in CPUSolver power-iteration loop. Upstream fix was preventive — bug only bites non-converged transients which the pincell SUT does not exercise."
+    },
+    {
+      "code": "R-Case-2",
+      "title": "OpenMC PR #3712 `add_temperature` chained-append → None",
+      "related_application": "openmc",
+      "upstream_fix_commit": "dfc80c70",
+      "status": "fixed-upstream",
+      "description": "`add_temperature` chained-append returns None. Live in matrix via openmc-pincell-fuel-temperature-via-add-temperature scenario; cell status=error with marker `RuntimeError: OpenMC PR #3712 ... triggered`."
+    },
+    {
+      "code": "R-Case-3",
+      "title": "OpenMC PR #3708 distribcell `group_name=''.zfill(N)` collapse",
+      "related_application": "openmc",
+      "upstream_fix_commit": "10f2b753",
+      "status": "fixed-upstream",
+      "description": "distribcell tally `group_name='' zfill(N)` collapse. m_inv (MR02-tally / MR03-tally) MR family applicable. Walkthrough only — bug path needs MGXS-from-tallies + 2×2 pin SUT extension."
+    },
+    {
+      "code": "R-Case-4",
+      "title": "OpenMOC CPUSolver power-iter basin @ moderator-σ_a factor=1.5",
+      "related_application": "openmoc",
+      "upstream_fix_commit": null,
+      "status": "open",
+      "description": "MetBench self-discovery 2026-05-12. m_cmp via MR14 cross-program. Live confirmed: OpenMOC k=0.476 vs OpenMC k=0.968 (51% Δ). Power-iter narrow basin in CPUSolver — extended MT first finding."
+    },
+    {
+      "code": "R-Case-5",
+      "title": "OpenMC PR #3662 `borated_water(density=X)` drops temperature",
+      "related_application": "openmc",
+      "upstream_fix_commit": "ef22558f",
+      "status": "fixed-upstream",
+      "description": "`borated_water(density=X)` silently drops `temperature` argument. Live in matrix via openmc-pincell-moderator-temperature-via-borated-water scenario; cell status=error with marker `RuntimeError: OpenMC PR #3662 ... triggered`."
+    },
+    {
+      "code": "R-Case-6",
+      "title": "OpenMOC CPUSolver power-iter basin @ fuel-temperature factor=1.25",
+      "related_application": "openmoc",
+      "upstream_fix_commit": null,
+      "status": "open",
+      "description": "MetBench self-discovery 2026-05-12 via tools/mr_parameter_sweep.py. m_mono via MR-T parameter sweep — first classical-MT live finding. OpenMOC k=0.508 at single factor sliver while neighbours give 1.11."
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+classDiagram
+    class MutationOperator {
+        +int IdOperator
+        +string Code «Mut02-runner-sigt-from-siga»
+        +string Category «runner-level/input-adapter-level/code-level»
+        +string TargetFileType
+        +string ApplicationSpec
+        +string PredictedClass «semantic/equivalent/pathological»
+        +string? RelatedMetaPattern
+    }
+
+    class Mutant {
+        +int IdMutant
+        +int OperatorId «FK»
+        +int? ApplicationId «FK»
+        +string AppliedDiff
+        +string Status «active/deprecated/experimental»
+    }
+
+    class MutationCampaign {
+        +Guid IdCampaign
+        +string Name
+        +string ScopeSpecJson
+        +string CatalogVersionSha
+        +DateTime StartedAt / FinishedAt
+        +string Status «running/ok/cancelled»
+    }
+
+    class MutationResult {
+        +Guid IdMutationResult
+        +Guid CampaignId «FK»
+        +int MutantId «FK»
+        +int MRBindingId «FK»
+        +Guid ExecutionId «FK»
+        +string Outcome «detected/missed/error/not-affected»
+        +double? ObservedDelta / ExpectedDelta
+    }
+
+    class Execution {
+        +Guid IdExecution
+        +int MRInstanceId
+        +string Status
+    }
+
+    MutationOperator "1" --> "0..*" Mutant : OperatorId
+    MutationCampaign "1" --> "0..*" MutationResult : CampaignId
+    Mutant "1" --> "0..*" MutationResult : MutantId
+    MutationResult --> Execution : ExecutionId (复用 Pipeline 跑)

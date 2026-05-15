@@ -1,0 +1,40 @@
+flowchart LR
+    subgraph WPFLayer["MetBench_Client (WPF)"]
+        Pages["Views/Pages/*.xaml"]
+        VM["ViewModels/*.cs"]
+        Pages --> VM
+    end
+
+    subgraph BLLCore["MetBench_BLL.Core (net8.0 跨平台)"]
+        direction TB
+        subgraph SystemMT["SystemMT/*"]
+            Assertions["Assertions/<br/>AssertionEvaluator +<br/>6 FA 扩展方法"]
+            PipelineNs["Pipeline/<br/>SystemMtPipeline + Context +<br/>IProcessExecutor + ReplayService"]
+            Transformations["Transformations/<br/>IMRTransformation +<br/>6 实现 + Registry"]
+            PathMapping["ParameterMapping/<br/>IFieldPathResolver +<br/>JsonPointer/Mcnp/Namelist"]
+        end
+        Modules["Discovery/ Mutation/ Coverage/<br/>Trend/ Reports/ ...<br/>(P6-P8)"]
+    end
+
+    subgraph DAL["MetBench_DAL (LiteDB 实现)"]
+        DbConfig["DbConfig 单例<br/>23 collection 注册"]
+        Repos["V2/LiteDb*Repository<br/>(20 个 v2 + 3 个 v1)"]
+        DIExt["ServiceCollectionExtensions<br/>AddSystemMtRepositories()"]
+    end
+
+    subgraph IDAL["MetBench_IDAL (接口)"]
+        IRepo["IRepository&lt;T&gt; (int PK)"]
+        IGuidRepo["IGuidRepository&lt;T&gt; (Guid PK)"]
+        ISpecific["20 个实体专属接口"]
+    end
+
+    subgraph Domain["MetBench_Domain (实体)"]
+        V1Ent["v1: MetamorphicRelation /<br/>Application / Domain<br/>(扩展了 v2 字段)"]
+        V2Ent["V2/: 18 个新实体 +<br/>5 个 value object"]
+    end
+
+    WPFLayer --> BLLCore
+    BLLCore --> IDAL
+    DAL -->|实现| IDAL
+    DAL --> Domain
+    BLLCore -.consumes.-> Domain

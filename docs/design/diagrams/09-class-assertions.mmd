@@ -1,0 +1,64 @@
+classDiagram
+    class AssertionTypeCodes {
+        <<constants>>
+        +string Less
+        +string Greater
+        +string Approx
+        +string LessNoiseAware
+        +string GreaterNoiseAware
+        +string ApproxInvariant
+        +string VarianceRatio
+        +string FluxPointwiseApprox
+        +string CrossProgramAgree
+    }
+
+    class AssertionInput {
+        <<record>>
+        +double SourceValue / SourceStd
+        +double FollowupValue / FollowupStd
+        +string ValueName
+        +Dict~string,double~? ExtraValues
+    }
+
+    class AssertionTolerance {
+        <<record>>
+        +bool NoiseAware
+        +double ToleranceRel
+        +double ToleranceAbs
+        +double NoiseMultiplier
+    }
+
+    class SystemMtAssertionResultV2 {
+        <<record>>
+        +string AssertionTypeCode
+        +bool Passed
+        +double? SourceValue / FollowupValue
+        +double? ObservedDelta / ExpectedThreshold
+        +string Expression
+        +string? FailureReason
+        +PassedResult() SystemMtAssertionResultV2
+        +FailedResult() SystemMtAssertionResultV2
+        +UnknownType() SystemMtAssertionResultV2
+    }
+
+    class MetbenchAssertionExtensions {
+        <<static extensions>>
+        +BeLessThanWithNoiseFloor(NumericAssertions, ...)
+        +BeGreaterThanWithNoiseFloor(NumericAssertions, ...)
+        +BeApproximatelyEqualUnderTransform(NumericAssertions, ...)
+        +HaveVarianceRatio(NumericAssertions, ...)
+        +BePointwiseApproximately(CollectionAssertions, ...)
+        +AgreeWithReference(NumericAssertions, ...)
+    }
+
+    class AssertionEvaluator {
+        +Evaluate(input, tolerance, code) SystemMtAssertionResultV2
+        -IsAssertionFailure(Exception) bool
+        -ExtractArray(Dict, string) IEnumerable~double~
+    }
+
+    AssertionEvaluator ..> AssertionInput : input
+    AssertionEvaluator ..> AssertionTolerance : input
+    AssertionEvaluator ..> AssertionTypeCodes : dispatches on
+    AssertionEvaluator ..> MetbenchAssertionExtensions : delegates
+    AssertionEvaluator ..> SystemMtAssertionResultV2 : returns

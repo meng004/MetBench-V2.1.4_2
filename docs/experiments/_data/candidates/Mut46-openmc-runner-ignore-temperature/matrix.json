@@ -1,0 +1,206 @@
+{
+  "mutation_id": "Mut46-openmc-runner-ignore-temperature",
+  "factor": 1.5,
+  "cells": [
+    {
+      "scenario_id": "openmoc-pincell-nu-sigma-f",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-nu-sigma-f",
+      "status": "ran",
+      "k_source": 1.1245000140253056,
+      "k_followup": 1.689960859187143,
+      "k_source_std": 0.001786852281182983,
+      "k_followup_std": 0.0025165741998489214,
+      "ratio": 1.5028553473625055,
+      "assertion": "greater",
+      "factor": 1.5,
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmoc-pincell-sigma-a",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-sigma-a",
+      "status": "ran",
+      "k_source": 1.1245000140252905,
+      "k_followup": 0.8027171860617989,
+      "k_source_std": 0.0017868522811831373,
+      "k_followup_std": 0.0013193223083043265,
+      "ratio": 0.7138436425521871,
+      "assertion": "less",
+      "factor": 1.5,
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmoc-pincell-group-permute",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-fuel-sigma-t",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-moderator-sigma-a",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-group-permute",
+      "status": "ran",
+      "k_source": 1.1245000140252783,
+      "k_followup": 1.1260095041119156,
+      "k_source_std": 0.0017868522811653647,
+      "k_followup_std": 0.0017763420637652003,
+      "ratio": 1.0013423655560785,
+      "assertion": "approx",
+      "factor": 1.5,
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-sigma-t",
+      "status": "ran",
+      "k_source": 1.124500014025286,
+      "k_followup": 0.11292348432290203,
+      "k_source_std": 0.001786852281144724,
+      "k_followup_std": 0.0002152963584811987,
+      "ratio": 0.10042106083990034,
+      "assertion": "less",
+      "factor": 1.5,
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmc-pincell-moderator-sigma-a",
+      "status": "ran",
+      "k_source": 1.1245000140252905,
+      "k_followup": 0.9683112180449214,
+      "k_source_std": 0.0017868522811555307,
+      "k_followup_std": 0.0016647893052133688,
+      "ratio": 0.8611037847645092,
+      "assertion": "less",
+      "factor": 1.5,
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmoc-pincell-fuel-sigma-s",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-sigma-s",
+      "status": "ran",
+      "k_source": 1.1245000140252883,
+      "k_followup": 1.093256977814714,
+      "k_source_std": 0.0017868522811570855,
+      "k_followup_std": 0.0019547208762857146,
+      "ratio": 0.972216064187731,
+      "assertion": "less",
+      "factor": 0.5,
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmoc-pincell-fuel-radius",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-radius",
+      "status": "ran",
+      "k_source": 1.124500014025283,
+      "k_followup": 1.1708592074426303,
+      "k_source_std": 0.0017868522811616949,
+      "k_followup_std": 0.0017145646357893077,
+      "ratio": 1.0412264942989187,
+      "assertion": "greater",
+      "factor": 1.05,
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmc-pincell-particles-refine",
+      "status": "ran",
+      "k_source": 1.1245000140252974,
+      "k_followup": 1.124765762651797,
+      "k_source_std": 0.0017868522811707783,
+      "k_followup_std": 0.0005489853886843756,
+      "ratio": 1.000236326032179,
+      "assertion": "variance-ratio",
+      "factor": 10.0,
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmoc-pincell-rotate-90",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-rotate-90",
+      "status": "ran",
+      "k_source": 1.1543816170752519,
+      "k_followup": 1.1535361614026804,
+      "k_source_std": 0.001556492207927589,
+      "k_followup_std": 0.0019251225475429637,
+      "ratio": 0.9992676116285415,
+      "assertion": "approx",
+      "factor": 1.5,
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmoc-pincell-mirror-x",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-mirror-x",
+      "status": "ran",
+      "k_source": 1.0960150560282693,
+      "k_followup": 1.0980778782345795,
+      "k_source_std": 0.001691536193419568,
+      "k_followup_std": 0.001800559951736016,
+      "ratio": 1.001882111194517,
+      "assertion": "approx",
+      "factor": 1.5,
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmoc-pincell-mirror-y",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-mirror-y",
+      "status": "ran",
+      "k_source": 1.0960150560282662,
+      "k_followup": 1.0955540690024501,
+      "k_source_std": 0.0016915361934015834,
+      "k_followup_std": 0.0018586249217613625,
+      "ratio": 0.9995793971777298,
+      "assertion": "approx",
+      "factor": 1.5,
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmoc-pincell-fuel-temperature",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-temperature",
+      "status": "ran",
+      "k_source": 1.1245000140252996,
+      "k_followup": 1.1245000140252897,
+      "k_source_std": 0.0017868522811576508,
+      "k_followup_std": 0.0017868522811818619,
+      "ratio": 0.9999999999999911,
+      "assertion": "less",
+      "factor": 1.5,
+      "assertion_passed": false,
+      "outcome": "detected"
+    }
+  ]
+}

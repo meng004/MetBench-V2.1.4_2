@@ -1,0 +1,82 @@
+[
+  {
+    "id": "Adv01-mono-direction-inverted",
+    "meta_pattern": "m_mono",
+    "expected": "invalid",
+    "verdict": "valid",
+    "confidence": 0.95,
+    "reasoning": "Scaling fuel.nu_sigma_f down reduces neutron production per fission, so k_eff must decrease. The candidate's hypothesis of an increase is physically inverted, but the underlying monotonic relationship is correct when the assertion direction is flipped to 'less'. This MR effectively tests whether the code correctly handles changes in fissile material properties.",
+    "raw_response": "{\n  \"verdict\": \"valid\",\n  \"confidence\": 0.95,\n  \"suggested_assertion\": \"less\",\n  \"reasoning\": \"Scaling fuel.nu_sigma_f down reduces neutron production per fission, so k_eff must decrease. The candidate's hypothesis of an increase is physically inverted, but the underlying monotonic relationship is correct when the assertion direction is flipped to 'less'. This MR effectively tests whether the code correctly handles changes in fissile material properties.\",\n  \"caveats\": \"\",\n  \"implementation_hint\": \"Multiply the fuel material's nu_sigma_f by a factor in (0,1) (e.g., 0.5) in the input JSON and assert k_eff < original k_eff.\"\n}",
+    "elapsed_s": 37.183,
+    "tokens": {
+      "input": 237,
+      "output": 1107,
+      "cache_read": 512,
+      "cache_creation": 0
+    }
+  },
+  {
+    "id": "Adv02-cmp-impossible-budget",
+    "meta_pattern": "m_cmp",
+    "expected": "invalid",
+    "verdict": "invalid",
+    "confidence": 0.9,
+    "reasoning": "The candidate MR asserts that OpenMOC and OpenMC will agree to within 1e-10 for the same pin-cell case. This ignores the fundamentally different error sources: OpenMOC is subject to discretisation error (ray spacing, angular quadrature, flat-source region meshing) and OpenMC is subject to statistical noise. Even with default convergence parameters, the k-eff values can differ by orders of magnitude larger than 1e-10. To reduce both errors below 1e-10 would require astronomically fine discretisation and particle counts, making the MR physically unrealistic and impossible to satisfy with any practical computational budget. Therefore the MR does not represent a correct physical expectation for this SUT; it is an invalid metamorphic relation because a correct implementation of both solvers will routinely fail the assertion.",
+    "raw_response": "{\n  \"verdict\": \"invalid\",\n  \"confidence\": 0.9,\n  \"suggested_assertion\": \"bound\",\n  \"reasoning\": \"The candidate MR asserts that OpenMOC and OpenMC will agree to within 1e-10 for the same pin-cell case. This ignores the fundamentally different error sources: OpenMOC is subject to discretisation error (ray spacing, angular quadrature, flat-source region meshing) and OpenMC is subject to statistical noise. Even with default convergence parameters, the k-eff values can differ by orders of magnitude larger than 1e-10. To reduce both errors below 1e-10 would require astronomically fine discretisation and particle counts, making the MR physically unrealistic and impossible to satisfy with any practical computational budget. Therefore the MR does not represent a correct physical expectation for this SUT; it is an invalid metamorphic relation because a correct implementation of both solvers will routinely fail the assertion.\",\n  \"caveats\": \"If both solvers were configured to extreme precision (e.g., track spacing \u2192 0, particle count \u2192 \u221e) the eigenvalues would converge to the same exact transport solution, but the proposed bound of 1e-10 is still arbitrary and not reliably testable in practice. The MR as stated provides no mechanism to guarantee convergence to that level, making it vacuous as a fault-detection test.\",\n  \"implementation_hint\": \"To run the MR one would parse the JSON case file, execute the OpenMOC and OpenMC solvers separately, and compare k-eff. Because of the unrealistic tolerance, the test would always fail under normal execution.\"\n}",
+    "elapsed_s": 63.426,
+    "tokens": {
+      "input": 261,
+      "output": 1837,
+      "cache_read": 512,
+      "cache_creation": 0
+    }
+  },
+  {
+    "id": "Adv03-conv-direction-inverted",
+    "meta_pattern": "m_conv",
+    "expected": "invalid",
+    "verdict": "invalid",
+    "confidence": 0.98,
+    "reasoning": "The proposed hypothesis asserts that reducing azimuthal angles from 16 to 4 brings k_eff closer to the continuum, i.e., discretisation error decreases with coarsening. For the method of characteristics, increasing azimuthal refinement (more angles) improves accuracy, so error should monotonically decrease towards the continuum. The inequality is therefore physically backward; a valid convergence MR would state |k_coarse - k_continuum| > |k_baseline - k_continuum| (or an equivalent ordering). As given, the relation is not satisfied by the SUT and would trivially fail, offering no fault-detection capability for correct physics.",
+    "raw_response": "{\n  \"verdict\": \"invalid\",\n  \"confidence\": 0.98,\n  \"suggested_assertion\": \"greater\",\n  \"reasoning\": \"The proposed hypothesis asserts that reducing azimuthal angles from 16 to 4 brings k_eff closer to the continuum, i.e., discretisation error decreases with coarsening. For the method of characteristics, increasing azimuthal refinement (more angles) improves accuracy, so error should monotonically decrease towards the continuum. The inequality is therefore physically backward; a valid convergence MR would state |k_coarse - k_continuum| > |k_baseline - k_continuum| (or an equivalent ordering). As given, the relation is not satisfied by the SUT and would trivially fail, offering no fault-detection capability for correct physics.\",\n  \"caveats\": \"If the 'continuum' were defined as a reference from an even finer solution (e.g., num_azim=64), the relation would still be incorrect because baseline (16) should be closer to that reference than the coarser (4) case. The error direction is inverted.\",\n  \"implementation_hint\": \"To construct a correct m_conv MR, run both a coarser (e.g., num_azim=4) and a finer (e.g., num_azim=32) tracking case and assert that the absolute difference |k_finer - k_coarser| is smaller than a tolerance, or that |k_coarser - k_ref| > |k_baseline - k_ref| where k_ref is a very fine solution.\"\n}",
+    "elapsed_s": 32.278,
+    "tokens": {
+      "input": 260,
+      "output": 956,
+      "cache_read": 512,
+      "cache_creation": 0
+    }
+  },
+  {
+    "id": "Adv04-inv-vacuous-identity",
+    "meta_pattern": "m_inv",
+    "expected": "invalid",
+    "verdict": "valid",
+    "confidence": 0.8,
+    "reasoning": "The identity transformation (x\u2190x) is physically correct and belongs to the group-action invariance MetaPattern (m_inv). Running the same input twice should produce the same k-eff to within solver tolerance (exact for deterministic, statistical for Monte Carlo). The MR is trivially testable and can detect certain non-deterministic implementation faults (e.g., race conditions, uninitialised memory). However, it is a vacuous relation that does not test any physical or numerical behaviour beyond basic consistency, offering limited fault-detection power.",
+    "raw_response": "{\n  \"verdict\": \"valid\",\n  \"confidence\": 0.8,\n  \"suggested_assertion\": \"approx\",\n  \"reasoning\": \"The identity transformation (x\u2190x) is physically correct and belongs to the group-action invariance MetaPattern (m_inv). Running the same input twice should produce the same k-eff to within solver tolerance (exact for deterministic, statistical for Monte Carlo). The MR is trivially testable and can detect certain non-deterministic implementation faults (e.g., race conditions, uninitialised memory). However, it is a vacuous relation that does not test any physical or numerical behaviour beyond basic consistency, offering limited fault-detection power.\",\n  \"caveats\": \"For OpenMC, the same random seed must be used to guarantee reproducibility; otherwise the assertion must allow a statistical interval (approximately equal). Even with a fixed seed, platform-level nondeterminism can cause occasional failure, making this MR less robust than non-trivial invariance relations.\",\n  \"implementation_hint\": \"Clone the input JSON and re-run the solver with identical settings; for Monte Carlo, ensure the same pseudo-random seed is set.\"\n}",
+    "elapsed_s": 55.85,
+    "tokens": {
+      "input": 232,
+      "output": 1630,
+      "cache_read": 512,
+      "cache_creation": 0
+    }
+  },
+  {
+    "id": "Adv05-fabricated-cmp",
+    "meta_pattern": "m_cmp",
+    "expected": "invalid",
+    "verdict": "invalid",
+    "confidence": 0.95,
+    "reasoning": "The proposed relation claims that k_eff(1 thread) > k_eff(8 threads) by at least 0.01, based on the unsupported claim that parallel reduction-order differences systematically depress k_eff in deterministic transport solvers. In a correct implementation of the method of characteristics, k_eff is independent of the number of threads; any floating-point differences are typically unbiased, far smaller than 0.01, and not systematic in direction. Asserting a strict one-sided inequality with such a large threshold would produce unreliable, false-positive failures.",
+    "raw_response": "{\n  \"verdict\": \"invalid\",\n  \"confidence\": 0.95,\n  \"suggested_assertion\": \"approx\",\n  \"reasoning\": \"The proposed relation claims that k_eff(1 thread) > k_eff(8 threads) by at least 0.01, based on the unsupported claim that parallel reduction-order differences systematically depress k_eff in deterministic transport solvers. In a correct implementation of the method of characteristics, k_eff is independent of the number of threads; any floating-point differences are typically unbiased, far smaller than 0.01, and not systematic in direction. Asserting a strict one-sided inequality with such a large threshold would produce unreliable, false-positive failures.\",\n  \"caveats\": \"A valid test of parallel consistency would check approximate equality (e.g., |k(1)-k(8)| < 1e-5) to detect severe implementation flaws, but such a test is not the proposed MR.\",\n  \"implementation_hint\": \"Run two OpenMOC configurations with solver.thread_count=1 and solver.thread_count=8, extract k_eff from each output.\"\n}",
+    "elapsed_s": 42.438,
+    "tokens": {
+      "input": 262,
+      "output": 1253,
+      "cache_read": 512,
+      "cache_creation": 0
+    }
+  }
+]

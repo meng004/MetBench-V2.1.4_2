@@ -1,0 +1,40 @@
+{
+  "mutation_id": "Mut18-openmc-runner-batches-too-few",
+  "predicted_classification": "semantic",
+  "target_file": "SUT/openmc/openmc_runner.py",
+  "solver": "openmc",
+  "patched_source": {
+    "openmoc": null,
+    "openmc": {
+      "solver": "openmc",
+      "reps": [
+        1.0918685914885757,
+        1.091868591488576,
+        1.091868591488576
+      ],
+      "stds": [
+        0.05149577343159909,
+        0.051495773431598016,
+        0.051495773431598016
+      ],
+      "mean": 1.091868591488576,
+      "max_std": 0.05149577343159909
+    }
+  },
+  "baseline": {
+    "openmoc": 1.1330583459569659,
+    "openmc": 1.1245000140252948
+  },
+  "classifications_per_solver": {
+    "openmc": {
+      "abs_delta": 0.0326314225367188,
+      "rel_delta": 0.02901860571785176,
+      "mc_threshold_3sigma": 0.15448732029479728,
+      "rel_threshold": 0.005622500070126474,
+      "threshold": 0.15448732029479728,
+      "semantic": false
+    }
+  },
+  "classification": "equivalent",
+  "threshold_rel": 0.005
+}

@@ -150,3 +150,37 @@ Acceptance criteria:
 - At least a design or prototype exists for a second program adapter.
 - Reports clearly show the MR, source case, follow-up case, actual outputs, and
   pass/fail evidence.
+
+## Stage 5: Phase-3 Tallies + Temperature + Visualization (delivered 2026-05-13)
+
+See `docs/superpowers/plans/2026-05-13-stage5-phase3-tallies-and-temperature.md`
+and `docs/superpowers/plans/2026-05-13-stage5-phase3-visualization.md`. Adds
+MR02-tally / MR03-tally / MR-T scenarios and dashboard.html visualisation;
+binds R-Case-2/3/5 to live cells via OpenMC-side parser hooks.
+
+## Stage 6: v2 development P1-P8 (delivered 2026-05-13)
+
+See `docs/superpowers/plans/2026-05-13-v2-development-plan.md` (8-week plan).
+All cloud-side P1-P8 work shipped on `claude/continue-phase-2-AdZ6f`:
+
+| Phase | Cloud deliverable | VM-deferred |
+|-------|-------------------|-------------|
+| P1 | 23 collections + entity model + DbConfig | — |
+| P2 | 21 IDAL interfaces + 22 LiteDB repos | — |
+| P3 | `IMRTransformation` + 6 Python parsers + PathResolver | — |
+| P4 | FluentAssertions MT extensions + `SystemMtPipeline` + `ReplayService` | — |
+| P5 | Reqnroll v2 steps + feature↔DB sync tools + migrations | — |
+| P6 | `AnomalyService` + `CommonalityReport` | Anomaly viewer page |
+| P7 | `Discovery` (IMRDiscoverer + 3 Validator + `ValidationService`) + `MutationCampaignService` | Discovery / Mutation pages |
+| P8 | `CoverageService` + `TrendAnalysisService` + `SystemMtReportService` (5 scope) + paper-package | Coverage / Trend dashboards, e2e demo |
+
+Cloud-side test footprint (as of P8 ship): **321 xUnit pass / 2 skip / 0 fail
++ 27 Python pass**. WPF pages and end-to-end smoke against real
+OpenMOC/OpenMC SUTs are VM-side responsibilities (Stage 6 VM follow-up).
+
+Acceptance criteria (v2 ship):
+
+- Every BLL.Core service has TDD coverage with fake repository injection.
+- Every Python helper has contract tests guarding stdout JSON shape.
+- `tools/build_paper_package.py` produces a reproducible tarball.
+- All cloud-side P PRs merged onto the integration branch; CI green.

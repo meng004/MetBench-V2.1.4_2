@@ -1,0 +1,59 @@
+classDiagram
+    class ValueRange {
+        +double? Min
+        +double? Max
+    }
+
+    class ToleranceConfig {
+        +bool NoiseAware
+        +double ToleranceRel
+        +double ToleranceAbs
+        +double NoiseMultiplier «default 3.0»
+    }
+
+    class SutHyperparams {
+        +long? Seed
+        +int? Particles
+        +int? Batches
+        +int? MaxIterations
+        +string? FitnessFunction
+        +Dict OtherParams
+    }
+
+    class SamplingSpec {
+        +string Distribution «fixed-list/uniform/log-uniform/normal»
+        +int SampleCount
+        +Dict DistributionParams
+    }
+
+    class ParameterMapping {
+        +string AbstractParamName
+        +string ConcreteFieldPath
+        +string FieldType «number/array/string»
+        +ValueRange? ValueRange
+        +string Unit
+        +string PathSyntax «json-pointer/mcnp-card/namelist-key»
+        +string? Notes
+    }
+
+    class MRBinding {
+        +int IdMRBinding
+        +List~ParameterMapping~ ParameterMappings
+        +ToleranceConfig DefaultTolerance
+        +SutHyperparams DefaultHyperparams
+    }
+
+    class MRInstance {
+        +int IdInstance
+        +SamplingSpec? Sampling
+        +SutHyperparams? HyperparamsOverride
+        +ToleranceConfig? ToleranceOverride
+    }
+
+    ParameterMapping --> ValueRange
+    MRBinding *-- ParameterMapping : embeds
+    MRBinding *-- ToleranceConfig
+    MRBinding *-- SutHyperparams
+    MRInstance *-- SamplingSpec
+    MRInstance *-- ToleranceConfig
+    MRInstance *-- SutHyperparams

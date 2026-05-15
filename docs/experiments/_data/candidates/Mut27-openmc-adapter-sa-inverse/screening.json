@@ -1,0 +1,40 @@
+{
+  "mutation_id": "Mut27-openmc-adapter-sa-inverse",
+  "predicted_classification": "semantic",
+  "target_file": "SUT/openmc/openmc_input_adapter_sigma_a.py",
+  "solver": "openmc",
+  "patched_source": {
+    "openmoc": null,
+    "openmc": {
+      "solver": "openmc",
+      "reps": [
+        1.1245000140252828,
+        1.1245000140253063,
+        1.1245000140252663
+      ],
+      "stds": [
+        0.0017868522811884681,
+        0.0017868522811727934,
+        0.001786852281162177
+      ],
+      "mean": 1.1245000140252852,
+      "max_std": 0.0017868522811884681
+    }
+  },
+  "baseline": {
+    "openmoc": 1.1330583459569659,
+    "openmc": 1.1245000140252948
+  },
+  "classifications_per_solver": {
+    "openmc": {
+      "abs_delta": 9.547918011776346e-15,
+      "rel_delta": 8.490811820978397e-15,
+      "mc_threshold_3sigma": 0.005360556843565404,
+      "rel_threshold": 0.005622500070126474,
+      "threshold": 0.005622500070126474,
+      "semantic": false
+    }
+  },
+  "classification": "equivalent",
+  "threshold_rel": 0.005
+}

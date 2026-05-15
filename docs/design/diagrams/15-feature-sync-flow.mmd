@@ -1,0 +1,49 @@
+flowchart LR
+    subgraph Files["metbench/catalog/features/"]
+        F1["m_mono/MR-T.feature"]
+        F2["m_inv/MR-Rot90.feature"]
+        F3["m_conv/MR-RefineParticles.feature"]
+    end
+
+    subgraph Tools["Python tools/"]
+        FtoDB["feature_to_db.py"]
+        DBtoF["db_to_feature.py"]
+        Validate["validate_feature_sync.py"]
+    end
+
+    subgraph Migrations["tools/migrate_*.py"]
+        MS["migrate_python_scenarios_to_v2.py"]
+        MM["migrate_mutations_to_v2.py"]
+        MR["migrate_real_bugs_to_v2.py"]
+    end
+
+    subgraph Catalog["metbench/catalog/migration/"]
+        JS["scenarios.json"]
+        JM["mutations.json"]
+        JR["real-bugs.json"]
+    end
+
+    subgraph DB["LiteDB"]
+        DB1["MetamorphicRelations"]
+        DB2["MRBindings"]
+        DB3["MutationOperators / Mutants"]
+        DB4["KnownBugs"]
+    end
+
+    F1 & F2 & F3 -->|parse| FtoDB
+    FtoDB -->|JSON| JS
+
+    MS -->|生成| JS
+    MM -->|生成| JM
+    MR -->|生成| JR
+
+    JS & JM & JR -->|CSharp import - P8| DB1 & DB2 & DB3 & DB4
+
+    DB1 & DB2 -->|export JSON| DBtoF
+    DBtoF -->|生成| F1 & F2 & F3
+
+    F1 & F2 & F3 -.->|input| Validate
+    DB1 & DB2 -.->|export| Validate
+    Validate -->|diff| Output{In sync?}
+    Output -->|✓ CI green| End[OK]
+    Output -->|✗ drift| Block[CI fail]

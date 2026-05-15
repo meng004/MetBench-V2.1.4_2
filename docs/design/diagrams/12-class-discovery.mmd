@@ -1,0 +1,53 @@
+classDiagram
+    class DiscoveryMethod {
+        +int IdMethod
+        +string Name «MetaPattern-Structural/LLM-Native»
+        +string Version
+        +string ConfigJson
+        +bool Enabled
+    }
+
+    class DiscoveryRun {
+        +Guid IdRun
+        +int MethodId «FK»
+        +int? TargetApplicationId «FK»
+        +DateTime StartedAt / FinishedAt
+        +string Status
+        +int CandidatesProduced
+    }
+
+    class CandidateMR {
+        +Guid IdCandidate
+        +Guid DiscoveryRunId «FK»
+        +string ProposedCode / ProposedName
+        +string? SuggestedTransformationName
+        +string? SuggestedAssertionTypeCode
+        +string ProposedValueName
+        +string Rationale
+        +double Confidence
+        +string Status «pending/validated/promoted/rejected/duplicate»
+        +int? PromotedToMRId «FK to MetamorphicRelation»
+        +string? RejectionReason
+    }
+
+    class ValidationRun {
+        +Guid IdValidation
+        +Guid CandidateMRId «FK»
+        +string ValidatorName «empirical/theoretical-llm/adversarial-mutmut»
+        +DateTime RunAt
+        +bool Passed
+        +string DetailsJson
+    }
+
+    class MetamorphicRelation {
+        +int IdMR
+        +string Code
+        +int? DiscoveryRunId
+        +double? DiscoveryConfidence
+        +string DiscoveryMethod
+    }
+
+    DiscoveryMethod "1" --> "0..*" DiscoveryRun : MethodId
+    DiscoveryRun "1" --> "0..*" CandidateMR : DiscoveryRunId
+    CandidateMR "1" --> "0..*" ValidationRun : CandidateMRId
+    CandidateMR ..> MetamorphicRelation : PromotedToMRId\n(when ≥2 validators pass)

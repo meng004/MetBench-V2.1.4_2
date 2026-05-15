@@ -1,0 +1,138 @@
+<Page x:Class="MetBench_Client.Views.Pages.CandidateReviewPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      Title="CandidateReviewPage"
+      d:DesignHeight="750" d:DesignWidth="1100"
+      ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+      Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+      mc:Ignorable="d">
+
+    <Grid Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Row 0: candidate picker + info card -->
+        <Border Grid.Row="0"
+                BorderThickness="1"
+                BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                CornerRadius="4"
+                Padding="12"
+                Margin="0,0,0,12">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Candidate picker -->
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                    <TextBlock Text="Select candidate:" VerticalAlignment="Center"
+                               FontWeight="SemiBold" Margin="0,0,8,0" />
+                    <ComboBox ItemsSource="{Binding ViewModel.Candidates}"
+                              SelectedItem="{Binding ViewModel.SelectedCandidate, Mode=TwoWay}"
+                              DisplayMemberPath="ProposedCode"
+                              Width="260" />
+                    <TextBlock Margin="16,0,0,0" VerticalAlignment="Center"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                               Text="{Binding ViewModel.SelectedCandidate.Status, FallbackValue=''}" />
+                </StackPanel>
+
+                <!-- Candidate info row 1 -->
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,4">
+                    <TextBlock Text="Name: " FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding ViewModel.SelectedCandidate.ProposedName, FallbackValue=—}"
+                               Margin="0,0,24,0" TextWrapping="Wrap" MaxWidth="500" />
+                    <TextBlock Text="Confidence: " FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding ViewModel.SelectedCandidate.Confidence, StringFormat=F2, FallbackValue=—}"
+                               Margin="0,0,24,0" />
+                    <TextBlock Text="Assertion: " FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding ViewModel.SelectedCandidate.SuggestedAssertionTypeCode, FallbackValue=—}" />
+                </StackPanel>
+
+                <!-- Rationale -->
+                <StackPanel Grid.Row="2" Orientation="Horizontal">
+                    <TextBlock Text="Rationale: " FontWeight="SemiBold" VerticalAlignment="Top" />
+                    <TextBlock Text="{Binding ViewModel.SelectedCandidate.Rationale, FallbackValue=—}"
+                               TextWrapping="Wrap" MaxWidth="800"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Row 1: validators + validate button + status -->
+        <Border Grid.Row="1"
+                BorderThickness="1"
+                BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                CornerRadius="4"
+                Padding="12"
+                Margin="0,0,0,12">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <TextBlock Text="Validators:" FontWeight="SemiBold"
+                               VerticalAlignment="Center" Margin="0,0,12,0" />
+                    <CheckBox Content="empirical"
+                              IsChecked="{Binding ViewModel.UseEmpirical, Mode=TwoWay}"
+                              Margin="0,0,16,0" VerticalAlignment="Center" />
+                    <CheckBox Content="theoretical-llm"
+                              IsChecked="{Binding ViewModel.UseTheoreticalLlm, Mode=TwoWay}"
+                              Margin="0,0,16,0" VerticalAlignment="Center" />
+                    <CheckBox Content="adversarial-mutmut"
+                              IsChecked="{Binding ViewModel.UseAdversarial, Mode=TwoWay}"
+                              Margin="0,0,24,0" VerticalAlignment="Center" />
+
+                    <ui:Button Appearance="Primary"
+                               Content="Validate selected"
+                               Icon="{ui:SymbolIcon CheckmarkCircle24}"
+                               Command="{Binding ViewModel.ValidateSelectedCommand}" />
+
+                    <ProgressBar IsIndeterminate="True" Width="100" Height="4"
+                                 Margin="12,0,0,0" VerticalAlignment="Center">
+                        <ProgressBar.Style>
+                            <Style TargetType="ProgressBar">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ViewModel.IsBusy}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ProgressBar.Style>
+                    </ProgressBar>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding ViewModel.StatusMessage}"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                               VerticalAlignment="Center" Margin="0,0,16,0" />
+                    <TextBlock Text="{Binding ViewModel.ErrorMessage}"
+                               Foreground="OrangeRed"
+                               VerticalAlignment="Center" TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Row 2: validation history DataGrid -->
+        <ui:DataGrid Grid.Row="2"
+                     ItemsSource="{Binding ViewModel.ValidationHistory}"
+                     AutoGenerateColumns="False"
+                     IsReadOnly="True"
+                     HeadersVisibility="Column"
+                     CanUserAddRows="False"
+                     BorderThickness="1"
+                     BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}">
+            <ui:DataGrid.Columns>
+                <DataGridTextColumn Header="Validator"   Binding="{Binding ValidatorName}"              Width="160" />
+                <DataGridTextColumn Header="Passed"      Binding="{Binding Passed}"                     Width="70" />
+                <DataGridTextColumn Header="Run At"      Binding="{Binding RunAt, StringFormat=yyyy-MM-dd HH:mm:ss}" Width="150" />
+                <DataGridTextColumn Header="Details"     Binding="{Binding DetailsJson}"                Width="*" />
+            </ui:DataGrid.Columns>
+        </ui:DataGrid>
+    </Grid>
+</Page>

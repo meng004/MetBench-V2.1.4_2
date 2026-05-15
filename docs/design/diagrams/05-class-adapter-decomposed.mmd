@@ -1,0 +1,57 @@
+classDiagram
+    class Adapter概念 {
+        <<deprecated as single entity>>
+        在 v2 拆解为三层
+    }
+    note for Adapter概念 "v1 'Adapter' = 文件解析 + 字段映射 + MR 变换 三件套.\nv2 设计把这三件事拆开存放，避免反模式."
+
+    class Application {
+        <<L1 — 文件 IO 解析>>
+        +string InputParserPath
+        +string OutputParserPath
+        +string RunnerEntryPath
+        +int RuntimeId
+        每 SUT 一份；不感知 MR 含义
+    }
+    note for Application "Layer 1: Parser\n• Python 脚本，read/write SUT 原生文件\n• per-SUT 共享（同 SUT 的所有 MR 复用同一 parser）"
+
+    class MRBinding {
+        <<L2 — 抽象 → 具体字段映射>>
+        +List~ParameterMapping~ ParameterMappings
+        per-MR-per-SUT
+    }
+    note for MRBinding "Layer 2: ParameterMapping\n• 数据驱动（存 LiteDB，可在 UI 编辑）\n• 不知道 SUT 文件格式\n• 不知道变换逻辑"
+
+    class ParameterMapping {
+        +string AbstractParamName
+        +string ConcreteFieldPath
+        +string PathSyntax
+        +ValueRange? ValueRange
+        +string Unit
+    }
+    note for ParameterMapping "embedded record:\nMR 视角 'fuel.temperature' →\nSUT 视角 'materials.fuel.temperature_kelvin'"
+
+    class IMRTransformation {
+        <<L3 — MR 输入变换>>
+        +string Name
+        +Apply(dict, fieldPath, params) Dict
+        per-transformation-type
+    }
+    note for IMRTransformation "Layer 3: Transformation\n• C# 内存 dict 操作\n• 不接触文件，不知道 SUT 格式\n• 跨 SUT 复用（Identity/ScaleField/Permute/Mirror/...）"
+
+    class Pipeline协作 {
+        <<编排 — SystemMtPipeline>>
+        1. Parser.parse(source.file) → source_dict
+        2. Transformation.Apply(source_dict, fieldPath, params) → followup_dict
+        3. Parser.write(followup_dict) → followup.file
+        4. Runtime.invoke(SUT) → output.file
+        5. Parser.parse(output.file) → values
+        6. AssertionEvaluator.Evaluate(values)
+    }
+    note for Pipeline协作 "Pipeline 通过 ParameterMapping 把 abstract field path\n解析成 concrete path 传给 Transformation"
+
+    Application ..> ParameterMapping : "Application 提供 Parser；\nParameterMapping 提供字段定位"
+    MRBinding *-- ParameterMapping : embeds
+    Pipeline协作 ..> Application : "调 Input/Output Parser"
+    Pipeline协作 ..> IMRTransformation : "调 Apply"
+    Pipeline协作 ..> ParameterMapping : "读字段路径"

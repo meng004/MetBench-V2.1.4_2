@@ -299,8 +299,11 @@ No BLL.Core changes required. No new interfaces. The IR is the
 | #5 second SUT | ✅ | PR #13 (heat-equation) + PR #21 (OpenMC, bonus) |
 | #6 cross-program IR | ✅ | PR #22 (MrFamily + cross-program BDD) |
 
-**Stage 4 closed.** Roadmap continues per `AGENTS.md` (Stage 5 not yet drafted
-as of this PR).
+**Stage 4 closed.** Roadmap continues per `AGENTS.md`.
+
+**Stage 5 Phase 1 hand-off** (mutation-based empirical validation): plan in
+[`2026-05-12-stage5-mutation-detection-study.md`](2026-05-12-stage5-mutation-detection-study.md);
+results in [`../../experiments/`](../../experiments/).
 
 ---
 

@@ -1,0 +1,728 @@
+{
+  "source": "mutations.py::ALL_MUTATIONS",
+  "total": 48,
+  "operators": [
+    {
+      "code": "Mut00-identity",
+      "category": "runner-level",
+      "target_file_type": "openmoc_runner.py",
+      "application_spec": "Identity (no change).",
+      "predicted_class": "equivalent",
+      "related_meta_pattern": null,
+      "description": "False-positive control. Any MR reporting `detected` on Mut00 is a bug in the MR or the harness, not in the SUT."
+    },
+    {
+      "code": "Mut01-openmoc-runner-chi-zero",
+      "category": "runner-level",
+      "target_file_type": "openmoc_runner.py",
+      "application_spec": "Zero out chi (fission spectrum) for every material.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": null,
+      "description": "With chi = 0 the fission source vanishes; k_eff collapses to ~0. An MR-suite should be insensitive to whether nu_sigma_f or sigma_a changed because the fission-spectrum bug kills *both* sides of the MR equally — useful gap check."
+    },
+    {
+      "code": "Mut02-openmoc-runner-sigt-from-siga",
+      "category": "runner-level",
+      "target_file_type": "openmoc_runner.py",
+      "application_spec": "Pass mat[\"sigma_a\"] to setSigmaT instead of mat[\"sigma_t\"].",
+      "predicted_class": "semantic",
+      "related_meta_pattern": null,
+      "description": "Realistic indexing slip: sigma_a < sigma_t by physics, so the runner would use a smaller total cross section, raising k_eff. The MR ratio for ScaleNuSigmaF should still hold qualitatively; this probes whether the MR is sensitive to absolute-scale corruption."
+    },
+    {
+      "code": "Mut03-openmoc-runner-swap-fuel-moderator",
+      "category": "runner-level",
+      "target_file_type": "openmoc_runner.py",
+      "application_spec": "Fill fuel cell with moderator material and vice versa.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "nu_sigma_f",
+      "description": "Material/geometry swap — fuel sits where moderator should and vice versa. k_eff drops sharply because the fissile region has the wrong cross sections. Should trigger both MRs."
+    },
+    {
+      "code": "Mut04-openmoc-runner-drop-nu-sigma-f",
+      "category": "runner-level",
+      "target_file_type": "openmoc_runner.py",
+      "application_spec": "Drop the setNuSigmaF call entirely.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": null,
+      "description": "Missing fission production cross section. k_eff drops drastically. Tests whether the MR-suite can spot a complete-zero fission scenario."
+    },
+    {
+      "code": "Mut05-openmoc-runner-chi-swap-groups",
+      "category": "runner-level",
+      "target_file_type": "openmoc_runner.py",
+      "application_spec": "Replace setChi(mat['chi']) with setChi(reversed(mat['chi'])).",
+      "predicted_class": "semantic",
+      "related_meta_pattern": null,
+      "description": "Fast/thermal swap of fission spectrum. Fuel chi = [1, 0] becomes [0, 1]: fission emits into the thermal group instead of the fast group, which is physically wrong and shifts k_eff measurably."
+    },
+    {
+      "code": "Mut06-openmoc-runner-vacuum-boundary",
+      "category": "runner-level",
+      "target_file_type": "openmoc_runner.py",
+      "application_spec": "Change boundary type from REFLECTIVE to VACUUM.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": null,
+      "description": "Pin-cell with leakage. k_eff drops because neutrons escape instead of reflecting. MR ratios may still hold (same scaling applied to both source and follow-up) — useful coverage probe."
+    },
+    {
+      "code": "Mut07-openmoc-adapter-nsf-inverse",
+      "category": "input-adapter-level",
+      "target_file_type": "openmoc_input_adapter.py",
+      "application_spec": "Scale fuel.nu_sigma_f by 1/factor instead of factor.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "nu_sigma_f",
+      "description": "Sign/direction inversion. The MR expects k_followup > k_source; with this bug k_followup < k_source. Should be detected by ScaleNuSigmaF (GreaterThan assertion fails)."
+    },
+    {
+      "code": "Mut08-openmoc-adapter-nsf-square",
+      "category": "input-adapter-level",
+      "target_file_type": "openmoc_input_adapter.py",
+      "application_spec": "Apply the scaling factor twice (factor**2).",
+      "predicted_class": "semantic",
+      "related_meta_pattern": null,
+      "description": "Realistic copy-paste error: scaling line duplicated. k_followup is over-amplified. The GreaterThan assertion still passes (k_followup is way bigger), so the MR misses this fault — interesting gap."
+    },
+    {
+      "code": "Mut09-openmoc-adapter-nsf-moderator",
+      "category": "input-adapter-level",
+      "target_file_type": "openmoc_input_adapter.py",
+      "application_spec": "Scale moderator.nu_sigma_f instead of fuel.nu_sigma_f.",
+      "predicted_class": "equivalent",
+      "related_meta_pattern": null,
+      "description": "Moderator nu_sigma_f is exactly [0, 0] in the pin-cell case. Multiplying zero by any factor is a no-op, so this is an equivalent mutant by construction. Included to validate that baseline screening catches it."
+    },
+    {
+      "code": "Mut10-openmoc-adapter-nsf-identity",
+      "category": "input-adapter-level",
+      "target_file_type": "openmoc_input_adapter.py",
+      "application_spec": "Ignore factor; copy nu_sigma_f unchanged.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "nu_sigma_f",
+      "description": "Bug: factor parsed but not applied. Source and follow-up are identical, so k_followup == k_source. The MR's GreaterThan assertion fails strictly — predicted detection."
+    },
+    {
+      "code": "Mut11-openmoc-adapter-nsf-fast-only",
+      "category": "input-adapter-level",
+      "target_file_type": "openmoc_input_adapter.py",
+      "application_spec": "Scale only the fast-group nu_sigma_f; leave thermal group untouched.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": null,
+      "description": "Partial scaling. k_followup increases but less than expected. MR still sees k_followup > k_source (assertion passes), so this fault is missed — another coverage-gap probe."
+    },
+    {
+      "code": "Mut12-openmoc-adapter-sa-no-sigt-update",
+      "category": "input-adapter-level",
+      "target_file_type": "openmoc_input_adapter_sigma_a.py",
+      "application_spec": "Update fuel.sigma_a but leave sigma_t unchanged.",
+      "predicted_class": "solver-dependent",
+      "related_meta_pattern": "sigma_a",
+      "description": "Inconsistent input. OpenMOC reads sigma_t directly (sigma_a is derived), so for the OpenMOC scenario this is an equivalent mutant. OpenMC reads both, so the inconsistency surfaces there. Tests cross-solver behaviour on the same patch."
+    },
+    {
+      "code": "Mut13-openmoc-adapter-sa-inverse",
+      "category": "input-adapter-level",
+      "target_file_type": "openmoc_input_adapter_sigma_a.py",
+      "application_spec": "Scale fuel.sigma_a by 1/factor instead of factor.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "sigma_a",
+      "description": "Direction inversion. With factor > 1 the bug *decreases* absorption, so k_followup > k_source, but the assertion is LessThan. Predicted detection."
+    },
+    {
+      "code": "Mut14-openmoc-adapter-sa-moderator",
+      "category": "input-adapter-level",
+      "target_file_type": "openmoc_input_adapter_sigma_a.py",
+      "application_spec": "Scale moderator.sigma_a (and moderator.sigma_t) instead of fuel.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "sigma_a",
+      "description": "Moderator sigma_a is non-zero (unlike its nu_sigma_f). Scaling moderator absorption by 1.5 should still measurably depress k_eff. Whether the MR detects this depends on whether the MR allows for moderator-side perturbation; under the strict ScaleFuelSigmaA definition this is a mis-targeted fault, not an equivalent."
+    },
+    {
+      "code": "Mut15-openmc-runner-chi-zero",
+      "category": "runner-level",
+      "target_file_type": "openmc_runner.py",
+      "application_spec": "Zero out chi for every material in the MGXS library.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": null,
+      "description": "OpenMC mirror of Mut01. Same logic: kills fission source. Expected to drive baseline k_eff toward zero."
+    },
+    {
+      "code": "Mut16-openmc-runner-scatter-transpose",
+      "category": "runner-level",
+      "target_file_type": "openmc_runner.py",
+      "application_spec": "Transpose the scatter matrix (swap g_in and g_out axes).",
+      "predicted_class": "semantic",
+      "related_meta_pattern": null,
+      "description": "Scattering matrix S[g_in, g_out] becomes S[g_out, g_in]. Up- and down-scattering swap places, which fundamentally changes the thermal spectrum. Realistic indexing bug. Expected baseline shift."
+    },
+    {
+      "code": "Mut17-openmc-runner-vacuum-boundary",
+      "category": "runner-level",
+      "target_file_type": "openmc_runner.py",
+      "application_spec": "Change boundary_type from reflective to vacuum on all four planes.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": null,
+      "description": "OpenMC mirror of Mut06. Neutrons escape; k_eff drops. Useful to compare against the OpenMOC reflective→vacuum baseline shift."
+    },
+    {
+      "code": "Mut18-openmc-runner-batches-too-few",
+      "category": "runner-level",
+      "target_file_type": "openmc_runner.py",
+      "application_spec": "Hard-code batches=5, inactive=2, particles=200 (very noisy MC).",
+      "predicted_class": "semantic",
+      "related_meta_pattern": null,
+      "description": "Massive statistical-noise injection. Tests whether the MR's GreaterThan/LessThan assertion is robust to MC noise at low particle counts."
+    },
+    {
+      "code": "Mut19-openmc-runner-hardcode-keff",
+      "category": "runner-level",
+      "target_file_type": "openmc_runner.py",
+      "application_spec": "Hardcode k_mean = 1.0 regardless of statepoint contents.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "nu_sigma_f",
+      "description": "Worst-case bug: solver bypassed. k_eff identical across source and follow-up; both MRs' strict assertions fail. Easy detection."
+    },
+    {
+      "code": "Mut20-openmc-runner-chi-swap-groups",
+      "category": "runner-level",
+      "target_file_type": "openmc_runner.py",
+      "application_spec": "Reverse chi array before passing to set_chi.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": null,
+      "description": "OpenMC mirror of Mut05. Fast-to-thermal fission shift."
+    },
+    {
+      "code": "Mut21-openmc-runner-fission-zero",
+      "category": "runner-level",
+      "target_file_type": "openmc_runner.py",
+      "application_spec": "Zero out fission cross section but keep nu_sigma_f.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": null,
+      "description": "Inconsistent fission data. OpenMC may warn / refuse / silently proceed; documents observed behaviour either way."
+    },
+    {
+      "code": "Mut22-openmc-adapter-nsf-inverse",
+      "category": "input-adapter-level",
+      "target_file_type": "openmc_input_adapter.py",
+      "application_spec": "Scale fuel.nu_sigma_f by 1/factor (OpenMC twin of Mut07).",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "nu_sigma_f",
+      "description": "Matched pair with Mut07. Used for cross-solver Cohen's κ."
+    },
+    {
+      "code": "Mut23-openmc-adapter-nsf-square",
+      "category": "input-adapter-level",
+      "target_file_type": "openmc_input_adapter.py",
+      "application_spec": "Apply factor twice (OpenMC twin of Mut08).",
+      "predicted_class": "semantic",
+      "related_meta_pattern": null,
+      "description": "Matched pair with Mut08."
+    },
+    {
+      "code": "Mut24-openmc-adapter-nsf-moderator",
+      "category": "input-adapter-level",
+      "target_file_type": "openmc_input_adapter.py",
+      "application_spec": "Scale moderator nu_sigma_f (OpenMC twin of Mut09).",
+      "predicted_class": "equivalent",
+      "related_meta_pattern": null,
+      "description": "Matched pair with Mut09; equivalent-mutant control on the OpenMC side."
+    },
+    {
+      "code": "Mut25-openmc-adapter-nsf-identity",
+      "category": "input-adapter-level",
+      "target_file_type": "openmc_input_adapter.py",
+      "application_spec": "Ignore factor; copy unchanged (OpenMC twin of Mut10).",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "nu_sigma_f",
+      "description": "Matched pair with Mut10."
+    },
+    {
+      "code": "Mut26-openmc-adapter-sa-no-sigt-update",
+      "category": "input-adapter-level",
+      "target_file_type": "openmc_input_adapter_sigma_a.py",
+      "application_spec": "Update fuel.sigma_a but leave sigma_t unchanged (OpenMC twin of Mut12).",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "sigma_a",
+      "description": "Matched pair with Mut12. OpenMC twin is semantic (OpenMC reads sigma_t and sigma_a independently). Together with Mut12 this documents the cross-solver split clearly."
+    },
+    {
+      "code": "Mut27-openmc-adapter-sa-inverse",
+      "category": "input-adapter-level",
+      "target_file_type": "openmc_input_adapter_sigma_a.py",
+      "application_spec": "Scale fuel.sigma_a by 1/factor (OpenMC twin of Mut13).",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "sigma_a",
+      "description": "Matched pair with Mut13."
+    },
+    {
+      "code": "Mut28-openmoc-runner-chi-fast-only",
+      "category": "runner-level",
+      "target_file_type": "openmoc_runner.py",
+      "application_spec": "Hard-code chi to [1.0, 0.0] regardless of mat[\"chi\"].",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "group_permute",
+      "description": "Hard-coded fast-only fission emission. Equivalent for the source case (reference fuel.chi == [1, 0] already), but breaks PermuteEnergyGroups (MR04): the permuted JSON has chi == [0, 1] yet the runner still emits into group 0. Phase-1 monotonicity MRs scale nu_sigma_f / sigma_a only, so they are insensitive to chi handling — this fault should be invisible to Phase 1 and visible to Phase 2 MR04."
+    },
+    {
+      "code": "Mut29-openmoc-adapter-fuel-sigt-no-siga-update",
+      "category": "input-adapter-level",
+      "target_file_type": "openmoc_input_adapter_fuel_sigma_t.py",
+      "application_spec": "Update fuel.sigma_t but skip the matching fuel.sigma_a bump.",
+      "predicted_class": "equivalent",
+      "related_meta_pattern": null,
+      "description": "Adapter inconsistency analogous to Mut12 but for the new fuel-sigma_t MR. OpenMOC reads sigma_t directly and derives sigma_a from sigma_t − Σ sigma_s, so missing the JSON sigma_a write is silent on OpenMOC: the runner still sees the correct effective absorption. Pure documentation-vs-runtime split — predicted equivalent for OpenMOC and semantic only when a downstream consumer actually reads sigma_a from the JSON (none currently does, so this is in the catalogue mostly to document the parity with Mut12 — important when OpenMC support lands)."
+    },
+    {
+      "code": "Mut30-openmoc-adapter-moderator-sigma-a-no-sigt-update",
+      "category": "input-adapter-level",
+      "target_file_type": "openmoc_input_adapter_moderator_sigma_a.py",
+      "application_spec": "Update moderator.sigma_a but skip the matching moderator.sigma_t bump.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "moderator_sigma_a",
+      "description": "Adapter inconsistency for the new moderator-sigma_a MR. Because OpenMOC derives moderator absorption from sigma_t (not from sigma_a in the JSON), the runner only sees the original moderator.sigma_t, so the follow-up k_eff is unchanged from the source — that violates ScaleModeratorSigmaA's Less assertion. Predicted detected by MR07 on OpenMOC; missed by Phase-1 MRs (which never touch moderator)."
+    },
+    {
+      "code": "Mut31-openmoc-adapter-group-permute-fuel-only",
+      "category": "input-adapter-level",
+      "target_file_type": "openmoc_input_adapter_group_permute.py",
+      "application_spec": "Permute energy groups in fuel only; leave moderator unchanged.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "group_permute",
+      "description": "Adapter does only half of the symmetry transformation. The follow-up JSON has fuel with groups 0<->1 but moderator unchanged — a physically meaningless mixed state. The runner produces a different k_eff than the source, violating PermuteEnergyGroups' approx assertion. Pure Phase-2 MR target; Phase-1 MRs do not exercise this adapter."
+    },
+    {
+      "code": "Mut32-openmoc-adapter-fuel-sigma-s-identity",
+      "category": "input-adapter-level",
+      "target_file_type": "openmoc_input_adapter_fuel_sigma_s.py",
+      "application_spec": "Ignore the factor — copy fuel.sigma_s unchanged.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "fuel_sigma_s",
+      "description": "Adapter no-op: classic 'forgot to apply factor' bug analogous to Mut10 (nsf-identity). The follow-up case is bit-equivalent to the source, so k_followup == k_source. The MR06 MR's strict 'less' assertion fails. Phase-1 MRs do not exercise this adapter; predicted detection by MR06 only."
+    },
+    {
+      "code": "Mut33-openmoc-adapter-fuel-radius-shrink",
+      "category": "input-adapter-level",
+      "target_file_type": "openmoc_input_adapter_fuel_radius.py",
+      "application_spec": "Divide fuel_radius by factor instead of multiplying.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "fuel_radius",
+      "description": "Direction inversion. Scenario factor is 1.05 (factor > 1), so the bug shrinks the fuel by ~5%. With less fuel volume the cell is more moderated and k_eff drops, violating MR08's 'greater' assertion. Predicted detection by MR08; invisible to all Phase-1 MRs because they do not touch geometry."
+    },
+    {
+      "code": "Mut34-openmc-adapter-particles-no-op",
+      "category": "input-adapter-level",
+      "target_file_type": "openmc_input_adapter_refine_particles.py",
+      "application_spec": "Ignore the factor — leave solver.particles unchanged.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "particles_refine",
+      "description": "Adapter doesn't change particle count, so the follow-up MC run has the same statistical noise as the source. Observed σ ratio ≈ 1.0, but MR12's variance-ratio assertion expects 1/√10 ≈ 0.316. Detected by MR12 (variance-ratio). Inert in deterministic OpenMOC; OpenMC-only mutation."
+    },
+    {
+      "code": "Mut35-openmc-runner-chi-fast-only",
+      "category": "runner-level",
+      "target_file_type": "openmc_runner.py",
+      "application_spec": "Hard-code chi to [1.0, 0.0] regardless of mat['chi']. OpenMC twin of Mut28.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "group_permute",
+      "description": "OpenMC twin of Mut28. Same logic: chi[0]=1 hardcoded so fission always emits into group 0, regardless of the JSON. Permuted JSON (MR04) has chi=[0,1] but runner still emits to 0 → MR04 detects."
+    },
+    {
+      "code": "Mut36-openmc-adapter-group-permute-fuel-only",
+      "category": "input-adapter-level",
+      "target_file_type": "openmc_input_adapter_group_permute.py",
+      "application_spec": "Permute groups in fuel only; leave moderator unchanged. OpenMC twin of Mut31.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "group_permute",
+      "description": "OpenMC twin of Mut31. Half-permutes the JSON, producing a mixed state that violates MR04's approx assertion."
+    },
+    {
+      "code": "Mut37-openmc-adapter-fuel-sigma-s-identity",
+      "category": "input-adapter-level",
+      "target_file_type": "openmc_input_adapter_fuel_sigma_s.py",
+      "application_spec": "Ignore the factor — copy fuel.sigma_s unchanged. OpenMC twin of Mut32.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "fuel_sigma_s",
+      "description": "OpenMC twin of Mut32. Adapter no-op, so follow-up == source, violating MR06's strict less assertion."
+    },
+    {
+      "code": "Mut38-openmc-adapter-fuel-radius-shrink",
+      "category": "input-adapter-level",
+      "target_file_type": "openmc_input_adapter_fuel_radius.py",
+      "application_spec": "Divide fuel_radius by factor instead of multiplying. OpenMC twin of Mut33.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "fuel_radius",
+      "description": "OpenMC twin of Mut33. Direction inversion; shrinks the fuel, drops k_eff, violates MR08's greater assertion."
+    },
+    {
+      "code": "Mut39-openmoc-runner-hardcode-y-from-x",
+      "category": "runner-level",
+      "target_file_type": "openmoc_runner.py",
+      "application_spec": "Use g[\"x_extent_cm\"] for half_y instead of g[\"y_extent_cm\"].",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "rotate_90",
+      "description": "Hard-codes y-extent to x-extent — geometry is correct only when x == y. On the asymmetric pin-cell (1.0 × 1.5 cm) the runner constructs a 1.0 × 0.5 cell from the source JSON and a 1.5 × 0.75 cell from the 90°-rotated JSON; k_eff differs noticeably between them, so MR01 (Rotate90) detects. Both source and follow-up of Phase-1 MRs use the symmetric sample, where this patch is silently equivalent — exactly the MR-coverage gap MR01 was designed to fill."
+    },
+    {
+      "code": "Mut40-openmc-runner-hardcode-y-from-x",
+      "category": "runner-level",
+      "target_file_type": "openmc_runner.py",
+      "application_spec": "OpenMC twin of Mut39: half_y = g[\"x_extent_cm\"] / 2.0.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "rotate_90",
+      "description": "OpenMC mirror of Mut39. Same logical bug, same MR01 detection prediction. Matched pair entry for cross-solver κ."
+    },
+    {
+      "code": "Mut41-openmoc-runner-clamp-y-offset-positive",
+      "category": "runner-level",
+      "target_file_type": "openmoc_runner.py",
+      "application_spec": "Replace y=...fuel_offset_y_cm with y=max(0.0, ...) inside ZCylinder.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "mirror_x",
+      "description": "Asymmetric y-handling: negative offsets get clamped to 0, positive ones pass through. Silent equivalent on the symmetric pin-cell (no offset). On the off-centre sample, source (y=-0.05) sees fuel at y=0 but the MirrorX follow-up (y=+0.05) sees fuel at +0.05 — k_eff differs, MR02 detects. MR03 (mirror y) and rotation MR untouched."
+    },
+    {
+      "code": "Mut42-openmoc-runner-clamp-x-offset-positive",
+      "category": "runner-level",
+      "target_file_type": "openmoc_runner.py",
+      "application_spec": "Replace x=...fuel_offset_x_cm with x=max(0.0, ...) inside ZCylinder.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "mirror_y",
+      "description": "Symmetric of Mut41 across the y-axis: negative x-offsets clamped to 0, positive ones pass through. On the off-centre sample source (x=+0.10) is unchanged, but MirrorY follow-up (x=-0.10) becomes x=0 — k_eff differs, MR03 detects. MR02 untouched."
+    },
+    {
+      "code": "Mut43-openmc-runner-clamp-y-offset-positive",
+      "category": "runner-level",
+      "target_file_type": "openmc_runner.py",
+      "application_spec": "OpenMC twin of Mut41 (y0=max(0.0, ...)).",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "mirror_x",
+      "description": "OpenMC mirror of Mut41. Matched pair for cross-solver κ on MR02."
+    },
+    {
+      "code": "Mut44-openmc-runner-clamp-x-offset-positive",
+      "category": "runner-level",
+      "target_file_type": "openmc_runner.py",
+      "application_spec": "OpenMC twin of Mut42 (x0=max(0.0, ...)).",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "mirror_y",
+      "description": "OpenMC mirror of Mut42. Matched pair for cross-solver κ on MR03."
+    },
+    {
+      "code": "Mut45-openmoc-runner-ignore-temperature",
+      "category": "runner-level",
+      "target_file_type": "openmoc_runner.py",
+      "application_spec": "Force doppler factor = 1.0 in _build_material (ignore mat[\"temperature_kelvin\"]).",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "fuel_temperature",
+      "description": "Plumbing bypass analogous to upstream OpenMC PR #3712 (chained Material.add_temperature returns None). Runner reads the temperature field from JSON but discards it, so source and follow-up of MR-T (RaiseFuelTemperature) run with the same factor=1.0 (no Doppler scaling) and produce identical k_eff. MR-T's `less` assertion fails strictly → DETECTED. All non-temperature MRs are unaffected (their adapters never touch temperature_kelvin)."
+    },
+    {
+      "code": "Mut46-openmc-runner-ignore-temperature",
+      "category": "runner-level",
+      "target_file_type": "openmc_runner.py",
+      "application_spec": "Force doppler = 1.0 in OpenMC MGXS-library construction.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "fuel_temperature",
+      "description": "OpenMC twin of Mut45. Same logical bug, same MR detection prediction. Matched-pair entry for MR-T cross-solver κ."
+    },
+    {
+      "code": "Mut47-openmoc-runner-tally-y-sign-bucket",
+      "category": "runner-level",
+      "target_file_type": "openmoc_runner.py",
+      "application_spec": "Replace cell-id-based tally bucketing with y-sign-based bucketing.",
+      "predicted_class": "semantic",
+      "related_meta_pattern": "tally_mirror",
+      "description": "Tally-export bug analogous to OpenMC PR #3708 distribcell group-name collision: assigns FSR fluxes to fuel/moderator buckets based on FSR centroid y-sign instead of containing cell ID. Source case (fuel offset y=-0.08) buckets correctly; MirrorX follow-up (fuel offset y=+0.08) gets fuel and moderator swapped in the output dict. k_eff unaffected. Caught by `flux-pointwise-approx` on MR02-tally / MR03-tally, invisible to every other MR."
+    }
+  ],
+  "mutants": [
+    {
+      "operator_code": "Mut00-identity",
+      "application_sut": "openmoc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut01-openmoc-runner-chi-zero",
+      "application_sut": "openmoc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut02-openmoc-runner-sigt-from-siga",
+      "application_sut": "openmoc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut03-openmoc-runner-swap-fuel-moderator",
+      "application_sut": "openmoc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut04-openmoc-runner-drop-nu-sigma-f",
+      "application_sut": "openmoc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut05-openmoc-runner-chi-swap-groups",
+      "application_sut": "openmoc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut06-openmoc-runner-vacuum-boundary",
+      "application_sut": "openmoc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut07-openmoc-adapter-nsf-inverse",
+      "application_sut": "openmoc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut08-openmoc-adapter-nsf-square",
+      "application_sut": "openmoc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut09-openmoc-adapter-nsf-moderator",
+      "application_sut": "openmoc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut10-openmoc-adapter-nsf-identity",
+      "application_sut": "openmoc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut11-openmoc-adapter-nsf-fast-only",
+      "application_sut": "openmoc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut12-openmoc-adapter-sa-no-sigt-update",
+      "application_sut": "openmoc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut13-openmoc-adapter-sa-inverse",
+      "application_sut": "openmoc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut14-openmoc-adapter-sa-moderator",
+      "application_sut": "openmoc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut15-openmc-runner-chi-zero",
+      "application_sut": "openmc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut16-openmc-runner-scatter-transpose",
+      "application_sut": "openmc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut17-openmc-runner-vacuum-boundary",
+      "application_sut": "openmc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut18-openmc-runner-batches-too-few",
+      "application_sut": "openmc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut19-openmc-runner-hardcode-keff",
+      "application_sut": "openmc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut20-openmc-runner-chi-swap-groups",
+      "application_sut": "openmc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut21-openmc-runner-fission-zero",
+      "application_sut": "openmc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut22-openmc-adapter-nsf-inverse",
+      "application_sut": "openmc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut23-openmc-adapter-nsf-square",
+      "application_sut": "openmc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut24-openmc-adapter-nsf-moderator",
+      "application_sut": "openmc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut25-openmc-adapter-nsf-identity",
+      "application_sut": "openmc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut26-openmc-adapter-sa-no-sigt-update",
+      "application_sut": "openmc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut27-openmc-adapter-sa-inverse",
+      "application_sut": "openmc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut28-openmoc-runner-chi-fast-only",
+      "application_sut": "openmoc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut29-openmoc-adapter-fuel-sigt-no-siga-update",
+      "application_sut": "openmoc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut30-openmoc-adapter-moderator-sigma-a-no-sigt-update",
+      "application_sut": "openmoc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut31-openmoc-adapter-group-permute-fuel-only",
+      "application_sut": "openmoc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut32-openmoc-adapter-fuel-sigma-s-identity",
+      "application_sut": "openmoc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut33-openmoc-adapter-fuel-radius-shrink",
+      "application_sut": "openmoc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut34-openmc-adapter-particles-no-op",
+      "application_sut": "openmc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut35-openmc-runner-chi-fast-only",
+      "application_sut": "openmc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut36-openmc-adapter-group-permute-fuel-only",
+      "application_sut": "openmc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut37-openmc-adapter-fuel-sigma-s-identity",
+      "application_sut": "openmc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut38-openmc-adapter-fuel-radius-shrink",
+      "application_sut": "openmc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut39-openmoc-runner-hardcode-y-from-x",
+      "application_sut": "openmoc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut40-openmc-runner-hardcode-y-from-x",
+      "application_sut": "openmc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut41-openmoc-runner-clamp-y-offset-positive",
+      "application_sut": "openmoc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut42-openmoc-runner-clamp-x-offset-positive",
+      "application_sut": "openmoc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut43-openmc-runner-clamp-y-offset-positive",
+      "application_sut": "openmc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut44-openmc-runner-clamp-x-offset-positive",
+      "application_sut": "openmc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut45-openmoc-runner-ignore-temperature",
+      "application_sut": "openmoc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut46-openmc-runner-ignore-temperature",
+      "application_sut": "openmc",
+      "applied_diff": "",
+      "status": "active"
+    },
+    {
+      "operator_code": "Mut47-openmoc-runner-tally-y-sign-bucket",
+      "application_sut": "openmoc",
+      "applied_diff": "",
+      "status": "active"
+    }
+  ]
+}

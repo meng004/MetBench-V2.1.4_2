@@ -13,9 +13,16 @@ using MetBench_DAL;
 using MetBench_IDAL;
 using MetBench_BLL;
 using MetBench_BLL.SystemMT;
+using MetBench_BLL.SystemMT.Anomaly;
 using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Persistence;
+using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_BLL.SystemMT.Reporting;
+using MetBench_BLL.Discovery;
+using MetBench_BLL.Discovery.Validators;
+using MetBench_BLL.Mutation;
+using MetBench_BLL.Coverage;
+using MetBench_BLL.Trend;
 using Wpf.Ui.Controls;
 using Wpf.Ui;
 using Stylet;
@@ -37,7 +44,11 @@ namespace MetBench_Client
         // https://docs.microsoft.com/dotnet/core/extensions/logging
         private static readonly IHost _host = Host
             .CreateDefaultBuilder()
-            .ConfigureAppConfiguration(c => { c.SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)); })
+            .ConfigureAppConfiguration(c =>
+            {
+                c.SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location));
+                c.AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: false);
+            })
             .ConfigureServices((context, services) =>
             {  
                 //添加各种服务和页面
@@ -140,8 +151,79 @@ namespace MetBench_Client
                 services.AddScoped<Views.Pages.SystemMtExecutionPage>();
                 services.AddScoped<ViewModels.SystemMtExecutionViewModel>();
 
+                // === v2 SystemMT repositories (LiteDB) + Anomaly stack ===
+                services.AddSystemMtRepositories();
+                services.AddScoped<IAnomalyService, AnomalyService>();
+
+                // === v2 Anomaly list page ===
+                services.AddScoped<Views.Pages.AnomalyListPage>();
+                services.AddScoped<ViewModels.AnomalyListViewModel>();
+
+                // === v2 Replay result page (§1.2) ===
+                services.AddSingleton<MetBench_Client.Services.ReplayInbox>();
+                services.AddScoped<ISystemMtPipeline, SystemMtPipeline>();
+                services.AddScoped<ReplayService>();
+                services.AddScoped<Views.Pages.ReplayResultPage>();
+                services.AddScoped<ViewModels.ReplayResultViewModel>();
+
                 // 结果可视化相关IOC配置
                 services.AddScoped<MTVisualizationSerive>();
+
+                // === v2 Discovery stack (P7) ===
+                services.AddScoped<DiscoveryService>();
+                services.AddSingleton<ILlmGateway>(provider =>
+                {
+                    var cfg = provider.GetRequiredService<IConfiguration>();
+                    var baseUrl = cfg["DeepSeek:BaseUrl"];
+                    var apiKey  = cfg["DeepSeek:ApiKey"];
+                    var model   = cfg["DeepSeek:Model"];
+                    if (!string.IsNullOrWhiteSpace(baseUrl) && !string.IsNullOrWhiteSpace(apiKey) && !string.IsNullOrWhiteSpace(model))
+                        return new DeepSeekLlmGateway(baseUrl, apiKey, model);
+                    return new NullLlmGateway();
+                });
+                services.AddSingleton<MetaPatternDiscoverer>(provider => new MetaPatternDiscoverer(
+                    OperatingSystem.IsWindows() ? "python" : "python3",
+                    Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!, "tools", "noether_candidates.py")));
+                services.AddSingleton<LlmNativeDiscoverer>(provider =>
+                    new LlmNativeDiscoverer(provider.GetRequiredService<ILlmGateway>()));
+                services.AddSingleton<IMRDiscoverer>(provider => provider.GetRequiredService<MetaPatternDiscoverer>());
+                services.AddSingleton<IMRDiscoverer>(provider => provider.GetRequiredService<LlmNativeDiscoverer>());
+                services.AddScoped<Views.Pages.DiscoveryPage>();
+                services.AddScoped<ViewModels.DiscoveryViewModel>();
+
+                // === v2 Validation stack (P7) ===
+                services.AddScoped<ValidationService>();
+                services.AddSingleton<EmpiricalValidator>(provider => new EmpiricalValidator(
+                    (candidate, ct) => System.Threading.Tasks.Task.FromResult<System.Collections.Generic.IReadOnlyList<EmpiricalSample>>(
+                        new EmpiricalSample[]
+                        {
+                            new(1.0, 1.1, true), new(1.0, 1.1, true), new(1.0, 1.1, true),
+                            new(1.0, 1.1, true), new(1.0, 1.1, true), new(1.0, 1.1, true),
+                            new(1.0, 1.1, true), new(1.0, 1.1, true), new(1.0, 1.1, true),
+                            new(1.0, 1.1, true),
+                        })));
+                services.AddSingleton<TheoreticalLlmValidator>(provider =>
+                    new TheoreticalLlmValidator(new NullLlmGateway("{\"plausible\": true, \"reason\": \"demo\"}")));
+                services.AddSingleton<AdversarialMutmutValidator>(provider => new AdversarialMutmutValidator(
+                    (candidate, ct) => System.Threading.Tasks.Task.FromResult<System.Collections.Generic.IReadOnlyList<MutantProbe>>(new MutantProbe[]
+                        { new(1, false), new(2, true), new(3, false), new(4, true), new(5, false) })));
+                services.AddScoped<Views.Pages.CandidateReviewPage>();
+                services.AddScoped<ViewModels.CandidateReviewViewModel>();
+
+                // === v2 Mutation campaign (P7) ===
+                services.AddScoped<MutationCampaignService>();
+                services.AddScoped<Views.Pages.MutationCampaignPage>();
+                services.AddScoped<ViewModels.MutationCampaignViewModel>();
+
+                // === v2 Coverage dashboard (P8) ===
+                services.AddScoped<CoverageService>();
+                services.AddScoped<Views.Pages.CoverageDashboardPage>();
+                services.AddScoped<ViewModels.CoverageDashboardViewModel>();
+
+                // === v2 Trend dashboard (P8) ===
+                services.AddScoped<TrendAnalysisService>();
+                services.AddScoped<Views.Pages.TrendDashboardPage>();
+                services.AddScoped<ViewModels.TrendDashboardViewModel>();
 
                 // 蜕变关系识别相关IOC配置
                 services.AddScoped<MRDetector>();
@@ -247,7 +329,12 @@ namespace MetBench_Client
         /// </summary>
         private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
-            // For more info see https://docs.microsoft.com/en-us/dotnet/api/system.windows.application.dispatcherunhandledexception?view=windowsdesktop-6.0
+            var logPath = Path.Combine(Path.GetTempPath(), "MetBench_crash.log");
+            try { File.WriteAllText(logPath, $"{DateTime.Now}\n{e.Exception}"); } catch { }
+            e.Handled = true;
+            System.Windows.MessageBox.Show(
+                $"Unhandled exception:\n{e.Exception.GetType().Name}: {e.Exception.Message}\n\nSee {logPath} for full details.",
+                "MetBench Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
         }
     }
 }

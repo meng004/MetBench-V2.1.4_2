@@ -1,0 +1,205 @@
+erDiagram
+    Domain ||--o{ ApplicationDomain : "1:N"
+    Application ||--o{ ApplicationDomain : "1:N"
+    Runtime ||--o{ Application : "RuntimeId (1:N)"
+
+    MetamorphicRelation ||--o{ MRBinding : "MRId (1:N)"
+    Application ||--o{ MRBinding : "ApplicationId (1:N)"
+    MRBinding ||--o{ MRInstance : "MRBindingId (1:N)"
+    MRInstance ||--o{ Execution : "MRInstanceId (1:N)"
+    Execution ||--|| Result : "1:1"
+    Result ||--o| Anomaly : "0..1"
+    KnownBug ||--o{ Anomaly : "LinkedKnownBugId (0..*)"
+
+    Batch ||--o{ Execution : "BatchId (0..*)"
+    BatchPlan ||--o{ Batch : "PlanId (0..*)"
+
+    DiscoveryMethod ||--o{ DiscoveryRun : "MethodId (1:N)"
+    DiscoveryRun ||--o{ CandidateMR : "DiscoveryRunId (1:N)"
+    CandidateMR ||--o{ ValidationRun : "CandidateMRId (1:N)"
+    CandidateMR }o..|| MetamorphicRelation : "PromotedToMRId (when promoted)"
+    Application ||--o{ DiscoveryRun : "TargetApplicationId (0..*)"
+
+    MutationOperator ||--o{ Mutant : "OperatorId (1:N)"
+    Application ||--o{ Mutant : "ApplicationId (0..*)"
+    MutationCampaign ||--o{ MutationResult : "CampaignId (1:N)"
+    Mutant ||--o{ MutationResult : "MutantId (1:N)"
+    MRBinding ||--o{ MutationResult : "MRBindingId (1:N)"
+    Execution ||--o{ MutationResult : "ExecutionId (1:N)"
+
+    Application ||--o{ KnownBug : "RelatedApplicationId (0..*)"
+
+    MetamorphicRelation {
+        int IdMR PK
+        string Code
+        string MetaPatternCode
+        string TransformationName
+        string AssertionTypeCode
+        string ValueName
+        bool NoiseAware
+        double ToleranceRel
+        string Kind "method/system"
+    }
+
+    Application {
+        int IdApplication PK
+        string Name UK
+        string Version
+        int RuntimeId FK
+        string RunnerEntryPath
+        string InputParserPath
+        string OutputParserPath
+        string Kind "method/system"
+    }
+
+    Runtime {
+        int IdRuntime PK
+        string Name UK
+        string Kind "python/matlab/cpp/java/fortran"
+        string InvokeTemplate
+    }
+
+    Domain {
+        int IdDomain PK
+        string Name UK
+        string Description
+    }
+
+    ApplicationDomain {
+        int IdJunction PK
+        int ApplicationId FK
+        int DomainId FK
+    }
+
+    MRBinding {
+        int IdMRBinding PK
+        int MRId FK
+        int ApplicationId FK
+        string DefaultSampleCasePath
+        bool IsActive
+    }
+
+    MRInstance {
+        int IdInstance PK
+        int MRBindingId FK
+        string ParameterOverridesJson
+        bool IsReusable
+    }
+
+    Execution {
+        guid IdExecution PK
+        int MRInstanceId FK
+        guid BatchId FK
+        string Status
+        string CatalogVersionSha
+        string SutVersionSnapshot
+        DateTime QueuedAt
+    }
+
+    Result {
+        guid IdResult PK
+        guid ExecutionId FK
+        double SourceValue
+        double FollowupValue
+        bool AssertionPassed
+    }
+
+    Anomaly {
+        guid IdAnomaly PK
+        guid ResultId FK
+        string Severity
+        string Category
+        string Status
+        int LinkedKnownBugId FK
+    }
+
+    KnownBug {
+        int IdBug PK
+        string Code UK
+        int RelatedApplicationId FK
+        string Status
+    }
+
+    Batch {
+        guid IdBatch PK
+        int PlanId FK
+        string Status
+    }
+
+    BatchPlan {
+        int IdPlan PK
+        string Name UK
+        string Schedule
+        bool Enabled
+    }
+
+    Report {
+        guid IdReport PK
+        string Scope
+        DateTime GeneratedAt
+    }
+
+    DiscoveryMethod {
+        int IdMethod PK
+        string Name
+        string Version
+        bool Enabled
+    }
+
+    DiscoveryRun {
+        guid IdRun PK
+        int MethodId FK
+        int TargetApplicationId FK
+        string Status
+    }
+
+    CandidateMR {
+        guid IdCandidate PK
+        guid DiscoveryRunId FK
+        string Status
+        int PromotedToMRId FK
+    }
+
+    ValidationRun {
+        guid IdValidation PK
+        guid CandidateMRId FK
+        string ValidatorName
+        bool Passed
+    }
+
+    MutationOperator {
+        int IdOperator PK
+        string Code UK
+        string Category
+        string PredictedClass
+    }
+
+    Mutant {
+        int IdMutant PK
+        int OperatorId FK
+        int ApplicationId FK
+        string Status
+    }
+
+    MutationCampaign {
+        guid IdCampaign PK
+        string Name
+        string CatalogVersionSha
+        string Status
+    }
+
+    MutationResult {
+        guid IdMutationResult PK
+        guid CampaignId FK
+        int MutantId FK
+        int MRBindingId FK
+        guid ExecutionId FK
+        string Outcome
+    }
+
+    AuditLog {
+        guid IdLog PK
+        DateTime Timestamp
+        string Action
+        string TargetEntityId
+    }

@@ -74,10 +74,61 @@ def _build_mgxs_library(case: dict, library_path: Path) -> None:
         if n != 2:
             raise ValueError(f"OpenMC runner expects num_groups=2, got {n} for material '{name}'")
 
+        # Phase-3: optional Doppler-style absorption broadening. T_ref = 600 K
+        # so existing samples (no field) get factor = 1.0 and behave identically.
+        # Mirrors the formula in SUT/openmoc/openmoc_runner.py::_doppler_factor.
+        import math as _math
+        t_kelvin = float(mat.get("temperature_kelvin", 600.0))
+        doppler = 1.0 + 0.05 * _math.log(t_kelvin / 600.0) if t_kelvin > 0 else 1.0
+
         xsdata = openmc.XSdata(name, library.energy_groups)
         xsdata.order = 0  # P0 scattering, isotropic
-        xsdata.set_total(np.array(mat["sigma_t"], dtype=np.float64))
-        xsdata.set_absorption(np.array(mat["sigma_a"], dtype=np.float64))
+        xsdata.set_total(np.array(mat["sigma_t"], dtype=np.float64) * doppler)
+        xsdata.set_absorption(np.array(mat["sigma_a"], dtype=np.float64) * doppler)
+
+        # Phase-3 / Case 2 live-trigger plumbing.
+        # When the case JSON sets `materials.<name>.exercise_add_temperature: true`
+        # AND a non-default `temperature_kelvin`, we additionally call
+        # `xsdata.add_temperature(t_kelvin)` — exactly the upstream code path
+        # broken by OpenMC PR #3712 (`temperatures.tolist().append(T)` returns
+        # None). On installed buggy OpenMC the call crashes with TypeError;
+        # the runner re-raises with a recognizable marker so the matrix can
+        # attribute the failure to the upstream bug rather than to a synthetic
+        # mutation. Default is to skip this call so existing scenarios remain
+        # untouched.
+        if mat.get("exercise_add_temperature") and t_kelvin > 0 and abs(t_kelvin - 600.0) > 1e-9:
+            try:
+                xsdata.add_temperature(t_kelvin)
+            except TypeError as e:
+                raise RuntimeError(
+                    f"OpenMC PR #3712 (add_temperature → None) triggered on "
+                    f"{name}: {e}"
+                ) from None
+
+        # Phase-3 / Case 5 live-trigger plumbing.
+        # When the case JSON sets `materials.<name>.exercise_borated_water: true`
+        # AND a non-default `temperature_kelvin`, we additionally call
+        # `openmc.model.borated_water(boron_ppm, temperature=t, density=...)` —
+        # the path broken by OpenMC PR #3662 (when density is supplied, the
+        # user-given temperature is silently dropped from the returned
+        # Material). On installed buggy OpenMC the returned material has
+        # `temperature is None` (or != t); the runner raises with a
+        # recognizable marker so the matrix attributes the failure to the
+        # upstream bug. Default is to skip so existing scenarios are untouched.
+        if mat.get("exercise_borated_water") and t_kelvin > 0 and abs(t_kelvin - 600.0) > 1e-9:
+            import openmc.model
+            boron_ppm = float(mat.get("boron_ppm", 500.0))
+            density_g_cc = float(mat.get("density_g_cc", 0.7))
+            bw_mat = openmc.model.borated_water(
+                boron_ppm=boron_ppm, temperature=t_kelvin, density=density_g_cc,
+            )
+            actual_t = bw_mat.temperature
+            if actual_t is None or abs(float(actual_t) - t_kelvin) > 1e-6:
+                raise RuntimeError(
+                    f"OpenMC PR #3662 (borated_water drops temperature when "
+                    f"density set) triggered on {name}: requested T={t_kelvin}, "
+                    f"got mat.temperature={actual_t}"
+                )
         # OpenMOC stores sigma_s as a 4-element row-major matrix [g_in -> g_out].
         # OpenMC's set_scatter_matrix wants shape (num_groups, num_groups, num_legendre_moments).
         # With xsdata.order = 0 (P0, isotropic), num_legendre_moments = 1.
@@ -115,7 +166,13 @@ def _build_model(case: dict, library_path: Path) -> "openmc.Model":
     materials.cross_sections = str(library_path)
 
     # Geometry: 2D pin cell with reflective boundaries.
-    fuel_outer = openmc.ZCylinder(r=g["fuel_radius_cm"])
+    # Phase-2 MR02/MR03: optional fuel-offset (defaults to 0 → centred fuel,
+    # backward compatible with all existing samples).
+    fuel_outer = openmc.ZCylinder(
+        x0=float(g.get("fuel_offset_x_cm", 0.0)),
+        y0=float(g.get("fuel_offset_y_cm", 0.0)),
+        r=float(g["fuel_radius_cm"]),
+    )
     xmin = openmc.XPlane(x0=-half_x, boundary_type="reflective")
     xmax = openmc.XPlane(x0=+half_x, boundary_type="reflective")
     ymin = openmc.YPlane(y0=-half_y, boundary_type="reflective")
@@ -125,6 +182,16 @@ def _build_model(case: dict, library_path: Path) -> "openmc.Model":
     fuel_cell = openmc.Cell(name="fuel", fill=fuel, region=-fuel_outer & box)
     mod_cell = openmc.Cell(name="moderator", fill=moderator, region=+fuel_outer & box)
     geometry = openmc.Geometry(openmc.Universe(cells=[fuel_cell, mod_cell]))
+
+    # Phase-3: per-cell scalar flux tally for tally-symmetry MRs.
+    # Two energy groups (matching the MGXS library cutoff at 0.625 eV).
+    import numpy as np
+    cell_filter = openmc.CellFilter([fuel_cell, mod_cell])
+    energy_filter = openmc.EnergyFilter(np.array([1e-5, 0.625, 2.0e7], dtype=np.float64))
+    flux_tally = openmc.Tally(name="flux_per_cell")
+    flux_tally.filters = [cell_filter, energy_filter]
+    flux_tally.scores = ["flux"]
+    tallies = openmc.Tallies([flux_tally])
 
     # Settings: multi-group mode, eigenvalue calculation.
     sv = case.get("solver", {})
@@ -140,7 +207,12 @@ def _build_model(case: dict, library_path: Path) -> "openmc.Model":
     settings.output = {"summary": False, "tallies": False}
     settings.verbosity = 1  # warnings only; MetBench captures stdout separately
 
-    return openmc.Model(geometry=geometry, materials=materials, settings=settings)
+    model = openmc.Model(geometry=geometry, materials=materials, settings=settings)
+    model.tallies = tallies
+    # Stash cell IDs so solve() can resolve them in the statepoint tally.
+    model._fuel_cell_id = fuel_cell.id  # type: ignore[attr-defined]
+    model._mod_cell_id = mod_cell.id    # type: ignore[attr-defined]
+    return model
 
 
 def solve(case: dict) -> dict:
@@ -170,6 +242,28 @@ def solve(case: dict) -> dict:
                 k_mean = float(k.nominal_value)
                 k_std = float(k.std_dev)
                 batches = int(sp.n_batches)
+
+                # Per-cell flux from the Phase-3 tally. The tally has two
+                # filters (cell × energy-group) and a single "flux" score.
+                # OpenMC reports energy filter bins in ascending-energy order
+                # (group 0 = thermal, group 1 = fast). MetBench's convention
+                # everywhere else (matching OpenMOC) is group 0 = fast,
+                # group 1 = thermal — so we reverse the energy axis here.
+                flux_per_cell = {}
+                try:
+                    t = sp.get_tally(name="flux_per_cell")
+                    arr = t.mean.reshape(2, 2)  # (cell, energy) — order matches filter declaration
+                    bins = t.filters[0].bins
+                    fuel_cell_id = getattr(model, "_fuel_cell_id", None)
+                    mod_cell_id = getattr(model, "_mod_cell_id", None)
+                    for i, cell_id in enumerate(bins):
+                        cid = int(cell_id)
+                        bucket = ("fuel" if cid == fuel_cell_id else
+                                  "moderator" if cid == mod_cell_id else f"cell_{cid}")
+                        # reverse: bin[0] is thermal, bin[1] is fast; MetBench wants [fast, thermal]
+                        flux_per_cell[bucket] = [float(arr[i, 1]), float(arr[i, 0])]
+                except Exception as e:  # don't kill the run if tally extraction fails
+                    flux_per_cell = {"error": f"tally extraction failed: {type(e).__name__}: {e}"}
         finally:
             os.chdir(cwd)
             # Clean up any large data files OpenMC may have written outside tmpdir.
@@ -191,6 +285,7 @@ def solve(case: dict) -> dict:
         "batches": batches,
         "particles": int(sv.get("particles", 5000)),
         "converged": True,
+        "flux_per_cell": flux_per_cell,
         "metadata": {"runner": "openmc", "energy_mode": "multi-group"},
     }
 

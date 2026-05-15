@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 
 namespace MetBench_Domain
 {
-    //Application
+    //Application — v1 方法级被测程序 / v2 系统级 SUT 共用同一实体，由 Kind 字段区分
     public class Application
     {
         [BsonId]
@@ -29,8 +29,36 @@ namespace MetBench_Domain
         public string DOI { get; set; }
         public string Url { get; set; }
 
-        //Domain的Name 作为外键
-        public string DomainName { get; set; } = String.Empty; // DomainName之间以:为分隔符
+        // ===== v1 反模式（保留读取兼容，标 Obsolete；v2 由 ApplicationDomains junction 取代） =====
+        //Domain的Name 作为外键，DomainName 之间以:为分隔符
+        [Obsolete("Use ApplicationDomains junction collection instead. Kept for v1 read compatibility only.")]
+        public string DomainName { get; set; } = String.Empty;
+
+        // ===== v2 新增字段（系统级 SUT 专用；v1 行默认值为空/null） =====
+
+        /// <summary>SUT 自身版本（git sha / release tag），支持多版本并存。</summary>
+        public string? Version { get; set; }
+
+        /// <summary>运行时引用（→ Runtimes.IdRuntime）。null 表示用默认 Python。</summary>
+        public int? RuntimeId { get; set; }
+
+        /// <summary>SUT runner 脚本路径（如 "SUT/openmoc/openmoc_runner.py"）。</summary>
+        public string? RunnerEntryPath { get; set; }
+
+        /// <summary>Input parser 脚本路径（如 "SUT/openmoc/openmoc_input_parser.py"）。</summary>
+        public string? InputParserPath { get; set; }
+
+        /// <summary>Output parser 脚本路径（如 "SUT/openmoc/openmoc_output_parser.py"）。</summary>
+        public string? OutputParserPath { get; set; }
+
+        /// <summary>默认超时秒数（系统级执行）。</summary>
+        public int? DefaultTimeoutSeconds { get; set; } = 60;
+
+        /// <summary>并发上限（如 OpenMC MPI 4 进程版只允许 1 个并发）。</summary>
+        public int? MaxConcurrentRuns { get; set; } = 1;
+
+        /// <summary>"method-level"（v1）或 "system-level"（v2）。</summary>
+        public string Kind { get; set; } = "method-level";
     }
 
     // 应用程序参数类

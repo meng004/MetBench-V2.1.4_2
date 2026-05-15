@@ -12,14 +12,14 @@ work fits in cleanly. For project intent and the staged plan, see
 | `MetBench_BLL.Core/` | `net8.0` | Anywhere (incl. Linux CI) | All cross-platform business logic. **System-MT runner, adapters, persistence contracts, reporting renderer, launcher facade live here.** |
 | `MetBench_Domain/`, `MetBench_IDAL/` | `net8.0` | Anywhere | Legacy method-level entities + DAL contracts. |
 | `MetBench_DAL/` | `net8.0` | Anywhere | LiteDB-backed implementations. References `MetBench_BLL.Core` for the new system-MT result repository. |
-| `MetBench_BLL/` | **`net8.0-windows`** | Windows only | Legacy WPF-side business orchestration. Charts (LiveCharts), Word/Excel/PDF generation packages live here. |
+| `MetBench_BLL/` | `net8.0` | Anywhere (incl. Linux CI) | Legacy method-level MT business orchestration + cross-platform `MTVisualizationSerive` (LiveCharts data, no WPF) + Word/Excel/PDF report generators. **WPF chart plotters were extracted to `MetBench_Client/Services/Plotting/`** so BLL stays portable. |
 | `MetBench_Client/` | **`net8.0-windows7.0`**, `<UseWPF>true</UseWPF>` | Windows only | The WPF UI app. Entry point. |
 | `MetBench_SystemMT.Tests/` | `net8.0` | Anywhere (incl. Linux CI) | All tests. xUnit + Reqnroll. |
 
 **Hard rule for cross-environment work**:
 
-- Code that needs to run in CI / Linux cloud → `MetBench_BLL.Core/` or `MetBench_DAL/`.
-- Code that touches WPF (XAML, dispatcher, WinForms interop, Win32) → `MetBench_BLL/` or `MetBench_Client/`. Linux dotnet SDK ships without `Microsoft.NET.Sdk.WindowsDesktop.targets`, so `dotnet build MetBench_Client.csproj` **fails on Linux** with MSB4019. Cloud agents can edit WPF source but cannot compile it.
+- Code that needs to run in CI / Linux cloud → `MetBench_BLL.Core/` / `MetBench_DAL/` / `MetBench_BLL/` (all `net8.0`, all build on Linux).
+- Code that touches WPF (XAML, dispatcher, WinForms interop, Win32, LiveCharts WPF chart controls) → `MetBench_Client/` only (`net8.0-windows7.0`). Linux dotnet SDK ships without `Microsoft.NET.Sdk.WindowsDesktop.targets`, so `dotnet build MetBench_Client.csproj` **fails on Linux** with MSB4019. Cloud agents can edit WPF source but cannot compile it.
 
 ## WPF stack (do not mix in alternatives)
 
@@ -195,8 +195,30 @@ OpenMOC tests skip cleanly without the OpenMOC venv (`OpenMocTestPaths.OpenMocIm
 
 Tracks coordinate via the launcher facade: Cloud owns the contract; VM consumes it. Cloud agents must not modify `*.xaml*` files in `MetBench_Client/` or `MetBench_BLL/` without explicit user direction (they cannot compile them locally to verify the change). VM agents must not modify `MetBench_BLL.Core/SystemMT/*` public types without first proposing a Cloud-side change (CI catches breakage).
 
+## v2 BLL.Core namespaces (P1-P8 ship)
+
+Once a feature has been cloud-side TDD-tested, it lives in one of these
+`MetBench_BLL.Core/` subtrees:
+
+| Namespace | Purpose | Key types |
+|-----------|---------|-----------|
+| `MetBench_BLL.SystemMT.*` | Pipeline + Launcher + Persistence + Reporting | `SystemMtPipeline`, `ISystemMtScenarioLauncher`, `HtmlSystemMtResultReportRenderer` |
+| `MetBench_BLL.SystemMT.Anomaly` | Anomaly viewer + commonality | `AnomalyService`, `CommonalityReport` |
+| `MetBench_BLL.Discovery` | MR Discovery + Validation | `IMRDiscoverer`, `DiscoveryService`, `ValidationService`, `ILlmGateway` |
+| `MetBench_BLL.Discovery.Validators` | Day-1 validators | `EmpiricalValidator`, `TheoreticalLlmValidator`, `AdversarialMutmutValidator` |
+| `MetBench_BLL.Mutation` | Mutation campaign matrix | `MutationCampaignService`, `MutationCellRunner` |
+| `MetBench_BLL.Coverage` | 4-dim coverage report | `CoverageService`, `CoverageReport` |
+| `MetBench_BLL.Trend` | Weekly trend + WoW + burst detection | `TrendAnalysisService`, `WeeklyReport` |
+| `MetBench_BLL.Reporting` | 5-scope report generator | `SystemMtReportService` |
+
+All services are stateless and inject only IDAL repository interfaces +
+optional gateway abstractions (`ILlmGateway`, `MutationCellRunner`,
+`IProcessExecutor`). Tests inject fakes, prod injects LiteDB + real
+process / LLM.
+
 ## Roadmap pointers
 
 - Staged plan: [`AGENTS.md`](AGENTS.md)
 - Per-stage implementation plans: [`docs/superpowers/plans/`](docs/superpowers/plans/)
 - Active Stage 4 cross-env plan: [`docs/superpowers/plans/2026-05-10-stage4-remaining-acs.md`](docs/superpowers/plans/2026-05-10-stage4-remaining-acs.md)
+- v2 P1-P8 development plan: [`docs/superpowers/plans/2026-05-13-v2-development-plan.md`](docs/superpowers/plans/2026-05-13-v2-development-plan.md)

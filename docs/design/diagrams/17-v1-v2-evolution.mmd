@@ -1,0 +1,29 @@
+flowchart LR
+    subgraph V1["v1（保留+扩展）"]
+        V1MR["MetamorphicRelation<br/>+ApplicationName «obsolete»<br/>+v2 字段 (Code/MetaPatternCode/...)"]
+        V1App["Application<br/>+DomainName «obsolete»<br/>+v2 字段 (Version/RuntimeId/...)"]
+        V1Dom["Domain"]
+    end
+
+    subgraph V2New["v2 新增"]
+        V2Bind["MRBinding<br/>替代 ApplicationName 多值反模式"]
+        V2AppDom["ApplicationDomain<br/>替代 DomainName 多值反模式"]
+        V2RT["Runtime"]
+        V2Inst["MRInstance"]
+        V2Exec["Execution"]
+        V2Res["Result"]
+        V2Ano["Anomaly"]
+        V2Disc["DiscoveryMethod / DiscoveryRun /<br/>CandidateMR / ValidationRun"]
+        V2Mut["MutationOperator / Mutant /<br/>MutationCampaign / MutationResult"]
+        V2Misc["KnownBug / AuditLog /<br/>Batch / BatchPlan / Report"]
+    end
+
+    V1MR -.->|"M:N junction"| V2Bind
+    V1App -.-> V2Bind
+    V1App -.-> V2AppDom
+    V1Dom -.-> V2AppDom
+    V1App -.->|"RuntimeId"| V2RT
+    V2Bind -.-> V2Inst
+    V2Inst -.-> V2Exec
+    V2Exec -.-> V2Res
+    V2Res -.-> V2Ano

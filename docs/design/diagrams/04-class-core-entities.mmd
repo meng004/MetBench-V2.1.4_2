@@ -1,0 +1,124 @@
+classDiagram
+    class MetaPattern {
+        <<enum>>
+        m_inv
+        m_mono
+        m_conv
+        m_cmp
+        m_adj / m_rev / m_dyn / m_rel
+    }
+
+    class MetamorphicRelation {
+        +int IdMR
+        +string Code
+        +string MetaPatternCode
+        +string TransformationName
+        +string AssertionTypeCode
+        +string ValueName
+        +bool NoiseAware
+        +double ToleranceRel
+        +double NoiseMultiplier
+        +string FeatureFilePath
+        +string Kind «method/system»
+        +DateTime CreatedAt
+        ~v1 fields preserved~
+    }
+    note for MetamorphicRelation "Level 2: MR Schema\n抽象 MR 模板\nv1 字段 + v2 扩展共存"
+
+    class Application {
+        +int IdApplication
+        +string Name
+        +string Version
+        +int? RuntimeId
+        +string RunnerEntryPath
+        +string InputParserPath
+        +string OutputParserPath
+        +int DefaultTimeoutSeconds
+        +string Kind «method/system»
+        ~v1 fields preserved~
+    }
+    note for Application "SUT 实体\nv1+v2 共用，Kind 区分"
+
+    class Runtime {
+        +int IdRuntime
+        +string Name
+        +string Kind «python/matlab/cpp/java/fortran»
+        +string InvokeTemplate
+        +Dict EnvVars
+    }
+
+    class MRBinding {
+        +int IdMRBinding
+        +int MRId «FK»
+        +int ApplicationId «FK»
+        +List~ParameterMapping~ ParameterMappings
+        +string DefaultSampleCasePath
+        +ToleranceConfig DefaultTolerance
+        +SutHyperparams DefaultHyperparams
+        +bool IsActive
+    }
+    note for MRBinding "Level 3: MR Binding\nM:N junction\n替代 v1 ApplicationName 多值反模式"
+
+    class MRInstance {
+        +int IdInstance
+        +int MRBindingId «FK»
+        +Dict ParameterOverrides
+        +SamplingSpec? Sampling
+        +SutHyperparams? HyperparamsOverride
+        +ToleranceConfig? ToleranceOverride
+        +bool IsReusable
+        +string? Name
+    }
+    note for MRInstance "Level 4: MR Instance\n含参数 + 采样 + SUT 超参 override"
+
+    class Execution {
+        +Guid IdExecution
+        +int MRInstanceId «FK»
+        +Guid? BatchId
+        +string Status
+        +string CatalogVersionSha
+        +string SutVersionSnapshot
+        +string ArtifactsDirectory
+        +DateTime QueuedAt/StartedAt/FinishedAt
+    }
+    note for Execution "Level 5: Execution\n状态机 + 版本快照"
+
+    class Result {
+        +Guid IdResult
+        +Guid ExecutionId «FK»
+        +double? SourceValue / SourceStd
+        +double? FollowupValue / FollowupStd
+        +Dict SourceMetrics / FollowupMetrics
+        +bool AssertionPassed
+        +string AssertionExpression
+        +string? FailureReason
+    }
+
+    class Anomaly {
+        +Guid IdAnomaly
+        +Guid ResultId «FK»
+        +string Severity «noise/minor/major/critical»
+        +string Category «basin/mc-floor/cross-program/...»
+        +int ReplayCount
+        +string Status «new/investigating/known/confirmed-bug/false-positive»
+        +int? LinkedKnownBugId «FK»
+    }
+
+    class KnownBug {
+        +int IdBug
+        +string Code «R-Case-N»
+        +string Title
+        +int? RelatedApplicationId
+        +string? UpstreamFixCommit
+        +string Status
+    }
+
+    MetamorphicRelation --> MetaPattern : MetaPatternCode
+    Runtime <-- Application : RuntimeId
+    MetamorphicRelation "1" --> "0..*" MRBinding : MRId
+    Application "1" --> "0..*" MRBinding : ApplicationId
+    MRBinding "1" --> "0..*" MRInstance : MRBindingId
+    MRInstance "1" --> "0..*" Execution : MRInstanceId
+    Execution "1" --> "1" Result : ExecutionId
+    Result "1" --> "0..1" Anomaly : ResultId
+    Anomaly --> "0..1" KnownBug : LinkedKnownBugId

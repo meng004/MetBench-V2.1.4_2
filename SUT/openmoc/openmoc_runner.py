@@ -35,6 +35,22 @@ import json
 from pathlib import Path
 
 
+def _doppler_factor(temperature_kelvin: float) -> float:
+    """Phase-3 Doppler-style absorption-broadening factor.
+
+    Real Doppler broadening requires resonance cross-section data we don't
+    carry in the multi-group library; this is a fictitious-but-monotone
+    surrogate that exercises the temperature plumbing code path so MRs in
+    the m_mono(T) family have something physical to assert. T_ref = 600 K
+    so existing samples (which omit the field and default to 600) get
+    factor = 1.0 and behave identically to before.
+    """
+    import math
+    if temperature_kelvin <= 0:
+        return 1.0
+    return 1.0 + 0.05 * math.log(temperature_kelvin / 600.0)
+
+
 def _build_material(name: str, mat: dict):
     import openmoc
 
@@ -43,9 +59,30 @@ def _build_material(name: str, mat: dict):
     # exposes setSigmaA only as a per-group setter, but the bulk solve does
     # not require it - the case JSON's sigma_a is for documentation /
     # cross-checks only.
+    #
+    # Phase-3 Doppler: scale **only** the absorption part of sigma_t
+    # (i.e. the difference sigma_t - row_sum_sigma_s) by the Doppler
+    # factor, not all of sigma_t. Scaling raw sigma_t amplifies through
+    # the sigma_a derivation (a 2% sigma_t bump becomes a ~40% sigma_a
+    # bump because most of sigma_t is scattering), which puts OpenMOC's
+    # CPUSolver into one of its narrow non-physical convergence basins
+    # documented in historical-bugs.md Case 4.
+    t_kelvin = float(mat.get("temperature_kelvin", 600.0))
+    doppler = _doppler_factor(t_kelvin)
+    n = int(mat["num_groups"])
+    sigma_s_flat = list(mat["sigma_s"])
+    if doppler != 1.0:
+        sigma_t = []
+        for g_in in range(n):
+            row_sum = sum(sigma_s_flat[g_in * n + g_out] for g_out in range(n))
+            old_sigma_a = float(mat["sigma_t"][g_in]) - row_sum
+            sigma_t.append(doppler * old_sigma_a + row_sum)
+    else:
+        sigma_t = list(mat["sigma_t"])
+
     m = openmoc.Material(name=name)
-    m.setNumEnergyGroups(int(mat["num_groups"]))
-    m.setSigmaT(mat["sigma_t"])
+    m.setNumEnergyGroups(n)
+    m.setSigmaT(sigma_t)
     m.setSigmaS(mat["sigma_s"])
     m.setNuSigmaF(mat["nu_sigma_f"])
     m.setSigmaF(mat["sigma_f"])
@@ -53,7 +90,7 @@ def _build_material(name: str, mat: dict):
     return m
 
 
-def solve(case: dict) -> tuple[float, int, bool]:
+def solve(case: dict) -> tuple[float, int, bool, dict]:
     import openmoc
     import openmoc.log as omlog
 
@@ -77,7 +114,13 @@ def solve(case: dict) -> tuple[float, int, bool]:
     zmax = openmoc.ZPlane(z=half_z)
     for s in (xmin, xmax, ymin, ymax, zmin, zmax):
         s.setBoundaryType(openmoc.REFLECTIVE)
-    fuel_cyl = openmoc.ZCylinder(x=0.0, y=0.0, radius=g["fuel_radius_cm"])
+    # Phase-2 MR02/MR03: optional fuel-offset (defaults to 0 → centred fuel,
+    # backward compatible with all existing samples).
+    fuel_cyl = openmoc.ZCylinder(
+        x=float(g.get("fuel_offset_x_cm", 0.0)),
+        y=float(g.get("fuel_offset_y_cm", 0.0)),
+        radius=float(g["fuel_radius_cm"]),
+    )
 
     fuel_cell = openmoc.Cell(name="fuel")
     fuel_cell.setFill(fuel_mat)
@@ -111,7 +154,33 @@ def solve(case: dict) -> tuple[float, int, bool]:
     solver.computeEigenvalue(max_iters)
 
     iters = int(solver.getNumIterations())
-    return float(solver.getKeff()), iters, iters < max_iters
+
+    # Phase-3: per-cell scalar flux export for tally-symmetry MRs.
+    # For our 2-cell geometry (fuel + moderator) the geometry's
+    # `initializeFlatSourceRegions()` produces one FSR per cell, so we walk
+    # all FSRs and sum-by-cell. `findCellContainingFSR(fsr)` returns the
+    # Cell object; we tag fuel vs moderator by the cell IDs we recorded at
+    # construction time.
+    n_fsr = geom.getNumFSRs()
+    num_groups = int(case["materials"]["fuel"]["num_groups"])
+    fuel_id, mod_id = fuel_cell.getId(), mod_cell.getId()
+    flux_by_cell: dict[str, list[float]] = {
+        "fuel":      [0.0] * num_groups,
+        "moderator": [0.0] * num_groups,
+    }
+    for fsr in range(n_fsr):
+        cell = geom.findCellContainingFSR(fsr)
+        if cell is None:
+            continue
+        bucket = "fuel" if cell.getId() == fuel_id else (
+                 "moderator" if cell.getId() == mod_id else None)
+        if bucket is None:
+            continue
+        for g in range(num_groups):
+            # OpenMOC API: getFlux takes 1-indexed group.
+            flux_by_cell[bucket][g] += float(solver.getFlux(fsr, g + 1))
+
+    return float(solver.getKeff()), iters, iters < max_iters, flux_by_cell
 
 
 def _require_section(case: dict, key: str) -> dict:
@@ -134,7 +203,7 @@ def main() -> int:
     if "fuel" not in materials or "moderator" not in materials:
         raise ValueError("Case JSON 'materials' must define 'fuel' and 'moderator'")
 
-    k, iters, converged = solve(case)
+    k, iters, converged, flux_per_cell = solve(case)
 
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -144,6 +213,7 @@ def main() -> int:
                 "k_eff": k,
                 "iterations": iters,
                 "converged": converged,
+                "flux_per_cell": flux_per_cell,
                 "metadata": {"runner": "openmoc"},
             },
             indent=2,

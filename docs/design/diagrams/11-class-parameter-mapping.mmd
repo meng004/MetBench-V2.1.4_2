@@ -1,0 +1,51 @@
+classDiagram
+    class IFieldPathResolver {
+        <<interface>>
+        +string PathSyntax
+        +Get(IReadOnlyDict data, string path) object?
+        +Set(IReadOnlyDict data, string path, object? value) Dict
+        +Exists(IReadOnlyDict data, string path) bool
+    }
+
+    class JsonPointerResolver {
+        +PathSyntax = "json-pointer"
+        -SplitPath(string) string[]
+        -Step(current, segment) object?
+        -SetRecursive(current, segments, idx, value)
+    }
+    note for JsonPointerResolver "RFC 6901 简化版\n支持 /x/y 和 x.y 和 x[0]"
+
+    class McnpCardResolver {
+        +PathSyntax = "mcnp-card"
+        +ToJsonPointer(string) string
+    }
+    note for McnpCardResolver "card:m1::tmp →\n/cards/m1/tmp\n委托给 JsonPointer"
+
+    class NamelistKeyResolver {
+        +PathSyntax = "namelist-key"
+        +ToJsonPointer(string) string
+    }
+    note for NamelistKeyResolver "&material/T →\n/namelists/material/T"
+
+    class FieldPathResolverFactory {
+        <<static>>
+        +For(string syntax) IFieldPathResolver
+        +SupportedSyntaxes List~string~
+    }
+
+    class FieldPathNotFoundException {
+        <<exception>>
+    }
+
+    IFieldPathResolver <|.. JsonPointerResolver
+    IFieldPathResolver <|.. McnpCardResolver
+    IFieldPathResolver <|.. NamelistKeyResolver
+
+    McnpCardResolver --> JsonPointerResolver : delegates
+    NamelistKeyResolver --> JsonPointerResolver : delegates
+
+    FieldPathResolverFactory ..> JsonPointerResolver : creates
+    FieldPathResolverFactory ..> McnpCardResolver : creates
+    FieldPathResolverFactory ..> NamelistKeyResolver : creates
+
+    JsonPointerResolver ..> FieldPathNotFoundException : throws
