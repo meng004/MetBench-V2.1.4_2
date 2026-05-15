@@ -80,6 +80,9 @@ MetBench_Python/**/Results/
 *.class
 *.mp4
 
+# Local secrets (never commit API keys)
+appsettings.local.json
+
 # Large ML model/checkpoint artifacts
 *.pt
 *.pth

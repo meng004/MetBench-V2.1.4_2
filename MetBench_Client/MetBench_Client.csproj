@@ -16,6 +16,9 @@
 
   <ItemGroup>
     <Content Include="applicationIcon.ico" />
+    <Content Include="appsettings.local.json" Condition="Exists('appsettings.local.json')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

@@ -44,7 +44,11 @@ namespace MetBench_Client
         // https://docs.microsoft.com/dotnet/core/extensions/logging
         private static readonly IHost _host = Host
             .CreateDefaultBuilder()
-            .ConfigureAppConfiguration(c => { c.SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)); })
+            .ConfigureAppConfiguration(c =>
+            {
+                c.SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location));
+                c.AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: false);
+            })
             .ConfigureServices((context, services) =>
             {  
                 //添加各种服务和页面
@@ -167,7 +171,16 @@ namespace MetBench_Client
 
                 // === v2 Discovery stack (P7) ===
                 services.AddScoped<DiscoveryService>();
-                services.AddSingleton<ILlmGateway, NullLlmGateway>();
+                services.AddSingleton<ILlmGateway>(provider =>
+                {
+                    var cfg = provider.GetRequiredService<IConfiguration>();
+                    var baseUrl = cfg["DeepSeek:BaseUrl"];
+                    var apiKey  = cfg["DeepSeek:ApiKey"];
+                    var model   = cfg["DeepSeek:Model"];
+                    if (!string.IsNullOrWhiteSpace(baseUrl) && !string.IsNullOrWhiteSpace(apiKey) && !string.IsNullOrWhiteSpace(model))
+                        return new DeepSeekLlmGateway(baseUrl, apiKey, model);
+                    return new NullLlmGateway();
+                });
                 services.AddSingleton<MetaPatternDiscoverer>(provider => new MetaPatternDiscoverer(
                     OperatingSystem.IsWindows() ? "python" : "python3",
                     Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!, "tools", "noether_candidates.py")));
