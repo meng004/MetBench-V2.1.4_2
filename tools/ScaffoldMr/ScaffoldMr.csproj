@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>ScaffoldMr</RootNamespace>
+    <AssemblyName>scaffold-mr</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\MetBench_BLL.Core\MetBench_BLL.Core.csproj" />
+    <ProjectReference Include="..\..\MetBench_DAL\MetBench_DAL.csproj" />
+    <ProjectReference Include="..\..\MetBench_Domain\MetBench_Domain.csproj" />
+    <ProjectReference Include="..\..\MetBench_IDAL\MetBench_IDAL.csproj" />
+  </ItemGroup>
+</Project>
