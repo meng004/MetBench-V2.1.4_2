@@ -7,7 +7,8 @@ using Xunit;
 namespace MetBench_SystemMT.Tests.V2Schema;
 
 /// <summary>
-/// TDD 验证 P2.3：AddSystemMtRepositories() 扩展方法注册了 20 个 v2 Repository。
+/// TDD 验证 P2.3：AddSystemMtRepositories() 扩展方法注册了 21 个 v2 Repository
+/// (20 原始 + 1 新增 IMetaPatternRepository @ 2026-05-15)。
 /// 由于 v1 DbConfig 单例依赖 ConfigurationManager 在 WPF 上下文里，本测试
 /// 仅校验 ServiceCollection 描述符（描述 service-type → implementation-type 映射），
 /// 不实际构造 service provider（避免触发数据库连接初始化）。
@@ -15,12 +16,12 @@ namespace MetBench_SystemMT.Tests.V2Schema;
 public sealed class V2RepositoryDIBindingTests
 {
     [Fact]
-    public void P2_3_AddSystemMtRepositories_registers_20_v2_repositories()
+    public void P2_3_AddSystemMtRepositories_registers_21_v2_repositories()
     {
         var services = new ServiceCollection();
         services.AddSystemMtRepositories();
 
-        Assert.Equal(20, services.Count);
+        Assert.Equal(21, services.Count);
     }
 
     [Fact]
