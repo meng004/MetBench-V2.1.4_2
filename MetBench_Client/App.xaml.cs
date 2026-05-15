@@ -191,22 +191,16 @@ namespace MetBench_Client
                 services.AddScoped<Views.Pages.DiscoveryPage>();
                 services.AddScoped<ViewModels.DiscoveryViewModel>();
 
-                // === v2 Validation stack (P7) ===
+                // === v2 Validation stack (P7) — T-C: 真实 sampler 替换 hardcoded stub ===
                 services.AddScoped<ValidationService>();
-                services.AddSingleton<EmpiricalValidator>(provider => new EmpiricalValidator(
-                    (candidate, ct) => System.Threading.Tasks.Task.FromResult<System.Collections.Generic.IReadOnlyList<EmpiricalSample>>(
-                        new EmpiricalSample[]
-                        {
-                            new(1.0, 1.1, true), new(1.0, 1.1, true), new(1.0, 1.1, true),
-                            new(1.0, 1.1, true), new(1.0, 1.1, true), new(1.0, 1.1, true),
-                            new(1.0, 1.1, true), new(1.0, 1.1, true), new(1.0, 1.1, true),
-                            new(1.0, 1.1, true),
-                        })));
-                services.AddSingleton<TheoreticalLlmValidator>(provider =>
-                    new TheoreticalLlmValidator(new NullLlmGateway("{\"plausible\": true, \"reason\": \"demo\"}")));
-                services.AddSingleton<AdversarialMutmutValidator>(provider => new AdversarialMutmutValidator(
-                    (candidate, ct) => System.Threading.Tasks.Task.FromResult<System.Collections.Generic.IReadOnlyList<MutantProbe>>(new MutantProbe[]
-                        { new(1, false), new(2, true), new(3, false), new(4, true), new(5, false) })));
+                services.AddScoped<EmpiricalRepoSampler>();
+                services.AddScoped<AdversarialCampaignSampler>();
+                services.AddScoped<EmpiricalValidator>(provider =>
+                    new EmpiricalValidator(provider.GetRequiredService<EmpiricalRepoSampler>().SampleAsync));
+                services.AddScoped<TheoreticalLlmValidator>(provider =>
+                    new TheoreticalLlmValidator(provider.GetRequiredService<ILlmGateway>()));
+                services.AddScoped<AdversarialMutmutValidator>(provider =>
+                    new AdversarialMutmutValidator(provider.GetRequiredService<AdversarialCampaignSampler>().SampleAsync));
                 services.AddScoped<Views.Pages.CandidateReviewPage>();
                 services.AddScoped<ViewModels.CandidateReviewViewModel>();
 
