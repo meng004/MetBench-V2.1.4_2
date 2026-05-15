@@ -21,6 +21,8 @@ using MetBench_BLL.SystemMT.Reporting;
 using MetBench_BLL.Discovery;
 using MetBench_BLL.Discovery.Validators;
 using MetBench_BLL.Mutation;
+using MetBench_BLL.Coverage;
+using MetBench_BLL.Trend;
 using Wpf.Ui.Controls;
 using Wpf.Ui;
 using Stylet;
@@ -199,6 +201,16 @@ namespace MetBench_Client
                 services.AddScoped<MutationCampaignService>();
                 services.AddScoped<Views.Pages.MutationCampaignPage>();
                 services.AddScoped<ViewModels.MutationCampaignViewModel>();
+
+                // === v2 Coverage dashboard (P8) ===
+                services.AddScoped<CoverageService>();
+                services.AddScoped<Views.Pages.CoverageDashboardPage>();
+                services.AddScoped<ViewModels.CoverageDashboardViewModel>();
+
+                // === v2 Trend dashboard (P8) ===
+                services.AddScoped<TrendAnalysisService>();
+                services.AddScoped<Views.Pages.TrendDashboardPage>();
+                services.AddScoped<ViewModels.TrendDashboardViewModel>();
 
                 // 蜕变关系识别相关IOC配置
                 services.AddScoped<MRDetector>();

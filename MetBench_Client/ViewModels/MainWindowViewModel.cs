@@ -115,6 +115,18 @@ namespace MetBench_Client.ViewModels
             },
                      new NavigationViewItem()
             {
+                Content = "Coverage",
+                Icon = new SymbolIcon { Symbol = SymbolRegular.DataPie20 },
+                TargetPageType = typeof(Views.Pages.CoverageDashboardPage)
+            },
+                     new NavigationViewItem()
+            {
+                Content = "Trends",
+                Icon = new SymbolIcon { Symbol = SymbolRegular.DataTrending20 },
+                TargetPageType = typeof(Views.Pages.TrendDashboardPage)
+            },
+                     new NavigationViewItem()
+            {
                 Content = "MR Detection",
                 Icon = new SymbolIcon { Symbol = SymbolRegular.CalendarSearch20 },
                 TargetPageType = typeof(Views.Pages.AutoDetectMRPage)
