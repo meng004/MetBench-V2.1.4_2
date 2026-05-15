@@ -19,6 +19,7 @@ using MetBench_BLL.SystemMT.Persistence;
 using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_BLL.SystemMT.Reporting;
 using MetBench_BLL.Discovery;
+using MetBench_BLL.Discovery.Validators;
 using Wpf.Ui.Controls;
 using Wpf.Ui;
 using Stylet;
@@ -173,6 +174,25 @@ namespace MetBench_Client
                 services.AddSingleton<IMRDiscoverer>(provider => provider.GetRequiredService<LlmNativeDiscoverer>());
                 services.AddScoped<Views.Pages.DiscoveryPage>();
                 services.AddScoped<ViewModels.DiscoveryViewModel>();
+
+                // === v2 Validation stack (P7) ===
+                services.AddScoped<ValidationService>();
+                services.AddSingleton<EmpiricalValidator>(provider => new EmpiricalValidator(
+                    (candidate, ct) => System.Threading.Tasks.Task.FromResult<System.Collections.Generic.IReadOnlyList<EmpiricalSample>>(
+                        new EmpiricalSample[]
+                        {
+                            new(1.0, 1.1, true), new(1.0, 1.1, true), new(1.0, 1.1, true),
+                            new(1.0, 1.1, true), new(1.0, 1.1, true), new(1.0, 1.1, true),
+                            new(1.0, 1.1, true), new(1.0, 1.1, true), new(1.0, 1.1, true),
+                            new(1.0, 1.1, true),
+                        })));
+                services.AddSingleton<TheoreticalLlmValidator>(provider =>
+                    new TheoreticalLlmValidator(new NullLlmGateway("{\"plausible\": true, \"reason\": \"demo\"}")));
+                services.AddSingleton<AdversarialMutmutValidator>(provider => new AdversarialMutmutValidator(
+                    (candidate, ct) => System.Threading.Tasks.Task.FromResult<System.Collections.Generic.IReadOnlyList<MutantProbe>>(new MutantProbe[]
+                        { new(1, false), new(2, true), new(3, false), new(4, true), new(5, false) })));
+                services.AddScoped<Views.Pages.CandidateReviewPage>();
+                services.AddScoped<ViewModels.CandidateReviewViewModel>();
 
                 // 蜕变关系识别相关IOC配置
                 services.AddScoped<MRDetector>();

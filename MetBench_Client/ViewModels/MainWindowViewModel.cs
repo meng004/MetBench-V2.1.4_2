@@ -97,6 +97,12 @@ namespace MetBench_Client.ViewModels
             },
                      new NavigationViewItem()
             {
+                Content = "Candidate Review",
+                Icon = new SymbolIcon { Symbol = SymbolRegular.ClipboardCheckmark24 },
+                TargetPageType = typeof(Views.Pages.CandidateReviewPage)
+            },
+                     new NavigationViewItem()
+            {
                 Content = "Replay",
                 Icon = new SymbolIcon { Symbol = SymbolRegular.ArrowCounterclockwise24 },
                 TargetPageType = typeof(Views.Pages.ReplayResultPage)
