@@ -40,6 +40,7 @@ namespace MetBench_DAL
         public readonly string Batches_Key = "Batches";
         public readonly string BatchPlans_Key = "BatchPlans";
         public readonly string Reports_Key = "Reports";
+        public readonly string MetaPatterns_Key = "MetaPatterns";
 
         /// <summary>
         /// 连接字符串

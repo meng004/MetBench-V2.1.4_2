@@ -32,6 +32,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IMutantRepository, LiteDbMutantRepository>();
         services.AddScoped<IKnownBugRepository, LiteDbKnownBugRepository>();
         services.AddScoped<IBatchPlanRepository, LiteDbBatchPlanRepository>();
+        services.AddScoped<IMetaPatternRepository, LiteDbMetaPatternRepository>();
 
         // ===== Guid PK Repository =====
         services.AddScoped<IExecutionRepository, LiteDbExecutionRepository>();
