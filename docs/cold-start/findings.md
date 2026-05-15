@@ -99,3 +99,38 @@ noether `tools/noether_candidates.py` 用全描述码（`MR01-inv-quarter-rotati
 - **2 架构问题已 surface**：C1 m_cmp 数据模型 / C4-rest 命名 canonicalization
 - **0 测试回归**：全部 27 Python + 325 xUnit pass
 - **cold_start_demo.py 可重复运行**，每次产出 markdown + JSON 报告，可入 CI
+
+---
+
+## Round 2 — 空库完整冷启动（C# 集成测试）
+
+新增 `MetBench_SystemMT.Tests/ColdStart/ColdStartIntegrationTests.cs` 6 个测试，
+用真实 LiteDatabase + entity round-trip 走完 Applications / MRs / MRBindings / KnownBugs
+全链路，暴露 2 个新 bug：
+
+### 🛑 C5 (High) — DbConfig._conn Windows-only path
+**根因**: `MetBench_DAL/DbConfig.cs:80` 使用 `appPath = $"{solutionDirPath}\\MetBench_DataBase"`
+（反斜杠 + 依赖 `ConfigurationManager.ConnectionStrings["litedb"]` 从 app.config 读取）。
+
+**影响**: `DbConfig.Instance` 在 Linux/CI 上不可用 — v1 ApplicationRepository、v2 LiteDb*Repository
+基类都依赖它。本测试通过直接 `new LiteDatabase(tmpPath)` 绕开。
+
+**修复方向（follow-up F18）**: DbConfig 加 `OverrideConnectionString(string)` API 或环境变量
+`METBENCH_DB_PATH` 优先级。同时 `appPath` 改 `Path.Combine`。
+
+### 🛑 C6 (Minor) — Status 字段命名不一致
+**根因**: `MRBinding.IsActive: bool` 而其他 v2 实体（KnownBug.Status, Anomaly.Status,
+Mutant.Status）用 `Status: string`。
+
+**影响**: 状态机扩展（如 "active → deprecated → archived"）在 MRBinding 上需要破坏性改 schema；
+也让查询 "list all active records" 跨实体写法不统一。
+
+**修复方向（follow-up F19）**: 加 `MRBinding.Status: string` 字段（保留 `IsActive` 作 backwards-compat 属性）。
+
+## 当前 cold-start 工作覆盖
+
+- Phase 1-7.5 Python orchestrator：`cold_start_demo/cold_start_demo.py` 8 phase 全绿
+- C# 集成测试：`ColdStartIntegrationTests.cs` 6 test 全绿
+- Bugs 发现：6 个（C1 m_cmp / C2 dedup / C3 density / C4 naming / C5 DbConfig / C6 status）
+- Bugs 修复：3 个（C2 / C3 / C4 part）
+- 留待 follow-up：3 个（C1 / C5 / C6） + C4-rest naming canonicalization
