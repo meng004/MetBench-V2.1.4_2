@@ -103,6 +103,12 @@ namespace MetBench_Client.ViewModels
             },
                      new NavigationViewItem()
             {
+                Content = "Mutation",
+                Icon = new SymbolIcon { Symbol = SymbolRegular.Bug24 },
+                TargetPageType = typeof(Views.Pages.MutationCampaignPage)
+            },
+                     new NavigationViewItem()
+            {
                 Content = "Replay",
                 Icon = new SymbolIcon { Symbol = SymbolRegular.ArrowCounterclockwise24 },
                 TargetPageType = typeof(Views.Pages.ReplayResultPage)

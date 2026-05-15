@@ -1,0 +1,209 @@
+<Page x:Class="MetBench_Client.Views.Pages.MutationCampaignPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      Title="MutationCampaignPage"
+      d:DesignHeight="750" d:DesignWidth="1100"
+      ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+      Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+      mc:Ignorable="d">
+
+    <Grid Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Row 0: campaign name + seed button -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+            <TextBlock Text="Campaign name:" VerticalAlignment="Center"
+                       FontWeight="SemiBold" Margin="0,0,8,0" />
+            <ui:TextBox Text="{Binding ViewModel.CampaignName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Width="220" Margin="0,0,16,0" />
+            <ui:Button Appearance="Secondary"
+                       Content="Seed demo data"
+                       Icon="{ui:SymbolIcon AddSquare24}"
+                       Command="{Binding ViewModel.SeedDemoDataCommand}"
+                       ToolTip="Insert 5 demo mutants + 5 MR bindings if tables are empty" />
+        </StackPanel>
+
+        <!-- Row 1: Mutants | MRBindings two-panel selection -->
+        <Grid Grid.Row="1" Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Mutants -->
+            <Border Grid.Column="0"
+                    BorderThickness="1"
+                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                    CornerRadius="4" Padding="10" Margin="0,0,8,0">
+                <StackPanel>
+                    <TextBlock Text="Mutants" FontWeight="Bold" Margin="0,0,0,6" />
+                    <ScrollViewer MaxHeight="140" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding ViewModel.AvailableMutants}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <CheckBox Content="{Binding DisplayName}"
+                                              IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                              Margin="0,2" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                    <TextBlock Margin="0,6,0,0"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                               FontSize="11">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="{}{0} available">
+                                <Binding Path="ViewModel.AvailableMutants.Count" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+
+            <!-- MR Bindings -->
+            <Border Grid.Column="1"
+                    BorderThickness="1"
+                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                    CornerRadius="4" Padding="10" Margin="8,0,0,0">
+                <StackPanel>
+                    <TextBlock Text="MR Bindings" FontWeight="Bold" Margin="0,0,0,6" />
+                    <ScrollViewer MaxHeight="140" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding ViewModel.AvailableBindings}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <CheckBox Content="{Binding DisplayName}"
+                                              IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                              Margin="0,2" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                    <TextBlock Margin="0,6,0,0"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                               FontSize="11">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="{}{0} available">
+                                <Binding Path="ViewModel.AvailableBindings.Count" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Row 2: Start / Cancel + progress -->
+        <Border Grid.Row="2"
+                BorderThickness="1"
+                BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                CornerRadius="4" Padding="10"
+                Margin="0,0,0,12">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <ui:Button Appearance="Primary"
+                               Content="Start campaign"
+                               Icon="{ui:SymbolIcon Play24}"
+                               Command="{Binding ViewModel.StartCampaignCommand}"
+                               Margin="0,0,8,0" />
+                    <ui:Button Appearance="Secondary"
+                               Content="Cancel"
+                               Icon="{ui:SymbolIcon Stop24}"
+                               Command="{Binding ViewModel.CancelCampaignCommand}"
+                               Margin="0,0,16,0" />
+                    <ProgressBar Value="{Binding ViewModel.ProgressCurrent}"
+                                 Maximum="{Binding ViewModel.ProgressTotal}"
+                                 Width="200" Height="8"
+                                 VerticalAlignment="Center">
+                        <ProgressBar.Style>
+                            <Style TargetType="ProgressBar">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ViewModel.IsBusy}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ProgressBar.Style>
+                    </ProgressBar>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding ViewModel.StatusMessage}"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                               VerticalAlignment="Center" Margin="0,0,12,0" />
+                    <TextBlock Text="{Binding ViewModel.ErrorMessage}"
+                               Foreground="OrangeRed"
+                               VerticalAlignment="Center" TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Row 3: summary card (collapsed when no run yet) -->
+        <Border Grid.Row="3" Margin="0,0,0,12" Padding="12"
+                BorderThickness="1"
+                BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                CornerRadius="4">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ViewModel.LastSummary}" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock FontWeight="Bold" Text="Campaign Summary" VerticalAlignment="Center"
+                           Margin="0,0,20,0" />
+                <TextBlock VerticalAlignment="Center" Margin="0,0,16,0">
+                    <Run Text="Total: " />
+                    <Run Text="{Binding ViewModel.LastSummary.TotalCells, FallbackValue=0}" FontWeight="SemiBold" />
+                </TextBlock>
+                <TextBlock VerticalAlignment="Center" Margin="0,0,16,0">
+                    <Run Text="Detected: " />
+                    <Run Text="{Binding ViewModel.LastSummary.Detected, FallbackValue=0}" FontWeight="SemiBold" Foreground="#27AE60" />
+                </TextBlock>
+                <TextBlock VerticalAlignment="Center" Margin="0,0,16,0">
+                    <Run Text="Missed: " />
+                    <Run Text="{Binding ViewModel.LastSummary.Missed, FallbackValue=0}" FontWeight="SemiBold" Foreground="#E67E22" />
+                </TextBlock>
+                <TextBlock VerticalAlignment="Center" Margin="0,0,16,0">
+                    <Run Text="Errors: " />
+                    <Run Text="{Binding ViewModel.LastSummary.Errors, FallbackValue=0}" />
+                </TextBlock>
+                <TextBlock VerticalAlignment="Center" Margin="0,0,16,0">
+                    <Run Text="Detection rate: " />
+                    <Run Text="{Binding ViewModel.LastSummary.DetectionRate, StringFormat=P0, FallbackValue=—}"
+                         FontWeight="Bold" FontSize="15" />
+                </TextBlock>
+            </StackPanel>
+        </Border>
+
+        <!-- Row 4: mutation results DataGrid -->
+        <ui:DataGrid Grid.Row="4"
+                     ItemsSource="{Binding ViewModel.LastResults}"
+                     AutoGenerateColumns="False"
+                     IsReadOnly="True"
+                     HeadersVisibility="Column"
+                     CanUserAddRows="False"
+                     BorderThickness="1"
+                     BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}">
+            <ui:DataGrid.Columns>
+                <DataGridTextColumn Header="Mutant"     Binding="{Binding MutantId}"                  Width="70" />
+                <DataGridTextColumn Header="Binding"    Binding="{Binding MRBindingId}"               Width="70" />
+                <DataGridTextColumn Header="Outcome"    Binding="{Binding Outcome}"                    Width="100" />
+                <DataGridTextColumn Header="Obs Δ"      Binding="{Binding ObservedDelta, StringFormat=F4}"  Width="80" />
+                <DataGridTextColumn Header="Exp Δ"      Binding="{Binding ExpectedDelta, StringFormat=F4}"  Width="80" />
+                <DataGridTextColumn Header="Notes"      Binding="{Binding Notes}"                     Width="*" />
+            </ui:DataGrid.Columns>
+        </ui:DataGrid>
+    </Grid>
+</Page>

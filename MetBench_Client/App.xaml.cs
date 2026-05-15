@@ -20,6 +20,7 @@ using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_BLL.SystemMT.Reporting;
 using MetBench_BLL.Discovery;
 using MetBench_BLL.Discovery.Validators;
+using MetBench_BLL.Mutation;
 using Wpf.Ui.Controls;
 using Wpf.Ui;
 using Stylet;
@@ -194,6 +195,11 @@ namespace MetBench_Client
                 services.AddScoped<Views.Pages.CandidateReviewPage>();
                 services.AddScoped<ViewModels.CandidateReviewViewModel>();
 
+                // === v2 Mutation campaign (P7) ===
+                services.AddScoped<MutationCampaignService>();
+                services.AddScoped<Views.Pages.MutationCampaignPage>();
+                services.AddScoped<ViewModels.MutationCampaignViewModel>();
+
                 // 蜕变关系识别相关IOC配置
                 services.AddScoped<MRDetector>();
                 services.AddScoped<IRecognitionAlgorithm, AutoMRAlgorithm>();
@@ -298,7 +304,12 @@ namespace MetBench_Client
         /// </summary>
         private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
-            // For more info see https://docs.microsoft.com/en-us/dotnet/api/system.windows.application.dispatcherunhandledexception?view=windowsdesktop-6.0
+            var logPath = Path.Combine(Path.GetTempPath(), "MetBench_crash.log");
+            try { File.WriteAllText(logPath, $"{DateTime.Now}\n{e.Exception}"); } catch { }
+            e.Handled = true;
+            System.Windows.MessageBox.Show(
+                $"Unhandled exception:\n{e.Exception.GetType().Name}: {e.Exception.Message}\n\nSee {logPath} for full details.",
+                "MetBench Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
         }
     }
 }
