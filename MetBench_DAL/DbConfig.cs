@@ -43,52 +43,141 @@ namespace MetBench_DAL
         public readonly string MetaPatterns_Key = "MetaPatterns";
 
         /// <summary>
-        /// 连接字符串
-        /// database connection string
+        /// 连接字符串。
+        /// 优先级：
+        ///   1) <see cref="OverrideConnectionString(string)"/> 设的静态 override（测试 / CI 用）
+        ///   2) 环境变量 <c>METBENCH_DB_PATH</c>（指向 .litedb 文件绝对路径，Linux/CI/容器可用）
+        ///   3) 旧 Windows 路径：<see cref="ConfigurationManager"/> 读 app.config 的 <c>litedb</c>
+        ///      connection string + 向上搜 .sln 定位 <c>MetBench_DataBase</c> 目录。
         /// </summary>
-        //配置文件读取数据库连接字符串
         public string _conn
         {
             get
             {
-                //读取数据库连接字符串
-                //read connectionstring.
-
-                Assembly assembly = Assembly.GetEntryAssembly();
-                // 获取执行程序集的文件路径
-                string assemblyPath = assembly.Location;
-
-                // 获取解决方案的目录路径
-                string solutionDirPath = Path.GetDirectoryName(assemblyPath);
-
-                // 循环向上查找解决方案文件（.sln）
-                while (!Directory.GetFiles(solutionDirPath, "*.sln").Any())
+                // 优先级 1：显式 override（测试 / CI 热替换）
+                if (s_connectionStringOverride is { } ov)
                 {
-                    // 获取上级目录路径
-                    string parentDirPath = Directory.GetParent(solutionDirPath)?.FullName;
-
-                    // 如果已经到达根目录，则返回空字符串
-                    if (parentDirPath == null)
-                    {
-                        return string.Empty;
-                    }
-
-                    solutionDirPath = parentDirPath;
+                    return ov;
                 }
 
-                var db_file = ConfigurationManager.ConnectionStrings["litedb"].ConnectionString;
-                //string appName = Assembly.GetEntryAssembly().GetName().Name;//获取应用程序名称
-                string appPath = $"{solutionDirPath}\\MetBench_DataBase";//获取应用程序的路径
-                Directory.CreateDirectory(appPath); //目录存在则无操作
-                var conn = db_file.Replace("|DataDirectory|", appPath);
-                return conn;
+                // 优先级 2：METBENCH_DB_PATH 环境变量 — 跨平台首选
+                var envPath = Environment.GetEnvironmentVariable("METBENCH_DB_PATH");
+                if (!string.IsNullOrWhiteSpace(envPath))
+                {
+                    var dir = Path.GetDirectoryName(envPath);
+                    if (!string.IsNullOrEmpty(dir))
+                    {
+                        Directory.CreateDirectory(dir);
+                    }
+                    return $"Filename={envPath}";
+                }
+
+                // 优先级 3：legacy Windows app.config + .sln 走查（保留 WPF 现网行为）
+                return ResolveLegacyConnectionString();
             }
         }
 
+        private static string ResolveLegacyConnectionString()
+        {
+            //读取数据库连接字符串
+            //read connectionstring.
+
+            Assembly? assembly = Assembly.GetEntryAssembly();
+            if (assembly is null)
+            {
+                throw new InvalidOperationException(
+                    "DbConfig: Assembly.GetEntryAssembly() returned null. " +
+                    "Set METBENCH_DB_PATH environment variable or call DbConfig.OverrideConnectionString().");
+            }
+
+            // 获取执行程序集的文件路径
+            string assemblyPath = assembly.Location;
+
+            // 获取解决方案的目录路径
+            string? solutionDirPath = Path.GetDirectoryName(assemblyPath);
+            if (string.IsNullOrEmpty(solutionDirPath))
+            {
+                throw new InvalidOperationException(
+                    "DbConfig: cannot resolve entry-assembly directory. " +
+                    "Set METBENCH_DB_PATH or call DbConfig.OverrideConnectionString().");
+            }
+
+            // 循环向上查找解决方案文件（.sln）
+            while (!Directory.GetFiles(solutionDirPath, "*.sln").Any())
+            {
+                // 获取上级目录路径
+                string? parentDirPath = Directory.GetParent(solutionDirPath)?.FullName;
+
+                // 如果已经到达根目录，则报错（旧版本返回 string.Empty 让 LiteDatabase 后续 NRE — 不友好）
+                if (parentDirPath == null)
+                {
+                    throw new InvalidOperationException(
+                        "DbConfig: no .sln found above entry assembly. " +
+                        "Set METBENCH_DB_PATH environment variable to a .litedb absolute path, " +
+                        "or call DbConfig.OverrideConnectionString() (typical for Linux/CI/container).");
+                }
+
+                solutionDirPath = parentDirPath;
+            }
+
+            var connStringSection = ConfigurationManager.ConnectionStrings["litedb"];
+            if (connStringSection is null)
+            {
+                throw new InvalidOperationException(
+                    "DbConfig: ConfigurationManager has no 'litedb' connection string " +
+                    "(missing app.config?). Set METBENCH_DB_PATH or call DbConfig.OverrideConnectionString().");
+            }
+
+            var db_file = connStringSection.ConnectionString;
+            //string appName = Assembly.GetEntryAssembly().GetName().Name;//获取应用程序名称
+            // Path.Combine 替代 "\\" 硬路径，跨平台
+            string appPath = Path.Combine(solutionDirPath, "MetBench_DataBase");
+            Directory.CreateDirectory(appPath); //目录存在则无操作
+            var conn = db_file.Replace("|DataDirectory|", appPath);
+            return conn;
+        }
+
         //DbConfig实例
-         private static DbConfig instance;
+        private static DbConfig? instance;
         //锁
         private static readonly object _lock = new object();
+
+        /// <summary>
+        /// 静态连接串 override（测试 / CI 用）。null = 走环境变量或 legacy 路径。
+        /// </summary>
+        private static string? s_connectionStringOverride;
+
+        /// <summary>
+        /// 显式设置连接串并重置 Instance — 测试 / CI 专用。
+        /// 调用后下一次访问 <see cref="Instance"/> 会用新串重跑实体映射 ctor。
+        /// </summary>
+        /// <param name="conn">完整 LiteDB connection string，如 <c>"Filename=/tmp/test.litedb"</c>。</param>
+        public static void OverrideConnectionString(string conn)
+        {
+            if (string.IsNullOrWhiteSpace(conn))
+            {
+                throw new ArgumentException("Connection string must be non-empty.", nameof(conn));
+            }
+
+            lock (_lock)
+            {
+                s_connectionStringOverride = conn;
+                instance = null;  // 强制下次 Instance 访问重跑 ctor
+            }
+        }
+
+        /// <summary>
+        /// 清除 <see cref="OverrideConnectionString"/> 的设置 + 重置 Instance。
+        /// 测试 teardown 用，防止 static state 串扰其他测试。
+        /// </summary>
+        public static void ResetOverride()
+        {
+            lock (_lock)
+            {
+                s_connectionStringOverride = null;
+                instance = null;
+            }
+        }
 
         //使用单例模式 完成实体映射数据表
         private DbConfig()
