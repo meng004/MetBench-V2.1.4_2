@@ -72,25 +72,47 @@ public sealed class TrendAnalysisService
             Headline: headline);
     }
 
+    /// <summary>原 API：按 Category 分维度。保留向后兼容。</summary>
     internal static IReadOnlyList<AnomalyBurst> DetectBursts(
         IReadOnlyList<MetBench_Domain.Anomaly> all,
         DateTime weekStartUtc,
         DateTime weekEndUtc,
         int historyWeeks = 4,
         double sigmaThreshold = 2.0)
+        => DetectBurstsByDimension(all, weekStartUtc, weekEndUtc,
+            dimensionName: "category",
+            keySelector: a => a.Category ?? "uncategorized",
+            historyWeeks, sigmaThreshold);
+
+    /// <summary>
+    /// F6 新 API：按任意维度（caller 提供 keySelector）算 burst。
+    /// 推荐 dimensionName 取值：category / sut / mr-code / metapattern / severity。
+    /// </summary>
+    /// <remarks>
+    /// 维度需要的字段（如 sut_id / mr_code）不在 Anomaly 实体上 — caller 应预先 join
+    /// (Result → Execution → MRInstance → MRBinding → MR/Application) 把映射 dict 传入或写
+    /// keySelector lambda 即可。本方法对数据层零依赖，便于单测。
+    /// </remarks>
+    public static IReadOnlyList<AnomalyBurst> DetectBurstsByDimension(
+        IReadOnlyList<MetBench_Domain.Anomaly> all,
+        DateTime weekStartUtc,
+        DateTime weekEndUtc,
+        string dimensionName,
+        Func<MetBench_Domain.Anomaly, string> keySelector,
+        int historyWeeks = 4,
+        double sigmaThreshold = 2.0)
     {
         var bursts = new List<AnomalyBurst>();
         var thisWeek = all.Where(a => a.DiscoveredAt >= weekStartUtc && a.DiscoveredAt < weekEndUtc).ToList();
 
-        // 按 category 分（最近实际可用的"维度"字段）；m_pattern / sut 等需 join，先用 Category 兜底
-        foreach (var g in thisWeek.GroupBy(a => a.Category ?? "uncategorized"))
+        foreach (var g in thisWeek.GroupBy(keySelector))
         {
             var historyCounts = new List<double>();
             for (int i = 1; i <= historyWeeks; i++)
             {
                 var s = weekStartUtc.AddDays(-7 * i);
                 var e = s.AddDays(7);
-                historyCounts.Add(all.Count(a => a.Category == g.Key
+                historyCounts.Add(all.Count(a => keySelector(a) == g.Key
                     && a.DiscoveredAt >= s && a.DiscoveredAt < e));
             }
             var mean = historyCounts.Count == 0 ? 0.0 : historyCounts.Average();
@@ -100,7 +122,7 @@ public sealed class TrendAnalysisService
             if (sigmas >= sigmaThreshold)
             {
                 bursts.Add(new AnomalyBurst(
-                    Dimension: "category",
+                    Dimension: dimensionName,
                     Key: g.Key,
                     Count: g.Count(),
                     Baseline: mean,
@@ -108,6 +130,26 @@ public sealed class TrendAnalysisService
             }
         }
         return bursts;
+    }
+
+    /// <summary>
+    /// 多维度并发计算 — 一次过 caller 给的所有 (dimensionName, keySelector) 二元组。
+    /// 重复 burst 被合并（dimension + key 唯一）。
+    /// </summary>
+    public static IReadOnlyList<AnomalyBurst> DetectBurstsMultiDim(
+        IReadOnlyList<MetBench_Domain.Anomaly> all,
+        DateTime weekStartUtc,
+        DateTime weekEndUtc,
+        IReadOnlyList<(string dimensionName, Func<MetBench_Domain.Anomaly, string> keySelector)> dimensions,
+        int historyWeeks = 4,
+        double sigmaThreshold = 2.0)
+    {
+        var combined = new List<AnomalyBurst>();
+        foreach (var (dim, sel) in dimensions)
+        {
+            combined.AddRange(DetectBurstsByDimension(all, weekStartUtc, weekEndUtc, dim, sel, historyWeeks, sigmaThreshold));
+        }
+        return combined;
     }
 
     private static double StdDev(IReadOnlyList<double> xs, double mean)
