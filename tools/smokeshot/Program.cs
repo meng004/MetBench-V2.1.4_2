@@ -1,199 +1,116 @@
-// Smoke test navigator: navigate MetBench to each page and take PrintWindow screenshots
+// smokeshot — UIA driver for MetBench_Client screenshot smoke flows.
+//
+// Usage:
+//   smokeshot nav-all [--out DIR]            5-page navigation loop (PR #29 behavior)
+//   smokeshot app-add <sutName> [--out DIR]  Step 1: Application Management add SUT
+//   smokeshot mr-add  <mrCode>  [--out DIR]  Step 2: MR Management add MR
+//   smokeshot mt-exec [--out DIR]            Step 3: MT execution (skips if OpenMOC venv missing)
+//   smokeshot metapatterns [--out DIR]       MetaPatterns CRUD: list / page2 / toggle screenshots
+//   smokeshot debug                          Dump named UIA tree of running app
+//
+// Exit codes: 0 = ok, 1 = failure, 2 = skipped (env not ready), 3 = app not running.
+//
+// Requires: MetBench_Client.exe already running. Orchestrator (run_full_smoke.ps1)
+// launches it and waits for window before invoking each flow.
 using System;
 using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
+using System.IO;
 using System.Threading;
-using System.Windows.Automation;
 
-class SmokeNav
+namespace Smokeshot;
+
+internal static class Program
 {
-    [DllImport("user32.dll")] static extern bool ShowWindow(IntPtr h, int n);
-    [DllImport("user32.dll")] static extern bool SetWindowPos(IntPtr h, IntPtr i, int x, int y, int cx, int cy, uint f);
-    [DllImport("user32.dll")] static extern bool PrintWindow(IntPtr h, IntPtr dc, uint f);
-    [DllImport("user32.dll")] static extern bool GetClientRect(IntPtr h, out RECT r);
-    [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
-    [DllImport("user32.dll")] static extern bool AttachThreadInput(uint a, uint b, bool f);
-    [DllImport("kernel32.dll")] static extern uint GetCurrentThreadId();
-    [DllImport("user32.dll")] static extern bool SetForegroundWindow(IntPtr h);
-    [DllImport("user32.dll")] static extern bool SetCursorPos(int x, int y);
-    [DllImport("user32.dll")] static extern void mouse_event(uint flags, uint dx, uint dy, uint data, UIntPtr extra);
-    [DllImport("user32.dll", SetLastError = true)] static extern bool IsWindowEnabled(IntPtr h);
-    [StructLayout(LayoutKind.Sequential)] struct RECT { public int L, T, R, B; }
+    private const string DefaultOutDir = @"C:\Users\limeng\MetBench-V2.1.4_2\docs\screenshots\v2-ship-2026-05-14\";
 
-    const uint MOUSEEVENTF_LEFTDOWN = 0x0002;
-    const uint MOUSEEVENTF_LEFTUP   = 0x0004;
-    const uint MOUSEEVENTF_ABSOLUTE = 0x8000;
-    const uint MOUSEEVENTF_MOVE     = 0x0001;
-
-    static Bitmap Capture(IntPtr hwnd)
+    static int Main(string[] args)
     {
-        GetClientRect(hwnd, out RECT r);
-        var bmp = new Bitmap(r.R - r.L, r.B - r.T);
-        using var g = Graphics.FromImage(bmp);
-        PrintWindow(hwnd, g.GetHdc(), 2);
-        g.ReleaseHdc();
-        return bmp;
-    }
-
-    static void FocusWindow(IntPtr hwnd)
-    {
-        uint tid = GetWindowThreadProcessId(hwnd, out _);
-        uint cur = GetCurrentThreadId();
-        ShowWindow(hwnd, 9);
-        SetWindowPos(hwnd, new IntPtr(-1), 0, 0, 0, 0, 3);
-        AttachThreadInput(cur, tid, true);
-        SetForegroundWindow(hwnd);
-        Thread.Sleep(300);
-        AttachThreadInput(cur, tid, false);
-        SetWindowPos(hwnd, new IntPtr(-2), 0, 0, 0, 0, 3);
-    }
-
-    // Dismiss any modal dialog belonging to this process
-    static void DismissDialogs(uint pid, IntPtr mainHwnd)
-    {
-        var root = AutomationElement.RootElement;
-        var allWindows = root.FindAll(TreeScope.Children,
-            new PropertyCondition(AutomationElement.ProcessIdProperty, (int)pid));
-        foreach (AutomationElement win in allWindows)
+        if (args.Length == 0)
         {
-            if (win.Current.NativeWindowHandle == (int)mainHwnd) continue; // skip main window
-            Console.WriteLine($"  Dialog: Name={win.Current.Name} HWND={win.Current.NativeWindowHandle}");
-            // Try invoking the OK button
-            var ok = win.FindFirst(TreeScope.Descendants,
-                new AndCondition(
-                    new PropertyCondition(AutomationElement.NameProperty, "OK"),
-                    new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Button)));
-            if (ok != null)
-            {
-                try
-                {
-                    ((InvokePattern)ok.GetCurrentPattern(InvokePattern.Pattern)).Invoke();
-                    Console.WriteLine("  Dismissed dialog via OK");
-                    Thread.Sleep(500);
-                }
-                catch (Exception ex) { Console.WriteLine($"  Failed to dismiss: {ex.Message}"); }
-            }
-        }
-    }
-
-    static void ClickAndShot(IntPtr hwnd, AutomationElement appEl, string navName, string shotPath, int screenW = 3840, int screenH = 2160, int dpiScale = 2)
-    {
-        bool enabled = IsWindowEnabled(hwnd);
-        Console.WriteLine($"  Main window enabled: {enabled}");
-
-        var el = appEl.FindFirst(TreeScope.Descendants,
-            new AndCondition(
-                new PropertyCondition(AutomationElement.NameProperty, navName),
-                new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.DataItem)));
-
-        if (el == null)
-        {
-            el = appEl.FindFirst(TreeScope.Descendants,
-                new PropertyCondition(AutomationElement.NameProperty, navName));
+            PrintUsage();
+            return 1;
         }
 
-        if (el == null) { Console.WriteLine($"  NOT FOUND: {navName}"); return; }
+        var cmd = args[0].ToLowerInvariant();
+        var outDir = ParseOutDir(args);
+        Directory.CreateDirectory(outDir);
 
-        string ct = el.Current.ControlType?.ProgrammaticName ?? "?";
-        Console.WriteLine($"  Found {navName}: CT={ct} Class={el.Current.ClassName}");
-
-        dynamic rawRect = el.GetCurrentPropertyValue(AutomationElement.BoundingRectangleProperty);
-        double rl = (double)rawRect.Left, rt = (double)rawRect.Top,
-               rw = (double)rawRect.Width, rh = (double)rawRect.Height;
-        int physX = (int)(rl + rw / 2);
-        int physY = (int)(rt + rh / 2);
-        Console.WriteLine($"  {navName}: phys=({physX},{physY}) sz=({(int)rw}x{(int)rh})");
-
-        // Try InvokePattern
-        bool invoked = false;
-        try
-        {
-            if (el.GetCurrentPattern(InvokePattern.Pattern) is InvokePattern inv)
-            {
-                inv.Invoke();
-                invoked = true;
-                Console.WriteLine($"  {navName}: invoked via InvokePattern");
-            }
-        }
-        catch { }
-
-        if (!invoked)
-        {
-            // Try focus + keyboard: Tab to nav then arrow down
-            // Actually: use SetFocus on the element then send Enter
-            try
-            {
-                el.SetFocus();
-                Thread.Sleep(200);
-                // Send Enter key via SendKeys would require WinForms... skip
-            }
-            catch { }
-
-            int logX = physX / dpiScale, logY = physY / dpiScale;
-            uint absX = (uint)((long)physX * 65535 / (screenW - 1));
-            uint absY = (uint)((long)physY * 65535 / (screenH - 1));
-            SetCursorPos(logX, logY);
-            Thread.Sleep(150);
-            mouse_event(MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE, absX, absY, 0, UIntPtr.Zero);
-            Thread.Sleep(100);
-            mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_ABSOLUTE, absX, absY, 0, UIntPtr.Zero);
-            Thread.Sleep(100);
-            mouse_event(MOUSEEVENTF_LEFTUP | MOUSEEVENTF_ABSOLUTE, absX, absY, 0, UIntPtr.Zero);
-            Console.WriteLine($"  {navName}: clicked via mouse_event phys=({physX},{physY})");
-        }
-
-        Thread.Sleep(2200);
-        using var bmp = Capture(hwnd);
-        bmp.Save(shotPath, ImageFormat.Png);
-        Console.WriteLine($"  Saved: {shotPath} ({bmp.Width}x{bmp.Height})");
-    }
-
-    static void Main(string[] args)
-    {
         var procs = Process.GetProcessesByName("MetBench_Client");
-        if (procs.Length == 0) { Console.WriteLine("MetBench not running"); return; }
+        if (procs.Length == 0)
+        {
+            Console.Error.WriteLine("MetBench_Client.exe not running — launch the WPF app first.");
+            return 3;
+        }
+
         var hwnd = procs[0].MainWindowHandle;
         var pid = (uint)procs[0].Id;
         Console.WriteLine($"MetBench PID={pid} HWND={hwnd}");
 
-        ShowWindow(hwnd, 3);
-        Thread.Sleep(800);
-        FocusWindow(hwnd);
+        // 1. Bring window forward (most flows assume the page is interactive)
         Thread.Sleep(400);
+        var app = UiaHelpers.FocusAndAttach(hwnd);
+        UiaHelpers.DismissDialogs(pid, hwnd);
+        Console.WriteLine($"App UIA: Name={app.Current.Name} Enabled={app.Current.IsEnabled}");
 
-        // Dismiss any modal dialogs
-        Console.WriteLine("Checking for modal dialogs...");
-        DismissDialogs(pid, hwnd);
-
-        var appEl = AutomationElement.FromHandle(hwnd);
-        Console.WriteLine($"App UIA: Name={appEl.Current.Name} Enabled={appEl.Current.IsEnabled}");
-        Console.WriteLine($"Main window enabled (Win32): {IsWindowEnabled(hwnd)}");
-
-        if (args.Length > 0 && args[0] == "--debug")
+        // 2. Dispatch flow
+        try
         {
-            var all = appEl.FindAll(TreeScope.Descendants, Condition.TrueCondition);
-            Console.WriteLine($"Descendants: {all.Count}");
-            foreach (AutomationElement e in all)
+            return cmd switch
             {
-                string n = e.Current.Name ?? "";
-                if (n.Length > 0 && n.Length < 40)
-                    Console.WriteLine($"  Name={n,-32} CT={e.Current.ControlType?.ProgrammaticName,-28} Enabled={e.Current.IsEnabled}");
-            }
-            return;
+                "nav-all"      => Flows.NavAll(hwnd, app, outDir),
+                "app-add"      => Flows.AppAdd(hwnd, app, outDir, RequirePositional(args, 1, "sutName")),
+                "mr-add"       => Flows.MrAdd(hwnd, app, outDir, RequirePositional(args, 1, "mrCode")),
+                "mt-exec"      => Flows.MtExec(hwnd, app, outDir),
+                "metapatterns" => Flows.MetaPatterns(hwnd, app, outDir),
+                "debug"        => Flows.Debug(app),
+                _              => UnknownCommand(cmd),
+            };
         }
-
-        var baseDir = @"C:\Users\limeng\MetBench-V2.1.4_2\docs\screenshots\v2-ship-2026-05-14\";
-        string[] pages = { "Anomalies", "Discovery", "Mutation", "Coverage", "Trends" };
-        string[] shots = { "smoke-04-anomalies.png", "smoke-06-discovery.png", "smoke-08-mutation.png", "smoke-09-coverage.png", "smoke-10-trends.png" };
-
-        for (int i = 0; i < pages.Length; i++)
+        catch (Exception ex)
         {
-            Console.WriteLine($"\nNavigating to {pages[i]}...");
-            FocusWindow(hwnd);
-            ClickAndShot(hwnd, appEl, pages[i], baseDir + shots[i]);
+            Console.Error.WriteLine($"Unhandled error: {ex.GetType().Name}: {ex.Message}");
+            Console.Error.WriteLine(ex.StackTrace);
+            return 1;
         }
-        Console.WriteLine("\nDone.");
+    }
+
+    private static int UnknownCommand(string cmd)
+    {
+        Console.Error.WriteLine($"Unknown command: {cmd}");
+        PrintUsage();
+        return 1;
+    }
+
+    private static string ParseOutDir(string[] args)
+    {
+        for (int i = 0; i < args.Length - 1; i++)
+            if (args[i] == "--out") return args[i + 1];
+        return DefaultOutDir;
+    }
+
+    private static string RequirePositional(string[] args, int index, string label)
+    {
+        // Args layout: cmd [positional ...] [--out DIR]
+        // Skip the cmd; treat anything before "--out" at position `index` as positional.
+        int positionalIndex = 0;
+        for (int i = 1; i < args.Length; i++)
+        {
+            if (args[i] == "--out") { i++; continue; }  // skip flag + its value
+            if (positionalIndex == index - 1) return args[i];
+            positionalIndex++;
+        }
+        throw new ArgumentException($"Missing positional argument '{label}' at slot {index}.");
+    }
+
+    private static void PrintUsage()
+    {
+        Console.Error.WriteLine("Usage:");
+        Console.Error.WriteLine("  smokeshot nav-all [--out DIR]            5-page navigation loop");
+        Console.Error.WriteLine("  smokeshot app-add <sutName> [--out DIR]  Step 1: Application Management add SUT");
+        Console.Error.WriteLine("  smokeshot mr-add  <mrCode>  [--out DIR]  Step 2: MR Management add MR");
+        Console.Error.WriteLine("  smokeshot mt-exec [--out DIR]            Step 3: MT execution (skips if no OpenMOC)");
+        Console.Error.WriteLine("  smokeshot metapatterns [--out DIR]       MetaPatterns CRUD screenshots");
+        Console.Error.WriteLine("  smokeshot debug                          Dump named UIA tree");
+        Console.Error.WriteLine("Exit codes: 0=ok 1=fail 2=skipped 3=app-not-running");
     }
 }
