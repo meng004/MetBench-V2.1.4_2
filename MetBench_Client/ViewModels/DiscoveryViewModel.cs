@@ -18,7 +18,7 @@ public sealed partial class DiscoveryViewModel : ObservableObject, INavigationAw
     private readonly DiscoveryService _discoveryService;
     private readonly IEnumerable<IMRDiscoverer> _discoverers;
     private readonly ICandidateMRRepository _candidateRepo;
-    private readonly ApplicationSerive _appService;
+    private readonly ApplicationService _appService;
 
     [ObservableProperty]
     private ObservableCollection<IMRDiscoverer> _discovererList = new();
@@ -53,7 +53,7 @@ public sealed partial class DiscoveryViewModel : ObservableObject, INavigationAw
         DiscoveryService discoveryService,
         IEnumerable<IMRDiscoverer> discoverers,
         ICandidateMRRepository candidateRepo,
-        ApplicationSerive appService)
+        ApplicationService appService)
     {
         _discoveryService = discoveryService;
         _discoverers = discoverers;

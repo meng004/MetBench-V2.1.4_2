@@ -32,13 +32,13 @@ namespace MetBench_Client.ViewModels
         private IPageService _pageService;
 
         // 蜕变关系管理服务
-        private MetamorphicRelationSerive _metamorphicRelationSerive;
+        private MetamorphicRelationService _metamorphicRelationSerive;
 
         // 应用程序管理服务
-        private ApplicationSerive _applicationSerive;
+        private ApplicationService _applicationSerive;
 
         // 应用领域管理服务
-        private DomainSerive _domainSerive;
+        private DomainService _domainSerive;
 
         // txbIdApplication 的数据绑定属性
         public string IdApplication { get; set; } = "0";
@@ -159,7 +159,7 @@ namespace MetBench_Client.ViewModels
         }
 
         // 构造函数
-        public ApplicationManagementViewModel(MetamorphicRelationSerive metamorphicRelationSerive, ApplicationSerive applicationSerive, DomainSerive domainSerive, IPageService pageService, INavigationService navigationService, IEventAggregator eventAggregator, IServiceProvider serviceProvider)
+        public ApplicationManagementViewModel(MetamorphicRelationService metamorphicRelationSerive, ApplicationService applicationSerive, DomainService domainSerive, IPageService pageService, INavigationService navigationService, IEventAggregator eventAggregator, IServiceProvider serviceProvider)
         {
             this._metamorphicRelationSerive = metamorphicRelationSerive;
             this._applicationSerive = applicationSerive;

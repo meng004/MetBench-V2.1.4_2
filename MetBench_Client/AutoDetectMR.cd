@@ -12,8 +12,8 @@
     </TypeIdentifier>
     <ShowAsAssociation>
       <Property Name="AutoMRDetector" />
-      <Property Name="ApplicationSerive" />
-      <Property Name="MetamorphicRelationSerive" />
+      <Property Name="ApplicationService" />
+      <Property Name="MetamorphicRelationService" />
     </ShowAsAssociation>
     <Lollipop Position="0.2" />
   </Class>
@@ -25,11 +25,11 @@
     <Position X="8.5" Y="5.25" Width="2.25" />
     <TypeIdentifier />
   </Class>
-  <Class Name="MetBench_BLL.MetamorphicRelationSerive">
+  <Class Name="MetBench_BLL.MetamorphicRelationService">
     <Position X="0.75" Y="5.25" Width="2.5" />
     <TypeIdentifier />
   </Class>
-  <Class Name="MetBench_BLL.ApplicationSerive">
+  <Class Name="MetBench_BLL.ApplicationService">
     <Position X="0.75" Y="1.5" Width="2.5" />
     <TypeIdentifier />
   </Class>
