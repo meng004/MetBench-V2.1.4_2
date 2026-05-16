@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MetBench_BLL.SystemMT.Assertions;
 using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_Client.Services;
 using MetBench_Domain;
@@ -16,24 +19,31 @@ namespace MetBench_Client.ViewModels
     /// 入口：AnomalyListPage 设置 ReplayInbox.PendingAnomaly 后 navigate 进来。
     /// </summary>
     /// <remarks>
-    /// First-ship 范围：纯展示 + 一个 "Run replay" 占位按钮。
-    /// 真实 Replay 需要从 Anomaly→Result→Execution→MRBinding 重建 PipelineContext，
-    /// 这块跟 ISystemMtScenarioLauncher 集成留作 follow-up（见 §1.5 同期）。
+    /// 两条路径：
+    ///   1) <see cref="SimulateReplayAsync"/> — 用 DemoClassification 合成 ReplayResult 仅演示 UI 6 种着色。
+    ///   2) <see cref="RunRealReplayAsync"/> — 走 cloud-ship 的 ReplayContextBuilder + ReplayService.ReplayAsync
+    ///      真实重跑 Pipeline，比较新旧 outcome 并打分类标签。
     /// </remarks>
     public sealed partial class ReplayResultViewModel : ObservableObject, INavigationAware
     {
         private readonly ReplayInbox _inbox;
         private readonly IAnomalyRepository _anomalies;
         private readonly IResultRepository _results;
+        private readonly ReplayContextBuilder _builder;
+        private readonly ReplayService _replayService;
 
         public ReplayResultViewModel(
             ReplayInbox inbox,
             IAnomalyRepository anomalies,
-            IResultRepository results)
+            IResultRepository results,
+            ReplayContextBuilder builder,
+            ReplayService replayService)
         {
             _inbox = inbox;
             _anomalies = anomalies;
             _results = results;
+            _builder = builder;
+            _replayService = replayService;
         }
 
         // === Anomaly / 原 Result 展示字段 ===
@@ -68,7 +78,7 @@ namespace MetBench_Client.ViewModels
         [ObservableProperty] private string? _statusMessage;
         [ObservableProperty] private bool _isBusy;
 
-        // 用于演示 6 种分类着色（first ship — 真实 ReplayService 集成是 follow-up）。
+        // 用于演示 6 种分类着色 — SimulateReplay 路径专用，RunRealReplay 不依赖。
         [ObservableProperty] private ReplayClassification _demoClassification = ReplayClassification.Reproduced;
 
         public IReadOnlyList<ReplayClassification> AvailableClassifications { get; } = new[]
@@ -116,11 +126,11 @@ namespace MetBench_Client.ViewModels
                 return;
             }
 
-            // Pipeline 元数据（MR/SUT/参数）在当前数据模型里没单独存到 Result/Anomaly，
-            // 真实 PipelineContext 重建需要 Execution + MRBinding。这里只显示已有字段。
-            MrCode = "—  (needs Execution + MRBinding lookup)";
-            SutName = "—  (needs Execution + MRBinding lookup)";
-            TriggerParameters = "—  (needs Execution + MRBinding lookup)";
+            // Pipeline 元数据（MR/SUT/参数）由 RunRealReplay 调 ReplayContextBuilder 解析后填入。
+            // 进页时先显示占位，提示用户用按钮拉真实上下文。
+            MrCode = "—  (click \"Run real replay\" to resolve)";
+            SutName = "—  (click \"Run real replay\" to resolve)";
+            TriggerParameters = "—  (click \"Run real replay\" to resolve)";
 
             OriginalSourceValue = OriginalResult.SourceValue;
             OriginalFollowupValue = OriginalResult.FollowupValue;
@@ -137,7 +147,7 @@ namespace MetBench_Client.ViewModels
             else
             {
                 ResetReplay();
-                StatusMessage = "Replay has not been run yet. Use \"Simulate replay\" to preview the classification UI; real Replay wiring is tracked as a follow-up.";
+                StatusMessage = "Pick \"Run real replay\" to invoke ReplayService, or \"Simulate replay\" to preview a classification.";
             }
         }
 
@@ -156,7 +166,7 @@ namespace MetBench_Client.ViewModels
         {
             HasReplayResult = true;
             Classification = rr.Classification;
-            ReplaySourceValue = rr.ReplayOutcome.SourceMetrics is { } sm && OriginalResult is { } &&
+            ReplaySourceValue = rr.ReplayOutcome.SourceMetrics is { } sm &&
                                 sm.TryGetValue("k_eff", out var sv) ? sv : null;
             ReplayFollowupValue = rr.ReplayOutcome.FollowupMetrics is { } fm &&
                                   fm.TryGetValue("k_eff", out var fv) ? fv : null;
@@ -166,8 +176,85 @@ namespace MetBench_Client.ViewModels
         }
 
         /// <summary>
-        /// First-ship 占位 — 真实 Replay 需要 PipelineContext 重建。
-        /// 现阶段用所选 DemoClassification 合成一个 ReplayResult 仅用于演示 UI 6 种着色。
+        /// 真实 Replay — 调 ReplayContextBuilder.Build + ReplayService.ReplayAsync。
+        /// 失败时 ErrorMessage 显示原因；UI 不崩。
+        /// </summary>
+        [RelayCommand(CanExecute = nameof(CanRunRealReplay))]
+        private async Task RunRealReplayAsync()
+        {
+            if (Anomaly is null || OriginalResult is null) return;
+            IsBusy = true;
+            ErrorMessage = null;
+            try
+            {
+                var workingDir = Path.Combine(
+                    Path.GetTempPath(), "MetBench", "replay", Anomaly.IdAnomaly.ToString("N"));
+                Directory.CreateDirectory(workingDir);
+
+                var built = _builder.Build(Anomaly.IdAnomaly, workingDir);
+                var original = ReconstructOutcomeFromResult(OriginalResult);
+                var replay = await _replayService.ReplayAsync(built.Context, original).ConfigureAwait(true);
+
+                MrCode = string.IsNullOrWhiteSpace(built.MrCode) ? "—" : built.MrCode;
+                SutName = string.IsNullOrWhiteSpace(built.SutName) ? "—" : built.SutName;
+                TriggerParameters = built.TriggerParameters.Count == 0
+                    ? "(none)"
+                    : string.Join(", ", built.TriggerParameters.Select(kv => $"{kv.Key}={kv.Value}"));
+
+                ApplyReplayResult(replay);
+                StatusMessage = $"Real replay completed → {replay.Classification}.";
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Real replay failed: {ex.Message}";
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        private bool CanRunRealReplay() => !IsBusy && Anomaly is not null && OriginalResult is not null;
+
+        /// <summary>
+        /// 把持久化的 v2 Result 字段直填回 Pipeline 跑过的 PipelineOutcome 形态，
+        /// 供 ReplayService.Classify 跟新 outcome 比较。
+        /// 路径信息（ArtifactsDirectory / *InputPath / *OutputPath）原 Result 没存 —— 留空字符串。
+        /// </summary>
+        private static PipelineOutcome ReconstructOutcomeFromResult(Result r)
+        {
+            var assertion = new SystemMtAssertionResultV2(
+                AssertionTypeCode: "v2-original",
+                Passed: r.AssertionPassed,
+                SourceValue: r.SourceValue,
+                FollowupValue: r.FollowupValue,
+                ObservedDelta: r.ObservedDelta,
+                ExpectedThreshold: r.ExpectedThreshold,
+                Expression: r.AssertionExpression ?? string.Empty,
+                FailureReason: r.FailureReason);
+
+            return new PipelineOutcome(
+                FinalStatus: r.AssertionPassed ? PipelineStatus.Ok : PipelineStatus.Anomaly,
+                ErrorMessage: r.FailureReason,
+                StartedAt: DateTime.UtcNow,
+                FinishedAt: DateTime.UtcNow,
+                ArtifactsDirectory: string.Empty,
+                SourceInputPath: string.Empty,
+                FollowupInputPath: string.Empty,
+                SourceOutputPath: string.Empty,
+                FollowupOutputPath: string.Empty,
+                SourceMetrics: r.SourceMetrics,
+                FollowupMetrics: r.FollowupMetrics,
+                AssertionResult: assertion,
+                SourceElapsed: r.SourceElapsed,
+                FollowupElapsed: r.FollowupElapsed,
+                SourceExitCode: r.SourceExitCode,
+                FollowupExitCode: r.FollowupExitCode);
+        }
+
+        /// <summary>
+        /// First-ship 占位 — 真实 Replay 走 RunRealReplayAsync。
+        /// 这里仅用所选 DemoClassification 合成一个 ReplayResult 让 UI 6 种着色可演示。
         /// </summary>
         [RelayCommand(CanExecute = nameof(CanSimulate))]
         private async Task SimulateReplayAsync()
@@ -178,7 +265,6 @@ namespace MetBench_Client.ViewModels
             {
                 await Task.Delay(150).ConfigureAwait(true); // 模拟跑一下
 
-                // 根据 DemoClassification 反推一个 "replay outcome" 让 UI 显示一致
                 var (replayStatus, replayPassed, replayFollowup) = DemoClassification switch
                 {
                     ReplayClassification.Reproduced =>
@@ -203,7 +289,7 @@ namespace MetBench_Client.ViewModels
                 ReplayFinalStatus = replayStatus;
                 ReplayAssertionPassed = replayPassed;
                 ReplayAssertionExpression = $"simulated → {DemoClassification}";
-                StatusMessage = "Simulated only — wire ReplayService.ReplayAsync (PipelineContext reconstruction needed) for real replay.";
+                StatusMessage = "Simulated only — use \"Run real replay\" for the real pipeline path.";
             }
             finally
             {
@@ -213,8 +299,20 @@ namespace MetBench_Client.ViewModels
 
         private bool CanSimulate() => !IsBusy && Anomaly is not null && OriginalResult is not null;
 
-        partial void OnAnomalyChanged(Anomaly? value) => SimulateReplayCommand.NotifyCanExecuteChanged();
-        partial void OnOriginalResultChanged(Result? value) => SimulateReplayCommand.NotifyCanExecuteChanged();
-        partial void OnIsBusyChanged(bool value) => SimulateReplayCommand.NotifyCanExecuteChanged();
+        partial void OnAnomalyChanged(Anomaly? value)
+        {
+            SimulateReplayCommand.NotifyCanExecuteChanged();
+            RunRealReplayCommand.NotifyCanExecuteChanged();
+        }
+        partial void OnOriginalResultChanged(Result? value)
+        {
+            SimulateReplayCommand.NotifyCanExecuteChanged();
+            RunRealReplayCommand.NotifyCanExecuteChanged();
+        }
+        partial void OnIsBusyChanged(bool value)
+        {
+            SimulateReplayCommand.NotifyCanExecuteChanged();
+            RunRealReplayCommand.NotifyCanExecuteChanged();
+        }
     }
 }
