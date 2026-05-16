@@ -269,7 +269,8 @@ namespace MetBench_DAL
                     x => new { x.MRId, x.ApplicationId, x.DefaultSampleCasePath }, unique: true);
                 collection.EnsureIndex(x => x.MRId);
                 collection.EnsureIndex(x => x.ApplicationId);
-                collection.EnsureIndex(x => x.IsActive);
+                // F19: 索引 Status (persisted string) 而非 IsActive ([BsonIgnore] 计算属性)
+                collection.EnsureIndex(x => x.Status);
                 mapper.Entity<MRBinding>().Id(x => x.IdMRBinding);
             }
 
