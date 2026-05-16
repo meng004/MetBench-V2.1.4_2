@@ -8,7 +8,7 @@ namespace MetBench_BLL
     /// 跨平台可视化数据服务 —— 读 CSV → 返回 <see cref="ISeries"/>[] + <see cref="Axis"/>[]。
     /// UI 侧（WPF / Web）拿这三个数组自己塞进 chart 控件，不再经过 WPF-only Engine。
     /// </summary>
-    public class MTVisualizationSerive
+    public class MTVisualizationService
     {
         private ISeries[]? _series;
         private Axis[]? _xAxes;

@@ -1,13 +1,13 @@
 ﻿namespace MetBench_BLL
 {
-    public class MTReportGeneratorSerive
+    public class MTReportGeneratorService
     {
         private ReportGenerator _reportGenerator;
         private ReportGenerator _htmlReportGenerator;
         private ReportGenerator _wordReportGenerator;
         private ReportGenerator _pdfReportGenerator;
 
-        public MTReportGeneratorSerive()
+        public MTReportGeneratorService()
         {
             _reportGenerator = new ReportGenerator(new ExcelTestReport());
             _htmlReportGenerator = new ReportGenerator(new HTMLTestReport());

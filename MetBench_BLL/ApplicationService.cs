@@ -5,14 +5,14 @@ using System.Collections.ObjectModel;
 namespace MetBench_BLL
 {
     //应用程序管理服务类
-    public class ApplicationSerive
+    public class ApplicationService
     {
         //数据仓库（实体集合的仓库）
         private IApplicationRepository Application_repository;
 
 
         //依赖注入实体
-        public ApplicationSerive( IApplicationRepository applicationRepository)
+        public ApplicationService( IApplicationRepository applicationRepository)
         {
             Application_repository = applicationRepository;
         }

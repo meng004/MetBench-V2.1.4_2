@@ -9,8 +9,8 @@ namespace MetBench_BLL
 {
     public class SyntaxSimilarityDetector : ISyntaxSimilarityDetector
     {
-        private ApplicationSerive _applicationSerive;
-        public SyntaxSimilarityDetector(ApplicationSerive applicationSerive) 
+        private ApplicationService _applicationSerive;
+        public SyntaxSimilarityDetector(ApplicationService applicationSerive) 
         {
             _applicationSerive = applicationSerive; 
         }
