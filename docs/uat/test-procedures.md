@@ -116,14 +116,16 @@
 
 ### UC-A8 CRUD 端到端（无 UI 路径）
 
-仅 Linux：通过测试套件验证 CRUD 在 DAL 层正确：
+仅 Linux：通过测试套件验证 CRUD 在 DAL 层正确。Application 实体的覆盖通过
+V1 兼容 + V2 round-trip 两个测试类实现（v1 `ApplicationRepository` 没有专属测试，
+但 V1 兼容测试 + V2 round-trip 都包含 Application 行为）：
 
 ```bash
 dotnet test MetBench_SystemMT.Tests \
-  --filter "FullyQualifiedName~ApplicationRepositoryTests|FullyQualifiedName~MetaPatternEntityTests|FullyQualifiedName~MRBindingStatusTests"
+  --filter "FullyQualifiedName~V1CompatibilityTests|FullyQualifiedName~V2EntityRoundtripTests|FullyQualifiedName~MetaPatternEntityTests|FullyQualifiedName~MRBindingStatusTests"
 ```
 
-✅ 期望：Passed > 0, Failed = 0。
+✅ 期望：Passed > 0, Failed = 0。包含 Application v1 形 / V2 schema / MetaPattern / MRBinding 共 4 类实体的 round-trip。
 
 ---
 
@@ -533,10 +535,20 @@ dotnet test MetBench_SystemMT.Tests --filter "FullyQualifiedName~KeysetPaginatio
 
 ```bash
 dotnet test MetBench_SystemMT.Tests --logger "trx;LogFileName=uat-results.trx"
-python3 tools/ci_perf_baseline.py MetBench_SystemMT.Tests/TestResults/uat-results.trx
+python3 tools/ci_perf_baseline.py --trx MetBench_SystemMT.Tests/TestResults/uat-results.trx
 ```
 
-✅ 期望：脚本 exit 0；输出 `Total test wall-time < 120s budget OK`。
+✅ 期望（参考 dry-run 实测）：
+
+```
+===== CI perf baseline =====
+  Trx file:           ...uat-results.trx
+  Total cumulative:   ~40s  (budget: 120s)
+  Slow tests (>2000ms): 3        # OpenMOC 集成预期慢
+✓ PASS: under 120s budget.
+```
+
+脚本 `exit 0`。若出现 OpenMOC 不可用，cumulative 会下降到 ~10s，仍然 PASS。
 
 ---
 
