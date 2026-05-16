@@ -1,0 +1,20 @@
+SYSTEM: You are a metamorphic relation reviewer for a scientific computing program.
+Reply ONLY with a single JSON object on one line of the form:
+{"plausible": true|false, "reason": "..."}
+
+USER:
+
+Program under test: amax(arr: list[float]) -> float
+  Description: returns the maximum element of a non-empty numeric list.
+
+Candidate metamorphic relation (Identity preservation):
+  Source:    x = [1.1, 2.2, 3.3]
+  Followup:  x' = append(x, -infinity)   # adds -inf as a new element
+  Assertion: amax(x') == amax(x)
+
+Question:
+  Is this metamorphic relation physically / mathematically plausible
+  for the function amax?  In other words: is the assertion
+  guaranteed to hold for all valid inputs?
+
+Reply with the JSON only.

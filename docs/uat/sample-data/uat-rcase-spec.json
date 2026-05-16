@@ -1,0 +1,18 @@
+{
+  "_comment": "F9 R-Case auto-reproduction UAT sample spec (UC-D1). 调用 RCaseReproductionService.ReproduceAsync 时的 RCaseReproductionSpec 结构。论文核心 R-Case-4 = OpenMOC narrow basin @ ModSigmaA factor=1.5 → k_eff gap > 5%。",
+
+  "knownBugCode": "R-Case-4",
+
+  "context": {
+    "_comment": "pipeline context — 由 ReplayContextBuilder 从历史 binding 构造；UAT 时由 fake 注入或用真实 MR14-cmp + openmoc binding",
+    "valueName": "k_eff",
+    "triggeredBy": "uat-cli",
+    "catalogVersionSha": "uat-sha-001",
+    "sutVersionSnapshot": "openmoc@3D-MOC",
+    "metbenchVersion": "v2.1.4"
+  },
+
+  "detectionThreshold": 0.05,
+  "linkAnomalyOnReproduction": true,
+  "actor": "uat-validator"
+}

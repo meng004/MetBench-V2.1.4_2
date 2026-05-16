@@ -1,0 +1,18 @@
+{
+  "_comment": "样例 MR spec — UC-A5 新建 method-level MR 时填表参考。",
+
+  "name": "UAT-Identity-MR",
+  "type": "invariance",
+  "granularity": "method",
+  "applicationName": "UAT-App-1",
+  "codeName": "amax.py",
+  "domain": "numeric-utilities",
+  "operator": "append",
+  "expression": "amax(append(x, -infinity)) == amax(x)",
+  "constraint": "x is non-empty list of finite numbers",
+  "inputPattern": "list[float]",
+  "outputPattern": "float",
+  "dimensionOfInputPattern": "1-D variable length",
+  "dimensionOfOutputPattern": "scalar",
+  "description": "Adding -infinity to a list doesn't change its max."
+}
