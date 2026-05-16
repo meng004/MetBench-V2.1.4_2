@@ -67,4 +67,23 @@ public class MRBinding
 
     /// <summary>绑定者。</summary>
     public string BoundBy { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 跨求解器对比 binding 中的角色（F16）。
+    /// 取值：
+    ///   • 空字符串 — 单 SUT 普通 binding（默认，覆盖 99% 场景）
+    ///   • "primary" — m_cmp pair 中的左侧 / reference SUT
+    ///   • "partner" — m_cmp pair 中的右侧 / comparison SUT
+    /// </summary>
+    /// <remarks>
+    /// 闭环 cold-start C1 — m_cmp MR 之前缺乏正式 schema 表达"对 SUT pair"。
+    /// 现在一份 m_cmp MR 产 2 条 binding，role="primary"/"partner"，
+    /// 通过 <see cref="PartnerBindingId"/> 互指。BLL 层 <c>MRPairingService</c> 维护配对一致性。
+    /// </remarks>
+    public string Role { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 配对 binding 的 IdMRBinding（F16）。仅 Role 非空时填值。
+    /// </summary>
+    public int? PartnerBindingId { get; set; }
 }
