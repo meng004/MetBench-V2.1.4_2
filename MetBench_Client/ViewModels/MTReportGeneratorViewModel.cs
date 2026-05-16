@@ -19,7 +19,7 @@ namespace MetBench_Client.ViewModels
         // 页面服务 用于获取页面实体
         private IPageService _pageService;
 
-        private MTReportGeneratorSerive _mtReportGeneratorSerive;
+        private MTReportGeneratorService _mtReportGeneratorSerive;
 
         public List<string> ReportTypeList { get { return new List<string>() { "Pdf", "Word", "Excel", "Html" }; } }
 
@@ -141,7 +141,7 @@ namespace MetBench_Client.ViewModels
         }
 
         // 构造函数
-        public MTReportGeneratorViewModel(IPageService pageService, INavigationService navigationService, MTReportGeneratorSerive mTReportGeneratorSerive)
+        public MTReportGeneratorViewModel(IPageService pageService, INavigationService navigationService, MTReportGeneratorService mTReportGeneratorSerive)
         {
             _navigationService = navigationService;
             _pageService = pageService;

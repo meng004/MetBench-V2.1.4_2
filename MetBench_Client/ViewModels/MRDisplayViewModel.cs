@@ -22,7 +22,7 @@ namespace MetBench_Client.ViewModels
         private IPageService _pageService;
 
         // 蜕变关系管理服务
-        MetamorphicRelationSerive _metamorphicRelationSerive;
+        MetamorphicRelationService _metamorphicRelationSerive;
 
         // OrderOfMR_ComboBox的数据源
         public List<string> OrderOfMRList { get { return MultClass.GetOrderOfMR(); } }
@@ -85,7 +85,7 @@ namespace MetBench_Client.ViewModels
         {
         }
 
-        public MRDisplayViewModel(MetamorphicRelationSerive metamorphicRelationSerive, IPageService pageService, INavigationService navigationService, IEventAggregator eventAggregator)
+        public MRDisplayViewModel(MetamorphicRelationService metamorphicRelationSerive, IPageService pageService, INavigationService navigationService, IEventAggregator eventAggregator)
         {
             _metamorphicRelationSerive = metamorphicRelationSerive;
             _pageService = pageService;

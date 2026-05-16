@@ -23,7 +23,7 @@ namespace MetBench_Client.ViewModels
         private IPageService _pageService;
 
         // 管理服务
-        private DomainSerive _domainSerive;
+        private DomainService _domainSerive;
 
         // datagrid的数据源
         public ObservableCollection<Domain> Data { get; set; }
@@ -72,7 +72,7 @@ namespace MetBench_Client.ViewModels
         }
 
         // 构造函数
-        public DomainManagementViewModel(IPageService pageService, INavigationService navigationService, DomainSerive domainSerive, IEventAggregator eventAggregator) 
+        public DomainManagementViewModel(IPageService pageService, INavigationService navigationService, DomainService domainSerive, IEventAggregator eventAggregator) 
         {
             _pageService = pageService;
             _navigationService = navigationService;
