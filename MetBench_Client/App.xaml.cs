@@ -163,6 +163,7 @@ namespace MetBench_Client
                 services.AddSingleton<MetBench_Client.Services.ReplayInbox>();
                 services.AddScoped<ISystemMtPipeline, SystemMtPipeline>();
                 services.AddScoped<ReplayService>();
+                services.AddScoped<ReplayContextBuilder>();
                 services.AddScoped<Views.Pages.ReplayResultPage>();
                 services.AddScoped<ViewModels.ReplayResultViewModel>();
 
