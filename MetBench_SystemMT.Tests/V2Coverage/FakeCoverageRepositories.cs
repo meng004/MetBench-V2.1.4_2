@@ -33,7 +33,8 @@ internal sealed class FakeMRBindingRepository : IMRBindingRepository
     public bool Remove(MRBinding e) => Data.Remove(e);
     public ObservableCollection<MRBinding> GetByMR(int mrId) => new(Data.Where(b => b.MRId == mrId).ToList());
     public ObservableCollection<MRBinding> GetByApplication(int appId) => new(Data.Where(b => b.ApplicationId == appId).ToList());
-    public ObservableCollection<MRBinding> GetActive() => new(Data);
+    public ObservableCollection<MRBinding> GetActive() => new(Data.Where(b => b.Status == "active").ToList());
+    public ObservableCollection<MRBinding> GetByStatus(string status) => new(Data.Where(b => b.Status == status).ToList());
 }
 
 internal sealed class FakeApplicationRepository : IApplicationRepository

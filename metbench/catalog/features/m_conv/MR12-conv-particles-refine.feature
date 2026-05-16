@@ -1,12 +1,12 @@
 @metapattern:m_conv @assertion:variance-ratio @value:k_eff_std
 @noise_aware:false @tolerance_rel:0.3
-Feature: MR-RefineParticles — RefineParticles
+Feature: MR12-conv-particles-refine — RefineParticles
 
   Background:
     Migrated from mutation_study.SCENARIOS id=openmc-pincell-particles-refine
 
-  Scenario Outline: Apply MR-RefineParticles to <sut> with factor <factor>
-    Given the MR Schema "MR-RefineParticles" is bound to SUT "<sut>"
+  Scenario Outline: Apply MR12-conv-particles-refine to <sut> with factor <factor>
+    Given the MR Schema "MR12-conv-particles-refine" is bound to SUT "<sut>"
     And the binding uses sample case "<sample>"
     And the parameter mapping for "numerics.particles" is configured
     When the MT pipeline runs with parameter "factor"="<factor>"

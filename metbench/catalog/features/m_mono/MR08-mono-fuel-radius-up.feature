@@ -1,12 +1,12 @@
 @metapattern:m_mono @assertion:greater @value:k_eff
 @noise_aware:false @tolerance_rel:0.0
-Feature: MR-FuelRadius — ScaleFuelRadius
+Feature: MR08-mono-fuel-radius-up — ScaleFuelRadius
 
   Background:
     Migrated from mutation_study.SCENARIOS id=openmoc-pincell-fuel-radius
 
-  Scenario Outline: Apply MR-FuelRadius to <sut> with factor <factor>
-    Given the MR Schema "MR-FuelRadius" is bound to SUT "<sut>"
+  Scenario Outline: Apply MR08-mono-fuel-radius-up to <sut> with factor <factor>
+    Given the MR Schema "MR08-mono-fuel-radius-up" is bound to SUT "<sut>"
     And the binding uses sample case "<sample>"
     And the parameter mapping for "geometry.fuel.radius" is configured
     When the MT pipeline runs with parameter "factor"="<factor>"

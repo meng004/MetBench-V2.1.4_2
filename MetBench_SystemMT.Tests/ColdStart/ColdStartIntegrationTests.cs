@@ -50,9 +50,9 @@ public sealed class ColdStartIntegrationTests : IDisposable
     /// <summary>5 个 anchor (跟 cold_start_demo/anchors/anchors.json 同源).</summary>
     private static readonly (string Code, string MetaPattern, string Assertion, string[] Suts)[] Anchors =
     {
-        ("MR-Rot90",                    "m_inv",  "approx-invariant", new[]{"openmoc","openmc"}),
+        ("MR01-inv-quarter-rotation-90", "m_inv",  "approx-invariant", new[]{"openmoc","openmc"}),
         ("MR-NuSigmaF",                 "m_mono", "greater",          new[]{"openmoc","openmc"}),
-        ("MR-RefineParticles",          "m_conv", "bound",            new[]{"openmc"}),
+        ("MR12-conv-particles-refine",  "m_conv", "bound",            new[]{"openmc"}),
         ("MR14-cmp-openmoc-vs-openmc",  "m_cmp",  "bound",            new[]{"openmoc","openmc"}),
         ("MR15-cmp-p0-vs-p1-scattering","m_cmp",  "bound",            new[]{"openmc"}),
     };
