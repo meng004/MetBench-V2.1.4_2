@@ -9,8 +9,8 @@ namespace MetBench_BLL
 {
     public class SemanticSimilarityDetector : ISemanticSimilarityDetector
     {
-        private ApplicationSerive _applicationSerive;
-        public SemanticSimilarityDetector(ApplicationSerive applicationSerive)
+        private ApplicationService _applicationSerive;
+        public SemanticSimilarityDetector(ApplicationService applicationSerive)
         {
             _applicationSerive = applicationSerive;
         }

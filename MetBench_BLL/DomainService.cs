@@ -4,13 +4,13 @@ using System.Collections.ObjectModel;
 
 namespace MetBench_BLL
 {
-    public class DomainSerive
+    public class DomainService
     {
 
         private IDomainRepository Domain_Repository;
 
         //依赖注入实体
-        public DomainSerive(IDomainRepository domain_Repository)
+        public DomainService(IDomainRepository domain_Repository)
         {
             Domain_Repository = domain_Repository;
         }
