@@ -33,5 +33,12 @@ namespace MetBench_IDAL
         public string ApplicationName { get; set; }
         public string CodeName { get; set; } //Code的Name
         public string DomainName { get; set; }
+
+        /// <summary>
+        /// MRBinding-derived 状态聚合（F19 / PR-VM-6）。取值: active / deprecated / archived / experimental。
+        /// 默认 "active" — 该 MR 无 binding 行 / VM 未注入 IMRBindingRepository 时回退为 active。
+        /// 聚合规则: 任一 binding active → "active"；否则取第一个 binding 的 Status；都没 binding → "active"。
+        /// </summary>
+        public string Status { get; set; } = "active";
     }
 }

@@ -33,6 +33,13 @@
                     <ui:TextBox TextWrapping="Wrap" Text="{Binding ViewModel.ApplicationNameBoxText,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" s:View.ActionTarget="{Binding ViewModel}" Margin="10 0 0 0" Width="150" />
                     <ui:Button Appearance="Info" Content="Query" Margin="5 0 0 0" s:View.ActionTarget="{Binding ViewModel}"
                     Command="{s:Action reload_ItemsSource}"/>
+
+                    <!-- PR-VM-6 / F19: Status filter dropdown — default "active" hides deprecated/archived rows -->
+                    <TextBlock Text="Status:" VerticalAlignment="Center" Margin="20 0 0 0"/>
+                    <ComboBox Margin="5 0 0 0" Width="120"
+                              ItemsSource="{Binding ViewModel.StatusFilterList}"
+                              SelectedValue="{Binding ViewModel.StatusFilter, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                              ToolTip="Filter MRs by aggregated MRBinding.Status (default hides deprecated/archived)"/>
                 </StackPanel>
 
                 <ui:DataGrid  LoadingRow="dataGrid_LoadingRow" BorderBrush="LightGray"  BorderThickness="2" MaxHeight="320" Margin="10 0 10 10"  FontSize="15" HeadersVisibility="Column"  SelectedItem="{Binding ViewModel.DataGridSelectItem,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" x:Name="datagrid"  ItemsSource="{Binding ViewModel.Data,UpdateSourceTrigger=PropertyChanged}"  AutoGenerateColumns="False" CanUserAddRows="False" AutomationProperties.AutomationId="DataGrid_MR"
@@ -121,6 +128,13 @@
                         <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}"  Binding="{Binding DomainName}" Width="200" IsReadOnly="True">
                             <DataGridTextColumn.Header>
                                 <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="DomainName"></TextBlock>
+                            </DataGridTextColumn.Header>
+                        </DataGridTextColumn>
+
+                        <!-- PR-VM-6 / F19: MRBinding-derived Status column -->
+                        <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}" Binding="{Binding Status}" Width="100" IsReadOnly="True">
+                            <DataGridTextColumn.Header>
+                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="Status"></TextBlock>
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
 

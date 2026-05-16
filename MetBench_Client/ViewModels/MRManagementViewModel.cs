@@ -37,6 +37,10 @@ namespace MetBench_Client.ViewModels
         // 应用程序管理服务
         private ApplicationSerive _applicationSerive;
 
+        // v2 MRBinding repository (PR-VM-6 / F19) — used to aggregate Status per MR row.
+        // Optional: if null (legacy DI in tests), all rows default to Status="active".
+        private readonly IMRBindingRepository? _mrBindingRepository;
+
         // Latex格式转换Sympy
         private Latextosympy_Await latextosympy_Await = new Latextosympy_Await();
 
@@ -118,6 +122,14 @@ namespace MetBench_Client.ViewModels
         // 查询关键字
         public string ApplicationNameBoxText { get; set; } = string.Empty;
 
+        // PR-VM-6 / F19: Status filter dropdown for MRBinding-derived Status.
+        // 默认 "active" — 隐藏 deprecated / archived rows. "all" 不过滤.
+        public List<string> StatusFilterList { get; } = new() { "active", "deprecated", "archived", "experimental", "all" };
+        public string StatusFilter { get; set; } = "active";
+
+        // Filter change handler — Fody emits On{Property}Changed plumbing; this method name is reflected on.
+        public void OnStatusFilterChanged() => reload_ItemsSource();
+
         // 初始化标志
         private bool _isInitialized = false;
 
@@ -161,13 +173,14 @@ namespace MetBench_Client.ViewModels
         }
 
         // 构造函数
-        public MRManagementViewModel(MetamorphicRelationSerive metamorphicRelationSerive, ApplicationSerive applicationSerive, IPageService pageService, INavigationService navigationService, IEventAggregator eventAggregator)
+        public MRManagementViewModel(MetamorphicRelationSerive metamorphicRelationSerive, ApplicationSerive applicationSerive, IPageService pageService, INavigationService navigationService, IEventAggregator eventAggregator, IMRBindingRepository mrBindingRepository = null)
         {
             this._metamorphicRelationSerive = metamorphicRelationSerive;
             this._applicationSerive = applicationSerive;
             this._navigationService = navigationService;
             this._pageService = pageService;
             this._eventAggregator = eventAggregator;
+            this._mrBindingRepository = mrBindingRepository;
             _eventAggregator.Subscribe(this);
             IsIndeterminate = false;
             Visibility = Visibility.Collapsed;
@@ -223,6 +236,20 @@ namespace MetBench_Client.ViewModels
             //// 按关键字查询
             //var mrs = datas.Where(x => x.ApplicationName.Contains(ApplicationNameBoxText)).ToList();
 
+            // PR-VM-6 / F19: aggregate MRBinding.Status per MR row + apply StatusFilter.
+            // 跳过逻辑当 _mrBindingRepository 注入失败（极少见，例如旧 DI 配置）.
+            if (_mrBindingRepository != null)
+            {
+                foreach (var row in mrs)
+                {
+                    row.Status = AggregateStatusForMr(row.IdMR);
+                }
+                if (!string.Equals(StatusFilter, "all", StringComparison.OrdinalIgnoreCase))
+                {
+                    mrs = mrs.Where(x => string.Equals(x.Status, StatusFilter, StringComparison.OrdinalIgnoreCase)).ToList();
+                }
+            }
+
             // 分页数量
             var count = (double)(mrs.Count * 1.0 / DataCountPerPage);
 
@@ -238,6 +265,29 @@ namespace MetBench_Client.ViewModels
 
             //// 查完后将搜索框的内容清空
             //ApplicationNameBoxText = string.Empty;
+        }
+
+        /// <summary>
+        /// PR-VM-6 / F19: 对一条 MR (IdMR=mrId) 查它的所有 MRBinding，按规则聚合 Status:
+        ///   • 任一 binding active → "active"
+        ///   • 否则取第一个 binding 的 Status
+        ///   • 该 MR 没有任何 binding → "active" (默认认为新 MR 是 active 的)
+        /// </summary>
+        private string AggregateStatusForMr(int mrId)
+        {
+            try
+            {
+                var bindings = _mrBindingRepository!.GetAll().Where(b => b.MRId == mrId).ToList();
+                if (bindings.Count == 0) return "active";
+                if (bindings.Any(b => string.Equals(b.Status, "active", StringComparison.OrdinalIgnoreCase)))
+                    return "active";
+                return bindings[0].Status ?? "active";
+            }
+            catch
+            {
+                // Repository 查询失败 → 回退 active，避免破坏 UI
+                return "active";
+            }
         }
 
         // 创建蜕变关系实体
