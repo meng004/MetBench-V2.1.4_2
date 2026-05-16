@@ -163,6 +163,7 @@ namespace MetBench_Client
                 services.AddSingleton<MetBench_Client.Services.ReplayInbox>();
                 services.AddScoped<ISystemMtPipeline, SystemMtPipeline>();
                 services.AddScoped<ReplayService>();
+                services.AddScoped<ReplayContextBuilder>();
                 services.AddScoped<Views.Pages.ReplayResultPage>();
                 services.AddScoped<ViewModels.ReplayResultViewModel>();
 
@@ -218,6 +219,10 @@ namespace MetBench_Client
                 services.AddScoped<TrendAnalysisService>();
                 services.AddScoped<Views.Pages.TrendDashboardPage>();
                 services.AddScoped<ViewModels.TrendDashboardViewModel>();
+
+                // === v2 MetaPatterns CRUD (F21 / PR-VM-3) ===
+                services.AddScoped<Views.Pages.MetaPatternsPage>();
+                services.AddScoped<ViewModels.MetaPatternsViewModel>();
 
                 // 蜕变关系识别相关IOC配置
                 services.AddScoped<MRDetector>();

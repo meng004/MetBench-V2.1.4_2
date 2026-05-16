@@ -127,6 +127,12 @@ namespace MetBench_Client.ViewModels
             },
                      new NavigationViewItem()
             {
+                Content = "MetaPatterns",
+                Icon = new SymbolIcon { Symbol = SymbolRegular.Shapes24 },
+                TargetPageType = typeof(Views.Pages.MetaPatternsPage)
+            },
+                     new NavigationViewItem()
+            {
                 Content = "MR Detection",
                 Icon = new SymbolIcon { Symbol = SymbolRegular.CalendarSearch20 },
                 TargetPageType = typeof(Views.Pages.AutoDetectMRPage)
