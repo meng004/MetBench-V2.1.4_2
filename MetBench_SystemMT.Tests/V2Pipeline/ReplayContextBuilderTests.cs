@@ -298,6 +298,7 @@ internal sealed class FakeRcbBindingRepo : IMRBindingRepository
     public ObservableCollection<MRBinding> GetByMR(int id) => new(Data.Where(b => b.MRId == id).ToList());
     public ObservableCollection<MRBinding> GetByApplication(int id) => new();
     public ObservableCollection<MRBinding> GetActive() => new();
+    public ObservableCollection<MRBinding> GetByStatus(string status) => new();
 }
 
 internal sealed class FakeRcbMrRepo : IMetamorphicRelationRepository

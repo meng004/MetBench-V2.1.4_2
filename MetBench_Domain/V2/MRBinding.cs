@@ -41,8 +41,26 @@ public class MRBinding
     /// <summary>该 Binding 的默认 SUT 超参。可在 MRInstance 上 override。</summary>
     public SutHyperparams DefaultHyperparams { get; set; } = new();
 
-    /// <summary>是否启用（true = 列在 catalog；false = 历史保留）。</summary>
-    public bool IsActive { get; set; } = true;
+    /// <summary>
+    /// 状态：active / deprecated / archived / experimental。
+    /// 跟其他 v2 实体（KnownBug/Mutant/MetaPattern）的 Status 字段语义保持一致。
+    /// </summary>
+    /// <remarks>
+    /// 闭环 cold-start C6 (Status 字段命名不一致)。
+    /// 旧 <see cref="IsActive"/> 属性保留为兼容性计算属性（active → true，其他 → false）。
+    /// </remarks>
+    public string Status { get; set; } = "active";
+
+    /// <summary>
+    /// 兼容性：旧 v2.0 代码读 IsActive；新代码请直接读 <see cref="Status"/>。
+    /// Getter 返回 Status=="active"；Setter 把 true → "active"，false → "deprecated"。
+    /// </summary>
+    [BsonIgnore]
+    public bool IsActive
+    {
+        get => string.Equals(Status, "active", StringComparison.Ordinal);
+        set => Status = value ? "active" : "deprecated";
+    }
 
     /// <summary>绑定时间。</summary>
     public DateTime BoundAt { get; set; } = DateTime.UtcNow;
