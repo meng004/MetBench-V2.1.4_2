@@ -48,4 +48,19 @@ jobs:
         # the gate working in the meantime.
         run: |
           dotnet test MetBench_SystemMT.Tests/MetBench_SystemMT.Tests.csproj \
-              --no-build --nologo --logger "console;verbosity=normal"
+              --no-build --nologo \
+              --logger "console;verbosity=normal" \
+              --logger "trx;LogFileName=test-results.trx" \
+              --results-directory TestResults
+
+      - name: Performance baseline check (F14)
+        # 性能回归 gate：
+        #   • 总时长 > 120s → fail（v2 ship 时基线 ~15s；3× margin 防设备波动）
+        #   • 单个 test > 2000ms → warn（保留 OpenMOC subprocess timeout 等真慢测试余地）
+        # 数据来自 trx 文件（vstest 标准结构）。
+        if: always()
+        run: |
+          python3 tools/ci_perf_baseline.py \
+              --trx TestResults/test-results.trx \
+              --total-budget-seconds 120 \
+              --per-test-warn-ms 2000
