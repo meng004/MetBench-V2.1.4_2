@@ -77,7 +77,7 @@ public abstract class LiteDbGuidPkRepositoryBase<T> where T : class
     /// <remarks>
     /// LiteDB 的 <c>Skip(N)</c> 是 in-memory 线性扫描而非索引偏移：每页都从头跳 N 行。
     /// 集合 ≤ 10k 行时可忽略；超大集合（Executions / MutationResults）做深翻页前应改成
-    /// keyset pagination（按 IdXxx &gt; lastSeenId）。
+    /// <see cref="GetPageKeyset"/>（按 IdXxx &gt; lastSeenId）。
     /// </remarks>
     public virtual ObservableCollection<T> GetPage(int pageIndex, int pageSize)
     {
@@ -88,6 +88,23 @@ public abstract class LiteDbGuidPkRepositoryBase<T> where T : class
             .Limit(pageSize)
             .ToList();
         return new ObservableCollection<T>(query);
+    }
+
+    /// <inheritdoc cref="IGuidRepository{T}.GetPageKeyset"/>
+    /// <remarks>
+    /// 用 PK (<c>_id</c>) 索引做 keyset 过滤，O(pageSize) 复杂度。
+    /// LiteDB 的 <c>_id</c> 索引是自动创建且唯一。
+    /// </remarks>
+    public virtual ObservableCollection<T> GetPageKeyset(Guid? afterId, int pageSize)
+    {
+        if (pageSize <= 0) return new ObservableCollection<T>();
+        using var db = new LiteDatabase(_conn);
+        var col = db.GetCollection<T>(CollectionKey);
+        var query = col.Query();
+        if (afterId.HasValue)
+            query = query.Where("_id > @0", new BsonValue(afterId.Value));
+        var rows = query.OrderBy("_id").Limit(pageSize).ToList();
+        return new ObservableCollection<T>(rows);
     }
 
     public virtual int Count()
