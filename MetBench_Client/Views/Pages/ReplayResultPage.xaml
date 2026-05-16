@@ -163,13 +163,18 @@
             </Grid>
         </Border>
 
-        <!-- Row 3: simulate replay controls -->
+        <!-- Row 3: replay controls — real path + simulate fallback -->
         <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,12,0,0">
+            <ui:Button Appearance="Primary"
+                       Content="Run real replay"
+                       Icon="{ui:SymbolIcon Play24}"
+                       Command="{Binding ViewModel.RunRealReplayCommand}"
+                       Margin="0,0,16,0" />
             <TextBlock Text="Simulate classification:" VerticalAlignment="Center" Margin="0,0,8,0" />
             <ComboBox ItemsSource="{Binding Source={StaticResource ClassificationValues}}"
                       SelectedValue="{Binding ViewModel.DemoClassification, Mode=TwoWay}"
                       Width="220" Margin="0,0,8,0" />
-            <ui:Button Appearance="Primary"
+            <ui:Button Appearance="Secondary"
                        Content="Simulate replay"
                        Icon="{ui:SymbolIcon ArrowCounterclockwise24}"
                        Command="{Binding ViewModel.SimulateReplayCommand}" />
