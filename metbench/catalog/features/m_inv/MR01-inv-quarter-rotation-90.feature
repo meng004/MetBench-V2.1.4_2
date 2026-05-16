@@ -1,12 +1,12 @@
 @metapattern:m_inv @assertion:approx-invariant @value:k_eff
 @noise_aware:false @tolerance_rel:0.0001
-Feature: MR-Rot90 — Rotate90
+Feature: MR01-inv-quarter-rotation-90 — Rotate90
 
   Background:
     Migrated from mutation_study.SCENARIOS id=openmoc-pincell-rotate-90
 
-  Scenario Outline: Apply MR-Rot90 to <sut> with factor <factor>
-    Given the MR Schema "MR-Rot90" is bound to SUT "<sut>"
+  Scenario Outline: Apply MR01-inv-quarter-rotation-90 to <sut> with factor <factor>
+    Given the MR Schema "MR01-inv-quarter-rotation-90" is bound to SUT "<sut>"
     And the binding uses sample case "<sample>"
     And the parameter mapping for "geometry.rotation_deg" is configured
     When the MT pipeline runs with parameter "factor"="<factor>"

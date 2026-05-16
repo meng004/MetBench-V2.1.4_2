@@ -28,6 +28,14 @@ public sealed class LiteDbMRBindingRepository
     {
         using var db = new LiteDatabase(_conn);
         var col = db.GetCollection<MRBinding>(CollectionKey);
-        return new ObservableCollection<MRBinding>(col.Find(x => x.IsActive));
+        // 查 Status="active" 而非 IsActive (后者 [BsonIgnore]，是计算属性)
+        return new ObservableCollection<MRBinding>(col.Find(x => x.Status == "active"));
+    }
+
+    public ObservableCollection<MRBinding> GetByStatus(string status)
+    {
+        using var db = new LiteDatabase(_conn);
+        var col = db.GetCollection<MRBinding>(CollectionKey);
+        return new ObservableCollection<MRBinding>(col.Find(x => x.Status == status));
     }
 }

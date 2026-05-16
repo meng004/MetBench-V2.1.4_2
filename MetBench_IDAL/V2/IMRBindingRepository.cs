@@ -12,6 +12,9 @@ public interface IMRBindingRepository : IRepository<MRBinding>
     /// <summary>列出指定 SUT 上的全部绑定。</summary>
     ObservableCollection<MRBinding> GetByApplication(int applicationId);
 
-    /// <summary>列出全部 IsActive=true 的绑定（catalog 公开视图）。</summary>
+    /// <summary>列出全部 Status="active" 的绑定（catalog 公开视图）。</summary>
     ObservableCollection<MRBinding> GetActive();
+
+    /// <summary>按指定 Status 列出（active / deprecated / archived / experimental）。</summary>
+    ObservableCollection<MRBinding> GetByStatus(string status);
 }
