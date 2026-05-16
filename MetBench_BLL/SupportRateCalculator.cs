@@ -7,9 +7,9 @@ namespace MetBench_BLL
     // 验证支持率计算接口
     public class SupportRateCalculator
     {
-        private MetamorphicRelationSerive _metamorphicRelationSerive;
+        private MetamorphicRelationService _metamorphicRelationSerive;
 
-        public SupportRateCalculator(MetamorphicRelationSerive metamorphicRelationSerive)
+        public SupportRateCalculator(MetamorphicRelationService metamorphicRelationSerive)
         {
             _metamorphicRelationSerive = metamorphicRelationSerive;
         }

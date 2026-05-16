@@ -5,9 +5,9 @@ namespace MetBench_BLL
 {
     public class UnitLevelPreprocessor :IPreprocessor
     {
-        private ApplicationSerive _applicationSerive ;
+        private ApplicationService _applicationSerive ;
 
-        public UnitLevelPreprocessor(ApplicationSerive applicationSerive) 
+        public UnitLevelPreprocessor(ApplicationService applicationSerive) 
         {
             _applicationSerive = applicationSerive ;
         }

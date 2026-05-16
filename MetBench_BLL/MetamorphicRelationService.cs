@@ -4,13 +4,13 @@ using System.Collections.ObjectModel;
 
 namespace MetBench_BLL
 {
-    public class MetamorphicRelationSerive
+    public class MetamorphicRelationService
     {
         private IMetamorphicRelationRepository MR_repository ;
         private IApplicationRepository Application_repository ;
 
         //依赖注入实体
-        public MetamorphicRelationSerive(IMetamorphicRelationRepository metamorphicRelationRepository, IApplicationRepository applicationRepository) 
+        public MetamorphicRelationService(IMetamorphicRelationRepository metamorphicRelationRepository, IApplicationRepository applicationRepository) 
         {
             MR_repository = metamorphicRelationRepository;
             Application_repository = applicationRepository;

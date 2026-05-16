@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 
 namespace MetBench_BLL
 {
-    public class MRRecommendationSerive
+    public class MRRecommendationService
     {
         private IPreprocessor _preprocessor;
         private ISyntaxSimilarityDetector _syntaxDetector;
@@ -13,7 +13,7 @@ namespace MetBench_BLL
         private SyntaxMRRecommendation syntaxMRRecommendation;
         private SemanticMRRecommendation semanticMRRecommendation;
 
-        public MRRecommendationSerive(
+        public MRRecommendationService(
        IPreprocessor preprocessor,
        ISyntaxSimilarityDetector syntaxDetector,
        ISemanticSimilarityDetector semanticDetector,
