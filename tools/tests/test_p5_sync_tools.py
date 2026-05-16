@@ -114,7 +114,7 @@ def test_feature_to_db_round_trip_preserves_tags():
                 Pin-cell rotational symmetry.
 
               Scenario Outline: Apply to <sut>
-                Given the MR Schema "MR-Rot90" is bound to SUT "<sut>"
+                Given the MR Schema "MR01-inv-quarter-rotation-90" is bound to SUT "<sut>"
                 When the MT pipeline runs with parameter "angle"="<angle>"
                 Then the "approx-invariant" assertion holds on "k_eff"
 
@@ -220,11 +220,11 @@ def test_migrate_python_scenarios_known_codes_present():
     pkg = migrate()
     codes = {s["code"] for s in pkg["schemas"]}
     expected = {
-        "MR-NuSigmaF", "MR-SigmaA", "MR-SigmaT", "MR-SigmaS",
-        "MR-FuelRadius", "MR-ModSigmaA",
+        "MR-NuSigmaF", "MR-SigmaA", "MR05-mono-fuel-sigma-t-up", "MR06-mono-fuel-sigma-s-down",
+        "MR08-mono-fuel-radius-up", "MR07-mono-moderator-sigma-a-up",
         "MR-T", "MR-T-AddTemp", "MR-T-BoratedWater",
-        "MR-Rot90", "MR-MirrorX", "MR-MirrorY",
-        "MR-RefineParticles", "MR-PermuteEnergyGroups",
+        "MR01-inv-quarter-rotation-90", "MR02-inv-mirror-x", "MR03-inv-mirror-y",
+        "MR12-conv-particles-refine", "MR04-inv-energy-group-relabel",
     }
     missing = expected - codes
     assert not missing, f"Missing MRSchema codes after migration: {missing}"

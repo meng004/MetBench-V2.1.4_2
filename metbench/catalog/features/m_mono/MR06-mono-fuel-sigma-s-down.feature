@@ -1,12 +1,12 @@
 @metapattern:m_mono @assertion:less @value:k_eff
 @noise_aware:false @tolerance_rel:0.0
-Feature: MR-SigmaS — ScaleFuelSigmaS
+Feature: MR06-mono-fuel-sigma-s-down — ScaleFuelSigmaS
 
   Background:
     Migrated from mutation_study.SCENARIOS id=openmoc-pincell-fuel-sigma-s
 
-  Scenario Outline: Apply MR-SigmaS to <sut> with factor <factor>
-    Given the MR Schema "MR-SigmaS" is bound to SUT "<sut>"
+  Scenario Outline: Apply MR06-mono-fuel-sigma-s-down to <sut> with factor <factor>
+    Given the MR Schema "MR06-mono-fuel-sigma-s-down" is bound to SUT "<sut>"
     And the binding uses sample case "<sample>"
     And the parameter mapping for "physics.fuel.sigma_s" is configured
     When the MT pipeline runs with parameter "factor"="<factor>"

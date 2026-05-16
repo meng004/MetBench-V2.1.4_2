@@ -1,12 +1,12 @@
 @metapattern:m_mono @assertion:less @value:k_eff
 @noise_aware:false @tolerance_rel:0.0
-Feature: MR-ModSigmaA — ScaleModeratorSigmaA
+Feature: MR07-mono-moderator-sigma-a-up — ScaleModeratorSigmaA
 
   Background:
     Migrated from mutation_study.SCENARIOS id=openmoc-pincell-moderator-sigma-a
 
-  Scenario Outline: Apply MR-ModSigmaA to <sut> with factor <factor>
-    Given the MR Schema "MR-ModSigmaA" is bound to SUT "<sut>"
+  Scenario Outline: Apply MR07-mono-moderator-sigma-a-up to <sut> with factor <factor>
+    Given the MR Schema "MR07-mono-moderator-sigma-a-up" is bound to SUT "<sut>"
     And the binding uses sample case "<sample>"
     And the parameter mapping for "physics.moderator.sigma_a" is configured
     When the MT pipeline runs with parameter "factor"="<factor>"
