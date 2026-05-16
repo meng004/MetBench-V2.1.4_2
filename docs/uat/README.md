@@ -42,9 +42,14 @@
 | 文件 | 用途 | 谁读 |
 |------|------|------|
 | [README.md](README.md) (本文件) | 总览 · 用例索引 | 所有人 |
+| [任务书.md](任务书.md) | 单页下发文档 | 测试员（先读这个） |
 | [setup-guide.md](setup-guide.md) | 一步步装环境 / SUT / LLM API 配置 | 验收员开工前必读 |
-| [test-procedures.md](test-procedures.md) | 21 个用例的逐步执行步骤 + 预期输出 | 验收员主操作手册 |
+| [test-procedures.md](test-procedures.md) | 45 个用例的逐步执行步骤 + 预期输出 | 验收员主操作手册 |
 | [acceptance-rubric.md](acceptance-rubric.md) | 评价表（通过 / 不通过判定） | 验收员 + 审计员 |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | 如何新增 / 修改 UAT 用例 | 加用例的人 |
+| [reports/](reports/) | 历次轮次报告 + baseline | 下发人 + 审计员 |
+| [reports/dashboard.md](reports/dashboard.md) | 历轮 PASS / FAIL 趋势表 | 项目负责人 |
+| [reports/round-template/](reports/round-template/) | 单轮报告模板（测试员复制后填） | 测试员 |
 | [sample-data/](sample-data/) | 验收用预置 spec / 配置 / 输入 | 跟着 test-procedures 引用 |
 
 ---

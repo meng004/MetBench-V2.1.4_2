@@ -1,0 +1,214 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="3f1252f1-0ed0-480c-a541-fa85c38c8abf" name="@vm 2026-05-16 09:11:38" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-05-16T09:11:38.5003456+00:00" queuing="2026-05-16T09:11:38.5003457+00:00" start="2026-05-16T09:11:34.5597947+00:00" finish="2026-05-16T09:11:44.6452603+00:00" />
+  <TestSettings name="default" id="8869cb0e-3f5f-40aa-8109-b9c4ae689f89">
+    <Deployment runDeploymentRoot="_vm_2026-05-16_09_11_38" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="32bca3f2-8525-4734-a995-b424278b0d8e" testId="0fd867b5-4fc0-7bda-69e4-0c6f6cb0a6d7" testName="MetBench_SystemMT.Tests.SystemMT.OpenMocInputAdapterTests.TransformAsync_scales_fuel_nu_sigma_f_and_preserves_other_arrays" computerName="vm" duration="00:00:00.0838762" startTime="2026-05-16T09:11:39.5536981+00:00" endTime="2026-05-16T09:11:39.5536984+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="32bca3f2-8525-4734-a995-b424278b0d8e" />
+    <UnitTestResult executionId="547a022c-11e0-47fb-b0ab-a060bb7cf85b" testId="36f08d14-0480-f921-9f94-12879b92ad10" testName="MetBench_SystemMT.Tests.SystemMT.OpenMocSigmaAInputAdapterTests.TransformAsync_rejects_non_positive_factor" computerName="vm" duration="00:00:00.1004948" startTime="2026-05-16T09:11:40.2170642+00:00" endTime="2026-05-16T09:11:40.2170645+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="547a022c-11e0-47fb-b0ab-a060bb7cf85b" />
+    <UnitTestResult executionId="eba90af5-2c2b-47da-980a-b7aa7450cdb2" testId="5c477246-c7b4-7197-d52a-bbc842cb5ebb" testName="Follow-up output range is greater than source output range" computerName="vm" duration="00:00:02.8455751" startTime="2026-05-16T09:11:38.5756078+00:00" endTime="2026-05-16T09:11:38.5756081+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="eba90af5-2c2b-47da-980a-b7aa7450cdb2">
+      <Output>
+        <StdOut>Given a projectile MT case named "source" with input "10 45 9.81"
+-&gt; done: ProjectileRangeSteps.GivenAProjectileMtCase("source", "10 45 9.81") (0.1s)
+And a projectile MT case named "follow-up" with input "20 45 9.81"
+-&gt; done: ProjectileRangeSteps.GivenAProjectileMtCase("follow-up", "20 45 9.81") (0.3s)
+When I run both projectile cases
+-&gt; done: ProjectileRangeSteps.WhenIRunBothProjectileCases() (2.4s)
+Then the projectile parsed value "range" of "follow-up" should exceed "source"
+-&gt; done: ProjectileRangeSteps.ThenProjectileParsedValueShouldExceed("range", "follow-up", "source") (0.0s)
+And the follow-up range should be approximately 4 times the source range
+-&gt; done: ProjectileRangeSteps.ThenFollowUpRangeRatio(4) (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="7671848e-c4a3-4ce9-9518-8d74ae685d81" testId="d4b1d385-1dd8-6316-0dc5-23fd63487875" testName="MetBench_SystemMT.Tests.SystemMT.OpenMocSigmaAInputAdapterTests.TransformAsync_rejects_missing_factor_param" computerName="vm" duration="00:00:00.4037809" startTime="2026-05-16T09:11:40.1161095+00:00" endTime="2026-05-16T09:11:40.1161099+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7671848e-c4a3-4ce9-9518-8d74ae685d81" />
+    <UnitTestResult executionId="8daf6e05-dd36-42d5-ba40-80d5321e945f" testId="12827450-d435-daa9-9d3d-2e6b41f13e07" testName="MetBench_SystemMT.Tests.SystemMT.OpenMocRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json" computerName="vm" duration="00:00:08.0786663" startTime="2026-05-16T09:11:43.7888816+00:00" endTime="2026-05-16T09:11:43.7888819+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8daf6e05-dd36-42d5-ba40-80d5321e945f" />
+    <UnitTestResult executionId="c78e7160-6d1e-4c84-8c91-0f819a8a0cbb" testId="b3149cdf-6b1e-4f4a-3790-1b47c4c52fd0" testName="MetBench_SystemMT.Tests.SystemMT.OpenMocInputAdapterTests.TransformAsync_rejects_missing_factor_param" computerName="vm" duration="00:00:00.1740773" startTime="2026-05-16T09:11:39.3930410+00:00" endTime="2026-05-16T09:11:39.3930414+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c78e7160-6d1e-4c84-8c91-0f819a8a0cbb" />
+    <UnitTestResult executionId="0cfeadd0-1437-4600-9e20-4605d0fa470d" testId="db326942-5c61-47cc-13a9-14b106b825a7" testName="MetBench_SystemMT.Tests.SystemMT.HeatEquationOutputAdapterTests.ParseAsync_rejects_missing_field" computerName="vm" duration="00:00:00.0624033" startTime="2026-05-16T09:11:38.5213608+00:00" endTime="2026-05-16T09:11:38.5213610+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0cfeadd0-1437-4600-9e20-4605d0fa470d" />
+    <UnitTestResult executionId="dcc79c1e-8868-405b-8a2b-218686bc5396" testId="eb93e881-7091-f3c8-1ee3-2fbd530bd4db" testName="MetBench_SystemMT.Tests.SystemMT.HeatEquationOutputAdapterTests.ParseAsync_emits_one_when_stability_violated" computerName="vm" duration="00:00:02.6238142" startTime="2026-05-16T09:11:38.4575768+00:00" endTime="2026-05-16T09:11:38.4576021+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="dcc79c1e-8868-405b-8a2b-218686bc5396" />
+    <UnitTestResult executionId="d896ab6c-f8ad-49c0-a3b4-8fac89e652a4" testId="7665bad3-c0c8-ec15-344c-145ac794487f" testName="MetBench_SystemMT.Tests.SystemMT.HeatEquationOutputAdapterTests.ParseAsync_returns_max_l2_integral_and_stability_metrics" computerName="vm" duration="00:00:00.0596917" startTime="2026-05-16T09:11:38.5815145+00:00" endTime="2026-05-16T09:11:38.5815146+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d896ab6c-f8ad-49c0-a3b4-8fac89e652a4" />
+    <UnitTestResult executionId="aaa2dafc-22cc-4611-8262-32971bb465be" testId="4817c504-7a43-4362-725b-c7bbbe84f6bf" testName="MetBench_SystemMT.Tests.SystemMT.OpenMocOutputAdapterTests.ParseAsync_reports_malformed_json_as_adapter_failure" computerName="vm" duration="00:00:01.0796041" startTime="2026-05-16T09:11:41.3396771+00:00" endTime="2026-05-16T09:11:41.3396774+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="aaa2dafc-22cc-4611-8262-32971bb465be" />
+    <UnitTestResult executionId="19db53df-d766-481b-9092-fcac95c3d131" testId="3beedea9-e607-1b64-64a6-0451708475b2" testName="MetBench_SystemMT.Tests.SystemMT.Launcher.SystemMtScenarioLauncherTests.ListAvailableAsync_openmoc_sigma_a_descriptor_has_expected_metadata" computerName="vm" duration="00:00:00.3614468" startTime="2026-05-16T09:11:39.2187395+00:00" endTime="2026-05-16T09:11:39.2187399+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="19db53df-d766-481b-9092-fcac95c3d131" />
+    <UnitTestResult executionId="66e1380b-9af0-42f6-961e-aa4e40d6ef65" testId="e62972af-ad11-6806-0620-603b5736cae2" testName="MetBench_SystemMT.Tests.SystemMT.OpenMocSampleCaseTests.Sample_pincell_json_satisfies_runner_contract" computerName="vm" duration="00:00:00.0067130" startTime="2026-05-16T09:11:38.8557366+00:00" endTime="2026-05-16T09:11:38.8557371+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="66e1380b-9af0-42f6-961e-aa4e40d6ef65" />
+    <UnitTestResult executionId="f2b3eabf-36c9-49ac-8608-b5650cdb3824" testId="39312d23-f528-d095-55c7-9e9f4fc9960c" testName="MetBench_SystemMT.Tests.SystemMT.HeatEquationInputAdapterTests.TransformAsync_scales_initial_amplitude_and_preserves_other_fields" computerName="vm" duration="00:00:00.0609948" startTime="2026-05-16T09:11:41.6891466+00:00" endTime="2026-05-16T09:11:41.6891471+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f2b3eabf-36c9-49ac-8608-b5650cdb3824" />
+    <UnitTestResult executionId="3ae805d6-d61c-4091-9d1f-1e97759bc5d4" testId="33afc3b6-257f-e548-df64-880c061890e6" testName="MetBench_SystemMT.Tests.SystemMT.OpenMocInputAdapterTests.TransformAsync_rejects_non_positive_factor" computerName="vm" duration="00:00:00.0754500" startTime="2026-05-16T09:11:39.4692537+00:00" endTime="2026-05-16T09:11:39.4692541+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3ae805d6-d61c-4091-9d1f-1e97759bc5d4" />
+    <UnitTestResult executionId="801f8090-f121-45d9-b258-32c8aa2a6d4d" testId="eb4e6021-c5cc-31bb-98e2-3750c7201755" testName="Follow-up k_eff is less than source k_eff after scaling fuel sigma_a" computerName="vm" duration="00:00:08.8113711" startTime="2026-05-16T09:11:44.5339387+00:00" endTime="2026-05-16T09:11:44.5339391+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="801f8090-f121-45d9-b258-32c8aa2a6d4d">
+      <Output>
+        <StdOut>Given an OpenMOC pin-cell sigma_a source case from "openmoc/sample/pincell.json"
+-&gt; done: OpenMocPinCellSigmaASteps.GivenAnOpenMocSigmaASourceCase("openmoc/sample/pi...") (7.3s)
+And the OpenMOC sigma_a transformation "ScaleFuelSigmaA" with parameter "factor" set to "1.5"
+-&gt; done: OpenMocPinCellSigmaASteps.GivenTheSigmaATransformation("ScaleFuelSigmaA", "factor", "1.5") (0.0s)
+When I run source and the generated follow-up through OpenMOC for sigma_a
+-&gt; done: OpenMocPinCellSigmaASteps.WhenIRunThroughOpenMocSigmaA() (1.4s)
+Then the OpenMOC parsed value "k_eff" of the generated follow-up should be less than the source
+-&gt; done: OpenMocPinCellSigmaASteps.ThenTheOpenMocParsedValueShouldBeLess("k_eff") (0.0s)
+And the OpenMOC follow-up k_eff should be at most 0.85 times the source k_eff
+-&gt; done: OpenMocPinCellSigmaASteps.ThenFollowUpKeffRatioCeiling(0.85) (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="0caf63c1-04b0-4eec-901a-22e6d1bb0ddb" testId="c7fc64c1-185a-13ce-4a70-2cfec2306fe2" testName="MetBench_SystemMT.Tests.SystemMT.HeatEquationInputAdapterTests.TransformAsync_rejects_non_positive_factor" computerName="vm" duration="00:00:00.1620116" startTime="2026-05-16T09:11:41.6313095+00:00" endTime="2026-05-16T09:11:41.6313100+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0caf63c1-04b0-4eec-901a-22e6d1bb0ddb" />
+    <UnitTestResult executionId="ef831e43-0548-4cce-9d64-d5940abb99e8" testId="7baa18bb-2121-06a0-3a30-1b82251d0ba9" testName="MetBench_SystemMT.Tests.SystemMT.OpenMocOutputAdapterTests.ParseAsync_emits_zero_for_unconverged" computerName="vm" duration="00:00:00.0436705" startTime="2026-05-16T09:11:41.4627791+00:00" endTime="2026-05-16T09:11:41.4627795+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ef831e43-0548-4cce-9d64-d5940abb99e8" />
+    <UnitTestResult executionId="1fe95fc6-fa35-4db3-8de3-4dce95785de0" testId="74c1bb6c-a860-8a40-c902-efe90f64fd06" testName="MetBench_SystemMT.Tests.SystemMT.OpenMocSigmaAInputAdapterTests.TransformAsync_scales_fuel_sigma_a_and_increases_sigma_t_by_delta" computerName="vm" duration="00:00:00.0407608" startTime="2026-05-16T09:11:40.2585128+00:00" endTime="2026-05-16T09:11:40.2585132+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1fe95fc6-fa35-4db3-8de3-4dce95785de0" />
+    <UnitTestResult executionId="5efcd21c-6f7f-40ce-a82c-8bc1d9e8d08f" testId="9eb51960-a204-457d-c2ee-faf5911a59aa" testName="Follow-up max_u exceeds source max_u after scaling initial amplitude" computerName="vm" duration="00:00:01.1123823" startTime="2026-05-16T09:11:39.7104396+00:00" endTime="2026-05-16T09:11:39.7104400+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5efcd21c-6f7f-40ce-a82c-8bc1d9e8d08f">
+      <Output>
+        <StdOut>Given a heat-equation source case from "heat_equation/sample/gaussian.json"
+-&gt; done: HeatEquationAmplitudeSteps.GivenAHeatEquationSourceCase("heat_equation/sam...") (0.6s)
+And a heat-equation transformation "ScaleAmplitude" with parameter "factor" set to "2"
+-&gt; done: HeatEquationAmplitudeSteps.GivenTheHeatEquationTransformation("ScaleAmplitude", "factor", "2") (0.0s)
+When I run source and the generated follow-up through the heat-equation solver
+-&gt; done: HeatEquationAmplitudeSteps.WhenIRunThroughTheHeatEquationSolver() (0.4s)
+Then the heat-equation parsed value "max_u" of the generated follow-up should be greater than the source
+-&gt; done: HeatEquationAmplitudeSteps.ThenParsedValueShouldBeGreater("max_u") (0.0s)
+And the heat-equation follow-up max_u should be at least 1.95 times the source max_u
+-&gt; done: HeatEquationAmplitudeSteps.ThenFollowUpMaxRatioFloor(1.95) (0.0s)
+And the heat-equation follow-up max_u should be at most 2.05 times the source max_u
+-&gt; done: HeatEquationAmplitudeSteps.ThenFollowUpMaxRatioCeiling(2.05) (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="f9a6539f-5505-47fa-a6e6-f21a42cbd59b" testId="6500ae4e-aae0-87b9-5eca-d2cf14d3a988" testName="MetBench_SystemMT.Tests.SystemMT.OpenMocOutputAdapterTests.ParseAsync_returns_keff_iterations_and_converged" computerName="vm" duration="00:00:00.0778693" startTime="2026-05-16T09:11:41.4184573+00:00" endTime="2026-05-16T09:11:41.4184577+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f9a6539f-5505-47fa-a6e6-f21a42cbd59b" />
+    <UnitTestResult executionId="456d9567-8e1f-4c60-8967-ddac5eb465ea" testId="8556cbb3-c92d-e438-9f35-e414fcc3b299" testName="Follow-up k_eff exceeds source k_eff after scaling fuel nu*sigma_f" computerName="vm" duration="00:00:04.7996223" startTime="2026-05-16T09:11:44.3587040+00:00" endTime="2026-05-16T09:11:44.3587043+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="456d9567-8e1f-4c60-8967-ddac5eb465ea">
+      <Output>
+        <StdOut>Given an OpenMOC pin-cell source case from "openmoc/sample/pincell.json"
+-&gt; done: OpenMocPinCellNuSigmaFSteps.GivenAnOpenMocPinCellSourceCase("openmoc/sample/pi...") (3.5s)
+And an OpenMOC MR transformation "ScaleNuSigmaF" with parameter "factor" set to "1.5"
+-&gt; done: OpenMocPinCellNuSigmaFSteps.GivenTheMrTransformation("ScaleNuSigmaF", "factor", "1.5") (0.0s)
+When I run source and the generated follow-up through OpenMOC
+-&gt; done: OpenMocPinCellNuSigmaFSteps.WhenIRunThroughOpenMoc() (1.2s)
+Then the OpenMOC parsed value "k_eff" of the generated follow-up should be greater than the source
+-&gt; done: OpenMocPinCellNuSigmaFSteps.ThenTheOpenMocParsedValueShouldBeGreater("k_eff") (0.0s)
+And the OpenMOC follow-up k_eff should be at least 1.2 times the source k_eff
+-&gt; done: OpenMocPinCellNuSigmaFSteps.ThenFollowUpKeffRatioFloor(1.2) (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="95b144c8-c7d2-42b7-b514-e470758e4d84" testId="415a93ee-3f8e-04d8-dcd5-819fa14a71f7" testName="MetBench_SystemMT.Tests.SystemMT.HeatEquationInputAdapterTests.TransformAsync_rejects_missing_factor_param" computerName="vm" duration="00:00:00.0374994" startTime="2026-05-16T09:11:41.7271058+00:00" endTime="2026-05-16T09:11:41.7271068+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="95b144c8-c7d2-42b7-b514-e470758e4d84" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="MetBench_SystemMT.Tests.SystemMT.OpenMocSampleCaseTests.Sample_pincell_json_satisfies_runner_contract" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="e62972af-ad11-6806-0620-603b5736cae2">
+      <Execution id="66e1380b-9af0-42f6-961e-aa4e40d6ef65" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.SystemMT.OpenMocSampleCaseTests" name="Sample_pincell_json_satisfies_runner_contract" />
+    </UnitTest>
+    <UnitTest name="MetBench_SystemMT.Tests.SystemMT.HeatEquationInputAdapterTests.TransformAsync_rejects_non_positive_factor" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="c7fc64c1-185a-13ce-4a70-2cfec2306fe2">
+      <Execution id="0caf63c1-04b0-4eec-901a-22e6d1bb0ddb" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.SystemMT.HeatEquationInputAdapterTests" name="TransformAsync_rejects_non_positive_factor" />
+    </UnitTest>
+    <UnitTest name="MetBench_SystemMT.Tests.SystemMT.OpenMocInputAdapterTests.TransformAsync_rejects_non_positive_factor" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="33afc3b6-257f-e548-df64-880c061890e6">
+      <Execution id="3ae805d6-d61c-4091-9d1f-1e97759bc5d4" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.SystemMT.OpenMocInputAdapterTests" name="TransformAsync_rejects_non_positive_factor" />
+    </UnitTest>
+    <UnitTest name="MetBench_SystemMT.Tests.SystemMT.HeatEquationOutputAdapterTests.ParseAsync_rejects_missing_field" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="db326942-5c61-47cc-13a9-14b106b825a7">
+      <Execution id="0cfeadd0-1437-4600-9e20-4605d0fa470d" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.SystemMT.HeatEquationOutputAdapterTests" name="ParseAsync_rejects_missing_field" />
+    </UnitTest>
+    <UnitTest name="Follow-up output range is greater than source output range" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="5c477246-c7b4-7197-d52a-bbc842cb5ebb">
+      <Execution id="eba90af5-2c2b-47da-980a-b7aa7450cdb2" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.ProjectileRangeMT_DoublingInitialSpeedQuadruplesTheRangeFeature" name="Follow_UpOutputRangeIsGreaterThanSourceOutputRange" />
+    </UnitTest>
+    <UnitTest name="MetBench_SystemMT.Tests.SystemMT.OpenMocSigmaAInputAdapterTests.TransformAsync_rejects_missing_factor_param" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="d4b1d385-1dd8-6316-0dc5-23fd63487875">
+      <Execution id="7671848e-c4a3-4ce9-9518-8d74ae685d81" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.SystemMT.OpenMocSigmaAInputAdapterTests" name="TransformAsync_rejects_missing_factor_param" />
+    </UnitTest>
+    <UnitTest name="MetBench_SystemMT.Tests.SystemMT.OpenMocSigmaAInputAdapterTests.TransformAsync_scales_fuel_sigma_a_and_increases_sigma_t_by_delta" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="74c1bb6c-a860-8a40-c902-efe90f64fd06">
+      <Execution id="1fe95fc6-fa35-4db3-8de3-4dce95785de0" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.SystemMT.OpenMocSigmaAInputAdapterTests" name="TransformAsync_scales_fuel_sigma_a_and_increases_sigma_t_by_delta" />
+    </UnitTest>
+    <UnitTest name="MetBench_SystemMT.Tests.SystemMT.HeatEquationOutputAdapterTests.ParseAsync_emits_one_when_stability_violated" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="eb93e881-7091-f3c8-1ee3-2fbd530bd4db">
+      <Execution id="dcc79c1e-8868-405b-8a2b-218686bc5396" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.SystemMT.HeatEquationOutputAdapterTests" name="ParseAsync_emits_one_when_stability_violated" />
+    </UnitTest>
+    <UnitTest name="Follow-up k_eff exceeds source k_eff after scaling fuel nu*sigma_f" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="8556cbb3-c92d-e438-9f35-e414fcc3b299">
+      <Execution id="456d9567-8e1f-4c60-8967-ddac5eb465ea" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.OpenMOCPin_CellMR_ScalingFuelNuSigma_FIncreasesK_EffFeature" name="Follow_UpK_EffExceedsSourceK_EffAfterScalingFuelNuSigma_F" />
+    </UnitTest>
+    <UnitTest name="MetBench_SystemMT.Tests.SystemMT.HeatEquationOutputAdapterTests.ParseAsync_returns_max_l2_integral_and_stability_metrics" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="7665bad3-c0c8-ec15-344c-145ac794487f">
+      <Execution id="d896ab6c-f8ad-49c0-a3b4-8fac89e652a4" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.SystemMT.HeatEquationOutputAdapterTests" name="ParseAsync_returns_max_l2_integral_and_stability_metrics" />
+    </UnitTest>
+    <UnitTest name="Follow-up k_eff is less than source k_eff after scaling fuel sigma_a" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="eb4e6021-c5cc-31bb-98e2-3750c7201755">
+      <Execution id="801f8090-f121-45d9-b258-32c8aa2a6d4d" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.OpenMOCPin_CellMR_ScalingFuelSigma_ADecreasesK_EffFeature" name="Follow_UpK_EffIsLessThanSourceK_EffAfterScalingFuelSigma_A" />
+    </UnitTest>
+    <UnitTest name="MetBench_SystemMT.Tests.SystemMT.HeatEquationInputAdapterTests.TransformAsync_rejects_missing_factor_param" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="415a93ee-3f8e-04d8-dcd5-819fa14a71f7">
+      <Execution id="95b144c8-c7d2-42b7-b514-e470758e4d84" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.SystemMT.HeatEquationInputAdapterTests" name="TransformAsync_rejects_missing_factor_param" />
+    </UnitTest>
+    <UnitTest name="MetBench_SystemMT.Tests.SystemMT.OpenMocOutputAdapterTests.ParseAsync_emits_zero_for_unconverged" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="7baa18bb-2121-06a0-3a30-1b82251d0ba9">
+      <Execution id="ef831e43-0548-4cce-9d64-d5940abb99e8" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.SystemMT.OpenMocOutputAdapterTests" name="ParseAsync_emits_zero_for_unconverged" />
+    </UnitTest>
+    <UnitTest name="MetBench_SystemMT.Tests.SystemMT.OpenMocOutputAdapterTests.ParseAsync_reports_malformed_json_as_adapter_failure" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="4817c504-7a43-4362-725b-c7bbbe84f6bf">
+      <Execution id="aaa2dafc-22cc-4611-8262-32971bb465be" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.SystemMT.OpenMocOutputAdapterTests" name="ParseAsync_reports_malformed_json_as_adapter_failure" />
+    </UnitTest>
+    <UnitTest name="MetBench_SystemMT.Tests.SystemMT.OpenMocOutputAdapterTests.ParseAsync_returns_keff_iterations_and_converged" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="6500ae4e-aae0-87b9-5eca-d2cf14d3a988">
+      <Execution id="f9a6539f-5505-47fa-a6e6-f21a42cbd59b" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.SystemMT.OpenMocOutputAdapterTests" name="ParseAsync_returns_keff_iterations_and_converged" />
+    </UnitTest>
+    <UnitTest name="MetBench_SystemMT.Tests.SystemMT.Launcher.SystemMtScenarioLauncherTests.ListAvailableAsync_openmoc_sigma_a_descriptor_has_expected_metadata" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="3beedea9-e607-1b64-64a6-0451708475b2">
+      <Execution id="19db53df-d766-481b-9092-fcac95c3d131" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.SystemMT.Launcher.SystemMtScenarioLauncherTests" name="ListAvailableAsync_openmoc_sigma_a_descriptor_has_expected_metadata" />
+    </UnitTest>
+    <UnitTest name="Follow-up max_u exceeds source max_u after scaling initial amplitude" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="9eb51960-a204-457d-c2ee-faf5911a59aa">
+      <Execution id="5efcd21c-6f7f-40ce-a82c-8bc1d9e8d08f" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features._1DHeatEquationMR_AmplitudeScalingPreservesLinearityFeature" name="Follow_UpMax_UExceedsSourceMax_UAfterScalingInitialAmplitude" />
+    </UnitTest>
+    <UnitTest name="MetBench_SystemMT.Tests.SystemMT.OpenMocSigmaAInputAdapterTests.TransformAsync_rejects_non_positive_factor" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="36f08d14-0480-f921-9f94-12879b92ad10">
+      <Execution id="547a022c-11e0-47fb-b0ab-a060bb7cf85b" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.SystemMT.OpenMocSigmaAInputAdapterTests" name="TransformAsync_rejects_non_positive_factor" />
+    </UnitTest>
+    <UnitTest name="MetBench_SystemMT.Tests.SystemMT.OpenMocRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="12827450-d435-daa9-9d3d-2e6b41f13e07">
+      <Execution id="8daf6e05-dd36-42d5-ba40-80d5321e945f" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.SystemMT.OpenMocRunnerSmokeTests" name="Runner_solves_sample_pincell_and_writes_keff_json" />
+    </UnitTest>
+    <UnitTest name="MetBench_SystemMT.Tests.SystemMT.HeatEquationInputAdapterTests.TransformAsync_scales_initial_amplitude_and_preserves_other_fields" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="39312d23-f528-d095-55c7-9e9f4fc9960c">
+      <Execution id="f2b3eabf-36c9-49ac-8608-b5650cdb3824" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.SystemMT.HeatEquationInputAdapterTests" name="TransformAsync_scales_initial_amplitude_and_preserves_other_fields" />
+    </UnitTest>
+    <UnitTest name="MetBench_SystemMT.Tests.SystemMT.OpenMocInputAdapterTests.TransformAsync_rejects_missing_factor_param" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="b3149cdf-6b1e-4f4a-3790-1b47c4c52fd0">
+      <Execution id="c78e7160-6d1e-4c84-8c91-0f819a8a0cbb" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.SystemMT.OpenMocInputAdapterTests" name="TransformAsync_rejects_missing_factor_param" />
+    </UnitTest>
+    <UnitTest name="MetBench_SystemMT.Tests.SystemMT.OpenMocInputAdapterTests.TransformAsync_scales_fuel_nu_sigma_f_and_preserves_other_arrays" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="0fd867b5-4fc0-7bda-69e4-0c6f6cb0a6d7">
+      <Execution id="32bca3f2-8525-4734-a995-b424278b0d8e" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.SystemMT.OpenMocInputAdapterTests" name="TransformAsync_scales_fuel_nu_sigma_f_and_preserves_other_arrays" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="0fd867b5-4fc0-7bda-69e4-0c6f6cb0a6d7" executionId="32bca3f2-8525-4734-a995-b424278b0d8e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="36f08d14-0480-f921-9f94-12879b92ad10" executionId="547a022c-11e0-47fb-b0ab-a060bb7cf85b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5c477246-c7b4-7197-d52a-bbc842cb5ebb" executionId="eba90af5-2c2b-47da-980a-b7aa7450cdb2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d4b1d385-1dd8-6316-0dc5-23fd63487875" executionId="7671848e-c4a3-4ce9-9518-8d74ae685d81" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="12827450-d435-daa9-9d3d-2e6b41f13e07" executionId="8daf6e05-dd36-42d5-ba40-80d5321e945f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b3149cdf-6b1e-4f4a-3790-1b47c4c52fd0" executionId="c78e7160-6d1e-4c84-8c91-0f819a8a0cbb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="db326942-5c61-47cc-13a9-14b106b825a7" executionId="0cfeadd0-1437-4600-9e20-4605d0fa470d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="eb93e881-7091-f3c8-1ee3-2fbd530bd4db" executionId="dcc79c1e-8868-405b-8a2b-218686bc5396" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7665bad3-c0c8-ec15-344c-145ac794487f" executionId="d896ab6c-f8ad-49c0-a3b4-8fac89e652a4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4817c504-7a43-4362-725b-c7bbbe84f6bf" executionId="aaa2dafc-22cc-4611-8262-32971bb465be" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3beedea9-e607-1b64-64a6-0451708475b2" executionId="19db53df-d766-481b-9092-fcac95c3d131" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e62972af-ad11-6806-0620-603b5736cae2" executionId="66e1380b-9af0-42f6-961e-aa4e40d6ef65" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="39312d23-f528-d095-55c7-9e9f4fc9960c" executionId="f2b3eabf-36c9-49ac-8608-b5650cdb3824" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="33afc3b6-257f-e548-df64-880c061890e6" executionId="3ae805d6-d61c-4091-9d1f-1e97759bc5d4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="eb4e6021-c5cc-31bb-98e2-3750c7201755" executionId="801f8090-f121-45d9-b258-32c8aa2a6d4d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c7fc64c1-185a-13ce-4a70-2cfec2306fe2" executionId="0caf63c1-04b0-4eec-901a-22e6d1bb0ddb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7baa18bb-2121-06a0-3a30-1b82251d0ba9" executionId="ef831e43-0548-4cce-9d64-d5940abb99e8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="74c1bb6c-a860-8a40-c902-efe90f64fd06" executionId="1fe95fc6-fa35-4db3-8de3-4dce95785de0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9eb51960-a204-457d-c2ee-faf5911a59aa" executionId="5efcd21c-6f7f-40ce-a82c-8bc1d9e8d08f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6500ae4e-aae0-87b9-5eca-d2cf14d3a988" executionId="f9a6539f-5505-47fa-a6e6-f21a42cbd59b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8556cbb3-c92d-e438-9f35-e414fcc3b299" executionId="456d9567-8e1f-4c60-8967-ddac5eb465ea" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="415a93ee-3f8e-04d8-dcd5-819fa14a71f7" executionId="95b144c8-c7d2-42b7-b514-e470758e4d84" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="22" executed="22" passed="22" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.8.2+699d445a1a (64-bit .NET 8.0.26)
+[xUnit.net 00:00:00.14]   Discovering: MetBench_SystemMT.Tests
+[xUnit.net 00:00:00.33]   Discovered:  MetBench_SystemMT.Tests
+[xUnit.net 00:00:00.34]   Starting:    MetBench_SystemMT.Tests
+[xUnit.net 00:00:09.42]   Finished:    MetBench_SystemMT.Tests
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

@@ -1,0 +1,85 @@
+name: UAT Finding (验收发现)
+description: 测试员在 UAT 中发现的 bug / 问题 / 改进点
+title: "[uat] <一句话描述>"
+labels: ["uat-finding"]
+body:
+  - type: input
+    id: uc_id
+    attributes:
+      label: UC 编号
+      description: 涉及的 UAT 用例号（如 UC-B4, UC-E3）
+      placeholder: UC-B4
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: 严重度
+      description: 与 acceptance-rubric 阻断分类对齐
+      options:
+        - "🔴 Blocker — 阻断 Release"
+        - "🟡 Major — 应修；累计 ≥5 阻断"
+        - "🟢 Minor — 不影响 Release"
+        - "uat-doc — 文档错误"
+        - "uat-env — 环境装不通"
+        - "uat-enhancement — 建议 / 新覆盖点"
+    validations:
+      required: true
+
+  - type: input
+    id: round
+    attributes:
+      label: UAT 轮次
+      description: 在哪一轮验收发现的
+      placeholder: round-1-20260520-zhangsan
+    validations:
+      required: true
+
+  - type: input
+    id: commit
+    attributes:
+      label: 接手 commit
+      description: 测试时使用的 git commit hash
+      placeholder: 97863ea
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: 平台
+      options:
+        - Linux
+        - Windows
+        - 双端
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 重现步骤
+      description: 别人照着能复现的最小步骤
+      placeholder: |
+        1. ...
+        2. ...
+        3. 期望 ✅ A，实际 ❌ B
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 证据
+      description: 截图链接 / trx 文件 / 错误日志（贴文本或链 reports/round-N/evidence/）
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 备注 / 建议修复方向
+      description: 可选；测试员的猜测 / 关联 issue
+    validations:
+      required: false
