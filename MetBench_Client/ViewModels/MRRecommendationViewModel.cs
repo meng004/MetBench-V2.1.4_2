@@ -25,13 +25,13 @@ namespace MetBench_Client.ViewModels
         private IPageService _pageService;
 
         // 蜕变关系管理服务
-        private MetamorphicRelationSerive _metamorphicRelationSerive;
+        private MetamorphicRelationService _metamorphicRelationSerive;
 
         // 应用程序管理服务
-        private ApplicationSerive _applicationSerive;
+        private ApplicationService _applicationSerive;
 
         // 蜕变关系推荐服务
-        private MRRecommendationSerive _mrRecommendationSerive;
+        private MRRecommendationService _mrRecommendationSerive;
 
         // DataGrid控件的数据源
         public ObservableCollection<MRRecommendationVIsualResult> Data { get; set; }
@@ -93,7 +93,7 @@ namespace MetBench_Client.ViewModels
         {
         }
 
-        public MRRecommendationViewModel(MetamorphicRelationSerive metamorphicRelationSerive, ApplicationSerive applicationSerive, MRRecommendationSerive mRRecommendationSerive, IPageService pageService, INavigationService navigationService)
+        public MRRecommendationViewModel(MetamorphicRelationService metamorphicRelationSerive, ApplicationService applicationSerive, MRRecommendationService mRRecommendationSerive, IPageService pageService, INavigationService navigationService)
         {
             _metamorphicRelationSerive = metamorphicRelationSerive;
             _applicationSerive = applicationSerive;

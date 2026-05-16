@@ -25,10 +25,10 @@ namespace MetBench_Client.ViewModels
         private IPageService _pageService;
 
         // 应用程序管理服务
-        private ApplicationSerive _applicationSerive;
+        private ApplicationService _applicationSerive;
 
         // 蜕变关系管理服务
-        private MetamorphicRelationSerive _metamorphicRelationSerive;
+        private MetamorphicRelationService _metamorphicRelationSerive;
 
         // 事件聚合
         private IEventAggregator _eventAggregator;
@@ -118,7 +118,7 @@ namespace MetBench_Client.ViewModels
 
         // 构造函数订阅事件
         // 构造函数
-        public AutoDetectMRViewModel(IPageService pageService , INavigationService navigationService,ApplicationSerive applicationSerive,MetamorphicRelationSerive metamorphicRelationSerive , MRDetector mRDetector, IEventAggregator eventAggregator) 
+        public AutoDetectMRViewModel(IPageService pageService , INavigationService navigationService,ApplicationService applicationSerive,MetamorphicRelationService metamorphicRelationSerive , MRDetector mRDetector, IEventAggregator eventAggregator) 
         {
             _navigationService = navigationService;
             _pageService = pageService;
@@ -506,7 +506,7 @@ namespace MetBench_Client.ViewModels
             }
         }
 
-        public ApplicationSerive ApplicationSerive
+        public ApplicationService ApplicationService
         {
             get => default;
             set
@@ -514,7 +514,7 @@ namespace MetBench_Client.ViewModels
             }
         }
 
-        public MetamorphicRelationSerive MetamorphicRelationSerive
+        public MetamorphicRelationService MetamorphicRelationService
         {
             get => default;
             set

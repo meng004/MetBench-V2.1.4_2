@@ -33,10 +33,10 @@ namespace MetBench_Client.ViewModels
         private IPageService _pageService;
 
         // 应用程序管理服务
-        private ApplicationSerive _applicationSerive;
+        private ApplicationService _applicationSerive;
 
         // 蜕变关系管理服务
-        private MetamorphicRelationSerive _metamorphicRelationSerive;
+        private MetamorphicRelationService _metamorphicRelationSerive;
 
         // DataGrid的SelectedItem数据绑定属性
         public MetamorphicRelations_QueryResultData DataGridSelectedItem { get; set; }
@@ -147,7 +147,7 @@ namespace MetBench_Client.ViewModels
         private bool _isInitialSelection = true; // 初始选择标志
 
         //MT结果可视化服务
-        private MTVisualizationSerive _mTVisualizationSerive;
+        private MTVisualizationService _mTVisualizationSerive;
 
         // datagrid的数据源
         public ObservableCollection<MetamorphicRelations_QueryResultData> Data { get; set; }
@@ -245,7 +245,7 @@ namespace MetBench_Client.ViewModels
         }
 
         // 构造函数
-        public MTExecutionViewModel(IPageService pageService, INavigationService navigationService, ApplicationSerive applicationSerive, MetamorphicRelationSerive metamorphicRelationSerive, MTVisualizationSerive mTVisualizationSerive)
+        public MTExecutionViewModel(IPageService pageService, INavigationService navigationService, ApplicationService applicationSerive, MetamorphicRelationService metamorphicRelationSerive, MTVisualizationService mTVisualizationSerive)
         {
             _navigationService = navigationService;
             _pageService = pageService;
@@ -625,7 +625,7 @@ namespace MetBench_Client.ViewModels
 
             try
             {
-                MTReportGeneratorSerive _mtReportGeneratorSerive = new MTReportGeneratorSerive();
+                MTReportGeneratorService _mtReportGeneratorSerive = new MTReportGeneratorService();
                 // 加载数据
                 _mtReportGeneratorSerive.LoadData(STCPath, FTCPath, CombinedPath);
 
@@ -713,7 +713,7 @@ namespace MetBench_Client.ViewModels
             }
         }
 
-        public MetamorphicRelationSerive MetamorphicRelationSerive
+        public MetamorphicRelationService MetamorphicRelationService
         {
             get => default;
             set
@@ -721,7 +721,7 @@ namespace MetBench_Client.ViewModels
             }
         }
 
-        public ApplicationSerive ApplicationSerive
+        public ApplicationService ApplicationService
         {
             get => default;
             set

@@ -106,9 +106,9 @@ namespace MetBench_Client
                 services.AddSingleton<IDomainRepository, DomainRepository>();
 
                 // 注册业务类
-                services.AddScoped<MetamorphicRelationSerive>();
-                services.AddScoped<ApplicationSerive>();
-                services.AddScoped<DomainSerive>();
+                services.AddScoped<MetamorphicRelationService>();
+                services.AddScoped<ApplicationService>();
+                services.AddScoped<DomainService>();
 
                 // 蜕变测试执行
                 services.AddScoped<AutoRunMR_Await>();
@@ -168,7 +168,7 @@ namespace MetBench_Client
                 services.AddScoped<ViewModels.ReplayResultViewModel>();
 
                 // 结果可视化相关IOC配置
-                services.AddScoped<MTVisualizationSerive>();
+                services.AddScoped<MTVisualizationService>();
 
                 // === v2 Discovery stack (P7) ===
                 services.AddScoped<DiscoveryService>();
@@ -238,10 +238,10 @@ namespace MetBench_Client
                 services.AddScoped<ISemanticSimilarityDetector, SemanticSimilarityDetector>();// 语义相似检测
                 services.AddScoped<SimilarityResultFilter>();
                 services.AddScoped<SupportRateCalculator>();
-                services.AddScoped<MRRecommendationSerive>();
+                services.AddScoped<MRRecommendationService>();
 
                 // 蜕变测试报告生成相关IOC配置
-                services.AddScoped<MTReportGeneratorSerive>();
+                services.AddScoped<MTReportGeneratorService>();
 
                 // 注册 IEventAggregator
                 services.AddSingleton<IEventAggregator, EventAggregator>();

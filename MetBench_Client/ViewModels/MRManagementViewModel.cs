@@ -32,10 +32,10 @@ namespace MetBench_Client.ViewModels
         private IPageService _pageService;
 
         // 蜕变关系管理服务
-        private MetamorphicRelationSerive _metamorphicRelationSerive;
+        private MetamorphicRelationService _metamorphicRelationSerive;
 
         // 应用程序管理服务
-        private ApplicationSerive _applicationSerive;
+        private ApplicationService _applicationSerive;
 
         // v2 MRBinding repository (PR-VM-6 / F19) — used to aggregate Status per MR row.
         // Optional: if null (legacy DI in tests), all rows default to Status="active".
@@ -173,7 +173,7 @@ namespace MetBench_Client.ViewModels
         }
 
         // 构造函数
-        public MRManagementViewModel(MetamorphicRelationSerive metamorphicRelationSerive, ApplicationSerive applicationSerive, IPageService pageService, INavigationService navigationService, IEventAggregator eventAggregator, IMRBindingRepository mrBindingRepository = null)
+        public MRManagementViewModel(MetamorphicRelationService metamorphicRelationSerive, ApplicationService applicationSerive, IPageService pageService, INavigationService navigationService, IEventAggregator eventAggregator, IMRBindingRepository mrBindingRepository = null)
         {
             this._metamorphicRelationSerive = metamorphicRelationSerive;
             this._applicationSerive = applicationSerive;

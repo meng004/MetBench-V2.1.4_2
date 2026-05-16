@@ -10,7 +10,7 @@ namespace MetBench_Client.Helpers
 {
     public class FileCompressionAndStorageUtility
     {
-        ApplicationSerive _applicationRSerive ;
+        ApplicationService _applicationRSerive ;
 
         // 解压文件的存储路径（默认系统的Temp路径）
         string SystemTemppath = Path.GetTempPath() + "\\MetBench";
@@ -20,7 +20,7 @@ namespace MetBench_Client.Helpers
         static byte[] CodeFile = null;
 
         // 构造函数
-        public FileCompressionAndStorageUtility(ApplicationSerive applicationSerive) 
+        public FileCompressionAndStorageUtility(ApplicationService applicationSerive) 
         {
             _applicationRSerive = applicationSerive;
         }
