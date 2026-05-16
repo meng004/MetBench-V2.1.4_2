@@ -37,6 +37,41 @@ public interface IGuidRepository<T> where T : class
     /// <summary>分页列出（推荐用于高频实体的 UI 列表）。</summary>
     ObservableCollection<T> GetPage(int pageIndex, int pageSize);
 
+    /// <summary>
+    /// Keyset 分页 —— 用 PK 作为 cursor，生产实现 (LiteDB) 走索引 O(pageSize)；
+    /// 默认实现走 <see cref="GetAll"/> + LINQ 过滤，给测试 fake 用。
+    /// </summary>
+    /// <param name="afterId">cursor：返回 ID 严格大于此值的 page；首页传 <c>null</c>。</param>
+    /// <param name="pageSize">每页行数。</param>
+    /// <remarks>
+    /// 适合"加载更多"风格 UI（infinite scroll）。结果按 PK 升序排序，
+    /// 调用方拿最后一行的 Id 作为下一页 cursor 即可。
+    ///
+    /// 默认实现依赖反射：找一个 <see cref="Guid"/> 类型且名字以 "Id" 开头的 public property
+    /// 作为 PK。生产 <c>LiteDb*Repository</c> 会 override 这个走 <c>_id</c> 索引。
+    /// </remarks>
+    ObservableCollection<T> GetPageKeyset(Guid? afterId, int pageSize)
+    {
+        if (pageSize <= 0) return new ObservableCollection<T>();
+        var pk = typeof(T).GetProperties()
+            .FirstOrDefault(p => p.PropertyType == typeof(Guid)
+                && (p.Name.StartsWith("Id", StringComparison.Ordinal)
+                    || p.Name.Equals("Id", StringComparison.Ordinal)));
+        if (pk is null) return new ObservableCollection<T>();
+        var rows = GetAll();
+        IEnumerable<T> filtered = rows;
+        if (afterId.HasValue)
+        {
+            var cursor = afterId.Value;
+            filtered = filtered.Where(x => ((Guid)pk.GetValue(x)!).CompareTo(cursor) > 0);
+        }
+        var page = filtered
+            .OrderBy(x => (Guid)pk.GetValue(x)!)
+            .Take(pageSize)
+            .ToList();
+        return new ObservableCollection<T>(page);
+    }
+
     /// <summary>总行数（分页 UI 用）。</summary>
     int Count();
 }
