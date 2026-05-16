@@ -219,6 +219,10 @@ namespace MetBench_Client
                 services.AddScoped<Views.Pages.TrendDashboardPage>();
                 services.AddScoped<ViewModels.TrendDashboardViewModel>();
 
+                // === v2 MetaPatterns CRUD (F21 / PR-VM-3) ===
+                services.AddScoped<Views.Pages.MetaPatternsPage>();
+                services.AddScoped<ViewModels.MetaPatternsViewModel>();
+
                 // 蜕变关系识别相关IOC配置
                 services.AddScoped<MRDetector>();
                 services.AddScoped<IRecognitionAlgorithm, AutoMRAlgorithm>();
