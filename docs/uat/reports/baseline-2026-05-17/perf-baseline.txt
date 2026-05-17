@@ -1,0 +1,16 @@
+===== CI perf baseline =====
+  Trx file:           docs/uat/reports/baseline-2026-05-17/baseline-full.trx
+  Total cumulative:   73.02s  (budget: 120s)
+  Wall-clock window:  2026-05-17T07:14:49.0039315+00:00 → 2026-05-17T07:15:25.1614334+00:00
+  Slow tests (>2000ms): 6
+       18099ms  ScaleNuSigmaF increases k_eff regardless of solver(solver: "openmc", sut: "openmc", __pickleIndex: "1", exampleTags: [])
+       12902ms  ScaleFuelSigmaA decreases k_eff regardless of solver(solver: "openmc", sut: "openmc", __pickleIndex: "3", exampleTags: [])
+       12281ms  MetBench_SystemMT.Tests.SystemMT.OpenMcRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json
+        2243ms  Follow-up k_eff exceeds source k_eff after scaling fuel nu*sigma_f
+        2209ms  ScaleNuSigmaF increases k_eff regardless of solver(solver: "openmoc", sut: "openmoc", __pickleIndex: "0", exampleTags: [])
+        2146ms  Follow-up k_eff is less than source k_eff after scaling fuel sigma_a
+
+⚠ WARN: 6 test(s) slower than 2000ms.
+  Not failing — but consider profiling or skipping for fast feedback.
+
+✓ PASS: under 120s budget.

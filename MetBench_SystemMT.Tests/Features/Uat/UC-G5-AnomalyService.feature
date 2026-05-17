@@ -6,4 +6,4 @@ Feature: UAT UC-G5 — Anomaly service + commonality
 
   Scenario: UC-G5 rubric coverage and baseline are green
     Then UAT case "UC-G5" requires at least 8 verified facts in test class "MetBench_SystemMT.Tests.V2Anomaly.AnomalyServiceTests"
-    And UAT case "UC-G5" baseline trx "docs/uat/reports/baseline-2026-05-16/baseline-full.trx" shows test class "MetBench_SystemMT.Tests.V2Anomaly.AnomalyServiceTests" with 0 Failed
+    And UAT case "UC-G5" baseline trx "docs/uat/reports/baseline-2026-05-17/baseline-full.trx" shows test class "MetBench_SystemMT.Tests.V2Anomaly.AnomalyServiceTests" with 0 Failed

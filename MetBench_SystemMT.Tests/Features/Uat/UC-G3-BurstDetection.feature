@@ -6,4 +6,4 @@ Feature: UAT UC-G3 — 多维 burst 检测
 
   Scenario: UC-G3 rubric coverage and baseline are green
     Then UAT case "UC-G3" requires at least 4 verified facts in test class "MetBench_SystemMT.Tests.V2Trend.MultiDimBurstDetectionTests"
-    And UAT case "UC-G3" baseline trx "docs/uat/reports/baseline-2026-05-16/baseline-full.trx" shows test class "MetBench_SystemMT.Tests.V2Trend.MultiDimBurstDetectionTests" with 0 Failed
+    And UAT case "UC-G3" baseline trx "docs/uat/reports/baseline-2026-05-17/baseline-full.trx" shows test class "MetBench_SystemMT.Tests.V2Trend.MultiDimBurstDetectionTests" with 0 Failed
