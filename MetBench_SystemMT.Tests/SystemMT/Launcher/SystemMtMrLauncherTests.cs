@@ -154,7 +154,7 @@ public sealed class SystemMtMrLauncherTests : IDisposable
 
         var persisted = await _repository.GetAsync(result.RecordId);
         Assert.NotNull(persisted);
-        Assert.Equal("1D heat equation — ScaleAmplitude (linearity)", persisted!.ScenarioName);
+        Assert.Equal("1D heat equation — ScaleAmplitude (linearity)", persisted!.MrName);
         Assert.Equal("ScaleAmplitude", persisted.TransformationName);
         Assert.Equal("2", persisted.TransformationParameters!["factor"]);
         Assert.True(persisted.Passed);
@@ -201,7 +201,7 @@ public sealed class SystemMtMrLauncherTests : IDisposable
         await _launcher.RunAsync("heat-equation-amplitude");
         await _launcher.RunAsync("heat-equation-amplitude");
 
-        var recent = await _repository.ListByScenarioAsync(
+        var recent = await _repository.ListByMrNameAsync(
             "1D heat equation — ScaleAmplitude (linearity)",
             limit: 10);
         Assert.Equal(2, recent.Count);
