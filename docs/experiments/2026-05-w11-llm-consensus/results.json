@@ -1,0 +1,560 @@
+{
+  "ranAt": "2026-05-17T03:10:48.6742792+00:00",
+  "providers": [
+    "deepseek",
+    "openai",
+    "claude"
+  ],
+  "promptCount": 20,
+  "totalElapsed": "00:04:53.2312352",
+  "summary": {
+    "Total": 20,
+    "ConsensusMatched": 19,
+    "ConsensusAccuracy": 0.95,
+    "UnanimousCount": 20,
+    "UnanimousRate": 1,
+    "MeanKappa": 0
+  },
+  "results": [
+    {
+      "Id": "MR-amax-identity-1",
+      "Expected": true,
+      "Consensus": false,
+      "Unanimous": true,
+      "Kappa": null,
+      "ProviderResponses": [
+        {
+          "Provider": "deepseek",
+          "Plausible": false,
+          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022Appending -infinity does not change the maximum for real numbers or infinities, but if the list contains NaN, the maximum may be NaN. In floating-point arithmetic, NaN ...",
+          "Error": null
+        },
+        {
+          "Provider": "openai",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        },
+        {
+          "Provider": "claude",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        }
+      ]
+    },
+    {
+      "Id": "MR-amax-identity-2",
+      "Expected": false,
+      "Consensus": false,
+      "Unanimous": true,
+      "Kappa": null,
+      "ProviderResponses": [
+        {
+          "Provider": "deepseek",
+          "Plausible": false,
+          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022Appending \u002Binfinity changes the maximum to infinity unless the original array already contained infinity. In general, amax(x\u0027) will be \u002Binfinity while amax(x) is finite...",
+          "Error": null
+        },
+        {
+          "Provider": "openai",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        },
+        {
+          "Provider": "claude",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        }
+      ]
+    },
+    {
+      "Id": "MR-amax-permutation",
+      "Expected": true,
+      "Consensus": true,
+      "Unanimous": true,
+      "Kappa": null,
+      "ProviderResponses": [
+        {
+          "Provider": "deepseek",
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022The maximum (or absolute maximum) of a list depends only on the multiset of values and is invariant under permutation; shuffling does not change the result.\u0022}",
+          "Error": null
+        },
+        {
+          "Provider": "openai",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        },
+        {
+          "Provider": "claude",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        }
+      ]
+    },
+    {
+      "Id": "MR-amax-double",
+      "Expected": true,
+      "Consensus": true,
+      "Unanimous": true,
+      "Kappa": null,
+      "ProviderResponses": [
+        {
+          "Provider": "deepseek",
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Multiplying all elements by a positive constant scales the max (or absolute max) by that same constant, which holds mathematically for any norm-like function.\u0022}",
+          "Error": null
+        },
+        {
+          "Provider": "openai",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        },
+        {
+          "Provider": "claude",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        }
+      ]
+    },
+    {
+      "Id": "MR-amax-add-constant",
+      "Expected": true,
+      "Consensus": true,
+      "Unanimous": true,
+      "Kappa": null,
+      "ProviderResponses": [
+        {
+          "Provider": "deepseek",
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Adding a constant to all elements of a set shifts the maximum by that constant, a mathematically sound property.\u0022}",
+          "Error": null
+        },
+        {
+          "Provider": "openai",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        },
+        {
+          "Provider": "claude",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        }
+      ]
+    },
+    {
+      "Id": "MR-amax-negate",
+      "Expected": false,
+      "Consensus": false,
+      "Unanimous": true,
+      "Kappa": null,
+      "ProviderResponses": [
+        {
+          "Provider": "deepseek",
+          "Plausible": false,
+          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022If amax returns the maximum value, negating elements gives max(x\u0027) = -min(x), while -amax(x) = -max(x). Equality would imply min(x) = max(x), which only holds for const...",
+          "Error": null
+        },
+        {
+          "Provider": "openai",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        },
+        {
+          "Provider": "claude",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        }
+      ]
+    },
+    {
+      "Id": "MR-amax-replicate",
+      "Expected": true,
+      "Consensus": true,
+      "Unanimous": true,
+      "Kappa": null,
+      "ProviderResponses": [
+        {
+          "Provider": "deepseek",
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Concatenating a list with itself duplicates the elements, so the maximum value (or absolute maximum) remains unchanged.\u0022}",
+          "Error": null
+        },
+        {
+          "Provider": "openai",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        },
+        {
+          "Provider": "claude",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        }
+      ]
+    },
+    {
+      "Id": "MR-amin-identity",
+      "Expected": true,
+      "Consensus": true,
+      "Unanimous": true,
+      "Kappa": null,
+      "ProviderResponses": [
+        {
+          "Provider": "deepseek",
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Appending \u002Binfinity adds an element larger than any finite value, so the minimum of the array remains unchanged, assuming the original array is non-empty (which is the t...",
+          "Error": null
+        },
+        {
+          "Provider": "openai",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        },
+        {
+          "Provider": "claude",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        }
+      ]
+    },
+    {
+      "Id": "MR-sin-half-period",
+      "Expected": true,
+      "Consensus": true,
+      "Unanimous": true,
+      "Kappa": null,
+      "ProviderResponses": [
+        {
+          "Provider": "deepseek",
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022This follows from the trigonometric identity sin(x \u002B \u03C0) = -sin(x).\u0022}",
+          "Error": null
+        },
+        {
+          "Provider": "openai",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        },
+        {
+          "Provider": "claude",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        }
+      ]
+    },
+    {
+      "Id": "MR-sin-full-period",
+      "Expected": true,
+      "Consensus": true,
+      "Unanimous": true,
+      "Kappa": null,
+      "ProviderResponses": [
+        {
+          "Provider": "deepseek",
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022The sine function is periodic with period 2\u03C0, so sin(x \u002B 2\u03C0) = sin(x) holds for all real x. This is a fundamental mathematical identity.\u0022}",
+          "Error": null
+        },
+        {
+          "Provider": "openai",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        },
+        {
+          "Provider": "claude",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        }
+      ]
+    },
+    {
+      "Id": "MR-sin-scale-x",
+      "Expected": false,
+      "Consensus": false,
+      "Unanimous": true,
+      "Kappa": null,
+      "ProviderResponses": [
+        {
+          "Provider": "deepseek",
+          "Plausible": false,
+          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022The double-angle identity is sin(2x) = 2 sin(x) cos(x), not 2 sin(x). The relation only holds when cos(x) = 1, which is not true for arbitrary x.\u0022}",
+          "Error": null
+        },
+        {
+          "Provider": "openai",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        },
+        {
+          "Provider": "claude",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        }
+      ]
+    },
+    {
+      "Id": "MR-heat-amplitude-scale",
+      "Expected": true,
+      "Consensus": true,
+      "Unanimous": true,
+      "Kappa": null,
+      "ProviderResponses": [
+        {
+          "Provider": "deepseek",
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022The heat equation is linear, so scaling the initial condition by a constant factor scales the solution at all times by the same factor.\u0022}",
+          "Error": null
+        },
+        {
+          "Provider": "openai",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        },
+        {
+          "Provider": "claude",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        }
+      ]
+    },
+    {
+      "Id": "MR-heat-translation",
+      "Expected": true,
+      "Consensus": true,
+      "Unanimous": true,
+      "Kappa": null,
+      "ProviderResponses": [
+        {
+          "Provider": "deepseek",
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022The heat equation on an infinite domain is translation invariant; shifting the initial condition by a results in the solution being shifted by the same amount.\u0022}",
+          "Error": null
+        },
+        {
+          "Provider": "openai",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        },
+        {
+          "Provider": "claude",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        }
+      ]
+    },
+    {
+      "Id": "MR-openmoc-scale-nu-sigma-f",
+      "Expected": true,
+      "Consensus": true,
+      "Unanimous": true,
+      "Kappa": null,
+      "ProviderResponses": [
+        {
+          "Provider": "deepseek",
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Increasing the fission production cross section (nu_sigma_f) by 10% directly enhances neutron production, leading to a higher effective multiplication factor k_eff, assu...",
+          "Error": null
+        },
+        {
+          "Provider": "openai",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        },
+        {
+          "Provider": "claude",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        }
+      ]
+    },
+    {
+      "Id": "MR-openmoc-scale-sigma-a",
+      "Expected": true,
+      "Consensus": true,
+      "Unanimous": true,
+      "Kappa": null,
+      "ProviderResponses": [
+        {
+          "Provider": "deepseek",
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Increasing fuel absorption cross-section reduces neutron multiplication, thus k_eff should decrease.\u0022}",
+          "Error": null
+        },
+        {
+          "Provider": "openai",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        },
+        {
+          "Provider": "claude",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        }
+      ]
+    },
+    {
+      "Id": "MR-openmoc-rotate-geometry",
+      "Expected": true,
+      "Consensus": true,
+      "Unanimous": true,
+      "Kappa": null,
+      "ProviderResponses": [
+        {
+          "Provider": "deepseek",
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022The pin-cell geometry consists of concentric fuel and moderator regions, which are rotationally symmetric about the centerline. Rotating by 90 degrees yields an identica...",
+          "Error": null
+        },
+        {
+          "Provider": "openai",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        },
+        {
+          "Provider": "claude",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        }
+      ]
+    },
+    {
+      "Id": "MR-projectile-double-velocity",
+      "Expected": false,
+      "Consensus": false,
+      "Unanimous": true,
+      "Kappa": null,
+      "ProviderResponses": [
+        {
+          "Provider": "deepseek",
+          "Plausible": false,
+          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022The range is proportional to the square of the initial velocity (R = v0^2 sin(2\u03B8)/g). Doubling v0 quadruples the range, not doubles it.\u0022}",
+          "Error": null
+        },
+        {
+          "Provider": "openai",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        },
+        {
+          "Provider": "claude",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        }
+      ]
+    },
+    {
+      "Id": "MR-projectile-angle-complement",
+      "Expected": true,
+      "Consensus": true,
+      "Unanimous": true,
+      "Kappa": null,
+      "ProviderResponses": [
+        {
+          "Provider": "deepseek",
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022In ideal projectile motion on level ground, range = (v0^2 * sin(2*angle))/g. Since sin(2*(90\u00B0-angle)) = sin(180\u00B0-2*angle) = sin(2*angle), complementary launch angles yie...",
+          "Error": null
+        },
+        {
+          "Provider": "openai",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        },
+        {
+          "Provider": "claude",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        }
+      ]
+    },
+    {
+      "Id": "MR-spurious-1",
+      "Expected": false,
+      "Consensus": false,
+      "Unanimous": true,
+      "Kappa": null,
+      "ProviderResponses": [
+        {
+          "Provider": "deepseek",
+          "Plausible": false,
+          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022Sorting the array does not change the maximum absolute value, so amax(x\u0027) should equal amax(x), not amax(x) \u002B 1.0.\u0022}",
+          "Error": null
+        },
+        {
+          "Provider": "openai",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        },
+        {
+          "Provider": "claude",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        }
+      ]
+    },
+    {
+      "Id": "MR-spurious-2",
+      "Expected": false,
+      "Consensus": false,
+      "Unanimous": true,
+      "Kappa": null,
+      "ProviderResponses": [
+        {
+          "Provider": "deepseek",
+          "Plausible": false,
+          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022The equality sin(x) = cos(x) is not a mathematical identity; it holds only for specific values of x (e.g., \u03C0/4 \u002B k\u03C0), not for all inputs.\u0022}",
+          "Error": null
+        },
+        {
+          "Provider": "openai",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        },
+        {
+          "Provider": "claude",
+          "Plausible": null,
+          "RawText": "",
+          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+        }
+      ]
+    }
+  ]
+}
