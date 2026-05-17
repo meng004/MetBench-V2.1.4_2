@@ -1,0 +1,168 @@
+{
+  "_comment": "W11.2 F12 Multi-LLM Consensus 实验 prompt 集。每条是一个 candidate MR 的合理性判断任务，让 3 家 LLM 各自返回 {\"plausible\": bool, \"reason\": \"...\"}。",
+
+  "system_prompt": "You are an expert in metamorphic testing for scientific computing programs. Reply ONLY with a single JSON object on one line: {\"plausible\": true|false, \"reason\": \"...\"}. Do not include any other text.",
+
+  "candidates": [
+    {
+      "id": "MR-amax-identity-1",
+      "program": "amax(arr: list[float]) -> float (returns max element of non-empty list)",
+      "transformation": "x' = append(x, -infinity)",
+      "assertion": "amax(x') == amax(x)",
+      "expected": true,
+      "note": "True: adding -inf doesn't change max."
+    },
+    {
+      "id": "MR-amax-identity-2",
+      "program": "amax(arr: list[float]) -> float",
+      "transformation": "x' = append(x, +infinity)",
+      "assertion": "amax(x') == amax(x)",
+      "expected": false,
+      "note": "False: +inf becomes new max."
+    },
+    {
+      "id": "MR-amax-permutation",
+      "program": "amax(arr: list[float]) -> float",
+      "transformation": "x' = shuffle(x)",
+      "assertion": "amax(x') == amax(x)",
+      "expected": true,
+      "note": "True: max is permutation-invariant."
+    },
+    {
+      "id": "MR-amax-double",
+      "program": "amax(arr: list[float]) -> float",
+      "transformation": "x' = [v * 2.0 for v in x]",
+      "assertion": "amax(x') == 2.0 * amax(x)",
+      "expected": true,
+      "note": "True for non-negative x; tricky if x has negatives — debate ground."
+    },
+    {
+      "id": "MR-amax-add-constant",
+      "program": "amax(arr: list[float]) -> float",
+      "transformation": "x' = [v + 5.0 for v in x]",
+      "assertion": "amax(x') == amax(x) + 5.0",
+      "expected": true,
+      "note": "True: max is translation-equivariant."
+    },
+    {
+      "id": "MR-amax-negate",
+      "program": "amax(arr: list[float]) -> float",
+      "transformation": "x' = [-v for v in x]",
+      "assertion": "amax(x') == -amax(x)",
+      "expected": false,
+      "note": "False: max(-x) = -min(x), not -max(x)."
+    },
+    {
+      "id": "MR-amax-replicate",
+      "program": "amax(arr: list[float]) -> float",
+      "transformation": "x' = x + x  (concatenate)",
+      "assertion": "amax(x') == amax(x)",
+      "expected": true,
+      "note": "True: doubling doesn't introduce new max."
+    },
+    {
+      "id": "MR-amin-identity",
+      "program": "amin(arr: list[float]) -> float (returns min element)",
+      "transformation": "x' = append(x, +infinity)",
+      "assertion": "amin(x') == amin(x)",
+      "expected": true,
+      "note": "True: +inf doesn't change min."
+    },
+    {
+      "id": "MR-sin-half-period",
+      "program": "sin(x: float) -> float",
+      "transformation": "x' = x + pi",
+      "assertion": "sin(x') == -sin(x)",
+      "expected": true,
+      "note": "True: sin(x+π) = -sin(x), trig identity."
+    },
+    {
+      "id": "MR-sin-full-period",
+      "program": "sin(x: float) -> float",
+      "transformation": "x' = x + 2*pi",
+      "assertion": "sin(x') == sin(x)",
+      "expected": true,
+      "note": "True: 2π periodicity."
+    },
+    {
+      "id": "MR-sin-scale-x",
+      "program": "sin(x: float) -> float",
+      "transformation": "x' = 2 * x",
+      "assertion": "sin(x') == 2 * sin(x)",
+      "expected": false,
+      "note": "False: sin(2x) = 2 sin(x) cos(x), not 2 sin(x). Tempting linear extrapolation."
+    },
+    {
+      "id": "MR-heat-amplitude-scale",
+      "program": "heat_equation(u0(x), t) -> u(x,t) (linear PDE solver)",
+      "transformation": "u0'(x) = 3 * u0(x)",
+      "assertion": "u'(x, t) == 3 * u(x, t) for all (x, t)",
+      "expected": true,
+      "note": "True: heat equation is linear in initial condition."
+    },
+    {
+      "id": "MR-heat-translation",
+      "program": "heat_equation(u0(x), t) on infinite domain",
+      "transformation": "u0'(x) = u0(x - a)  (shift)",
+      "assertion": "u'(x, t) == u(x - a, t)",
+      "expected": true,
+      "note": "True: spatial translation invariance for infinite-domain heat equation."
+    },
+    {
+      "id": "MR-openmoc-scale-nu-sigma-f",
+      "program": "OpenMOC 2D pin-cell neutron transport, computes k_eff",
+      "transformation": "fuel.nu_sigma_f *= 1.1  (10% increase in fission production cross section)",
+      "assertion": "k_eff_followup > k_eff_source",
+      "expected": true,
+      "note": "True: more neutrons produced per fission → higher multiplication factor."
+    },
+    {
+      "id": "MR-openmoc-scale-sigma-a",
+      "program": "OpenMOC 2D pin-cell neutron transport, computes k_eff",
+      "transformation": "fuel.sigma_a *= 1.2  (20% increase in absorption)",
+      "assertion": "k_eff_followup < k_eff_source",
+      "expected": true,
+      "note": "True: more absorption removes neutrons → lower k_eff."
+    },
+    {
+      "id": "MR-openmoc-rotate-geometry",
+      "program": "OpenMOC 2D pin-cell with concentric fuel/moderator regions",
+      "transformation": "rotate geometry by 90 degrees around pin centerline",
+      "assertion": "k_eff_followup == k_eff_source (within tolerance)",
+      "expected": true,
+      "note": "True: pin-cell geometry has rotational symmetry → k_eff invariant."
+    },
+    {
+      "id": "MR-projectile-double-velocity",
+      "program": "projectile(angle, v0, g) → range",
+      "transformation": "v0' = 2 * v0",
+      "assertion": "range_followup == 2 * range_source",
+      "expected": false,
+      "note": "False: range scales as v0² (parabolic), not v0¹. Trap for linear thinking."
+    },
+    {
+      "id": "MR-projectile-angle-complement",
+      "program": "projectile(angle, v0, g) → range",
+      "transformation": "angle' = 90 - angle  (complement)",
+      "assertion": "range_followup == range_source",
+      "expected": true,
+      "note": "True: range symmetric around 45° (e.g. 30° and 60° give same range)."
+    },
+    {
+      "id": "MR-spurious-1",
+      "program": "amax(arr: list[float])",
+      "transformation": "x' = sorted(x)",
+      "assertion": "amax(x') == amax(x) + 1.0",
+      "expected": false,
+      "note": "False: sorting preserves max but adding +1 is wrong. Sanity check."
+    },
+    {
+      "id": "MR-spurious-2",
+      "program": "sin(x: float)",
+      "transformation": "x' = x",
+      "assertion": "sin(x') == cos(x)",
+      "expected": false,
+      "note": "False: identity transform but wrong RHS. Sanity check."
+    }
+  ]
+}
