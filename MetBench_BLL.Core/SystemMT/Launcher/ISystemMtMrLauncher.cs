@@ -20,7 +20,7 @@ public interface ISystemMtMrLauncher
     /// MR's default parameters where keys overlap; missing keys fall
     /// back to defaults. The persisted record is keyed by the MR's
     /// <see cref="MrSummary.DisplayName"/> as
-    /// <c>SystemMtResultRecord.ScenarioName</c>.
+    /// <c>SystemMtResultRecord.MrName</c>.
     /// </summary>
     /// <exception cref="ArgumentException">If <paramref name="mrId"/> is unknown or blank.</exception>
     /// <exception cref="OperationCanceledException">If <paramref name="cancellationToken"/> trips.</exception>

@@ -115,7 +115,7 @@
                         Header="Run At"/>
                     <DataGridTextColumn
                         Width="2*"
-                        Binding="{Binding ScenarioName}"
+                        Binding="{Binding MrName}"
                         Header="Scenario"/>
                     <DataGridTextColumn
                         Width="120"

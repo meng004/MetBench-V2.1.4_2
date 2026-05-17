@@ -24,7 +24,7 @@ public sealed class HtmlSystemMtResultReportRendererTests
         return new SystemMtResultRecord
         {
             Id = "507f1f77bcf86cd799439011",
-            ScenarioName = scenario,
+            MrName = scenario,
             RunAt = new DateTimeOffset(2026, 5, 9, 12, 34, 56, TimeSpan.Zero),
             AssertionName = assertionName,
             ValueName = valueName,
