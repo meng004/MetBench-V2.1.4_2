@@ -145,7 +145,7 @@ namespace MetBench_Client
                     return new LiteDbSystemMtResultRepository($"Filename={dbPath}");
                 });
 
-                services.AddSingleton<ISystemMtScenarioLauncher, SystemMtScenarioLauncher>();
+                services.AddSingleton<ISystemMtMrLauncher, SystemMtMrLauncher>();
                 services.AddSingleton<ISystemMtResultReportRenderer, HtmlSystemMtResultReportRenderer>();
 
                 services.AddScoped<Views.Pages.SystemMtExecutionPage>();

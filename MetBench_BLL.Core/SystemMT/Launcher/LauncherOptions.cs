@@ -8,7 +8,7 @@ namespace MetBench_BLL.SystemMT.Launcher;
 /// <param name="SutRoot">
 /// Absolute path to the directory that contains per-SUT subdirectories
 /// (<c>openmoc/</c>, <c>heat_equation/</c>, ...). The launcher resolves
-/// scenario script paths relative to this root.
+/// MR script paths relative to this root.
 /// </param>
 /// <param name="SystemPython">
 /// Python executable for SUTs that only need the standard library (e.g.
@@ -24,7 +24,7 @@ namespace MetBench_BLL.SystemMT.Launcher;
 /// <see cref="OpenMocPython"/> because OpenMOC and OpenMC have
 /// incompatible build requirements and typically live in separate venvs.
 /// May equal <see cref="SystemPython"/> when neither is installed
-/// (scenarios that need OpenMC will fail at runtime; that is expected
+/// (MRs that need OpenMC will fail at runtime; that is expected
 /// in CI / VM where OpenMC is not installed).
 /// </param>
 public sealed record LauncherOptions(
@@ -36,7 +36,7 @@ public sealed record LauncherOptions(
     /// <summary>
     /// Resolves to <see cref="OpenMcPython"/> if set, otherwise
     /// <see cref="SystemPython"/>. Lets existing call sites that don't know
-    /// about OpenMC continue to compile; OpenMC scenarios attempted with the
+    /// about OpenMC continue to compile; OpenMC MRs attempted with the
     /// system Python will simply fail at run time (which is acceptable on
     /// machines that do not have OpenMC installed).
     /// </summary>

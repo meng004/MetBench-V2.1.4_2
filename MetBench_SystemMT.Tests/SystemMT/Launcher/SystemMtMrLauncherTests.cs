@@ -5,13 +5,13 @@ using Xunit;
 
 namespace MetBench_SystemMT.Tests.SystemMT.Launcher;
 
-public sealed class SystemMtScenarioLauncherTests : IDisposable
+public sealed class SystemMtMrLauncherTests : IDisposable
 {
     private readonly string _dbPath;
     private readonly LiteDbSystemMtResultRepository _repository;
-    private readonly SystemMtScenarioLauncher _launcher;
+    private readonly SystemMtMrLauncher _launcher;
 
-    public SystemMtScenarioLauncherTests()
+    public SystemMtMrLauncherTests()
     {
         _dbPath = Path.Combine(
             Path.GetTempPath(),
@@ -19,7 +19,7 @@ public sealed class SystemMtScenarioLauncherTests : IDisposable
             Guid.NewGuid().ToString("N") + ".db");
         Directory.CreateDirectory(Path.GetDirectoryName(_dbPath)!);
         _repository = new LiteDbSystemMtResultRepository(_dbPath);
-        _launcher = new SystemMtScenarioLauncher(
+        _launcher = new SystemMtMrLauncher(
             new LauncherOptions(
                 SutRoot: TestAssetPaths.AssetRoot(),
                 SystemPython: TestAssetPaths.PythonExecutable(),
@@ -39,7 +39,7 @@ public sealed class SystemMtScenarioLauncherTests : IDisposable
     public void Constructor_rejects_null_options()
     {
         Assert.Throws<ArgumentNullException>(() =>
-            new SystemMtScenarioLauncher(null!, _repository));
+            new SystemMtMrLauncher(null!, _repository));
     }
 
     [Fact]
@@ -47,7 +47,7 @@ public sealed class SystemMtScenarioLauncherTests : IDisposable
     {
         var options = new LauncherOptions("/tmp", "python3", "python3");
         Assert.Throws<ArgumentNullException>(() =>
-            new SystemMtScenarioLauncher(options, null!));
+            new SystemMtMrLauncher(options, null!));
     }
 
     [Fact]
@@ -146,7 +146,7 @@ public sealed class SystemMtScenarioLauncherTests : IDisposable
 
         Assert.True(result.Passed, result.FailureReason);
         Assert.False(string.IsNullOrEmpty(result.RecordId));
-        Assert.Equal("heat-equation-amplitude", result.ScenarioId);
+        Assert.Equal("heat-equation-amplitude", result.MrId);
         Assert.Equal("max_u", result.ValueName);
         Assert.True(result.SourceValue > 0);
         Assert.True(result.FollowUpValue > result.SourceValue,

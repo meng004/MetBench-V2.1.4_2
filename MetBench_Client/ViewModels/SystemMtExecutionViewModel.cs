@@ -16,17 +16,17 @@ namespace MetBench_Client.ViewModels
 {
     public partial class SystemMtExecutionViewModel : ObservableObject, INavigationAware
     {
-        private readonly ISystemMtScenarioLauncher _launcher;
+        private readonly ISystemMtMrLauncher _launcher;
         private readonly ISystemMtResultRepository _repository;
         private readonly ISystemMtResultReportRenderer _reportRenderer;
         private bool _isInitialized;
 
         [ObservableProperty]
-        private ObservableCollection<ScenarioDescriptor> _availableScenarios = new();
+        private ObservableCollection<MrSummary> _availableMrs = new();
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(RunCommand))]
-        private ScenarioDescriptor? _selectedScenario;
+        private MrSummary? _selectedMr;
 
         [ObservableProperty]
         private string _factorOverride = string.Empty;
@@ -45,7 +45,7 @@ namespace MetBench_Client.ViewModels
         private ObservableCollection<SystemMtResultRecord> _recentRuns = new();
 
         public SystemMtExecutionViewModel(
-            ISystemMtScenarioLauncher launcher,
+            ISystemMtMrLauncher launcher,
             ISystemMtResultRepository repository,
             ISystemMtResultReportRenderer reportRenderer)
         {
@@ -57,14 +57,14 @@ namespace MetBench_Client.ViewModels
         public async void OnNavigatedTo()
         {
             if (_isInitialized) return;
-            await LoadScenariosAsync();
+            await LoadMrsAsync();
             await LoadRecentRunsAsync();
             _isInitialized = true;
         }
 
         public void OnNavigatedFrom() { }
 
-        partial void OnSelectedScenarioChanged(ScenarioDescriptor? value)
+        partial void OnSelectedMrChanged(MrSummary? value)
         {
             FactorOverride = value is not null
                 && value.DefaultParameters.TryGetValue("factor", out var defaultFactor)
@@ -72,13 +72,13 @@ namespace MetBench_Client.ViewModels
                 : string.Empty;
         }
 
-        private async Task LoadScenariosAsync()
+        private async Task LoadMrsAsync()
         {
             var list = await _launcher.ListAvailableAsync();
-            AvailableScenarios = new ObservableCollection<ScenarioDescriptor>(list);
-            if (SelectedScenario is null && AvailableScenarios.Count > 0)
+            AvailableMrs = new ObservableCollection<MrSummary>(list);
+            if (SelectedMr is null && AvailableMrs.Count > 0)
             {
-                SelectedScenario = AvailableScenarios[0];
+                SelectedMr = AvailableMrs[0];
             }
         }
 
@@ -91,10 +91,10 @@ namespace MetBench_Client.ViewModels
         [RelayCommand(CanExecute = nameof(CanRun))]
         private async Task RunAsync()
         {
-            if (SelectedScenario is null) return;
+            if (SelectedMr is null) return;
 
             IsRunning = true;
-            StatusMessage = $"Running {SelectedScenario.DisplayName}…";
+            StatusMessage = $"Running {SelectedMr.DisplayName}…";
             LastResultSummary = string.Empty;
 
             try
@@ -105,7 +105,7 @@ namespace MetBench_Client.ViewModels
                     overrides = new Dictionary<string, string> { ["factor"] = FactorOverride.Trim() };
                 }
 
-                var result = await _launcher.RunAsync(SelectedScenario.Id, overrides);
+                var result = await _launcher.RunAsync(SelectedMr.Id, overrides);
 
                 LastResultSummary = result.Passed
                     ? $"PASS — {result.ValueName}: source={result.SourceValue:G}, follow-up={result.FollowUpValue:G}"
@@ -125,7 +125,7 @@ namespace MetBench_Client.ViewModels
             }
         }
 
-        private bool CanRun() => SelectedScenario is not null && !IsRunning;
+        private bool CanRun() => SelectedMr is not null && !IsRunning;
 
         [RelayCommand]
         private async Task RefreshRecentAsync()
