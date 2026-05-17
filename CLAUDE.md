@@ -127,23 +127,26 @@ new NavigationViewItem()
 },
 ```
 
-## System-MT facade rules (Stage 4)
+## System-MT facade rules (Stage 4 / post-W12 命名统一)
 
 The launcher facade in `MetBench_BLL.Core/SystemMT/Launcher/` exposes the **only** entry point WPF code should use to run a system-level metamorphic test:
 
 ```csharp
-ISystemMtScenarioLauncher
-    Task<IReadOnlyList<ScenarioDescriptor>> ListAvailableAsync(ct)
-    Task<ScenarioRunResult> RunAsync(scenarioId, parameterOverrides?, ct)
+ISystemMtMrLauncher
+    Task<IReadOnlyList<MrSummary>> ListAvailableAsync(ct)
+    Task<MrRunResult> RunAsync(mrId, parameterOverrides?, ct)
+    Task<IReadOnlyList<MrRunResult>> RunBatchAsync(requests, progress?, ct)
 ```
+
+> 历史命名（已废弃）：`ISystemMtScenarioLauncher` / `ScenarioDescriptor` / `ScenarioRunResult` / `scenarioId` 等。post-W12（PR #58）彻底改名以消除与 BDD Gherkin Scenario 的撞名混淆。Persistence 层的 `ScenarioName` 字段同步改为 `MrName` 并附 LiteDB 自动 schema migration（PR #62）。详见 [`docs/PROJECT-STRUCTURE.md`](docs/PROJECT-STRUCTURE.md) §8。
 
 **Type-leakage rule** — public method signatures use only:
 
 - primitives, `string`, `Dictionary<string, string>`,
-- record DTOs from `MetBench_BLL.SystemMT.Launcher.*`,
+- record DTOs from `MetBench_BLL.SystemMT.Launcher.*`（`MrSummary` / `MrRunResult` / `BatchMrRunRequest` / `BatchProgress`），
 - `SystemMtResultRecord` from `MetBench_BLL.SystemMT.Persistence`.
 
-Do **not** expose `MrTransformation`, `SystemMtTask`, `SystemMtRunner`, `IMrAssertion`, `SystemMtResult`, `SystemMtCase`, or any other engine-internal type through the facade. WPF must remain insulated so the planned IR refactor (Stage 4 AC #6) can change internals without breaking views.
+Do **not** expose `MrTransformation`, `SystemMtTask`, `SystemMtRunner`, `IMrAssertion`, `SystemMtResult`, `SystemMtCase`, or any other engine-internal type through the facade. WPF must remain insulated so the planned IR refactor can change internals without breaking views.
 
 DI registration for system-MT (in `App.xaml.cs`):
 
@@ -152,6 +155,8 @@ services.AddSingleton(provider => new LauncherOptions(
     SutRoot: Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!, "SUT"),
     SystemPython: OperatingSystem.IsWindows() ? "python" : "python3",
     OpenMocPython: Environment.GetEnvironmentVariable("METBENCH_OPENMOC_PYTHON")
+        ?? (OperatingSystem.IsWindows() ? "python" : "python3"),
+    OpenMcPython: Environment.GetEnvironmentVariable("METBENCH_OPENMC_PYTHON")
         ?? (OperatingSystem.IsWindows() ? "python" : "python3")));
 
 services.AddSingleton<ISystemMtResultRepository>(provider =>
@@ -160,7 +165,7 @@ services.AddSingleton<ISystemMtResultRepository>(provider =>
     return new LiteDbSystemMtResultRepository($"Filename={Path.Combine(dataDir, "SystemMT.Litedb")}");
 });
 
-services.AddSingleton<ISystemMtScenarioLauncher, SystemMtScenarioLauncher>();
+services.AddSingleton<ISystemMtMrLauncher, SystemMtMrLauncher>();
 services.AddSingleton<ISystemMtResultReportRenderer, HtmlSystemMtResultReportRenderer>();
 ```
 
@@ -184,7 +189,7 @@ The system-MT LiteDB file (`SystemMT.Litedb`) is intentionally separate from the
 
 CI (`.github/workflows/dotnet-test.yml`, `ubuntu-24.04`) runs **only** the cross-platform projects. WPF code is not compiled by CI; visual / runtime verification is the developer's responsibility on a Windows host (Parallels VM or otherwise).
 
-OpenMOC tests skip cleanly without the OpenMOC venv (`OpenMocTestPaths.OpenMocImportable()`); CI does not install OpenMOC. To run OpenMOC tests locally, use `.claude/web-setup.sh` (Linux) or set `METBENCH_OPENMOC_PYTHON` (any OS) to a Python with OpenMOC importable.
+OpenMOC + OpenMC tests skip cleanly when the respective venv is missing (`OpenMocTestPaths.OpenMocImportable()` / `OpenMcTestPaths.OpenMcImportable()`); CI does not install either. To run them locally, use `.claude/web-setup.sh` (Linux) or set `METBENCH_OPENMOC_PYTHON` / `METBENCH_OPENMC_PYTHON` (any OS) to a Python where the package is importable. OpenMC additionally requires the `openmc` binary on PATH (or in the same venv `bin/`); the setup script handles this via cmake source build.
 
 ## Cross-environment workflow (Linux cloud + Windows VM)
 
@@ -202,7 +207,7 @@ Once a feature has been cloud-side TDD-tested, it lives in one of these
 
 | Namespace | Purpose | Key types |
 |-----------|---------|-----------|
-| `MetBench_BLL.SystemMT.*` | Pipeline + Launcher + Persistence + Reporting | `SystemMtPipeline`, `ISystemMtScenarioLauncher`, `HtmlSystemMtResultReportRenderer` |
+| `MetBench_BLL.SystemMT.*` | Pipeline + Launcher + Persistence + Reporting | `SystemMtPipeline`, `ISystemMtMrLauncher`, `HtmlSystemMtResultReportRenderer` |
 | `MetBench_BLL.SystemMT.Anomaly` | Anomaly viewer + commonality | `AnomalyService`, `CommonalityReport` |
 | `MetBench_BLL.Discovery` | MR Discovery + Validation | `IMRDiscoverer`, `DiscoveryService`, `ValidationService`, `ILlmGateway` |
 | `MetBench_BLL.Discovery.Validators` | Day-1 validators | `EmpiricalValidator`, `TheoreticalLlmValidator`, `AdversarialMutmutValidator` |
@@ -218,7 +223,8 @@ process / LLM.
 
 ## Roadmap pointers
 
-- Staged plan: [`AGENTS.md`](AGENTS.md)
-- Per-stage implementation plans: [`docs/superpowers/plans/`](docs/superpowers/plans/)
-- Active Stage 4 cross-env plan: [`docs/superpowers/plans/2026-05-10-stage4-remaining-acs.md`](docs/superpowers/plans/2026-05-10-stage4-remaining-acs.md)
-- v2 P1-P8 development plan: [`docs/superpowers/plans/2026-05-13-v2-development-plan.md`](docs/superpowers/plans/2026-05-13-v2-development-plan.md)
+- 📘 全息项目结构: [`docs/PROJECT-STRUCTURE.md`](docs/PROJECT-STRUCTURE.md)（含 4 SUT + 测试矩阵 + 命名约定）
+- 🧭 Staged plan: [`AGENTS.md`](AGENTS.md)（含 Stage 7 W11-W12 交付清单）
+- 📜 Release Notes: [`RELEASE_NOTES.md`](RELEASE_NOTES.md)（v2.1.0 涉及 PR 一览）
+- 🗒 Per-stage implementation plans: [`docs/superpowers/plans/`](docs/superpowers/plans/)
+- 🟢 当前活跃 RFC: [`docs/superpowers/plans/2026-05-17-f11-status.md`](docs/superpowers/plans/2026-05-17-f11-status.md)（F11 m_adj 月度监控）

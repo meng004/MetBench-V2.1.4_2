@@ -37,9 +37,12 @@ Responsibility boundaries:
 
 | SUT | Role | MRs | Adapter language |
 |-----|------|-----|------------------|
-| **OpenMOC** (2D pin-cell neutron transport) | Production-grade case | `ScaleNuSigmaF` (k_eff increases), `ScaleFuelSigmaA` (k_eff decreases) | Python |
-| **1D heat equation** (finite-difference solver) | Validates the abstraction transfers beyond OpenMOC | `ScaleAmplitude` (linearity) | Python (stdlib only) |
+| **OpenMOC** (2D pin-cell neutron transport, deterministic MOC) | Production-grade case | `ScaleNuSigmaF` (k_eff increases), `ScaleFuelSigmaA` (k_eff decreases) | Python |
+| **OpenMC** (2D pin-cell neutron transport, Monte Carlo) | Cross-implementation `m_cmp` partner of OpenMOC | Same 2 MR transformations as OpenMOC (cross-program scenario instances) | Python |
+| **1D heat equation** (finite-difference solver) | Validates abstraction transfers beyond neutron transport | `ScaleAmplitude` (linearity) | Python (stdlib only) |
 | **Projectile** | Closed-loop demo SUT | trivial range MR | Python |
+
+详见 [`docs/PROJECT-STRUCTURE.md`](docs/PROJECT-STRUCTURE.md) §2 §3（含 4 SUT 单元 + 系统级 BDD 测试矩阵 + Launcher MR 注册映射）。
 
 ## Build and run tests
 
@@ -50,20 +53,28 @@ dotnet build MetBench.sln
 dotnet test MetBench_SystemMT.Tests
 ```
 
-The OpenMOC BDD scenarios and the OpenMOC smoke test require a working
-OpenMOC Python venv. They detect availability via `OpenMocTestPaths` and
-**skip cleanly** when OpenMOC is not importable. All other tests run on a
-plain .NET 8 install with no extra setup.
+The OpenMOC and OpenMC BDD scenarios + smoke tests require working
+Python venvs with the respective package importable. They detect availability
+via `OpenMocTestPaths` / `OpenMcTestPaths` and **skip cleanly** when the SUT
+is not available. All other tests run on a plain .NET 8 install with no extra
+setup.
 
-To exercise the OpenMOC tests locally, see `.claude/web-setup.sh` for the
-Linux install path that has been verified end-to-end.
+To exercise the OpenMOC + OpenMC tests locally, see `.claude/web-setup.sh`
+for the Linux install path that has been verified end-to-end (cmake +
+source build for OpenMC; SWIG build for OpenMOC).
 
 ## Continuous integration
 
 Every push to `main` and every pull request runs
 `dotnet test MetBench_SystemMT.Tests` on `ubuntu-24.04` via
-`.github/workflows/dotnet-test.yml`. OpenMOC is not built in CI; OpenMOC-
-specific tests skip cleanly there. Cold runtime is around 25 seconds.
+`.github/workflows/dotnet-test.yml`. OpenMOC + OpenMC are not built in CI;
+their tests skip cleanly there. Cold runtime is around 35 seconds for the
+full 521 tests (cumulative 73 s; budget 120 s gated by
+`tools/ci_perf_baseline.py`).
+
+A second workflow `.github/workflows/f11-monthly-monitor.yml` runs on a
+monthly cron (`17 3 1 * *` UTC) to poll OpenMOC upstream for adjoint-flux
+export commits (F11 m_adj path A; auto-files a tracking issue when hit).
 
 ## Repository layout
 
@@ -82,19 +93,22 @@ docs/                    # design specs and staged implementation plans
 
 ## Roadmap and design docs
 
-The staged plan is in [`AGENTS.md`](AGENTS.md). Current state at the time of
-this README:
+- 📘 [`docs/PROJECT-STRUCTURE.md`](docs/PROJECT-STRUCTURE.md) — 项目结构 / 4 SUT 测试矩阵 / MetBench 框架测试覆盖 一目了然
+- 🧭 [`AGENTS.md`](AGENTS.md) — 分阶段 roadmap
+- 🤖 [`CLAUDE.md`](CLAUDE.md) — AI agent / 协作者非显然约定
+- 🗒 [`docs/superpowers/plans/`](docs/superpowers/plans/) — per-stage 实现计划 + RFC
 
-- **Stage 1** (BDD-driven system-level MT closed loop): landed.
-- **Stage 2** (input data generation and follow-up derivation): landed.
-- **Stage 3** (OpenMOC single-program application, with two MRs in opposite
-  directions): landed.
+Current state at the time of this README:
+
+- **Stage 1** (BDD-driven system-level MT closed loop): landed
+- **Stage 2** (input data generation and follow-up derivation): landed
+- **Stage 3** (OpenMOC single-program application, with two MRs in opposite directions): landed
 - **Stage 4** (platform features, persistence, reporting, second SUT): landed
-  (all six acceptance criteria closed via PRs #10–#23).
-- **Stage 5 Phase 1** (mutation-based empirical validation of the MR suite):
-  landed; see [`docs/experiments/`](docs/experiments/).
+- **Stage 5 Phase 1** (mutation-based empirical validation of the MR suite): landed
+- **Stage 6** (v2 development P1-P8 cloud-side): landed
+- **Stage 7** (W11-W12: Multi-LLM consensus 真实跑通 / OpenMC 第 3 SUT 接入 / UAT 47 用例 markdown + 21 用例 BDD / scenario→MR 命名统一 / LiteDB schema migration / F11 月度监控): landed 2026-05-17，baseline-2026-05-17 全套 **521/521 Pass**
 
-Per-stage implementation plans live under `docs/superpowers/plans/`.
+剩余前置：Windows 端跑过 1 轮 UAT round-1（A/B/D/E 26 UI 用例，参 [windows-uat-round-1.md](docs/uat/runbooks/windows-uat-round-1.md)）→ tag `release-v2.1.0`。
 
 ## Experiments
 
