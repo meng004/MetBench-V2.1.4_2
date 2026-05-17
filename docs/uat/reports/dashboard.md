@@ -6,7 +6,8 @@
 
 | 轮次 | 日期 | commit | 测试员 | 平台 | Pass% | Blocker | Major | Minor | 总评 | 报告 |
 |------|------|--------|--------|------|-------|---------|-------|-------|------|------|
-| baseline | 2026-05-16 | `97863ea` | dev | Linux | 100% | 0 | 0 | 0 | reference | [`baseline-2026-05-16/`](baseline-2026-05-16/) |
+| baseline-1 | 2026-05-16 | `97863ea` | dev | Linux | 100% | 0 | 0 | 0 | reference | [`baseline-2026-05-16/`](baseline-2026-05-16/) |
+| baseline-2 | 2026-05-17 | `45a145f` | dev | Linux + OpenMC | **100%** | 0 | 0 | **0** | reference (post W11-W12, 100% pass) | [`baseline-2026-05-17/`](baseline-2026-05-17/) |
 | _round-1_ | _待排_ | | | | | | | | | |
 
 ## 趋势分析约定
@@ -19,8 +20,11 @@
 
 ## Commentary（追加式，倒序）
 
-### 2026-05-16 baseline
-开发侧自跑作为 reference：458 facts pass / 0 fail / 22.35s cumulative。OpenMOC venv OK。 全部 7 类的 CLI 用例都跑通。
+### 2026-05-16 baseline-1
+开发侧自跑作为 reference：458 facts pass / 0 fail / 22.35s cumulative。OpenMOC venv OK。全部 7 类的 CLI 用例都跑通。
+
+### 2026-05-17 baseline-2
+Post W11-W12 (8 PR land): W11.2 Multi-LLM 真实跑通 + W12 F13 OpenMC 接入 + scenario→MR 改名 + UAT BDD 21 用例 + LiteDB schema migration + UAT 三段式重写 + W12 F11 monitor。新增 OpenMC venv (0.15.3 master)。**DbConfig.Instance 跨 class flake 修复** (`[Collection("DbConfigGlobal")]` 加到 6 个 class) + UAT BDD 指向新 baseline → **521/521 全 Pass / 0 Skip / 0 Fail / 35s wall / 73.02s cumulative**。历史首次 100% 完全清空 skip 列表。
 
 ### _待写_
 

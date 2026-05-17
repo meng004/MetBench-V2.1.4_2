@@ -18,6 +18,7 @@ namespace MetBench_SystemMT.Tests.ColdStart;
 /// 不依赖 DbConfig.Instance —— 避开 v1 ConfigurationManager Windows-only 路径
 /// （cold-start finding C5）；用 LiteDatabase + 临时文件做隔离。
 /// </summary>
+[Collection("DbConfigGlobal")]
 public sealed class ColdStartIntegrationTests : IDisposable
 {
     private readonly string _dbPath;
