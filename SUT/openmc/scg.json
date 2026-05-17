@@ -1,0 +1,36 @@
+{
+  "_comment": "Semantic Causal Graph for OpenMC pin-cell neutron transport (Monte Carlo). Hand-authored by domain expert; consumed by ScgHeuristicDiscoverer to mine candidate metamorphic relations (direct-cause / mediator / confounder patterns). Same physical causality as SUT/openmoc/scg.json — at pin-cell level the deterministic MOC and stochastic MC solvers share identical input → output dependencies, only the numerical method differs. Kept as a separate file so SCG-Heuristic discovery is per-SUT and m_cmp pair-mining can match SCG node IDs across solvers.",
+
+  "nodes": [
+    {"id": "fuel.nu_sigma_f",   "name": "Fuel ν·Σ_f (fission production)", "type": "param"},
+    {"id": "fuel.sigma_a",      "name": "Fuel Σ_a (absorption)",           "type": "param"},
+    {"id": "fuel.temperature",  "name": "Fuel temperature",                "type": "param"},
+    {"id": "fuel.radius",       "name": "Fuel pin radius",                 "type": "param"},
+    {"id": "mod.sigma_a",       "name": "Moderator Σ_a",                   "type": "param"},
+    {"id": "geometry.rotation", "name": "Geometry rotation angle",         "type": "input"},
+    {"id": "geometry.mirror",   "name": "Geometry mirror axis",            "type": "input"},
+    {"id": "flux.thermal",      "name": "Thermal-group flux",              "type": "intermediate"},
+    {"id": "flux.fast",         "name": "Fast-group flux",                 "type": "intermediate"},
+    {"id": "k_eff",             "name": "Effective multiplication factor", "type": "output"}
+  ],
+
+  "edges": [
+    {"from": "fuel.nu_sigma_f", "to": "k_eff",       "relation": "causes"},
+    {"from": "fuel.sigma_a",    "to": "k_eff",       "relation": "causes"},
+    {"from": "mod.sigma_a",     "to": "flux.thermal","relation": "causes"},
+    {"from": "flux.thermal",    "to": "k_eff",       "relation": "causes"},
+
+    {"from": "fuel.temperature", "to": "fuel.sigma_a", "relation": "causes"},
+    {"from": "fuel.temperature", "to": "fuel.nu_sigma_f", "relation": "causes"},
+
+    {"from": "fuel.radius", "to": "flux.thermal", "relation": "causes"},
+    {"from": "fuel.radius", "to": "flux.fast",    "relation": "causes"}
+  ],
+
+  "_expected_patterns_demo": {
+    "_note": "Heuristic expectations; actual matches produced by RuleBasedScgPatternMiner at runtime. Patterns are identical to SUT/openmoc/scg.json — the SCG describes the physics, not the solver algorithm.",
+    "direct-cause": ["fuel.nu_sigma_f → k_eff", "fuel.sigma_a → k_eff", "flux.thermal → k_eff"],
+    "mediator":     ["mod.sigma_a → flux.thermal → k_eff"],
+    "confounder":   ["fuel.temperature → (fuel.sigma_a, fuel.nu_sigma_f)", "fuel.radius → (flux.thermal, flux.fast)"]
+  }
+}

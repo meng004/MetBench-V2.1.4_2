@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Claude Code on web setup for MetBench Stage 3 (OpenMOC + .NET 8 + Python 3.12).
+# Claude Code on web setup for MetBench Stage 3 (OpenMOC + OpenMC + .NET 8 + Python 3.12).
 #
 # This script bootstraps a cloud Linux session into a state where the
 # MetBench .NET tests can run and OpenMOC is importable from a dedicated
@@ -39,12 +39,19 @@
 #   OPENMOC_REF           default 3D-MOC (mit-crpg/OpenMOC branch)
 #   OPENMOC_VENV          default /opt/openmoc-venv
 #   SKIP_OPENMOC          set to 1 to skip the heavy OpenMOC compile
+#   OPENMC_REF            default master (openmc-dev/openmc branch)
+#   OPENMC_VENV           default /opt/openmc-venv
+#   OPENMC_PREFIX         default /opt/openmc (cmake install prefix for openmc binary)
+#   SKIP_OPENMC           set to 1 to skip the heavy OpenMC compile
 
 set -euo pipefail
 
 DOTNET_CHANNEL="${DOTNET_CHANNEL:-8.0}"
 OPENMOC_REF="${OPENMOC_REF:-3D-MOC}"
 OPENMOC_VENV="${OPENMOC_VENV:-/opt/openmoc-venv}"
+OPENMC_REF="${OPENMC_REF:-master}"
+OPENMC_VENV="${OPENMC_VENV:-/opt/openmc-venv}"
+OPENMC_PREFIX="${OPENMC_PREFIX:-/opt/openmc}"
 
 log() { printf '\n[setup] %s\n' "$*"; }
 
@@ -61,9 +68,10 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     build-essential cmake pkg-config ca-certificates curl gnupg \
     swig \
     libhdf5-dev libhdf5-serial-dev libgomp1 \
+    libpng-dev libxml2-dev libeigen3-dev \
     python3.12 python3.12-dev python3.12-venv \
     python3 python3-dev python3-pip python3-setuptools \
-    python3-numpy python3-h5py python3-matplotlib
+    python3-numpy python3-h5py python3-matplotlib python3-pandas python3-scipy
 
 # ---------------------------------------------------------------------------
 # 2. .NET SDK via the Microsoft apt repo. The dot.net install script
@@ -152,6 +160,68 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# 4b. OpenMC (heavy step; ~10-15 min). Source build with cmake — there is no
+#     PyPI / apt / conda-free wheel for OpenMC, the project ships C++ + a
+#     Python frontend that links against the installed C++ binary. We
+#     install the C++ binary to OPENMC_PREFIX and the Python bindings into
+#     OPENMC_VENV (separate from OPENMOC_VENV so the two scientific stacks
+#     do not collide). openmc binary is symlinked into the venv so
+#     `model.run(openmc_exec=Path(sys.executable).with_name("openmc"))` in
+#     SUT/openmc/openmc_runner.py resolves cleanly.
+# ---------------------------------------------------------------------------
+if [ "${SKIP_OPENMC:-0}" = "1" ]; then
+    log "SKIP_OPENMC=1 → skipping OpenMC install"
+elif "${OPENMC_VENV}/bin/python" -c "import openmc" >/dev/null 2>&1 \
+     && [ -x "${OPENMC_VENV}/bin/openmc" ]; then
+    log "OpenMC already importable from ${OPENMC_VENV}; skipping rebuild"
+else
+    log "Creating Python 3.12 venv at ${OPENMC_VENV} (with --system-site-packages)"
+    sudo install -d -m 0755 -o "$(id -u)" -g "$(id -g)" "${OPENMC_VENV%/*}" 2>/dev/null \
+        || sudo install -d -m 0777 "${OPENMC_VENV%/*}"
+    if [ ! -x "${OPENMC_VENV}/bin/python" ]; then
+        sudo /usr/bin/python3.12 -m venv --system-site-packages "${OPENMC_VENV}"
+        sudo chown -R "$(id -u):$(id -g)" "${OPENMC_VENV}"
+    fi
+    "${OPENMC_VENV}/bin/pip" install --upgrade pip setuptools wheel >/dev/null
+
+    log "Cloning OpenMC (branch ${OPENMC_REF}, with submodules)"
+    rm -rf /tmp/openmc-src
+    git clone --depth=1 --branch "${OPENMC_REF}" --recurse-submodules \
+        https://github.com/openmc-dev/openmc.git /tmp/openmc-src
+
+    log "CMake configure → ${OPENMC_PREFIX} (MPI off, OpenMP on, DAGMC off)"
+    mkdir -p /tmp/openmc-src/build
+    (
+        cd /tmp/openmc-src/build
+        cmake -DCMAKE_INSTALL_PREFIX="${OPENMC_PREFIX}" \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DOPENMC_USE_MPI=OFF \
+              -DOPENMC_USE_OPENMP=ON \
+              -DOPENMC_USE_DAGMC=OFF \
+              -DOPENMC_USE_LIBMESH=OFF \
+              .. >/dev/null
+    )
+
+    log "Building openmc binary (make -j$(nproc), this is the slow step)"
+    (cd /tmp/openmc-src/build && make -j"$(nproc)" >/dev/null)
+
+    log "Installing openmc binary to ${OPENMC_PREFIX}"
+    (cd /tmp/openmc-src/build && sudo make install >/dev/null)
+
+    log "Installing OpenMC Python bindings into ${OPENMC_VENV}"
+    (cd /tmp/openmc-src && "${OPENMC_VENV}/bin/pip" install --no-build-isolation . >/dev/null)
+
+    log "Symlinking ${OPENMC_PREFIX}/bin/openmc → ${OPENMC_VENV}/bin/openmc"
+    ln -sf "${OPENMC_PREFIX}/bin/openmc" "${OPENMC_VENV}/bin/openmc"
+
+    rm -rf /tmp/openmc-src
+
+    log "Smoke-testing 'import openmc' + 'openmc --version' from ${OPENMC_VENV}"
+    (cd /tmp && "${OPENMC_VENV}/bin/python" -c "import openmc; print('openmc Python OK, version:', openmc.__version__)")
+    "${OPENMC_VENV}/bin/openmc" --version | head -n 1
+fi
+
+# ---------------------------------------------------------------------------
 # 5. Restore .NET dependencies for the SystemMT test project so subsequent
 #    `dotnet test` calls do not pay the cold-start NuGet restore each time.
 # ---------------------------------------------------------------------------
@@ -170,8 +240,16 @@ if [ -x "${OPENMOC_VENV}/bin/python" ] \
 else
     log "  openmoc          : not importable (run with SKIP_OPENMOC unset to build)"
 fi
+if [ -x "${OPENMC_VENV}/bin/python" ] \
+   && "${OPENMC_VENV}/bin/python" -c "import openmc" >/dev/null 2>&1 \
+   && [ -x "${OPENMC_VENV}/bin/openmc" ]; then
+    log "  openmc           : importable from ${OPENMC_VENV}/bin/python + binary at ${OPENMC_VENV}/bin/openmc"
+else
+    log "  openmc           : not importable (run with SKIP_OPENMC unset to build)"
+fi
 log "  gh               : $(gh --version 2>/dev/null | head -n1 || echo 'not installed')"
 log ""
-log "  To run Stage 3 tests against this venv:"
+log "  To run Stage 3 tests against these venvs:"
 log "    METBENCH_OPENMOC_PYTHON=${OPENMOC_VENV}/bin/python \\"
+log "        METBENCH_OPENMC_PYTHON=${OPENMC_VENV}/bin/python \\"
 log "        dotnet test MetBench_SystemMT.Tests/MetBench_SystemMT.Tests.csproj"
