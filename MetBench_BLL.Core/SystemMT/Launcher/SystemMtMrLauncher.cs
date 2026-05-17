@@ -3,58 +3,58 @@ using MetBench_BLL.SystemMT.Persistence;
 namespace MetBench_BLL.SystemMT.Launcher;
 
 /// <summary>
-/// Production implementation of <see cref="ISystemMtScenarioLauncher"/>.
-/// Owns the scenario registry and routes scenario ids to the correct
+/// Production implementation of <see cref="ISystemMtMrLauncher"/>.
+/// Owns the MR registry and routes MR ids to the correct
 /// SystemMtRunner construction. Persists every run via the injected
 /// <see cref="ISystemMtResultRepository"/>.
 /// </summary>
 /// <remarks>
-/// The scenario list is hard-coded here on purpose: each scenario binds a
+/// The MR list is hard-coded here on purpose: each MR binds a
 /// specific MR + transformation + assertion + value-name + sample-case
 /// quartet that has been validated end-to-end in the BDD test suite. Adding a
-/// new scenario should be done by extending <see cref="BuildScenarios"/>
+/// new MR should be done by extending <see cref="BuildMrCatalog"/>
 /// after the corresponding adapter and assertion are landed.
 /// </remarks>
-public sealed class SystemMtScenarioLauncher : ISystemMtScenarioLauncher
+public sealed class SystemMtMrLauncher : ISystemMtMrLauncher
 {
     private readonly LauncherOptions _options;
     private readonly ISystemMtResultRepository _repository;
-    private readonly IReadOnlyDictionary<string, ScenarioBlueprint> _scenarios;
+    private readonly IReadOnlyDictionary<string, MrBlueprint> _mrCatalog;
 
-    public SystemMtScenarioLauncher(LauncherOptions options, ISystemMtResultRepository repository)
+    public SystemMtMrLauncher(LauncherOptions options, ISystemMtResultRepository repository)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
-        _scenarios = BuildScenarios(options).ToDictionary(s => s.Descriptor.Id, StringComparer.Ordinal);
+        _mrCatalog = BuildMrCatalog(options).ToDictionary(s => s.Mr.Id, StringComparer.Ordinal);
     }
 
-    public Task<IReadOnlyList<ScenarioDescriptor>> ListAvailableAsync(CancellationToken cancellationToken = default)
+    public Task<IReadOnlyList<MrSummary>> ListAvailableAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        IReadOnlyList<ScenarioDescriptor> descriptors = _scenarios.Values
-            .Select(s => s.Descriptor)
-            .OrderBy(d => d.Id, StringComparer.Ordinal)
+        IReadOnlyList<MrSummary> mrs = _mrCatalog.Values
+            .Select(s => s.Mr)
+            .OrderBy(m => m.Id, StringComparer.Ordinal)
             .ToList();
-        return Task.FromResult(descriptors);
+        return Task.FromResult(mrs);
     }
 
-    public async Task<ScenarioRunResult> RunAsync(
-        string scenarioId,
+    public async Task<MrRunResult> RunAsync(
+        string mrId,
         IReadOnlyDictionary<string, string>? parameterOverrides = null,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(scenarioId))
+        if (string.IsNullOrWhiteSpace(mrId))
         {
-            throw new ArgumentException("Scenario id is required", nameof(scenarioId));
+            throw new ArgumentException("MR id is required", nameof(mrId));
         }
-        if (!_scenarios.TryGetValue(scenarioId, out var blueprint))
+        if (!_mrCatalog.TryGetValue(mrId, out var blueprint))
         {
-            throw new ArgumentException($"Unknown scenario id: '{scenarioId}'", nameof(scenarioId));
+            throw new ArgumentException($"Unknown MR id: '{mrId}'", nameof(mrId));
         }
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var parameters = new Dictionary<string, string>(blueprint.Descriptor.DefaultParameters, StringComparer.Ordinal);
+        var parameters = new Dictionary<string, string>(blueprint.Mr.DefaultParameters, StringComparer.Ordinal);
         if (parameterOverrides is not null)
         {
             foreach (var (key, value) in parameterOverrides)
@@ -76,20 +76,20 @@ public sealed class SystemMtScenarioLauncher : ISystemMtScenarioLauncher
         if (!File.Exists(sampleSource))
         {
             throw new FileNotFoundException(
-                $"Scenario '{scenarioId}' sample case not found at {sampleSource}", sampleSource);
+                $"MR '{mrId}' sample case not found at {sampleSource}", sampleSource);
         }
         var sampleContent = await File.ReadAllTextAsync(sampleSource, cancellationToken).ConfigureAwait(false);
         await File.WriteAllTextAsync(sourceInputPath, sampleContent, cancellationToken).ConfigureAwait(false);
 
         var program = new SystemProgram(
             ProgramLanguage.Python,
-            blueprint.Descriptor.SutName,
+            blueprint.Mr.SutName,
             blueprint.PythonExecutable,
             $"{blueprint.RunnerScriptPath} --input {{input}} --output {{output}}",
             blueprint.OutputAdapterScriptPath);
 
         var transformation = new MrTransformation(
-            blueprint.Descriptor.TransformationName,
+            blueprint.Mr.TransformationName,
             parameters);
 
         var task = SystemMtTask.WithGeneratedFollowUp(
@@ -100,7 +100,7 @@ public sealed class SystemMtScenarioLauncher : ISystemMtScenarioLauncher
             followUpWorkingDirectory: followUpDir,
             followUpOutputPath: Path.Combine(followUpDir, "output.json"),
             transformation,
-            blueprint.Descriptor.AssertionName,
+            blueprint.Mr.AssertionName,
             blueprint.Timeout);
 
         var assertions = new IMrAssertion[]
@@ -117,13 +117,13 @@ public sealed class SystemMtScenarioLauncher : ISystemMtScenarioLauncher
                 new PythonInputAdapter(blueprint.PythonExecutable),
                 blueprint.InputAdapterScriptPath));
 
-        var result = await runner.RunAsync(task, blueprint.Descriptor.ValueName, cancellationToken).ConfigureAwait(false);
+        var result = await runner.RunAsync(task, blueprint.Mr.ValueName, cancellationToken).ConfigureAwait(false);
 
-        var recordId = await _repository.SaveAsync(blueprint.Descriptor.DisplayName, result, cancellationToken).ConfigureAwait(false);
+        var recordId = await _repository.SaveAsync(blueprint.Mr.DisplayName, result, cancellationToken).ConfigureAwait(false);
 
-        return new ScenarioRunResult(
+        return new MrRunResult(
             RecordId: recordId,
-            ScenarioId: scenarioId,
+            MrId: mrId,
             Passed: result.Passed,
             FailureReason: result.FailureReason ?? string.Empty,
             ValueName: result.Assertion.ValueName,
@@ -133,8 +133,8 @@ public sealed class SystemMtScenarioLauncher : ISystemMtScenarioLauncher
             FollowUpElapsed: result.FollowUpRun.Elapsed);
     }
 
-    public async Task<IReadOnlyList<ScenarioRunResult>> RunBatchAsync(
-        IReadOnlyList<BatchScenarioRequest> requests,
+    public async Task<IReadOnlyList<MrRunResult>> RunBatchAsync(
+        IReadOnlyList<BatchMrRunRequest> requests,
         IProgress<BatchProgress>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -144,7 +144,7 @@ public sealed class SystemMtScenarioLauncher : ISystemMtScenarioLauncher
         }
         if (requests.Count == 0)
         {
-            return Array.Empty<ScenarioRunResult>();
+            return Array.Empty<MrRunResult>();
         }
 
         // Pre-validate every request id before running anything. A typo in
@@ -152,22 +152,22 @@ public sealed class SystemMtScenarioLauncher : ISystemMtScenarioLauncher
         for (var i = 0; i < requests.Count; i++)
         {
             var req = requests[i];
-            if (req is null || string.IsNullOrWhiteSpace(req.ScenarioId))
+            if (req is null || string.IsNullOrWhiteSpace(req.MrId))
             {
                 throw new ArgumentException(
-                    $"Batch request at index {i} has a blank scenario id", nameof(requests));
+                    $"Batch request at index {i} has a blank MR id", nameof(requests));
             }
-            if (!_scenarios.ContainsKey(req.ScenarioId))
+            if (!_mrCatalog.ContainsKey(req.MrId))
             {
                 throw new ArgumentException(
-                    $"Batch request at index {i} has an unknown scenario id: '{req.ScenarioId}'",
+                    $"Batch request at index {i} has an unknown MR id: '{req.MrId}'",
                     nameof(requests));
             }
         }
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var results = new List<ScenarioRunResult>(requests.Count);
+        var results = new List<MrRunResult>(requests.Count);
         var total = requests.Count;
 
         for (var i = 0; i < requests.Count; i++)
@@ -177,12 +177,12 @@ public sealed class SystemMtScenarioLauncher : ISystemMtScenarioLauncher
 
             progress?.Report(new BatchProgress(
                 Completed: i, Total: total,
-                CurrentScenarioId: req.ScenarioId, LastResult: null));
+                CurrentMrId: req.MrId, LastResult: null));
 
-            ScenarioRunResult result;
+            MrRunResult result;
             try
             {
-                result = await RunAsync(req.ScenarioId, req.ParameterOverrides, cancellationToken)
+                result = await RunAsync(req.MrId, req.ParameterOverrides, cancellationToken)
                     .ConfigureAwait(false);
             }
             catch (OperationCanceledException)
@@ -191,12 +191,12 @@ public sealed class SystemMtScenarioLauncher : ISystemMtScenarioLauncher
             }
             catch (Exception ex)
             {
-                // Infrastructure failure inside one scenario (Python missing,
+                // Infrastructure failure inside one MR (Python missing,
                 // SUT file gone, persistence I/O error). Synthesize a failed
-                // result so the remaining scenarios still execute.
-                result = new ScenarioRunResult(
+                // result so the remaining MRs still execute.
+                result = new MrRunResult(
                     RecordId: string.Empty,
-                    ScenarioId: req.ScenarioId,
+                    MrId: req.MrId,
                     Passed: false,
                     FailureReason: $"Run threw {ex.GetType().Name}: {ex.Message}",
                     ValueName: string.Empty,
@@ -209,16 +209,16 @@ public sealed class SystemMtScenarioLauncher : ISystemMtScenarioLauncher
             results.Add(result);
             progress?.Report(new BatchProgress(
                 Completed: i + 1, Total: total,
-                CurrentScenarioId: req.ScenarioId, LastResult: result));
+                CurrentMrId: req.MrId, LastResult: result));
         }
 
         return results;
     }
 
-    private static IEnumerable<ScenarioBlueprint> BuildScenarios(LauncherOptions options)
+    private static IEnumerable<MrBlueprint> BuildMrCatalog(LauncherOptions options)
     {
-        yield return new ScenarioBlueprint(
-            new ScenarioDescriptor(
+        yield return new MrBlueprint(
+            new MrSummary(
                 Id: "openmoc-pincell-nu-sigma-f",
                 DisplayName: "OpenMOC pin-cell — ScaleNuSigmaF (k_eff increases)",
                 SutName: "openmoc",
@@ -239,8 +239,8 @@ public sealed class SystemMtScenarioLauncher : ISystemMtScenarioLauncher
             WorkRootName: "MetBenchOpenMocNuSigmaF",
             Timeout: TimeSpan.FromMinutes(2));
 
-        yield return new ScenarioBlueprint(
-            new ScenarioDescriptor(
+        yield return new MrBlueprint(
+            new MrSummary(
                 Id: "openmoc-pincell-sigma-a",
                 DisplayName: "OpenMOC pin-cell — ScaleFuelSigmaA (k_eff decreases)",
                 SutName: "openmoc",
@@ -260,8 +260,8 @@ public sealed class SystemMtScenarioLauncher : ISystemMtScenarioLauncher
             WorkRootName: "MetBenchOpenMocSigmaA",
             Timeout: TimeSpan.FromMinutes(2));
 
-        yield return new ScenarioBlueprint(
-            new ScenarioDescriptor(
+        yield return new MrBlueprint(
+            new MrSummary(
                 Id: "openmc-pincell-nu-sigma-f",
                 DisplayName: "OpenMC pin-cell — ScaleNuSigmaF (k_eff increases)",
                 SutName: "openmc",
@@ -283,8 +283,8 @@ public sealed class SystemMtScenarioLauncher : ISystemMtScenarioLauncher
             WorkRootName: "MetBenchOpenMcNuSigmaF",
             Timeout: TimeSpan.FromMinutes(5));
 
-        yield return new ScenarioBlueprint(
-            new ScenarioDescriptor(
+        yield return new MrBlueprint(
+            new MrSummary(
                 Id: "openmc-pincell-sigma-a",
                 DisplayName: "OpenMC pin-cell — ScaleFuelSigmaA (k_eff decreases)",
                 SutName: "openmc",
@@ -305,8 +305,8 @@ public sealed class SystemMtScenarioLauncher : ISystemMtScenarioLauncher
             WorkRootName: "MetBenchOpenMcSigmaA",
             Timeout: TimeSpan.FromMinutes(5));
 
-        yield return new ScenarioBlueprint(
-            new ScenarioDescriptor(
+        yield return new MrBlueprint(
+            new MrSummary(
                 Id: "heat-equation-amplitude",
                 DisplayName: "1D heat equation — ScaleAmplitude (linearity)",
                 SutName: "heat-equation",
@@ -328,8 +328,8 @@ public sealed class SystemMtScenarioLauncher : ISystemMtScenarioLauncher
             Timeout: TimeSpan.FromSeconds(60));
     }
 
-    private sealed record ScenarioBlueprint(
-        ScenarioDescriptor Descriptor,
+    private sealed record MrBlueprint(
+        MrSummary Mr,
         string SampleCaseRelativePath,
         string RunnerScriptPath,
         string InputAdapterScriptPath,

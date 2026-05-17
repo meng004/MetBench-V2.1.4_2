@@ -51,8 +51,8 @@
                     <ComboBox
                         Margin="0,4,0,0"
                         DisplayMemberPath="DisplayName"
-                        ItemsSource="{Binding ViewModel.AvailableScenarios, Mode=OneWay}"
-                        SelectedItem="{Binding ViewModel.SelectedScenario, Mode=TwoWay}"/>
+                        ItemsSource="{Binding ViewModel.AvailableMrs, Mode=OneWay}"
+                        SelectedItem="{Binding ViewModel.SelectedMr, Mode=TwoWay}"/>
 
                     <TextBlock Margin="0,12,0,0" FontWeight="SemiBold" Text="Factor parameter"/>
                     <ui:TextBox
@@ -79,7 +79,7 @@
                     <TextBlock
                         Margin="0,4,0,0"
                         Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                        Text="{Binding ViewModel.SelectedScenario.Description, Mode=OneWay}"
+                        Text="{Binding ViewModel.SelectedMr.Description, Mode=OneWay}"
                         TextWrapping="Wrap"/>
 
                     <TextBlock Margin="0,12,0,0" FontWeight="SemiBold" Text="Last result"/>
