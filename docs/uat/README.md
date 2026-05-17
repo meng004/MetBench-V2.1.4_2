@@ -44,7 +44,7 @@
 | [README.md](README.md) (本文件) | 总览 · 用例索引 | 所有人 |
 | [任务书.md](任务书.md) | 单页下发文档 | 测试员（先读这个） |
 | [setup-guide.md](setup-guide.md) | 一步步装环境 / SUT / LLM API 配置 | 验收员开工前必读 |
-| [test-procedures.md](test-procedures.md) | 45 个用例的逐步执行步骤 + 预期输出 | 验收员主操作手册 |
+| [test-procedures.md](test-procedures.md) | 46 个用例的逐步执行步骤 + 预期输出 | 验收员主操作手册 |
 | [acceptance-rubric.md](acceptance-rubric.md) | 评价表（通过 / 不通过判定） | 验收员 + 审计员 |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | 如何新增 / 修改 UAT 用例 | 加用例的人 |
 | [reports/](reports/) | 历次轮次报告 + baseline | 下发人 + 审计员 |

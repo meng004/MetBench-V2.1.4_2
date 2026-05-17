@@ -23,12 +23,12 @@
 |------|--------|---|----|----|-------|
 | A. 管理 CRUD | 8 | | | | / |
 | B. MR 测试主流程 | 9 | | | | / |
-| C. MR 发现 & 验证 | 9 | | | | / |
+| C. MR 发现 & 验证 | 10 | | | | / |
 | D. R-Case 自动复现 | 2 | | | | / |
 | E. 可视化 & 报表 | 7 | | | | / |
 | F. 持久化 & schema | 5 | | | | / |
 | G. 运营 & 性能 | 5 | | | | / |
-| **合计** | **45** | | | | / |
+| **合计** | **46** | | | | / |
 
 **Release 判定**（验收员勾选）：
 
@@ -82,6 +82,7 @@
 | C7 | MR Recommendation UI | top-K 推荐 + 按 confidence 排序 | 🟢 | | 截图 |
 | C8 | AutoDetectMR UI | 进度条 < 2 min + 候选可入库 | 🟡 | | 截图 |
 | C9 | Mutation Campaign UI | Kill Rate ≥ 0 + diff 可看 | 🟡 | | 截图 |
+| C10 | SCG-Heuristic Discoverer | Passed ≥ 29, Failed 0 + 三类 pattern 都产 candidate | 🟡 | | trx |
 
 ---
 

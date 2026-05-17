@@ -9,12 +9,12 @@
 |------|------|-------|------|
 | A. **管理 CRUD**（应用 / 域 / MR / MetaPattern） | F、UI | 8 | Win |
 | B. **MR 蜕变测试主流程**（选 → 生 → 跑 → 看 → 重跑） | F、UI + Linux | 9 | Win + Linux |
-| C. **MR 发现 & 验证**（含 LLM / mutmut / 多家投票） | F | 7 | Linux |
+| C. **MR 发现 & 验证**（含 LLM / mutmut / 多家投票 / SCG） | F | 10 | Linux + Win |
 | D. **R-Case 自动复现**（论文核心） | F | 2 | Linux |
 | E. **可视化 & 报表**（趋势 / coverage / Word/Excel/PDF/HTML） | F、UI | 7 | Win |
 | F. **持久化 & schema** | F | 5 | Linux |
 | G. **运营 & 性能** | F | 5 | Linux |
-| **合计** | | **43** | |
+| **合计** | | **46** | |
 
 ---
 
@@ -363,9 +363,36 @@ dotnet test MetBench_SystemMT.Tests --filter "FullyQualifiedName~ValidationServi
 
 ---
 
+### UC-C10 SCG-Heuristic Discoverer — 第 3 类 MR 识别（W11.1）
+
+仅 Linux：跑通基于因果图的启发式发现 + 用真实 OpenMOC SCG JSON 验产 candidate。
+
+```bash
+dotnet test MetBench_SystemMT.Tests \
+  --filter "FullyQualifiedName~ScgHeuristicDiscovererTests|FullyQualifiedName~JsonFileScgGraphBuilderTests|FullyQualifiedName~DiscoveryMethodSeedTests"
+```
+
+✅ 期望：Passed ≥ 29, Failed 0。覆盖：
+
+- 3 类 do-calculus 模式（direct-cause / mediator / confounder）识别
+- hash 去重防重复
+- 异常 / 取消传播
+- `SUT/openmoc/scg.json` 真实文件加载 → 同时产 3 类 candidate
+- `DiscoveryMethodSeed` 把 SCG-Heuristic 与 MetaPattern / LLM 并列入库（3 条）
+
+✅ 验证 `SUT/openmoc/scg.json` 文件存在 + JSON 合法：
+
+```bash
+test -f SUT/openmoc/scg.json && python3 -c "import json; print(len(json.load(open('SUT/openmoc/scg.json'))['nodes']),'nodes')"
+# 期望: 10 nodes
+```
+
+---
+
 ## 类别 D — R-Case 自动复现（论文核心）
 
 ### UC-D1 R-Case 自动复现 service 跑通
+
 
 ```bash
 dotnet test MetBench_SystemMT.Tests --filter "FullyQualifiedName~RCaseReproductionServiceTests"
