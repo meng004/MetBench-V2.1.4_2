@@ -5,13 +5,13 @@ using Xunit;
 
 namespace MetBench_SystemMT.Tests.SystemMT.Launcher;
 
-public sealed class SystemMtScenarioLauncherBatchTests : IDisposable
+public sealed class SystemMtMrLauncherBatchTests : IDisposable
 {
     private readonly string _dbPath;
     private readonly LiteDbSystemMtResultRepository _repository;
-    private readonly SystemMtScenarioLauncher _launcher;
+    private readonly SystemMtMrLauncher _launcher;
 
-    public SystemMtScenarioLauncherBatchTests()
+    public SystemMtMrLauncherBatchTests()
     {
         _dbPath = Path.Combine(
             Path.GetTempPath(),
@@ -19,7 +19,7 @@ public sealed class SystemMtScenarioLauncherBatchTests : IDisposable
             Guid.NewGuid().ToString("N") + ".db");
         Directory.CreateDirectory(Path.GetDirectoryName(_dbPath)!);
         _repository = new LiteDbSystemMtResultRepository(_dbPath);
-        _launcher = new SystemMtScenarioLauncher(
+        _launcher = new SystemMtMrLauncher(
             new LauncherOptions(
                 SutRoot: TestAssetPaths.AssetRoot(),
                 SystemPython: TestAssetPaths.PythonExecutable(),
@@ -35,7 +35,7 @@ public sealed class SystemMtScenarioLauncherBatchTests : IDisposable
         if (File.Exists(logFile)) File.Delete(logFile);
     }
 
-    private static BatchScenarioRequest Req(string id, string? factor = null) =>
+    private static BatchMrRunRequest Req(string id, string? factor = null) =>
         new(id, factor is null ? null : new Dictionary<string, string> { ["factor"] = factor });
 
     [Fact]
@@ -47,7 +47,7 @@ public sealed class SystemMtScenarioLauncherBatchTests : IDisposable
     [Fact]
     public async Task RunBatchAsync_empty_requests_returns_empty()
     {
-        var results = await _launcher.RunBatchAsync(Array.Empty<BatchScenarioRequest>());
+        var results = await _launcher.RunBatchAsync(Array.Empty<BatchMrRunRequest>());
         Assert.Empty(results);
     }
 
@@ -93,7 +93,7 @@ public sealed class SystemMtScenarioLauncherBatchTests : IDisposable
         var results = await _launcher.RunBatchAsync(new[] { Req("heat-equation-amplitude") });
 
         Assert.Single(results);
-        Assert.Equal("heat-equation-amplitude", results[0].ScenarioId);
+        Assert.Equal("heat-equation-amplitude", results[0].MrId);
         Assert.True(results[0].Passed, results[0].FailureReason);
     }
 
@@ -110,7 +110,7 @@ public sealed class SystemMtScenarioLauncherBatchTests : IDisposable
         var results = await _launcher.RunBatchAsync(requests);
 
         Assert.Equal(3, results.Count);
-        Assert.All(results, r => Assert.Equal("heat-equation-amplitude", r.ScenarioId));
+        Assert.All(results, r => Assert.Equal("heat-equation-amplitude", r.MrId));
         Assert.All(results, r => Assert.True(r.Passed));
 
         // Each persisted with its own RecordId
