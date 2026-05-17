@@ -74,7 +74,7 @@ public sealed class LiteDbSystemMtResultRepositoryTests : IDisposable
         Assert.NotNull(record);
         Assert.Equal(id, record!.Id);
         Assert.InRange(record.RunAt, before.AddSeconds(-1), after.AddSeconds(1));
-        Assert.Equal("OpenMocPinCellNuSigmaF", record.ScenarioName);
+        Assert.Equal("OpenMocPinCellNuSigmaF", record.MrName);
         Assert.Equal("GreaterThan", record.AssertionName);
         Assert.Equal("k_eff", record.ValueName);
         Assert.Equal(1.13, record.SourceValue);
@@ -171,28 +171,28 @@ public sealed class LiteDbSystemMtResultRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task ListByScenarioAsync_filters_to_one_scenario()
+    public async Task ListByMrNameAsync_filters_to_one_mr()
     {
         using var repo = new LiteDbSystemMtResultRepository(_dbPath);
         await repo.SaveAsync("ScenarioA", MakeResult());
         await repo.SaveAsync("ScenarioB", MakeResult());
         await repo.SaveAsync("ScenarioA", MakeResult(sourceValue: 9, followUpValue: 10));
 
-        var aResults = await repo.ListByScenarioAsync("ScenarioA");
-        var bResults = await repo.ListByScenarioAsync("ScenarioB");
+        var aResults = await repo.ListByMrNameAsync("ScenarioA");
+        var bResults = await repo.ListByMrNameAsync("ScenarioB");
 
         Assert.Equal(2, aResults.Count);
-        Assert.All(aResults, r => Assert.Equal("ScenarioA", r.ScenarioName));
+        Assert.All(aResults, r => Assert.Equal("ScenarioA", r.MrName));
         Assert.Single(bResults);
-        Assert.Equal("ScenarioB", bResults[0].ScenarioName);
+        Assert.Equal("ScenarioB", bResults[0].MrName);
     }
 
     [Fact]
-    public async Task ListByScenarioAsync_rejects_blank_scenario_name()
+    public async Task ListByMrNameAsync_rejects_blank_mr_name()
     {
         using var repo = new LiteDbSystemMtResultRepository(_dbPath);
-        await Assert.ThrowsAsync<ArgumentException>(() => repo.ListByScenarioAsync(""));
-        await Assert.ThrowsAsync<ArgumentException>(() => repo.ListByScenarioAsync("   "));
+        await Assert.ThrowsAsync<ArgumentException>(() => repo.ListByMrNameAsync(""));
+        await Assert.ThrowsAsync<ArgumentException>(() => repo.ListByMrNameAsync("   "));
     }
 
     [Fact]
@@ -216,14 +216,14 @@ public sealed class LiteDbSystemMtResultRepositoryTests : IDisposable
         string id;
         using (var repo = new LiteDbSystemMtResultRepository(_dbPath))
         {
-            id = await repo.SaveAsync("PersistedScenario", MakeResult());
+            id = await repo.SaveAsync("PersistedMr", MakeResult());
         }
 
         using var reopened = new LiteDbSystemMtResultRepository(_dbPath);
         var record = await reopened.GetAsync(id);
 
         Assert.NotNull(record);
-        Assert.Equal("PersistedScenario", record!.ScenarioName);
+        Assert.Equal("PersistedMr", record!.MrName);
     }
 
     private async Task SeedAsync(LiteDbSystemMtResultRepository repo, int count, string scenarioPrefix = "Scenario")
@@ -349,13 +349,13 @@ public sealed class LiteDbSystemMtResultRepositoryTests : IDisposable
         // 9 records total: 3 in each of Scenario-0, Scenario-1, Scenario-2
         await SeedAsync(repo, 9);
 
-        var page = await repo.ListPagedByScenarioAsync(
+        var page = await repo.ListPagedByMrNameAsync(
             "Scenario-1",
             new MetBench_BLL.Paging.PageRequest(0, 10));
 
         Assert.Equal(3, page.TotalCount);
         Assert.Equal(3, page.Items.Count);
-        Assert.All(page.Items, r => Assert.Equal("Scenario-1", r.ScenarioName));
+        Assert.All(page.Items, r => Assert.Equal("Scenario-1", r.MrName));
     }
 
     [Fact]
@@ -363,9 +363,9 @@ public sealed class LiteDbSystemMtResultRepositoryTests : IDisposable
     {
         using var repo = new LiteDbSystemMtResultRepository(_dbPath);
         await Assert.ThrowsAsync<ArgumentException>(() =>
-            repo.ListPagedByScenarioAsync("", new MetBench_BLL.Paging.PageRequest(0, 10)));
+            repo.ListPagedByMrNameAsync("", new MetBench_BLL.Paging.PageRequest(0, 10)));
         await Assert.ThrowsAsync<ArgumentException>(() =>
-            repo.ListPagedByScenarioAsync("   ", new MetBench_BLL.Paging.PageRequest(0, 10)));
+            repo.ListPagedByMrNameAsync("   ", new MetBench_BLL.Paging.PageRequest(0, 10)));
     }
 
     [Fact]
@@ -373,7 +373,84 @@ public sealed class LiteDbSystemMtResultRepositoryTests : IDisposable
     {
         using var repo = new LiteDbSystemMtResultRepository(_dbPath);
         await Assert.ThrowsAsync<ArgumentNullException>(() =>
-            repo.ListPagedByScenarioAsync("Scenario-0", null!));
+            repo.ListPagedByMrNameAsync("Scenario-0", null!));
+    }
+
+    [Fact]
+    public async Task Migration_renames_legacy_ScenarioName_field_to_MrName_on_open()
+    {
+        // Build a "legacy v2.1" DB by writing a BsonDocument with the OLD
+        // field name "ScenarioName" through the raw collection (bypassing the
+        // typed mapper). Then open via the new typed repository and confirm
+        // the migration renamed the field in-place.
+        using (var db = new LiteDB.LiteDatabase(_dbPath))
+        {
+            var raw = db.GetCollection("SystemMtResults");
+            var legacyDoc = new LiteDB.BsonDocument
+            {
+                ["_id"] = "legacy-id-1",
+                ["ScenarioName"] = "openmoc-pincell-nu-sigma-f",  // OLD field name
+                ["RunAt"] = DateTime.UtcNow,
+                ["AssertionName"] = "GreaterThan",
+                ["ValueName"] = "k_eff",
+                ["SourceValue"] = 1.13,
+                ["FollowUpValue"] = 1.51,
+                ["Passed"] = true,
+                ["FailureReason"] = string.Empty,
+                ["SourceCaseName"] = "src",
+                ["FollowUpCaseName"] = "flw",
+                ["SourceElapsed"] = TimeSpan.FromSeconds(2).Ticks,
+                ["FollowUpElapsed"] = TimeSpan.FromSeconds(2).Ticks,
+                ["SourceExitCode"] = 0,
+                ["FollowUpExitCode"] = 0,
+                ["SourceMetrics"] = new LiteDB.BsonDocument(),
+                ["FollowUpMetrics"] = new LiteDB.BsonDocument(),
+            };
+            raw.Insert(legacyDoc);
+
+            // Sanity: legacy field is there pre-migration
+            var pre = raw.FindById("legacy-id-1");
+            Assert.True(pre.ContainsKey("ScenarioName"));
+            Assert.False(pre.ContainsKey("MrName"));
+        }
+
+        // Open with the new typed repo → constructor runs migration.
+        using (var repo = new LiteDbSystemMtResultRepository(_dbPath))
+        {
+            var record = await repo.GetAsync("legacy-id-1");
+            Assert.NotNull(record);
+            Assert.Equal("openmoc-pincell-nu-sigma-f", record!.MrName);
+        }
+
+        // Verify raw doc no longer has ScenarioName + has MrName instead.
+        using (var db = new LiteDB.LiteDatabase(_dbPath))
+        {
+            var raw = db.GetCollection("SystemMtResults");
+            var post = raw.FindById("legacy-id-1");
+            Assert.False(post.ContainsKey("ScenarioName"),
+                "legacy field ScenarioName should have been removed");
+            Assert.True(post.ContainsKey("MrName"),
+                "new field MrName should exist after migration");
+            Assert.Equal("openmoc-pincell-nu-sigma-f", post["MrName"].AsString);
+        }
+    }
+
+    [Fact]
+    public async Task Migration_is_idempotent_when_run_twice()
+    {
+        // Open, save (writes with new MrName field), close.
+        using (var repo = new LiteDbSystemMtResultRepository(_dbPath))
+        {
+            await repo.SaveAsync("MR-test", MakeResult());
+        }
+
+        // Reopen → migration runs but finds nothing to migrate; record remains.
+        using (var repo = new LiteDbSystemMtResultRepository(_dbPath))
+        {
+            var recent = await repo.ListRecentAsync(10);
+            Assert.Single(recent);
+            Assert.Equal("MR-test", recent[0].MrName);
+        }
     }
 }
 

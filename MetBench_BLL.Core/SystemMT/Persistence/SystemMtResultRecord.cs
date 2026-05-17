@@ -17,7 +17,7 @@ public sealed class SystemMtResultRecord
 {
     public string Id { get; set; } = string.Empty;
 
-    public string ScenarioName { get; set; } = string.Empty;
+    public string MrName { get; set; } = string.Empty;
 
     public DateTimeOffset RunAt { get; set; }
 
@@ -61,11 +61,11 @@ public sealed class SystemMtResultRecord
     /// Project a runner result into the persistable summary shape. The
     /// repository fills <see cref="Id"/> and <see cref="RunAt"/> on Save.
     /// </summary>
-    public static SystemMtResultRecord FromResult(string scenarioName, SystemMtResult result)
+    public static SystemMtResultRecord FromResult(string mrName, SystemMtResult result)
     {
-        if (string.IsNullOrWhiteSpace(scenarioName))
+        if (string.IsNullOrWhiteSpace(mrName))
         {
-            throw new ArgumentException("Scenario name is required", nameof(scenarioName));
+            throw new ArgumentException("MR name is required", nameof(mrName));
         }
         if (result is null)
         {
@@ -74,7 +74,7 @@ public sealed class SystemMtResultRecord
 
         return new SystemMtResultRecord
         {
-            ScenarioName = scenarioName,
+            MrName = mrName,
             AssertionName = result.Assertion.AssertionName,
             ValueName = result.Assertion.ValueName,
             SourceValue = result.Assertion.SourceValue,
