@@ -203,57 +203,64 @@ Cloud-side 测试态（baseline-2026-05-17）：**521 xUnit pass / 0 skip / 0 fa
 
 剩余前置（v2.1.0 发版）：Windows 端 UAT round-1 跑通 **21 个 WPF UI 用例**（A1-A7 + B1-B9 + E1-E5；其余 5 个 A8/D1/D2/E6/E7 是 CLI，cloud baseline-2026-05-17 已覆盖） → dashboard `PASS` → tag `release-v2.1.0`。
 
-## Stage 8: MR 库 — 反应堆物理 5 方程 × 多程序类型矩阵覆盖（启动 2026-05-18，v2.2 主线）
+## Stage 8: MR 库 — 5 方程 × 4 程序类型 × 5 MP 矩阵覆盖（启动 2026-05-18，v2.2 主线）
 
-**上游对接**: P-series 研究纲领的 [Cmrlibrary.md 5 维 schema](.)（外部上传，未入仓）+ NOETHER 8 元模式 + 12 网格选定。MetBench 升级为 P-series MR 库的**可执行存储 + MT 执行载体**。
+**上游对接**: P-series 研究纲领 [Cmrlibrary.md 5D schema + 57 种子 MR + 三层验证] + [PWR_MR_Analysis.md 27 PWR 新增 MR] + NOETHER 8 元模式（→ 5 MP 映射见 [`docs/GLOSSARY.md`](docs/GLOSSARY.md) §5）。MetBench 升级为 P-series MR 库的**可执行存储 + MT 执行载体**。
+
+**术语规范**：见 [`docs/GLOSSARY.md`](docs/GLOSSARY.md)（5 MP 定义+实例 / BDD 术语+实例 / 5 方程 / 程序类型 / 5D 索引 / 内部命名）。
 
 **核心范围**:
-- 反应堆物理 **5 个核心方程**：A 中子输运 / B 中子扩散 / C 燃耗 / D 热传导 / E 热工（NS 简化）
-- 程序类型 4 类正交：**数值模拟 / 概率（MC）/ ML 代理 / PINNs**
-- MR schema：5 维索引（方程 × 程序类型 × 元模式 × 来源层次 × 故障关联）
-- 推导：方程算子 → 适用元模式 → 参数扫描 → meta-prompt → LLM → MT 执行 → 高支持入库 / 低支持反例
-- Deliverable：**三元组（程序集 / MR 集 / 测试用例集）+ 反例缺陷论文**
+- 反应堆物理 **5 个核心方程**：boltzmann / diffusion / bateman / fourier / NS（英文全称，前缀 `E_`）
+- 程序类型 4 类正交：**Num / MC / Surr / PINN**
+- MR 元模式 **5 类 MP**：MP_inv / MP_mono / MP_conv / MP_traj / MP_part（NOETHER 8 ↔ 5 MP 映射含 m_cmp 拆分：严格相等→MP_inv / 偏序→MP_part）
+- MR schema：5D 索引（Equation / ProgramType / MetaPattern / SourceLevel / FailureCorrelation）通过 **BDD `.feature` + Gherkin tags + LiteDB sync** 落地（沿用现有约定，不引 YAML mirror）
+- 推导：方程算子 → 适用 MP 选取 → 参数扫描 → meta-prompt → LLM → MT 执行 → 高支持入库 / 低支持反例 / discard
+- Deliverable：**三元组（程序集 / MR 集 / 测试用例集）+ 17 cells 覆盖矩阵**
 
 **暂缓**（独立模块，Stage 9+ 候）:
-- **BNCT 硼中子放疗**：现 plan 内保留但 Stage 8 不实施；2 个理由 — (a) 80% 中子输运 + 20% post-process 不构成新 cell；(b) BNCT 专属程序大多商业 / 申请 / 停维，cloud 不可获取
-- **V3 故障注入验证**：独立模块挂起；Stage 8 内 MR 库只做 V1（数学可推导）+ V2（程序执行）；V3（mutation kill rate）留 Stage 9
+- **BNCT 硼中子放疗**：plan 内保留章节，Stage 8 不实施（80% 重叠 boltzmann + 程序大多商业/申请/停维）
+- **故障注入 V3**：独立模块挂起；Stage 8 MR 库只做 V1+V2
+- **论文 writeup**：暂不绑定（user 指令：先做实验，发现 bug 再考虑）
 
 ### Goal 1: 元模式驱动 meta-prompt MR 识别引擎
 
-把 8 NOETHER MetaPattern 升级成 LLM-driven 自动 MR 识别引擎。详见 [meta-prompt-mr-discovery-brainstorming.md](docs/superpowers/plans/2026-05-18-meta-prompt-mr-discovery-brainstorming.md) + [...-plan.md](docs/superpowers/plans/2026-05-18-meta-prompt-mr-discovery-plan.md)。**保留不变**。
+把 5 MP 升级成 LLM-driven 自动 MR 识别引擎。详见 [meta-prompt-mr-discovery-brainstorming.md](docs/superpowers/plans/2026-05-18-meta-prompt-mr-discovery-brainstorming.md) + [...-plan.md](docs/superpowers/plans/2026-05-18-meta-prompt-mr-discovery-plan.md)。**保留**，作为 Goal 2 工具基础。
 
-### Goal 2: 反应堆物理 5 方程 × 4 程序类型 MR 库矩阵
+### Goal 2: 17 cells × 5 MP 矩阵 + 84 MR 母集落地
 
-按 Cmrlibrary.md 5 维 schema 在 MetBench 内构建 MR 库，覆盖 **5 方程 A/B/C/D/E × 4 程序类型 D₁-D₄** 矩阵。
+按 5D schema 在 MetBench 内构建 MR 库，覆盖 **5 方程 × 4 程序类型 = 20 cells**（3 个 D₂ MC cell 本质不适用 → **17 实际可填**）。
 
-**完整研究工作流**（per cell）:
+**程序候选（cloud-friendly 评估）**：
+- OpenMOC + OpenMC ✅ 已装（boltzmann + bateman）
+- 4 home-grown（diffusion nodal + Bateman ODE + 1D Fourier + 1D subchannel）替代 PARCS / ORIGEN / FRAPCON / RELAP5 (商业 / 学术申请，cloud 不可获取)
+- D₃ Surr 用 scikit-learn GP（不依赖 PyTorch / 论文 release）
+- D₄ PINN 留 Stage 9
+
+**MR 母集**：57 Cmrlibrary 种子 + 27 PWR_MR_Analysis 新增 = **84 条候选 MR**，按 5 MP × 5 方程 cell 分类。
+
+**完整研究工作流**（per cell）：
 
 ```
-方程算子（algebraic property）
-  → 适用元模式选取（不变 / 单调 / 仿射 / 退化 / 一致 / 自伴 / 时间反演）
-  → 扫描 SUT 输入参数
-  → 代入元模式 → 构造 meta-prompt
-  → LLM 识别 MR 实例（candidate pool）
-  → MetBench 执行 MT（source + followup）
-  → 分支判定：
-      ├─ 高支持度（MR 不被违反）→ 入 MR 库
-      ├─ 低支持度但元模式数学性质应成立：
-      │     ├─ MR 错（适用域 / tol 设错）→ 改 MR
-      │     └─ 程序错（bug）→ 反例归档 → 积累 → 缺陷修复 → 论文
-      └─ 元模式数学性质也不成立 → discard
+方程算子 algebraic property
+  → 适用 5 MP 选取
+  → 输入参数扫描
+  → meta-prompt 构造
+  → LLM 识别 MR (多家 consensus)
+  → MetBench 执行 MT
+  → 三分支:
+      ├─ 高支持 → 入库 (.feature + LiteDB)
+      ├─ 低支持 + MP 数学应成立 → 反例归档（不刻意造）
+      └─ MP 数学不成立 → discard
 ```
 
-### Goal 3 (新增 base): 现有 4 SUT 上的核心 workflow 验证
+### Stage 8 时间盒（5-6 周）
 
-**Phase 8.2.5**：用 Goal 1 meta-prompt engine 跑现有 4 SUT（OpenMOC / OpenMC / heat_equation / projectile）端到端验证 Goal 2 工作流。**MR 入库 / 反例归档 / 缺陷分析 3 个分支都至少各跑通 1 例**，作为 Phase 8.3 大规模接入的范式。
+- W13 (2026-05-18 ~ 25): Phase 8.0 5D tag schema + Phase 8.1 meta-prompt 引擎
+- W14: Phase 8.2 现有 4 SUT 5D tag 升级 + **8.2.5 端到端 workflow 验证**
+- W15-W18: Phase 8.3 4 home-grown cells (Bateman + Fourier + nodal diffusion + subchannel)
+- W19: Phase 8.4 D₃/D₄ 横切试点 (Surr + MC depletion) + 8.5 cells 覆盖 dashboard
 
-### Stage 8 时间盒
-
-- W13 (2026-05-18 ~ 25): Phase 8.0 5D schema + Phase 8.1 meta-prompt 引擎
-- W14: Phase 8.2 现有 4 SUT 5D 升级 + **8.2.5 端到端 workflow 验证**
-- W15-W19: Phase 8.3 5 方程 5 cells 接入（A/B/C/D/E 每个 1 cell 优先）
-- W20-W21: Phase 8.4 D₂/D₃/D₄ 程序类型横切
-- W22: Phase 8.5 反例缺陷归档 + 论文 writeup
+**ship 验收**：≥ 12 cells 不空白（17 实际可填）+ ≥ 15 MR 入库 + 全套 `dotnet test` 0 fail。
 
 **不阻塞 v2.1 发版**。v2.1 发版后立即启动。
 

@@ -1,244 +1,208 @@
 # Stage 8 expanded MR library — brainstorming
 
-> **Date**: 2026-05-18（rev：按 user 指令 BNCT 搁置 / V3 独立挂起 / Phase 8.2.5 端到端 / 8.3 完整研究工作流）
-> **Status**: Brainstorming（细化需求；下一步 writing-plan）
-> **Supersedes**: [`2026-05-18-reactor-physics-five-equations-brainstorming.md`](2026-05-18-reactor-physics-five-equations-brainstorming.md)（旧 narrow 5-equation scope，未覆盖程序类型正交 + 未对接 Cmrlibrary 5D schema）
-> **Upstream refs**（外部上传，未入仓）: P-series CLAUDE.md（论文协作硬约束）+ Cmrlibrary.md（5 维 MR schema + 12 网格 + 57 条种子 MR + 6 类来源）
-> **Carryover refs**（入仓）: NOETHER 8 元模式 + `MetBench_BLL.SystemMT.Discovery.*` 现有 LLM gateway + 4 SUT（OpenMOC / OpenMC / heat / projectile）
+> **Date**: 2026-05-18（rev：5 MP + 17 cells + 84 MR 母集 + cloud-friendly 程序评估）
+> **Status**: Brainstorming（→ writing-plan）
+> **Supersedes**: [`2026-05-18-reactor-physics-five-equations-brainstorming.md`](2026-05-18-reactor-physics-five-equations-brainstorming.md)
+> **术语规范**: [`docs/GLOSSARY.md`](../../GLOSSARY.md)（5 MP 定义 + BDD 术语 + NOETHER↔5 MP 映射 + 内部命名）
+> **Upstream refs**（外部上传，未入仓）:
+>   - P-series CLAUDE.md（论文协作硬约束）
+>   - Cmrlibrary.md（5D MR schema + 12 网格 + 57 条种子 MR + 6 类来源）
+>   - PWR_MR_Analysis.md（PWR 5 层方程 + 27 条新增 MR + PARCS/Serpent 适用性）
+>   - MT____MR___1998_2025_.md（MT 文献 MR 数据源清单 + NUIT/HTGR 私有程序）
 
 ---
 
-## §1 需求重述（rev）
+## §1 需求重述
 
-User 指令分两段：**Phase 8.2.5 端到端验证**（用现有示例跑通核心 workflow）+ **Phase 8.3 大规模接入**（5 方程开源程序 + 完整研究工作流）。BNCT + V3 故障注入暂缓。
+User 指令链（合并多轮）:
 
-### §1.1 Phase 8.2.5 — 端到端核心 workflow 验证（**首要**）
+1. 反应堆物理 5 个核心方程：boltzmann / diffusion / bateman / fourier / NS
+2. 4 程序类型：Num / MC / Surr / PINN
+3. 5 MetaPattern：MP_inv / MP_mono / MP_conv / MP_traj / MP_part（NOETHER 8 ↔ 5 MP 映射见 GLOSSARY §5）
+4. 5D MR schema 用 BDD `.feature` + Gherkin tags 落地（不用 YAML mirror）
+5. 现有 4 SUT 端到端跑通 workflow 验证（Phase 8.2.5）
+6. 5 方程 cells 接入 + 完整研究工作流（Phase 8.3）
+7. **暂缓**：BNCT（plan 内保留），故障注入 V3（独立模块挂起）
+8. **目标**：cells 尽量填满，不空白；论文待真发现 bug 再考虑
 
-> "在现有示例基础上，把核心功能跑通"
+---
 
-用 Goal 1 meta-prompt engine 跑现有 4 SUT 一遍：
-- 验证主链路："方程算子 → 元模式选取 → 参数扫描 → prompt 构造 → LLM 识别 → MR 入库 / MT 执行" 全跑通
-- 3 个分支结果（入库 / 反例 / 缺陷修复）至少各跑通 1 例作示范
-- 这是 Phase 8.3 大规模接入的**最小可信范式**
+## §2 5 方程归类（D₁，英文全称）
 
-### §1.2 Phase 8.3 — 5 方程开源程序接入 + 完整研究工作流
-
-> "把 5 方程对应的开源或可获取程序作为下一阶段任务，目标是建立**可信 MR 库**"
-
-完整研究工作流（每个 cell 跑一遍）：
-
-```
-1. 方程算子 → algebraic property 分析
-2. 适用元模式选取（不变 / 单调 / 仿射 / 退化 / 一致 / ...）
-3. 扫描 SUT 输入参数（自动 schema 解析 + 人工标注）
-4. 代入元模式 → 构造 SUT-specific meta-prompt
-5. LLM 识别 MR 实例（candidate pool, 多 LLM consensus）
-6. MetBench 执行 MT (source + followup)
-7. 分支判定（核心创新）:
-   ├─ 高支持度 → MR 库
-   ├─ 低支持度 + 元模式数学应成立 → 进入分析:
-   │    ├─ MR 错（适用域 / tol 设错）→ 改 MR
-   │    └─ 程序错（bug）→ 反例归档 → 积累 → 缺陷修复 → 论文
-   └─ 元模式数学性质也不成立 → discard
-```
-
-**论文 narrative 升级**：从 "MR-based verification 演示"→ "**meta-pattern driven LLM-based MR identification with bug detection on open-source reactor physics codes**"。反例 + 缺陷反馈是论文 hard evidence。
-
-### §1.3 暂缓项
-
-| 项 | 状态 | 计划 |
+| 方程 | Cmrlibrary 编码 | 数学形式（PWR_MR_Analysis §1）|
 |---|---|---|
-| **BNCT 硼中子放疗** | Plan 内保留 + Stage 8 内**不实施** | Stage 9+ 候。理由：(a) 80% 中子输运（同 A 方程）+ 20% post-process，不构成新方程 cell；(b) BNCT 专属程序（NCTPlan / SERA / MultiPlan）大多商业 / 学术申请 / 停维，cloud 不可获取 |
-| **故障注入 V3** | **独立模块挂起** | Stage 9 候。Stage 8 MR 库只做 V1（数学可推导）+ V2（程序执行）；V3（mutation kill rate）独立设计 + 复用 mutmut 现有基础设施 |
+| **boltzmann** 中子输运 | A | Ω·∇ψ + Σ_t ψ = ∫Σ_s ψ + χ/k Σ νΣ_f φ |
+| **diffusion** 中子扩散 | B | -∇·D∇φ + Σ_r φ = Σ_s φ + χ/k Σ νΣ_f φ（输运的 P₁ 近似） |
+| **bateman** 燃耗 | C | dN/dt = A(φ) N（线性 ODE，矩阵指数解 e^{At} N₀） |
+| **fourier** 热传导 | D | ρc ∂T/∂t = ∇·(k∇T) + q''' |
+| **NS** 简化 | E | 1D 系统级质量/动量/能量守恒 |
 
 ---
 
-## §2 数学物理方程归类（D₁）
+## §3 方程 × 程序类型 矩阵（cloud-friendly 程序候选）
 
-按 Cmrlibrary.md §C.1.1 编码，**Stage 8 主体聚焦 A-E 5 方程**:
+3 个 D₂ MC cell 本质不适用（diffusion/fourier/NS 不走 MC）→ **17 实际可填 cells**。
 
-| 编码 | 方程 | 专业域 | 备注 |
-|---|---|---|---|
-| **A** | Boltzmann 中子输运 ∂φ/∂t + Ω·∇φ + Σ_t φ = ∫Σ_s φ + νΣ_f φ/k | 中子物理 | OpenMC / OpenMOC 现有 |
-| **B** | 多群中子扩散 -∇·D∇φ + Σ_a φ = ν Σ_f φ/k | 中子物理 | PARCS / NESTLE 学术 / home-grown nodal |
-| **C** | Bateman 核素链 dN_i/dt = ΣY_ji λ_j N_j - λ_i N_i | 燃耗 | ORIGEN 学术 / OpenMC depletion / home-grown ODE |
-| **D** | Fourier 热传导 ρc∂T/∂t = ∇·(k∇T) + q''' | 热工（固体燃料） | FRAPCON 学术 / BISON-mini / home-grown 1D |
-| **E** | NS 简化 1D 系统级（质量 / 动量 / 能量守恒） | 热工（冷却剂） | RELAP5 学术 / CTF 学术 / home-grown 1D |
-| ~~H BNCT~~ | ~~Boltzmann + dose 后处理~~ | ~~医学物理~~ | **Stage 8 不实施**，见 §1.3 |
-| F (横切) | 蒙特卡洛专有 MR | D₂ cell 专属 | OpenMC + MCNP 共享，不算独立方程 cell |
-| G (横切) | ML / PINN 专有 MR | D₃/D₄ cell 专属 | DeepONet / R²-PINN 等 |
+| 方程 ↓ \ 程序类型 → | **Num** 数值 | **MC** 蒙特卡洛 | **Surr** ML 代理 | **PINN** |
+|---|---|---|---|---|
+| **boltzmann** | **OpenMOC** ✅ (现有) | **OpenMC** ✅ (现有) | home-grown GP (scikit-learn) | home-grown 简化 PINN |
+| **diffusion** | **home-grown nodal**（PARCS 留 Stage 9） | ⬛ 不适用 | home-grown GP | home-grown 简化 PINN |
+| **bateman** | **home-grown ODE**（ORIGEN/NUIT 不可获取） | **OpenMC depletion** ✅ (现有) | home-grown GP | (留 Stage 9) |
+| **fourier** | **home-grown 1D**（升级现有 heat_equation；FRAPCON 不可获取） | ⬛ 不适用 | home-grown GP | home-grown 简化 PINN |
+| **NS** | **home-grown subchannel**（RELAP5/CTF 不可获取） | ⬛ 不适用 | home-grown GP | home-grown CHF-PINN |
 
----
+### §3.1 程序可获取性评估（从 PWR_MR_Analysis + MT-MR 文件）
 
-## §3 程序类型 × 5 方程矩阵（D₂ × 域）
+| 程序 | 出处 | 方程 | 程序类型 | 获取 | Cloud 安装 | 推荐 |
+|---|---|---|---|---|---|---|
+| **OpenMC** ✅ | PWR + 现有 | boltzmann + bateman | MC | 开源 MIT | 已装 | ⭐ 主力 |
+| **OpenMOC** ✅ | PWR + 现有 | boltzmann | Num (MOC) | 开源 MIT | 已装 | ⭐ 主力 |
+| **PARCS** | PWR §3.1 | diffusion + 动力学 | Num (NEM/ANM/FDM) | USNRC 注册申请 (~2 周) | gfortran + LAPACK + 自编译 + 需 PMAXS 截面 | 🟡 Stage 9 |
+| Serpent 2 | PWR §3.1 | boltzmann + bateman | MC | VTT 学术 license 申请 | 商业 ACE 截面库 | ❌ |
+| SCALE/ORIGEN | PWR §3.1 | bateman | Num | ORNL 商业 + RSICC | — | ❌ |
+| NUIT (Li Meng) | MT-MR §4.1 | bateman | Num | 未公开 source | — | ❌ MR 描述借鉴 |
+| HTGR 多尺度耦合 (Zhao/Li 2026) | MT-MR §4.2 | 多尺度耦合 | Coupled | 未公开 source | — | ❌ MR 描述借鉴 |
+| LLMORPH | MT-MR §1 | — (NLP MR tool) | — | GitHub 开源 | — | ❌ 不是反应堆 SUT |
 
-| 程序类型 ↓ \ 方程 → | A 输运 | B 扩散 | C 燃耗 | D 热传导 | E 热工 |
-|---|---|---|---|---|---|
-| **D₁ 数值确定性** | OpenMOC ✅, NEWT | **home-grown nodal**, PARCS (学术) | **home-grown Bateman ODE**, PyNE | **home-grown 1D Fourier**, FRAPCON-mini | **home-grown 1D subchannel**, CTF (重) |
-| **D₂ 蒙特卡洛** | OpenMC ✅, MCNP (商业), Serpent | — | **OpenMC depletion** ✅, MCNP-burnup | — | — |
-| **D₃ ML 代理** | DeepONet 论文 release | DeepONet | ML burnup surrogate | DeepONet AP-1000 | DeepONet AP-1000 |
-| **D₄ PINN** | R²-PINN, NAS-PINN | PINN diffusion | (少) | CHF-PINN | CHF-PINN |
-
-**Cloud-friendly 推荐程序候选**（按可获取性 + 安装成本排序）:
-
-| 程序 | 类型 | 方程 | 安装 | Cloud 可行 | 备注 |
-|---|---|---|---|---|---|
-| **OpenMOC** ✅ | D₁ | A | 已装 `/opt/openmoc-venv` | ✅ | 现有 SUT |
-| **OpenMC** ✅ | D₂ | A + C | 已装 `/opt/openmc-venv` | ✅ | 现有 SUT，自带 depletion |
-| **home-grown Bateman ODE** | D₁ | C | Python stdlib + scipy | ✅✅ | 最稳，半天 |
-| **home-grown 1D Fourier** | D₁ | D | Python stdlib + numpy | ✅✅ | 半天 |
-| **home-grown 1D subchannel** | D₁ | E | Python stdlib + scipy | ✅✅ | 1 天 |
-| **home-grown nodal 扩散** | D₁ | B | Python + numpy | ✅✅ | 1-2 天 |
-| **PyNE** | D₁ | C | `pip install pyne`（ENDF/B 二进制 ≈ 200 MB） | ✅ | 替代 home-grown Bateman |
-| **OpenFOAM** | D₁ | E | apt 装（30+ min 编译，~1 GB） | ⚠️ 重 | 留 Phase 8.4+ 候 |
-| **PARCS / NESTLE** | D₁ | B | 学术申请 / 商业 | ❌ | Stage 9 候 |
-| **CTF (PSU)** | D₁ | E | 学术申请 + C++ build | ❌ | Stage 9 候 |
-| **TOPAS / NCTPlan**（BNCT 专属） | D₂ | A+H | Geant4 重 / 申请 | ❌ | BNCT 搁置 |
-
-**Phase 8.3 minimum viable 6 cells**（每方程 1 个 + 中子输运双源）:
-
-| Cell | 程序 | 论证 |
-|---|---|---|
-| (D₁, A) | OpenMOC ✅ | 现有，强化 5D + meta-prompt 验证 |
-| (D₂, A+C) | OpenMC ✅ | 现有，加 depletion + m_cmp + meta-prompt |
-| (D₁, B) | home-grown nodal | 替代 PARCS 不可获取 |
-| (D₁, C) | home-grown Bateman | 替代 ORIGEN 不可获取 |
-| (D₁, D) | home-grown 1D Fourier | 替代 FRAPCON 简化版 |
-| (D₁, E) | home-grown 1D subchannel | 替代 RELAP5 不可获取 |
-
-合计 **6 cells**（中子输运 OpenMOC + OpenMC 双源），覆盖 5 方程 D₁/D₂ 程序类型。
-
-D₃/D₄ 横切作为 Phase 8.4 候（看精力 + 论文需要）。
+**结论**：cloud-friendly 现成 = **OpenMOC + OpenMC**（+ depletion）。其余 cells 用 home-grown 填，借鉴 PARCS / NUIT / HTGR / PWR MR 描述。
 
 ---
 
-## §4 元模式 × 5 方程 → likely MR 推导矩阵
+## §4 5 MP × 5 方程 似然 MR 推导矩阵
 
-按 Cmrlibrary §C.1.3 8 元模式 × 5 方程：
-
-✅ = 强 likely（直接 from algebraic property）
-⚠️ = 弱 likely（need precondition / 限定）
+✅ = 强 likely（方程算子直接推出）
+⚠️ = 弱 likely（需适用域 / precondition）
 — = 不适用
-? = 需 LLM-driven 探索
 
-| 元模式 ↓ \ 方程 → | A 输运 | B 扩散 | C 燃耗 | D 热传导 | E 热工 |
+| MP \ 方程 | boltzmann | diffusion | bateman | fourier | NS |
 |---|---|---|---|---|---|
-| **P₁ m_inv** 不变性 | ✅ 旋转/平移/置换 | ✅ 旋转/平移 | ⚠️ 核素置换 | ✅ 镜像/旋转 | ✅ 几何对称 |
-| **P₂ m_mono** 单调性 | ⚠️ 截面区间限定 | ⚠️ 同上 | ✅ 燃耗 → k_inf 单调（寿期内） | ✅ 源 ↑ → T ↑ | ✅ 流量 ↓ → T_peak ↑ |
-| **P₃ m_conv** 仿射/线性 | ✅ 源齐次 φ→αφ | ✅ 同上 | ⚠️ Bateman 局部线性 | ✅ 源齐次 T→αT | ⚠️ 层流区线性压降 |
-| **P₄ 退化/极限** | ✅ 各向同性 → 扩散 | ✅ D→∞ 退化 | ✅ 燃耗=0 → 新堆 | ✅ k→∞ 退化均匀 | ✅ 空泡→0 → 单相 |
-| **P₅ m_cmp** 跨实现 | ✅ OpenMOC vs OpenMC | ⚠️ 扩散 vs 输运 | ⚠️ ORIGEN vs PyNE | ⚠️ 数值 vs 解析（1D 球） | ⚠️ 系统 vs 子通道 |
-| **P₅ m_dyn** 多执行自洽 | ⚠️ 重启等价 | ✅ 重启等价 | ✅ 燃耗分段 vs 一段 | ✅ 重启 | ✅ 瞬态重启 |
-| **m_adj** 自伴反应度 | ✅ OpenMOC adjoint 待 F11 | ⚠️ 部分支持 | — | — | — |
-| **m_rev** 时间反演 | ⚠️ 稳态 trivial | ⚠️ 同上 | ⚠️ Bateman 反向 ill-posed | — | — |
+| **MP_inv** 守恒/不变 | ✅ 旋转/平移/置换 + 守恒律 + 自伴 | ✅ 旋转/平移 + 自伴随（各向同性）+ ADF=1 退化 + CMFD on/off | ⚠️ 核素重排（Y_ji 对称限） + 质量守恒 | ✅ 镜像/旋转 + 热源守恒 | ✅ 几何对称 + 质量/能量守恒 |
+| **MP_mono** 单调 | ⚠️ 截面区间限定 + 富集度 ↑→k ↑ | ✅ 硼浓度 ↑→k ↓ + 控制棒价值正 + Doppler/MTC + Dancoff | ✅ 燃耗 ↑→k_inf ↓（寿期内）+ 毒物含量 | ✅ 源 ↑→T ↑ | ✅ 流量 ↓→T_peak ↑ + 破口尺寸 ↑→喷放峰 ↑ |
+| **MP_conv** 收敛/极限 | ✅ 源齐次 + 各向同性→扩散退化 + 角度细化 | ✅ 节块细化 + NEM 阶数 + 微分硼价值恒定 + 子群收敛 | ⚠️ 局部线性（小步长） + t=0→新堆退化 | ✅ 网格 h→h/2 二阶 + k→∞ 均匀化 | ✅ 空泡→0→单相退化 + 网格收敛 |
+| **MP_traj** 轨迹 | ⚠️ 重启等价 + 多 batch 平均（MC） | ✅ 重启等价 + 控制棒微分价值曲线（先增后减） | ✅ 分段 vs 一段 + Gd S 曲线 + 燃耗 chain 时序 | ✅ 瞬态重启 | ✅ 瞬态重启 + ITC 硼依赖 + SDM 极值 |
+| **MP_part** 偏序 | ⚠️ OpenMOC vs OpenMC 跨实现（强吸收偏序） | ✅ 输运-扩散一致（弱吸收 ≈，强吸收偏序） + NEM-FDM 极限 + Gd 棒数 vs 浓度 | ⚠️ ORIGEN vs PyNE 跨实现（链式截断处偏序） | ⚠️ 数值 vs 解析（1D 球） | ⚠️ 系统 vs 子通道 + 装载模式→功率峰 |
 
-**强 likely MR (✅)** ≈ 23 个。**弱 likely (⚠️)** ≈ 16 个。**总 candidate pool ≈ 39 个**（不含 BNCT，不含 D₃/D₄ 横切扩展）。
+强 likely ✅ ≈ 30 条 / 弱 likely ⚠️ ≈ 18 条 → **总母集 ≈ 48 条 likely MR** 候选。
 
 ---
 
-## §5 MetBench 5D schema 升级需求
+## §5 已识别 MR 母集（57 Cmrlibrary 种子 + 27 PWR 新增 = 84 条）
 
-详见 [plan §2 Phase 8.0]：
+按 5 MP × 5 方程 cell 分类。⭐ = 高工程价值 / 非平凡（PWR_MR_Analysis §2.7 强调）。
 
-- **`MetamorphicRelationV3` entity**：5D 字段 + tolerance + V1/V2 验证状态
-- **`IMetamorphicRelationV3Repository`**：按 5D 维度查询
-- **LiteDB migration**：旧 V2 MR 自动迁移（默认 D₁=A, D₂=D1, D₃=P1）
-- **YAML ↔ LiteDB 双向 sync**：`tools/mr_library_sync.py`
-- **覆盖率 dashboard**：`docs/mr_library/INDEX.md` 按 5D 维度切片
+### MP_inv (守恒 / 不变)
 
----
+| Cell | MR 候选 | 来源 |
+|---|---|---|
+| (boltzmann, *) | S-N-01~07 几何对称 / C-N-01~05 守恒 / H-N-01 源齐次 / E-N-01~03 重述等价 | Cmrlibrary §C.14 |
+| (diffusion, Num) | Dif-Phy-03 自伴随性 / Dif-Phy-07 ADF=1 退化 / Dif-Phy-09 装载对称 / Dif-Alg-05 CMFD 不改变收敛解 ⭐ | PWR §2.3 |
+| (bateman, *) | C-N-03 重核+裂变碎片守恒 | Cmrlibrary |
+| (fourier, *) | S-T-03 圆管对称 / C-T-03 能量平衡 | Cmrlibrary |
+| (NS, *) | S-T-01,02,04,05 对称 / C-T-01~05 守恒 | Cmrlibrary |
 
-## §6 Per-cell 完整自动化研究链路
+### MP_mono (单调)
 
-```
-Step 1: 方程算子 algebraic property 分析（人工 + LLM 协助）
-        e.g., A 输运算子是线性、保正、自伴
+| Cell | MR 候选 | 来源 |
+|---|---|---|
+| (boltzmann, *) | M-N-02 富集度→k↑（区间）/ M-N-04 Doppler / I-N-02 吸收单调 | Cmrlibrary |
+| (diffusion, Num) | Dif-Phy-02 控制棒区偏方向 ⭐ / Dif-Phy-04 硼浓度 / Dif-Phy-05 临界硼唯一 / Dif-Phy-08 ADF 异质性 / Dif-Phy-10 边缘低功率 / Dif-Phy-11 控制棒价值 / Dif-Phy-13 棒遮蔽 ⭐ / Dif-Alg-04 FDM 粗网偏低 / Res-Alg-02 稀释截面 / Res-Alg-03 Dancoff / Res-Alg-04 温度→展宽 | PWR §2.3-2.5 |
+| (bateman, *) | M-N-05 燃耗→k↓（寿期内）/ M-N-06 可燃毒物 | Cmrlibrary |
+| (fourier, *) | (热传导单调显然，源 ↑→T ↑) | 推导 |
+| (NS, *) | M-T-01 流量→包壳温 / M-T-02 破口尺寸 / M-T-03 过冷度 / M-T-04 加热功率→CHF / M-T-05 压力→饱和裕量 / Cpl-App-01 Doppler / Cpl-App-02 MTC / Cpl-App-03 功率系数 / Cpl-App-07 Gd 含量 / Cpl-App-09 富集度→寿期 | Cmrlibrary + PWR |
 
-Step 2: 适用元模式选取（基于 algebraic property）
-        e.g., A 输运 → P₁ m_inv + P₃ m_conv + P₄ 退化 + P₅ m_cmp
+### MP_conv (收敛 / 极限)
 
-Step 3: 扫描 SUT 输入参数
-        e.g., OpenMC pin-cell.json → fuel.nu_sigma_f, fuel.sigma_a,
-              geometry.radius, geometry.boundary, ...
+| Cell | MR 候选 | 来源 |
+|---|---|---|
+| (boltzmann, *) | H-N-03,04,05 时间/网格/能群收敛 / L-N-04 各向同性→扩散退化 / L-N-05 多群→连续能量 / L-N-06 SN 角度数→∞ | Cmrlibrary |
+| (diffusion, Num) | Dif-Phy-06 微分硼价值恒定 / Dif-Alg-01 节块细化 / Dif-Alg-02 NEM 阶数 / Res-Alg-01 子群收敛 | PWR |
+| (bateman, *) | L-N-01 燃耗=0→新 / L-N-02 控制棒全提→无棒 / L-N-03 时间步→0 Cauchy / E-N-03 燃耗段 vs 重启 | Cmrlibrary |
+| (fourier, *) | H-T-01 几何相似 / L-T-03,04 网格/时间步收敛 | Cmrlibrary |
+| (NS, *) | L-T-01 空泡→0→单相 / L-T-02 流速→0 自然循环 / L-T-05 子通道→CFD 极限 | Cmrlibrary |
 
-Step 4: 元模式 × 参数 → 构造 meta-prompt
-        e.g., m_inv × {geometry.rotation} →
-              "Given f = OpenMC k_eff. Is f(rotate(geometry)) == f(geometry)?"
+### MP_traj (轨迹)
 
-Step 5: LLM 识别 MR 实例（多家 consensus, fan-out 3 providers）
-        e.g., DeepSeek + OpenAI + Claude → 候选 MR 列表
+| Cell | MR 候选 | 来源 |
+|---|---|---|
+| (boltzmann, MC) | (重启 vs 多 batch 平均) | 推导 |
+| (diffusion, Num) | Dif-Phy-12 控制棒微分价值曲线 ⭐（先增后减，余弦²）| PWR |
+| (bateman, *) | E-N-03 燃耗分段 vs 一段 / Gd S 曲线 | Cmrlibrary + PWR Cpl-App-06 ⭐ |
+| (fourier, *) | E-T-02 瞬态分段 vs 一段 | Cmrlibrary |
+| (NS, *) | E-T-02 瞬态重启 / Cpl-App-04 ITC 硼依赖 ⭐ / Cpl-App-05 SDM 极值 | PWR |
 
-Step 6: candidates 入 CandidateRepository, 等程序验证
+### MP_part (偏序)
 
-Step 7: MetBench 执行 MT (source + followup) per MR
-        - 高支持度（V2 通过, MR 不被违反）→ 入 MR 库（如 V1 也通过加 stable rating）
-        - 低支持度但元模式数学应成立 → 进入分析阶段:
-            ├─ 7b-i. MR 错（适用域设错 / tolerance 太严 / parameter 越界）
-            │        → 改 MR + 重测
-            └─ 7b-ii. 程序错（实际 bug）
-                     → 反例归档 `docs/mr_library/counterexamples/<sut>-<mr-id>.md`
-                     → 积累
-                     → 缺陷修复 issue → upstream PR 或本地 fix log
-                     → 论文章节 "MR-based bug detection on open-source codes"
-        - 元模式数学性质也不成立 → discard，记录 `docs/mr_library/discarded.md`
-```
-
-### 关键洞察
-
-**分支 7b-ii 是论文 contribution 的硬证据**。工作流要**主动追踪**：
-
-- 每个 cell 累计反例数
-- 每个反例对应程序 + 版本 + commit hash
-- 每个反例的"违反的元模式 + 数学根据 + 程序行为"对照表
-- 缺陷修复后的 regression test
-
-每月产 1-2 个反例 → 一年 12-24 反例 → P6 论文实证素材。
+| Cell | MR 候选 | 来源 |
+|---|---|---|
+| (boltzmann, * vs *) | (OpenMOC vs OpenMC 跨实现，强吸收区偏序) | 推导（NEA benchmarks 启示） |
+| (diffusion, Num vs Num) | Dif-Phy-01 输运-扩散一致（弱吸收 ≈，强吸收偏序） / Dif-Alg-03 NEM-FDM 极限 | PWR |
+| (bateman, Num vs Num) | (ORIGEN vs PyNE 跨实现，链式截断处偏序) | 推导 |
+| (fourier, Num vs analytic) | L-T-03 数值 vs 解析 | Cmrlibrary |
+| (NS, Num vs Num) | (系统 vs 子通道) / Cpl-App-08 Gd 棒数 vs 浓度 / Cpl-App-10 装载模式→功率峰 | PWR |
 
 ---
 
-## §7 三元组 deliverable 切片
-
-**Per cell deliverable**:
+## §6 完整研究工作流（Phase 8.3 per cell）
 
 ```
-docs/mr_library/cells/<celcoord>.md         # cell 说明 (方程 + 程序 + 适用元模式 + MR 列表)
-docs/mr_library/<mr-id>.yaml                # 每条 MR 的 5D YAML 元数据
-docs/mr_library/counterexamples/<id>.md     # 每个反例的归档（如有）
-SUT/<sut-name>/<sut>_runner.py              # SUT runner（新接入）
-MetBench_SystemMT.Tests/Features/MrLibrary/  # BDD scenarios
-docs/uat/reports/baseline-<date>/           # trx baseline 含 MR 测试结果
+方程算子 algebraic property 分析
+  → 适用 5 MP 选取（参考 §4 矩阵）
+  → 扫描 SUT 输入参数（自动 schema 解析）
+  → 元模式 × 参数 → meta-prompt（Goal 1 引擎）
+  → LLM 识别 MR 实例（多家 consensus）
+  → MetBench 执行 MT (src + flw)
+  → 分支判定:
+      ├─ 高支持度 (V1+V2 通过) → 入 MR 库（BDD .feature + LiteDB sync）
+      ├─ 低支持度 + MP 数学应成立 → 分析:
+      │    ├─ MR 错（适用域 / tol 设错）→ 改 MR + 重测
+      │    └─ 程序错（疑似 bug）→ 反例归档（不刻意造 paper narrative）
+      └─ MP 数学性质也不成立 → discard
 ```
 
-**Stage-level deliverable**:
-
-- `docs/mr_library/INDEX.md`：5D 索引 + cell 覆盖矩阵 + 反例统计
-- `docs/experiments/2026-XX-stage8-mr-library/README.md`：实验报告
-- 论文 draft：MR 库 + 反例 + 缺陷修复实证
+**反例处理**：自动归档到 `MetBench_SystemMT.Tests/Features/Counterexamples/`，**不刻意为论文造势**。若数量积累，回头考虑独立论文（user 指令：先做实验，再考虑论文）。
 
 ---
 
-## §8 与既有工作的衔接
+## §7 三元组 deliverable per cell
 
-| 既有 | 衔接方式 |
+```
+MetBench_SystemMT.Tests/Features/MrLibrary/<cell>.feature  # BDD canonical，含 5D tags
+SUT/<sut-name>/                                            # SUT runner + adapters + sample
+MetBench_SystemMT.Tests/Steps/<sut-name>Steps.cs           # step bindings
+```
+
+LiteDB 索引 = `tools/feature_to_db.py` 扫 feature tags → `MetamorphicRelations` 表（无独立 YAML mirror）。
+
+**Stage-level**:
+- `docs/mr_library/INDEX.md`：17 cells 覆盖矩阵 + MR 数 + V1/V2 通过率
+- `docs/mr_library/counterexamples/INDEX.md`：反例归档（如有）
+
+---
+
+## §8 与既有衔接
+
+| 既有 | 衔接 |
 |---|---|
-| Goal 1 meta-prompt engine | **基础工具**，Phase 8.2.5 端到端验证 + Phase 8.3 大规模用 |
-| 旧 5-equation plan（PR #68 committed） | **supersede**；旧文件保留 audit trail |
-| 4 SUT (OpenMOC / OpenMC / heat / projectile) | Phase 8.2 全部升级 5D 元数据；Phase 8.2.5 跑端到端验证 |
-| Cmrlibrary 57 条种子 MR | 选与 5 方程兼容的（如 H-N-01 源齐次 / S-N-01 几何对称 / L-N-01 燃耗 0 退化）优先入库 |
-| F11 m_adj 月度监控 | A cell 加 m_adj MR 占位；OpenMOC 上游解锁后激活 |
-| BNCT | **搁置**，plan 内保留章节作 Stage 9+ 候 |
-| 故障注入 V3 | **独立挂起**，Stage 9 候；Stage 8 MR 库只做 V1+V2 |
+| Goal 1 meta-prompt engine | Phase 8.2.5 验证 + 8.3 大规模用 |
+| 旧 5-equation plan（PR #68） | supersede（保留 audit trail） |
+| 4 SUT（OpenMOC/OpenMC/heat/projectile） | Phase 8.2 升级 5D tag；heat → fourier cell；projectile 标 demo |
+| Cmrlibrary 57 种子 MR | Phase 8.2.5 优先入库（与 5 方程 17 cells 兼容） |
+| PWR_MR_Analysis 27 PWR MR | 同上，按 §5 cell 分类 |
+| BDD .feature + LiteDB 现有约定 | **沿用**，不引 YAML mirror |
+| F11 m_adj 月度监控 | (boltzmann, Num) cell 加 m_adj MR 占位（→ MP_inv 自伴随归类） |
+| BNCT | **搁置** Stage 9+ |
+| 故障注入 V3 | **独立挂起** Stage 9+ |
 
 ---
 
-## §9 决策点（推荐 + 等 user confirm）
+## §9 决策点
 
 | # | 项 | 推荐 |
 |---|---|---|
-| 1 | **首批 cells scope** | **6 cells**（5 方程 + OpenMOC + OpenMC 双 A 源 = Phase 8.2 现有 4 SUT 升级 + Phase 8.3 新增 4 home-grown） |
-| 2 | **MR 库存储** | **LiteDB + YAML mirror**（review-friendly） |
-| 3 | **首 PR 切片** | **Phase 8.0 5D schema infra**（单 PR） |
-| 4 | **启动时机** | **v2.1 发版后**（Windows UAT round-1 PASS + tag release-v2.1.0 后）|
-| 5 | **论文绑定** | **新 P6 论文**（Stage 8 独立成文 — "Meta-pattern driven LLM-based MR identification with bug detection on open-source reactor physics codes"） |
+| 1 | 首批 cells | **7 cells**（D₁ × 5 + D₂ × 2 = 必填） → 扩展 12 (+Surr) → 17 (+PINN) |
+| 2 | MR 存储 | **BDD .feature + Gherkin tags + LiteDB sync**（沿用现有约定）|
+| 3 | 首 PR 切片 | **Phase 8.0** 5D tag schema 扩展 + LiteDB sync 工具 |
+| 4 | 启动时机 | **v2.1 发版后** |
+| 5 | 论文 | **暂不绑定**（user 指令：先做实验，发现 bug 再说） |
 
-—— 下一步进入 writing-plan，固化 phase × deliverable × 工时。
+—— 下一步 writing-plan。
