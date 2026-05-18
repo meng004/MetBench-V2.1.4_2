@@ -84,9 +84,10 @@ namespace MetBench_BLL
         /// </summary>
         /// <param name="domain"></param>
         /// <returns>0 表示失败 1 表示重复  2表示成功 </returns>
-        public int UpdateService(Domain domain) 
+        public int UpdateService(Domain domain)
         {
-            if (Domain_Repository.IsDuplicate(domain, false))
+            // excludeSelf=true：避免把"修改同名记录"当成"新建重名"误判 (UAT round-1 UC-A2 bug, 同 ApplicationService)
+            if (Domain_Repository.IsDuplicate(domain, excludeSelf: true))
             {
                 return 1;
             }
