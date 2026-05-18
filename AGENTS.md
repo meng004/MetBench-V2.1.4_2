@@ -202,3 +202,62 @@ Post v2.1.0-rc1 工作：consolidate v2.1 发版 + 论文核心补充 + 框架�
 Cloud-side 测试态（baseline-2026-05-17）：**521 xUnit pass / 0 skip / 0 fail / 35s wall / 73.02s cumulative**。
 
 剩余前置（v2.1.0 发版）：Windows 端 UAT round-1 跑通 **21 个 WPF UI 用例**（A1-A7 + B1-B9 + E1-E5；其余 5 个 A8/D1/D2/E6/E7 是 CLI，cloud baseline-2026-05-17 已覆盖） → dashboard `PASS` → tag `release-v2.1.0`。
+
+## Stage 8: 元模式驱动 MR 识别 + 反应堆物理 5 大方程 SUT 覆盖（启动 2026-05-18，v2.2 候）
+
+post v2.1 发版后的两个并行工作线，论文 contribution 加分。**v2.2 主线**，详见同期 RFC + plan 文档。
+
+### Goal 1: 基于元模式的结构化 meta-prompt MR 识别引擎
+
+**目标**：把 8 个 NOETHER MetaPattern 从"数据库 seed 行"升级成"可驱动 LLM 识别 MR 的 prompt 模板"。给定一个 SUT 的输入文件 schema + 参数说明 + 数学物理方程上下文，自动：
+
+1. 解析 SUT 输入 → 抽参数名 + 类型
+2. 依据方程性质（守恒律 / 对称 / 单调性 / 收敛性 / 跨实现一致 …）选匹配的 MetaPattern 子集
+3. 用 MetaPattern 对应的**结构化 meta-prompt 模板** + 该 SUT 参数填充 → 生成 SUT-specific MR 识别 prompt
+4. 调 LLM（复用现有 `OpenAiCompatibleLlmGateway` + `MultiLlmConsensusValidator`）
+5. 解析 LLM 响应为 MR candidate + confidence → 入 CandidateRepository
+
+**论文价值**：把 metamorphic testing 框架的"凭经验写 prompt" 提升为"基于元模式的自动 prompt 生成"，可重复 + 可比较，是 metamorphic testing 自动化研究的真实贡献。
+
+**deliverables**:
+- 8 个 MetaPattern 各自的 meta-prompt 模板（结构化，含 placeholder）
+- `SutParameterExtractor` / `MetaPromptBuilder` / `LlmMrIdentifier` 三个 service
+- 端到端 demo：amax.py SUT → 至少 1 个识别出的 MR candidate
+- TDD 覆盖（fake gateway + 真实 LLM gateway sanity test）
+
+**详细计划**: [docs/superpowers/plans/2026-05-18-meta-prompt-mr-discovery-brainstorming.md](docs/superpowers/plans/2026-05-18-meta-prompt-mr-discovery-brainstorming.md) → [...-plan.md](docs/superpowers/plans/2026-05-18-meta-prompt-mr-discovery-plan.md)
+
+### Goal 2: 反应堆物理 5 大方程 SUT 覆盖
+
+**目标**：当前 4 SUT 偏中子物理（OpenMOC + OpenMC neutron transport），其余 heat_equation + projectile 是 demo。要让框架覆盖**反应堆物理工程实践中真实关心的 5 大方程**：
+
+1. **中子输运**（Boltzmann transport equation） — 已有 OpenMOC + OpenMC ✅
+2. **燃耗 / 核素演化**（Bateman equation） — 待接 SUT
+3. **燃料热传导**（fuel pin heat conduction） — 待接 SUT
+4. **冷却剂热工水力**（thermal-hydraulics, 1D 子通道） — 待接 SUT
+5. **反应堆动力学**（point-kinetics / space-time kinetics） — 待接 SUT
+
+对每个待接方程：
+- 调研 2-3 个开源候选程序（github / pip 可获取，cloud Linux 友好）
+- 用 Stage 8 Goal 1 的 meta-prompt 引擎自动生成 MR 候选
+- 选 ≥ 1 个 MR 落地为 SUT scenario，跑通 MT 流程
+- 录入 MetBench LiteDB + UAT BDD 加 scenario
+
+**论文价值**：从"演示 metamorphic testing 适用于多种 numerical solver" → "覆盖反应堆物理工程**完整**方程栈"，论据强度大幅提升。
+
+**deliverables (5 阶段)**:
+- Phase 8.2.1 — Bateman / 燃耗：用 OpenMC depletion 模块（已有 binary），1 个 MR
+- Phase 8.2.2 — Fuel heat conduction：home-grown Python 1D 径向求解器（无外部依赖）+ 1 MR
+- Phase 8.2.3 — Thermal-hydraulics 子通道：home-grown Python 1D channel 或 PyNE 候选
+- Phase 8.2.4 — Point-kinetics：home-grown Python ODE（最简单）
+- Phase 8.2.5 — paper writeup: "5 equations coverage" 实证
+
+**详细计划**: [docs/superpowers/plans/2026-05-18-reactor-physics-five-equations-brainstorming.md](docs/superpowers/plans/2026-05-18-reactor-physics-five-equations-brainstorming.md) → [...-plan.md](docs/superpowers/plans/2026-05-18-reactor-physics-five-equations-plan.md)
+
+### Stage 8 时间盒
+
+- W13 (2026-05-18 ~ 25): Goal 1 设计 + 实施（meta-prompt 引擎跑通 amax demo）
+- W14-W16 (2026-05-26 ~ 06-15): Goal 2 五阶段轮转接 SUT
+- W17 (2026-06-16+): 论文 writeup + UAT round-2
+
+**不阻塞 v2.1 发版**。v2.1 发版后立即启动。
