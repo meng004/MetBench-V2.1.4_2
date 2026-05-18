@@ -77,6 +77,7 @@ RUN git clone --depth=1 --branch "$OPENMOC_REF" \
        "$OPENMOC_VENV/lib/python3.12/site-packages/openmoc/" \
  && cp /tmp/OpenMOC/openmoc/openmoc.py \
        "$OPENMOC_VENV/lib/python3.12/site-packages/openmoc/openmoc.py" \
+ && cd / \
  && "$OPENMOC_VENV/bin/python" -c "import openmoc; print('openmoc OK')" \
  && rm -rf /tmp/OpenMOC
 
@@ -103,6 +104,7 @@ RUN git clone --depth=1 --branch "$OPENMC_REF" --recurse-submodules \
  && cd /tmp/openmc-src \
  && "$OPENMC_VENV/bin/pip" install --no-cache-dir --no-build-isolation . \
  && ln -sf "$OPENMC_PREFIX/bin/openmc" "$OPENMC_VENV/bin/openmc" \
+ && cd / \
  && "$OPENMC_VENV/bin/python" -c "import openmc; print('openmc OK', openmc.__version__)" \
  && "$OPENMC_VENV/bin/openmc" --version \
  && rm -rf /tmp/openmc-src
