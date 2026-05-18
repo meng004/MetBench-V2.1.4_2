@@ -38,7 +38,7 @@
 
 - **47 用例 markdown** 分 7 类（A 管理 CRUD / B MT 主流程 / C 发现 & 验证 / D R-Case / E 可视化 & 报表 / F 持久化 / G 运营），全部三段式
 - **21 用例 BDD wrapper**（Part F + G + C 共 21 个 .feature，自动反射 + baseline trx 检查）
-- **Windows UAT runbook**：A/B/D/E 26 UI 用例的 3 小时 1 轮完整指导（[`docs/uat/runbooks/windows-uat-round-1.md`](docs/uat/runbooks/windows-uat-round-1.md)）
+- **Windows UAT runbook**：**21 个 WPF UI 用例**（A1-A7 + B1-B9 + E1-E5）2-2.5 小时 1 轮完整指导（[`docs/uat/runbooks/windows-uat-round-1.md`](docs/uat/runbooks/windows-uat-round-1.md)）；其余 5 个 CLI 用例（A8 / D1 / D2 / E6 / E7）已由 cloud baseline 完全覆盖，**不重跑**
 - **Baseline 2026-05-17**：cloud-side reference，**521/521 Pass / 0 Skip / 0 Fail**
 
 ## 测试态（baseline-2026-05-17）

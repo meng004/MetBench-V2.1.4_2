@@ -1,11 +1,51 @@
 # Windows UAT round-1 操作指导
 
-> **目标**：在 Windows 11 + VS 2022 + WPF 主程序上跑通 Part A/B/D/E 共 **26 个 UI 用例**，产出 round-1 验收证据包。
-> **预计工时**：active 2 小时 + buffer 1 小时 = **3 小时**。
-> **入口前提**：仓库 main 至少包含 commit `9b0a53b66cefd899f6dfd0f57311f3d9bd7d838e`（baseline-2026-05-17 land 后）。
+> **目标**：在 Windows 11 + VS 2022 + WPF 主程序上跑通 **21 个 WPF UI 用例**（Part A1-A7 / B1-B9 / E1-E5）— 即 **真正 Windows-only 的 UAT 范围**。
+> **预计工时**：active 1.5–2 小时 + buffer 30 分钟 = **2–2.5 小时**。
+> **入口前提**：仓库 main 含 commit `0dc5a42c401a0b5455bd7686ec46e2d82746a24a`（PROJECT-STRUCTURE.md land 后）。
 > **本 runbook 写于**：cloud session 2026-05-17，对应 baseline-2026-05-17 reference。
 
-## §1 环境准备（一次性，~30 分钟）
+---
+
+## §0 范围裁剪：26 → 21
+
+之前版本的 runbook 把 Part A/B/D/E **全部 26 用例** 拉到 Windows，但里面 **5 个是 CLI**（`dotnet test ...`），云端 baseline-2026-05-17 已 0 fail 跑过。Windows 重跑这 5 个无新增覆盖。
+
+**真正 Windows-only 范围 = 21 个 WPF UI 用例**：
+
+| 类别 | Windows UI 用例 | 数 |
+|---|---|---|
+| A. 管理 CRUD | A1-A7（**A8 是 CLI，云端覆盖** ⤳） | 7 |
+| B. MR 蜕变测试主流程 | B1-B9（全部 WPF UI） | 9 |
+| E. 可视化 & 报表 | E1-E5（**E6, E7 是 CLI，云端覆盖** ⤳） | 5 |
+| **合计 Windows UI** | | **21** |
+
+### 已云端覆盖的 5 个 CLI 用例（Windows 端跳过）
+
+| UC | 测试套件 | trx 证据 | baseline 结果 |
+|---|---|---|---|
+| **UC-A8** | `V1CompatibilityTests` + `V2EntityRoundtripTests` + `MetaPatternEntityTests` + `MRBindingStatusTests` | `docs/uat/reports/baseline-2026-05-17/baseline-full.trx` | ✅ 0 fail |
+| **UC-D1** | `RCaseReproductionServiceTests` (≥9 facts) | 同上 | ✅ 0 fail |
+| **UC-D2** | `WriteAudit_records_r_case_reproduced` fact 命中 | 同上 | ✅ 命中 + Passed |
+| **UC-E6** | `SystemMtReportServiceTests` (≥6 facts) | 同上 | ✅ 0 fail |
+| **UC-E7** | `HtmlSystemMtResultReport*Tests` (>0 facts) | 同上 | ✅ 0 fail |
+
+**Windows 测试员只需在 evidence 包 `results-summary.md` 把这 5 行标 ✅ + 备注 "cloud baseline-2026-05-17 已覆盖"**，不重跑。如要本地确认，可一次性跑：
+
+```powershell
+dotnet test MetBench_SystemMT.Tests --logger "trx;LogFileName=cloud-mirror.trx"
+# 期望 521 Pass / 0 Fail（与 cloud baseline 一致）
+```
+
+——以上一次跑通就已经把 A8 / D1 / D2 / E6 / E7 全验完。
+
+### Part D 全部云端覆盖
+
+**Part D 整段（UC-D1 + UC-D2）都是 CLI**，Windows 端**整段跳过**，依赖云端 baseline。Windows runbook 不含 D 类章节。
+
+---
+
+## §1 环境准备（一次性，~10 分钟）
 
 ### 1.1 软件清单
 
@@ -13,18 +53,25 @@
 |---|---|---|---|
 | Windows | 11 22H2+ | 主操作系统 | — |
 | Visual Studio 2022 | 17.8+ Community 即可 | 跑 WPF + 编译 | https://visualstudio.microsoft.com/ |
-| .NET 8.0 SDK | 8.0.x | 编译 + 测试 | VS 安装时勾上 ".NET desktop development" + ".NET 8.0 Runtime" |
-| Python 3.12 | 3.12.x | 跑 SUT runner (OpenMOC / heat_eq / projectile) | https://www.python.org/downloads/ ；勾 "Add to PATH" |
+| .NET 8.0 SDK | 8.0.x | 编译 + 测试 | VS 安装勾上 ".NET desktop development" + ".NET 8.0 Runtime" |
+| Python 3.12 | 3.12.x | 跑 heat_equation + projectile（stdlib + numpy；OpenMOC/OpenMC 不需要） | https://www.python.org/downloads/，勾 "Add to PATH" |
 | LiteDB Studio | 最新 | 验 `MR.Litedb` 数据 | https://github.com/mbdavid/LiteDB.Studio/releases |
 | Process Monitor | 最新 | （可选）测响应时间 | https://learn.microsoft.com/sysinternals/downloads/procmon |
 | Git for Windows | 2.40+ | clone / commit | https://git-scm.com/download/win |
 
-### 1.2 OpenMOC venv（B 类用例需要；可跳过 → 4 个 OpenMOC scenario 会 SKIP）
+### 1.2 ❌ 无需 OpenMOC / OpenMC venv
 
-OpenMOC 在 Windows 上原生编译困难。两条路：
+OpenMOC + OpenMC 的端到端物理跑动已在 **cloud baseline 4 个 cross-program BDD scenarios** 全 Pass（cumulative 17.6s + 12.6s OpenMC + 2.2s + 2.6s OpenMOC，物理 k_eff ∈ 合理范围）。Windows 端 UAT **不重跑物理**，UI 用例（UC-B2-B6）默认走 **heat_equation** SUT 验 MT 主流程 UI 行为。
 
-- **路径 A (推荐)**：在 WSL2 Ubuntu 24.04 跑 `bash .claude/web-setup.sh` 安装 `/opt/openmoc-venv`，然后 WPF 通过 `METBENCH_OPENMOC_PYTHON=\\wsl$\Ubuntu\opt\openmoc-venv\bin\python` 桥接。
-- **路径 B**：B 类 OpenMOC 用例全跳过（标 ⚠️），论文里诚实说 "Windows 端 OpenMOC 因编译复杂度未上线，Linux baseline 已覆盖"。
+若你确实想在 Windows 验 OpenMOC 端到端（论文 reviewer 可能问），加跑：
+
+```powershell
+# 可选验证：在 WSL2 Ubuntu 跑 cloud 同款 baseline，确认本地 0 fail
+# (然后 baseline trx 直接复用，无需 Windows 重跑物理)
+wsl -d Ubuntu -- bash -c "cd /mnt/c/Work/MetBench-V2.1.4_2 && METBENCH_OPENMOC_PYTHON=/opt/openmoc-venv/bin/python METBENCH_OPENMC_PYTHON=/opt/openmc-venv/bin/python dotnet test MetBench_SystemMT.Tests --logger 'trx;LogFileName=wsl-mirror.trx'"
+```
+
+但这**不算 Windows-only 责任**，是可选 sanity。
 
 ### 1.3 Repo clone + build
 
@@ -38,7 +85,7 @@ git rev-parse HEAD     # 记录 commit hash 到证据包元数据
 dotnet build MetBench.sln      # 完整 WPF + BLL build，仅 Windows 可
 ```
 
-期望：`Build succeeded. 0 Error(s)`。若失败先排查 VS 2022 是否装了 ".NET desktop development" workload。
+期望：`Build succeeded. 0 Error(s)`。
 
 ### 1.4 启动 WPF
 
@@ -46,11 +93,11 @@ dotnet build MetBench.sln      # 完整 WPF + BLL build，仅 Windows 可
 dotnet run --project MetBench_Client
 ```
 
-或在 VS 2022 打开 `MetBench.sln`，把 `MetBench_Client` 设为启动项，F5 启动。
+或 VS 2022 F5 启动。
 
-**期望**：主窗口在 < 5 s 内打开；左侧导航有 ≥ 10 个页面（Dashboard / Application Management / Domain Management / MR Management / MetaPatterns / Discovery / MT Execution / Anomaly List / Replay Result / Trend Dashboard / Coverage Dashboard / MT Report Generator）。
+**期望**：主窗口 < 5 s 打开；左侧导航 ≥ 10 个页面。
 
-### 1.5 证据包目录（手工建）
+### 1.5 证据包目录
 
 ```powershell
 $tester = "<your-name>"
@@ -60,231 +107,168 @@ New-Item -ItemType Directory $evidence
 New-Item -ItemType Directory "$evidence\screenshots"
 ```
 
-之后所有 trx / 截图 / DB 快照都落到这里。
-
 ---
 
-## §2 跑用例的总策略
-
-26 用例分四组，**有依赖**：
+## §2 跑 21 用例的总策略
 
 ```
-A1 → A2 → A3 → A4 → A5 → A6 → A7 → A8
+A1 → A2 → A3 → A4 → A5 → A6 → A7
                               ↓
-                              (B1 用 amax.py SUT)
-                              ↓
-B1 → B2 → B3 → B4 → B5 → B6 → B7 → B8 → B9
+B1 (Discovery 页) → B2 → B3 → B4 → B5 → B6 → B7 → B8 → B9
                          ↓        ↓
-                       (产生 anomaly 给 D)
+                       (产生 anomaly 数据)
                               ↓
-                              D1 → D2
-                              ↓
-              (有数据后 E 才有意义)
-                              ↓
-              E1 → E2 → E3 → E4 → E5 → E6 → E7
+              E1 → E2 → E3 → E4 → E5
 ```
 
-**强烈建议按 A → B → D → E 顺序跑**，前组产数据给后组用。中途**不要清 DB**（否则后面 E 类的可视化没数据可看）。
+**按 A → B → E 顺序跑**，前组产数据给后组用。中途**不清 DB**。
 
-### 2.1 截图命名约定
-
-每个 UI 用例至少 1 张截图，存到 `screenshots/`：
+### 2.1 截图命名
 
 ```
-UC-A1-application-created.png        # 用例编号 + 关键状态描述
-UC-A1-litedb-applications-row.png    # 同一用例多张就 -1 / -2 / ...
+UC-A1-application-created.png
+UC-A1-litedb-applications-row.png
 UC-B4-progressbar-mid.png
 UC-B4-result-panel-ok.png
 UC-E3-word-docx-opened.png
-...
 ```
 
-### 2.2 evidence 包最终结构（提交时）
+### 2.2 evidence 包最终结构
 
 ```
 docs/uat/reports/round-1-<tester>-<date>/
-├── README.md              # 你写的总结 + 与 baseline-2026-05-17 对比
-├── results-summary.md     # 26 用例逐行通过状态 (✅/⚠️/❌ + 备注)
-├── screenshots/           # 各 UC 截图，命名见上
-│   ├── UC-A1-*.png
-│   ├── UC-A2-*.png
-│   └── ...
-├── trx/                   # CLI 用例的 trx 文件（A8 / E6 / E7 / D1 / D2）
-│   ├── uc-a8.trx
-│   ├── uc-d1.trx
-│   ├── uc-e6.trx
-│   └── uc-e7.trx
-├── reports-export/        # E3 生成的 4 个文件
-│   ├── MTTestReport_Word.docx
-│   ├── MTTestReport_Excel.xlsx
-│   ├── MTTestReport_Pdf.pdf
-│   └── MTTestReport_Html.html
-└── MR.Litedb-snapshot     # 跑完后整个 DB 的 copy（验数据完整性）
+├── README.md                 # 总结 + 与 baseline-2026-05-17 对比
+├── results-summary.md        # 26 用例逐行（21 自跑 + 5 cloud 覆盖标 ✅）
+├── screenshots/              # ~25-30 张 PNG
+├── reports-export/           # E3 4 个文件 (Word/Excel/PDF/HTML)
+└── MR.Litedb-snapshot        # 跑完后的 DB copy
 ```
+
+无 `trx/` 目录 — CLI 用例由 cloud baseline 提供。
 
 ---
 
-## §3 Part A — 管理 CRUD（8 用例，~24 分钟）
+## §3 Part A — 管理 CRUD（7 个 UI 用例，~20 分钟）
 
-参考详细步骤见 [test-procedures.md UC-A1~A8](../test-procedures.md#类别-a--管理-crud)，本节只列**新增 / 简化**。
+按 [`test-procedures.md` UC-A1~A7](../test-procedures.md#类别-a--管理-crud) 三段式逐项跑。
 
-### 3.1 A1-A3（Application CRUD）
+### 3.1 A1-A3（Application CRUD chain）
 
-按 test-procedures **三段式**逐项跑：
-- UC-A1 新建 `UAT-App-1`
-- UC-A2 改 description
-- UC-A3 删除
-
-每步**截图 + 用 LiteDB Studio 截 Applications 集合的当前行**作为证据。
-
-> ⚠ **重要**：A3 删除后**不要重启**，立即跑 A4（A4 会重新建 Application）。或先做 A4 / A5 再回头 A3 — 顺序不强制，只要每个用例的初始条件满足。
+- **UC-A1** 新建 `UAT-App-1`（截图 + LiteDB Applications 集合截图）
+- **UC-A2** 改 description = `UAT smoke v2`
+- **UC-A3** 删除（注意：v2 schema 是软删 `Status=deleted`，硬删要看具体 schema 配置）
 
 ### 3.2 A4-A7（Domain / MR / MetaPattern）
 
-- UC-A4 Domain `Neutronics` + 绑 App
-- UC-A5 MR `UAT-Identity-MR`
-- UC-A6 列表筛选 / 搜索（用秒表测响应 < 500 ms）
-- UC-A7 MetaPatterns 8 行（4 active + 4 out-of-scope）
+- **UC-A4** Domain `Neutronics` + 绑 App
+- **UC-A5** MR `UAT-Identity-MR`
+- **UC-A6** 列表搜索 `Identity` < 500 ms
+- **UC-A7** MetaPatterns 8 行（4 active + 4 out-of-scope）
 
-每个用例至少 1 张截图。
+每用例 ≥1 张截图。
 
-### 3.3 A8（CLI 用例）
-
-```powershell
-dotnet test MetBench_SystemMT.Tests --filter "FullyQualifiedName~V1CompatibilityTests|FullyQualifiedName~V2EntityRoundtripTests|FullyQualifiedName~MetaPatternEntityTests|FullyQualifiedName~MRBindingStatusTests" --logger "trx;LogFileName=$evidence\trx\uc-a8.trx"
-```
-
-**断言**：trx 含 Passed > 0, Failed = 0。
+> 🟢 **UC-A8 跳过**：cloud baseline-2026-05-17 已覆盖 4 类 CRUD 实体 round-trip + Seed + Status。在 results-summary 标 ✅ + 备注 "cloud baseline 已覆盖"。
 
 ---
 
-## §4 Part B — MR 蜕变测试主流程（9 用例，~45 分钟）
+## §4 Part B — MR 蜕变测试主流程（9 个 UI 用例，~45 分钟）
 
-### 4.1 B1（Discovery 页）
+### 4.1 B1（Discovery 页，amax.py SUT）
 
-UC-B1：选 SUT = `amax.py`，点 Run Discovery → 候选 MR 列表 ≥ 1 行 + 截图。
+UC-B1：进 Discovery 页 → SUT = `amax.py` → Run Discovery → 候选 MR ≥ 1 行 + confidence 字段。
 
-### 4.2 B2-B6（System-MT 主流程，OpenMOC）
+### 4.2 B2-B6（MT Execution 主链路 — 默认 heat_equation SUT）
 
-> ⚠ 若 OpenMOC venv 未上（§1.2 路径 B），B2-B6 全部 ⚠️ 跳过；下面假设 venv OK。
+> 💡 **关键 scoping**：runbook 默认用 **heat_equation** SUT 走 MT 主流程，不需要 OpenMOC venv。heat_equation 是 Python stdlib + numpy，已随 Win Python 3.12 装上。
+>
+> 测试关注的是 WPF UI 行为（进度条 / Status / chart / Result 面板），**不是物理正确性**。物理正确性由 cloud cross-program BDD 4/4 已覆盖。
 
 按链路：
-1. UC-B2 选 MR `ScaleNuSigmaF` + sample `pincell.json`
-2. UC-B3 Generate Follow-up（< 1 s，截 followup JSON）
-3. UC-B4 Run（30-60 s，截进度条 mid + 结束状态）
-4. UC-B5 Result 面板 6 个字段（source/follow-up k_eff / passed / Δ / threshold / reason）
-5. UC-B6 chart（CartesianChart + PieChart + hover tooltip）
+1. **UC-B2** 选 MR `heat-equation-amplitude` + sample `SUT/heat_equation/sample/gaussian.json`
+2. **UC-B3** Generate Follow-up（< 1 s，截 followup JSON）
+3. **UC-B4** Run（heat_equation 单次 ~2-5 s，截进度条 + 结束 Status）
+4. **UC-B5** Result 面板 6 字段全（`Source max_u` / `Follow-up max_u` / `Assertion Passed` / `Observed Δ` / `Expected Threshold` / `Failure Reason`）
+5. **UC-B6** chart（CartesianChart + 数值类 metric + hover tooltip）
 
-> 💡 **小贴士**：B4 跑的时候用 PowerShell 另开窗口 `Get-Date` 记开始时间，结束时再看，算总时长，写进 README perf 段。
+> 💡 **可选**：如果你想验 OpenMOC 走 UI 路径，可以在 §1.2 提到的 WSL2 桥接环境下选 OpenMOC SUT 跑一次。但这是 nice-to-have，不算 round-1 必跑。
 
-### 4.3 B7-B9（Anomaly 流程）
+### 4.3 B7-B9（Anomaly 流程 — 故意造 anomaly）
 
-为了拿到 anomaly，**故意把 B4 的 factor 改成 0.5**（默认 1.5 → 改成 0.5 让 GreaterThan 必失败）：
-- 在 MT Execution 页 factor 输入框改 `0.5`
-- 点 Run → Status 显示 `anomaly`（红底）
+为了拿到 anomaly，**改 factor=0.5**（默认 2 → 改 0.5 让 GreaterThan 必失败）：
+- 重跑 2 次（产生 2 条 anomaly 供 commonality）
 
 然后：
-- UC-B7 Anomaly List 看新增 anomaly 行
-- UC-B8 多选 2+ anomaly（先把 factor=0.5 重跑 2 次）→ Analyze Commonality
-- UC-B9 选一个 anomaly → Replay
+- **UC-B7** Anomaly List 看新增 anomaly 行（Severity / Category / LinkedKnownBug 列）
+- **UC-B8** 多选 2+ anomaly → Analyze Commonality
+- **UC-B9** 选一个 anomaly → Replay → Reproduced=true/false
 
-每个用例**截图 + 记 Reproduced=true/false**。
-
----
-
-## §5 Part D — R-Case 自动复现（2 用例，~10 分钟）
-
-### 5.1 D1（CLI 测试）
-
-```powershell
-dotnet test MetBench_SystemMT.Tests --filter "FullyQualifiedName~RCaseReproductionServiceTests" --logger "trx;LogFileName=$evidence\trx\uc-d1.trx"
-```
-
-**断言**：trx 含 Passed ≥ 9, Failed = 0。
-
-### 5.2 D2（meta 检查）
-
-```powershell
-Select-String -Path "$evidence\trx\uc-d1.trx" -Pattern "WriteAudit_records_r_case_reproduced"
-```
-
-**断言**：grep 命中且 outcome=Passed。
-
-> 💡 加分项：用 LiteDB Studio 打开 `MR.Litedb` 看 `AuditLog` 集合是否含 `r-case.reproduced` 类型的行（B9 跑成功后会有）。
+每用例截图。
 
 ---
 
-## §6 Part E — 可视化 & 报表（7 用例，~35 分钟）
+## §5 Part E — 可视化 & 报表（5 个 UI 用例，~25 分钟）
 
-E1-E5 依赖前面 A/B/D 已产生数据。**不要清 DB**。
+E1-E5 依赖前面 A/B 产的数据。**不清 DB**。
 
-### 6.1 E1-E2（两个 Dashboard）
+### 5.1 E1-E2（两个 Dashboard）
 
-- UC-E1 Trend Dashboard：选 `Anomaly Count` × "最近 4 周" → CartesianChart 折线 + hover tooltip + WoW 标注
-- UC-E2 Coverage Dashboard：4 个 PieChart，每图 ≥ 2 扇区，legend 显示百分比
+- **UC-E1** Trend Dashboard：`Anomaly Count` × "最近 4 周" → CartesianChart 折线 + hover + WoW 标注
+- **UC-E2** Coverage Dashboard：4 个 PieChart，每图 ≥ 2 扇区 + legend 百分比
 
-**截图**：每个 dashboard 各 1 张全屏。
+### 5.2 E3-E4（报告 4 端导出 + WebView2）
 
-### 6.2 E3-E4（报告导出 + WebView2）
+- **UC-E3**：选 scope = `By MR`，点 Generate All
+- 4 个文件 (Word/Excel/PDF/HTML) 落到 `Documents\MetBench_MTReport\`，**copy 到 `$evidence\reports-export\`**
+- 每个文件打开看一眼，内容含报告头 / 摘要 / MR 列表 / 异常列表 → 4 个都 OK = E3 ✅
+- **UC-E4**：MT Report Generator 页内点 "View HTML in App" → WebView2 渲染正确
 
-- UC-E3：选 scope = By MR，点 Generate All
-- **导出后从 `Documents\MetBench_MTReport\` 把 4 个文件 (Word/Excel/PDF/HTML) copy 到 `$evidence\reports-export\`**
-- 每个文件打开看一眼 → 内容包含报告头 / 摘要 / MR 列表 / 异常列表，4 个都 OK = E3 ✅
-- UC-E4：在 MT Report Generator 页内点 "View HTML in App" → WebView2 渲染正确 → 截图
+### 5.3 E5（Dashboard 主页 cards）
 
-### 6.3 E5（Dashboard 主页 cards）
+- 回 Dashboard 主页，看顶部 4-6 个 card（Total MRs / Executions Today / Anomalies This Week / Pass Rate）
+- 数值有意义（不全 0）+ 截图
 
-回 Dashboard 主页，看顶部 4-6 个 card → 截图。数值有意义（不是全 0）。
-
-### 6.4 E6-E7（CLI）
-
-```powershell
-dotnet test MetBench_SystemMT.Tests --filter "FullyQualifiedName~SystemMtReportServiceTests" --logger "trx;LogFileName=$evidence\trx\uc-e6.trx"
-dotnet test MetBench_SystemMT.Tests --filter "FullyQualifiedName~HtmlSystemMtResultReport" --logger "trx;LogFileName=$evidence\trx\uc-e7.trx"
-```
-
-**断言**：E6 Passed ≥ 6, E7 Passed > 0，都 Failed = 0。
+> 🟢 **UC-E6 / UC-E7 跳过**：cloud baseline 已覆盖 `SystemMtReportServiceTests` + `HtmlSystemMtResultReport*`。在 results-summary 标 ✅ + 备注。
 
 ---
 
-## §7 收尾（~15 分钟）
+## §6 收尾（~15 分钟）
 
-### 7.1 备份 MR.Litedb 快照
+### 6.1 备份 MR.Litedb 快照
 
 ```powershell
-Copy-Item "$env:LOCALAPPDATA\..\..\..\Work\MetBench-V2.1.4_2\MetBench_Client\bin\Debug\net8.0-windows7.0\MR.Litedb" "$evidence\MR.Litedb-snapshot"
-# 路径取决于你 dotnet run 时 MR.Litedb 落在哪；可用 Process Monitor 查实际路径
+Copy-Item "C:\Work\MetBench-V2.1.4_2\MetBench_Client\bin\Debug\net8.0-windows7.0\MR.Litedb" "$evidence\MR.Litedb-snapshot"
 ```
 
-### 7.2 写 evidence 包 README
+### 6.2 evidence 包 README 模板
 
-模板 `$evidence\README.md`：
+`$evidence\README.md`：
 
 ```markdown
 # Windows UAT Round-1 — <tester> — <date>
 
 | 项 | 值 |
 |---|---|
-| 仓库 commit | <git rev-parse HEAD 输出> |
+| 仓库 commit | <git rev-parse HEAD> |
 | 平台 | Windows 11 22H2 + VS 2022 17.x + .NET 8.0.x |
-| WPF 冷启动 | _____ s（应 < 5 s） |
-| OpenMOC venv | ✅ (WSL2 桥接) / ❌ (跳过 B2-B6) |
-| LLM API | not exercised |
-| 总跑时长（active） | _____ 小时 _____ 分钟 |
+| WPF 冷启动 | _____ s (期望 < 5 s) |
+| 总跑时长 (active) | _____ 小时 _____ 分钟 |
+| Windows 自跑用例 | 21 (A1-A7 + B1-B9 + E1-E5) |
+| 云端覆盖用例（不重跑） | 5 (A8 / D1 / D2 / E6 / E7) |
+| Baseline 引用 | docs/uat/reports/baseline-2026-05-17/baseline-full.trx |
 
-## 结果汇总（对比 baseline-2026-05-17）
+## 结果汇总（21 自跑 + 5 cloud-covered = 26）
 
-| 类别 | Pass | ⚠️ | ❌ | 备注 |
-|---|---|---|---|---|
-| A. 管理 CRUD (8) | _/8 | | | |
-| B. MR 主流程 (9) | _/9 | | | |
-| D. R-Case (2) | _/2 | | | |
-| E. 可视化 & 报表 (7) | _/7 | | | |
-| **合计** | _/26 | | | |
+| 类别 | Windows UI Pass | Cloud Covered | ⚠️ | ❌ | 备注 |
+|---|---|---|---|---|---|
+| A. 管理 CRUD (8) | _/7 | 1 (UC-A8) | | | |
+| B. MR 主流程 (9) | _/9 | 0 | | | |
+| D. R-Case (2) | 0 | 2 (UC-D1, D2) | | | |
+| E. 可视化 & 报表 (7) | _/5 | 2 (UC-E6, E7) | | | |
+| **合计** | _/21 | 5/5 | | | |
 
 ## 偏差说明
 
-（列每个 ⚠️ 或 ❌ 的具体原因 + 截图引用）
+（每个 ⚠️ 或 ❌ 的原因 + 截图引用）
 
 ## 性能实测（与 baseline 对比）
 
@@ -293,34 +277,41 @@ Copy-Item "$env:LOCALAPPDATA\..\..\..\Work\MetBench-V2.1.4_2\MetBench_Client\bin
 | WPF 冷启动 | < 5 s | _____ s |
 | Application CRUD | < 2 s | _____ s |
 | MR 列表搜索 | < 500 ms | _____ ms |
-| OpenMOC 单次跑 | < 90 s | _____ s |
+| heat_equation 单次跑 | < 5 s | _____ s |
 | 4 端报告导出 | < 30 s | _____ s |
 ```
 
-### 7.3 写 results-summary.md
-
-模板 `$evidence\results-summary.md`：每个 UC 一行：
+### 6.3 results-summary.md 模板
 
 ```markdown
 | UC | 类别 | 结果 | 备注 | 证据 |
 |---|---|---|---|---|
 | UC-A1 | A | ✅ | 操作 1.8 s | screenshots/UC-A1-application-created.png |
 | UC-A2 | A | ✅ | — | screenshots/UC-A2-edited.png |
-| UC-A3 | A | ⚠️ | DB 软删而非硬删（v2 schema 行为）| screenshots/UC-A3-soft-deleted.png |
 ...
+| UC-A8 | A | ✅ | cloud baseline-2026-05-17 已覆盖 | (cloud trx) |
+| UC-B1 | B | ✅ | — | screenshots/UC-B1-discovery-list.png |
+...
+| UC-D1 | D | ✅ | cloud baseline 已覆盖 | (cloud trx) |
+| UC-D2 | D | ✅ | cloud baseline 已覆盖 | (cloud trx) |
+...
+| UC-E6 | E | ✅ | cloud baseline 已覆盖 | (cloud trx) |
+| UC-E7 | E | ✅ | cloud baseline 已覆盖 | (cloud trx) |
 ```
 
-### 7.4 在仓里 dashboard.md 加 round-1 行
-
-打开 `docs/uat/reports/dashboard.md`，在 baseline-2 行下加：
+### 6.4 dashboard.md 加 round-1 行
 
 ```markdown
-| round-1 | <date> | <commit> | <tester> | Windows | __/26 | __ | __ | __ | <PASS/CONDITIONAL/FAIL> | round-1-<tester>-<date>/ |
+| round-1 | <date> | <commit> | <tester> | Windows UI | __/21 + 5 cloud | __ | __ | __ | <PASS/CONDITIONAL/FAIL> | round-1-<tester>-<date>/ |
 ```
 
-并在 Commentary 段加 2-3 句总结。
+Commentary：
+```
+### <date> round-1 Windows
+21 个 WPF UI 用例 (A1-A7 + B1-B9 + E1-E5) + 5 个 cloud baseline 覆盖 (A8/D1/D2/E6/E7) = 26/26. 总评 ___. Windows 端用 heat_equation SUT 验 MT 主流程 UI 行为；OpenMOC + OpenMC 端到端物理由 cloud cross-program BDD 4/4 覆盖.
+```
 
-### 7.5 提交 + 开 PR
+### 6.5 提交 + 开 PR
 
 ```powershell
 cd C:\Work\MetBench-V2.1.4_2
@@ -334,35 +325,51 @@ gh pr create --base main --fill
 
 ---
 
-## §8 故障排查 cheat sheet
+## §7 故障排查 cheat sheet
 
 | 症状 | 可能原因 | 处理 |
 |---|---|---|
 | WPF 不启动 | VS 缺 .NET desktop workload | VS Installer → "修改" → 勾上 |
 | Application Management 页空白 | DB 路径错（v1/v2 schema） | LiteDB Studio 看 `MR.Litedb` 是否在 `MetBench_Client/bin/Debug/` 下 |
-| B4 OpenMOC 跑爆 | venv 不通 | 见 §1.2，跳过 B2-B6 |
-| LLM API 失败 | UC-C4 默认走 fake gateway，**不影响 UAT** | — |
-| E3 4 端导出缺一个 | NPOI / iText 缺包 | `dotnet restore`；查 csproj 是否含 NPOI / iTextSharp |
-| CLI 测试 KeysetPagination 5 个 fail | `DbConfig.Instance` flake | 应该已在 PR #64 修复 (`[Collection("DbConfigGlobal")]`)；若仍现说明 commit 不含 #64，pull 最新 |
+| B4 heat_equation 跑爆 | numpy 未装 | `pip install numpy` 然后重试 |
+| 想验 OpenMOC 走 WPF UI 路径 | nice-to-have | 见 §1.2 WSL2 桥接（**可选**，不影响 round-1） |
+| E3 4 端导出缺一个 | NPOI / iText 缺包 | `dotnet restore`，查 csproj 是否含 NPOI / iTextSharp |
 | 实测时间远超 baseline | 硬件慢 / 后台占用 | 关其他程序重测；< 2× baseline 算通过 |
 
 ---
 
-## §9 与 v2.1 发版的关系
+## §8 与 v2.1 发版的关系
 
-本 round-1 跑通 + dashboard `PASS` 后，加上 cloud-side `baseline-2026-05-17` 已是 100% pass，**v2.1 发版条件成立**：
+本 round-1 跑通 + dashboard `PASS` 后，加上 cloud-side `baseline-2026-05-17` 已是 100% pass（含全部 5 个 CLI 用例），**v2.1 发版条件成立**：
 
 ```powershell
-git tag -a release-v2.1.0 -m "MetBench v2.1.0 release: cloud baseline-2026-05-17 (521/521) + Windows round-1 PASS"
+git tag -a release-v2.1.0 -m "MetBench v2.1.0: cloud baseline-2026-05-17 (521/521) + Windows round-1 PASS (21 UI + 5 cloud-covered)"
 git push origin release-v2.1.0
 ```
 
 ---
 
-## §10 worst-case 提早撤退条件
+## §9 worst-case 提早撤退条件
 
 若以下任一发生，**立即停跑本轮**，开 issue + 改 dashboard `FAIL`：
 
 - A1 / A2 / A3 / A5 / B2 / B4 任一 Blocker 用例失败
-- 任一 Linux baseline 已 pass 的 CLI 用例（A8 / D1 / E6 / E7）在 Windows 上 Failed > 0
 - 跑到一半 WPF crash 且重启复现
+- 5 个 cloud-covered 用例在本地复跑出现 fail（说明 Windows 环境异常，超出 round-1 验收范围，应单独 issue）
+
+---
+
+## §10 责任边界总结（Windows vs Cloud）
+
+| 测试类型 | 平台 | 覆盖范围 | 证据位置 |
+|---|---|---|---|
+| **CLI 单测 / 集成 / BDD smoke** | Cloud | 521 facts (含 5 CLI UAT 用例 + OpenMOC + OpenMC + 30 BDD scenarios + 4 cross-program) | `docs/uat/reports/baseline-2026-05-17/` |
+| **WPF UI 用例** | Windows | 21 UAT 用例 (A1-A7 / B1-B9 / E1-E5) | `docs/uat/reports/round-1-<tester>-<date>/` |
+| **物理正确性 (OpenMOC / OpenMC k_eff)** | Cloud | 4 cross-program BDD + 2 smoke test | 同 cloud baseline |
+| **数据持久化 / Schema migration** | Cloud | LiteDb*Tests + V2Schema/* | 同 cloud baseline |
+| **报表生成器 service / Renderer** | Cloud | E6 / E7 单测 | 同 cloud baseline |
+| **报表 UI 渲染（Word/Excel/PDF 实际打开）** | Windows | UC-E3 / E4 4 端打开验证 | Windows evidence |
+| **WebView2 嵌入** | Windows | UC-E4 | 同 |
+| **Chart 可视化 (LiveCharts hover tooltip)** | Windows | UC-B6 / E1 / E2 | 同 |
+
+**Windows 只负责"渲染 + 用户交互 + UI 状态机"**，不重复验云端已覆盖的逻辑。

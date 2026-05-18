@@ -108,7 +108,7 @@ Current state at the time of this README:
 - **Stage 6** (v2 development P1-P8 cloud-side): landed
 - **Stage 7** (W11-W12: Multi-LLM consensus 真实跑通 / OpenMC 第 3 SUT 接入 / UAT 47 用例 markdown + 21 用例 BDD / scenario→MR 命名统一 / LiteDB schema migration / F11 月度监控): landed 2026-05-17，baseline-2026-05-17 全套 **521/521 Pass**
 
-剩余前置：Windows 端跑过 1 轮 UAT round-1（A/B/D/E 26 UI 用例，参 [windows-uat-round-1.md](docs/uat/runbooks/windows-uat-round-1.md)）→ tag `release-v2.1.0`。
+剩余前置：Windows 端跑过 1 轮 UAT round-1（**21 个 WPF UI 用例** A1-A7 + B1-B9 + E1-E5；其余 5 个 CLI 用例 A8/D1/D2/E6/E7 已由 cloud baseline 覆盖，参 [windows-uat-round-1.md](docs/uat/runbooks/windows-uat-round-1.md)）→ tag `release-v2.1.0`。
 
 ## Experiments
 
