@@ -203,61 +203,65 @@ Cloud-side 测试态（baseline-2026-05-17）：**521 xUnit pass / 0 skip / 0 fa
 
 剩余前置（v2.1.0 发版）：Windows 端 UAT round-1 跑通 **21 个 WPF UI 用例**（A1-A7 + B1-B9 + E1-E5；其余 5 个 A8/D1/D2/E6/E7 是 CLI，cloud baseline-2026-05-17 已覆盖） → dashboard `PASS` → tag `release-v2.1.0`。
 
-## Stage 8: 元模式驱动 MR 识别 + 反应堆物理 5 大方程 SUT 覆盖（启动 2026-05-18，v2.2 候）
+## Stage 8: MR 库 — 5 方程 × 4 程序类型 × 5 MP 矩阵覆盖（启动 2026-05-18，v2.2 主线）
 
-post v2.1 发版后的两个并行工作线，论文 contribution 加分。**v2.2 主线**，详见同期 RFC + plan 文档。
+**上游对接**: P-series 研究纲领 [Cmrlibrary.md 5D schema + 57 种子 MR + 三层验证] + [PWR_MR_Analysis.md 27 PWR 新增 MR] + NOETHER 8 元模式（→ 5 MP 映射见 [`docs/GLOSSARY.md`](docs/GLOSSARY.md) §5）。MetBench 升级为 P-series MR 库的**可执行存储 + MT 执行载体**。
 
-### Goal 1: 基于元模式的结构化 meta-prompt MR 识别引擎
+**术语规范**：见 [`docs/GLOSSARY.md`](docs/GLOSSARY.md)（5 MP 定义+实例 / BDD 术语+实例 / 5 方程 / 程序类型 / 5D 索引 / 内部命名）。
 
-**目标**：把 8 个 NOETHER MetaPattern 从"数据库 seed 行"升级成"可驱动 LLM 识别 MR 的 prompt 模板"。给定一个 SUT 的输入文件 schema + 参数说明 + 数学物理方程上下文，自动：
+**核心范围**:
+- 反应堆物理 **5 个核心方程**：boltzmann / diffusion / bateman / fourier / NS（英文全称，前缀 `E_`）
+- 程序类型 4 类正交：**Num / MC / Surr / PINN**
+- MR 元模式 **5 类 MP**：MP_inv / MP_mono / MP_conv / MP_traj / MP_part（NOETHER 8 ↔ 5 MP 映射含 m_cmp 拆分：严格相等→MP_inv / 偏序→MP_part）
+- MR schema：5D 索引（Equation / ProgramType / MetaPattern / SourceLevel / FailureCorrelation）通过 **BDD `.feature` + Gherkin tags + LiteDB sync** 落地（沿用现有约定，不引 YAML mirror）
+- 推导：方程算子 → 适用 MP 选取 → 参数扫描 → meta-prompt → LLM → MT 执行 → 高支持入库 / 低支持反例 / discard
+- Deliverable：**三元组（程序集 / MR 集 / 测试用例集）+ 17 cells 覆盖矩阵**
 
-1. 解析 SUT 输入 → 抽参数名 + 类型
-2. 依据方程性质（守恒律 / 对称 / 单调性 / 收敛性 / 跨实现一致 …）选匹配的 MetaPattern 子集
-3. 用 MetaPattern 对应的**结构化 meta-prompt 模板** + 该 SUT 参数填充 → 生成 SUT-specific MR 识别 prompt
-4. 调 LLM（复用现有 `OpenAiCompatibleLlmGateway` + `MultiLlmConsensusValidator`）
-5. 解析 LLM 响应为 MR candidate + confidence → 入 CandidateRepository
+**暂缓**（独立模块，Stage 9+ 候）:
+- **BNCT 硼中子放疗**：plan 内保留章节，Stage 8 不实施（80% 重叠 boltzmann + 程序大多商业/申请/停维）
+- **故障注入 V3**：独立模块挂起；Stage 8 MR 库只做 V1+V2
+- **论文 writeup**：暂不绑定（user 指令：先做实验，发现 bug 再考虑）
 
-**论文价值**：把 metamorphic testing 框架的"凭经验写 prompt" 提升为"基于元模式的自动 prompt 生成"，可重复 + 可比较，是 metamorphic testing 自动化研究的真实贡献。
+### Goal 1: 元模式驱动 meta-prompt MR 识别引擎
 
-**deliverables**:
-- 8 个 MetaPattern 各自的 meta-prompt 模板（结构化，含 placeholder）
-- `SutParameterExtractor` / `MetaPromptBuilder` / `LlmMrIdentifier` 三个 service
-- 端到端 demo：amax.py SUT → 至少 1 个识别出的 MR candidate
-- TDD 覆盖（fake gateway + 真实 LLM gateway sanity test）
+把 5 MP 升级成 LLM-driven 自动 MR 识别引擎。详见 [meta-prompt-mr-discovery-brainstorming.md](docs/superpowers/plans/2026-05-18-meta-prompt-mr-discovery-brainstorming.md) + [...-plan.md](docs/superpowers/plans/2026-05-18-meta-prompt-mr-discovery-plan.md)。**保留**，作为 Goal 2 工具基础。
 
-**详细计划**: [docs/superpowers/plans/2026-05-18-meta-prompt-mr-discovery-brainstorming.md](docs/superpowers/plans/2026-05-18-meta-prompt-mr-discovery-brainstorming.md) → [...-plan.md](docs/superpowers/plans/2026-05-18-meta-prompt-mr-discovery-plan.md)
+### Goal 2: 17 cells × 5 MP 矩阵 + 84 MR 母集落地
 
-### Goal 2: 反应堆物理 5 大方程 SUT 覆盖
+按 5D schema 在 MetBench 内构建 MR 库，覆盖 **5 方程 × 4 程序类型 = 20 cells**（3 个 D₂ MC cell 本质不适用 → **17 实际可填**）。
 
-**目标**：当前 4 SUT 偏中子物理（OpenMOC + OpenMC neutron transport），其余 heat_equation + projectile 是 demo。要让框架覆盖**反应堆物理工程实践中真实关心的 5 大方程**：
+**程序候选（cloud-friendly 评估）**：
+- OpenMOC + OpenMC ✅ 已装（boltzmann + bateman）
+- 4 home-grown（diffusion nodal + Bateman ODE + 1D Fourier + 1D subchannel）替代 PARCS / ORIGEN / FRAPCON / RELAP5 (商业 / 学术申请，cloud 不可获取)
+- D₃ Surr 用 scikit-learn GP（不依赖 PyTorch / 论文 release）
+- D₄ PINN 留 Stage 9
 
-1. **中子输运**（Boltzmann transport equation） — 已有 OpenMOC + OpenMC ✅
-2. **燃耗 / 核素演化**（Bateman equation） — 待接 SUT
-3. **燃料热传导**（fuel pin heat conduction） — 待接 SUT
-4. **冷却剂热工水力**（thermal-hydraulics, 1D 子通道） — 待接 SUT
-5. **反应堆动力学**（point-kinetics / space-time kinetics） — 待接 SUT
+**MR 母集**：57 Cmrlibrary 种子 + 27 PWR_MR_Analysis 新增 = **84 条候选 MR**，按 5 MP × 5 方程 cell 分类。
 
-对每个待接方程：
-- 调研 2-3 个开源候选程序（github / pip 可获取，cloud Linux 友好）
-- 用 Stage 8 Goal 1 的 meta-prompt 引擎自动生成 MR 候选
-- 选 ≥ 1 个 MR 落地为 SUT scenario，跑通 MT 流程
-- 录入 MetBench LiteDB + UAT BDD 加 scenario
+**完整研究工作流**（per cell）：
 
-**论文价值**：从"演示 metamorphic testing 适用于多种 numerical solver" → "覆盖反应堆物理工程**完整**方程栈"，论据强度大幅提升。
+```
+方程算子 algebraic property
+  → 适用 5 MP 选取
+  → 输入参数扫描
+  → meta-prompt 构造
+  → LLM 识别 MR (多家 consensus)
+  → MetBench 执行 MT
+  → 三分支:
+      ├─ 高支持 → 入库 (.feature + LiteDB)
+      ├─ 低支持 + MP 数学应成立 → 反例归档（不刻意造）
+      └─ MP 数学不成立 → discard
+```
 
-**deliverables (5 阶段)**:
-- Phase 8.2.1 — Bateman / 燃耗：用 OpenMC depletion 模块（已有 binary），1 个 MR
-- Phase 8.2.2 — Fuel heat conduction：home-grown Python 1D 径向求解器（无外部依赖）+ 1 MR
-- Phase 8.2.3 — Thermal-hydraulics 子通道：home-grown Python 1D channel 或 PyNE 候选
-- Phase 8.2.4 — Point-kinetics：home-grown Python ODE（最简单）
-- Phase 8.2.5 — paper writeup: "5 equations coverage" 实证
+### Stage 8 时间盒（5-6 周）
 
-**详细计划**: [docs/superpowers/plans/2026-05-18-reactor-physics-five-equations-brainstorming.md](docs/superpowers/plans/2026-05-18-reactor-physics-five-equations-brainstorming.md) → [...-plan.md](docs/superpowers/plans/2026-05-18-reactor-physics-five-equations-plan.md)
+- W13 (2026-05-18 ~ 25): Phase 8.0 5D tag schema + Phase 8.1 meta-prompt 引擎
+- W14: Phase 8.2 现有 4 SUT 5D tag 升级 + **8.2.5 端到端 workflow 验证**
+- W15-W18: Phase 8.3 4 home-grown cells (Bateman + Fourier + nodal diffusion + subchannel)
+- W19: Phase 8.4 D₃/D₄ 横切试点 (Surr + MC depletion) + 8.5 cells 覆盖 dashboard
 
-### Stage 8 时间盒
-
-- W13 (2026-05-18 ~ 25): Goal 1 设计 + 实施（meta-prompt 引擎跑通 amax demo）
-- W14-W16 (2026-05-26 ~ 06-15): Goal 2 五阶段轮转接 SUT
-- W17 (2026-06-16+): 论文 writeup + UAT round-2
+**ship 验收**：≥ 12 cells 不空白（17 实际可填）+ ≥ 15 MR 入库 + 全套 `dotnet test` 0 fail。
 
 **不阻塞 v2.1 发版**。v2.1 发版后立即启动。
+
+详细计划见 [stage8-expanded-mr-library-brainstorming.md](docs/superpowers/plans/2026-05-18-stage8-expanded-mr-library-brainstorming.md) + [...-plan.md](docs/superpowers/plans/2026-05-18-stage8-expanded-mr-library-plan.md)。
