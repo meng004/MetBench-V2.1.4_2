@@ -203,61 +203,80 @@ Cloud-side 测试态（baseline-2026-05-17）：**521 xUnit pass / 0 skip / 0 fa
 
 剩余前置（v2.1.0 发版）：Windows 端 UAT round-1 跑通 **21 个 WPF UI 用例**（A1-A7 + B1-B9 + E1-E5；其余 5 个 A8/D1/D2/E6/E7 是 CLI，cloud baseline-2026-05-17 已覆盖） → dashboard `PASS` → tag `release-v2.1.0`。
 
-## Stage 8: 元模式驱动 MR 识别 + 反应堆物理 5 大方程 SUT 覆盖（启动 2026-05-18，v2.2 候）
+## Stage 8: MR 库 — 多专业域 × 多程序类型矩阵覆盖（启动 2026-05-18 / 取代旧 5-equation scope，v2.2 主线）
 
-post v2.1 发版后的两个并行工作线，论文 contribution 加分。**v2.2 主线**，详见同期 RFC + plan 文档。
+**上游对接**: P-series 研究纲领的 [Cmrlibrary.md 5 维 schema](.)（外部上传，未入仓）+ NOETHER 8 元模式 + 12 网格选定。MetBench 升级为 P-series MR 库的**可执行存储 + MT 执行载体**。
 
-### Goal 1: 基于元模式的结构化 meta-prompt MR 识别引擎
+**核心扩展**（vs 旧 Stage 8 narrow scope）:
+- 程序类型 4 类正交：**数值模拟 / 概率（MC）/ ML 代理 / PINNs**
+- 专业域 5 类：中子输运 / 中子扩散 / 燃耗 / 热工 + **新增 BNCT（硼中子放疗）**
+- MR schema 升级：5 维索引（方程 × 程序类型 × 元模式 × 来源层次 × 故障关联）
+- 推导：每 cell（方程 × 程序类型 × 域）→ 8 元模式 → 似然 MR 候选 → V1/V2/V3 三层验证 → 入库
+- Deliverable 框架：**三元组（程序集 / MR 集 / 测试用例集）per cell**
 
-**目标**：把 8 个 NOETHER MetaPattern 从"数据库 seed 行"升级成"可驱动 LLM 识别 MR 的 prompt 模板"。给定一个 SUT 的输入文件 schema + 参数说明 + 数学物理方程上下文，自动：
+### Goal 1: 元模式驱动 meta-prompt MR 识别引擎（carryover from old scope）
 
-1. 解析 SUT 输入 → 抽参数名 + 类型
-2. 依据方程性质（守恒律 / 对称 / 单调性 / 收敛性 / 跨实现一致 …）选匹配的 MetaPattern 子集
-3. 用 MetaPattern 对应的**结构化 meta-prompt 模板** + 该 SUT 参数填充 → 生成 SUT-specific MR 识别 prompt
-4. 调 LLM（复用现有 `OpenAiCompatibleLlmGateway` + `MultiLlmConsensusValidator`）
-5. 解析 LLM 响应为 MR candidate + confidence → 入 CandidateRepository
+把 8 NOETHER MetaPattern 升级成 LLM-driven 自动 MR 识别引擎。详见 [meta-prompt-mr-discovery-brainstorming.md](docs/superpowers/plans/2026-05-18-meta-prompt-mr-discovery-brainstorming.md) + [...-plan.md](docs/superpowers/plans/2026-05-18-meta-prompt-mr-discovery-plan.md)。**保留不变**，作为 Goal 2 推导矩阵的工具基础。
 
-**论文价值**：把 metamorphic testing 框架的"凭经验写 prompt" 提升为"基于元模式的自动 prompt 生成"，可重复 + 可比较，是 metamorphic testing 自动化研究的真实贡献。
+### Goal 2: 多专业域 × 多程序类型 MR 库矩阵（**取代** 旧 "5 reactor equations" scope）
 
-**deliverables**:
-- 8 个 MetaPattern 各自的 meta-prompt 模板（结构化，含 placeholder）
-- `SutParameterExtractor` / `MetaPromptBuilder` / `LlmMrIdentifier` 三个 service
-- 端到端 demo：amax.py SUT → 至少 1 个识别出的 MR candidate
-- TDD 覆盖（fake gateway + 真实 LLM gateway sanity test）
+按 Cmrlibrary.md 5 维 schema 在 MetBench 内构建 MR 库，覆盖：
 
-**详细计划**: [docs/superpowers/plans/2026-05-18-meta-prompt-mr-discovery-brainstorming.md](docs/superpowers/plans/2026-05-18-meta-prompt-mr-discovery-brainstorming.md) → [...-plan.md](docs/superpowers/plans/2026-05-18-meta-prompt-mr-discovery-plan.md)
+**方程维 (D₁，按 Cmrlibrary 编码)**:
+- **A**: Boltzmann 中子输运（OpenMC / OpenMOC / MCNP / NEWT）
+- **B**: 中子扩散（PARCS / NESTLE / OpenNodal）
+- **C**: Bateman 燃耗（ORIGEN / OpenMC depletion / PyNE）
+- **D**: Fourier 热传导（FRAPCON / BISON 简化 / home-grown）
+- **E**: Navier-Stokes 简化系统级（RELAP5 / CTF / OpenFOAM 子集）
+- **F**: 蒙特卡洛专有 MR（OpenMC / MCNP 共享）
+- **G**: ML 代理 / PINN 专有（DeepONet / R²-PINN / FNO）
+- **H**（新增）: **BNCT 剂量学**（SERA / TOPAS / MCNP-BNCT / NCTPlan）
 
-### Goal 2: 反应堆物理 5 大方程 SUT 覆盖
+**程序类型维 (D₂)**: D1 数值确定性 / D2 蒙特卡洛 / D3 代理模型 / D4 PINN
 
-**目标**：当前 4 SUT 偏中子物理（OpenMOC + OpenMC neutron transport），其余 heat_equation + projectile 是 demo。要让框架覆盖**反应堆物理工程实践中真实关心的 5 大方程**：
+**元模式维 (D₃)**: P₁ 不变性 / P₂ 单调性 / P₃ 仿射收敛 / P₄ 退化极限 / P₅ 一致性 + m_adj + m_rev + P₉ 候选
 
-1. **中子输运**（Boltzmann transport equation） — 已有 OpenMOC + OpenMC ✅
-2. **燃耗 / 核素演化**（Bateman equation） — 待接 SUT
-3. **燃料热传导**（fuel pin heat conduction） — 待接 SUT
-4. **冷却剂热工水力**（thermal-hydraulics, 1D 子通道） — 待接 SUT
-5. **反应堆动力学**（point-kinetics / space-time kinetics） — 待接 SUT
+每 cell 工作流（**单一 cell deliverable**）:
+1. **方程归类** → 该 cell 对应数学物理方程明确
+2. **程序候选搜索** → ≥2 个开源 / 公开程序（github / pip / 学术 release）
+3. **元模式 × 方程推导** → 8 元模式逐一过 → 该方程下的似然 likely MR 列表（含适用域 + 关系类型 + 容差量级）
+4. **录入 MetBench**: MR YAML + LiteDB 入库 + 5D 索引完整
+5. **MT 执行**: 至少 1 个程序 × 至少 1 个 MR 跑通 source + followup + assertion
+6. **三层验证 (V1/V2/V3)**: 数学可推导性 + 程序执行 + 故障注入检出力
+7. **测试用例归档**: source + followup + 输入变换脚本 + 容差 + 适用域声明 + 自动化等级
 
-对每个待接方程：
-- 调研 2-3 个开源候选程序（github / pip 可获取，cloud Linux 友好）
-- 用 Stage 8 Goal 1 的 meta-prompt 引擎自动生成 MR 候选
-- 选 ≥ 1 个 MR 落地为 SUT scenario，跑通 MT 流程
-- 录入 MetBench LiteDB + UAT BDD 加 scenario
+**三元组终态 per cell**: 一组程序 + 一组 MR（YAML 入库）+ 一组测试用例（BDD + trx baseline）。
 
-**论文价值**：从"演示 metamorphic testing 适用于多种 numerical solver" → "覆盖反应堆物理工程**完整**方程栈"，论据强度大幅提升。
+**论文价值**:
+- 取代 "5 个 reactor 方程演示" 的薄证据 → "8 方程 × 4 程序类型 ≈ 30 cells 矩阵覆盖"
+- 直接喂给 P-series（P1 经验审计 / P2 IST SMS 度量）作为实证基础
+- BNCT 加入扩域到放射肿瘤 / 医学物理边缘，论文新颖性
 
-**deliverables (5 阶段)**:
-- Phase 8.2.1 — Bateman / 燃耗：用 OpenMC depletion 模块（已有 binary），1 个 MR
-- Phase 8.2.2 — Fuel heat conduction：home-grown Python 1D 径向求解器（无外部依赖）+ 1 MR
-- Phase 8.2.3 — Thermal-hydraulics 子通道：home-grown Python 1D channel 或 PyNE 候选
-- Phase 8.2.4 — Point-kinetics：home-grown Python ODE（最简单）
-- Phase 8.2.5 — paper writeup: "5 equations coverage" 实证
+### Goal 3 (新增): BNCT 硼中子放疗专属 cell
 
-**详细计划**: [docs/superpowers/plans/2026-05-18-reactor-physics-five-equations-brainstorming.md](docs/superpowers/plans/2026-05-18-reactor-physics-five-equations-brainstorming.md) → [...-plan.md](docs/superpowers/plans/2026-05-18-reactor-physics-five-equations-plan.md)
+BNCT 是医学物理领域，与反应堆物理共享 Boltzmann 输运求解器但有专属物理:
+- **附加方程**: 剂量学（DRBE 等）+ 生物效应（LQ 模型 / RBE）
+- **专属 MR 来源**: 剂量-反应单调（剂量 ↑ → 杀伤率 ↑）/ 几何对称（球肿瘤模型）/ 跨实现一致（TOPAS vs MCNP-BNCT）
+- **候选程序**: SERA（开源？）/ TOPAS（开源 Geant4 wrapper）/ NCTPlan（学术）/ MCNP-BNCT
 
-### Stage 8 时间盒
+BNCT 既扩域又复用 Boltzmann 元模式，是 Stage 8 矩阵的"压力测试" cell。
 
-- W13 (2026-05-18 ~ 25): Goal 1 设计 + 实施（meta-prompt 引擎跑通 amax demo）
-- W14-W16 (2026-05-26 ~ 06-15): Goal 2 五阶段轮转接 SUT
-- W17 (2026-06-16+): 论文 writeup + UAT round-2
+### Deliverable 框架
+
+| Level | 产物 |
+|---|---|
+| **Cell-level** | 程序候选清单 + likely MR 表 + 至少 1 个端到端 MT 测试用例 + 5D 元数据 YAML |
+| **Stage-level** | MR 库（LiteDB collection + YAML mirror）+ MR catalog .md（per cell 一节）+ 三层验证报告 |
+| **Paper-level** | "多专业域 MR 库 + 元模式驱动 MR 自动识别" 实证章节（喂 P1 / P2） |
+
+### Stage 8 时间盒（重新校准）
+
+- W13 (2026-05-18 ~ 25): Goal 1 meta-prompt 引擎 + Cmrlibrary 5D schema 在 MetBench 落地（**Phase 8.0**）
+- W14-15: 中子输运 + 扩散 + 燃耗 cell 推导 + 录入（Phase 8.A-C）
+- W16-17: 热传导 + 热工 + BNCT cell（Phase 8.D-H）
+- W18-19: ML 代理 + PINN 程序类型横切（Phase 8.D₃₋₄）
+- W20: 论文 writeup + UAT round-N
 
 **不阻塞 v2.1 发版**。v2.1 发版后立即启动。
+
+详细推导矩阵 + cell 工作流见 [stage8-expanded-mr-library-brainstorming.md](docs/superpowers/plans/2026-05-18-stage8-expanded-mr-library-brainstorming.md) + [...-plan.md](docs/superpowers/plans/2026-05-18-stage8-expanded-mr-library-plan.md)。
