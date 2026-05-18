@@ -99,7 +99,9 @@ namespace MetBench_BLL
         /// <returns>0 表示失败 1 表示重复  2表示成功 </returns>
         public int UpdateService(Application application)
         {
-            if (Application_repository.IsDuplicate(application, false))
+            // excludeSelf=true: 排除当前编辑记录, 否则同名 update 永远被误判为重复
+            // (Windows UAT round-1 limeng 2026-05-18 UC-A2 bug fix)
+            if (Application_repository.IsDuplicate(application, true))
             {
                 return 1;
             }

@@ -59,6 +59,10 @@ namespace MetBench_Domain
 
         /// <summary>"method-level"（v1）或 "system-level"（v2）。</summary>
         public string Kind { get; set; } = "method-level";
+
+        // WPF ComboBox 等控件直接 ToString() 取显示文本; 不 override 会显示类全名
+        // (Windows UAT round-1 limeng 2026-05-18 UC-A5/B1 bug fix)
+        public override string ToString() => Name ?? string.Empty;
     }
 
     // 应用程序参数类
