@@ -31,5 +31,9 @@ namespace MetBench_Client.Models
         {
             Application = application;
         }
+
+        // WPF ComboBox 等控件 ToString() 显示文本; 委托给底层 Application
+        // (Windows UAT round-1 limeng 2026-05-18 UC-A5/B1 bug fix)
+        public override string ToString() => Application?.ToString() ?? string.Empty;
     }
 }
