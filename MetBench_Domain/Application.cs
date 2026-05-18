@@ -59,6 +59,9 @@ namespace MetBench_Domain
 
         /// <summary>"method-level"（v1）或 "system-level"（v2）。</summary>
         public string Kind { get; set; } = "method-level";
+
+        // 让 WPF ComboBox 默认按 Name 显示, 而不是 fallback 到 "MetBench_Domain.Application" 类名 (UAT round-1 UC-A5/B1 bug)
+        public override string ToString() => Name ?? string.Empty;
     }
 
     // 应用程序参数类

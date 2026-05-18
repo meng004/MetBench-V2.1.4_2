@@ -13,6 +13,7 @@ namespace MetBench_SystemMT.Tests.V2Schema;
 /// TDD for MetaPattern 实体（v2 24-th collection）：
 ///   round-trip 入库 / Code 唯一性 / GetByStatus / Active 过滤 / Seed 8 个 NOETHER / DI 注册。
 /// </summary>
+[Collection("DbConfigGlobal")]
 public sealed class MetaPatternEntityTests : IDisposable
 {
     private readonly string _dbPath;

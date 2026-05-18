@@ -16,6 +16,7 @@ namespace MetBench_SystemMT.Tests.V2Pagination;
 ///   - 升序遍历不重复 / 不遗漏 / 覆盖全集
 /// 性能验证靠 CI baseline（F14 已栅）。
 /// </remarks>
+[Collection("DbConfigGlobal")]
 public sealed class KeysetPaginationTests : IDisposable
 {
     private readonly string _dbPath;

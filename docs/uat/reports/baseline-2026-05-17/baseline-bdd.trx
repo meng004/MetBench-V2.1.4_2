@@ -1,0 +1,475 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="5cbf32c6-c20d-45b9-bcbd-ba16919264d3" name="@vm 2026-05-17 07:11:08" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-05-17T07:11:08.6077257+00:00" queuing="2026-05-17T07:11:08.6077258+00:00" start="2026-05-17T07:11:07.4964536+00:00" finish="2026-05-17T07:11:36.1384760+00:00" />
+  <TestSettings name="default" id="783aeff0-f5e3-4df1-a16e-c3358ba0772e">
+    <Deployment runDeploymentRoot="_vm_2026-05-17_07_11_08" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="b0b04a2c-7f58-490e-a2c2-3bfbd4299ec0" testId="d20c59ed-e5d8-fe5e-64d9-08eb129df0e9" testName="UC-G2 helper script exists and is non-empty" computerName="vm" duration="00:00:00.0030331" startTime="2026-05-17T07:11:08.9340746+00:00" endTime="2026-05-17T07:11:08.9340747+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b0b04a2c-7f58-490e-a2c2-3bfbd4299ec0">
+      <Output>
+        <StdOut>Then UAT case "UC-G2" helper "tools/ci_perf_baseline.py" exists and is non-empty
+-&gt; done: UatRubricSteps.ThenHelperExistsAndNonEmpty("UC-G2", "tools/ci_perf_bas...") (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="e0f575df-a299-4221-a8f8-1d524dc651ee" testId="a6b5319b-ba8e-6aa1-d7fb-6fc0fac9dcf3" testName="UC-C7 is documented for manual UI verification" computerName="vm" duration="00:00:00.0061440" startTime="2026-05-17T07:11:08.9261173+00:00" endTime="2026-05-17T07:11:08.9261175+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e0f575df-a299-4221-a8f8-1d524dc651ee">
+      <Output>
+        <StdOut>Then UAT case "UC-C7" is documented for manual UI verification in "docs/uat/test-procedures.md"
+-&gt; done: UatRubricSteps.ThenDocumentedForManual("UC-C7", "docs/uat/test-pro...") (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="6fc280f9-379b-42b7-986f-babf4e48cbea" testId="3b217d11-e9c9-9ed7-7b1f-97076d4e1e97" testName="ScaleFuelSigmaA decreases k_eff regardless of solver(solver: &quot;openmoc&quot;, sut: &quot;openmoc&quot;, __pickleIndex: &quot;2&quot;, exampleTags: [])" computerName="vm" duration="00:00:01.5018257" startTime="2026-05-17T07:11:24.6181656+00:00" endTime="2026-05-17T07:11:24.6181669+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6fc280f9-379b-42b7-986f-babf4e48cbea">
+      <Output>
+        <StdOut>Given a pin-cell neutron-transport source case from "openmoc/sample/pincell.json" for solver "openmoc"
+-&gt; done: CrossProgramSteps.GivenPinCellSourceCaseForSolver("openmoc/sample/pi...", "openmoc") (0.4s)
+And an MR transformation "ScaleFuelSigmaA" with factor "1.5"
+-&gt; done: CrossProgramSteps.GivenMrTransformation("ScaleFuelSigmaA", "1.5") (0.0s)
+When I run source and the generated follow-up through the "openmoc" solver
+-&gt; done: CrossProgramSteps.WhenIRunThroughSolver("openmoc") (1.1s)
+Then the follow-up k_eff should be strictly less than the source k_eff
+-&gt; done: CrossProgramSteps.ThenFollowUpKEffLess() (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="6a8c0fe5-4340-4fab-9c73-555d763a6018" testId="d9f6ca1f-ef00-752a-1a21-2a79230941f9" testName="UC-F2 rubric coverage and baseline are green" computerName="vm" duration="00:00:00.0261219" startTime="2026-05-17T07:11:09.2513296+00:00" endTime="2026-05-17T07:11:09.2513298+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6a8c0fe5-4340-4fab-9c73-555d763a6018">
+      <Output>
+        <StdOut>Then UAT case "UC-F2" requires at least 11 verified facts in test class "MetBench_SystemMT.Tests.V2Schema.MetaPatternEntityTests"
+-&gt; done: UatRubricSteps.ThenRubricFacts("UC-F2", 11, "MetBench_SystemMT...") (0.0s)
+And UAT case "UC-F2" baseline trx "docs/uat/reports/baseline-2026-05-16/baseline-full.trx" shows test class "MetBench_SystemMT.Tests.V2Schema.MetaPatternEntityTests" with 0 Failed
+-&gt; done: UatRubricSteps.ThenBaselineTrxAllPassed("UC-F2", "docs/uat/reports/...", "MetBench_SystemMT...") (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="b9d0cb15-b204-4c26-900d-8ab4931d5a06" testId="9eb51960-a204-457d-c2ee-faf5911a59aa" testName="Follow-up max_u exceeds source max_u after scaling initial amplitude" computerName="vm" duration="00:00:00.4001903" startTime="2026-05-17T07:11:08.8662604+00:00" endTime="2026-05-17T07:11:08.8662605+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b9d0cb15-b204-4c26-900d-8ab4931d5a06">
+      <Output>
+        <StdOut>Given a heat-equation source case from "heat_equation/sample/gaussian.json"
+-&gt; done: HeatEquationAmplitudeSteps.GivenAHeatEquationSourceCase("heat_equation/sam...") (0.1s)
+And a heat-equation transformation "ScaleAmplitude" with parameter "factor" set to "2"
+-&gt; done: HeatEquationAmplitudeSteps.GivenTheHeatEquationTransformation("ScaleAmplitude", "factor", "2") (0.0s)
+When I run source and the generated follow-up through the heat-equation solver
+-&gt; done: HeatEquationAmplitudeSteps.WhenIRunThroughTheHeatEquationSolver() (0.3s)
+Then the heat-equation parsed value "max_u" of the generated follow-up should be greater than the source
+-&gt; done: HeatEquationAmplitudeSteps.ThenParsedValueShouldBeGreater("max_u") (0.0s)
+And the heat-equation follow-up max_u should be at least 1.95 times the source max_u
+-&gt; done: HeatEquationAmplitudeSteps.ThenFollowUpMaxRatioFloor(1.95) (0.0s)
+And the heat-equation follow-up max_u should be at most 2.05 times the source max_u
+-&gt; done: HeatEquationAmplitudeSteps.ThenFollowUpMaxRatioCeiling(2.05) (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="8d3e7e44-5dbb-4469-b979-063a3ae8f110" testId="fdc083c0-a0de-566a-99c0-9614f119f764" testName="UC-C1 rubric coverage and baseline are green" computerName="vm" duration="00:00:00.0140164" startTime="2026-05-17T07:11:08.4581411+00:00" endTime="2026-05-17T07:11:08.4581412+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8d3e7e44-5dbb-4469-b979-063a3ae8f110">
+      <Output>
+        <StdOut>Then UAT case "UC-C1" requires at least 4 verified facts in test class "MetBench_SystemMT.Tests.V2Discovery.RealSamplerTests"
+-&gt; done: UatRubricSteps.ThenRubricFacts("UC-C1", 4, "MetBench_SystemMT...") (0.0s)
+And UAT case "UC-C1" baseline trx "docs/uat/reports/baseline-2026-05-16/baseline-full.trx" shows test class "MetBench_SystemMT.Tests.V2Discovery.RealSamplerTests" with 0 Failed
+-&gt; done: UatRubricSteps.ThenBaselineTrxAllPassed("UC-C1", "docs/uat/reports/...", "MetBench_SystemMT...") (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="0c502b24-97e5-439f-bcf8-a20273cbe8ce" testId="eb4e6021-c5cc-31bb-98e2-3750c7201755" testName="Follow-up k_eff is less than source k_eff after scaling fuel sigma_a" computerName="vm" duration="00:00:01.6010943" startTime="2026-05-17T07:11:10.6914883+00:00" endTime="2026-05-17T07:11:10.6914887+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0c502b24-97e5-439f-bcf8-a20273cbe8ce">
+      <Output>
+        <StdOut>Given an OpenMOC pin-cell sigma_a source case from "openmoc/sample/pincell.json"
+-&gt; done: OpenMocPinCellSigmaASteps.GivenAnOpenMocSigmaASourceCase("openmoc/sample/pi...") (0.5s)
+And the OpenMOC sigma_a transformation "ScaleFuelSigmaA" with parameter "factor" set to "1.5"
+-&gt; done: OpenMocPinCellSigmaASteps.GivenTheSigmaATransformation("ScaleFuelSigmaA", "factor", "1.5") (0.0s)
+When I run source and the generated follow-up through OpenMOC for sigma_a
+-&gt; done: OpenMocPinCellSigmaASteps.WhenIRunThroughOpenMocSigmaA() (1.1s)
+Then the OpenMOC parsed value "k_eff" of the generated follow-up should be less than the source
+-&gt; done: OpenMocPinCellSigmaASteps.ThenTheOpenMocParsedValueShouldBeLess("k_eff") (0.0s)
+And the OpenMOC follow-up k_eff should be at most 0.85 times the source k_eff
+-&gt; done: OpenMocPinCellSigmaASteps.ThenFollowUpKeffRatioCeiling(0.85) (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="d8578759-e7f5-4192-842b-a54726459bfc" testId="5c477246-c7b4-7197-d52a-bbc842cb5ebb" testName="Follow-up output range is greater than source output range" computerName="vm" duration="00:00:00.1900306" startTime="2026-05-17T07:11:09.1311551+00:00" endTime="2026-05-17T07:11:09.1311553+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d8578759-e7f5-4192-842b-a54726459bfc">
+      <Output>
+        <StdOut>Given a projectile MT case named "source" with input "10 45 9.81"
+-&gt; done: ProjectileRangeSteps.GivenAProjectileMtCase("source", "10 45 9.81") (0.0s)
+And a projectile MT case named "follow-up" with input "20 45 9.81"
+-&gt; done: ProjectileRangeSteps.GivenAProjectileMtCase("follow-up", "20 45 9.81") (0.0s)
+When I run both projectile cases
+-&gt; done: ProjectileRangeSteps.WhenIRunBothProjectileCases() (0.2s)
+Then the projectile parsed value "range" of "follow-up" should exceed "source"
+-&gt; done: ProjectileRangeSteps.ThenProjectileParsedValueShouldExceed("range", "follow-up", "source") (0.0s)
+And the follow-up range should be approximately 4 times the source range
+-&gt; done: ProjectileRangeSteps.ThenFollowUpRangeRatio(4) (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="c03fd51c-18da-4c57-9723-4898df51aef7" testId="d2128fb5-548e-ee13-be49-7cc41f3dcaeb" testName="ScaleFuelSigmaA decreases k_eff regardless of solver(solver: &quot;openmc&quot;, sut: &quot;openmc&quot;, __pickleIndex: &quot;3&quot;, exampleTags: [])" computerName="vm" duration="00:00:11.4082189" startTime="2026-05-17T07:11:36.0278927+00:00" endTime="2026-05-17T07:11:36.0278932+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c03fd51c-18da-4c57-9723-4898df51aef7">
+      <Output>
+        <StdOut>Given a pin-cell neutron-transport source case from "openmc/sample/pincell.json" for solver "openmc"
+-&gt; done: CrossProgramSteps.GivenPinCellSourceCaseForSolver("openmc/sample/pin...", "openmc") (0.7s)
+And an MR transformation "ScaleFuelSigmaA" with factor "1.5"
+-&gt; done: CrossProgramSteps.GivenMrTransformation("ScaleFuelSigmaA", "1.5") (0.0s)
+When I run source and the generated follow-up through the "openmc" solver
+-&gt; done: CrossProgramSteps.WhenIRunThroughSolver("openmc") (10.7s)
+Then the follow-up k_eff should be strictly less than the source k_eff
+-&gt; done: CrossProgramSteps.ThenFollowUpKEffLess() (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="49916159-66d2-4fad-b109-ac1af1f0ee04" testId="e61d25a8-0eaa-c73e-8ea3-7d85e1871142" testName="UC-C6 is documented for manual UI verification" computerName="vm" duration="00:00:00.0022027" startTime="2026-05-17T07:11:09.3165578+00:00" endTime="2026-05-17T07:11:09.3165581+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="49916159-66d2-4fad-b109-ac1af1f0ee04">
+      <Output>
+        <StdOut>Then UAT case "UC-C6" is documented for manual UI verification in "docs/uat/test-procedures.md"
+-&gt; done: UatRubricSteps.ThenDocumentedForManual("UC-C6", "docs/uat/test-pro...") (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="cfc28133-d16f-4a4a-84b1-62510000f33a" testId="48b5281b-40f5-1bdc-7265-52086dd0278e" testName="Follow-up output value is greater than source output value" computerName="vm" duration="00:00:00.2902021" startTime="2026-05-17T07:11:08.8015866+00:00" endTime="2026-05-17T07:11:08.8015868+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cfc28133-d16f-4a4a-84b1-62510000f33a">
+      <Output>
+        <StdOut>Given a system MT case named "source" with input file "source-input.txt"
+-&gt; done: SystemLevelCliMtSteps.GivenASystemMtCaseNamedWithInputFile("source", "source-input.txt") (0.0s)
+And a system MT case named "follow-up" with input file "followup-input.txt"
+-&gt; done: SystemLevelCliMtSteps.GivenASystemMtCaseNamedWithInputFile("follow-up", "followup-input.txt") (0.0s)
+When I run both cases with program profile "example-cli"
+-&gt; done: SystemLevelCliMtSteps.WhenIRunBothCasesWithProgramProfile("example-cli") (0.2s)
+Then the parsed output value "result" of "follow-up" should be greater than "source"
+-&gt; done: SystemLevelCliMtSteps.ThenTheParsedOutputValueOfShouldBeGreaterThan("result", "follow-up", "source") (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="f876ada2-94d4-43b7-bc34-2c7bc6b70c0f" testId="9179449d-baa2-5afe-72fa-003997d9870f" testName="UC-C2 rubric coverage and baseline are green" computerName="vm" duration="00:00:00.0269851" startTime="2026-05-17T07:11:09.2873068+00:00" endTime="2026-05-17T07:11:09.2873070+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f876ada2-94d4-43b7-bc34-2c7bc6b70c0f">
+      <Output>
+        <StdOut>Then UAT case "UC-C2" requires at least 8 verified facts in test class "MetBench_SystemMT.Tests.V2Discovery.ValidatorTests"
+-&gt; done: UatRubricSteps.ThenRubricFacts("UC-C2", 8, "MetBench_SystemMT...") (0.0s)
+And UAT case "UC-C2" baseline trx "docs/uat/reports/baseline-2026-05-16/baseline-full.trx" shows test class "MetBench_SystemMT.Tests.V2Discovery.ValidatorTests" with 0 Failed
+-&gt; done: UatRubricSteps.ThenBaselineTrxAllPassed("UC-C2", "docs/uat/reports/...", "MetBench_SystemMT...") (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="19bd3451-2b52-4d39-b054-0dfaa303f5d5" testId="36c37c9f-f6a9-e967-580a-db54434ac348" testName="UC-C5 rubric coverage and baseline are green" computerName="vm" duration="00:00:00.0821825" startTime="2026-05-17T07:11:08.4138898+00:00" endTime="2026-05-17T07:11:08.4138899+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="19bd3451-2b52-4d39-b054-0dfaa303f5d5">
+      <Output>
+        <StdOut>Then UAT case "UC-C5" requires at least 1 verified facts in test class "MetBench_SystemMT.Tests.V2Discovery.ValidationServiceTests"
+-&gt; done: UatRubricSteps.ThenRubricFacts("UC-C5", 1, "MetBench_SystemMT...") (0.0s)
+And UAT case "UC-C5" baseline trx "docs/uat/reports/baseline-2026-05-16/baseline-full.trx" shows test class "MetBench_SystemMT.Tests.V2Discovery.ValidationServiceTests" with 0 Failed
+-&gt; done: UatRubricSteps.ThenBaselineTrxAllPassed("UC-C5", "docs/uat/reports/...", "MetBench_SystemMT...") (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="5366c0b4-8ad7-4af9-beb9-d09e586b5ac1" testId="c2973ab7-93b2-3c03-5c03-5060486c1a70" testName="UC-C8 is documented for manual UI verification" computerName="vm" duration="00:00:00.0064457" startTime="2026-05-17T07:11:09.1461316+00:00" endTime="2026-05-17T07:11:09.1461318+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5366c0b4-8ad7-4af9-beb9-d09e586b5ac1">
+      <Output>
+        <StdOut>Then UAT case "UC-C8" is documented for manual UI verification in "docs/uat/test-procedures.md"
+-&gt; done: UatRubricSteps.ThenDocumentedForManual("UC-C8", "docs/uat/test-pro...") (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="3e9b52ea-9cdd-470b-9839-fa503b9ff205" testId="57f75862-9cc8-427a-8ec1-b22323c20f9f" testName="UC-C10 rubric coverage and baseline are green" computerName="vm" duration="00:00:00.0010000" startTime="2026-05-17T07:11:08.5351759+00:00" endTime="2026-05-17T07:11:08.5351760+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3e9b52ea-9cdd-470b-9839-fa503b9ff205">
+      <Output>
+        <ErrorInfo>
+          <Message>UAT UC-C10: baseline trx contains 0 facts for ScgHeuristicDiscovererTests. Either baseline was generated before the class existed, or the trx names do not include the class name — skipping baseline check.</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="3d34d3d3-5675-408e-b18e-5c44f639b80d" testId="e0d410de-a6b7-60a5-e6bf-ee2d5c075612" testName="UC-G1 rubric coverage and baseline are green" computerName="vm" duration="00:00:00.0140473" startTime="2026-05-17T07:11:09.3349239+00:00" endTime="2026-05-17T07:11:09.3349240+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3d34d3d3-5675-408e-b18e-5c44f639b80d">
+      <Output>
+        <StdOut>Then UAT case "UC-G1" requires at least 10 verified facts in test class "MetBench_SystemMT.Tests.V2Pagination.KeysetPaginationTests"
+-&gt; done: UatRubricSteps.ThenRubricFacts("UC-G1", 10, "MetBench_SystemMT...") (0.0s)
+And UAT case "UC-G1" baseline trx "docs/uat/reports/baseline-2026-05-16/baseline-full.trx" shows test class "MetBench_SystemMT.Tests.V2Pagination.KeysetPaginationTests" with 0 Failed
+-&gt; done: UatRubricSteps.ThenBaselineTrxAllPassed("UC-G1", "docs/uat/reports/...", "MetBench_SystemMT...") (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="f91219d0-7d1e-4c7a-82e5-5464086f981d" testId="7316d448-67f2-2408-b271-60d721322405" testName="UC-F3 rubric coverage and baseline are green" computerName="vm" duration="00:00:00.0154913" startTime="2026-05-17T07:11:08.4337646+00:00" endTime="2026-05-17T07:11:08.4337647+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f91219d0-7d1e-4c7a-82e5-5464086f981d">
+      <Output>
+        <StdOut>Then UAT case "UC-F3" requires at least 7 verified facts in test class "MetBench_SystemMT.Tests.V2Schema.MRBindingStatusTests"
+-&gt; done: UatRubricSteps.ThenRubricFacts("UC-F3", 7, "MetBench_SystemMT...") (0.0s)
+And UAT case "UC-F3" baseline trx "docs/uat/reports/baseline-2026-05-16/baseline-full.trx" shows test class "MetBench_SystemMT.Tests.V2Schema.MRBindingStatusTests" with 0 Failed
+-&gt; done: UatRubricSteps.ThenBaselineTrxAllPassed("UC-F3", "docs/uat/reports/...", "MetBench_SystemMT...") (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="7730c47b-1c87-4920-a198-99bb2eaf03f7" testId="8556cbb3-c92d-e438-9f35-e414fcc3b299" testName="Follow-up k_eff exceeds source k_eff after scaling fuel nu*sigma_f" computerName="vm" duration="00:00:01.7025523" startTime="2026-05-17T07:11:10.0302470+00:00" endTime="2026-05-17T07:11:10.0302473+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7730c47b-1c87-4920-a198-99bb2eaf03f7">
+      <Output>
+        <StdOut>Given an OpenMOC pin-cell source case from "openmoc/sample/pincell.json"
+-&gt; done: OpenMocPinCellNuSigmaFSteps.GivenAnOpenMocPinCellSourceCase("openmoc/sample/pi...") (0.5s)
+And an OpenMOC MR transformation "ScaleNuSigmaF" with parameter "factor" set to "1.5"
+-&gt; done: OpenMocPinCellNuSigmaFSteps.GivenTheMrTransformation("ScaleNuSigmaF", "factor", "1.5") (0.0s)
+When I run source and the generated follow-up through OpenMOC
+-&gt; done: OpenMocPinCellNuSigmaFSteps.WhenIRunThroughOpenMoc() (1.1s)
+Then the OpenMOC parsed value "k_eff" of the generated follow-up should be greater than the source
+-&gt; done: OpenMocPinCellNuSigmaFSteps.ThenTheOpenMocParsedValueShouldBeGreater("k_eff") (0.0s)
+And the OpenMOC follow-up k_eff should be at least 1.2 times the source k_eff
+-&gt; done: OpenMocPinCellNuSigmaFSteps.ThenFollowUpKeffRatioFloor(1.2) (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="76392f42-8fa6-4834-82c7-2b76570a9f0a" testId="c68df73d-80aa-fd97-6100-50fa10f8ada2" testName="UC-G4 rubric coverage and baseline are green" computerName="vm" duration="00:00:00.0153309" startTime="2026-05-17T07:11:08.4364735+00:00" endTime="2026-05-17T07:11:08.4364736+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="76392f42-8fa6-4834-82c7-2b76570a9f0a">
+      <Output>
+        <StdOut>Then UAT case "UC-G4" requires at least 5 verified facts in test class "MetBench_SystemMT.Tests.V2Coverage.CoverageServiceTests"
+-&gt; done: UatRubricSteps.ThenRubricFacts("UC-G4", 5, "MetBench_SystemMT...") (0.0s)
+And UAT case "UC-G4" baseline trx "docs/uat/reports/baseline-2026-05-16/baseline-full.trx" shows test class "MetBench_SystemMT.Tests.V2Coverage.CoverageServiceTests" with 0 Failed
+-&gt; done: UatRubricSteps.ThenBaselineTrxAllPassed("UC-G4", "docs/uat/reports/...", "MetBench_SystemMT...") (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="a130e171-5da7-4046-b2b2-abeaa2805787" testId="6bc3f0b4-d702-c3f9-cbd8-ccfe313c3af6" testName="Follow-up input generated by ScalarMultiply produces a greater output" computerName="vm" duration="00:00:00.2314492" startTime="2026-05-17T07:11:09.0806501+00:00" endTime="2026-05-17T07:11:09.0806503+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a130e171-5da7-4046-b2b2-abeaa2805787">
+      <Output>
+        <StdOut>Given a source MT case with input value "5"
+-&gt; done: SystemLevelGeneratedFollowupSteps.GivenASourceMtCaseWithInputValue("5") (0.0s)
+And the MR transformation "ScalarMultiply" with parameter "multiplier" set to "3"
+-&gt; done: SystemLevelGeneratedFollowupSteps.GivenTheMrTransformationWithParameter("ScalarMultiply", "multiplier", "3") (0.0s)
+When I run source and the generated follow-up with program profile "example-cli"
+-&gt; done: SystemLevelGeneratedFollowupSteps.WhenIRunSourceAndTheGeneratedFollowUp("example-cli") (0.2s)
+Then the parsed output value "result" of the generated follow-up should be greater than the source
+-&gt; done: SystemLevelGeneratedFollowupSteps.ThenTheParsedOutputValueShouldBeGreater("result") (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="de98a9a0-f3d7-4ec4-b946-4d2e326f3577" testId="b6c1505e-16b9-881c-fad9-9491a7876055" testName="ScaleNuSigmaF increases k_eff regardless of solver(solver: &quot;openmc&quot;, sut: &quot;openmc&quot;, __pickleIndex: &quot;1&quot;, exampleTags: [])" computerName="vm" duration="00:00:12.9749525" startTime="2026-05-17T07:11:23.1147106+00:00" endTime="2026-05-17T07:11:23.1147110+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="de98a9a0-f3d7-4ec4-b946-4d2e326f3577">
+      <Output>
+        <StdOut>Given a pin-cell neutron-transport source case from "openmc/sample/pincell.json" for solver "openmc"
+-&gt; done: CrossProgramSteps.GivenPinCellSourceCaseForSolver("openmc/sample/pin...", "openmc") (0.7s)
+And an MR transformation "ScaleNuSigmaF" with factor "1.5"
+-&gt; done: CrossProgramSteps.GivenMrTransformation("ScaleNuSigmaF", "1.5") (0.0s)
+When I run source and the generated follow-up through the "openmc" solver
+-&gt; done: CrossProgramSteps.WhenIRunThroughSolver("openmc") (12.3s)
+Then the follow-up k_eff should be strictly greater than the source k_eff
+-&gt; done: CrossProgramSteps.ThenFollowUpKEffGreater() (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="b817ba56-c0bb-42a6-853b-c9d620295548" testId="6384b423-760e-8c35-3ff8-031ee818f6cb" testName="UC-G3 rubric coverage and baseline are green" computerName="vm" duration="00:00:00.0133474" startTime="2026-05-17T07:11:08.8837483+00:00" endTime="2026-05-17T07:11:08.8837484+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b817ba56-c0bb-42a6-853b-c9d620295548">
+      <Output>
+        <StdOut>Then UAT case "UC-G3" requires at least 4 verified facts in test class "MetBench_SystemMT.Tests.V2Trend.MultiDimBurstDetectionTests"
+-&gt; done: UatRubricSteps.ThenRubricFacts("UC-G3", 4, "MetBench_SystemMT...") (0.0s)
+And UAT case "UC-G3" baseline trx "docs/uat/reports/baseline-2026-05-16/baseline-full.trx" shows test class "MetBench_SystemMT.Tests.V2Trend.MultiDimBurstDetectionTests" with 0 Failed
+-&gt; done: UatRubricSteps.ThenBaselineTrxAllPassed("UC-G3", "docs/uat/reports/...", "MetBench_SystemMT...") (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="6f7960ba-1ca4-489b-88dc-71f7ee577409" testId="8f61fbba-6a39-e8bb-18ff-d838d8e3ff3f" testName="UC-F4 rubric coverage and baseline are green" computerName="vm" duration="00:00:00.0277246" startTime="2026-05-17T07:11:09.1793220+00:00" endTime="2026-05-17T07:11:09.1793221+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6f7960ba-1ca4-489b-88dc-71f7ee577409">
+      <Output>
+        <StdOut>Then UAT case "UC-F4" requires at least 9 verified facts in test class "MetBench_SystemMT.Tests.V2Schema.V2SoftDeleteAndMigrationTests"
+-&gt; done: UatRubricSteps.ThenRubricFacts("UC-F4", 9, "MetBench_SystemMT...") (0.0s)
+And UAT case "UC-F4" baseline trx "docs/uat/reports/baseline-2026-05-16/baseline-full.trx" shows test class "MetBench_SystemMT.Tests.V2Schema.V2SoftDeleteAndMigrationTests" with 0 Failed
+-&gt; done: UatRubricSteps.ThenBaselineTrxAllPassed("UC-F4", "docs/uat/reports/...", "MetBench_SystemMT...") (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="27a03f1d-174f-43cc-945d-7ddbf3934f50" testId="195821fa-d367-632a-c47e-ab4b8227f640" testName="UC-F1 rubric coverage and baseline are green" computerName="vm" duration="00:00:00.0176995" startTime="2026-05-17T07:11:09.3104238+00:00" endTime="2026-05-17T07:11:09.3104240+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="27a03f1d-174f-43cc-945d-7ddbf3934f50">
+      <Output>
+        <StdOut>Then UAT case "UC-F1" requires at least 5 verified facts in test class "MetBench_SystemMT.Tests.V2Schema.DbConfigTests"
+-&gt; done: UatRubricSteps.ThenRubricFacts("UC-F1", 5, "MetBench_SystemMT...") (0.0s)
+And UAT case "UC-F1" baseline trx "docs/uat/reports/baseline-2026-05-16/baseline-full.trx" shows test class "MetBench_SystemMT.Tests.V2Schema.DbConfigTests" with 0 Failed
+-&gt; done: UatRubricSteps.ThenBaselineTrxAllPassed("UC-F1", "docs/uat/reports/...", "MetBench_SystemMT...") (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="d08934ca-e32a-44e7-b06f-acdaf8e16894" testId="14f52af6-7874-0fbb-2dfd-f1db49e9ca1e" testName="UC-G5 rubric coverage and baseline are green" computerName="vm" duration="00:00:00.0140753" startTime="2026-05-17T07:11:08.4580657+00:00" endTime="2026-05-17T07:11:08.4580659+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d08934ca-e32a-44e7-b06f-acdaf8e16894">
+      <Output>
+        <StdOut>Then UAT case "UC-G5" requires at least 8 verified facts in test class "MetBench_SystemMT.Tests.V2Anomaly.AnomalyServiceTests"
+-&gt; done: UatRubricSteps.ThenRubricFacts("UC-G5", 8, "MetBench_SystemMT...") (0.0s)
+And UAT case "UC-G5" baseline trx "docs/uat/reports/baseline-2026-05-16/baseline-full.trx" shows test class "MetBench_SystemMT.Tests.V2Anomaly.AnomalyServiceTests" with 0 Failed
+-&gt; done: UatRubricSteps.ThenBaselineTrxAllPassed("UC-G5", "docs/uat/reports/...", "MetBench_SystemMT...") (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="7ac133d1-b989-4527-b9ba-541d3691eea9" testId="fb1845c3-8e61-10de-8aef-9e4d8a2b1047" testName="UC-C11 rubric coverage and baseline are green" computerName="vm" duration="00:00:00.0021571" startTime="2026-05-17T07:11:08.8898783+00:00" endTime="2026-05-17T07:11:08.8898784+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7ac133d1-b989-4527-b9ba-541d3691eea9">
+      <Output>
+        <StdOut>Then UAT case "UC-C11" requires at least 1 verified facts in test class "MetBench_SystemMT.Tests.SystemMT.OpenMcRunnerSmokeTests"
+-&gt; done: UatRubricSteps.ThenRubricFacts("UC-C11", 1, "MetBench_SystemMT...") (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="f0036038-5681-45e9-a78c-165a2e1f1af8" testId="c3f8e196-d0c2-d5b9-7a0a-de2dff6ac902" testName="UC-C3 rubric coverage and baseline are green" computerName="vm" duration="00:00:00.0269013" startTime="2026-05-17T07:11:09.2152592+00:00" endTime="2026-05-17T07:11:09.2152594+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f0036038-5681-45e9-a78c-165a2e1f1af8">
+      <Output>
+        <StdOut>Then UAT case "UC-C3" requires at least 11 verified facts in test class "MetBench_SystemMT.Tests.V2Discovery.MRPairingServiceTests"
+-&gt; done: UatRubricSteps.ThenRubricFacts("UC-C3", 11, "MetBench_SystemMT...") (0.0s)
+And UAT case "UC-C3" baseline trx "docs/uat/reports/baseline-2026-05-16/baseline-full.trx" shows test class "MetBench_SystemMT.Tests.V2Discovery.MRPairingServiceTests" with 0 Failed
+-&gt; done: UatRubricSteps.ThenBaselineTrxAllPassed("UC-C3", "docs/uat/reports/...", "MetBench_SystemMT...") (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="e8234578-39f3-4063-9cf3-2c5e118c69bb" testId="002f402b-387e-daba-bbf9-88d40609c130" testName="UC-C4 rubric coverage and baseline are green" computerName="vm" duration="00:00:00.0164713" startTime="2026-05-17T07:11:08.9140866+00:00" endTime="2026-05-17T07:11:08.9140867+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e8234578-39f3-4063-9cf3-2c5e118c69bb">
+      <Output>
+        <StdOut>Then UAT case "UC-C4" requires at least 15 verified facts in test class "MetBench_SystemMT.Tests.V2Discovery.MultiLlmConsensusValidatorTests"
+-&gt; done: UatRubricSteps.ThenRubricFacts("UC-C4", 15, "MetBench_SystemMT...") (0.0s)
+And UAT case "UC-C4" baseline trx "docs/uat/reports/baseline-2026-05-16/baseline-full.trx" shows test class "MetBench_SystemMT.Tests.V2Discovery.MultiLlmConsensusValidatorTests" with 0 Failed
+-&gt; done: UatRubricSteps.ThenBaselineTrxAllPassed("UC-C4", "docs/uat/reports/...", "MetBench_SystemMT...") (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="43e371cf-ae22-40b7-9b35-8d04a9a5dab2" testId="4bba0c4c-68cb-1950-03fb-6fd57966faba" testName="UC-C9 is documented for manual UI verification" computerName="vm" duration="00:00:00.0417686" startTime="2026-05-17T07:11:08.4008753+00:00" endTime="2026-05-17T07:11:08.4009027+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="43e371cf-ae22-40b7-9b35-8d04a9a5dab2">
+      <Output>
+        <StdOut>Then UAT case "UC-C9" is documented for manual UI verification in "docs/uat/test-procedures.md"
+-&gt; done: UatRubricSteps.ThenDocumentedForManual("UC-C9", "docs/uat/test-pro...") (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="7be52a59-cce7-473d-9c89-6d9586ae485c" testId="baf34af3-dbbd-90a3-7d15-dd8d7db69c85" testName="UC-F5 rubric coverage and baseline are green" computerName="vm" duration="00:00:00.0179925" startTime="2026-05-17T07:11:08.8300603+00:00" endTime="2026-05-17T07:11:08.8300604+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7be52a59-cce7-473d-9c89-6d9586ae485c">
+      <Output>
+        <StdOut>Then UAT case "UC-F5" requires at least 5 verified facts in test class "MetBench_SystemMT.Tests.V2Schema.V2RepositoryDIBindingTests"
+-&gt; done: UatRubricSteps.ThenRubricFacts("UC-F5", 5, "MetBench_SystemMT...") (0.0s)
+And UAT case "UC-F5" baseline trx "docs/uat/reports/baseline-2026-05-16/baseline-full.trx" shows test class "MetBench_SystemMT.Tests.V2Schema.V2RepositoryDIBindingTests" with 0 Failed
+-&gt; done: UatRubricSteps.ThenBaselineTrxAllPassed("UC-F5", "docs/uat/reports/...", "MetBench_SystemMT...") (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="fd10ba9e-652f-49c0-9a50-974a9f968a18" testId="875b2283-0652-1245-b390-88cf52f91a87" testName="ScaleNuSigmaF increases k_eff regardless of solver(solver: &quot;openmoc&quot;, sut: &quot;openmoc&quot;, __pickleIndex: &quot;0&quot;, exampleTags: [])" computerName="vm" duration="00:00:01.8101323" startTime="2026-05-17T07:11:10.1380804+00:00" endTime="2026-05-17T07:11:10.1380836+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fd10ba9e-652f-49c0-9a50-974a9f968a18">
+      <Output>
+        <StdOut>Given a pin-cell neutron-transport source case from "openmoc/sample/pincell.json" for solver "openmoc"
+-&gt; done: CrossProgramSteps.GivenPinCellSourceCaseForSolver("openmoc/sample/pi...", "openmoc") (0.5s)
+And an MR transformation "ScaleNuSigmaF" with factor "1.5"
+-&gt; done: CrossProgramSteps.GivenMrTransformation("ScaleNuSigmaF", "1.5") (0.0s)
+When I run source and the generated follow-up through the "openmoc" solver
+-&gt; done: CrossProgramSteps.WhenIRunThroughSolver("openmoc") (1.2s)
+Then the follow-up k_eff should be strictly greater than the source k_eff
+-&gt; done: CrossProgramSteps.ThenFollowUpKEffGreater() (0.0s)</StdOut>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="UC-G5 rubric coverage and baseline are green" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="14f52af6-7874-0fbb-2dfd-f1db49e9ca1e">
+      <Execution id="d08934ca-e32a-44e7-b06f-acdaf8e16894" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.Uat.UATUC_G5AnomalyServiceCommonalityFeature" name="UC_G5RubricCoverageAndBaselineAreGreen" />
+    </UnitTest>
+    <UnitTest name="UC-F1 rubric coverage and baseline are green" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="195821fa-d367-632a-c47e-ab4b8227f640">
+      <Execution id="27a03f1d-174f-43cc-945d-7ddbf3934f50" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.Uat.UATUC_F1DbConfig3_LevelOverrideFeature" name="UC_F1RubricCoverageAndBaselineAreGreen" />
+    </UnitTest>
+    <UnitTest name="UC-C9 is documented for manual UI verification" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="4bba0c4c-68cb-1950-03fb-6fd57966faba">
+      <Execution id="43e371cf-ae22-40b7-9b35-8d04a9a5dab2" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.Uat.UATUC_C9MutationCampaignUIManualOnlyFeature" name="UC_C9IsDocumentedForManualUIVerification" />
+    </UnitTest>
+    <UnitTest name="UC-C7 is documented for manual UI verification" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="a6b5319b-ba8e-6aa1-d7fb-6fc0fac9dcf3">
+      <Execution id="e0f575df-a299-4221-a8f8-1d524dc651ee" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.Uat.UATUC_C7MRRecommendationUIManualOnlyFeature" name="UC_C7IsDocumentedForManualUIVerification" />
+    </UnitTest>
+    <UnitTest name="UC-G1 rubric coverage and baseline are green" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="e0d410de-a6b7-60a5-e6bf-ee2d5c075612">
+      <Execution id="3d34d3d3-5675-408e-b18e-5c44f639b80d" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.Uat.UATUC_G1LiteDBKeyset分页Feature" name="UC_G1RubricCoverageAndBaselineAreGreen" />
+    </UnitTest>
+    <UnitTest name="UC-C6 is documented for manual UI verification" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="e61d25a8-0eaa-c73e-8ea3-7d85e1871142">
+      <Execution id="49916159-66d2-4fad-b109-ac1af1f0ee04" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.Uat.UATUC_C6CandidateReviewUIManualOnlyFeature" name="UC_C6IsDocumentedForManualUIVerification" />
+    </UnitTest>
+    <UnitTest name="Follow-up input generated by ScalarMultiply produces a greater output" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="6bc3f0b4-d702-c3f9-cbd8-ccfe313c3af6">
+      <Execution id="a130e171-5da7-4046-b2b2-abeaa2805787" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.System_LevelMetamorphicTestingWithGeneratedFollow_UpInputFeature" name="Follow_UpInputGeneratedByScalarMultiplyProducesAGreaterOutput" />
+    </UnitTest>
+    <UnitTest name="Follow-up output range is greater than source output range" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="5c477246-c7b4-7197-d52a-bbc842cb5ebb">
+      <Execution id="d8578759-e7f5-4192-842b-a54726459bfc" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.ProjectileRangeMT_DoublingInitialSpeedQuadruplesTheRangeFeature" name="Follow_UpOutputRangeIsGreaterThanSourceOutputRange" />
+    </UnitTest>
+    <UnitTest name="UC-G3 rubric coverage and baseline are green" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="6384b423-760e-8c35-3ff8-031ee818f6cb">
+      <Execution id="b817ba56-c0bb-42a6-853b-c9d620295548" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.Uat.UATUC_G3多维Burst检测Feature" name="UC_G3RubricCoverageAndBaselineAreGreen" />
+    </UnitTest>
+    <UnitTest name="UC-C5 rubric coverage and baseline are green" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="36c37c9f-f6a9-e967-580a-db54434ac348">
+      <Execution id="19bd3451-2b52-4d39-b054-0dfaa303f5d5" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.Uat.UATUC_C5ValidationServiceE2EFeature" name="UC_C5RubricCoverageAndBaselineAreGreen" />
+    </UnitTest>
+    <UnitTest name="UC-C2 rubric coverage and baseline are green" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="9179449d-baa2-5afe-72fa-003997d9870f">
+      <Execution id="f876ada2-94d4-43b7-bc34-2c7bc6b70c0f" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.Uat.UATUC_C2EmpiricalLLMValidatorFeature" name="UC_C2RubricCoverageAndBaselineAreGreen" />
+    </UnitTest>
+    <UnitTest name="UC-F2 rubric coverage and baseline are green" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="d9f6ca1f-ef00-752a-1a21-2a79230941f9">
+      <Execution id="6a8c0fe5-4340-4fab-9c73-555d763a6018" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.Uat.UATUC_F2MetaPatternSeed8PatternsFeature" name="UC_F2RubricCoverageAndBaselineAreGreen" />
+    </UnitTest>
+    <UnitTest name="UC-F5 rubric coverage and baseline are green" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="baf34af3-dbbd-90a3-7d15-dd8d7db69c85">
+      <Execution id="7be52a59-cce7-473d-9c89-6d9586ae485c" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.Uat.UATUC_F5V2DI完整性Feature" name="UC_F5RubricCoverageAndBaselineAreGreen" />
+    </UnitTest>
+    <UnitTest name="UC-C3 rubric coverage and baseline are green" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="c3f8e196-d0c2-d5b9-7a0a-de2dff6ac902">
+      <Execution id="f0036038-5681-45e9-a78c-165a2e1f1af8" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.Uat.UATUC_C3MRPairingM_CmpPartnerFeature" name="UC_C3RubricCoverageAndBaselineAreGreen" />
+    </UnitTest>
+    <UnitTest name="UC-C10 rubric coverage and baseline are green" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="57f75862-9cc8-427a-8ec1-b22323c20f9f">
+      <Execution id="3e9b52ea-9cdd-470b-9839-fa503b9ff205" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.Uat.UATUC_C10SCG_HeuristicDiscovererFeature" name="UC_C10RubricCoverageAndBaselineAreGreen" />
+    </UnitTest>
+    <UnitTest name="Follow-up k_eff exceeds source k_eff after scaling fuel nu*sigma_f" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="8556cbb3-c92d-e438-9f35-e414fcc3b299">
+      <Execution id="7730c47b-1c87-4920-a198-99bb2eaf03f7" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.OpenMOCPin_CellMR_ScalingFuelNuSigma_FIncreasesK_EffFeature" name="Follow_UpK_EffExceedsSourceK_EffAfterScalingFuelNuSigma_F" />
+    </UnitTest>
+    <UnitTest name="UC-G2 helper script exists and is non-empty" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="d20c59ed-e5d8-fe5e-64d9-08eb129df0e9">
+      <Execution id="b0b04a2c-7f58-490e-a2c2-3bfbd4299ec0" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.Uat.UATUC_G2CI性能基线Feature" name="UC_G2HelperScriptExistsAndIsNon_Empty" />
+    </UnitTest>
+    <UnitTest name="UC-C11 rubric coverage and baseline are green" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="fb1845c3-8e61-10de-8aef-9e4d8a2b1047">
+      <Execution id="7ac133d1-b989-4527-b9ba-541d3691eea9" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.Uat.UATUC_C11OpenMC第3_SUTBDDSmokeFeature" name="UC_C11RubricCoverageAndBaselineAreGreen" />
+    </UnitTest>
+    <UnitTest name="UC-C1 rubric coverage and baseline are green" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="fdc083c0-a0de-566a-99c0-9614f119f764">
+      <Execution id="8d3e7e44-5dbb-4469-b979-063a3ae8f110" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.Uat.UATUC_C1真实PythonSidecar发现Feature" name="UC_C1RubricCoverageAndBaselineAreGreen" />
+    </UnitTest>
+    <UnitTest name="UC-F3 rubric coverage and baseline are green" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="7316d448-67f2-2408-b271-60d721322405">
+      <Execution id="f91219d0-7d1e-4c7a-82e5-5464086f981d" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.Uat.UATUC_F3MRBinding_Status软删Feature" name="UC_F3RubricCoverageAndBaselineAreGreen" />
+    </UnitTest>
+    <UnitTest name="UC-C4 rubric coverage and baseline are green" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="002f402b-387e-daba-bbf9-88d40609c130">
+      <Execution id="e8234578-39f3-4063-9cf3-2c5e118c69bb" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.Uat.UATUC_C4Multi_LLMConsensusΚFeature" name="UC_C4RubricCoverageAndBaselineAreGreen" />
+    </UnitTest>
+    <UnitTest name="Follow-up k_eff is less than source k_eff after scaling fuel sigma_a" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="eb4e6021-c5cc-31bb-98e2-3750c7201755">
+      <Execution id="0c502b24-97e5-439f-bcf8-a20273cbe8ce" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.OpenMOCPin_CellMR_ScalingFuelSigma_ADecreasesK_EffFeature" name="Follow_UpK_EffIsLessThanSourceK_EffAfterScalingFuelSigma_A" />
+    </UnitTest>
+    <UnitTest name="UC-G4 rubric coverage and baseline are green" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="c68df73d-80aa-fd97-6100-50fa10f8ada2">
+      <Execution id="76392f42-8fa6-4834-82c7-2b76570a9f0a" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.Uat.UATUC_G4CoverageService单测Feature" name="UC_G4RubricCoverageAndBaselineAreGreen" />
+    </UnitTest>
+    <UnitTest name="ScaleFuelSigmaA decreases k_eff regardless of solver(solver: &quot;openmc&quot;, sut: &quot;openmc&quot;, __pickleIndex: &quot;3&quot;, exampleTags: [])" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="d2128fb5-548e-ee13-be49-7cc41f3dcaeb">
+      <Execution id="c03fd51c-18da-4c57-9723-4898df51aef7" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.Cross_ProgramMetamorphicRelationsOnNeutron_TransportSolversFeature" name="ScaleFuelSigmaADecreasesK_EffRegardlessOfSolver" />
+    </UnitTest>
+    <UnitTest name="ScaleNuSigmaF increases k_eff regardless of solver(solver: &quot;openmc&quot;, sut: &quot;openmc&quot;, __pickleIndex: &quot;1&quot;, exampleTags: [])" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="b6c1505e-16b9-881c-fad9-9491a7876055">
+      <Execution id="de98a9a0-f3d7-4ec4-b946-4d2e326f3577" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.Cross_ProgramMetamorphicRelationsOnNeutron_TransportSolversFeature" name="ScaleNuSigmaFIncreasesK_EffRegardlessOfSolver" />
+    </UnitTest>
+    <UnitTest name="UC-C8 is documented for manual UI verification" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="c2973ab7-93b2-3c03-5c03-5060486c1a70">
+      <Execution id="5366c0b4-8ad7-4af9-beb9-d09e586b5ac1" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.Uat.UATUC_C8AutoDetectMRUIManualOnlyFeature" name="UC_C8IsDocumentedForManualUIVerification" />
+    </UnitTest>
+    <UnitTest name="Follow-up max_u exceeds source max_u after scaling initial amplitude" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="9eb51960-a204-457d-c2ee-faf5911a59aa">
+      <Execution id="b9d0cb15-b204-4c26-900d-8ab4931d5a06" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features._1DHeatEquationMR_AmplitudeScalingPreservesLinearityFeature" name="Follow_UpMax_UExceedsSourceMax_UAfterScalingInitialAmplitude" />
+    </UnitTest>
+    <UnitTest name="ScaleFuelSigmaA decreases k_eff regardless of solver(solver: &quot;openmoc&quot;, sut: &quot;openmoc&quot;, __pickleIndex: &quot;2&quot;, exampleTags: [])" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="3b217d11-e9c9-9ed7-7b1f-97076d4e1e97">
+      <Execution id="6fc280f9-379b-42b7-986f-babf4e48cbea" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.Cross_ProgramMetamorphicRelationsOnNeutron_TransportSolversFeature" name="ScaleFuelSigmaADecreasesK_EffRegardlessOfSolver" />
+    </UnitTest>
+    <UnitTest name="ScaleNuSigmaF increases k_eff regardless of solver(solver: &quot;openmoc&quot;, sut: &quot;openmoc&quot;, __pickleIndex: &quot;0&quot;, exampleTags: [])" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="875b2283-0652-1245-b390-88cf52f91a87">
+      <Execution id="fd10ba9e-652f-49c0-9a50-974a9f968a18" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.Cross_ProgramMetamorphicRelationsOnNeutron_TransportSolversFeature" name="ScaleNuSigmaFIncreasesK_EffRegardlessOfSolver" />
+    </UnitTest>
+    <UnitTest name="UC-F4 rubric coverage and baseline are green" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="8f61fbba-6a39-e8bb-18ff-d838d8e3ff3f">
+      <Execution id="6f7960ba-1ca4-489b-88dc-71f7ee577409" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.Uat.UATUC_F4V2SchemaMigrationFeature" name="UC_F4RubricCoverageAndBaselineAreGreen" />
+    </UnitTest>
+    <UnitTest name="Follow-up output value is greater than source output value" storage="/home/user/metbench-v2.1.4_2/metbench_systemmt.tests/bin/debug/net8.0/metbench_systemmt.tests.dll" id="48b5281b-40f5-1bdc-7265-52086dd0278e">
+      <Execution id="cfc28133-d16f-4a4a-84b1-62510000f33a" />
+      <TestMethod codeBase="/home/user/MetBench-V2.1.4_2/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.Features.System_LevelMetamorphicTestingThroughCLIFeature" name="Follow_UpOutputValueIsGreaterThanSourceOutputValue" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="d20c59ed-e5d8-fe5e-64d9-08eb129df0e9" executionId="b0b04a2c-7f58-490e-a2c2-3bfbd4299ec0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a6b5319b-ba8e-6aa1-d7fb-6fc0fac9dcf3" executionId="e0f575df-a299-4221-a8f8-1d524dc651ee" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3b217d11-e9c9-9ed7-7b1f-97076d4e1e97" executionId="6fc280f9-379b-42b7-986f-babf4e48cbea" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d9f6ca1f-ef00-752a-1a21-2a79230941f9" executionId="6a8c0fe5-4340-4fab-9c73-555d763a6018" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9eb51960-a204-457d-c2ee-faf5911a59aa" executionId="b9d0cb15-b204-4c26-900d-8ab4931d5a06" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fdc083c0-a0de-566a-99c0-9614f119f764" executionId="8d3e7e44-5dbb-4469-b979-063a3ae8f110" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="eb4e6021-c5cc-31bb-98e2-3750c7201755" executionId="0c502b24-97e5-439f-bcf8-a20273cbe8ce" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5c477246-c7b4-7197-d52a-bbc842cb5ebb" executionId="d8578759-e7f5-4192-842b-a54726459bfc" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d2128fb5-548e-ee13-be49-7cc41f3dcaeb" executionId="c03fd51c-18da-4c57-9723-4898df51aef7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e61d25a8-0eaa-c73e-8ea3-7d85e1871142" executionId="49916159-66d2-4fad-b109-ac1af1f0ee04" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="48b5281b-40f5-1bdc-7265-52086dd0278e" executionId="cfc28133-d16f-4a4a-84b1-62510000f33a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9179449d-baa2-5afe-72fa-003997d9870f" executionId="f876ada2-94d4-43b7-bc34-2c7bc6b70c0f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="36c37c9f-f6a9-e967-580a-db54434ac348" executionId="19bd3451-2b52-4d39-b054-0dfaa303f5d5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c2973ab7-93b2-3c03-5c03-5060486c1a70" executionId="5366c0b4-8ad7-4af9-beb9-d09e586b5ac1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="57f75862-9cc8-427a-8ec1-b22323c20f9f" executionId="3e9b52ea-9cdd-470b-9839-fa503b9ff205" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e0d410de-a6b7-60a5-e6bf-ee2d5c075612" executionId="3d34d3d3-5675-408e-b18e-5c44f639b80d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7316d448-67f2-2408-b271-60d721322405" executionId="f91219d0-7d1e-4c7a-82e5-5464086f981d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8556cbb3-c92d-e438-9f35-e414fcc3b299" executionId="7730c47b-1c87-4920-a198-99bb2eaf03f7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c68df73d-80aa-fd97-6100-50fa10f8ada2" executionId="76392f42-8fa6-4834-82c7-2b76570a9f0a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6bc3f0b4-d702-c3f9-cbd8-ccfe313c3af6" executionId="a130e171-5da7-4046-b2b2-abeaa2805787" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b6c1505e-16b9-881c-fad9-9491a7876055" executionId="de98a9a0-f3d7-4ec4-b946-4d2e326f3577" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6384b423-760e-8c35-3ff8-031ee818f6cb" executionId="b817ba56-c0bb-42a6-853b-c9d620295548" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8f61fbba-6a39-e8bb-18ff-d838d8e3ff3f" executionId="6f7960ba-1ca4-489b-88dc-71f7ee577409" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="195821fa-d367-632a-c47e-ab4b8227f640" executionId="27a03f1d-174f-43cc-945d-7ddbf3934f50" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="14f52af6-7874-0fbb-2dfd-f1db49e9ca1e" executionId="d08934ca-e32a-44e7-b06f-acdaf8e16894" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fb1845c3-8e61-10de-8aef-9e4d8a2b1047" executionId="7ac133d1-b989-4527-b9ba-541d3691eea9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c3f8e196-d0c2-d5b9-7a0a-de2dff6ac902" executionId="f0036038-5681-45e9-a78c-165a2e1f1af8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="002f402b-387e-daba-bbf9-88d40609c130" executionId="e8234578-39f3-4063-9cf3-2c5e118c69bb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4bba0c4c-68cb-1950-03fb-6fd57966faba" executionId="43e371cf-ae22-40b7-9b35-8d04a9a5dab2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="baf34af3-dbbd-90a3-7d15-dd8d7db69c85" executionId="7be52a59-cce7-473d-9c89-6d9586ae485c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="875b2283-0652-1245-b390-88cf52f91a87" executionId="fd10ba9e-652f-49c0-9a50-974a9f968a18" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="31" executed="30" passed="30" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.8.2+699d445a1a (64-bit .NET 8.0.26)
+[xUnit.net 00:00:00.09]   Discovering: MetBench_SystemMT.Tests
+[xUnit.net 00:00:00.21]   Discovered:  MetBench_SystemMT.Tests
+[xUnit.net 00:00:00.22]   Starting:    MetBench_SystemMT.Tests
+[xUnit.net 00:00:00.64]       UAT UC-C10: baseline trx contains 0 facts for ScgHeuristicDiscovererTests. Either baseline was generated before the class existed, or the trx names do not include the class name — skipping baseline check.
+Test 'UC-C10 rubric coverage and baseline are green' was skipped in the test run.
+[xUnit.net 00:00:28.15]   Finished:    MetBench_SystemMT.Tests
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="vm" outcome="Warning" timestamp="2026-05-17T07:11:08.6161806+00:00">
+        <Text>[xUnit.net 00:00:00.64]     UC-C10 rubric coverage and baseline are green [SKIP]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

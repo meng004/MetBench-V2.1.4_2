@@ -99,7 +99,8 @@ namespace MetBench_BLL
         /// <returns>0 表示失败 1 表示重复  2表示成功 </returns>
         public int UpdateService(Application application)
         {
-            if (Application_repository.IsDuplicate(application, false))
+            // excludeSelf=true：避免把"修改同名记录"当成"新建重名"误判 (UAT round-1 UC-A2 bug)
+            if (Application_repository.IsDuplicate(application, excludeSelf: true))
             {
                 return 1;
             }

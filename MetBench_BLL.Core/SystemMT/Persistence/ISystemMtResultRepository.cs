@@ -14,7 +14,7 @@ public interface ISystemMtResultRepository
     /// <summary>
     /// Persist a run result and return the assigned record id.
     /// </summary>
-    Task<string> SaveAsync(string scenarioName, SystemMtResult result, CancellationToken cancellationToken = default);
+    Task<string> SaveAsync(string mrName, SystemMtResult result, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Fetch a single record by id, or <c>null</c> if not found.
@@ -29,7 +29,7 @@ public interface ISystemMtResultRepository
     /// <summary>
     /// Most-recent runs of a specific scenario, first.
     /// </summary>
-    Task<IReadOnlyList<SystemMtResultRecord>> ListByScenarioAsync(string scenarioName, int limit = 100, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<SystemMtResultRecord>> ListByMrNameAsync(string mrName, int limit = 100, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// One page of results across all scenarios, most-recent first. The
@@ -41,6 +41,6 @@ public interface ISystemMtResultRepository
     /// <summary>
     /// One page of results filtered to a single scenario, most-recent first.
     /// </summary>
-    Task<PagedResult<SystemMtResultRecord>> ListPagedByScenarioAsync(string scenarioName, PageRequest request, CancellationToken cancellationToken = default);
+    Task<PagedResult<SystemMtResultRecord>> ListPagedByMrNameAsync(string mrName, PageRequest request, CancellationToken cancellationToken = default);
 }
 

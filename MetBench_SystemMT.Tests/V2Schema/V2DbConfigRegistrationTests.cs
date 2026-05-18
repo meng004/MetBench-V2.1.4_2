@@ -12,6 +12,7 @@ namespace MetBench_SystemMT.Tests.V2Schema;
 /// 注意：DbConfig.Instance 单例会读真实文件系统的 .sln 路径来定位 LiteDB 文件，
 /// 所以本测试只验证 collection key 暴露 + 基础设施，不实际初始化数据库。
 /// </summary>
+[Collection("DbConfigGlobal")]
 public sealed class V2DbConfigRegistrationTests
 {
     [Fact]

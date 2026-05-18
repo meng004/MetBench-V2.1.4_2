@@ -10,6 +10,7 @@ namespace MetBench_SystemMT.Tests.V2Schema;
 /// 每个实体独立 [Fact]；本测试不依赖 DbConfig.Instance（避免污染 v1 数据库），
 /// 用临时 LiteDatabase 文件做隔离。
 /// </summary>
+[Collection("DbConfigGlobal")]
 public sealed class V2EntityRoundtripTests : IDisposable
 {
     private readonly string _dbPath;
