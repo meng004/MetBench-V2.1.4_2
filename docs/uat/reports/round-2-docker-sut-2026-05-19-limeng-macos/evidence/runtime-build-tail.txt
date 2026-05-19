@@ -1,0 +1,27 @@
+# Runtime build (rc=0, 78s)
+
+#5 66.10  Version:           8.0.126
+#5 66.10  Commit:            1956ae01d0
+#5 66.10  Workload version:  8.0.100-manifests.2891ca96
+#5 66.10 
+#5 DONE 66.4s
+
+#6 [3/3] WORKDIR /work
+#6 DONE 0.0s
+
+#7 exporting to image
+#7 exporting layers
+#7 exporting layers 11.4s done
+#7 exporting manifest sha256:3bdda06bdb7501ee93e8bc09f0b55e30a715f384692c1eb0252142704f021ed1 done
+#7 exporting config sha256:831a5caaedac5c46820cce279e00e96d95b62669a970c518b8ef8e5bd1a960e4 done
+#7 exporting attestation manifest sha256:979e8e7bcabd364f5dc289f51863a4aaf655a64c58ac93101f938b512fc803aa 0.0s done
+#7 exporting manifest list sha256:ad5385807bea6f4f70bb770a4c7c630aa1fa976bc3aac0d1c3dbd0a3717879af done
+#7 naming to docker.io/library/metbench-runtime:latest done
+#7 DONE 11.4s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/te3gamzbzfb703yahewq1ocuk
+real 78.41
+user 0.20
+sys 0.18
+Runtime build END: 2026-05-19 14:20:59
+EXIT_CODE=0
