@@ -45,6 +45,11 @@ public sealed class LiteDbSystemMtResultRepository : ISystemMtResultRepository, 
         _database = database ?? throw new ArgumentNullException(nameof(database));
         _ownsDatabase = ownsDatabase;
 
+        // UTC_DATE: deserialize DateTime/DateTimeOffset as Kind=Utc, not Local.
+        // Pragma is persisted in the file header on first set; matches
+        // DbConfig's setting so SystemMt.Litedb and MR.Litedb stay aligned.
+        _database.Pragma("UTC_DATE", true);
+
         // Map the Guid Id without forcing a [BsonId] attribute on the
         // BLL.Core entity, which would leak a LiteDB dependency upstream.
         // autoId=true lets LiteDB assign a fresh Guid on Insert when the
