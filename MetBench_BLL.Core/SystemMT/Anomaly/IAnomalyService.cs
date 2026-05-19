@@ -21,4 +21,16 @@ public interface IAnomalyService
 
     /// <summary>取消 KnownBug 关联（重新打开调查）。</summary>
     bool UnlinkKnownBug(Guid anomalyId, string actor);
+
+    /// <summary>
+    /// 记录一条失败 run 为 Anomaly（System MT launcher → Anomaly 桥，UC-B7）。
+    /// 在 Status="new" 起手，DiscoveredAt=UtcNow，写一条 anomaly.created 审计。
+    /// </summary>
+    /// <param name="resultId">SystemMtResultRecord.Id，Guid 字符串。</param>
+    Task<MetBench_Domain.Anomaly> RecordAnomalyAsync(
+        string mrName,
+        string resultId,
+        string severity,
+        string category,
+        CancellationToken cancellationToken = default);
 }
