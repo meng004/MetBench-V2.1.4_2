@@ -185,6 +185,14 @@ namespace MetBench_DAL
             //实体映射数据表
             using (var db = new LiteDatabase(_conn))
             {
+                // UTC_DATE: tell LiteDB to deserialize DateTime as Kind=Utc instead
+                // of the default Kind=Local (which shifts Ticks by the host's TZ
+                // offset on read — breaks any cross-TZ test or any comparison
+                // between a freshly-constructed UTC DateTime and a round-tripped
+                // value). Pragma is persisted in the file header on first set,
+                // so all subsequent opens by any repo see the same behavior.
+                db.Pragma("UTC_DATE", true);
+
                 var mapper = BsonMapper.Global;
                 //建立引用
 
