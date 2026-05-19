@@ -123,27 +123,31 @@ cat /tmp/dockerout/openmc-pincell.json | head -5
 
 ### 4.2 Track B — 完整 BDD 回归（核心交付）
 
-用 docker 镜像里的 venv 当 python 解释器，跑 .NET 端的 4-scenario cross-program feature。关键技巧：**volume mount 的容器内路径 = WSL 端路径**，让 launcher 生成的绝对路径不需要翻译就在容器里有效。
+用 docker 镜像里的 venv 当 python 解释器，跑 .NET 端的 4-scenario cross-program feature。
+
+**为什么要走 wrapper 脚本 `docker/wrappers/openm{oc,c}-docker.sh`，而不是直接把 `docker run …` 塞进 `METBENCH_OPENMOC_PYTHON`？**
+
+测试代码里的 importability gate（`MetBench_SystemMT.Tests/SystemMT/OpenMocTestPaths.cs`）用 `Process.Start` + `UseShellExecute=false`，把 env var 值当 **single executable path** 来 `execve()` —— 多词字符串 `"docker run --rm …"` 不会被 shell 解析，直接报 file-not-found → scenario 被 SKIP。Wrapper 脚本是单一可执行路径，内部 `exec docker run …`，gate 看见 single path 就放行，pipeline 调用也照常工作。
+
+**关键技巧**：wrapper 把 host repo 路径以 **同名 path** 挂进容器（`-v $REPO:$REPO`），让 launcher 生成的绝对路径（`/home/<you>/MetBench-V2.1.4_2/SUT/...`）在容器内不需要翻译就 resolve。
 
 ```bash
 cd ~/MetBench-V2.1.4_2     # WSL2 内仓库根，例如 /home/limeng/MetBench-V2.1.4_2
 
-export METBENCH_OPENMOC_PYTHON="docker run --rm \
-  -v $PWD:$PWD \
-  -w $PWD \
-  metbench-sut:latest \
-  /opt/openmoc-venv/bin/python"
+export METBENCH_OPENMOC_PYTHON=$PWD/docker/wrappers/openmoc-docker.sh
+export METBENCH_OPENMC_PYTHON=$PWD/docker/wrappers/openmc-docker.sh
 
-export METBENCH_OPENMC_PYTHON="docker run --rm \
-  -v $PWD:$PWD \
-  -w $PWD \
-  metbench-sut:latest \
-  /opt/openmc-venv/bin/python"
+# 先单独验 wrapper 自身能 import（5 s 内必返回）
+$METBENCH_OPENMOC_PYTHON -c "import openmoc; print('wrapper OK')"
+$METBENCH_OPENMC_PYTHON  -c "import openmc;  print('wrapper OK', openmc.__version__)"
 
+# 真正的 4-scenario 回归
 dotnet test MetBench_SystemMT.Tests/MetBench_SystemMT.Tests.csproj \
     --filter "FullyQualifiedName~Cross_ProgramMetamorphicRelationsOnNeutron_TransportSolversFeature" \
     --logger "console;verbosity=normal"
 ```
+
+> Wrapper 默认 mount repo root（脚本所在目录的两层父目录）。如果 dotnet 在子目录里跑 / repo 在非常规位置，显式 `export METBENCH_HOST_REPO=/path/to/MetBench-V2.1.4_2` 兜底。镜像 tag 默认 `metbench-sut:latest`，自定义可 `export METBENCH_SUT_IMAGE=metbench-sut:vXYZ`。
 
 **预期输出尾部**：
 
@@ -157,7 +161,7 @@ Total tests: 4
      Passed: 4
 ```
 
-> **耗时基线（参考）**：cloud 上 33.6 s 全部跑完。VM 上每个 `docker run` 有 ~1 s 启动开销，4 scenario × 5–6 次 docker run（parser/writer/runner）≈ 多 25–40 s overhead，总时长大致 60–90 s。
+> **耗时基线（参考）**：cloud 上直连 venv 33.6 s / docker-wrapper 48.4 s，4/4 ✅。VM 上每个 `docker run` 有 ~1 s 启动开销，4 scenario × 多个 docker run（parser/writer/runner），总时长大致 50–90 s。
 
 ### 4.3 Track C（可选）— Runner smoke + sample case 兜底
 
@@ -239,6 +243,7 @@ VM round-2 docker SUT 完成：
 | 文件 | 作用 |
 |---|---|
 | `docker/Dockerfile` | Ubuntu 24.04 multi-stage，含 OpenMOC + OpenMC 双 venv |
+| `docker/wrappers/openmoc-docker.sh` / `openmc-docker.sh` | Track B 用的 single-path wrapper（绕过 `Process.Start` 不走 shell 的限制） |
 | `.claude/web-setup.sh` | Cloud 端原生安装脚本，Dockerfile 行为基准 |
 | `MetBench_BLL.Core/SystemMT/Launcher/SystemMtMrLauncher.cs` | 4 条 MR 的 BuildMrCatalog 注册点 |
 | `MetBench_BLL.Core/SystemMT/Launcher/LauncherOptions.cs` | `OpenMocPython` / `OpenMcPython` 字段定义 |
