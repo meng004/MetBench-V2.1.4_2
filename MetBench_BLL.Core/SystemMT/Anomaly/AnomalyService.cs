@@ -132,6 +132,47 @@ public sealed class AnomalyService : IAnomalyService
         return ok;
     }
 
+    // ====== Creation (UC-B7) ======
+
+    public Task<MetBench_Domain.Anomaly> RecordAnomalyAsync(
+        string mrName,
+        string resultId,
+        string severity,
+        string category,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!Guid.TryParse(resultId, out var resultGuid))
+        {
+            throw new ArgumentException(
+                $"resultId must be a Guid string, got '{resultId}'", nameof(resultId));
+        }
+
+        var anomaly = new MetBench_Domain.Anomaly
+        {
+            IdAnomaly = Guid.NewGuid(),
+            ResultId = resultGuid,
+            Severity = severity,
+            Category = category,
+            Status = "new",
+            DiscoveredAt = DateTime.UtcNow,
+            DiscoveredBy = "system-mt",
+        };
+        var ok = _anomalies.Add(anomaly);
+        if (ok)
+        {
+            WriteAudit(
+                actor: "system-mt",
+                action: "anomaly.created",
+                entityType: "Anomaly",
+                entityId: anomaly.IdAnomaly.ToString(),
+                detailsJson:
+                    $"{{\"mrName\":\"{mrName}\",\"resultId\":\"{resultId}\"," +
+                    $"\"severity\":\"{severity}\",\"category\":\"{category}\"}}");
+        }
+        return Task.FromResult(anomaly);
+    }
+
     // ====== Helpers ======
 
     private void WriteAudit(string actor, string action, string entityType, string entityId, string detailsJson)

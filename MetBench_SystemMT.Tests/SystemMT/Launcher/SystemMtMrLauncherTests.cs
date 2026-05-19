@@ -1,6 +1,7 @@
 using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Persistence;
 using MetBench_DAL;
+using MetBench_SystemMT.Tests.V2Anomaly;
 using Xunit;
 
 namespace MetBench_SystemMT.Tests.SystemMT.Launcher;
@@ -9,6 +10,7 @@ public sealed class SystemMtMrLauncherTests : IDisposable
 {
     private readonly string _dbPath;
     private readonly LiteDbSystemMtResultRepository _repository;
+    private readonly RecordingAnomalyService _anomalyService;
     private readonly SystemMtMrLauncher _launcher;
 
     public SystemMtMrLauncherTests()
@@ -19,12 +21,14 @@ public sealed class SystemMtMrLauncherTests : IDisposable
             Guid.NewGuid().ToString("N") + ".db");
         Directory.CreateDirectory(Path.GetDirectoryName(_dbPath)!);
         _repository = new LiteDbSystemMtResultRepository(_dbPath);
+        _anomalyService = new RecordingAnomalyService();
         _launcher = new SystemMtMrLauncher(
             new LauncherOptions(
                 SutRoot: TestAssetPaths.AssetRoot(),
                 SystemPython: TestAssetPaths.PythonExecutable(),
                 OpenMocPython: TestAssetPaths.PythonExecutable()),
-            _repository);
+            _repository,
+            _anomalyService);
     }
 
     public void Dispose()
@@ -39,7 +43,7 @@ public sealed class SystemMtMrLauncherTests : IDisposable
     public void Constructor_rejects_null_options()
     {
         Assert.Throws<ArgumentNullException>(() =>
-            new SystemMtMrLauncher(null!, _repository));
+            new SystemMtMrLauncher(null!, _repository, _anomalyService));
     }
 
     [Fact]
@@ -47,7 +51,15 @@ public sealed class SystemMtMrLauncherTests : IDisposable
     {
         var options = new LauncherOptions("/tmp", "python3", "python3");
         Assert.Throws<ArgumentNullException>(() =>
-            new SystemMtMrLauncher(options, null!));
+            new SystemMtMrLauncher(options, null!, _anomalyService));
+    }
+
+    [Fact]
+    public void Constructor_rejects_null_anomaly_service()
+    {
+        var options = new LauncherOptions("/tmp", "python3", "python3");
+        Assert.Throws<ArgumentNullException>(() =>
+            new SystemMtMrLauncher(options, _repository, null!));
     }
 
     [Fact]
