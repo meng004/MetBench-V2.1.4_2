@@ -1,0 +1,39 @@
+# MetBench all-in-container runtime — `metbench-sut` + .NET 8 SDK.
+#
+# Lets the VM-side workflow be a single `docker run` from PowerShell, no
+# WSL2 and no host-side .NET install:
+#
+#     docker build -t metbench-sut:latest      docker/
+#     docker build -t metbench-runtime:latest  -f docker/Dockerfile.runtime docker/
+#
+#     docker run --rm -v "${PWD}:/work" -w /work `
+#         -e METBENCH_OPENMOC_PYTHON=/opt/openmoc-venv/bin/python `
+#         -e METBENCH_OPENMC_PYTHON=/opt/openmc-venv/bin/python `
+#         metbench-runtime:latest `
+#         dotnet test MetBench_SystemMT.Tests/MetBench_SystemMT.Tests.csproj `
+#             --filter "FullyQualifiedName~Cross_Program..."
+#
+# Separate file (instead of an extra stage in docker/Dockerfile) so a SUT-
+# image rebuild does not re-evaluate every stage of the multi-GB OpenMOC +
+# OpenMC builder. This image just layers ~250 MB of dotnet-sdk-8.0 on top.
+#
+# Runs as root because dotnet test writes obj/bin/ + LiteDB artifacts back
+# into the bind-mounted host tree; relying on container uid 1000 matching
+# the host uid is too fragile across Docker Desktop / native Linux / cloud.
+# =============================================================================
+
+FROM metbench-sut:latest
+
+USER root
+ENV DEBIAN_FRONTEND=noninteractive \
+    DOTNET_CLI_TELEMETRY_OPTOUT=1 \
+    DOTNET_NOLOGO=1
+
+# Ubuntu 24.04 noble ships dotnet-sdk-8.0 in `universe` — no Microsoft repo
+# needed. Pulls in ~150 packages (~250 MB layer).
+RUN apt-get update -qq \
+ && apt-get install -y --no-install-recommends dotnet-sdk-8.0 \
+ && rm -rf /var/lib/apt/lists/* \
+ && dotnet --info | head -5
+
+WORKDIR /work

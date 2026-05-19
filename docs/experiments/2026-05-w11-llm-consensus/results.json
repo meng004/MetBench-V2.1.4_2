@@ -1,45 +1,45 @@
 {
-  "ranAt": "2026-05-17T03:10:48.6742792+00:00",
+  "ranAt": "2026-05-17T03:51:03.5969868+00:00",
   "providers": [
     "deepseek",
     "openai",
     "claude"
   ],
   "promptCount": 20,
-  "totalElapsed": "00:04:53.2312352",
+  "totalElapsed": "00:04:46.1196749",
   "summary": {
     "Total": 20,
-    "ConsensusMatched": 19,
-    "ConsensusAccuracy": 0.95,
-    "UnanimousCount": 20,
-    "UnanimousRate": 1,
-    "MeanKappa": 0
+    "ConsensusMatched": 20,
+    "ConsensusAccuracy": 1,
+    "UnanimousCount": 19,
+    "UnanimousRate": 0.95,
+    "MeanKappa": 0.925
   },
   "results": [
     {
       "Id": "MR-amax-identity-1",
       "Expected": true,
-      "Consensus": false,
+      "Consensus": true,
       "Unanimous": true,
-      "Kappa": null,
+      "Kappa": 1,
       "ProviderResponses": [
         {
           "Provider": "deepseek",
-          "Plausible": false,
-          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022Appending -infinity does not change the maximum for real numbers or infinities, but if the list contains NaN, the maximum may be NaN. In floating-point arithmetic, NaN ...",
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Appending negative infinity to the list does not change the maximum value because negative infinity is less than any finite number, so the maximum remains the same as in...",
           "Error": null
         },
         {
           "Provider": "openai",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022:true,\u0022reason\u0022:\u0022Appending negative infinity cannot increase or otherwise change the maximum of a non-empty list of real/float values, since -infinity is less than or equal to every existin...",
+          "Error": null
         },
         {
           "Provider": "claude",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Appending -infinity to a non-empty list cannot change the maximum, since -infinity is less than or equal to every existing element. Thus amax(x\u0027) == amax(x) holds.\u0022}",
+          "Error": null
         }
       ]
     },
@@ -48,25 +48,25 @@
       "Expected": false,
       "Consensus": false,
       "Unanimous": true,
-      "Kappa": null,
+      "Kappa": 1,
       "ProviderResponses": [
         {
           "Provider": "deepseek",
           "Plausible": false,
-          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022Appending \u002Binfinity changes the maximum to infinity unless the original array already contained infinity. In general, amax(x\u0027) will be \u002Binfinity while amax(x) is finite...",
+          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022Appending \u002Binfinity changes the maximum value to infinity, which is not equal to the original maximum unless the original list already contained infinity. The relation ...",
           "Error": null
         },
         {
           "Provider": "openai",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": false,
+          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022Appending \u002Binfinity to the input makes the maximum of the transformed array \u002Binfinity, so it will generally not equal amax(x) unless x already contains \u002Binfinity.\u0022}",
+          "Error": null
         },
         {
           "Provider": "claude",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": false,
+          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022Appending \u002Binfinity makes the maximum become \u002Binfinity, which generally differs from amax(x); the correct relation would be amax(x\u0027) == \u002Binfinity (or \u003E= amax(x)).\u0022}",
+          "Error": null
         }
       ]
     },
@@ -75,25 +75,25 @@
       "Expected": true,
       "Consensus": true,
       "Unanimous": true,
-      "Kappa": null,
+      "Kappa": 1,
       "ProviderResponses": [
         {
           "Provider": "deepseek",
           "Plausible": true,
-          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022The maximum (or absolute maximum) of a list depends only on the multiset of values and is invariant under permutation; shuffling does not change the result.\u0022}",
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022If amax computes the absolute maximum or maximum of the list, the result depends only on the multiset of values, not their order. Shuffling does not change the multiset,...",
           "Error": null
         },
         {
           "Provider": "openai",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Shuffling preserves the multiset of input values, so the maximum value is unchanged; assuming non-empty inputs and no NaN/equality edge cases, amax(x\u0027) == amax(x).\u0022}",
+          "Error": null
         },
         {
           "Provider": "claude",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022The maximum of a list is invariant under permutation of its elements, since shuffling does not change the multiset of values.\u0022}",
+          "Error": null
         }
       ]
     },
@@ -102,25 +102,25 @@
       "Expected": true,
       "Consensus": true,
       "Unanimous": true,
-      "Kappa": null,
+      "Kappa": 1,
       "ProviderResponses": [
         {
           "Provider": "deepseek",
           "Plausible": true,
-          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Multiplying all elements by a positive constant scales the max (or absolute max) by that same constant, which holds mathematically for any norm-like function.\u0022}",
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Multiplying all elements by a positive constant scales the maximum (or absolute maximum) by that same factor, so the relation holds mathematically.\u0022}",
           "Error": null
         },
         {
           "Provider": "openai",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022For a nonempty list of real-valued finite numbers, multiplying every element by a positive constant preserves ordering, so the maximum also multiplies by that constant: ...",
+          "Error": null
         },
         {
           "Provider": "claude",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Scaling all elements by a positive constant scales the maximum by the same constant; multiplication by 2.0 is exact in IEEE 754 (just an exponent shift), so equality hol...",
+          "Error": null
         }
       ]
     },
@@ -129,25 +129,25 @@
       "Expected": true,
       "Consensus": true,
       "Unanimous": true,
-      "Kappa": null,
+      "Kappa": 1,
       "ProviderResponses": [
         {
           "Provider": "deepseek",
           "Plausible": true,
-          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Adding a constant to all elements of a set shifts the maximum by that constant, a mathematically sound property.\u0022}",
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Adding 5.0 to each element shifts the maximum value by exactly 5.0, assuming the array is non-empty and amax computes the maximum.\u0022}",
           "Error": null
         },
         {
           "Provider": "openai",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022:true,\u0022reason\u0022:\u0022For any non-empty list of finite real values, adding the same constant 5.0 to every element shifts the maximum by exactly 5.0, so amax([v\u002B5.0 for v in x]) = amax(x)\u002B5.0. Ca...",
+          "Error": null
         },
         {
           "Provider": "claude",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Adding a constant 5.0 to every element shifts the maximum by exactly 5.0, so amax(x\u0027) = amax(x) \u002B 5.0 holds mathematically (modulo floating-point exactness, which is exa...",
+          "Error": null
         }
       ]
     },
@@ -156,25 +156,25 @@
       "Expected": false,
       "Consensus": false,
       "Unanimous": true,
-      "Kappa": null,
+      "Kappa": 1,
       "ProviderResponses": [
         {
           "Provider": "deepseek",
           "Plausible": false,
-          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022If amax returns the maximum value, negating elements gives max(x\u0027) = -min(x), while -amax(x) = -max(x). Equality would imply min(x) = max(x), which only holds for const...",
+          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022The maximum of the negated array equals the negative of the minimum, not the negative of the maximum, unless all elements are equal.\u0022}",
           "Error": null
         },
         {
           "Provider": "openai",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": false,
+          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022Negating all elements reverses their order: amax([-v for v in x]) equals -min(x), not -amax(x) in general. The assertion only holds in special cases such as when all el...",
+          "Error": null
         },
         {
           "Provider": "claude",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": false,
+          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022Negating all elements gives amax(-x) = -amin(x), not -amax(x). These are equal only when max(x) == min(x) (constant array).\u0022}",
+          "Error": null
         }
       ]
     },
@@ -183,25 +183,25 @@
       "Expected": true,
       "Consensus": true,
       "Unanimous": true,
-      "Kappa": null,
+      "Kappa": 1,
       "ProviderResponses": [
         {
           "Provider": "deepseek",
           "Plausible": true,
-          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Concatenating a list with itself duplicates the elements, so the maximum value (or absolute maximum) remains unchanged.\u0022}",
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Concatenating a list with itself adds the same elements, so the maximum (or absolute maximum) remains unchanged.\u0022}",
           "Error": null
         },
         {
           "Provider": "openai",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022:true,\u0022reason\u0022:\u0022Concatenating a list with itself does not introduce any new values, so for any non-empty input where amax is well-defined, the maximum of x \u002B x is the same as the maximum o...",
+          "Error": null
         },
         {
           "Provider": "claude",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Concatenating a list with itself produces the same set of values (each duplicated), so the maximum element is unchanged.\u0022}",
+          "Error": null
         }
       ]
     },
@@ -210,25 +210,25 @@
       "Expected": true,
       "Consensus": true,
       "Unanimous": true,
-      "Kappa": null,
+      "Kappa": 1,
       "ProviderResponses": [
         {
           "Provider": "deepseek",
           "Plausible": true,
-          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Appending \u002Binfinity adds an element larger than any finite value, so the minimum of the array remains unchanged, assuming the original array is non-empty (which is the t...",
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Appending positive infinity, which is larger than any finite element, does not change the minimum of a non-empty list. The relation is mathematically valid for all non-e...",
           "Error": null
         },
         {
           "Provider": "openai",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Appending \u002Binfinity to a non-empty list cannot decrease or change the minimum, since \u002Binfinity is greater than or equal to every finite element; assuming amin is defined...",
+          "Error": null
         },
         {
           "Provider": "claude",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Appending \u002Binfinity cannot change the minimum because \u002Binfinity is greater than or equal to every element, so the minimum of x\u0027 equals the minimum of x (assuming x is no...",
+          "Error": null
         }
       ]
     },
@@ -237,25 +237,25 @@
       "Expected": true,
       "Consensus": true,
       "Unanimous": true,
-      "Kappa": null,
+      "Kappa": 1,
       "ProviderResponses": [
         {
           "Provider": "deepseek",
           "Plausible": true,
-          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022This follows from the trigonometric identity sin(x \u002B \u03C0) = -sin(x).\u0022}",
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022The identity sin(x \u002B \u03C0) = -sin(x) is a fundamental trigonometric identity, mathematically exact for all real x.\u0022}",
           "Error": null
         },
         {
           "Provider": "openai",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Mathematically, sine is pi-antiperiodic: sin(x \u002B pi) = -sin(x) for all real x, assuming x is in radians. In floating-point implementations, exact equality may fail due t...",
+          "Error": null
         },
         {
           "Provider": "claude",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022sin(x \u002B pi) = -sin(x) is a standard trigonometric identity.\u0022}",
+          "Error": null
         }
       ]
     },
@@ -263,26 +263,26 @@
       "Id": "MR-sin-full-period",
       "Expected": true,
       "Consensus": true,
-      "Unanimous": true,
-      "Kappa": null,
+      "Unanimous": false,
+      "Kappa": -0.5000000000000001,
       "ProviderResponses": [
         {
           "Provider": "deepseek",
           "Plausible": true,
-          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022The sine function is periodic with period 2\u03C0, so sin(x \u002B 2\u03C0) = sin(x) holds for all real x. This is a fundamental mathematical identity.\u0022}",
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Sine is a periodic function with period 2\u03C0; sin(x \u002B 2\u03C0) = sin(x) for all real x.\u0022}",
           "Error": null
         },
         {
           "Provider": "openai",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": false,
+          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022Mathematically sin(x \u002B 2*pi) = sin(x) for real numbers, but for a floating-point program exact equality is not generally reliable because x \u002B 2*pi and the subsequent si...",
+          "Error": null
         },
         {
           "Provider": "claude",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Sine is periodic with period 2*pi, so sin(x \u002B 2*pi) = sin(x) mathematically. Note: in floating-point arithmetic exact equality may fail due to rounding, but the relation...",
+          "Error": null
         }
       ]
     },
@@ -291,25 +291,25 @@
       "Expected": false,
       "Consensus": false,
       "Unanimous": true,
-      "Kappa": null,
+      "Kappa": 1,
       "ProviderResponses": [
         {
           "Provider": "deepseek",
           "Plausible": false,
-          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022The double-angle identity is sin(2x) = 2 sin(x) cos(x), not 2 sin(x). The relation only holds when cos(x) = 1, which is not true for arbitrary x.\u0022}",
+          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022sin(2x) = 2 sin(x) cos(x), not generally equal to 2 sin(x) unless cos(x)=1.\u0022}",
           "Error": null
         },
         {
           "Provider": "openai",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": false,
+          "RawText": "{\u0022plausible\u0022:false,\u0022reason\u0022:\u0022The identity is not generally true: sin(2x) = 2*sin(x)*cos(x), not 2*sin(x), except for special cases such as x where cos(x)=1 or sin(x)=0.\u0022}",
+          "Error": null
         },
         {
           "Provider": "claude",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": false,
+          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022The correct double-angle identity is sin(2x) = 2*sin(x)*cos(x), not 2*sin(x). For example, sin(\u03C0/2)=1 but 2*sin(\u03C0/4)=\u221A2\u22601.\u0022}",
+          "Error": null
         }
       ]
     },
@@ -318,25 +318,25 @@
       "Expected": true,
       "Consensus": true,
       "Unanimous": true,
-      "Kappa": null,
+      "Kappa": 1,
       "ProviderResponses": [
         {
           "Provider": "deepseek",
           "Plausible": true,
-          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022The heat equation is linear, so scaling the initial condition by a constant factor scales the solution at all times by the same factor.\u0022}",
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022The heat equation is a linear homogeneous PDE. By the principle of superposition and homogeneity, scaling the initial condition by a constant factor scales the entire so...",
           "Error": null
         },
         {
           "Provider": "openai",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022:true,\u0022reason\u0022:\u0022For a linear homogeneous heat equation solver with unchanged linear/homogeneous boundary conditions and parameters, scaling the initial condition by 3 scales the entire sol...",
+          "Error": null
         },
         {
           "Provider": "claude",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022The heat equation is linear, so scaling the initial condition by a constant scales the solution by the same constant at all (x,t).\u0022}",
+          "Error": null
         }
       ]
     },
@@ -345,25 +345,25 @@
       "Expected": true,
       "Consensus": true,
       "Unanimous": true,
-      "Kappa": null,
+      "Kappa": 1,
       "ProviderResponses": [
         {
           "Provider": "deepseek",
           "Plausible": true,
-          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022The heat equation on an infinite domain is translation invariant; shifting the initial condition by a results in the solution being shifted by the same amount.\u0022}",
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022The heat equation on an infinite domain with constant coefficients is translation invariant. If the initial condition is shifted by a constant a, the solution evolves id...",
           "Error": null
         },
         {
           "Provider": "openai",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022:true,\u0022reason\u0022:\u0022On an infinite homogeneous domain, the heat equation is translation invariant: shifting the initial condition by a shifts the entire solution by the same amount, so u\u0027(x,t)...",
+          "Error": null
         },
         {
           "Provider": "claude",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022The heat equation on an infinite domain is translation-invariant, so shifting the initial condition by \u0027a\u0027 results in the solution being shifted by the same amount: u\u0027(x...",
+          "Error": null
         }
       ]
     },
@@ -372,25 +372,25 @@
       "Expected": true,
       "Consensus": true,
       "Unanimous": true,
-      "Kappa": null,
+      "Kappa": 1,
       "ProviderResponses": [
         {
           "Provider": "deepseek",
           "Plausible": true,
-          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Increasing the fission production cross section (nu_sigma_f) by 10% directly enhances neutron production, leading to a higher effective multiplication factor k_eff, assu...",
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Increasing the fission production cross section (nu_sigma_f) by 10% directly increases the neutron production rate per fission, while leakage and absorption remain uncha...",
           "Error": null
         },
         {
           "Provider": "openai",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022:true,\u0022reason\u0022:\u0022In the neutron transport eigenvalue problem, k_eff is the ratio of neutron production to losses. Increasing fuel nu_sigma_f by 10% increases fission neutron production whil...",
+          "Error": null
         },
         {
           "Provider": "claude",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022k_eff scales with neutron production per fission; increasing nu_sigma_f by 10% increases the numerator of the neutron balance (production/absorption\u002Bleakage), so k_eff s...",
+          "Error": null
         }
       ]
     },
@@ -399,25 +399,25 @@
       "Expected": true,
       "Consensus": true,
       "Unanimous": true,
-      "Kappa": null,
+      "Kappa": 1,
       "ProviderResponses": [
         {
           "Provider": "deepseek",
           "Plausible": true,
-          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Increasing fuel absorption cross-section reduces neutron multiplication, thus k_eff should decrease.\u0022}",
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Increasing fuel absorption removes more neutrons from the system, reducing the effective multiplication factor, so k_eff_followup should be less than k_eff_source.\u0022}",
           "Error": null
         },
         {
           "Provider": "openai",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Increasing the fuel absorption cross section while leaving fission production and other parameters unchanged increases neutron loss in a region with nonzero flux, so the...",
+          "Error": null
         },
         {
           "Provider": "claude",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Increasing the fuel absorption cross-section increases neutron losses to capture without proportionally increasing fission production, reducing the neutron multiplicatio...",
+          "Error": null
         }
       ]
     },
@@ -426,25 +426,25 @@
       "Expected": true,
       "Consensus": true,
       "Unanimous": true,
-      "Kappa": null,
+      "Kappa": 1,
       "ProviderResponses": [
         {
           "Provider": "deepseek",
           "Plausible": true,
-          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022The pin-cell geometry consists of concentric fuel and moderator regions, which are rotationally symmetric about the centerline. Rotating by 90 degrees yields an identica...",
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022A 2D pin-cell with concentric fuel/moderator regions is axisymmetric; rotating by 90 degrees yields an identical geometry. Therefore, k_eff must be invariant under such ...",
           "Error": null
         },
         {
           "Provider": "openai",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022A 90-degree rotation about the centered pin axis is a symmetry of a concentric 2D pin-cell geometry with isotropic materials and appropriately rotated or symmetric bound...",
+          "Error": null
         },
         {
           "Provider": "claude",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022A concentric pin-cell has azimuthal symmetry, and a square outer boundary (typical pin-cell) is invariant under 90\u00B0 rotation, so k_eff should be unchanged up to discreti...",
+          "Error": null
         }
       ]
     },
@@ -453,25 +453,25 @@
       "Expected": false,
       "Consensus": false,
       "Unanimous": true,
-      "Kappa": null,
+      "Kappa": 1,
       "ProviderResponses": [
         {
           "Provider": "deepseek",
           "Plausible": false,
-          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022The range is proportional to the square of the initial velocity (R = v0^2 sin(2\u03B8)/g). Doubling v0 quadruples the range, not doubles it.\u0022}",
+          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022The range of a projectile (no air resistance) is proportional to v0^2, so doubling v0 quadruples the range, not doubles it.\u0022}",
           "Error": null
         },
         {
           "Provider": "openai",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": false,
+          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022For ideal projectile motion on level ground, range = v0^2 * sin(2*angle) / g, so doubling v0 makes the range 4 times larger, not 2 times larger.\u0022}",
+          "Error": null
         },
         {
           "Provider": "claude",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": false,
+          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022Projectile range scales as v0^2 (range = v0^2 sin(2\u03B8)/g), so doubling v0 quadruples the range, not doubles it. The correct relation would be range_followup == 4 * range...",
+          "Error": null
         }
       ]
     },
@@ -480,25 +480,25 @@
       "Expected": true,
       "Consensus": true,
       "Unanimous": true,
-      "Kappa": null,
+      "Kappa": 1,
       "ProviderResponses": [
         {
           "Provider": "deepseek",
           "Plausible": true,
-          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022In ideal projectile motion on level ground, range = (v0^2 * sin(2*angle))/g. Since sin(2*(90\u00B0-angle)) = sin(180\u00B0-2*angle) = sin(2*angle), complementary launch angles yie...",
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022In ideal projectile motion (no air resistance, flat ground), range = v0^2 * sin(2*angle) / g. Since sin(2*angle) = sin(180\u00B0 - 2*angle) = sin(2*(90\u00B0 - angle)), the range ...",
           "Error": null
         },
         {
           "Provider": "openai",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022For ideal projectile motion on level ground with the same initial speed and gravity, the range is R = v0^2 * sin(2*angle) / g. Replacing angle with 90 - angle gives sin(...",
+          "Error": null
         },
         {
           "Provider": "claude",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": true,
+          "RawText": "{\u0022plausible\u0022: true, \u0022reason\u0022: \u0022Range R = v0^2 sin(2\u03B8)/g; sin(2(90-\u03B8)) = sin(180-2\u03B8) = sin(2\u03B8), so complementary launch angles yield identical range.\u0022}",
+          "Error": null
         }
       ]
     },
@@ -507,25 +507,25 @@
       "Expected": false,
       "Consensus": false,
       "Unanimous": true,
-      "Kappa": null,
+      "Kappa": 1,
       "ProviderResponses": [
         {
           "Provider": "deepseek",
           "Plausible": false,
-          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022Sorting the array does not change the maximum absolute value, so amax(x\u0027) should equal amax(x), not amax(x) \u002B 1.0.\u0022}",
+          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022Sorting the array does not change its maximum value (or absolute maximum), so amax(sorted(x)) should equal amax(x), not amax(x) \u002B 1.0.\u0022}",
           "Error": null
         },
         {
           "Provider": "openai",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": false,
+          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022Sorting a list does not change its elements, so the maximum value should remain the same: amax(sorted(x)) == amax(x), not amax(x) \u002B 1.0.\u0022}",
+          "Error": null
         },
         {
           "Provider": "claude",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": false,
+          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022Sorting a list does not change its maximum value; amax(sorted(x)) should equal amax(x), not amax(x) \u002B 1.0.\u0022}",
+          "Error": null
         }
       ]
     },
@@ -534,25 +534,25 @@
       "Expected": false,
       "Consensus": false,
       "Unanimous": true,
-      "Kappa": null,
+      "Kappa": 1,
       "ProviderResponses": [
         {
           "Provider": "deepseek",
           "Plausible": false,
-          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022The equality sin(x) = cos(x) is not a mathematical identity; it holds only for specific values of x (e.g., \u03C0/4 \u002B k\u03C0), not for all inputs.\u0022}",
+          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022sin(x) is not equal to cos(x) in general; the equality holds only for specific x values, not for all inputs as required by a valid metamorphic relation.\u0022}",
           "Error": null
         },
         {
           "Provider": "openai",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": false,
+          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022With x\u0027 = x, the assertion becomes sin(x) == cos(x), which is not generally true; it only holds at special values such as x = pi/4 \u002B k*pi.\u0022}",
+          "Error": null
         },
         {
           "Provider": "claude",
-          "Plausible": null,
-          "RawText": "",
-          "Error": "LLM API 403 Forbidden: Host not in allowlist"
+          "Plausible": false,
+          "RawText": "{\u0022plausible\u0022: false, \u0022reason\u0022: \u0022Since x\u0027 = x, the assertion reduces to sin(x) == cos(x), which only holds at specific values (e.g., x = \u03C0/4 \u002B k\u03C0), not as a general metamorphic relation. The correct id...",
+          "Error": null
         }
       ]
     }

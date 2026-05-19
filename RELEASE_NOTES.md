@@ -1,91 +1,108 @@
-# MetBench v2.1.0-rc1 — Release Notes
+# MetBench v2.1.0 — Release Notes
 
-> **Status**: Release Candidate（用于 UAT round-1）
-> **Tag**: `v2.1.0-rc1`
-> **Commit**: `eccb051e4fbb9a277475d25dce8040385594159e`
-> **Date**: 2026-05-16
-> **Baseline data**: [`docs/uat/reports/baseline-2026-05-16/`](docs/uat/reports/baseline-2026-05-16/)
+> **Status**: Release Candidate（cloud-side baseline 100% Pass，待 Windows UAT round-1 验收）
+> **Tag**（待签）: `release-v2.1.0`
+> **Commit**: 见 [`docs/uat/reports/baseline-2026-05-17/README.md`](docs/uat/reports/baseline-2026-05-17/README.md)
+> **Baseline data**: [`docs/uat/reports/baseline-2026-05-17/`](docs/uat/reports/baseline-2026-05-17/)
 
-## Highlights
+## v2.1.0 Highlights — Post W11-W12
 
-### 论文核心
-- **F9 R-Case 自动复现**：给定 `KnownBugCode + PipelineContext`，service 自动跑 pipeline → 判定 → 落 Anomaly + 关联 KnownBug + audit log。支持闭环复现 R-Case-4 (OpenMOC narrow basin)。
-- **F12 Multi-LLM Consensus**：并发 fan-out 到 N 家 LLM provider，strict-majority consensus + pair-wise Cohen's κ。对应 reviewer 一定会问的 "为什么相信 LLM 判断" 问题。
+### 论文核心（v2.1.0-rc1 base + W11-W12 强化）
 
-### 主线功能
-- **F5 / F6 / F7 / F14**：soft-delete + schema migration + MetaPattern 集成 + MRPairing m_cmp partner-binding
-- **F10 LiteDB Keyset 分页**：高频实体（Executions / Anomalies）深翻页从 O(N) → O(pageSize)，UI infinite scroll 友好
-- **F15 / F19**：9 个 feature 文件统一重命名 + `MRBinding.Status` 单一软删机制
-- **F16 / F18**：CI 性能基线（< 120 s budget）+ DbConfig 3-tier override（Linux 兼容）
+- **F9 R-Case 自动复现**（v2.1.0-rc1 carryover）：给定 `KnownBugCode + PipelineContext`，service 自动跑 pipeline → 判定 → 落 Anomaly + 关联 KnownBug + audit log
+- **F12 Multi-LLM Consensus (W11.2 实证跑通)**：DeepSeek + OpenAI + Claude **真实** 60/60 calls，consensus accuracy 100%，mean pair-wise Cohen's κ = 0.925。唯一非 unanimous 行（`MR-sin-full-period`）展示 LLM 间"数学 vs 浮点严格等"口径分歧的真实信号，strict majority 正确吸收。数据：[`docs/experiments/2026-05-w11-llm-consensus/`](docs/experiments/2026-05-w11-llm-consensus/)
+- **F13 第 3 SUT OpenMC 接入 (W12)**：与 OpenMOC 同域不同算法（MOC deterministic vs MC stochastic），强化 `m_cmp` 跨实现一致性。cmake 源码 build + Python bindings + 4 cross-program BDD scenarios
+
+### 主线功能（v2.1.0-rc1 carryover）
+
+- **F5 / F6 / F7 / F14**：soft-delete + schema migration + MetaPattern + MRPairing m_cmp partner
+- **F10 LiteDB Keyset 分页**：深翻页 O(pageSize)
+- **F15 / F19**：9 个 feature 文件重命名 + `MRBinding.Status` 单一软删
+- **F16 / F18**：CI 性能基线（< 120 s）+ DbConfig 3-tier override
 - **F3a / F3b**：Serive → Service 拼写修正（含 [Obsolete] 兼容别名）
 
+### W11-W12 新增
+
+- **命名统一**：launcher 层 `scenario` → `MR` 彻底改名（65 处），消除与 BDD Gherkin Scenario 撞名混淆。persistence 层 `ScenarioName` → `MrName` + LiteDB **自动 schema migration**（兼容现有 .Litedb）。详见 [`docs/PROJECT-STRUCTURE.md`](docs/PROJECT-STRUCTURE.md) §8
+- **F11 m_adj 路径 A 启动**：`tools/check_openmoc_adjoint.sh` + GitHub Actions 月度 cron（`17 3 1 * *` UTC）→ 上游有 adjoint commit 自动开 issue。`m_adj` 暂保留 `out-of-scope`，paper "future work" 段
+- **flake 根治**：`DbConfig.Instance` 跨 class 竞态用 `[Collection("DbConfigGlobal")]` 注解 6 个类根治
+- **UAT 双轨**：47 用例 markdown 三段式（初始条件 / 操作步骤 / 断言）+ 21 用例 BDD wrapper（机器可验，反射 + baseline trx 双重检查）+ Windows round-1 完整 runbook
+
 ### 数据模型
+
 - **24 个 LiteDB collections**（NOETHER MetaPattern 是第 24 个）
 - **4 级 MR 语义层级** MetaPattern → MRSchema → MRBinding → MRInstance → Execution
 - **8 个 NOETHER MetaPatterns**：4 active (`m_inv` / `m_mono` / `m_conv` / `m_cmp`) + 4 out-of-scope
 
 ### UAT 包
-- **45 个用例** 分 7 类（CRUD / 主流程 / 发现 & 验证 / R-Case / 可视化 & 报表 / 持久化 / 运营）
-- **评价表** + 任务书 + 治理流程 + Issue 模板
-- **Baseline trx** 给测试员对照
 
-## 测试态
+- **47 用例 markdown** 分 7 类（A 管理 CRUD / B MT 主流程 / C 发现 & 验证 / D R-Case / E 可视化 & 报表 / F 持久化 / G 运营），全部三段式
+- **21 用例 BDD wrapper**（Part F + G + C 共 21 个 .feature，自动反射 + baseline trx 检查）
+- **Windows UAT runbook**：**21 个 WPF UI 用例**（A1-A7 + B1-B9 + E1-E5）2-2.5 小时 1 轮完整指导（[`docs/uat/runbooks/windows-uat-round-1.md`](docs/uat/runbooks/windows-uat-round-1.md)）；其余 5 个 CLI 用例（A8 / D1 / D2 / E6 / E7）已由 cloud baseline 完全覆盖，**不重跑**
+- **Baseline 2026-05-17**：cloud-side reference，**521/521 Pass / 0 Skip / 0 Fail**
+
+## 测试态（baseline-2026-05-17）
 
 | 项 | 值 |
-|----|----|
-| 全套 facts | **458 pass** / 2 skip / 0 fail |
-| Cumulative wall | **22.35 s** / 120 s budget |
-| Slow tests (>2 s) | 0 |
-| BDD smoke (OpenMOC + 3 SUT) | 22 pass / 0 fail |
+|---|---|
+| 全套 facts | **521 Pass** / 0 Skip / 0 Fail |
+| 整体 wall | **35 s** |
+| Cumulative wall | **73.02 s** / 120 s budget |
+| Slow tests (>2 s) | 6（全部 OpenMOC/OpenMC 物理跑，合理） |
+| BDD smoke | **30 Pass** / 1 Skip |
+| UAT BDD filter | **48 Pass** / 0 Skip |
 | CI | ✅ Linux Ubuntu 24.04 全绿 |
 
 ## 已知遗留 / 未完成
 
 | 编号 | 范围 | 状态 |
-|------|------|------|
-| **F11 m_adj MR 族** | 需 OpenMOC 升级支持 adjoint flux | 🚫 blocked，下版本（v2.2）排 |
-| **F13 第 3 SUT 接入** | Serpent / MCNP / 其他选型未定 | 🟡 待产品决策 |
-| **WPF UI 整改** | UAT 反馈驱动 | 🟡 与 UAT round-1 并行 |
+|---|---|---|
+| **F11 m_adj MR 族** | OpenMOC 上游升级 adjoint flux | 🟢 路径 A 月度监控在线，v2.2 候 |
+| **第 5 SUT** | SU2 / FEniCS / OpenFOAM | 🟡 等论文 reviewer 反馈 |
+| **WPF UI 验收** | Windows round-1 | 🟡 跟 v2.1.0 同步推进 |
 
 ## 升级 / 兼容性
 
-- **新增**：API / 实体 / DB collection 全部为新增，**无破坏式变更**
-- **拼写修正**：`MTReportGeneratorSerive` 等 6 个类已重命名为 `*Service`，旧名作 [Obsolete] 别名保留一版（v2.2 删除）
-- **DB 自动迁移**：首次启动 v2.1 自动创建新 collection + 索引；不需要手动迁移
+- **LiteDB schema migration**：v2.1.0 首次开 `MR.Litedb` 自动把 `ScenarioName` field 改名 `MrName`，幂等
+- **API 改名**：launcher `ScenarioDescriptor` / `ScenarioRunResult` / `ISystemMtScenarioLauncher` 等改为 `Mr*` 对应名。**WPF + 第三方调用方需要更新引用**，无兼容别名（cloud + Windows agents 已同步）
 - **`.env`**：LLM API key 配置（参考 `docs/uat/setup-guide.md` §3）
 
 ## 验收门槛
 
-**v2.1.0 正式版** 发版准入：
+**v2.1.0 正式版**发版准入：
 
-1. UAT round-1 由测试员独立跑通，**PASS** 或 **CONDITIONAL PASS** + 修复后 round-2 重验
-2. Linux + Windows 双端覆盖率达 ≥ 80% 用例 ✅
-3. 性能：cumulative test wall < 120 s（当前 22.35 s ✅）
+1. UAT round-1 由 Windows 测试员独立跑通，**PASS** 或 **CONDITIONAL PASS** + 修复后 round-2 重验
+2. Linux baseline ≥ 90% Pass ✅（当前 100%）
+3. 性能：cumulative test wall < 120 s ✅（73.02 s）
 4. 0 个 🔴 Blocker bug
 
 ## 谁该读
 
 | 角色 | 怎么用 |
-|------|--------|
-| 测试工程师 | 拿这个 rc1 commit 跑 UAT round-1（[任务书](docs/uat/任务书.md)） |
-| 项目负责人 | review UAT 结果，决定是否升 v2.1.0 正式版 |
-| 开发者 | 看 `git log v2.1.0-rc1` 了解本版改了什么 |
-| 论文 reviewer | 看 R-Case 复现 (F9) + Multi-LLM (F12) 两段论文支撑 |
+|---|---|
+| Windows 测试员 | 拿 baseline-2026-05-17 commit 按 [`windows-uat-round-1.md`](docs/uat/runbooks/windows-uat-round-1.md) 跑 round-1 |
+| 项目负责人 | review round-1 + dashboard.md PASS → tag `release-v2.1.0` |
+| 新加入开发者 | 先看 [`docs/PROJECT-STRUCTURE.md`](docs/PROJECT-STRUCTURE.md) 拿全图 |
+| 论文 reviewer | 看 W11.2 LLM 数据 + R-Case 复现 + 4 SUT (含 OpenMC m_cmp) |
 
 ## 链接
 
-- [UAT 包入口](docs/uat/README.md)
-- [UAT 任务书](docs/uat/任务书.md)
-- [Baseline 数据](docs/uat/reports/baseline-2026-05-16/)
-- [W11 计划](docs/superpowers/plans/2026-05-16-w11-plan.md)
-- [v2.1 followup pipeline](docs/superpowers/plans/2026-05-15-v2.1-followup-pipeline.md)
+- 📘 [项目结构 + 测试矩阵 `docs/PROJECT-STRUCTURE.md`](docs/PROJECT-STRUCTURE.md)
+- 📋 [UAT 包入口](docs/uat/README.md)
+- 📊 [Baseline 2026-05-17](docs/uat/reports/baseline-2026-05-17/)
+- 🪟 [Windows UAT runbook](docs/uat/runbooks/windows-uat-round-1.md)
+- 🧪 [W11.2 LLM consensus 实验](docs/experiments/2026-05-w11-llm-consensus/)
+- 🗓 [W11 计划](docs/superpowers/plans/2026-05-16-w11-plan.md) · [F13 RFC](docs/superpowers/plans/2026-05-17-f13-third-sut-rfc.md) · [F11 RFC](docs/superpowers/plans/2026-05-17-f11-unlock-rfc.md) · [F11 status](docs/superpowers/plans/2026-05-17-f11-status.md)
+- 📜 [v2.1.0-rc1 release notes (历史) — 见 git log `v2.1.0-rc1` tag](https://github.com/meng004/MetBench-V2.1.4_2/tags)
 
 ---
 
-## 完整 PR 列表（W9-W10）
+## v2.1.0 涉及 PR 一览（W9-W12 累计）
+
+### W9-W10 (v2.1.0-rc1)
 
 | PR | 标题 | 类别 |
-|----|------|------|
+|---|---|---|
 | #27 | v2 P1-P8 ship | 主线 |
 | #28-#32 | followup 计划 + T-A/B/C/D/E | 主线 |
 | #34 | F7+F5+F6 MetaPattern + soft-delete + burst | 主线 |
@@ -94,11 +111,24 @@
 | #38 | F14+F16 CI baseline + MRPairing | 主线 |
 | #40 / #44 | F3a/F3b Serive→Service | 主线 |
 | #43 | F9 R-Case 自动复现 | **论文核心** |
-| #45 | F12 Multi-LLM consensus | **论文加分** |
+| #45 | F12 Multi-LLM consensus（架构） | **论文加分** |
 | #46 | F10 keyset 分页 | 性能 |
-| #47 | UAT 包 45 用例 | UAT |
-| #48 | UAT dry-run fixes | UAT |
-| #49 | UAT 任务书 | UAT |
-| #50 | UAT 治理 + baseline | UAT |
+| #47-#50 | UAT 包 45 用例 + 治理 + baseline | UAT |
 
-共 **14 个主线 + 4 个 UAT PR** merged 进 v2.1.0-rc1。
+### W11-W12 (Stage 7, post-rc1)
+
+| PR | 标题 | 类别 |
+|---|---|---|
+| #54 | W11.3 RFC（F13 + F11 解锁） | 决策 |
+| #57 | W11.2 Multi-LLM 真实跑通 + W12 F13 OpenMC 接入 | **论文加分** + 主线 |
+| #58 | scenario → MR launcher 改名 | 命名清理 |
+| #59 | UAT BDD 21 用例（Part F/G/C） | UAT 双轨 |
+| #60 | UC-C11 unignore（PR #57 land 后） | UAT |
+| #61 | W12 F11 m_adj 路径 A 被动监控 | v2.2 准备 |
+| #62 | LiteDB ScenarioName → MrName + schema migration | 命名清理 |
+| #63 | UAT 47 用例三段式重写 | UAT |
+| #64 | baseline-2026-05-17 + DbConfig flake 根治 | UAT |
+| #65 | Windows UAT runbook | UAT |
+| #66 | PROJECT-STRUCTURE.md + 文档同步 | 文档 |
+
+共 v2.1.0 累计 **20+ 个主线 + 11 个 UAT/文档 PR**。

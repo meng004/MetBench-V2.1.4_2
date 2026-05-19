@@ -71,7 +71,7 @@ public sealed class HtmlSystemMtResultReportRenderer : ISystemMtResultReportRend
         var rowClass = r.Passed ? "row-pass" : "row-fail";
         sb.Append("<tr class=\"").Append(rowClass).AppendLine("\">");
         sb.Append("<td>").Append(Esc(r.RunAt.ToString("u", Inv))).AppendLine("</td>");
-        sb.Append("<td>").Append(Esc(r.ScenarioName)).AppendLine("</td>");
+        sb.Append("<td>").Append(Esc(r.MrName)).AppendLine("</td>");
         sb.Append("<td>").Append(Esc(r.AssertionName)).Append(" on <code>").Append(Esc(r.ValueName)).AppendLine("</code></td>");
         sb.Append("<td>").Append(Esc(r.SourceValue.ToString("G", Inv))).AppendLine("</td>");
         sb.Append("<td>").Append(Esc(r.FollowUpValue.ToString("G", Inv))).AppendLine("</td>");

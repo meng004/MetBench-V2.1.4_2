@@ -15,6 +15,7 @@ namespace MetBench_SystemMT.Tests.V2Schema;
 /// 这些测试不依赖 app.config，可在 Linux / CI 上运行 ——
 /// 每个测试以 try/finally 重置 static state (env var + override) 避免污染其他测试。
 /// </summary>
+[Collection("DbConfigGlobal")]
 public sealed class DbConfigTests : IDisposable
 {
     private const string EnvVar = "METBENCH_DB_PATH";

@@ -41,24 +41,46 @@ dotnet build MetBench_SystemMT.Tests/MetBench_SystemMT.Tests.csproj
 # 期望: 0 Error(s)
 ```
 
-### 1.5 OpenMOC venv（用 setup 脚本，**一键自动**）
+### 1.5 OpenMOC + OpenMC venv（用 setup 脚本，**一键自动**）
 
 ```bash
 bash .claude/web-setup.sh
-# 首次约 10-15 min。完成后输出: "[setup] OpenMOC import OK"
-# 安装到 /opt/openmoc-venv，python 路径 /opt/openmoc-venv/bin/python
+# 首次约 20-30 min（含两个科学计算栈的源码编译）。
+# 完成后输出含: "[setup] OpenMOC import OK" + "[setup] openmc Python OK"
+```
+
+脚本同时安装：
+- **OpenMOC** → `/opt/openmoc-venv` (SWIG build, branch `3D-MOC`)
+- **OpenMC** → `/opt/openmc-venv` + `/opt/openmc` binary (cmake source build, branch `master`, 0.15.x)
+
+跳过任一可设：
+
+```bash
+SKIP_OPENMOC=1 bash .claude/web-setup.sh   # 仅跳过 OpenMOC
+SKIP_OPENMC=1  bash .claude/web-setup.sh   # 仅跳过 OpenMC
 ```
 
 确认环境变量：
 
 ```bash
-echo "export METBENCH_OPENMOC_PYTHON=/opt/openmoc-venv/bin/python" >> ~/.bashrc
+cat >> ~/.bashrc <<'EOF'
+export METBENCH_OPENMOC_PYTHON=/opt/openmoc-venv/bin/python
+export METBENCH_OPENMC_PYTHON=/opt/openmc-venv/bin/python
+EOF
 source ~/.bashrc
 ```
 
 ### 1.6 (可选) Heat-Equation & Projectile
 
 无需额外依赖 —— 这两个 SUT 用 Python 3 标准库 + numpy / matplotlib（已随 OpenMOC venv 装好）。
+
+### 1.7 SUT 接入验证
+
+```bash
+$METBENCH_OPENMOC_PYTHON -c "import openmoc; print('openmoc OK')"
+$METBENCH_OPENMC_PYTHON  -c "import openmc;  print('openmc',  openmc.__version__)"
+/opt/openmc-venv/bin/openmc --version | head -1   # 期望含 "OpenMC version 0.15"
+```
 
 ---
 
@@ -136,11 +158,12 @@ curl -s https://api.deepseek.com/anthropic/v1/messages \
 
 ## 4. SUT 配置
 
-仓库内 `SUT/` 目录已包含 3 个 SUT 的 adapter + sample 输入：
+仓库内 `SUT/` 目录已包含 4 个 SUT 的 adapter + sample 输入：
 
 | SUT | 位置 | 启动 python | 依赖 |
 |-----|------|-------------|------|
 | OpenMOC | `SUT/openmoc/` | `$METBENCH_OPENMOC_PYTHON` (`/opt/openmoc-venv/bin/python`) | OpenMOC 已 import OK |
+| OpenMC | `SUT/openmc/` | `$METBENCH_OPENMC_PYTHON` (`/opt/openmc-venv/bin/python`) | OpenMC 已 import OK + `/opt/openmc-venv/bin/openmc --version` OK |
 | Heat-Equation | `SUT/heat_equation/` | `python3` | Python 3 stdlib + numpy（venv 已含） |
 | Projectile | `SUT/projectile/` | `python3` | Python 3 stdlib |
 
@@ -149,6 +172,12 @@ curl -s https://api.deepseek.com/anthropic/v1/messages \
 ```bash
 $METBENCH_OPENMOC_PYTHON -c "import openmoc; print(openmoc.__file__)"
 # 期望: /opt/openmoc-venv/lib/python3.12/site-packages/openmoc/openmoc.py
+
+$METBENCH_OPENMC_PYTHON -c "import openmc; print(openmc.__version__)"
+# 期望: 0.15.x
+
+/opt/openmc-venv/bin/openmc --version | head -1
+# 期望: OpenMC version 0.15.x
 
 python3 SUT/heat_equation/heat_equation.py SUT/heat_equation/sample/gaussian.json /tmp/he.out
 cat /tmp/he.out | head -3   # 期望 JSON 输出含 "temperature":[...]
