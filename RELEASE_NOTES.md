@@ -1,9 +1,9 @@
-# MetBench v2.1.0 — Release Notes
+# MetBench v2.1.0 / v2.1.1 — Release Notes
 
-> **Status**: Release Candidate（cloud-side baseline 100% Pass，待 Windows UAT round-1 验收）
-> **Tag**（待签）: `release-v2.1.0`
-> **Commit**: 见 [`docs/uat/reports/baseline-2026-05-17/README.md`](docs/uat/reports/baseline-2026-05-17/README.md)
-> **Baseline data**: [`docs/uat/reports/baseline-2026-05-17/`](docs/uat/reports/baseline-2026-05-17/)
+> **Status**: **Released** — `release-v2.1.0` tagged on `9b89f9b`（2026-05-19），紧随其后 hotfix `release-v2.1.1` tagged on `7a6e228`（LiteDB UTC_DATE pragma 修，post-release Windows TZ bug）
+> **Release tags**: [`release-v2.1.0`](https://github.com/meng004/MetBench-V2.1.4_2/releases/tag/release-v2.1.0) · [`release-v2.1.1`](https://github.com/meng004/MetBench-V2.1.4_2/releases/tag/release-v2.1.1)
+> **Release commits**: v2.1.0 = `9b89f9b`（含 PR #75 anomaly wiring + PR #77 ObjectId→Guid 结构性修 + round-2 全 5 UC PASS）；v2.1.1 = `7a6e228`（PR #79）
+> **Baseline data**: cloud [`docs/uat/reports/baseline-2026-05-17/`](docs/uat/reports/baseline-2026-05-17/) + Windows UAT round-2 [`docs/uat/reports/round-2-windows-2026-05-19-limeng/`](docs/uat/reports/round-2-windows-2026-05-19-limeng/)
 
 ## v2.1.0 Highlights — Post W11-W12
 
@@ -130,5 +130,34 @@
 | #64 | baseline-2026-05-17 + DbConfig flake 根治 | UAT |
 | #65 | Windows UAT runbook | UAT |
 | #66 | PROJECT-STRUCTURE.md + 文档同步 | 文档 |
+| #67 | UAT Windows scope 收缩 26 → 21 | UAT |
+| #68 / #69 | Stage 8 brainstorming + rev3 plan (5 MP × 84 MR 母集) | Stage 8 启动 |
 
-共 v2.1.0 累计 **20+ 个主线 + 11 个 UAT/文档 PR**。
+### v2.1.0 收尾（2026-05-18 → 05-19）
+
+| PR | 标题 | 类别 |
+|---|---|---|
+| #70 | UAT round-1 Windows CONDITIONAL PASS 报告 | UAT |
+| #71 / #72 | round-1 fix: UC-A2 excludeSelf + UC-A5 Entity.ToString (2 Major) | bugfix |
+| #73 | Docker SUT 镜像（`metbench-sut` + `Dockerfile.runtime` all-in-container） + VM 任务书 | infra |
+| #74 | Docker SUT 任务书 follow-up（Track C `--no-build` + 中国网络配置） | UAT 文档 |
+| #75 | UC-B7 — 失败 run 自动建 Anomaly（`SystemMtMrLauncher` 接线） | bugfix |
+| #76 | issue: UC-B7 round-2 跑出来的 ObjectId↔Guid cross-track bug | issue |
+| #77 | UC-B7 ObjectId → Guid 结构性修 + round-2 5/5 PASS + closes #76 | bugfix + UAT |
+
+### v2.1.1 hotfix（2026-05-19）
+
+| PR | 标题 | 类别 |
+|---|---|---|
+| #79 | `LiteDbSystemMtResultRepository` 加 `UTC_DATE` pragma；`SystemMtResultRecord.RunAt` 保持 `Kind=Utc` 跨进程 | bugfix |
+
+LiteDB v5 默认反序列化把 `DateTime` 还原为 `Kind=Local`，在非 UTC 主机（如 Windows VM CST=UTC+8）让 `Ticks` 偏移 8 小时，间接破坏两个 `KeysetPaginationTests`（`GetByStatusKeyset_*` 系列依赖 `QueuedAt` 排序）。Linux CI 跑 UTC 所以一直绿，Windows VM 每次复现。修法：连接串加 `UTC_DATE=true` pragma，让 LiteDB 反序列化时统一返回 UTC `DateTime`。
+
+共 v2.1.0/v2.1.1 累计 **22+ 个主线 + 19 UAT/文档/infra PR**。
+
+### Windows UAT 双轮总结
+
+- **Round-1** (2026-05-18, commit `0c0cd24`, limeng on Win11+Parallels)：**CONDITIONAL PASS** — 26 UC 跑 21 个 WPF + 5 cloud-covered；6 ✅ / 10 ⚠️ / 3 ❌；找到 3 个 Major bug (UC-A2/A5/B7) 由 PR #71/#72/#75 修复。
+- **Round-2** (2026-05-19, commit `9b89f9b`, limeng on Win11 ARM+Parallels)：**PASS 5/5** — UC-A2 / UC-A5 / UC-B7 全部 fix verified，加跑 UC-B8 + UC-B9 同步通过。Round-2 过程中又命中 UC-B7 cross-track ObjectId↔Guid bug（issue #76），由 PR #77 inline 做结构性修复（`SystemMtResultRecord.Id: string → Guid` + 一次性 idempotent migration + 3 个回归测试）。
+- **Post-release Windows TZ bug**：v2.1.0 tag 后 Windows TZ 上 2 个 `KeysetPaginationTests` 一直挂（Linux CI 因 UTC 漏报），PR #79 加 LiteDB `UTC_DATE` pragma 修，tagged 为 `release-v2.1.1`。
+- **Release 决策矩阵**：`1 轮 CONDITIONAL PASS + 全部 Major 已有 fix PR → 待 fix merge 后再验 1 轮` 满足，v2.1.0 已 tag；v2.1.1 是 post-release 兼容性修，不重走 UAT 流程。
