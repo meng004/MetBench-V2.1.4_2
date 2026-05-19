@@ -1,0 +1,9 @@
+# docker images output (snapshot)
+# captured: 2026-05-19 ~14:30
+
+metbench-runtime:latest   ad5385807bea       1.76GB          431MB        
+metbench-sut:latest       d25270df43f0       1.06GB          247MB        
+
+# real bytes via docker image inspect
+metbench-sut:latest     .Size bytes: 247430748
+metbench-runtime:latest .Size bytes: 431242152

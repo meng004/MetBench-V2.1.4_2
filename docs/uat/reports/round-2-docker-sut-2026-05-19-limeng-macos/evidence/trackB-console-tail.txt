@@ -1,0 +1,25 @@
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.8.2+699d445a1a (64-bit .NET 8.0.26)
+[xUnit.net 00:00:00.23]   Discovering: MetBench_SystemMT.Tests
+[xUnit.net 00:00:00.42]   Discovered:  MetBench_SystemMT.Tests
+[xUnit.net 00:00:00.43]   Starting:    MetBench_SystemMT.Tests
+-> Loading plugin /work/MetBench_SystemMT.Tests/bin/Debug/net8.0/MetBench_SystemMT.Tests.dll
+-> Loading plugin /work/MetBench_SystemMT.Tests/bin/Debug/net8.0/Reqnroll.xUnit.ReqnrollPlugin.dll
+-> Using default config
+  Passed ScaleNuSigmaF increases k_eff regardless of solver(solver: "openmoc", sut: "openmoc", __pickleIndex: "0", exampleTags: []) [3 s]
+  Passed ScaleNuSigmaF increases k_eff regardless of solver(solver: "openmc", sut: "openmc", __pickleIndex: "1", exampleTags: []) [13 s]
+  Passed ScaleFuelSigmaA decreases k_eff regardless of solver(solver: "openmoc", sut: "openmoc", __pickleIndex: "2", exampleTags: []) [2 s]
+[xUnit.net 00:00:32.89]   Finished:    MetBench_SystemMT.Tests
+  Passed ScaleFuelSigmaA decreases k_eff regardless of solver(solver: "openmc", sut: "openmc", __pickleIndex: "3", exampleTags: []) [12 s]
+
+Test Run Successful.
+Total tests: 4
+     Passed: 4
+ Total time: 34.2863 Seconds
+real 87.87
+user 0.01
+sys 0.01
+Track B END: 2026-05-19 14:25:00
+EXIT_CODE=0

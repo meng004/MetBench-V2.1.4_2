@@ -1,0 +1,47 @@
+# SUT build attempt 4 (success after attempts 1-3 hit network issues)
+
+#1 [internal] load build definition from Dockerfile
+#1 DONE 0.0s
+#2 [internal] load metadata for docker.io/library/ubuntu:24.04
+#2 DONE 0.0s
+#3 [internal] load .dockerignore
+#3 DONE 0.0s
+#4 [builder 1/6] FROM docker.io/library/ubuntu:24.04@sha256:c4a8d5503dfb2a3eb8ab5f807da5bc69a85730fb49b5cfca2330194ebcc41c7b
+#4 DONE 0.0s
+#5 [builder 2/6] RUN apt-get update -qq  && apt-get install -y --no-install-recommends         build-essential cmake pkg-config git ca-certificates curl         swig         libhdf5-dev libhdf5-serial-dev libgomp1         libpng-dev libxml2-dev libeigen3-dev         python3.12 python3.12-dev python3.12-venv         python3-numpy python3-h5py python3-matplotlib python3-pandas python3-scipy  && rm -rf /var/lib/apt/lists/*
+#5 CACHED
+#6 [builder 3/6] RUN python3.12 -m venv --system-site-packages "/opt/openmoc-venv"  && "/opt/openmoc-venv/bin/pip" install --no-cache-dir --upgrade pip setuptools wheel
+#6 CACHED
+#7 [runtime 2/8] RUN apt-get update -qq  && apt-get install -y --no-install-recommends         libhdf5-103-1t64 libhdf5-cpp-103-1t64         libhdf5-hl-100t64 libhdf5-hl-cpp-100t64         libgomp1 libpng16-16t64 libxml2         python3.12 python3.12-venv         python3-numpy python3-h5py python3-matplotlib python3-pandas python3-scipy         ca-certificates  && rm -rf /var/lib/apt/lists/*  && useradd -ms /bin/bash mt
+#7 CACHED
+#8 [builder 4/6] RUN git clone --depth=1 --branch "3D-MOC"         https://github.com/mit-crpg/OpenMOC.git /tmp/OpenMOC  && for f in /tmp/OpenMOC/openmoc/checkvalue.py              /tmp/OpenMOC/openmoc/plotter.py              /tmp/OpenMOC/openmoc/process.py; do         [ -f "$f" ] && sed -i             's/from collections import Iterable/from collections.abc import Iterable/g'             "$f";     done  && cd /tmp/OpenMOC  && "/opt/openmoc-venv/bin/python" setup.py build_ext --inplace  && "/opt/openmoc-venv/bin/pip" install --no-cache-dir --no-build-isolation .  && cp /tmp/OpenMOC/build/lib/_openmoc.cpython-312-x86_64-linux-gnu.so        "/opt/openmoc-venv/lib/python3.12/site-packages/openmoc/"  && cp /tmp/OpenMOC/openmoc/openmoc.py        "/opt/openmoc-venv/lib/python3.12/site-packages/openmoc/openmoc.py"  && cd /  && "/opt/openmoc-venv/bin/python" -c "import openmoc; print('openmoc OK')"  && rm -rf /tmp/OpenMOC
+#8 DONE 48.2s
+#9 [builder 5/6] RUN python3.12 -m venv --system-site-packages "/opt/openmc-venv"  && "/opt/openmc-venv/bin/pip" install --no-cache-dir --upgrade pip setuptools wheel
+#9 DONE 8.0s
+#10 [builder 6/6] RUN git clone --depth=1 --branch "master" --recurse-submodules         https://github.com/openmc-dev/openmc.git /tmp/openmc-src  && mkdir -p /tmp/openmc-src/build  && cd /tmp/openmc-src/build  && cmake -DCMAKE_INSTALL_PREFIX="/opt/openmc"           -DCMAKE_BUILD_TYPE=Release           -DOPENMC_USE_MPI=OFF           -DOPENMC_USE_OPENMP=ON           -DOPENMC_USE_DAGMC=OFF           -DOPENMC_USE_LIBMESH=OFF           ..  && make -j"$(nproc)"  && make install  && cd /tmp/openmc-src  && "/opt/openmc-venv/bin/pip" install --no-cache-dir --no-build-isolation .  && ln -sf "/opt/openmc/bin/openmc" "/opt/openmc-venv/bin/openmc"  && cd /  && "/opt/openmc-venv/bin/python" -c "import openmc; print('openmc OK', openmc.__version__)"  && "/opt/openmc-venv/bin/openmc" --version  && rm -rf /tmp/openmc-src
+#10 DONE 157.3s
+#11 [runtime 3/8] COPY --from=builder /opt/openmoc-venv /opt/openmoc-venv
+#11 DONE 0.3s
+#12 [runtime 4/8] COPY --from=builder /opt/openmc-venv  /opt/openmc-venv
+#12 DONE 0.5s
+#13 [runtime 5/8] COPY --from=builder /opt/openmc       /opt/openmc
+#13 DONE 0.1s
+#14 [runtime 6/8] RUN ln -sf /opt/openmc/bin/openmc /opt/openmc-venv/bin/openmc
+#14 DONE 0.1s
+#15 [runtime 7/8] RUN /opt/openmoc-venv/bin/python -c "import openmoc; print('runtime openmoc OK')"  && /opt/openmc-venv/bin/python  -c "import openmc;  print('runtime openmc OK', openmc.__version__)"  && /opt/openmc-venv/bin/openmc --version
+#15 DONE 2.5s
+#16 [runtime 8/8] WORKDIR /work
+#16 DONE 0.0s
+#17 DONE 13.2s
+
+# tail
+#17 exporting manifest list sha256:d25270df43f064efc030f107fe353d18504fb6c23132549d6982b60b703c730b done
+#17 naming to docker.io/library/metbench-sut:latest done
+#17 DONE 13.2s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/t5ns3xokd0y83eeci3aotl3ug
+real 231.20
+user 0.41
+sys 0.39
+SUT build END: 2026-05-19 14:18:05
+EXIT_CODE=0

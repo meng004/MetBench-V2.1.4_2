@@ -1,0 +1,21 @@
+{
+  "k_eff": 1.1245000140252865,
+  "k_eff_std": 0.001786852281206873,
+  "batches": 60,
+  "particles": 5000,
+  "converged": true,
+  "flux_per_cell": {
+    "fuel": [
+      18.526043679822838,
+      6.4258052777275765
+    ],
+    "moderator": [
+      39.62176164707463,
+      13.997437161322793
+    ]
+  },
+  "metadata": {
+    "runner": "openmc",
+    "energy_mode": "multi-group"
+  }
+}
