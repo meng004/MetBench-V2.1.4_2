@@ -6,18 +6,26 @@
 #     /opt/openmoc-venv/bin/python   →  import openmoc
 #     /opt/openmc-venv/bin/python    →  import openmc       (+ openmc binary)
 #
-# Build:
+# Two build targets:
+#
+#     # SUT-only image (the python venvs, no .NET):
 #     docker build -t metbench-sut:latest docker/
 #
-# Wire into the .NET launcher (any host OS — Windows/macOS/Linux):
+#     # SUT + .NET 8 SDK so dotnet test can run *inside* the container with
+#     # no host prerequisites (no WSL2, no host dotnet install):
+#     docker build -t metbench-runtime:latest --target sdk docker/
 #
-#     METBENCH_OPENMOC_PYTHON="docker run --rm -v <hostSUT>:/work/SUT \
-#         metbench-sut:latest /opt/openmoc-venv/bin/python"
-#     METBENCH_OPENMC_PYTHON="docker run --rm -v <hostSUT>:/work/SUT \
-#         metbench-sut:latest /opt/openmc-venv/bin/python"
+# Wire the SUT image into a host-side .NET launcher (Windows/macOS/Linux):
 #
-# and set LauncherOptions.SutRoot = "/work/SUT" so the script paths the
-# launcher generates resolve inside the container.
+#     METBENCH_OPENMOC_PYTHON="<repo>/docker/wrappers/openmoc-docker.sh"
+#     METBENCH_OPENMC_PYTHON="<repo>/docker/wrappers/openmc-docker.sh"
+#
+# Wire the runtime image for fully-containerised execution (preferred):
+#
+#     docker run --rm -v "${PWD}:/work" -w /work \
+#         -e METBENCH_OPENMOC_PYTHON=/opt/openmoc-venv/bin/python \
+#         -e METBENCH_OPENMC_PYTHON=/opt/openmc-venv/bin/python \
+#         metbench-runtime:latest dotnet test ...
 #
 # Build args:
 #     OPENMOC_REF  mit-crpg/OpenMOC branch       (default: 3D-MOC)
@@ -151,3 +159,7 @@ WORKDIR /work
 #     docker run --rm -v $PWD/SUT:/work/SUT metbench-sut:latest \
 #         /opt/openmoc-venv/bin/python /work/SUT/openmoc/openmoc_runner.py \
 #         --input /work/SUT/openmoc/sample/pincell.json --output /tmp/out.json
+#
+# For an all-in-one image that *also* contains the .NET 8 SDK (so dotnet
+# test can run inside the container with no host prerequisites), build the
+# sibling `docker/Dockerfile.runtime` which extends this image.
