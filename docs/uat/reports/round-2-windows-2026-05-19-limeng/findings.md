@@ -14,11 +14,11 @@
 |---|---|---|
 | **UC-A2** Application Service rename | ✅ **PASS** | description-only update + rename to unique new name both return `修改记录 成功！`. True-duplicate detection separately covered by `UatRound1BugFixTests` 7/7 ✅. |
 | **UC-A5** ApplicationEx ComboBox display | ✅ **PASS** | MR-Mgmt form combo + Discovery page Target SUT combo both show business name (`UAT-App-1-r2-204714`); selected-text post-select also shows business name; **no `MetBench_Domain.*` / `MetBench_Client.Models.*` FQN visible anywhere**. |
-| **UC-B7** Failed run → Anomaly | ❌ **FAIL — BLOCKED on new bug** | Production `LiteDbSystemMtResultRepository.SaveAsync` emits BSON ObjectId (24-hex), but `AnomalyService.RecordAnomalyAsync` (PR #75) parses `resultId` as Guid → `ArgumentException`. PR #75 unit tests passed because `StubResultRepository` returned `Guid.NewGuid().ToString()`. Filed cloud issue; STOP per round-2 task spec. |
-| UC-B8 commonality (bonus) | ⏸ N/A | Depends on UC-B7. |
-| UC-B9 replay (bonus) | ⏸ N/A | Depends on UC-B7. |
+| **UC-B7** Failed run → Anomaly | ✅ **PASS** (after fix) | First attempt crashed with `ArgumentException: resultId must be a Guid string, got '6a0c5df903a05102cba3d4f1'`. Root cause: prod `LiteDbSystemMtResultRepository.SaveAsync` emitted BSON ObjectId; `AnomalyService.RecordAnomalyAsync` (PR #75) requires Guid. PR #75 tests used a stub returning Guid, mask. **Fix applied in this PR** (see §UC-B7 fix below). Re-run produced anomaly `c22323a4-f144-4695-8d9e-2d7819380530` with `Severity=minor / Status=new / Category=single-point` — all 5 verification criteria met. |
+| **UC-B8** commonality (bonus) | ✅ **PASS** | After running a 2nd failing case (factor=0.3), Anomalies page shows 2 rows. Multi-selecting both + clicking **Analyze commonality** rendered: `2 anomalies analyzed. Dominant severity: minor. Dominant category: single-point.` + `Total: 2, Linked to known bug: 0`. |
+| **UC-B9** replay (bonus) | ✅ **PASS** | Selected an anomaly + **Replay this anomaly** → System MT `RecentRuns` count went from 8→9 (new result row written by the replay). |
 
-**Round-2 verdict**: **CONDITIONAL** — A2 + A5 fixes verified end-to-end through the WPF UI. B7 fix landed in cloud testing but breaks against the production LiteDB repo. Release tag `release-v2.1.0` is **DEFERRED** until cloud补 PR lands a fix.
+**Round-2 verdict**: **PASS** — All 3 round-1 Major fixes verified end-to-end through the WPF UI; 2 bonus anomaly-flow cases also green. UC-B7 surfaced a real cross-track bug in PR #75's prod path that's fixed in this same PR. Release tag `release-v2.1.0` is unblocked pending CI green on merge.
 
 ---
 
@@ -166,34 +166,125 @@ The PR #75 unit tests (`AnomalyCreationOnFailureTests`) miss this because they s
 2. The failure happens AFTER `SystemMtResult` is persisted but BEFORE anomaly recording — so the result row is in `SystemMT.Litedb` with no corresponding anomaly. UI dashboards diverge from the legacy `Anomalies` table.
 3. WPF surfaces the exception via the existing `try/catch StatusMessage` path, so the user sees a stack-trace dialog, not the intended "Run completed" + new anomaly.
 
-### Fix scope (for cloud)
+### Fix applied in this PR
 
-Smallest defensible patch: change ID generation in the production repository.
+Per user direction ("all entity IDs should be Guid; LiteDB auto-generates a BsonId for storage — business objects don't see storage id"), the fix matches the pattern every other v2 entity already follows (`[BsonId] public Guid IdXxx { get; set; }`):
 
-```csharp
-// MetBench_DAL/LiteDbSystemMtResultRepository.cs:119
-- record.Id = ObjectId.NewObjectId().ToString();
-+ record.Id = Guid.NewGuid().ToString();
+```diff
+ // MetBench_BLL.Core/SystemMT/Persistence/SystemMtResultRecord.cs
+-public string Id { get; set; } = string.Empty;
++public Guid Id { get; set; }
 ```
 
-Pre-existing rows keep their ObjectId-format Ids (legacy reads stay backward-compatible — `Id` is `string`, only the *format* of new Ids changes). Anomaly creation on new failed runs becomes able to round-trip the Guid.
+```diff
+ // MetBench_DAL/LiteDbSystemMtResultRepository.cs
+-// Map the string Id without forcing a [BsonId] attribute on the
+-// BLL.Core entity, which would leak a LiteDB dependency upstream.
+-_database.Mapper.Entity<SystemMtResultRecord>().Id(x => x.Id);
++// Map the Guid Id without forcing a [BsonId] attribute on the
++// BLL.Core entity, which would leak a LiteDB dependency upstream.
++// autoId=true lets LiteDB assign a fresh Guid on Insert when the
++// field is Guid.Empty (matches every other v2 entity in this repo).
++_database.Mapper.Entity<SystemMtResultRecord>().Id(x => x.Id, autoId: true);
 
-Add an integration regression test that wires the *real* `LiteDbSystemMtResultRepository` + `LiteDbAnomalyRepository` + `AnomalyService` + `SystemMtMrLauncher` end-to-end through `RunAsync` with a forced-fail result, asserting an Anomaly row is created. This is the test that PR #75 was missing.
+ // SaveAsync — no longer manually generates Id; LiteDB autoId fills it.
+ public Task<string> SaveAsync(...)
+ {
+-    record.Id = ObjectId.NewObjectId().ToString();
+     record.RunAt = DateTimeOffset.UtcNow;
+     _collection.Insert(record);
+-    return Task.FromResult(record.Id);
++    return Task.FromResult(record.Id.ToString());
+ }
 
-Filed as **GitHub issue [#76](https://github.com/meng004/MetBench-V2.1.4_2/issues/76)** (full body: `cloud-issue-uc-b7.md` in this directory).
+ // GetAsync — parse incoming string as Guid before FindById.
+ public Task<SystemMtResultRecord?> GetAsync(string id, ...)
+ {
+-    if (string.IsNullOrWhiteSpace(id)) return Task.FromResult<...>(null);
+-    var record = _collection.FindById(id);
++    if (!Guid.TryParse(id, out var guid)) return Task.FromResult<...>(null);
++    var record = _collection.FindById(guid);
+     return Task.FromResult<SystemMtResultRecord?>(record);
+ }
+```
+
+Plus a one-shot migration (idempotent) so any v2.0.x snapshot whose `_id` is still a BSON-string ObjectId gets rewritten to a Guid on first open of the new repo:
+
+```csharp
+private static void MigrateObjectIdStringToGuid(ILiteDatabase database, string collectionName)
+{
+    var raw = database.GetCollection(collectionName);
+    var stale = raw.FindAll().Where(d => d["_id"].IsString).ToList();
+    foreach (var doc in stale)
+    {
+        var oldId = doc["_id"];
+        doc["_id"] = new BsonValue(Guid.NewGuid());
+        raw.Insert(doc);
+        raw.Delete(oldId);
+    }
+}
+```
+
+Regression tests added (cross-platform, run on Linux CI):
+
+- `LiteDbSystemMtResultRepositoryTests.SaveAsync_returns_Guid_parseable_string_for_AnomalyService_contract` — pins the exact contract PR #75 missed.
+- `LiteDbSystemMtResultRepositoryTests.Migration_rewrites_legacy_ObjectId_string_id_to_Guid_on_open` — covers the v2.0.x snapshot case.
+- `HtmlSystemMtResultReportRendererTests` — fixture updated from `Id="507f1f77bcf86cd799439011"` to `Id=Guid.Parse(...)` to match new type.
+
+**Full test suite**: 528/530 pass (the 2 failures are pre-existing `KeysetPagination` tests unrelated to this fix — they fail on clean `main` too; verified via `git stash`).
+
+GitHub issue: [#76](https://github.com/meng004/MetBench-V2.1.4_2/issues/76) — closed by this PR.
 
 Evidence:
-- `screenshots/UC-B7-step0-anomaly-pre.png` ← Anomalies page, 0 rows
-- `screenshots/UC-B7-step1-system-mt-landing.png`
-- `screenshots/UC-B7-step2-scenario-combo-expanded.png` ← 5 MRs available
-- `screenshots/UC-B7-step3-scenario-selected.png`
-- `screenshots/UC-B7-step4-factor-0.5.png`
-- `screenshots/UC-B7-FAIL-status-error.png` ← **stack trace modal**
-- `dotnet-stdout.log` ← dotnet host startup (stderr was empty — exception is caught and displayed in WPF dialog, not stderr)
+- **First-attempt failure** (pre-fix):
+  - `screenshots/UC-B7-FAIL-status-error.png` ← stack trace modal `resultId must be a Guid string, got '6a0c5df903a05102cba3d4f1'`
+  - `screenshots/DEBUG-current-state.png` ← same error in Status TextBlock
+- **Post-fix success** (re-run after applying Guid Id fix):
+  - `screenshots/UC-B7-step0-anomaly-pre.png` ← Anomalies page, 0 rows
+  - `screenshots/UC-B7-step1-system-mt-landing.png`
+  - `screenshots/UC-B7-step2-scenario-combo-expanded.png` ← 5 MRs available
+  - `screenshots/UC-B7-step3-scenario-selected.png`
+  - `screenshots/UC-B7-step4-factor-0.5.png` ← factor=0.5 entered
+  - `screenshots/UC-B7-step5-after-run.png` ← run completed without error
+  - `screenshots/UC-B7-step6-anomaly-after-run.png`
+  - `screenshots/UC-B7-step7-anomaly-final.png` ← **Anomalies page shows 1 row**: `c22323a4-f144-4695-8d9e-2d7819380530 / minor / new / single-point / 2026-05-19 21:39 / Linked Bug 0`
+- `dotnet-stdout.log` ← dotnet host startup (first-attempt stderr was empty — exception was caught and displayed in WPF Status TextBlock)
 
 ---
 
-## What's deferred
+## UC-B8 — Multi-select + Analyze commonality
 
-- UC-B8 (commonality) / UC-B9 (replay) — both require at least one anomaly to exist; blocked by UC-B7.
-- `release-v2.1.0` tag — **not pushed**. Will tag after cloud补 PR fixes UC-B7 and a follow-up round drives B7/B8/B9 green.
+**Procedure** (driver: `uc_b8_b9_driver.ps1`):
+
+1. Ran a 2nd failing case (`factor=0.3`) to seed a 2nd anomaly → Anomalies page shows 2 rows.
+2. Selected both rows via `SelectionItemPattern.Select()` + `AddToSelection()`.
+3. Clicked **Analyze commonality**.
+
+**Verdict**: bottom of the Anomalies page renders the Commonality Report panel with:
+> `2 anomalies analyzed. Dominant severity: minor. Dominant category: single-point.`
+> `Total: 2   Dominant severity: minor   Dominant category: single-point   Linked to known bug: 0`
+
+Evidence:
+- `screenshots/UC-B8-step1-second-failing-run-prep.png`
+- `screenshots/UC-B8-step2-after-second-run.png`
+- `screenshots/UC-B8-step3-anomalies-2-rows.png`
+- `screenshots/UC-B8-step4-anomalies-selected.png`
+- `screenshots/UC-B8-step5-commonality-report.png` ← **report panel visible**
+
+---
+
+## UC-B9 — Replay this anomaly
+
+**Procedure**:
+
+1. Selected anomaly row [0] on Anomalies page.
+2. Clicked **Replay this anomaly**.
+3. Navigated to System MT → counted Recent runs rows.
+
+**Verdict**: Recent runs grid went from 8 rows pre-replay to **9 rows** post-replay — the replay wrote a new `SystemMtResultRecord` for the same MR, as specified. (Anomaly count stayed at 2; replay increments the replay counter on the existing anomaly when the result is again failing, rather than creating a duplicate anomaly. The anomaly row in `UC-B7-step7-anomaly-final.png` has `Replay # = 0` pre-replay; counter increment is a separate stage-7 follow-up.)
+
+Evidence:
+- `screenshots/UC-B9-step1-before-replay.png`
+- `screenshots/UC-B9-step2-after-replay.png`
+- `screenshots/UC-B9-step3-system-mt-after-replay.png` ← **9 RecentRuns rows**
+- `screenshots/UC-B9-step4-anomalies-after-replay.png`

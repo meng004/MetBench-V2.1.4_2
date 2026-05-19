@@ -45,15 +45,24 @@ public sealed class LiteDbSystemMtResultRepository : ISystemMtResultRepository, 
         _database = database ?? throw new ArgumentNullException(nameof(database));
         _ownsDatabase = ownsDatabase;
 
-        // Map the string Id without forcing a [BsonId] attribute on the
+        // Map the Guid Id without forcing a [BsonId] attribute on the
         // BLL.Core entity, which would leak a LiteDB dependency upstream.
-        _database.Mapper.Entity<SystemMtResultRecord>().Id(x => x.Id);
+        // autoId=true lets LiteDB assign a fresh Guid on Insert when the
+        // field is Guid.Empty (matches every other v2 entity in this repo).
+        _database.Mapper.Entity<SystemMtResultRecord>().Id(x => x.Id, autoId: true);
 
         // v2.2 schema migration: BSON field "ScenarioName" → "MrName".
         // Older .Litedb files written by v2.1.x have "ScenarioName"; renaming
         // the C# property without migrating the field would lose the column.
         // Idempotent — second call is a no-op (no docs with the old field).
         MigrateScenarioNameFieldToMrName(_database, CollectionName);
+
+        // v2.1.0 schema migration: legacy rows persisted by pre-Guid code
+        // (PR #75 era) have a string-typed _id holding a 24-hex BSON ObjectId.
+        // The typed mapper now expects a Guid _id; without rewriting these
+        // rows would fail to read and would break round-trips through
+        // AnomalyService (which Guid.TryParse-s the resultId). Idempotent.
+        MigrateObjectIdStringToGuid(_database, CollectionName);
 
         _collection = _database.GetCollection<SystemMtResultRecord>(CollectionName);
         _collection.EnsureIndex(x => x.RunAt, unique: false);
@@ -112,25 +121,52 @@ public sealed class LiteDbSystemMtResultRepository : ISystemMtResultRepository, 
         try { raw.DropIndex(OldField); } catch { /* index absent, fine */ }
     }
 
+    /// <summary>
+    /// One-shot migration: rewrite legacy rows whose <c>_id</c> is a BSON
+    /// string (24-hex ObjectId from the pre-Guid era) into rows keyed by a
+    /// fresh Guid. Performed by re-inserting under the new key and removing
+    /// the old document, since LiteDB does not allow updating <c>_id</c>.
+    /// </summary>
+    private static void MigrateObjectIdStringToGuid(ILiteDatabase database, string collectionName)
+    {
+        var raw = database.GetCollection(collectionName);
+        var stale = raw.FindAll()
+            .Where(d => d.ContainsKey("_id") && d["_id"].IsString)
+            .ToList();
+        if (stale.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var doc in stale)
+        {
+            var oldId = doc["_id"];
+            doc["_id"] = new BsonValue(Guid.NewGuid());
+            raw.Insert(doc);
+            raw.Delete(oldId);
+        }
+    }
+
     public Task<string> SaveAsync(string mrName, SystemMtResult result, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var record = SystemMtResultRecord.FromResult(mrName, result);
-        record.Id = ObjectId.NewObjectId().ToString();
         record.RunAt = DateTimeOffset.UtcNow;
+        // record.Id stays Guid.Empty here — LiteDB autoId fills a fresh Guid
+        // on Insert and writes it back onto the record before returning.
         _collection.Insert(record);
-        return Task.FromResult(record.Id);
+        return Task.FromResult(record.Id.ToString());
     }
 
     public Task<SystemMtResultRecord?> GetAsync(string id, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (string.IsNullOrWhiteSpace(id))
+        if (!Guid.TryParse(id, out var guid))
         {
             return Task.FromResult<SystemMtResultRecord?>(null);
         }
 
-        var record = _collection.FindById(id);
+        var record = _collection.FindById(guid);
         return Task.FromResult<SystemMtResultRecord?>(record);
     }
 
