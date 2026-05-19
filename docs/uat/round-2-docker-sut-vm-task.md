@@ -147,10 +147,12 @@ docker run --rm -v "${PWD}:/work" -w /work `
     metbench-runtime:latest `
     dotnet test MetBench_SystemMT.Tests/MetBench_SystemMT.Tests.csproj `
         --filter "FullyQualifiedName~OpenMocRunnerSmokeTests|FullyQualifiedName~OpenMcRunnerSmokeTests|FullyQualifiedName~OpenMocSampleCaseTests" `
-        --logger "console;verbosity=normal" --no-build
+        --logger "console;verbosity=normal"
 ```
 
-预期：3/3 ✅。
+预期：3/3 ✅，约 50 s（含 restore + build，比 Track B 略快因没有 cross-program runner 调用）。
+
+> **不要加 `--no-build`**：`docker run --rm` 是 ephemeral 容器，前一次 Track B 的 `bin/obj` 虽然 bind-mount 写回了宿主，但本次 fresh 容器内 nuget restore 状态丢失，dotnet test 会找不到 test discovery 元数据，结果为 `Total tests: 0`。让 fresh 容器自己重做 restore + build 多花 ~40 s 但稳。如要 `--no-build` 加速重跑，需要额外挂 `-v <host-nuget>:/root/.nuget/packages` 并保证两次容器使用同一份 nuget cache —— 不是 Track C 默认推荐配置。
 
 ## 5. 通过判定（Acceptance Criteria）
 
@@ -218,8 +220,64 @@ VM round-2 docker SUT (all-in-container) 完成：
 | 4 scenarios 全 Skipped (附录 A 路线) | env var 设成了多词 `docker run …` 字符串 | 改成 wrapper 脚本路径（见附录 A），或换主路线 |
 | OpenMC scenario 偶发 fail（k_eff↑ 但 follow-up 没显著大于 source） | Monte Carlo 噪声，5000 particle 太少 | 重跑 1 次；连续 3 次 fail 才算真 bug |
 | `docker run` 报 `permission denied: /work/...` | 仓库路径不在 Docker Desktop 共享列表 | Settings → Resources → File Sharing → 添加仓库所在盘符 |
+| Track C 报 `Total tests: 0`，dotnet test 立即 exit | 沿用了 `--no-build`，但 ephemeral 容器内 nuget restore 状态丢失 | 去掉 `--no-build`（见 §4.3 注释） |
 
-## 附录 C — 关键文件索引（VM Claude 走读用）
+## 附录 C — 中国境内网络配置（macOS + Apple Silicon 已验证）
+
+> 来源：round-2 UAT report on macOS 15.7.3 + M1 Pro（`docs/uat/reports/round-2-docker-sut-2026-05-19-limeng-macos/findings.md` §3）。海外/国际网络通常无需做以下任何一项。
+
+中国境内 build SUT 镜像必须同时配齐 **registry mirror + build-arg HTTP proxy + Clash TUN OFF** 三件套，缺一会在不同阶段失败：
+
+### C.1 Registry mirror（修 `docker pull ubuntu:24.04` 超时）
+
+`registry-1.docker.io` / `auth.docker.io` 国内直连不稳。Docker Desktop → Settings → Docker Engine 加 `registry-mirrors` 字段：
+
+```json
+{
+  "builder": { "gc": { "defaultKeepStorage": "20GB", "enabled": true } },
+  "experimental": false,
+  "registry-mirrors": ["https://docker.m.daocloud.io"]
+}
+```
+
+Apply & restart。`docker pull ubuntu:24.04` 应 ~30 s 完成。
+
+### C.2 build-arg HTTP proxy（修 `git clone github.com` TLS 中断）
+
+`github.com` 国内对中大 pack 文件不稳，build 内的 `git clone` 容易在 ~480 s 后 TLS 中断（`curl 56 GnuTLS recv error / fatal: early EOF`）。给 `docker build` 传 BuildKit 预定义的 proxy ARG，让 build 内的 git 走宿主 HTTP proxy（如 Clash Verge 的 7890 端口），同时让 apt **直连不走代理**（apt 走 Cloudflare CDN 稳定）：
+
+```bash
+docker build \
+  --platform=linux/amd64 \
+  --build-arg HTTP_PROXY=http://host.docker.internal:7890 \
+  --build-arg HTTPS_PROXY=http://host.docker.internal:7890 \
+  --build-arg NO_PROXY="archive.ubuntu.com,security.ubuntu.com,ports.ubuntu.com,127.0.0.1,localhost" \
+  -t metbench-sut:latest \
+  docker/
+```
+
+`HTTP_PROXY` / `HTTPS_PROXY` / `NO_PROXY`（含大小写共 6 个 ARG）是 BuildKit 自动透传到每个 RUN 的预定义 build-arg，Dockerfile 不需要任何修改。
+
+### C.3 Clash Verge TUN mode 必须 OFF
+
+如果出现 apt 报错 IP 是 `198.18.x.x`（RFC 2544 reserved 网段，Clash/mihomo TUN fake-IP 标志），且在 sustained ~600 kB/s 下载下连接池崩，那是 TUN mode 在搞鬼。正确状态：
+
+| 项 | 值 |
+|---|---|
+| Clash Verge GUI | **TUN Mode OFF** |
+| Clash Verge GUI | HTTP proxy mode ON（保留 mixed proxy 7890） |
+| macOS 系统 Network Proxies | 可全部关闭（不影响 docker build 路径） |
+| Docker Desktop → Settings → Resources → Proxies | **No proxy**（让 daemon 直连，依赖 §D.1 的 mirror；apt 流量通过 NO_PROXY 直连，git 流量通过 §D.2 build-arg 走 Clash 7890） |
+
+### C.4 失败模式速查
+
+| Attempt 配置 | 失败点 | 修法 |
+|---|---|---|
+| Docker Desktop 全局 proxy 设到 Clash 7897, TUN ON | apt fetch ~140 s 后 IP=198.18.1.17 EOF | 关 TUN, Docker Desktop proxy 改 None |
+| 同上但 Docker proxy=None, TUN OFF, 无 build-arg | apt + venv OK，git clone OpenMOC ~480 s TLS 中断 | 加 §D.2 三个 build-arg |
+| 全配齐（mirror + build-arg + TUN OFF） | ✅ ~4 min 全 build 通 | — |
+
+## 附录 D — 关键文件索引（VM Claude 走读用）
 
 | 文件 | 作用 |
 |---|---|
