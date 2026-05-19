@@ -60,6 +60,25 @@ public sealed class LiteDbSystemMtResultRepositoryTests : IDisposable
     }
 
     [Fact]
+    public async Task SaveAsync_returns_Guid_parseable_string_for_AnomalyService_contract()
+    {
+        // Regression for issue #76: PR #75's AnomalyService.RecordAnomalyAsync
+        // requires Guid.TryParse(resultId, ...) to succeed. The earlier prod
+        // path emitted ObjectId.NewObjectId().ToString() (24 hex, no dashes),
+        // which crashed RecordAnomalyAsync on every failed System-MT run.
+        // PR #75 unit tests used a stub repo returning Guid.NewGuid().ToString(),
+        // so this end-to-end contract slipped through. Pin it here.
+        using var repo = new LiteDbSystemMtResultRepository(_dbPath);
+
+        var id = await repo.SaveAsync("AnyMr", MakeResult());
+
+        Assert.True(Guid.TryParse(id, out var parsed),
+            $"SaveAsync return value must be Guid-format (was '{id}') — " +
+            "AnomalyService.RecordAnomalyAsync round-trips this via Guid.TryParse.");
+        Assert.NotEqual(Guid.Empty, parsed);
+    }
+
+    [Fact]
     public async Task SaveAsync_assigns_id_and_timestamp_persists_summary_fields()
     {
         using var repo = new LiteDbSystemMtResultRepository(_dbPath);
@@ -72,7 +91,8 @@ public sealed class LiteDbSystemMtResultRepositoryTests : IDisposable
 
         var record = await repo.GetAsync(id);
         Assert.NotNull(record);
-        Assert.Equal(id, record!.Id);
+        Assert.Equal(id, record!.Id.ToString());
+        Assert.True(Guid.TryParse(id, out _));
         Assert.InRange(record.RunAt, before.AddSeconds(-1), after.AddSeconds(1));
         Assert.Equal("OpenMocPinCellNuSigmaF", record.MrName);
         Assert.Equal("GreaterThan", record.AssertionName);
@@ -151,9 +171,9 @@ public sealed class LiteDbSystemMtResultRepositoryTests : IDisposable
         var recent = await repo.ListRecentAsync();
 
         Assert.Equal(3, recent.Count);
-        Assert.Equal(thirdId, recent[0].Id);
-        Assert.Equal(secondId, recent[1].Id);
-        Assert.Equal(firstId, recent[2].Id);
+        Assert.Equal(thirdId, recent[0].Id.ToString());
+        Assert.Equal(secondId, recent[1].Id.ToString());
+        Assert.Equal(firstId, recent[2].Id.ToString());
     }
 
     [Fact]
@@ -382,13 +402,17 @@ public sealed class LiteDbSystemMtResultRepositoryTests : IDisposable
         // Build a "legacy v2.1" DB by writing a BsonDocument with the OLD
         // field name "ScenarioName" through the raw collection (bypassing the
         // typed mapper). Then open via the new typed repository and confirm
-        // the migration renamed the field in-place.
+        // the migration renamed the field in-place. The _id is a Guid because
+        // the v2.1.0 schema (post-#76 fix) keys SystemMtResultRecord by Guid;
+        // this test exercises the ScenarioName→MrName migration, not the
+        // ObjectId→Guid migration (covered separately below).
+        var legacyId = Guid.NewGuid();
         using (var db = new LiteDB.LiteDatabase(_dbPath))
         {
             var raw = db.GetCollection("SystemMtResults");
             var legacyDoc = new LiteDB.BsonDocument
             {
-                ["_id"] = "legacy-id-1",
+                ["_id"] = legacyId,
                 ["ScenarioName"] = "openmoc-pincell-nu-sigma-f",  // OLD field name
                 ["RunAt"] = DateTime.UtcNow,
                 ["AssertionName"] = "GreaterThan",
@@ -409,7 +433,7 @@ public sealed class LiteDbSystemMtResultRepositoryTests : IDisposable
             raw.Insert(legacyDoc);
 
             // Sanity: legacy field is there pre-migration
-            var pre = raw.FindById("legacy-id-1");
+            var pre = raw.FindById(legacyId);
             Assert.True(pre.ContainsKey("ScenarioName"));
             Assert.False(pre.ContainsKey("MrName"));
         }
@@ -417,7 +441,7 @@ public sealed class LiteDbSystemMtResultRepositoryTests : IDisposable
         // Open with the new typed repo → constructor runs migration.
         using (var repo = new LiteDbSystemMtResultRepository(_dbPath))
         {
-            var record = await repo.GetAsync("legacy-id-1");
+            var record = await repo.GetAsync(legacyId.ToString());
             Assert.NotNull(record);
             Assert.Equal("openmoc-pincell-nu-sigma-f", record!.MrName);
         }
@@ -426,12 +450,77 @@ public sealed class LiteDbSystemMtResultRepositoryTests : IDisposable
         using (var db = new LiteDB.LiteDatabase(_dbPath))
         {
             var raw = db.GetCollection("SystemMtResults");
-            var post = raw.FindById("legacy-id-1");
+            var post = raw.FindById(legacyId);
             Assert.False(post.ContainsKey("ScenarioName"),
                 "legacy field ScenarioName should have been removed");
             Assert.True(post.ContainsKey("MrName"),
                 "new field MrName should exist after migration");
             Assert.Equal("openmoc-pincell-nu-sigma-f", post["MrName"].AsString);
+        }
+    }
+
+    [Fact]
+    public async Task Migration_rewrites_legacy_ObjectId_string_id_to_Guid_on_open()
+    {
+        // v2.0.x era: SaveAsync stored Id as ObjectId.NewObjectId().ToString().
+        // The new (v2.1.0) typed mapper requires Guid _id so AnomalyService can
+        // round-trip it. Constructor migration must rewrite stale rows so
+        // existing snapshots stay readable and downstream Guid.TryParse passes.
+        const string legacyObjectIdString = "6a0c5df903a05102cba3d4f1";
+        using (var db = new LiteDB.LiteDatabase(_dbPath))
+        {
+            var raw = db.GetCollection("SystemMtResults");
+            var legacyDoc = new LiteDB.BsonDocument
+            {
+                ["_id"] = legacyObjectIdString,
+                ["MrName"] = "openmoc-pincell-nu-sigma-f",
+                ["RunAt"] = DateTime.UtcNow,
+                ["AssertionName"] = "GreaterThan",
+                ["ValueName"] = "k_eff",
+                ["SourceValue"] = 1.13,
+                ["FollowUpValue"] = 0.95,
+                ["Passed"] = false,
+                ["FailureReason"] = "MR violated",
+                ["SourceCaseName"] = "src",
+                ["FollowUpCaseName"] = "flw",
+                ["SourceElapsed"] = TimeSpan.FromSeconds(2).Ticks,
+                ["FollowUpElapsed"] = TimeSpan.FromSeconds(2).Ticks,
+                ["SourceExitCode"] = 0,
+                ["FollowUpExitCode"] = 0,
+                ["SourceMetrics"] = new LiteDB.BsonDocument(),
+                ["FollowUpMetrics"] = new LiteDB.BsonDocument(),
+            };
+            raw.Insert(legacyDoc);
+
+            var pre = raw.FindById(legacyObjectIdString);
+            Assert.True(pre["_id"].IsString,
+                "pre-migration _id should still be a BSON string");
+        }
+
+        // Open with new typed repo → migration rewrites string _id to Guid.
+        using (var repo = new LiteDbSystemMtResultRepository(_dbPath))
+        {
+            var recent = await repo.ListRecentAsync();
+            Assert.Single(recent);
+            Assert.False(recent[0].Id == Guid.Empty,
+                "row should keep a non-empty Guid after migration");
+            Assert.Equal("openmoc-pincell-nu-sigma-f", recent[0].MrName);
+            Assert.False(recent[0].Passed);
+
+            // Downstream contract: SaveAsync return value must Guid.TryParse.
+            // The migrated row's Id, surfaced as string, must too.
+            Assert.True(Guid.TryParse(recent[0].Id.ToString(), out _),
+                "migrated Id must be parseable by AnomalyService.RecordAnomalyAsync");
+        }
+
+        // Raw check: the legacy string _id is gone, replaced by a Guid _id.
+        using (var db = new LiteDB.LiteDatabase(_dbPath))
+        {
+            var raw = db.GetCollection("SystemMtResults");
+            var stillString = raw.FindAll()
+                .Where(d => d["_id"].IsString)
+                .ToList();
+            Assert.Empty(stillString);
         }
     }
 
