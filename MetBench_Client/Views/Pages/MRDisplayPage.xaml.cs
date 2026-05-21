@@ -46,6 +46,8 @@ namespace MetBench_Client.Views.Pages
             e.Row.Header = e.Row.GetIndex() + 1;
         }
 
+        private void pagination_PageUpdated(object sender, RoutedEventArgs e) => ViewModel.reload_ItemsSource();
+
         //用于页面跳转（已弃用）
         //private void editMRButton_Click(object sender, RoutedEventArgs e)
         //{

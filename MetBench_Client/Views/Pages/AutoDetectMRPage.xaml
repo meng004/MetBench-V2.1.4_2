@@ -9,8 +9,8 @@
       xmlns:s="https://github.com/canton7/Stylet"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:viewmodels="clr-namespace:MetBench_Client.ViewModels"
-      xmlns:hc="https://handyorg.github.io/handycontrol"
-      mc:Ignorable="d" 
+      xmlns:controls="clr-namespace:MetBench_Client.Controls"
+      mc:Ignorable="d"
       d:DesignHeight="800"
       d:DesignWidth="1000"
      d:DataContext="{d:DesignInstance viewmodels:AutoDetectMRViewModel}"
@@ -97,8 +97,11 @@
                 </DataGrid.Columns>
             </ui:DataGrid>
             <Grid Grid.Row="1">
-                <hc:Pagination x:Name="pagination"  Margin=" 0 2 5 0"  Height="30" IsJumpEnabled="False" Visibility="Visible" HorizontalAlignment="Right" MaxPageCount="{Binding ViewModel.MaxPageCount,UpdateSourceTrigger=PropertyChanged}" PageIndex="{Binding ViewModel.PageIndex,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
-DataCountPerPage="{Binding ViewModel.DataCountPerPage,UpdateSourceTrigger=PropertyChanged}" MaxPageInterval="3" s:View.ActionTarget="{Binding ViewModel}" PageUpdated="{s:Action reload_ItemsSource}" VerticalAlignment="Center"  ></hc:Pagination>
+                <controls:SimplePagination x:Name="pagination" Margin="0 2 5 0" Height="30"
+                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                    MaxPageCount="{Binding ViewModel.MaxPageCount, UpdateSourceTrigger=PropertyChanged}"
+                    PageIndex="{Binding ViewModel.PageIndex, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                    PageUpdated="pagination_PageUpdated"/>
             </Grid>
         </Grid>
         <!--<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="0" >-->
