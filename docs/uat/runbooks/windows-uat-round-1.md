@@ -154,14 +154,14 @@ docs/uat/reports/round-1-<tester>-<date>/
 
 ### 3.1 A1-A3（Application CRUD chain）
 
-- **UC-A1** 新建 `UAT-App-1`（截图 + LiteDB Applications 集合截图）
+- **UC-A1** 新建 `UAT-App-1`（Name + Description + ProgrammingLanguage 填写；**`SoftwareUnderTest` 必填 — 通过 "Upl" 按钮上传 `.py` 文件，再按 "Unzip" 解压**；填完 → Add → 截图 + LiteDB Applications 集合截图）
 - **UC-A2** 改 description = `UAT smoke v2`
-- **UC-A3** 删除（注意：v2 schema 是软删 `Status=deleted`，硬删要看具体 schema 配置）
+- **UC-A3** 删除（v2.1 实测为**硬删**，行直接从 DB 移除；早期 runbook 暗示可能是软删 `Status=deleted`，已修正）
 
 ### 3.2 A4-A7（Domain / MR / MetaPattern）
 
-- **UC-A4** Domain `Neutronics` + 绑 App
-- **UC-A5** MR `UAT-Identity-MR`
+- **UC-A4** Domain `Neutronics` — 填 Name + Description → Add → 成功（⚠️ **v2.1 deviation**: 表单无 "Bound Applications" 多选框，Application 绑定功能缺口已列 backlog；另表单标签 "Desciption" 拼写错误，已列 backlog）
+- **UC-A5** MR 新建（v2.1 实际表单字段：`Context` / `Granularity` / `Hierarchy` / `InputPattern`\* / `OutputPattern`\* / `DimensionOfInputPattern`\* / `DimensionOfOutputPattern`\* / `ApplicationName`（checkbox 多选）\* / `ArityOfMR`\* / `Operator`\* / `Expression`\*；\* = 必填；截图 + "添加记录 成功" toast）
 - **UC-A6** 列表搜索 `Identity` < 500 ms
 - **UC-A7** MetaPatterns 8 行（4 active + 4 out-of-scope）
 
@@ -177,20 +177,20 @@ docs/uat/reports/round-1-<tester>-<date>/
 
 UC-B1：进 Discovery 页 → SUT = `amax.py` → Run Discovery → 候选 MR ≥ 1 行 + confidence 字段。
 
-### 4.2 B2-B6（MT Execution 主链路 — 默认 heat_equation SUT）
+### 4.2 B2-B6（System MT 主链路 — 默认 heat_equation SUT）
 
-> 💡 **关键 scoping**：runbook 默认用 **heat_equation** SUT 走 MT 主流程，不需要 OpenMOC venv。heat_equation 是 Python stdlib + numpy，已随 Win Python 3.12 装上。
+> 💡 **关键 scoping**：v2.1 的蜕变测试通过 **System MT 页**（左导航 "System MT"），不是旧版 MT Execution 页。runbook 默认用 **heat_equation** SUT，不需要 OpenMOC venv。
 >
-> 测试关注的是 WPF UI 行为（进度条 / Status / chart / Result 面板），**不是物理正确性**。物理正确性由 cloud cross-program BDD 4/4 已覆盖。
+> 测试关注的是 WPF UI 行为（进度 spinner / Status / Recent Runs 表格），**不是物理正确性**。物理正确性由 cloud cross-program BDD 4/4 已覆盖。
 
 按链路：
-1. **UC-B2** 选 MR `heat-equation-amplitude` + sample `SUT/heat_equation/sample/gaussian.json`
-2. **UC-B3** Generate Follow-up（< 1 s，截 followup JSON）
-3. **UC-B4** Run（heat_equation 单次 ~2-5 s，截进度条 + 结束 Status）
-4. **UC-B5** Result 面板 6 字段全（`Source max_u` / `Follow-up max_u` / `Assertion Passed` / `Observed Δ` / `Expected Threshold` / `Failure Reason`）
-5. **UC-B6** chart（CartesianChart + 数值类 metric + hover tooltip）
+1. **UC-B2** 进 **System MT 页** → Scenario 下拉选 `1D heat equation — ScaleAmplitude (linearity)` → 查看 Description 面板（理论说明文本）；截图
+2. **UC-B3** ⚠️ **N/A**：v2.1 System MT 新 UI 不分 "Generate Follow-up" / "Run" 两步，Run 内一次完成；此步跳过
+3. **UC-B4** 点 **Run**（factor=2，默认）→ 进度 spinner 旋转 → 约 2–5 s → "Completed" + Recent Runs 表格新增行；截图
+4. **UC-B5** Recent Runs 表行字段确认：`Run At` / `Scenario` / `Assertion`（GreaterThan/LessThan）/ `Value`（max_u 或 k_eff）/ `Source`（数值）/ `Follow-up`（数值）/ `Passed`（✓ 或空）；截图
+5. **UC-B6** ⚠️ **N/A**：System MT 页面无图表区，结果以 Recent Runs 表格展示；chart hover tooltip 不适用
 
-> 💡 **可选**：如果你想验 OpenMOC 走 UI 路径，可以在 §1.2 提到的 WSL2 桥接环境下选 OpenMOC SUT 跑一次。但这是 nice-to-have，不算 round-1 必跑。
+> 💡 **可选**：如果你想验 OpenMOC 走 System MT UI 路径，选 OpenMOC Scenario → Run 即可。nice-to-have，不算 round-1 必跑。
 
 ### 4.3 B7-B9（Anomaly 流程 — 故意造 anomaly）
 
@@ -217,15 +217,12 @@ E1-E5 依赖前面 A/B 产的数据。**不清 DB**。
 
 ### 5.2 E3-E4（报告 4 端导出 + WebView2）
 
-- **UC-E3**：选 scope = `By MR`，点 Generate All
-- 4 个文件 (Word/Excel/PDF/HTML) 落到 `Documents\MetBench_MTReport\`，**copy 到 `$evidence\reports-export\`**
-- 每个文件打开看一眼，内容含报告头 / 摘要 / MR 列表 / 异常列表 → 4 个都 OK = E3 ✅
-- **UC-E4**：MT Report Generator 页内点 "View HTML in App" → WebView2 渲染正确
+- **UC-E3**：进 **MR Report Generator 页** → Report Type 下拉选 `Pdf`（或 `Word` / `Excel` / `Html`，4 项对应 4 端）→ 点 ExportReport → 若有 method-level MR 数据，文件落到 `Documents\MetBench_MTReport\`，**copy 到 `$evidence\reports-export\`**；截图（⚠️ **v2.1 deviation**: 无 "Generate All" 单按钮，无 scope 下拉；4 端需逐一 Export；DB 数据为空时弹 "无目标文件！"，属正常 empty-data 行为）
+- **UC-E4** ⚠️ **N/A**：v2.1 MR Report Generator 页无 "View HTML in App" 按钮，WebView2 内嵌入口缺失，功能缺口已列 backlog
 
 ### 5.3 E5（Dashboard 主页 cards）
 
-- 回 Dashboard 主页，看顶部 4-6 个 card（Total MRs / Executions Today / Anomalies This Week / Pass Rate）
-- 数值有意义（不全 0）+ 截图
+- ⚠️ **N/A**：v2.1 左导航无 "Dashboard 主页" nav 项，主页打开后显示 MR Display 数据网格，不存在 runbook 描述的 Total MRs / Executions Today / Anomalies This Week / Pass Rate card 组件，功能缺口已列 backlog
 
 > 🟢 **UC-E6 / UC-E7 跳过**：cloud baseline 已覆盖 `SystemMtReportServiceTests` + `HtmlSystemMtResultReport*`。在 results-summary 标 ✅ + 备注。
 
