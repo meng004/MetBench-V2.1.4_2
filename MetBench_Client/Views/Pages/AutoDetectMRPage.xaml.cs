@@ -64,6 +64,8 @@ namespace MetBench_Client.Views.Pages
         {
             e.Row.Header = e.Row.GetIndex() + 1;
         }
+
+        private void pagination_PageUpdated(object sender, RoutedEventArgs e) => ViewModel.reload_ItemsSource();
     }
 
 }

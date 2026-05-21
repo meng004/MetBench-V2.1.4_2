@@ -1,9 +1,50 @@
-# MetBench v2.1.0 — Release Notes
+# MetBench v2.1.0 / v2.1.1 / v2.1.2 — Release Notes
 
-> **Status**: Release Candidate（cloud-side baseline 100% Pass，待 Windows UAT round-1 验收）
-> **Tag**（待签）: `release-v2.1.0`
-> **Commit**: 见 [`docs/uat/reports/baseline-2026-05-17/README.md`](docs/uat/reports/baseline-2026-05-17/README.md)
-> **Baseline data**: [`docs/uat/reports/baseline-2026-05-17/`](docs/uat/reports/baseline-2026-05-17/)
+> **Status**: **Released** — `release-v2.1.2` tagged on `ae4370f`（2026-05-21，polish 批次：HandyControl 移除 + UAT runbook 对齐）
+> **Release tags**: [`release-v2.1.0`](https://github.com/meng004/MetBench-V2.1.4_2/releases/tag/release-v2.1.0) · [`release-v2.1.1`](https://github.com/meng004/MetBench-V2.1.4_2/releases/tag/release-v2.1.1) · [`release-v2.1.2`](https://github.com/meng004/MetBench-V2.1.4_2/releases/tag/release-v2.1.2)
+> **Release commits**: v2.1.0 = `9b89f9b`（含 PR #75 anomaly wiring + PR #77 ObjectId→Guid 结构性修 + round-2 全 5 UC PASS）；v2.1.1 = `7a6e228`（PR #79）；v2.1.2 = `ae4370f`（PR #80 + #81）
+> **Baseline data**: cloud [`docs/uat/reports/baseline-2026-05-17/`](docs/uat/reports/baseline-2026-05-17/) + Windows UAT round-2 [`docs/uat/reports/round-2-windows-2026-05-19-limeng/`](docs/uat/reports/round-2-windows-2026-05-19-limeng/)
+
+---
+
+## v2.1.2 — polish 批次（2026-05-21）
+
+### 变更
+
+**PR #80 — refactor: 移除 HandyControl 依赖**
+
+- 删除 `HandyControl 3.5.0` NuGet 包（`MetBench_Client.csproj`）
+- 删除 `App.xaml` 中 HC 主题 ResourceDictionary 合并（`SkinDefault.xaml` / `Theme.xaml`）；Wpf.Ui 主题已覆盖所有画刷，无 styling 回归
+- 删除 `MainWindow.xaml` 死 `xmlns:hc` 声明（body 无使用）
+- 新增 `Controls/SimplePagination.xaml` UserControl：`◀`/`▶` `ui:Button` + 页码 TextBlock，暴露 `PageIndex`（TwoWay DP）/ `MaxPageCount` DP / `PageUpdated` RoutedEvent
+- 6 个翻页页面（AutoDetectMRPage / MRDisplayPage / DomainManagementPage / MRRecommendationPage / MRManagementPage / ApplicationManagementPage）从 `hc:Pagination` 换为 `controls:SimplePagination`；各 code-behind 加 `pagination_PageUpdated` → `ViewModel.reload_ItemsSource()` 事件处理
+- 删除 `MRDisplayPage.xaml` 中死注释块（`hc:Interaction.Triggers` / `hc:EventToCommand`）
+- 验证：`grep -rn 'HandyControl|hc:' MetBench_Client/` → 0 命中；`dotnet build MetBench_Client` → 0 errors
+
+**PR #81 — docs: UAT runbook 对齐 v2.1 WPF UI**
+
+基于 round-1（limeng 2026-05-18）实测结果，修正 `docs/uat/runbooks/windows-uat-round-1.md` 中 8 个 UC 的过时描述：
+
+| UC | 修正内容 |
+|---|---|
+| A1 | 补 `SoftwareUnderTest` 必填字段 + "Upl"/"Unzip" 文件上传说明 |
+| A3 | 修正"软删 `Status=deleted`" → "硬删，行直接从 DB 移除" |
+| A4 | 标注 "Bound Applications" 多选框在 v2.1 UI 中不存在（backlog G-1）；标注 "Desciption" 拼写错误（backlog G-2） |
+| A5 | 更新为实际 MR 表单字段（Context / Granularity / Hierarchy / InputPattern / OutputPattern / Dimensions / ApplicationName checkbox / ArityOfMR / Operator / Expression） |
+| B2–B6 | §4.2 标题改为 "System MT 主链路"；B2 指向 System MT 页；B3 标 N/A（单步 Run 替代 Generate Follow-up）；B5 更新列名；B6 标 N/A（无图表区） |
+| E3 | 更新为实际 UI（Report Type 下拉 + ExportReport，无 "Generate All"，无 scope 下拉） |
+| E4 | 标 N/A（"View HTML in App" 按钮不存在，backlog G-3） |
+| E5 | 标 N/A（"Dashboard 主页" nav 项不存在，backlog G-4） |
+
+新增 [`docs/superpowers/plans/2026-05-21-uat-ui-gaps-backlog.md`](docs/superpowers/plans/2026-05-21-uat-ui-gaps-backlog.md)，记录 5 个 UI 功能缺口（G-1 至 G-5）供下个 sprint 决定是否补实现。
+
+### 升级 / 兼容性
+
+- 无 API 变更，无 LiteDB schema 变更
+- WPF 项目移除 HandyControl 包引用后需重新 `dotnet restore`（首次 build 会下载新 lock file）
+- 翻页功能行为与原 `hc:Pagination` 等价（PageIndex TwoWay、PageUpdated 触发 reload）
+
+---
 
 ## v2.1.0 Highlights — Post W11-W12
 
@@ -130,5 +171,34 @@
 | #64 | baseline-2026-05-17 + DbConfig flake 根治 | UAT |
 | #65 | Windows UAT runbook | UAT |
 | #66 | PROJECT-STRUCTURE.md + 文档同步 | 文档 |
+| #67 | UAT Windows scope 收缩 26 → 21 | UAT |
+| #68 / #69 | Stage 8 brainstorming + rev3 plan (5 MP × 84 MR 母集) | Stage 8 启动 |
 
-共 v2.1.0 累计 **20+ 个主线 + 11 个 UAT/文档 PR**。
+### v2.1.0 收尾（2026-05-18 → 05-19）
+
+| PR | 标题 | 类别 |
+|---|---|---|
+| #70 | UAT round-1 Windows CONDITIONAL PASS 报告 | UAT |
+| #71 / #72 | round-1 fix: UC-A2 excludeSelf + UC-A5 Entity.ToString (2 Major) | bugfix |
+| #73 | Docker SUT 镜像（`metbench-sut` + `Dockerfile.runtime` all-in-container） + VM 任务书 | infra |
+| #74 | Docker SUT 任务书 follow-up（Track C `--no-build` + 中国网络配置） | UAT 文档 |
+| #75 | UC-B7 — 失败 run 自动建 Anomaly（`SystemMtMrLauncher` 接线） | bugfix |
+| #76 | issue: UC-B7 round-2 跑出来的 ObjectId↔Guid cross-track bug | issue |
+| #77 | UC-B7 ObjectId → Guid 结构性修 + round-2 5/5 PASS + closes #76 | bugfix + UAT |
+
+### v2.1.1 hotfix（2026-05-19）
+
+| PR | 标题 | 类别 |
+|---|---|---|
+| #79 | `LiteDbSystemMtResultRepository` 加 `UTC_DATE` pragma；`SystemMtResultRecord.RunAt` 保持 `Kind=Utc` 跨进程 | bugfix |
+
+LiteDB v5 默认反序列化把 `DateTime` 还原为 `Kind=Local`，在非 UTC 主机（如 Windows VM CST=UTC+8）让 `Ticks` 偏移 8 小时，间接破坏两个 `KeysetPaginationTests`（`GetByStatusKeyset_*` 系列依赖 `QueuedAt` 排序）。Linux CI 跑 UTC 所以一直绿，Windows VM 每次复现。修法：连接串加 `UTC_DATE=true` pragma，让 LiteDB 反序列化时统一返回 UTC `DateTime`。
+
+共 v2.1.0/v2.1.1 累计 **22+ 个主线 + 19 UAT/文档/infra PR**。
+
+### Windows UAT 双轮总结
+
+- **Round-1** (2026-05-18, commit `0c0cd24`, limeng on Win11+Parallels)：**CONDITIONAL PASS** — 26 UC 跑 21 个 WPF + 5 cloud-covered；6 ✅ / 10 ⚠️ / 3 ❌；找到 3 个 Major bug (UC-A2/A5/B7) 由 PR #71/#72/#75 修复。
+- **Round-2** (2026-05-19, commit `9b89f9b`, limeng on Win11 ARM+Parallels)：**PASS 5/5** — UC-A2 / UC-A5 / UC-B7 全部 fix verified，加跑 UC-B8 + UC-B9 同步通过。Round-2 过程中又命中 UC-B7 cross-track ObjectId↔Guid bug（issue #76），由 PR #77 inline 做结构性修复（`SystemMtResultRecord.Id: string → Guid` + 一次性 idempotent migration + 3 个回归测试）。
+- **Post-release Windows TZ bug**：v2.1.0 tag 后 Windows TZ 上 2 个 `KeysetPaginationTests` 一直挂（Linux CI 因 UTC 漏报），PR #79 加 LiteDB `UTC_DATE` pragma 修，tagged 为 `release-v2.1.1`。
+- **Release 决策矩阵**：`1 轮 CONDITIONAL PASS + 全部 Major 已有 fix PR → 待 fix merge 后再验 1 轮` 满足，v2.1.0 已 tag；v2.1.1 是 post-release 兼容性修，不重走 UAT 流程。

@@ -15,7 +15,14 @@ namespace MetBench_BLL.SystemMT.Persistence;
 /// </remarks>
 public sealed class SystemMtResultRecord
 {
-    public string Id { get; set; } = string.Empty;
+    /// <summary>
+    /// Business identity of this result. LiteDB persists the same value as the
+    /// document <c>_id</c>, generating a fresh Guid on Insert when this field
+    /// is <see cref="Guid.Empty"/>. Stable Guid format means downstream
+    /// consumers (e.g. <c>AnomalyService.RecordAnomalyAsync</c>) can parse it
+    /// without bridging through a BSON ObjectId.
+    /// </summary>
+    public Guid Id { get; set; }
 
     public string MrName { get; set; } = string.Empty;
 

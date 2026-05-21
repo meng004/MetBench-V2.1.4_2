@@ -1,6 +1,7 @@
 using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Persistence;
 using MetBench_DAL;
+using MetBench_SystemMT.Tests.V2Anomaly;
 using Xunit;
 
 namespace MetBench_SystemMT.Tests.SystemMT.Launcher;
@@ -9,6 +10,7 @@ public sealed class SystemMtMrLauncherBatchTests : IDisposable
 {
     private readonly string _dbPath;
     private readonly LiteDbSystemMtResultRepository _repository;
+    private readonly RecordingAnomalyService _anomalyService;
     private readonly SystemMtMrLauncher _launcher;
 
     public SystemMtMrLauncherBatchTests()
@@ -19,12 +21,14 @@ public sealed class SystemMtMrLauncherBatchTests : IDisposable
             Guid.NewGuid().ToString("N") + ".db");
         Directory.CreateDirectory(Path.GetDirectoryName(_dbPath)!);
         _repository = new LiteDbSystemMtResultRepository(_dbPath);
+        _anomalyService = new RecordingAnomalyService();
         _launcher = new SystemMtMrLauncher(
             new LauncherOptions(
                 SutRoot: TestAssetPaths.AssetRoot(),
                 SystemPython: TestAssetPaths.PythonExecutable(),
                 OpenMocPython: TestAssetPaths.PythonExecutable()),
-            _repository);
+            _repository,
+            _anomalyService);
     }
 
     public void Dispose()

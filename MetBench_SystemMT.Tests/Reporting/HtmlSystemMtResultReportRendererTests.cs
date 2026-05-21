@@ -23,7 +23,7 @@ public sealed class HtmlSystemMtResultReportRendererTests
     {
         return new SystemMtResultRecord
         {
-            Id = "507f1f77bcf86cd799439011",
+            Id = Guid.Parse("507f1f77-bcf8-6cd7-9943-9011deadbeef"),
             MrName = scenario,
             RunAt = new DateTimeOffset(2026, 5, 9, 12, 34, 56, TimeSpan.Zero),
             AssertionName = assertionName,

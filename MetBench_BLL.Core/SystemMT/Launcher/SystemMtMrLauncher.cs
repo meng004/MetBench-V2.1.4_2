@@ -1,3 +1,4 @@
+using MetBench_BLL.SystemMT.Anomaly;
 using MetBench_BLL.SystemMT.Persistence;
 
 namespace MetBench_BLL.SystemMT.Launcher;
@@ -19,12 +20,17 @@ public sealed class SystemMtMrLauncher : ISystemMtMrLauncher
 {
     private readonly LauncherOptions _options;
     private readonly ISystemMtResultRepository _repository;
+    private readonly IAnomalyService _anomalyService;
     private readonly IReadOnlyDictionary<string, MrBlueprint> _mrCatalog;
 
-    public SystemMtMrLauncher(LauncherOptions options, ISystemMtResultRepository repository)
+    public SystemMtMrLauncher(
+        LauncherOptions options,
+        ISystemMtResultRepository repository,
+        IAnomalyService anomalyService)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _anomalyService = anomalyService ?? throw new ArgumentNullException(nameof(anomalyService));
         _mrCatalog = BuildMrCatalog(options).ToDictionary(s => s.Mr.Id, StringComparer.Ordinal);
     }
 
@@ -121,6 +127,8 @@ public sealed class SystemMtMrLauncher : ISystemMtMrLauncher
 
         var recordId = await _repository.SaveAsync(blueprint.Mr.DisplayName, result, cancellationToken).ConfigureAwait(false);
 
+        await RecordAnomalyIfFailedAsync(blueprint.Mr.DisplayName, recordId, result, cancellationToken).ConfigureAwait(false);
+
         return new MrRunResult(
             RecordId: recordId,
             MrId: mrId,
@@ -131,6 +139,23 @@ public sealed class SystemMtMrLauncher : ISystemMtMrLauncher
             FollowUpValue: result.Assertion.FollowUpValue,
             SourceElapsed: result.SourceRun.Elapsed,
             FollowUpElapsed: result.FollowUpRun.Elapsed);
+    }
+
+    /// <summary>
+    /// UC-B7 — 失败 run 自动建一条 Anomaly。internal 暴露给 V2Anomaly 测试做 wiring 验证
+    /// （InternalsVisibleTo MetBench_SystemMT.Tests）。
+    /// </summary>
+    internal async Task RecordAnomalyIfFailedAsync(
+        string mrName,
+        string recordId,
+        SystemMtResult result,
+        CancellationToken cancellationToken)
+    {
+        if (result.Passed) return;
+        // TODO(stage-7-followup): 根据 |Δk%| 把 severity 从 'minor' 升级到 major/critical
+        // 或降到 noise（MC 噪声底）；当前先一刀切 'minor' 让 anomaly 表先有流量。
+        await _anomalyService.RecordAnomalyAsync(
+            mrName, recordId, "minor", "single-point", cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<IReadOnlyList<MrRunResult>> RunBatchAsync(

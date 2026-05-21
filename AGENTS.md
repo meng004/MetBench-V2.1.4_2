@@ -199,9 +199,20 @@ Post v2.1.0-rc1 工作：consolidate v2.1 发版 + 论文核心补充 + 框架�
 | **flake 根治 + baseline 刷新** | `DbConfig.Instance` 跨 class 竞态用 `[Collection("DbConfigGlobal")]` 注解 6 个类根治；baseline-2026-05-17 reference 521/521 0 skip 0 fail 35s wall | #64 |
 | **PROJECT-STRUCTURE.md** | 项目结构 / 4 SUT 测试矩阵 / MetBench 框架测试覆盖 / UAT 双轨 一目了然 | #66 |
 
-Cloud-side 测试态（baseline-2026-05-17）：**521 xUnit pass / 0 skip / 0 fail / 35s wall / 73.02s cumulative**。
+Cloud-side 测试态（baseline-2026-05-17）：**521 xUnit pass / 0 skip / 0 fail / 35s wall / 73.02s cumulative**。Post-Stage 7 head `9b89f9b` 处 cloud 复跑：**536 pass / 3 skip(冷启动 OpenMC import gate flake, warm 后全 pass) / 0 fail / 44.9s wall**。
 
-剩余前置（v2.1.0 发版）：Windows 端 UAT round-1 跑通 **21 个 WPF UI 用例**（A1-A7 + B1-B9 + E1-E5；其余 5 个 A8/D1/D2/E6/E7 是 CLI，cloud baseline-2026-05-17 已覆盖） → dashboard `PASS` → tag `release-v2.1.0`。
+**v2.1.0 发版前置全部清零（2026-05-19）**：
+
+- Windows UAT round-1 (commit `0c0cd24`, 2026-05-18, limeng on Parallels Win11) — **CONDITIONAL PASS** 11/26，找到 3 个 Major bug (UC-A2/A5/B7)。
+- 3 个 Major fix 落地：PR #71 / #72 / #75（UpdateService excludeSelf + Entity.ToString + SystemMtMrLauncher 接 AnomalyService）。
+- Windows UAT round-2 (commit `9b89f9b`, 2026-05-19, limeng on Parallels Win11 ARM) — **PASS 5/5**：UC-A2 / UC-A5 / UC-B7 + 加跑 UC-B8 / UC-B9 全过。Round-2 过程命中 cross-track bug（ObjectId↔Guid 不兼容），PR #77 inline 做结构性修（`SystemMtResultRecord.Id: string→Guid` + 一次性 idempotent migration + 3 个回归测试）。
+- 配套 infra：PR #73（Docker SUT `metbench-sut` + `metbench-runtime` all-in-container）+ PR #74（VM 任务书）。
+
+**v2.1.0 已 tag**（`release-v2.1.0` @ `9b89f9b`，2026-05-19）。
+
+**v2.1.1 hotfix**（tag `release-v2.1.1` @ `7a6e228`）：post-release Windows TZ 触发 LiteDB v5 默认反序列化把 `DateTime` 还原为 `Kind=Local`，CST=UTC+8 主机 `Ticks` 偏移 8 小时，间接破坏 2 个 `KeysetPaginationTests`（Linux CI 跑 UTC 漏报）。PR #79 在 `LiteDbSystemMtResultRepository` 连接串加 `UTC_DATE=true` pragma 修。
+
+后续工作进入 Stage 8（v2.2 主线）。
 
 ## Stage 8: MR 库 — 5 方程 × 4 程序类型 × 5 MP 矩阵覆盖（启动 2026-05-18，v2.2 主线）
 

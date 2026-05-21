@@ -55,6 +55,7 @@ namespace MetBench_Client.Views.Pages
             textBox.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden; // Hide vertical scrollbar
         }
 
+        private void pagination_PageUpdated(object sender, RoutedEventArgs e) => ViewModel.reload_ItemsSource();
     }
-    
+
 }
