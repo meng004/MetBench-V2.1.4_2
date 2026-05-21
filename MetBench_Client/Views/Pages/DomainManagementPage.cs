@@ -58,5 +58,7 @@ namespace MetBench_Client.Views.Pages
             textBox.Height = double.NaN; // Set the height back to auto
             textBox.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden; // Hide vertical scrollbar
         }
+
+        private void pagination_PageUpdated(object sender, RoutedEventArgs e) => ViewModel.reload_ItemsSource();
     }
 }
