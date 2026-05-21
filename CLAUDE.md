@@ -28,6 +28,10 @@ work fits in cleanly. For project intent and the staged plan, see
   映射、文件生成。
 - **MR 识别模块**：针对「蜕变关系从 0 到 1」的问题，提供可持续集成新识别技术
   （如 LLM-driven 识别）的框架。
+- **变异模块（Mutation）**：检验 MR 集合的有效性 —— 向 SUT 注入变异体、由 MR
+  suite 去「杀」，并据此搜寻最小 MR 完备子集。已实现变异 campaign 矩阵执行 +
+  杀死率 / 存活率 / 覆盖率 / 误报率统计；语义变异与语法 / 句法变异的分型、等价
+  变异体识别仍在规划（见 §4）。
 
 对应实现子系统：System-MT 引擎 + Launcher facade、LiteDB 持久化、4 SUT 适配器
 （OpenMOC / OpenMC / home-grown 热传导）、MR Discovery + 三层验证、Anomaly 异常
@@ -48,6 +52,10 @@ work fits in cleanly. For project intent and the staged plan, see
 - **Stage 8 / v2.2 主线未启动** —— 5 方程 × 4 程序类型 × 5 元模式的 MR 库
   （17 cells、84 候选 MR）。*必要性：这是论文核心交付，当前仅覆盖 boltzmann 方程
   + 少量 MR；地基 5D 索引 schema（Phase 8.0）须先落地，否则后续工作无处挂载。*
+- **变异模块增强** —— 语义变异与语法 / 句法变异的分型生成、等价变异体识别、最小
+  MR 完备子集搜寻尚未实现。*必要性：Stage 8 将产出 84 候选 MR，需客观证明其检错
+  能力并剔除冗余；等价变异体若不识别会人为压低杀死率、污染有效性结论；最小完备
+  子集让 MT 以最少 MR 达到同等检错力、降低执行成本。*
 - **5 个 UAT UI 缺口** —— Dashboard 导航入口、HTML 报告内嵌查看等。*必要性：部分
   后端能力已实现但 UI 上不可见，价值未释放。*
 - **DP-3 配置绑定** —— severity 阈值的 `appsettings` 绑定（WPF 侧）未接，现回退默认值。
