@@ -21,16 +21,19 @@ public sealed class SystemMtMrLauncher : ISystemMtMrLauncher
     private readonly LauncherOptions _options;
     private readonly ISystemMtResultRepository _repository;
     private readonly IAnomalyService _anomalyService;
+    private readonly AnomalySeverityThresholds _severityThresholds;
     private readonly IReadOnlyDictionary<string, MrBlueprint> _mrCatalog;
 
     public SystemMtMrLauncher(
         LauncherOptions options,
         ISystemMtResultRepository repository,
-        IAnomalyService anomalyService)
+        IAnomalyService anomalyService,
+        AnomalySeverityThresholds? severityThresholds = null)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _anomalyService = anomalyService ?? throw new ArgumentNullException(nameof(anomalyService));
+        _severityThresholds = severityThresholds ?? AnomalySeverityThresholds.Default;
         _mrCatalog = BuildMrCatalog(options).ToDictionary(s => s.Mr.Id, StringComparer.Ordinal);
     }
 
@@ -152,10 +155,10 @@ public sealed class SystemMtMrLauncher : ISystemMtMrLauncher
         CancellationToken cancellationToken)
     {
         if (result.Passed) return;
-        // TODO(stage-7-followup): 根据 |Δk%| 把 severity 从 'minor' 升级到 major/critical
-        // 或降到 noise（MC 噪声底）；当前先一刀切 'minor' 让 anomaly 表先有流量。
+        var severity = AnomalyClassifier.ClassifySeverity(result, _severityThresholds);
+        var category = AnomalyClassifier.ClassifyCategory(result);
         await _anomalyService.RecordAnomalyAsync(
-            mrName, recordId, "minor", "single-point", cancellationToken).ConfigureAwait(false);
+            mrName, recordId, severity, category, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<IReadOnlyList<MrRunResult>> RunBatchAsync(

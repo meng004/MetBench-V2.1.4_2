@@ -18,7 +18,8 @@ namespace MetBench_Domain;
 ///   basin            — 单点严重偏离（如 Case 4 / Case 6 OpenMOC convergence basin）
 ///   mc-floor         — MC 噪声底以下的小偏差
 ///   cross-program    — 同 MR 在两 SUT 上结果分歧
-///   single-point     — 单参数 sliver 触发
+///   single-point     — 单参数 sliver 触发（进程正常退出、MR 断言被违反）
+///   runner-failure   — SUT runner 进程崩溃（非 MR 反例，进程未正常退出）
 ///   legacy           — 从历史 SystemMtResultRecord 迁入
 ///
 /// Status 状态机：
@@ -36,7 +37,7 @@ public class Anomaly
     /// <summary>严重度：noise / minor / major / critical。</summary>
     public string Severity { get; set; } = "minor";
 
-    /// <summary>分类：basin / mc-floor / cross-program / single-point / legacy / ...</summary>
+    /// <summary>分类：basin / mc-floor / cross-program / single-point / runner-failure / legacy / ...</summary>
     public string Category { get; set; } = string.Empty;
 
     /// <summary>该 Anomaly 被 Replay 的次数。</summary>
