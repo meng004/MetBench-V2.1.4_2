@@ -9,6 +9,7 @@
 | baseline-1 | 2026-05-16 | `97863ea` | dev | Linux | 100% | 0 | 0 | 0 | reference | [`baseline-2026-05-16/`](baseline-2026-05-16/) |
 | baseline-2 | 2026-05-17 | `45a145f` | dev | Linux + OpenMC | **100%** | 0 | 0 | **0** | reference (post W11-W12, 100% pass) | [`baseline-2026-05-17/`](baseline-2026-05-17/) |
 | round-1 | 2026-05-18 | `0c0cd24` | limeng | Windows 11 (Parallels) UI | **42%** (11/26 incl. 5 cloud) | 0 | 3 | 10 | **CONDITIONAL PASS** | [`round-1-limeng-2026-05-18/`](round-1-limeng-2026-05-18/) |
+| round-2 | 2026-05-19 | `9b89f9b` | limeng | Windows 11 ARM (Parallels) UI | **100%** (5/5) | 0 | 0 | 0 | **PASS** | [`round-2-windows-2026-05-19-limeng/`](round-2-windows-2026-05-19-limeng/) |
 
 ## 趋势分析约定
 
@@ -29,6 +30,14 @@ Post W11-W12 (8 PR land): W11.2 Multi-LLM 真实跑通 + W12 F13 OpenMC 接入 +
 ### 2026-05-18 round-1 Windows (limeng)
 
 Claude Sonnet 全自动 UIA 驱动跑 21 WPF UI 用例 + 引用 5 cloud-covered = 26/26 覆盖。**6 ✅ PASS** (A1/A3/A4/A7/B2/B4-5) + **10 ⚠️ Partial/N/A** (A6/B1部分/B3/B6-9/E1-3) + **3 ❌ FAIL** (A2/A5/B1). 发现 **2 个真实 bug**: (1) `ApplicationService.UpdateService` IsDuplicate 未排除自身 → 同名 update 误判; (2) `Application`/`ApplicationEx` 缺 `ToString()` override → ComboBox 显示类名 block UC-A5/B1 选择. 另 2 处 typo (`Desciption`/`Eecute MT`) + 多处 runbook ↔ UI 不对齐 (System MT 新 UI 不分两步无图表, SystemMt ↔ Anomaly/Trends/Coverage 接线 gap). WPF 冷启动 2.68s ✅, heat_equation Run 3.4s ✅. Round-2 待 fix bug 后复跑。
+
+### 2026-05-19 round-2 Windows (limeng)
+
+3 个 round-1 Major bug 全部 WPF UI 端到端验证通过：UC-A2 description-only Update + rename-to-unique 都返回"修改记录 成功！"；UC-A5 ApplicationEx ComboBox 显示业务 Name（MR Mgmt + Discovery 双 sibling check 通过）；UC-B7 factor=0.5 失败 run → Anomaly 行自动创建 (Severity=minor, Status=new, Category=single-point)。加跑 UC-B8 多选 Analyze commonality + UC-B9 Replay anomaly 同步通过。
+
+UC-B7 初次跑命中 **cross-track bug**: 生产 `LiteDbSystemMtResultRepository.SaveAsync` 返回 BSON ObjectId 字符串（24 hex），PR #75 的 `AnomalyService.RecordAnomalyAsync` 要 Guid 字符串 —— PR #75 单元测试用 stub 返回 `Guid.NewGuid().ToString()` 屏蔽了此不兼容。issue #76 一行诊断 + 同 PR #77 做结构性 fix：`SystemMtResultRecord.Id` 从 `string` 改 `Guid`（与 v2 其他 entity 一致）+ LiteDB `autoId: true` 自动生成 + ObjectId→Guid 一次性 idempotent migration + 3 个回归测试。
+
+**release-v2.1.0 决策矩阵满足**: round-1 CONDITIONAL PASS → fix PR #71/#72/#75 merged → round-2 cross-track bug PR #77 inline 修 + 全部 5 UC ALL-PASS。可发版，待 tag。
 
 ### _待写_
 
