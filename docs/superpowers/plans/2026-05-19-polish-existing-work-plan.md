@@ -1,100 +1,93 @@
 # Plan — 完善已有工作（v2.1.x polish 批次）
 
-> **批次**: v2.1.x 收尾 polish — Stage 8 启动前的技术债清理
-> **日期**: 2026-05-19
-> **状态**: 正式实施计划，已 approved（DP-1 / DP-2 已拍板，2026-05-19）
-> **关联**: [AGENTS.md Stage 7](../../../AGENTS.md#stage-7-w11-w12-delivered-2026-05-17) · round-1 [`results-summary.md`](../../uat/reports/round-1-limeng-2026-05-18/results-summary.md) · round-2 [`findings.md`](../../uat/reports/round-2-windows-2026-05-19-limeng/findings.md)
-> **总工时**: Cloud ~6–7h（1 PR）+ VM ~2–2.5 天（2 PR）
+> **批次**: v2.1.x 收尾 polish
+> **创建**: 2026-05-19 ｜ **修订**: 2026-05-21（原 Item 1/2 前提不成立，已移除 —— 见 §0）
+> **状态**: 正式实施计划，已 approved
+> **关联**: round-1 [`results-summary.md`](../../uat/reports/round-1-limeng-2026-05-18/results-summary.md) · runbook [`windows-uat-round-1.md`](../../uat/runbooks/windows-uat-round-1.md)
+> **总工时**: VM ~2–3 天（2 PR）｜ Cloud 无可执行项
+
+---
+
+## 0. 修订说明 —— 为什么砍掉原 Item 1/2
+
+原计划含 4 项，其中 Item 1（Anomaly severity 分级）、Item 2（category 拆分）建立在一份**不准确的代码调研**上。落地前核实实际代码，发现前提不成立：
+
+- `SystemMtMrLauncher` **不存在** `RecordAnomalyIfFailedAsync` 方法；全仓 `grep` **无** `TODO(stage-7-followup)` 标记。
+- 系统 MT 跑挂时**根本不自动创建 `Anomaly`** —— `SystemMtMrLauncher.RunAsync` 失败时只存一条 `SystemMtResultRecord` 即返回（这点 round-1 UC-B7 也实测到："System MT 失败 run 未写入 Anomalies 表"）。
+- 全仓**唯一**创建 `Anomaly` 的地方是 `RCaseReproductionService.cs:155–170`（R-Case 复现已知 bug）。该处 `Severity = "major"` 虽硬编码，但语境是"复现一个已确认的 KnownBug"，判 major 属合理设计；`Category` 是 `$"r-case-{KnownBugCode}"`，已动态派生（不是调研声称的硬编 `"single-point"`）。
+
+结论：原 Item 1/2 所指的技术债**不存在**，移除。原 DP-1（新增 `runner-failure` 类别）、DP-3（severity 阈值配置）随之作废。本批次只保留 Item 3 + Item 4，两项均为 VM-track 工作。
+
+> 若未来确实需要"MT 跑挂 → 自动建 Anomaly + 分级"（round-1 UC-B7 暴露的 data 接线 gap），那是一项**净新增 feature**，应另开 RFC 设计（落在 launcher / `AnomalyService` / pipeline 哪一层需先定），不属于 polish 批次。
 
 ---
 
 ## 1. 目标 & 验收标准
 
-清掉 v2.1.x 期间留下的 4 项已知技术债，全部完成后 main 不再有 `TODO(stage-7-followup)` 标记、不再依赖 HandyControl、UAT runbook 与实际 WPF UI 一致。
-
 | # | 项 | 验收标准 | Track |
 |---|---|---|---|
-| 1 | Anomaly severity 分级 | `RecordAnomalyIfFailedAsync` 不再硬编 `"minor"`；按 \|Δk%\| 分 noise/minor/major/critical；TDD 覆盖 4 档边界 | Cloud |
-| 2 | Anomaly category 拆分 | runner 崩溃 → `runner-failure`，MR 反例 → `single-point`（保留）；TDD 覆盖 crash/violation 两路 | Cloud |
-| 3 | HandyControl 移除 | 6 个 XAML 文件不再引 `hc:`；`HandyControl` NuGet 包移除；WPF 能 build + 翻页功能可视验证 | VM |
-| 4 | runbook ↔ UI 对齐 | round-1 报出的 10 处偏差逐条归类（doc-fix / UI-gap）；runbook §3–5 改到与实际 UI 一致 | VM |
+| 3 | HandyControl 移除 | 8 个 XAML 不再引 HandyControl（`hc:` 控件 + `App.xaml` 主题合并）；`HandyControl` NuGet 包移除；WPF 能 build；6 个翻页页面功能可视验证无回归 | VM |
+| 4 | runbook ↔ UI 对齐 | round-1 报出的 runbook↔UI 偏差逐条归类；`windows-uat-round-1.md` 改到与实际 v2.1 WPF UI 一致；真功能缺口单独落 backlog | VM |
+
+**Cloud 说明**：原 Item 1/2 移除后，本批次无 `MetBench_BLL.Core` 改动 —— Cloud 会话无可执行项，本计划是向 VM track 的交接文档。
 
 ---
 
-## 2. 设计决策（DP-1 / DP-2 已拍板 2026-05-19）
+## 2. 设计决策
 
-### DP-1 — Anomaly 加第 6 个 category `runner-failure`？ ✅ 已定：加
+### DP — runbook 偏差：doc-fix vs UI-fix ✅ 已定：只做 doc-fix
 
-`MetBench_Domain/V2/Anomaly.cs:17–22` 当前文档化 5 个 category：`basin` / `mc-floor` / `cross-program` / `single-point` / `legacy`。runner 进程崩溃（非 MR 反例）语义上不属于任何一个。
-
-- **已采纳**：加 `runner-failure` 为第 6 个文档化 category。理由：crash 与"MR 数学被违反"是两类完全不同的信号，混进 `single-point` 会污染 commonality 分析。
-- ~~备选：crash 归 `single-point` + 用 severity=`critical` 区分。~~ 未采纳。
-
-### DP-2 — runbook 10 处偏差：doc-fix vs UI-fix ✅ 已定：只做 doc-fix
-
-round-1 报出的 10 处 runbook↔UI 偏差，分两类：
+round-1 报出的 runbook↔UI 偏差分两类：
 
 | 类型 | UC | 处理 |
 |---|---|---|
-| **v2.1 重设计的正常结果**（runbook 过时） | A1/A3/A4/B2/B3/B6 | doc-fix：改 runbook |
-| **疑似真缺功能**（UI 该有没有） | E3 "Generate All" 按钮 + scope 下拉 / E4 "View HTML in App" / E5 Dashboard 落地页 | 需判定：是 v2.1 砍掉的设计，还是漏实现 |
+| **v2.1 重设计 / schema 变更**（runbook 过时，UI 正确） | A1 / A3 / A5 / B2 / B3 / B6 | doc-fix：改 runbook |
+| **UI 缺 runbook 描述的东西**（是砍掉的设计还是漏实现，待判定） | A4 "Bound Applications" / E3 "Generate All"+scope 下拉 / E4 "View HTML in App" / E5 "Dashboard 主页" | runbook 改成与实际 UI 一致（标 N/A 或改步骤）；真功能缺口**单独立 backlog**，不在本批次实现 |
 
-- **已采纳**：本批次只做 doc-fix（改 runbook 到与实际 UI 一致，~0.5 天）。E3/E4/E5 的 3 个"疑似缺功能"单独立 backlog item，下个 sprint 决定补不补，**不混进 polish 批次**（避免 scope creep）。
-
-### DP-3 — severity 分段函数的区间端点放哪一层？ ✅ 已定：系统配置参数
-
-severity 分类本质是分段函数：标量 `|Δk%|` → 4 区间之一。端点 `{1, 10, 50}` 的归属：
-
-- **已采纳**：系统配置参数 —— 端点经外部 `appsettings.json` 配置，**不重编译可改**、全系统统一生效。
-- ~~纯硬编码 const~~ / ~~运行面板参数~~ 未采纳。运行面板参数会让持久化的 `severity` 跨 run 不可比、破坏 trend/commonality 聚合；运行时 UI 调节只适合做异常查看器的**显示筛选**，不定义存储标签。
-- **配置分层约束**：`MetBench_BLL.Core` 不读配置文件 —— 它只持有纯数据 record `AnomalySeverityThresholds`，由调用方注入；WPF `App.xaml.cs` 负责从 `appsettings.json` 绑定。缺配置时回退 record 构造默认值（`{1,10,50}`），保证 BLL.Core / tests / CI 独立可用。
-- **备注**：`noise/minor` 那条 ~1% 边界本质是 MC 噪声地板，随 SUT 与粒子数变化 —— 真做 per-SUT 差异化时，最该下沉到配置的就是这一条；本批次先用全局单值。
+- **已采纳**：本批次只做 doc-fix。E3/E4/E5（+ A4 多选框）的功能缺口下个 sprint 决定补不补，**不混进 polish 批次**（避免 scope creep）。
+- A2 / A5 / B1 是 round-1 定位的**真实代码 bug**（`UpdateService` 自身排除、`ApplicationEx` 缺 `ToString`）—— 属独立 bug-fix track，不在本计划范围。
 
 ---
 
 ## 3. 关键改动
 
-### Item 1 + 2 — Anomaly 分类（Cloud PR-A + VM 配置 addendum）
-
-新增 `MetBench_BLL.Core/SystemMT/Anomaly/AnomalyClassifier.cs` + 阈值配置 record `AnomalySeverityThresholds`：
-
-```csharp
-// 分段函数端点（DP-3 = 系统配置参数）。纯数据 record，BLL.Core 不读配置。
-public sealed record AnomalySeverityThresholds(
-    double NoiseMaxPercent = 1.0,    // |Δk%| ∈ [0,1)   → noise
-    double MinorMaxPercent = 10.0,   //         [1,10)  → minor
-    double MajorMaxPercent = 50.0)   //         [10,50) → major；[50,∞) → critical
-{
-    public static readonly AnomalySeverityThresholds Default = new();
-}
-
-public static class AnomalyClassifier
-{
-    // 分段函数：|Δk%| 落半开区间 [lo,hi)。thresholds 由调用方注入。
-    public static string ClassifySeverity(SystemMtResult result, AnomalySeverityThresholds thresholds);
-    // crash → runner-failure；assertion 违反 → single-point
-    public static string ClassifyCategory(SystemMtResult result);
-}
-```
-
-- `ClassifySeverity`：从 `SystemMtAssertionResult.SourceValue` / `FollowUpValue`（`SystemMtAssertionResult.cs:3–9`）算 `|（FollowUp−Source）/Source|×100`，按半开区间 `[lo,hi)` 落档。**Source≈0 守卫**：分母 < 1e-12 → `critical`。**crash 守卫**：runner crash → 直接 `critical`（不依赖 Δk%）。
-- `ClassifyCategory`：`result.SourceRun.Succeeded == false || result.FollowUpRun.Succeeded == false`（`CliRunResult.Succeeded`）→ `runner-failure`；否则 `single-point`。
-- 改 `SystemMtMrLauncher.cs:148–159` 的 `RecordAnomalyIfFailedAsync`：删 `TODO(stage-7-followup)` 注释，severity/category 改调 classifier；launcher 经构造函数持有一个 `AnomalySeverityThresholds`，未注入时回退 `.Default`（BLL.Core / tests / CI 零配置可用）。
-- `Anomaly.cs:17–22` 文档注释加 `runner-failure` 条目。
-- **配置绑定（VM 侧 addendum）**：`MetBench_Client/appsettings.json` 加 `"AnomalySeverity"` 段（`NoiseMaxPercent` / `MinorMaxPercent` / `MajorMaxPercent`）；`App.xaml.cs` 绑定该段为 `AnomalySeverityThresholds` singleton 注入 launcher。缺段时回退 `.Default`。
-
 ### Item 3 — HandyControl 移除（VM）
 
-6 个文件全在 `MetBench_Client/Views/Pages/`：`ApplicationManagementPage` / `AutoDetectMRPage` / `DomainManagementPage` / `MRDisplayPage` / `MRManagementPage` / `MRRecommendationPage`。
+全仓 **8 个文件**引用 HandyControl（调研原称 6 个，漏了 `App.xaml` 与 `MainWindow.xaml`）：
 
-- 全部用 `hc:Pagination`。`MRDisplayPage.xaml:138–145` 另有**已注释**的 `hc:EventToCommand` → 直接删（dead code，不迁移）。
-- `hc:Pagination` 替换：优先 `Wpf.Ui` 自带翻页控件；若 Wpf.Ui 无对应控件，用 `ItemsControl` + 上一页/下一页 `ui:Button`（ViewModel 已有分页命令，绑定现成）。
-- `MetBench_Client.csproj`：加 `Microsoft.Xaml.Behaviors.Wpf` PackageReference（当前未引）；6 文件全部去 `hc:` 后移除 `HandyControl 3.5.0`（`.csproj:26`）。
+| 文件 | HandyControl 触点 | 处理 |
+|---|---|---|
+| `App.xaml` L15–16 | 2× `ResourceDictionary` 合并 HC 主题（`SkinDefault.xaml` / `Theme.xaml`） | 删两条 merge；**先验证** Wpf.Ui 主题已覆盖所需画刷（styling 回归风险点） |
+| `Views/Windows/MainWindow.xaml` L11 | 仅 `xmlns:hc` 声明，**body 无使用** | 直接删 xmlns 行 |
+| `Views/Pages/AutoDetectMRPage.xaml` L12, 100–101 | `xmlns:hc` + `<hc:Pagination>`（带 Stylet `s:View.ActionTarget` + `PageUpdated="{s:Action reload_ItemsSource}"`） | 换翻页控件 + 重接 `PageUpdated` 事件 |
+| `Views/Pages/MRDisplayPage.xaml` L10, 138–145 | `xmlns:hc` + `<hc:Pagination>` + **已注释**的 `hc:Interaction.Triggers`/`hc:EventToCommand` | 换翻页控件；注释块直接删（dead code） |
+| `Views/Pages/DomainManagementPage.xaml` L9, 81–83 | `xmlns:hc` + `<hc:Pagination>` | 换翻页控件 |
+| `Views/Pages/MRRecommendationPage.xaml` L12, 140–143 | `xmlns:hc` + `<hc:Pagination>` | 换翻页控件 |
+| `Views/Pages/MRManagementPage.xaml` L12, 165–167 | `xmlns:hc` + `<hc:Pagination>` | 换翻页控件 |
+| `Views/Pages/ApplicationManagementPage.xaml` L11, 112–113 | `xmlns:hc` + `<hc:Pagination>`（带 Stylet `s:View.ActionTarget` + `PageUpdated="{s:Action reload_ItemsSource}"`） | 换翻页控件 + 重接 `PageUpdated` 事件 |
+
+要点：
+- **唯一在用的 HC 控件是 `hc:Pagination`**（`hc:EventToCommand` 仅以注释存在）。`hc:Pagination` 绑定 `MaxPageCount` / `PageIndex` / `DataCountPerPage` / `MaxPageInterval` / `IsJumpEnabled` + `PageUpdated` 事件，对应 ViewModel 属性已存在。
+- **翻页控件替换策略**（VM 端评估，~1h 内可定）：优先 `Wpf.Ui` 自带翻页控件；若无，写一个轻量 `Pagination` UserControl 或 `ItemsControl` + 上/下页 `ui:Button`，复用现成 VM 属性。
+- **`PageUpdated` 事件重接**：现用 Stylet `{s:Action reload_ItemsSource}`。替换后改为 code-behind 事件处理，或加 `Microsoft.Xaml.Behaviors.Wpf`（当前未引）用 `EventTrigger` + `InvokeCommandAction` 绑 VM 命令。
+- `MetBench_Client.csproj:26` 的 `HandyControl 3.5.0` PackageReference —— **8 个文件全部去 HC 后**才移除。
 
 ### Item 4 — runbook 对齐（VM）
 
-- 改 `docs/uat/runbooks/windows-uat-round-1.md` §3–5 的 UC 步骤到与实际 v2.1 WPF UI 一致（按 DP-2 推荐，只做 doc-fix 类的 6 个 UC）。
-- E3/E4/E5 的 3 个疑似缺功能 → 在 `docs/superpowers/plans/` 新开一个 backlog 条目记录，不在本批次实现。
+按 §2 DP（只做 doc-fix），改 `docs/uat/runbooks/windows-uat-round-1.md`：
+
+| UC | runbook 现状 | 改成 |
+|---|---|---|
+| A1 | 缺 `SoftwareUnderTest` 描述 | 补：v2.1 表单 `SoftwareUnderTest` 必填 + 文件上传 |
+| A3 | 暗示软删 | 明确：实测为硬删 |
+| A5 | 表单字段过时 | 改为实际 schema：`InputPattern`/`OutputPattern`/`Operator`/`Expression` 等 method-level 字段 |
+| B2 | 描述 legacy "MT Execution 页" | 改为 "System MT 页" |
+| B3 | "Generate Follow-up / Run" 两步 | 改为：System MT 页单步 Run |
+| B6 | chart hover tooltip 验证 | 删该步：System MT 页无图表区，结果为表格 |
+| A4 / E3 / E4 / E5 | 描述 UI 没有的功能 | runbook 步骤标 N/A 或改到实际 UI；功能缺口 → backlog |
+
+- 新开 backlog 条目（`docs/superpowers/plans/` 下）记录 A4/E3/E4/E5 的功能缺口 + A4 "Desciption" typo，交下个 sprint 判定。
+- round-2（`round-2-docker-sut-2026-05-19-limeng-macos`）是 Docker SUT 轮，与 WPF runbook 对齐无关，不引入本项。
 
 ---
 
@@ -102,13 +95,10 @@ public static class AnomalyClassifier
 
 | Phase | 内容 | 工时 | Track |
 |---|---|---|---|
-| **P1** | `AnomalySeverityThresholds` record + `AnomalyClassifier` + TDD（severity 4 档半开区间边界值 + 自定义 thresholds + category crash/violation 两路 + Source≈0 守卫）| ~3h | Cloud |
-| **P2** | wire 进 `RecordAnomalyIfFailedAsync`（launcher 持 thresholds，`.Default` 回退）+ 删 TODO + `Anomaly.cs` 文档加 `runner-failure` + 既有 `AnomalyCreationOnFailureTests` 参数化 | ~3h | Cloud |
-| **P2b** | WPF 配置绑定：`appsettings.json` 加 `AnomalySeverity` 段 + `App.xaml.cs` 绑定注册 `AnomalySeverityThresholds` singleton | ~0.5h | VM |
-| **P3** | HandyControl 移除：加 Behaviors 包 → 6 文件改 `hc:Pagination` → 删注释 EventToCommand → 移 HandyControl 包 → WPF build + 翻页可视验证 | ~1–1.5 天 | VM |
-| **P4** | runbook §3–5 对齐（6 个 doc-fix UC）+ E3/E4/E5 backlog 条目落档 | ~0.5 天 | VM |
+| **P3** | HandyControl 移除：评估翻页替换控件 → 6 页换 `hc:Pagination` + 重接 `PageUpdated` → 删 `MainWindow` 死 xmlns + `MRDisplayPage` 注释块 → 删 `App.xaml` HC 主题合并（验 styling 无回归）→ 移 `csproj` HC 包 → WPF build + 6 页翻页可视验证 | ~1.5–2 天 | VM |
+| **P4** | runbook §UC 步骤对齐（6 个 doc-fix UC）+ A4/E3/E4/E5 功能缺口 backlog 落档 | ~0.5–1 天 | VM |
 
-P1+P2 是同一个 cloud PR 的两段（TDD 先写 classifier，再 wire）。P2b 因 launcher 有 `.Default` 回退、对 P1/P2 无硬性顺序依赖 —— VM 可在 PR-A 合并后任意时点接入配置。
+P3 / P4 互不依赖，VM 端可并行。
 
 ---
 
@@ -116,46 +106,44 @@ P1+P2 是同一个 cloud PR 的两段（TDD 先写 classifier，再 wire）。P2
 
 | PR | 内容 | Track | CI |
 |---|---|---|---|
-| **PR-A** | P1+P2 — Anomaly severity + category 分类（`AnomalySeverityThresholds` + `AnomalyClassifier` + wire + tests） | Cloud | ✅ CI 全跑 |
-| **PR-B** | P2b + P3 — `AnomalySeverity` 配置绑定 + HandyControl 移除 | VM | WPF 不进 CI，VM 本地 build + 可视验证 |
-| **PR-C** | P4 — runbook 对齐 + backlog 落档 | VM | 纯文档 |
+| **PR-1** | P3 — HandyControl 移除 | VM | WPF 不进 CI；VM 本地 build + 可视验证 |
+| **PR-2** | P4 — runbook 对齐 + backlog 落档 | VM | 纯文档 |
 
-PR-A 先走（cloud，最快、CI 兜底）。P2b 体量小，搭 PR-B 一并带（同属 WPF 工程改动）。PR-B / PR-C VM 端并行，互不依赖。
+两个 PR 均 target `main`，VM 端并行，互不依赖。Cloud 无 PR。
 
 ---
 
-## 6. 依赖 & 风险
+## 6. 风险 & 缓解
 
 | 项 | 风险 | 缓解 |
 |---|---|---|
-| Item 1 Source≈0 | 相对变化分母为 0 | classifier 显式守卫 → `critical` |
-| Item 2 crash 检测 | `CliRunResult.Succeeded` 语义是否真覆盖所有 crash（超时？非零退出？） | TDD 造 Succeeded=false 的 fixture；超时路径单独 case |
-| Item 3 Wpf.Ui 无 Pagination | 替换控件不存在 | fallback `ItemsControl`+按钮；VM 端 1h 内可判定 |
-| Item 3 WPF 不进 CI | cloud 无法验证 | VM 端 build + 6 个页面逐个翻页点击验证（P3 验收项） |
-| Item 4 DP-2 误判 | 把真缺功能当 doc-fix 改掉 | E3/E4/E5 强制单独 backlog，不在本批次动 UI |
-| DP-3 配置缺段 | `appsettings.json` 无 `AnomalySeverity` 段或字段拼错 | record 构造默认值 `{1,10,50}` 作回退；P2b 验收点校验绑定生效 + 缺段回退两路 |
+| Item 3 `App.xaml` 主题合并 | 删 HC 主题 merge 后画刷丢失、UI 串样式 | 删前逐一确认所用画刷由 Wpf.Ui 主题提供；改完 6 页 + 主窗逐屏对比截图 |
+| Item 3 翻页替换 | `Wpf.Ui` 可能无 Pagination 控件 | fallback：轻量 UserControl 或 `ItemsControl`+按钮，复用现成 VM 属性；VM 端先 1h 评估 |
+| Item 3 `PageUpdated` 重接 | Stylet `{s:Action}` 换掉后翻页不刷新数据 | 6 页逐个翻页点击验证 reload 生效（P3 验收项） |
+| Item 3 WPF 不进 CI | Cloud 无法编译验证 | 全程 VM 端 build + 可视验证；本计划不含 Cloud 侧改动 |
+| Item 4 doc-fix 误判 | 把真功能缺口当 runbook 笔误改掉 | A4/E3/E4/E5 强制单独 backlog，不在本批次动 UI |
 
 ---
 
-## 7. 测试策略
+## 7. 验证
 
-- **PR-A**：TDD 先行 — `AnomalyClassifierTests` 覆盖 severity 半开区间边界值（0.9% / 恰 1.0% / 5% / 恰 10.0% / 30% / 恰 50.0% / 80% / Source=0 / crash）+ 自定义 `AnomalySeverityThresholds`（验证非默认端点也正确分档）+ category 两路（source crash / followup crash / 纯 assertion 违反）。既有 `AnomalyCreationOnFailureTests` 3 个测试参数化适配新签名。回归：cross-program 4 + 全套 `dotnet test` 0 fail。
-- **PR-B**：VM 端 build 通过 + `AnomalySeverity` 配置绑定生效（改 `appsettings.json` 端点 → 异常分档随之变）+ 缺段回退默认值两路验证 + 6 个含翻页的页面逐个手动翻页点击 + 截图存证。
-- **PR-C**：纯文档，无测试；VM 端对照实际 UI 逐条 review。
+- **PR-1**：VM 端 `dotnet build MetBench_Client` 通过 + `grep -rn "HandyControl\|hc:" MetBench_Client/` 0 命中 + 6 个翻页页面逐个手动翻页点击（确认 reload 生效）+ 主窗与 6 页逐屏截图比对无 styling 回归。
+- **PR-2**：纯文档；VM 端对照实际 v2.1 WPF UI 逐 UC review runbook。
 
 ---
 
-## 8. 完成时 main 状态
+## 8. 完成时状态
 
-- `grep -rn "TODO(stage-7-followup)"` → 0 命中
 - `grep -rn "HandyControl\|hc:" MetBench_Client/` → 0 命中
 - `MetBench_Client.csproj` 无 `HandyControl` PackageReference
-- severity 端点不再以字面量散落代码 —— 集中在 `AnomalySeverityThresholds`，`appsettings.json` 可改不重编译
-- runbook §3–5 与 v2.1 WPF UI 逐 UC 一致
-- 全套 `dotnet test` 0 fail；新增 ~12 个 classifier 测试
+- WPF 仍能 build + 6 页翻页功能正常 + 无 styling 回归
+- `windows-uat-round-1.md` 与 v2.1 WPF UI 逐 UC 一致
+- A4/E3/E4/E5 功能缺口已落 backlog 条目
 
 ## 9. 不交付（scope 外，明确）
 
-- E3/E4/E5 的 3 个疑似缺 UI 功能 — 单独 backlog，本批次只落档不实现
-- Anomaly category 的 `basin` / `mc-floor` / `cross-program` 细分启发式 — 本批次只做 crash vs violation 二分；细分留 Stage 8 cross-program 工作时一并做
-- F11 m_adj / 第 5 SUT — 外部依赖未解，不在 polish 范围
+- 原 Item 1/2（Anomaly severity 分级 / category 拆分）—— 前提不成立，已移除（§0）
+- "MT 跑挂 → 自动建 Anomaly" 新功能（round-1 UC-B7 的 data 接线 gap）—— 另开 RFC，非 polish
+- A4/E3/E4/E5 的 UI 功能缺口 —— 本批次只落 backlog 不实现
+- A2/A5/B1 真实代码 bug —— 独立 bug-fix track
+- F11 m_adj / 第 5 SUT —— 外部依赖未解，不在范围
