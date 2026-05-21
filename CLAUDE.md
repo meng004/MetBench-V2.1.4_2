@@ -5,6 +5,55 @@ captures the **non-obvious conventions** the codebase has settled on so new
 work fits in cleanly. For project intent and the staged plan, see
 [`AGENTS.md`](AGENTS.md). For build/test, see [`README.md`](README.md).
 
+## 项目状态概览
+
+> 路线图与分阶段计划见 [`AGENTS.md`](AGENTS.md)；本节只给冷启动 agent 一个全局快照。
+
+### 1. 目标
+
+反应堆物理科学计算软件的**系统级蜕变测试（System-level MT）基准平台** —— 以元模式
+驱动的蜕变关系（MR）自动发现并执行 MT，检出科学计算软件缺陷。现升级为 P-series MR
+库的「可执行存储 + MT 执行载体」。
+
+### 2. 核心功能与子系统
+
+**核心 —— 系统级 MT 流程**：测试输入生成 → 衍生输入转换 → 执行 SUT 被测程序 →
+验证源输出与衍生输出是否满足蜕变关系。
+
+**配套功能**：
+
+- **结果可视化 + 报表**：图表展示 + 4 端（PDF / Word / Excel / HTML）报告生成。
+- **CRUD**：应用程序 / 数学物理方程 / 蜕变关系 / 基础算例 / 测试过程数据。
+- **非结构化文件支持**：针对输入、输出为非结构化文件的 SUT，提供文件解析、参数
+  映射、文件生成。
+- **MR 识别模块**：针对「蜕变关系从 0 到 1」的问题，提供可持续集成新识别技术
+  （如 LLM-driven 识别）的框架。
+
+对应实现子系统：System-MT 引擎 + Launcher facade、LiteDB 持久化、4 SUT 适配器
+（OpenMOC / OpenMC / home-grown 热传导）、MR Discovery + 三层验证、Anomaly 异常
+调查、Mutation / Coverage / Trend 分析、WPF 客户端、BDD 测试（xUnit + Reqnroll）。
+
+### 3. 完成情况（已实现的主要功能）
+
+- **v2.1.0 / .1 / .2 已发布**；Stage 1-7 全部交付。
+- 已实现：System-MT 的 BDD 执行、输入生成与衍生输入推导、OpenMOC / OpenMC 接入、
+  批量执行 + 4 端报表、v2 的 8 个 BLL.Core 子系统（Discovery / Anomaly / Mutation /
+  Coverage / Trend / Reporting 等）、multi-LLM 共识（60/60 真实跑通、100% accuracy）、
+  scenario→MR 命名统一。
+- cloud baseline ~560 测试 0 fail；Windows UAT 双轮 PASS。
+- polish 批次：HandyControl 移除、UAT runbook 对齐、Anomaly severity / category 分级。
+
+### 4. 尚待完善
+
+- **Stage 8 / v2.2 主线未启动** —— 5 方程 × 4 程序类型 × 5 元模式的 MR 库
+  （17 cells、84 候选 MR）。*必要性：这是论文核心交付，当前仅覆盖 boltzmann 方程
+  + 少量 MR；地基 5D 索引 schema（Phase 8.0）须先落地，否则后续工作无处挂载。*
+- **5 个 UAT UI 缺口** —— Dashboard 导航入口、HTML 报告内嵌查看等。*必要性：部分
+  后端能力已实现但 UI 上不可见，价值未释放。*
+- **DP-3 配置绑定** —— severity 阈值的 `appsettings` 绑定（WPF 侧）未接，现回退默认值。
+- **F11 m_adj 路径、第 5 个 SUT** —— 受外部依赖（OpenMOC 伴随模式、商业程序获取）
+  阻塞，被动监控中。
+
 ## Project topology
 
 | Project | Target framework | Where it runs | Notes |
