@@ -15,7 +15,7 @@
 | **T1 直接支撑与操作入口** | SUT 运行环境适配、输入/输出文件适配、CRUD、WPF 客户端均✅；cross-program 差分测试✅（OpenMOC×OpenMC 4/4） | 差分测试未按 Num/MC/Surr/PINN 泛化；5 个 UAT UI 缺口 |
 | **T2 可视化与报表** | 图表 + 4 端（PDF/Word/Excel/HTML）报表✅ | 基本无 |
 | **T3 覆盖** | boltzmann（OpenMOC/OpenMC）✅ | **diffusion / bateman / fourier / NS 四方程未覆盖** —— 最大缺口 |
-| **T4 MR 识别** | multi-LLM 共识✅（60/60、100% accuracy） | 基于元模式的 meta-prompt 识别引擎未起 |
+| **T4 MR 识别** | multi-LLM 共识✅（60/60、100%）、语义因果图（SCG）启发式 discoverer✅ | 基于元模式的 meta-prompt 识别引擎未起 |
 | **T5 异常** | 异常调查工作流、severity/category 分级（PR #83 评审中）、R-Case 复现✅ | 缺陷封存的「程序版本 × MR × 测试输入」三元组未一级化 |
 | **T6 变异** | 变异 campaign 矩阵 + 杀死率/存活率/覆盖率/误报率✅ | 语义/语法句法变异分型、等价变异体识别、最小 MR 完备子集未起 |
 

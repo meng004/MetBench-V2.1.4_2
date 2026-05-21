@@ -55,9 +55,11 @@ work fits in cleanly. For project intent and the staged plan, see
 
 **T4 · MR 识别**
 
-把蜕变关系从 0 到 1 识别出来，两条技术路线 —— 基于元模式的 meta-prompt 方法、
-multi-LLM 共识方法。*必要性：核心第 4 步验证的对象就是 MR，没有 MR 核心无的放矢；
-「从 0 到 1」是 MR 库建设的入口。*
+把蜕变关系从 0 到 1 识别出来，可插拔 `IMRDiscoverer` 框架下三条技术路线 ——
+基于元模式的 meta-prompt 方法、multi-LLM 共识方法、语义因果图方法（从 SUT 的
+语义因果图 `scg.json` 挖 direct-cause / mediator / confounder 模式得候选 MR）。
+*必要性：核心第 4 步验证的对象就是 MR，没有 MR 核心无的放矢；「从 0 到 1」是
+MR 库建设的入口。*
 
 **T5 · 异常**
 
