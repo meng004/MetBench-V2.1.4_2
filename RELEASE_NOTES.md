@@ -1,9 +1,50 @@
-# MetBench v2.1.0 / v2.1.1 — Release Notes
+# MetBench v2.1.0 / v2.1.1 / v2.1.2 — Release Notes
 
-> **Status**: **Released** — `release-v2.1.0` tagged on `9b89f9b`（2026-05-19），紧随其后 hotfix `release-v2.1.1` tagged on `7a6e228`（LiteDB UTC_DATE pragma 修，post-release Windows TZ bug）
-> **Release tags**: [`release-v2.1.0`](https://github.com/meng004/MetBench-V2.1.4_2/releases/tag/release-v2.1.0) · [`release-v2.1.1`](https://github.com/meng004/MetBench-V2.1.4_2/releases/tag/release-v2.1.1)
-> **Release commits**: v2.1.0 = `9b89f9b`（含 PR #75 anomaly wiring + PR #77 ObjectId→Guid 结构性修 + round-2 全 5 UC PASS）；v2.1.1 = `7a6e228`（PR #79）
+> **Status**: **Released** — `release-v2.1.2` tagged on `ae4370f`（2026-05-21，polish 批次：HandyControl 移除 + UAT runbook 对齐）
+> **Release tags**: [`release-v2.1.0`](https://github.com/meng004/MetBench-V2.1.4_2/releases/tag/release-v2.1.0) · [`release-v2.1.1`](https://github.com/meng004/MetBench-V2.1.4_2/releases/tag/release-v2.1.1) · [`release-v2.1.2`](https://github.com/meng004/MetBench-V2.1.4_2/releases/tag/release-v2.1.2)
+> **Release commits**: v2.1.0 = `9b89f9b`（含 PR #75 anomaly wiring + PR #77 ObjectId→Guid 结构性修 + round-2 全 5 UC PASS）；v2.1.1 = `7a6e228`（PR #79）；v2.1.2 = `ae4370f`（PR #80 + #81）
 > **Baseline data**: cloud [`docs/uat/reports/baseline-2026-05-17/`](docs/uat/reports/baseline-2026-05-17/) + Windows UAT round-2 [`docs/uat/reports/round-2-windows-2026-05-19-limeng/`](docs/uat/reports/round-2-windows-2026-05-19-limeng/)
+
+---
+
+## v2.1.2 — polish 批次（2026-05-21）
+
+### 变更
+
+**PR #80 — refactor: 移除 HandyControl 依赖**
+
+- 删除 `HandyControl 3.5.0` NuGet 包（`MetBench_Client.csproj`）
+- 删除 `App.xaml` 中 HC 主题 ResourceDictionary 合并（`SkinDefault.xaml` / `Theme.xaml`）；Wpf.Ui 主题已覆盖所有画刷，无 styling 回归
+- 删除 `MainWindow.xaml` 死 `xmlns:hc` 声明（body 无使用）
+- 新增 `Controls/SimplePagination.xaml` UserControl：`◀`/`▶` `ui:Button` + 页码 TextBlock，暴露 `PageIndex`（TwoWay DP）/ `MaxPageCount` DP / `PageUpdated` RoutedEvent
+- 6 个翻页页面（AutoDetectMRPage / MRDisplayPage / DomainManagementPage / MRRecommendationPage / MRManagementPage / ApplicationManagementPage）从 `hc:Pagination` 换为 `controls:SimplePagination`；各 code-behind 加 `pagination_PageUpdated` → `ViewModel.reload_ItemsSource()` 事件处理
+- 删除 `MRDisplayPage.xaml` 中死注释块（`hc:Interaction.Triggers` / `hc:EventToCommand`）
+- 验证：`grep -rn 'HandyControl|hc:' MetBench_Client/` → 0 命中；`dotnet build MetBench_Client` → 0 errors
+
+**PR #81 — docs: UAT runbook 对齐 v2.1 WPF UI**
+
+基于 round-1（limeng 2026-05-18）实测结果，修正 `docs/uat/runbooks/windows-uat-round-1.md` 中 8 个 UC 的过时描述：
+
+| UC | 修正内容 |
+|---|---|
+| A1 | 补 `SoftwareUnderTest` 必填字段 + "Upl"/"Unzip" 文件上传说明 |
+| A3 | 修正"软删 `Status=deleted`" → "硬删，行直接从 DB 移除" |
+| A4 | 标注 "Bound Applications" 多选框在 v2.1 UI 中不存在（backlog G-1）；标注 "Desciption" 拼写错误（backlog G-2） |
+| A5 | 更新为实际 MR 表单字段（Context / Granularity / Hierarchy / InputPattern / OutputPattern / Dimensions / ApplicationName checkbox / ArityOfMR / Operator / Expression） |
+| B2–B6 | §4.2 标题改为 "System MT 主链路"；B2 指向 System MT 页；B3 标 N/A（单步 Run 替代 Generate Follow-up）；B5 更新列名；B6 标 N/A（无图表区） |
+| E3 | 更新为实际 UI（Report Type 下拉 + ExportReport，无 "Generate All"，无 scope 下拉） |
+| E4 | 标 N/A（"View HTML in App" 按钮不存在，backlog G-3） |
+| E5 | 标 N/A（"Dashboard 主页" nav 项不存在，backlog G-4） |
+
+新增 [`docs/superpowers/plans/2026-05-21-uat-ui-gaps-backlog.md`](docs/superpowers/plans/2026-05-21-uat-ui-gaps-backlog.md)，记录 5 个 UI 功能缺口（G-1 至 G-5）供下个 sprint 决定是否补实现。
+
+### 升级 / 兼容性
+
+- 无 API 变更，无 LiteDB schema 变更
+- WPF 项目移除 HandyControl 包引用后需重新 `dotnet restore`（首次 build 会下载新 lock file）
+- 翻页功能行为与原 `hc:Pagination` 等价（PageIndex TwoWay、PageUpdated 触发 reload）
+
+---
 
 ## v2.1.0 Highlights — Post W11-W12
 
