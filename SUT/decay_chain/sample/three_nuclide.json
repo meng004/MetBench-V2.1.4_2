@@ -1,0 +1,13 @@
+{
+  "initial": {
+    "N_A": 1000.0,
+    "N_B": 0.0,
+    "N_C": 0.0
+  },
+  "params": {
+    "lambda_A": 0.5,
+    "lambda_B": 0.2,
+    "t_final": 10.0,
+    "num_steps": 2000
+  }
+}
