@@ -12,6 +12,10 @@ This project is being extended from method/unit-level metamorphic testing (MT) t
 system/acceptance-level MT. The staged plan below is the current working
 baseline for architecture and implementation decisions.
 
+> 制订 / 维护 `docs/superpowers/plans/` 下的计划，遵循 [`CLAUDE.md`](CLAUDE.md)
+> 「计划工作流」闭环：读 AGENTS.md → 读相关 plan → 读 CLAUDE.md 约定 → 写 plan →
+> 回写 AGENTS.md（若改动路线图）。验收准则同见该节。
+
 ## Overall Direction
 
 MetBench will support Gherkin-based MR specifications, Reqnroll-based BDD
@@ -214,65 +218,32 @@ Cloud-side 测试态（baseline-2026-05-17）：**521 xUnit pass / 0 skip / 0 fa
 
 后续工作进入 Stage 8（v2.2 主线）。
 
-## Stage 8: MR 库 — 5 方程 × 4 程序类型 × 5 MP 矩阵覆盖（启动 2026-05-18，v2.2 主线）
+## Stage 8: MR 库 + 平台基线扩展（启动 2026-05-18，v2.2 主线）
 
-**上游对接**: P-series 研究纲领 [Cmrlibrary.md 5D schema + 57 种子 MR + 三层验证] + [PWR_MR_Analysis.md 27 PWR 新增 MR] + NOETHER 8 元模式（→ 5 MP 映射见 [`docs/GLOSSARY.md`](docs/GLOSSARY.md) §5）。MetBench 升级为 P-series MR 库的**可执行存储 + MT 执行载体**。
+> **定位调整（2026-05-21）**：项目定位由「反应堆物理基准平台」放宽为**通用
+> System-MT 平台与基线** —— 凡求解显式数学物理方程的程序皆可作 SUT，按 ODE / PDE
+> 选代表性方程，反应堆物理 5 方程为优先锚定子集。详见 [`CLAUDE.md`](CLAUDE.md) §1。
 
-**术语规范**：见 [`docs/GLOSSARY.md`](docs/GLOSSARY.md)（5 MP 定义+实例 / BDD 术语+实例 / 5 方程 / 程序类型 / 5D 索引 / 内部命名）。
+**高层目标**：在 MetBench 内构建可执行 MR 库 —— 覆盖代表性 ODE / PDE 方程 × 程序
+类型（Num / MC / Surr / PINN）矩阵，产出三元组（程序集 / MR 集 / 测试用例集）+ 覆盖
+矩阵。上游对接 P-series 研究纲领（Cmrlibrary 57 种子 MR + PWR_MR_Analysis 27 MR +
+NOETHER 元模式）。术语见 [`docs/GLOSSARY.md`](docs/GLOSSARY.md)。
 
-**核心范围**:
-- 反应堆物理 **5 个核心方程**：boltzmann / diffusion / bateman / fourier / NS（英文全称，前缀 `E_`）
-- 程序类型 4 类正交：**Num / MC / Surr / PINN**
-- MR 元模式 **5 类 MP**：MP_inv / MP_mono / MP_conv / MP_traj / MP_part（NOETHER 8 ↔ 5 MP 映射含 m_cmp 拆分：严格相等→MP_inv / 偏序→MP_part）
-- MR schema：5D 索引（Equation / ProgramType / MetaPattern / SourceLevel / FailureCorrelation）通过 **BDD `.feature` + Gherkin tags + LiteDB sync** 落地（沿用现有约定，不引 YAML mirror）
-- 推导：方程算子 → 适用 MP 选取 → 参数扫描 → meta-prompt → LLM → MT 执行 → 高支持入库 / 低支持反例 / discard
-- Deliverable：**三元组（程序集 / MR 集 / 测试用例集）+ 17 cells 覆盖矩阵**
+**两个 Goal**：
+- **Goal 1** — 元模式驱动 meta-prompt MR 识别引擎（功能分层中 T4 的一条技术路线）。
+- **Goal 2** — cells × 元模式矩阵 + 84 条候选 MR 母集落地（T3 覆盖）。
 
-**暂缓**（独立模块，Stage 9+ 候）:
-- **BNCT 硼中子放疗**：plan 内保留章节，Stage 8 不实施（80% 重叠 boltzmann + 程序大多商业/申请/停维）
-- **故障注入 V3**：独立模块挂起；Stage 8 MR 库只做 V1+V2
-- **论文 writeup**：暂不绑定（user 指令：先做实验，发现 bug 再考虑）
+**交付状态**：v2.1.0/.1/.2 已发布；Stage 8 主线未启动，地基 5D tag schema
+（Phase 8.0）须先落地；polish 批次（Anomaly severity/category 分级，PR #83）进行中。
 
-### Goal 1: 元模式驱动 meta-prompt MR 识别引擎
+**暂缓**（Stage 9+ 候）：BNCT 硼中子放疗、故障注入 V3、论文 writeup。
 
-把 5 MP 升级成 LLM-driven 自动 MR 识别引擎。详见 [meta-prompt-mr-discovery-brainstorming.md](docs/superpowers/plans/2026-05-18-meta-prompt-mr-discovery-brainstorming.md) + [...-plan.md](docs/superpowers/plans/2026-05-18-meta-prompt-mr-discovery-plan.md)。**保留**，作为 Goal 2 工具基础。
+**详细计划**（实施细节、phase 分解、工时、决策点以这些文档为准）：
+- [下一阶段开发计划](docs/superpowers/plans/2026-05-21-next-stage-development-plan.md) —— 按 T0–T6 的总排期（**当前**）
+- [代表性 SUT 接入计划](docs/superpowers/plans/2026-05-21-representative-sut-onboarding-plan.md) —— SUT 选型已放宽、home-grown 取消（**当前**）
+- 程序选型：[`docs/t3-program-selection.md`](docs/t3-program-selection.md)
+- [meta-prompt MR 识别引擎计划](docs/superpowers/plans/2026-05-18-meta-prompt-mr-discovery-plan.md)
+- [Stage 8 MR 库原始详细计划](docs/superpowers/plans/2026-05-18-stage8-expanded-mr-library-plan.md) —— 定位放宽前所写，其「5 方程 + home-grown」部分以上述「当前」文档为准
 
-### Goal 2: 17 cells × 5 MP 矩阵 + 84 MR 母集落地
-
-按 5D schema 在 MetBench 内构建 MR 库，覆盖 **5 方程 × 4 程序类型 = 20 cells**（3 个 D₂ MC cell 本质不适用 → **17 实际可填**）。
-
-**程序候选（cloud-friendly 评估）**：
-- OpenMOC + OpenMC ✅ 已装（boltzmann + bateman）
-- 4 home-grown（diffusion nodal + Bateman ODE + 1D Fourier + 1D subchannel）替代 PARCS / ORIGEN / FRAPCON / RELAP5 (商业 / 学术申请，cloud 不可获取)
-- D₃ Surr 用 scikit-learn GP（不依赖 PyTorch / 论文 release）
-- D₄ PINN 留 Stage 9
-
-**MR 母集**：57 Cmrlibrary 种子 + 27 PWR_MR_Analysis 新增 = **84 条候选 MR**，按 5 MP × 5 方程 cell 分类。
-
-**完整研究工作流**（per cell）：
-
-```
-方程算子 algebraic property
-  → 适用 5 MP 选取
-  → 输入参数扫描
-  → meta-prompt 构造
-  → LLM 识别 MR (多家 consensus)
-  → MetBench 执行 MT
-  → 三分支:
-      ├─ 高支持 → 入库 (.feature + LiteDB)
-      ├─ 低支持 + MP 数学应成立 → 反例归档（不刻意造）
-      └─ MP 数学不成立 → discard
-```
-
-### Stage 8 时间盒（5-6 周）
-
-- W13 (2026-05-18 ~ 25): Phase 8.0 5D tag schema + Phase 8.1 meta-prompt 引擎
-- W14: Phase 8.2 现有 4 SUT 5D tag 升级 + **8.2.5 端到端 workflow 验证**
-- W15-W18: Phase 8.3 4 home-grown cells (Bateman + Fourier + nodal diffusion + subchannel)
-- W19: Phase 8.4 D₃/D₄ 横切试点 (Surr + MC depletion) + 8.5 cells 覆盖 dashboard
-
-**ship 验收**：≥ 12 cells 不空白（17 实际可填）+ ≥ 15 MR 入库 + 全套 `dotnet test` 0 fail。
-
-**不阻塞 v2.1 发版**。v2.1 发版后立即启动。
-
-详细计划见 [stage8-expanded-mr-library-brainstorming.md](docs/superpowers/plans/2026-05-18-stage8-expanded-mr-library-brainstorming.md) + [...-plan.md](docs/superpowers/plans/2026-05-18-stage8-expanded-mr-library-plan.md)。
+> 本节原含「5 方程 × 4 程序类型 + 4 home-grown」的详细 phase 拆解；因定位放宽，
+> 细节已迁移并更新至上述 plans —— AGENTS.md 只保留路线图层面的高层描述与指针。

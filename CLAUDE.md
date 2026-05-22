@@ -5,6 +5,108 @@ captures the **non-obvious conventions** the codebase has settled on so new
 work fits in cleanly. For project intent and the staged plan, see
 [`AGENTS.md`](AGENTS.md). For build/test, see [`README.md`](README.md).
 
+## 项目状态概览
+
+> 路线图与分阶段计划见 [`AGENTS.md`](AGENTS.md)；本节只给冷启动 agent 一个全局快照。
+
+### 1. 目标
+
+为 MT 研究与工程社区提供一个**完整的系统级蜕变测试（System-level MT）平台与基线**
+—— 提供 MT 工作流、程序 / MR / 测试记录的 CRUD，以及 SUT、MR 识别方法、MR 有效性
+验证、测试用例生成方法的**快速接入与原型实验**。以元模式驱动的蜕变关系（MR）自动
+发现并执行 MT，检出科学计算软件缺陷。
+
+原则上，凡求解**具有显式数学物理方程**的程序皆可作为 SUT。方程从数学上分 ODE / PDE
+两类，平台从中选取代表性强、流传广、使用多的方程与程序（选型见
+[`docs/t3-program-selection.md`](docs/t3-program-selection.md)）；反应堆物理 5 个核心
+控制方程为优先锚定域。
+
+平台面向**科研场景**，聚焦缺陷检出与 MR 库建设；不自研项目管理类功能 —— 未来如有
+需要，以对接成熟工具（数据推送 / 交换）的方式实现，不重复造同质功能。
+
+### 2. 核心功能（分层）
+
+> T0 为核心；T1–T6 为围绕核心的功能层（次序经人工指定）。
+
+**T0 · 核心 —— 系统级 MT 流程**
+
+测试输入生成 → 衍生输入转换 → 执行 SUT 被测程序 → 验证源输出与衍生输出是否满足
+蜕变关系。实现为 System-MT 引擎 + Launcher facade（`ISystemMtMrLauncher` 单一入口）
++ LiteDB 持久化。**验收标准：流程端到端走通**，不以覆盖全部方程为准（覆盖见 T3）。
+
+**T1 · 直接支撑与操作入口**
+
+- **SUT 运行环境适配**：把核心第 3 步「执行 SUT」落地 —— 进程调用、超时、退出码、
+  工作目录等运行环境对接。*必要性：无适配则无 SUT 可执行，核心流程断在第 3 步。*
+- **输入 / 输出文件适配**：对输入、输出为非结构化文件的 SUT，提供文件解析、参数
+  映射、文件生成。*必要性：科学计算软件多以非结构化文件交互，是 SUT 可接入的前提。*
+- **同源异构程序差分测试**：两程序实现同一数学物理方程、但实现技术异构（数值模拟 /
+  概率 / 机器学习代理 / PINN），在相同 MR 下比对结果一致性（OpenMOC × OpenMC 即一对，
+  已检出一例疑似缺陷，待确认）。*必要性：跨异构实现的一致性偏离是检出科学计算缺陷
+  最有力的信号之一。*
+- **CRUD**：应用程序 / 数学物理方程 / 蜕变关系 / 基础算例 / 测试过程数据的增删改查。
+  *必要性：核心与各层的数据底座，需可维护。*
+- **WPF 客户端**：操作入口与页面导航。*必要性：人机交互载体。*
+
+**T2 · 可视化与报表**
+
+图表展示 + 4 端（PDF / Word / Excel / HTML）报告生成。*必要性：科研需要可读的
+图表与报告作为论文 / 评审材料。*
+
+**T3 · 覆盖**
+
+覆盖代表性的数学物理方程 —— 按 ODE / PDE 选取流传广、使用多的方程，每个方程至少
+对应一个可执行 MT 的 SUT；反应堆物理 5 个核心控制方程（boltzmann / diffusion /
+bateman / fourier / NS）为优先锚定子集。覆盖度量由 Coverage 子系统统计；选型见
+[`docs/t3-program-selection.md`](docs/t3-program-selection.md)。*必要性：方程维广度
+是 MT 基线的核心交付；当前仅 boltzmann 有成熟覆盖。*
+
+**T4 · MR 识别**
+
+把蜕变关系从 0 到 1 识别出来，可插拔 `IMRDiscoverer` 框架下三条技术路线 ——
+基于元模式的 meta-prompt 方法、multi-LLM 共识方法、语义因果图方法（从 SUT 的
+语义因果图 `scg.json` 挖 direct-cause / mediator / confounder 模式得候选 MR）。
+*必要性：核心第 4 步验证的对象就是 MR，没有 MR 核心无的放矢；「从 0 到 1」是
+MR 库建设的入口。*
+
+**T5 · 异常**
+
+MT 检出的违例进入异常调查工作流（查询 / 过滤 / 状态机 / 共性分析）；确认的缺陷
+封存入库，支持回放、缺陷定位、缺陷分类，并与「程序版本 × MR × 测试输入」三元组
+绑定。*必要性：检出只是第一步，封存才能复现、定位、归类，形成可追溯的缺陷资产。*
+
+**T6 · 变异**
+
+向 SUT 注入变异体、由 MR suite 去「杀」，统计杀死率 / 存活率 / 覆盖率 / 误报率，
+据此搜寻最小 MR 完备子集。已实现 campaign 矩阵 + 四项统计；语义 / 语法句法变异
+分型、等价变异体识别、最小完备子集搜寻规划中（见 §4）。*必要性：评估 MR 集的
+查错能力并据此去冗余。*
+
+### 3. 完成情况（已实现的主要功能）
+
+- **v2.1.0 / .1 / .2 已发布**；Stage 1-7 全部交付。
+- 已实现：System-MT 的 BDD 执行、输入生成与衍生输入推导、OpenMOC / OpenMC 接入、
+  批量执行 + 4 端报表、v2 的 BLL.Core 子系统群（Discovery / Anomaly / Mutation /
+  Coverage / Reporting 等）、multi-LLM 共识（60/60 真实跑通、100% accuracy）、
+  scenario→MR 命名统一。
+- cloud baseline ~560 测试 0 fail；Windows UAT 双轮 PASS。
+- polish 批次：HandyControl 移除、UAT runbook 对齐、Anomaly severity / category 分级。
+
+### 4. 尚待完善
+
+- **Stage 8 / v2.2 主线未启动** —— 5 方程 × 4 程序类型 × 5 元模式的 MR 库
+  （17 cells、84 候选 MR）。*必要性：这是论文核心交付，当前仅覆盖 boltzmann 方程
+  + 少量 MR；地基 5D 索引 schema（Phase 8.0）须先落地，否则后续工作无处挂载。*
+- **变异模块增强** —— 语义变异与语法 / 句法变异的分型生成、等价变异体识别、最小
+  MR 完备子集搜寻尚未实现。*必要性：Stage 8 将产出 84 候选 MR，需客观证明其检错
+  能力并剔除冗余；等价变异体若不识别会人为压低杀死率、污染有效性结论；最小完备
+  子集让 MT 以最少 MR 达到同等检错力、降低执行成本。*
+- **5 个 UAT UI 缺口** —— Dashboard 导航入口、HTML 报告内嵌查看等。*必要性：部分
+  后端能力已实现但 UI 上不可见，价值未释放。*
+- **DP-3 配置绑定** —— severity 阈值的 `appsettings` 绑定（WPF 侧）未接，现回退默认值。
+- **F11 m_adj 路径、第 5 个 SUT** —— 受外部依赖（OpenMOC 伴随模式、商业程序获取）
+  阻塞，被动监控中。
+
 ## Project topology
 
 | Project | Target framework | Where it runs | Notes |
@@ -220,6 +322,40 @@ All services are stateless and inject only IDAL repository interfaces +
 optional gateway abstractions (`ILlmGateway`, `MutationCellRunner`,
 `IProcessExecutor`). Tests inject fakes, prod injects LiteDB + real
 process / LLM.
+
+## 计划工作流（superpowers plan）
+
+`docs/superpowers/plans/` 下的实施计划，遵循以下**闭环**制订与维护 —— 流程对每个
+session 透明、可核验。
+
+### 闭环（4 步）
+
+1. **读上下文** —— `AGENTS.md`（路线图：当前 Stage、下一步）+ 顺指针读相关既有
+   plan + 本文件 §2 与各节约定（功能模型 T0–T6、硬约束）。
+2. **写 plan** —— 存 `docs/superpowers/plans/`（`YYYY-MM-DD-<topic>-plan.md`）；
+   含目标 & 验收标准、frontmatter「状态」字段；phase / 工时 / 决策点 / 不交付
+   **视需要**列。
+3. **执行**。
+4. **执行后回写** —— 更新 plan 对应 phase / 状态；**就地更新** `AGENTS.md` 对应
+   Stage 的交付记录（Stage 粒度，非逐 phase 追加）；若执行改动了路线图（新 Stage /
+   范围），一并更路线图层。
+
+### 验收准则（只列不与步骤重复的）
+
+- [ ] 所列事实（`file:line`、已实现 / 未实现判断）已**对当前分支核实**，非凭记忆。
+- [ ] `AGENTS.md` / plan / `CLAUDE.md` 三者无内容复制，只用指针互引。
+- [ ] 执行后 plan 与 `AGENTS.md` 状态已同步。
+
+### 文档职责与边界（唯一事实源，杜绝漂移）
+
+| 文档 | 职责（唯一拥有） | 边界（不放） |
+|---|---|---|
+| `CLAUDE.md` | 编码 / 协作约定、当前功能模型（§2 T0–T6） | 不放路线图、不放单次实施细节 |
+| `AGENTS.md` | 路线图、分阶段交付日志、指向 plan 的指针 | 不放 phase 级实施细节（指针引用） |
+| `docs/superpowers/plans/` | 单次工作的实施细节：phase / 工时 / 决策点 | 不放路线图（由 `AGENTS.md` 持有） |
+| `README.md` | 构建 / 测试入口 | — |
+
+四者互不复制内容，只用指针相互引用。
 
 ## Roadmap pointers
 
