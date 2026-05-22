@@ -8,4 +8,5 @@ public sealed record SystemMtResult(
     SystemMtAssertionResult Assertion,
     bool Passed,
     string FailureReason,
-    InputGenerationResult? InputGeneration = null);
+    InputGenerationResult? InputGeneration = null,
+    IReadOnlyList<InputSamplePoint>? InputSamples = null);

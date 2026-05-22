@@ -114,9 +114,12 @@ public sealed class SystemMtRunner
                 $"Configuration failure: unsupported assertion '{task.AssertionName}'. " +
                 $"Registered assertions: [{string.Join(", ", _assertions.Keys)}]");
 
+        var inputSamples = InputCaseReader.ReadSamples(
+            task.SourceCase.InputPath, followUpCase.InputPath);
+
         return new SystemMtResult(
             sourceRun, followUpRun, sourceOutput, followUpOutput, assertion,
-            assertion.Passed, assertion.FailureReason, generation);
+            assertion.Passed, assertion.FailureReason, generation, inputSamples);
     }
 
     private static SystemMtResult FailedBeforeRun(

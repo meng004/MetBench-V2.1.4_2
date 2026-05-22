@@ -37,7 +37,8 @@ public sealed class LiteDbSystemMtResultRepositoryTests : IDisposable
         string valueName = "k_eff",
         double sourceValue = 1.13,
         double followUpValue = 1.51,
-        InputGenerationResult? inputGeneration = null)
+        InputGenerationResult? inputGeneration = null,
+        IReadOnlyList<InputSamplePoint>? inputSamples = null)
     {
         var sourceRun = new CliRunResult(
             "source", 0, "stdout-source", string.Empty,
@@ -56,7 +57,32 @@ public sealed class LiteDbSystemMtResultRepositoryTests : IDisposable
             passed ? string.Empty : "MR violated");
         return new SystemMtResult(
             sourceRun, followUpRun, sourceOutput, followUpOutput, assertion,
-            passed, passed ? string.Empty : "MR violated", inputGeneration);
+            passed, passed ? string.Empty : "MR violated", inputGeneration, inputSamples);
+    }
+
+    private static IReadOnlyList<InputSamplePoint> SampleInputs() => new List<InputSamplePoint>
+    {
+        new() { Name = "initial.x0", SourceValue = 1.0, FollowUpValue = 2.0 },
+        new() { Name = "initial.v0", SourceValue = 0.5, FollowUpValue = 1.0 },
+    };
+
+    [Fact]
+    public void FromResult_projects_input_sample_points()
+    {
+        var record = SystemMtResultRecord.FromResult("mr", MakeResult(inputSamples: SampleInputs()));
+
+        Assert.Equal(2, record.InputSamples.Count);
+        Assert.Equal("initial.x0", record.InputSamples[0].Name);
+        Assert.Equal(1.0, record.InputSamples[0].SourceValue);
+        Assert.Equal(2.0, record.InputSamples[0].FollowUpValue);
+    }
+
+    [Fact]
+    public void FromResult_defaults_input_samples_to_empty_when_absent()
+    {
+        var record = SystemMtResultRecord.FromResult("mr", MakeResult());
+
+        Assert.Empty(record.InputSamples);
     }
 
     [Fact]
@@ -132,6 +158,23 @@ public sealed class LiteDbSystemMtResultRepositoryTests : IDisposable
         Assert.Equal("1.5", record.TransformationParameters!["factor"]);
         Assert.True(record.InputGenerationSucceeded);
         Assert.Equal("Scaled by 1.5", record.InputGenerationLog);
+    }
+
+    [Fact]
+    public async Task SaveAsync_then_GetAsync_roundtrips_input_samples()
+    {
+        using var repo = new LiteDbSystemMtResultRepository(_dbPath);
+        var id = await repo.SaveAsync("LotkaVolterraScaleGamma", MakeResult(inputSamples: SampleInputs()));
+
+        var record = await repo.GetAsync(id);
+
+        Assert.NotNull(record);
+        Assert.Equal(2, record!.InputSamples.Count);
+        Assert.Equal("initial.x0", record.InputSamples[0].Name);
+        Assert.Equal(1.0, record.InputSamples[0].SourceValue);
+        Assert.Equal(2.0, record.InputSamples[0].FollowUpValue);
+        Assert.Equal("initial.v0", record.InputSamples[1].Name);
+        Assert.Equal(1.0, record.InputSamples[1].FollowUpValue);
     }
 
     [Fact]

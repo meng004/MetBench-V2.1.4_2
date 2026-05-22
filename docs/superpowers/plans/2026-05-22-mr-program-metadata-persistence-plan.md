@@ -1,7 +1,8 @@
 # Plan — MR / 程序元信息持久化 + 相等断言
 
 > **日期**: 2026-05-22
-> **状态**: 执行中 —— P-A 相等断言 + P-C 元信息持久化 均已交付（2026-05-22）；P-B 待做
+> **状态**: ✅ 核心三 phase 全交付（2026-05-22）—— P-A 相等断言 + P-C 元信息持久化 +
+> P-B 运行记录增强。缩放等式 assertion / VM 接线为各 phase 待续项（见下）
 > **关联**: [`CLAUDE.md`](../../../CLAUDE.md) §2 · [`docs/t3-program-selection.md`](../../t3-program-selection.md) ·
 > [Stage 8 详细计划](2026-05-18-stage8-expanded-mr-library-plan.md) Phase 8.0（5D schema）
 
@@ -56,7 +57,7 @@ schema 是运行记录的关联底座 —— 先有 schema、再扩运行记录�
 |---|---|---|---|
 | **P-A** ✅ 相等断言 | `ApproxEqualAssertion`（绝对 + 相对合一容差）+ `EqualityThresholds` record + 7 测试。缩放等式（升 P1 MR）见 §4 后续 | ~1–2 天 | Cloud |
 | **P-C** ✅ 元信息持久化 | 方程 + MR 元信息 schema（实体 + DAL + seed catalog + 漂移守卫）。DP-3=(b) 独立层。BDD tag sync 留 Phase 8.0 | ~1 天 | Cloud |
-| **P-B** 运行记录增强 | `SystemMtResultRecord` / 持久化扩样本点级「输入 → 转换值 → 输出」三元组，关联 P-C 的 MR 元信息 | ~2–4 天 | Cloud |
+| **P-B** ✅ 运行记录增强 | `InputSamplePoint` + `InputCaseReader` + `SystemMtResultRecord.InputSamples` —— 样本点级「源输入 / 转换后输入」配对，与既有 output metrics 合成回放三元组 | ~1 天 | Cloud |
 
 P-A 独立、最先做（也解 P1 的 MP_mono→MP_inv 落差）。
 
@@ -112,11 +113,25 @@ P-A 独立、最先做（也解 P1 的 MP_mono→MP_inv 落差）。
 `App.xaml.cs` 注册 `ISystemMtMetadataRepository` + 启动时 `SystemMtMetadataCatalog.SeedAsync`。
 **留 Phase 8.0**：BDD `@mr:` tag sync、5D schema 的 SourceLevel / FailureCorrelation 维。
 
-### P-B 运行记录增强（~2–4 天）
+### P-B 运行记录增强 ✅ 已交付（2026-05-22）
 
-扩 `SystemMtResultRecord`（及 `LiteDbSystemMtResultRepository`）记录样本点级数据：
-输入样本点数、每个样本「源输入值 / 转换后输入值 / 输出变量值」三元组，并关联 P-C
-建立的 MR 元信息。用于回归测试：同 MR 同输入再跑，逐样本点比对。
+> **已交付**（TDD 红→绿，4 cycle）：10 个新测试，全套 592 passed。
+
+落点（`MetBench_BLL.Core/SystemMT/`）：
+
+- **`InputSamplePoint`** —— 一个输入变量在源 / 衍生两个用例间的配对：`Name`（点路径）/
+  `SourceValue`（源输入值）/ `FollowUpValue`（转换后输入值）。
+- **`InputCaseReader.ReadSamples(sourcePath, followUpPath)`** —— 读源 / 衍生输入用例文件，
+  把数值叶子展平配对（嵌套对象点路径、数组带位序下标、非数值叶子跳过、根标量入
+  `value`）。best-effort：文件缺失 / 非 JSON → 空列表，绝不因记录增强而让 run 失败。
+- **`SystemMtResult.InputSamples`** —— `SystemMtRunner.RunAsync` 在成功路径上调
+  `InputCaseReader` 捕获，挂到 result。
+- **`SystemMtResultRecord.InputSamples`**（`List<InputSamplePoint>`）—— `FromResult` 投影；
+  `LiteDbSystemMtResultRepository` 自动映射持久化。
+
+「输入 → 转换值 → 输出」三元组：输入 / 转换值由 `InputSamples` 持有，输出由记录既有的
+`SourceMetrics` / `FollowUpMetrics` 持有 —— 合起来即样本点级回放比对的数据底座。「输入
+样本点数」= `InputSamples.Count`。MR 元信息关联经 `MrName` ↔ `MrMetadata.MrId`。
 
 ---
 

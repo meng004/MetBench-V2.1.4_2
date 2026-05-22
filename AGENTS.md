@@ -236,17 +236,18 @@ NOETHER 元模式）。术语见 [`docs/GLOSSARY.md`](docs/GLOSSARY.md)。
 **交付状态**：v2.1.0/.1/.2 已发布；polish 批次 Anomaly severity/category 分级已并入
 main（PR #83）。Stage 8 主线：地基 5D tag schema（Phase 8.0）待落地；代表性 SUT 接入
 计划 **P1 已交付**（decay_chain / damped_oscillator / lotka_volterra 三个 ODE SUT +
-launcher catalog，2026-05-22）。MR/程序元信息持久化计划 **P-A + P-C 已交付**
+launcher catalog，2026-05-22）。MR/程序元信息持久化计划 **P-A + P-C + P-B 全交付**
 （2026-05-22）—— P-A：`ApproxEqual` 等式断言 + `EqualityThresholds`；P-C：方程 / MR
 元信息 schema（`EquationMetadata` / `MrMetadata` + `LiteDbSystemMtMetadataRepository`
-+ 5 方程 8 MR seed catalog + 漂移守卫）；P-B 运行记录增强待做。
++ 5 方程 8 MR seed catalog + 漂移守卫）；P-B：运行记录扩样本点级输入配对
+（`InputSamplePoint` / `InputCaseReader` + `SystemMtResultRecord.InputSamples`）。
 
 **暂缓**（Stage 9+ 候）：BNCT 硼中子放疗、故障注入 V3、论文 writeup。
 
 **详细计划**（实施细节、phase 分解、工时、决策点以这些文档为准）：
 - [下一阶段开发计划](docs/superpowers/plans/2026-05-21-next-stage-development-plan.md) —— 按 T0–T6 的总排期（**当前**）
 - [代表性 SUT 接入计划](docs/superpowers/plans/2026-05-21-representative-sut-onboarding-plan.md) —— SUT 选型已放宽、home-grown 取消（**当前**）
-- [MR/程序元信息持久化计划](docs/superpowers/plans/2026-05-22-mr-program-metadata-persistence-plan.md) —— P-A/P-C 已交付，P-B 待做（**当前**）
+- [MR/程序元信息持久化计划](docs/superpowers/plans/2026-05-22-mr-program-metadata-persistence-plan.md) —— P-A/P-C/P-B 核心三 phase 全交付
 - 程序选型：[`docs/t3-program-selection.md`](docs/t3-program-selection.md)
 - [meta-prompt MR 识别引擎计划](docs/superpowers/plans/2026-05-18-meta-prompt-mr-discovery-plan.md)
 - [Stage 8 MR 库原始详细计划](docs/superpowers/plans/2026-05-18-stage8-expanded-mr-library-plan.md) —— 定位放宽前所写，其「5 方程 + home-grown」部分以上述「当前」文档为准

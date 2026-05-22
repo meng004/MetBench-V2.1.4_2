@@ -50,6 +50,12 @@ public sealed class SystemMtRunnerGeneratedFollowupTests
         Assert.True(result.InputGeneration!.Succeeded);
         Assert.Equal(4, result.Assertion.SourceValue);
         Assert.Equal(12, result.Assertion.FollowUpValue);
+
+        // P-B: the runner captures the source / transformed input pair.
+        Assert.NotNull(result.InputSamples);
+        var sample = Assert.Single(result.InputSamples!);
+        Assert.Equal(4.0, sample.SourceValue);
+        Assert.Equal(12.0, sample.FollowUpValue);
     }
 
     [Fact]

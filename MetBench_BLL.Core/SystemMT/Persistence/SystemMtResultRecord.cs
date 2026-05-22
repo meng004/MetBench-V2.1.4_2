@@ -65,6 +65,15 @@ public sealed class SystemMtResultRecord
     public string? InputGenerationLog { get; set; }
 
     /// <summary>
+    /// Sample-point-level input record: each input leaf paired across the
+    /// source and follow-up (transformed) cases. Together with
+    /// <see cref="SourceMetrics"/> / <see cref="FollowUpMetrics"/> this gives a
+    /// run the "input → transformed input → output" triple needed to replay
+    /// and diff the run for regression testing.
+    /// </summary>
+    public List<InputSamplePoint> InputSamples { get; set; } = new();
+
+    /// <summary>
     /// Project a runner result into the persistable summary shape. The
     /// repository fills <see cref="Id"/> and <see cref="RunAt"/> on Save.
     /// </summary>
@@ -102,6 +111,9 @@ public sealed class SystemMtResultRecord
                 : new Dictionary<string, string>(result.InputGeneration.Transformation.Parameters),
             InputGenerationSucceeded = result.InputGeneration?.Succeeded,
             InputGenerationLog = result.InputGeneration?.Log,
+            InputSamples = result.InputSamples is null
+                ? new List<InputSamplePoint>()
+                : new List<InputSamplePoint>(result.InputSamples),
         };
     }
 }
