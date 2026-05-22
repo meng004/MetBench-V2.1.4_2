@@ -5,6 +5,156 @@ captures the **non-obvious conventions** the codebase has settled on so new
 work fits in cleanly. For project intent and the staged plan, see
 [`AGENTS.md`](AGENTS.md). For build/test, see [`README.md`](README.md).
 
+## 行为约束（Behavioral Constraints — 最高优先级）
+
+> 本节为 AI agent 与贡献者的强制行为约束，**凌驾于本文件其余所有约定**。
+> 与下文任何条目冲突时，以本节为准。
+
+### 核心规则（中文）
+
+#### 1. 先读再写
+
+修改前必须先阅读相关文件、导出接口、调用方和现有约定。不得重复已有逻辑，不得凭感觉新增相似实现。
+
+#### 2. 最小修改
+
+只修改完成目标所必需的内容。不得顺手重构、扩大范围、引入投机性功能或不必要抽象。
+
+#### 3. 确定性逻辑交给代码
+
+AI 可用于分类、摘要、草拟、解释等语言任务。路由、重试、状态处理、校验、权限判断等确定性逻辑必须由代码实现，不得交给模型判断。
+
+#### 4. 真实验证
+
+验证必须覆盖真实业务意图，而不是只验证表面现象。测试应能在关键逻辑错误时失败，否则该测试无效。
+
+#### 5. 冲突挑明
+
+遇到规则、实现或风格冲突时，必须明确指出冲突，选择其中一条路径，并把另一条标记为待清理项。禁止混合两套互相矛盾的方案。
+
+#### 6. 显式报错
+
+不得静默跳过、吞掉异常、掩盖不确定性或粉饰部分失败。跳过项、失败项、不确定假设和未验证内容必须明确说明。
+
+### Core Rules (English)
+
+#### 1. Read Before Writing
+
+Before making changes, read the relevant files, exported interfaces, call sites, and existing conventions. Do not duplicate existing logic or add similar implementations based on guesswork.
+
+#### 2. Minimal Changes
+
+Change only what is necessary to achieve the goal. Do not perform opportunistic refactoring, expand scope, add speculative features, or introduce unnecessary abstractions.
+
+#### 3. Deterministic Logic Belongs in Code
+
+AI may be used for language tasks such as classification, summarization, drafting, and explanation. Deterministic logic such as routing, retries, status handling, validation, and permission checks must be implemented in code, not delegated to model judgment.
+
+#### 4. Validate Real Intent
+
+Validation must check the real business intent, not surface-level behavior. A test is useful only if it fails when the important logic is wrong.
+
+#### 5. Expose Conflicts
+
+When rules, implementations, or styles conflict, state the conflict clearly, choose one path, and mark the other as a cleanup item if needed. Do not mix incompatible approaches into a compromise implementation.
+
+#### 6. Fail Explicitly
+
+Do not silently skip work, swallow errors, hide uncertainty, or disguise partial failure. Skipped items, failed items, uncertain assumptions, and unverified results must be reported clearly.
+
+---
+
+### §0. 不允许只说不做（最高优先级，ANTI-CLAIM-WITHOUT-ACTION）
+
+> 任何回复中出现以下表述时，必须 *在同一回合内* 真实执行对应工具调用并将证据回显给用户。
+
+#### §0.1 触发表述（中英文均触发）
+
+- **中文**：`已记住`、`已保存`、`已添加`、`已修改`、`已写入`、`已更新`、`已删除`、`已重命名`、`已提交`
+- **英文**：`I've noted`、`I've saved`、`I'll remember`、`I've added`、`I've modified`、`I've updated`、`I've committed`、`I've removed`
+
+#### §0.2 强制验证规则
+
+| 触发表述            | 必须执行的验证                                               |
+| ------------------- | ------------------------------------------------------------ |
+| "已修改文件 X"      | 紧接 `Read` 工具调用，显示修改后的相关行段（≥ 3 行上下文）   |
+| "已记住偏好 Y"      | 紧接 `Write` 工具调用，写入 `<MEMORY_DIR>/feedback_*.md` 并更新 `MEMORY.md` 索引 |
+| "已添加任务 Z"      | 紧接 `TaskCreate` 工具调用 / 更新 `NEXT_STEPS.md`，并在响应中给出 task ID |
+| "已提交 commit ABC" | 紧接 `Bash git log --oneline -1` 显示实际 commit hash        |
+| "已删除 / 已移除"   | 紧接 `Bash ls` 或 `grep` 验证目标已消失                      |
+| "已重命名 X → Y"    | 紧接 `Bash ls` 验证两个名字的存在状态                        |
+
+#### §0.3 禁止行为
+
+1. **只说不做**：声称"已记住"但未写入 memory 文件
+2. **假执行**：声称"已修改"但实际未调用 Edit / Write 工具
+3. **推迟**：用"稍后会..."、"将会..."替代立即执行
+4. **模糊化**：用"已处理"、"已完成"等不可验证的笼统表述
+
+#### §0.4 例外
+
+仅当所述操作 *已在前序回合中以工具调用形式完成*，且本回合只是回顾汇报时，可免重复执行——但必须以 `（前序 commit ABC / Edit at L123 已完成）` 之类的引用替代裸声明。
+
+---
+
+### §0.5. 禁止自发生成与自发改写（ANTI-UNREQUESTED-EDIT，次高优先级）
+
+> 仅次于 §0。AI 的默认倾向是"顺便优化"——修一处 bug 时重写整段、加符号时改周边散文、打包时"整理"未被提到的文件。本节全部禁止。
+
+#### §0.5.1 核心原则
+
+只做被要求做的事，不多做一分。每次 Edit 工具调用的 `old_string` 必须精确定位被要求修改的位置，`new_string` 只改 delta，不引入任何其他变化。
+
+#### §0.5.2 数字前缀术语零容忍
+
+任何形如 `\b\d+[-–]\w+` 的术语（如 "5-MP"、"12-PUT"、"60-cell"、"3-layer"、"two-stage"）：
+
+- **必须逐字来自原文或被引用文献**，不得由 AI 自行发明或"合理推断"。
+
+- AI 生成的数字前缀术语往往听起来合理但与实际不符，一旦进入论文将造成事实错误。
+
+- **发现即还原**：输出中出现原文不存在的此类术语，立即指出并还原为原文措辞。
+
+- 投稿前 grep 自检（应可逐一对照原文核实，除已记录在案的合法术语外）：
+
+  ```bash
+  grep -oP '\b\d+[-–]\w+' <PAPER_SOURCE> | sort -u
+  ```
+
+#### §0.5.3 禁止自发改写（只改被指定位置）
+
+| 被要求的操作         | 允许范围       | 禁止行为                           |
+| -------------------- | -------------- | ---------------------------------- |
+| 修复 L123 的符号错误 | 仅改 L123      | 重写 L120–L130 整段"以更清晰"      |
+| 修正拼写错误         | 仅改拼写目标   | "顺便"修改周边语序或标点           |
+| 修复 LaTeX overfull  | 仅改溢出行     | 重写整个公式块或"优化"换行         |
+| 更新一处数字         | 仅改该数字     | 更新其他"看起来也过时"的数字       |
+| 打包 zip             | 仅打包指定文件 | 删除 / 移动 / 重命名未被提及的文件 |
+
+#### §0.5.4 禁止自发添加内容
+
+未被要求时**一律不添加**：额外的 caveat / disclaimer / limitation 句、"This is important because…" 类解释、新的 transition sentence（"Moreover," / "In addition,"）、注释 / TODO / 脚注、新的参考文献条目、任何新的章节 / 小节 / bullet point。
+
+#### §0.5.5 禁止自发删除内容
+
+未被明确要求删除时**一律保留**：已有段落 / 句子 / bullet point、已有 `\cite{}` 引用、已有 LaTeX 注释（`% ...`）、已有图 / 表 / 附录。
+
+#### §0.5.6 违规自检
+
+每次完成编辑后对照以下清单：
+
+```
+□ 改动范围是否超出被要求的位置？
+□ 是否引入了原文中不存在的术语（含数字前缀术语）？
+□ 是否删除了任何未被要求删除的原有内容？
+□ 是否添加了任何原文中不存在的句子或段落？
+□ 数字（效应量 / p 值 / 计数 / 百分比）是否逐字来自数据源？
+```
+
+任一项"是"→ 立即还原多余改动，仅重新执行被指定的操作。
+
+---
+
 ## 项目状态概览
 
 > 路线图与分阶段计划见 [`AGENTS.md`](AGENTS.md)；本节只给冷启动 agent 一个全局快照。
