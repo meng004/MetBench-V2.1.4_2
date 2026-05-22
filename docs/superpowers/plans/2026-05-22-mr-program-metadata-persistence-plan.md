@@ -1,7 +1,7 @@
 # Plan — MR / 程序元信息持久化 + 相等断言
 
 > **日期**: 2026-05-22
-> **状态**: 执行中 —— P-A（不变性 equality assertion）已交付（2026-05-22）
+> **状态**: 执行中 —— P-A 相等断言 + P-C 元信息持久化 均已交付（2026-05-22）；P-B 待做
 > **关联**: [`CLAUDE.md`](../../../CLAUDE.md) §2 · [`docs/t3-program-selection.md`](../../t3-program-selection.md) ·
 > [Stage 8 详细计划](2026-05-18-stage8-expanded-mr-library-plan.md) Phase 8.0（5D schema）
 
@@ -38,11 +38,12 @@
   变换 `factor`。但 `IMrAssertion.Evaluate(valueName, src, flw)` 当前签名拿不到变换
   参数。推荐：先做不变性 equality（abs/rel 两模式）；缩放等式需扩 `IMrAssertion`
   签名或引入「期望比值」参数 —— 列为 P-A 的子项。
-- **DP-3 元信息 schema 落点（关键张力）** —— System-MT 的 MR catalog 目前是
-  **硬编码 C#**（`SystemMtMrLauncher.BuildMrCatalog`）。元信息要持久化，要么 (a) catalog
-  转 data / 每 SUT 一份 manifest（配置优先），要么 (b) 元信息独立持久化、与 blueprint
-  关联。推荐 **(a)**，与 Phase 8.0 的 5D schema 合流 —— 否则「硬编 catalog + 持久化
-  元信息」两套并存必漂移。
+- **DP-3 元信息 schema 落点（关键张力）** —— ✅ **已定（user 2026-05-22「走 b」）**。
+  System-MT 的 MR catalog 仍是硬编码 C#（`SystemMtMrLauncher.BuildMrCatalog`）。
+  **决定走 (b)**：元信息作**独立持久化层**，按 MR id / EquationKey 与 catalog 关联，
+  不改写 catalog。「两套并存漂移」风险由 `SystemMtMetadataCatalogTests` 的漂移守卫
+  消解 —— 它断言 seed 的 MR id 集与 launcher catalog 的 id 集**严格相等**，新增
+  catalog MR 而漏配元信息即编译期 / 测试期失败。
 
 ---
 
@@ -54,7 +55,7 @@ schema 是运行记录的关联底座 —— 先有 schema、再扩运行记录�
 | Phase | 内容 | 工作量 | Track |
 |---|---|---|---|
 | **P-A** ✅ 相等断言 | `ApproxEqualAssertion`（绝对 + 相对合一容差）+ `EqualityThresholds` record + 7 测试。缩放等式（升 P1 MR）见 §4 后续 | ~1–2 天 | Cloud |
-| **P-C** 元信息持久化 | 方程 + MR 元信息 schema（实体 + DAL + BDD tag sync）—— **并入 Phase 8.0 5D schema** | ~1–2 周 | Cloud |
+| **P-C** ✅ 元信息持久化 | 方程 + MR 元信息 schema（实体 + DAL + seed catalog + 漂移守卫）。DP-3=(b) 独立层。BDD tag sync 留 Phase 8.0 | ~1 天 | Cloud |
 | **P-B** 运行记录增强 | `SystemMtResultRecord` / 持久化扩样本点级「输入 → 转换值 → 输出」三元组，关联 P-C 的 MR 元信息 | ~2–4 天 | Cloud |
 
 P-A 独立、最先做（也解 P1 的 MP_mono→MP_inv 落差）。
@@ -86,11 +87,30 @@ P-A 独立、最先做（也解 P1 的 MP_mono→MP_inv 落差）。
 - 缩放等式（`flw ≈ k·src`）形态见 DP-2 —— 需接口决策，可作 P-A 子项或单列。
 - TDD：边界值、abs/rel 两模式、`src≈0` 时相对模式退化守卫。
 
-### P-C 元信息持久化（~1–2 周，并入 Phase 8.0）
+### P-C 元信息持久化 ✅ 已交付（2026-05-22）
 
-- **程序元信息**：方程名称、符号系统、参数说明。
-- **MR 元信息**：参数符号、物理含义、取值范围、输入转换关系、输出关系、比较类型。
-- 落点见 DP-3 —— 推荐 catalog 转 manifest / 与 5D schema 合流。本 Phase 须先定 DP-3。
+> **已交付**（TDD 红→绿，3 cycle）：DP-3 走 (b) 独立持久化层。13 个新测试，全套 582 passed。
+
+落点（`MetBench_BLL.Core/SystemMT/Metadata/`）：
+
+- **`EquationMetadata`**（程序元信息）—— `EquationKey`（业务键）/ `Name` / `CanonicalForm` /
+  `SymbolSystem` / `Parameters`（`EquationParameter` = 符号 + 说明 + 单位）。
+- **`MrMetadata`**（MR 元信息）—— `MrId`（= catalog `MrSummary.Id`）/ `EquationKey`（关联方程）/
+  `PhysicalMeaning` / `InputTransformation` 输入转换关系 / `OutputRelation` 输出关系 /
+  `ComparisonType` 比较类型 / `Parameters`（`MrParameter` = 符号 + 物理含义 + 取值范围）。
+- **`MrComparisonType`** 枚举 —— `Ordinal`（单调序，当前 8 条 catalog MR 全是此型）/
+  `Absolute` / `Relative`（两种相等容差模式，留给 DP-2 延后的缩放等式 MR）。
+- **`ISystemMtMetadataRepository`** + **`LiteDbSystemMtMetadataRepository`**（`MetBench_DAL/`）——
+  upsert（按业务键幂等）/ get / list，唯一索引护键。沿用 `LiteDbSystemMtResultRepository`
+  的私有 `BsonMapper` + 双构造器（connectionString / `ILiteDatabase`）模式。
+- **`SystemMtMetadataCatalog`** —— 5 方程（neutron-transport / heat-equation-1d / bateman /
+  damped-oscillator / lotka-volterra）+ 8 MR 的 seed 数据 + `SeedAsync`（幂等）。
+- **漂移守卫**：`SystemMtMetadataCatalogTests` 断言 seed MR id 集 ≡ launcher catalog id 集。
+
+**待续（VM）**：生产 DI 接线 —— 三个 System-MT 仓储（result / metadata）若指向同一
+`.Litedb` 文件需共享 `ILiteDatabase` 句柄（direct 模式独占锁），或 metadata 用独立文件；
+`App.xaml.cs` 注册 `ISystemMtMetadataRepository` + 启动时 `SystemMtMetadataCatalog.SeedAsync`。
+**留 Phase 8.0**：BDD `@mr:` tag sync、5D schema 的 SourceLevel / FailureCorrelation 维。
 
 ### P-B 运行记录增强（~2–4 天）
 
