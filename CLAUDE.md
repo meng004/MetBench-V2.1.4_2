@@ -335,8 +335,11 @@ session 透明、可核验。
 3. **读本文件 §2 + 各节约定** —— 当前功能模型（T0–T6）与硬约束。
 4. **写 plan** —— 存 `docs/superpowers/plans/`，命名 `YYYY-MM-DD-<topic>-plan.md`。
 5. **执行**。
-6. **回写** —— 若计划改动路线图（新 Stage / 范围 / 状态），回写 `AGENTS.md`（只更
-   路线图层、不复制 plan 细节）；执行完更新 plan 的「状态」字段。
+6. **执行后标记（必做）** —— 每完成一次执行（一个 phase 或一份 plan），**同时标记
+   两处**：① **plan 文档** —— 更新对应 phase / plan 状态（phase 勾 ✅、frontmatter
+   「状态」字段）；② **`AGENTS.md`** —— 对应 Stage 的交付记录加 / 更新一行（轻量：
+   交付内容 + PR / commit 号）。若执行还改动了路线图（新 Stage / 范围），一并回写
+   路线图层（不复制 plan 细节）。
 
 ### 验收准则（每个 plan 须满足）
 
@@ -344,7 +347,8 @@ session 透明、可核验。
 - [ ] frontmatter 有「状态」字段：draft / approved / 执行中 / 已交付。
 - [ ] 所列事实（`file:line`、已实现 / 未实现判断）已**对当前分支核实**，非凭记忆。
 - [ ] 若改动路线图 → `AGENTS.md` 已回写（指针层，无细节复制）。
-- [ ] 执行完成 → plan「状态」改为已交付；`AGENTS.md` 对应 Stage 的交付记录已更新。
+- [ ] **每次执行后**（必做）→ plan 对应 phase / 状态已标记；`AGENTS.md` 对应 Stage
+  交付记录已加 / 更新一行。
 
 ### 唯一事实源（杜绝漂移）
 
