@@ -240,7 +240,9 @@ launcher catalog，2026-05-22）。MR/程序元信息持久化计划 **P-A + P-C
 （2026-05-22）—— P-A：`ApproxEqual` 等式断言 + `EqualityThresholds`；P-C：方程 / MR
 元信息 schema（`EquationMetadata` / `MrMetadata` + `LiteDbSystemMtMetadataRepository`
 + 5 方程 8 MR seed catalog + 漂移守卫）；P-B：运行记录扩样本点级输入配对
-（`InputSamplePoint` / `InputCaseReader` + `SystemMtResultRecord.InputSamples`）。
+（`InputSamplePoint` / `InputCaseReader` + `SystemMtResultRecord.InputSamples`）。该计划的
+**缩放等式 assertion**（`flw≈k·src`，需扩 `IMrAssertion` 签名，升 P1 的 3 条齐次 MR 由
+MP_mono 到 MP_inv）由 DP-2 转入本 Stage MR 库工作。
 
 **暂缓**（Stage 9+ 候）：BNCT 硼中子放疗、故障注入 V3、论文 writeup。
 
