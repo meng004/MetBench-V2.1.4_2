@@ -1,0 +1,12 @@
+{
+  "initial": {
+    "x0": 1.0,
+    "v0": 0.0
+  },
+  "params": {
+    "omega": 2.0,
+    "zeta": 0.1,
+    "t_final": 20.0,
+    "num_steps": 4000
+  }
+}

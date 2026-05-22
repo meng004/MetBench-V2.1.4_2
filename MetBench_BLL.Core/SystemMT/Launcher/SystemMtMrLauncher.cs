@@ -354,6 +354,72 @@ public sealed class SystemMtMrLauncher : ISystemMtMrLauncher
             PythonExecutable: options.SystemPython,
             WorkRootName: "MetBenchHeatEq",
             Timeout: TimeSpan.FromSeconds(60));
+
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "decay-chain-scale-initial",
+                DisplayName: "Decay chain — ScaleInitial (linearity)",
+                SutName: "decay-chain",
+                TransformationName: "ScaleInitial",
+                AssertionName: "GreaterThan",
+                ValueName: "N_C_final",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "The 3-nuclide Bateman decay chain A→B→C is linear in the initial " +
+                    "quantities. Scaling every initial N by factor > 1 must scale the " +
+                    "accumulated end-nuclide N_C_final by the same factor.",
+                MrFamily: "Bateman.Scaling.Initial"),
+            SampleCaseRelativePath: Path.Combine("decay_chain", "sample", "three_nuclide.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain_input_adapter.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain_output_adapter.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchDecayChain",
+            Timeout: TimeSpan.FromSeconds(60));
+
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "damped-oscillator-scale-state",
+                DisplayName: "Damped oscillator — ScaleInitialState (linearity)",
+                SutName: "damped-oscillator",
+                TransformationName: "ScaleInitialState",
+                AssertionName: "GreaterThan",
+                ValueName: "max_abs_displacement",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "The damped harmonic oscillator is linear and homogeneous in the " +
+                    "initial state (x0, v0). Scaling the initial state by factor > 1 must " +
+                    "scale the peak absolute displacement by the same factor.",
+                MrFamily: "Oscillator.Scaling.InitialState"),
+            SampleCaseRelativePath: Path.Combine("damped_oscillator", "sample", "underdamped.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "damped_oscillator", "damped_oscillator.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "damped_oscillator", "damped_oscillator_input_adapter.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "damped_oscillator", "damped_oscillator_output_adapter.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchDampedOsc",
+            Timeout: TimeSpan.FromSeconds(60));
+
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "lotka-volterra-scale-gamma",
+                DisplayName: "Lotka-Volterra — ScaleGamma (mean-prey identity)",
+                SutName: "lotka-volterra",
+                TransformationName: "ScaleGamma",
+                AssertionName: "GreaterThan",
+                ValueName: "mean_prey",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "By the Lotka-Volterra time-average identity ⟨prey⟩ = gamma / delta, " +
+                    "scaling the predator death rate gamma by factor > 1 must increase " +
+                    "the time-averaged prey population mean_prey.",
+                MrFamily: "LotkaVolterra.Scaling.Gamma"),
+            SampleCaseRelativePath: Path.Combine("lotka_volterra", "sample", "classic.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "lotka_volterra", "lotka_volterra.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "lotka_volterra", "lotka_volterra_input_adapter.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "lotka_volterra", "lotka_volterra_output_adapter.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchLotkaVolterra",
+            Timeout: TimeSpan.FromSeconds(60));
     }
 
     private sealed record MrBlueprint(

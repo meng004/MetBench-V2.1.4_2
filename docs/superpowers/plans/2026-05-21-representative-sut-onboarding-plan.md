@@ -1,7 +1,7 @@
 # Plan — 代表性 SUT 接入计划（工作量从小到大）
 
 > **日期**: 2026-05-21
-> **状态**: 待 user 审定
+> **状态**: 执行中 —— P1 已交付（2026-05-22）
 > **关联**: [`docs/t3-program-selection.md`](../../t3-program-selection.md)（选型依据）·
 > [`CLAUDE.md`](../../../CLAUDE.md) §2 T3 ·
 > [下一阶段开发计划](2026-05-21-next-stage-development-plan.md)（本计划细化其 T3 部分）
@@ -26,7 +26,7 @@ ODE / PDE 方程，把对应**开源求解器程序与数据集接入为 SUT**�
 
 | Phase | 内容 | 新增 SUT | 工作量 | 关键成本 |
 |---|---|---|---|---|
-| **P1** | scipy ODE SUTs | 衰变链 / 阻尼振子 / Lotka-Volterra | ~1.5–2 天 | 每个是小 Python 脚本，SUT 模式现成（仿 `projectile`） |
+| **P1** ✅ | ODE SUTs（stdlib RK4） | decay_chain / damped_oscillator / lotka_volterra（已接入 catalog） | ~1.5–2 天 | 每个是小 Python 脚本，SUT 模式现成（仿 `heat_equation`） |
 | **P2** | FEniCS PDE SUTs | 热传导 / 扩散-反应 / Poisson / 波动 | ~4–6 天 | 首个 FEniCS 接入（装 + SUT runner + 文件适配）；后续每方程便宜 |
 | **P3** | Clawpack PDE SUTs | 对流 / Burgers | ~3–4 天 | Clawpack 接入 + 2 个脚本 |
 | **P4** | DeepXDE PINN SUTs | 上述方程的 PINN 形态 | ~1 周 | 一个 DeepXDE runner + 逐方程 PINN 脚本 + 准入验证 |
@@ -40,11 +40,19 @@ P2 / P3 并行（若有第二人手）。
 
 ## 3. 各 Phase 详情
 
-### P1 — scipy ODE SUTs（~1.5–2 天，最小）
+### P1 — ODE SUTs ✅ 已交付（2026-05-22）
 
-衰变链（Bateman）、阻尼振子、Lotka-Volterra 各写一个 `scipy.integrate.solve_ivp`
-Python SUT 脚本 + 输入/输出适配，纳入 `SUT/`。SUT 接入模式已由 `projectile` /
-`heat_equation` 立好，三者照搬即可。**最先做**：单个成本最低、零新依赖（scipy 已在）。
+衰变链（`SUT/decay_chain`）、阻尼振子（`SUT/damped_oscillator`）、Lotka-Volterra
+（`SUT/lotka_volterra`）三个 ODE SUT，各含 runner + 输入/输出适配 + 样例算例，并接入
+launcher catalog（各一条 `MrBlueprint`）：
+
+- `decay_chain` — ScaleInitial（Bateman 链线性；N_C_final 翻倍验证 ✓）
+- `damped_oscillator` — ScaleInitialState（线性；max_abs_displacement 翻倍验证 ✓）
+- `lotka_volterra` — ScaleGamma（LV 恒等式 ⟨prey⟩=γ/δ；mean_prey 单调增验证 ✓）
+
+**实现说明**：原计划用 `scipy.integrate.solve_ivp`，实际改用 **stdlib RK4**（零依赖，
+与 `heat_equation` 一致，避免 SUT 运行 Python 缺 scipy 的部署风险）。验证：3 SUT 直接
+调用 + MR 成立；catalog 5→8，全套 `dotnet test` 559 passed / 4 skipped / 0 failed。
 
 ### P2 — FEniCS PDE SUTs（~4–6 天）
 
