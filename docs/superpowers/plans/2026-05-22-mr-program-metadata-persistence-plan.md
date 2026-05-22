@@ -1,7 +1,7 @@
 # Plan — MR / 程序元信息持久化 + 相等断言
 
 > **日期**: 2026-05-22
-> **状态**: draft（待 user 审定）
+> **状态**: 执行中 —— P-A（不变性 equality assertion）已交付（2026-05-22）
 > **关联**: [`CLAUDE.md`](../../../CLAUDE.md) §2 · [`docs/t3-program-selection.md`](../../t3-program-selection.md) ·
 > [Stage 8 详细计划](2026-05-18-stage8-expanded-mr-library-plan.md) Phase 8.0（5D schema）
 
@@ -53,7 +53,7 @@ schema 是运行记录的关联底座 —— 先有 schema、再扩运行记录�
 
 | Phase | 内容 | 工作量 | Track |
 |---|---|---|---|
-| **P-A** 相等断言 | `IMrAssertion` 新增 `ApproxEqual`（绝对 / 相对两模式）+ TDD；阈值经 `appsettings.json` 配置；P1 的 3 条 MR 升 MP_inv | ~1–2 天 | Cloud |
+| **P-A** ✅ 相等断言 | `ApproxEqualAssertion`（绝对 + 相对合一容差）+ `EqualityThresholds` record + 7 测试。缩放等式（升 P1 MR）见 §4 后续 | ~1–2 天 | Cloud |
 | **P-C** 元信息持久化 | 方程 + MR 元信息 schema（实体 + DAL + BDD tag sync）—— **并入 Phase 8.0 5D schema** | ~1–2 周 | Cloud |
 | **P-B** 运行记录增强 | `SystemMtResultRecord` / 持久化扩样本点级「输入 → 转换值 → 输出」三元组，关联 P-C 的 MR 元信息 | ~2–4 天 | Cloud |
 
@@ -63,7 +63,17 @@ P-A 独立、最先做（也解 P1 的 MP_mono→MP_inv 落差）。
 
 ## 4. 各 Phase 详情
 
-### P-A 相等断言（~1–2 天）
+### P-A 相等断言 ✅ 已交付（2026-05-22）
+
+> **已交付**：`EqualityThresholds` record（atol=1e-5 / rtol=0.05 + `.Default`）+
+> `ApproxEqualAssertion`（`IMrAssertion`，numpy-isclose 风格合一容差 `|flw−src| ≤
+> atol+rtol·|src|`）+ 7 个 TDD + 注册进 launcher assertion 集。全套 566 passed。
+> **本次只做不变性形态**（`flw ≈ src`，MP_inv 不变性 MR）。
+> **后续**：缩放等式（`flw ≈ k·src`，升 P1 的 3 条齐次 MR 到 MP_inv）需给
+> `IMrAssertion.Evaluate` 传变换 factor —— 见 DP-2，作 P-A 后续子项单做。
+> **待续（VM）**：`appsettings.json` 的 `EqualityThresholds` 段绑定（同 DP-3 模式）。
+
+设计参考（已实现）：
 
 `MetBench_BLL.Core/SystemMT/Assertions/` 下新增 equality assertion，实现 `IMrAssertion`：
 
