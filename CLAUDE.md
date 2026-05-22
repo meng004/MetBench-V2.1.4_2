@@ -328,37 +328,34 @@ process / LLM.
 `docs/superpowers/plans/` 下的实施计划，遵循以下**闭环**制订与维护 —— 流程对每个
 session 透明、可核验。
 
-### 闭环
+### 闭环（4 步）
 
-1. **读 [`AGENTS.md`](AGENTS.md)** —— 路线图锚点：当前 Stage、已交付、下一步、相关 plan 指针。
-2. **顺指针读相关既有 plan** —— 避免重复造、保持衔接。
-3. **读本文件 §2 + 各节约定** —— 当前功能模型（T0–T6）与硬约束。
-4. **写 plan** —— 存 `docs/superpowers/plans/`，命名 `YYYY-MM-DD-<topic>-plan.md`。
-5. **执行**。
-6. **执行后标记（必做）** —— 每完成一次执行（一个 phase 或一份 plan），**同时标记
-   两处**：① **plan 文档** —— 更新对应 phase / plan 状态（phase 勾 ✅、frontmatter
-   「状态」字段）；② **`AGENTS.md`** —— 对应 Stage 的交付记录加 / 更新一行（轻量：
-   交付内容 + PR / commit 号）。若执行还改动了路线图（新 Stage / 范围），一并回写
-   路线图层（不复制 plan 细节）。
+1. **读上下文** —— `AGENTS.md`（路线图：当前 Stage、下一步）+ 顺指针读相关既有
+   plan + 本文件 §2 与各节约定（功能模型 T0–T6、硬约束）。
+2. **写 plan** —— 存 `docs/superpowers/plans/`（`YYYY-MM-DD-<topic>-plan.md`）；
+   含目标 & 验收标准、frontmatter「状态」字段；phase / 工时 / 决策点 / 不交付
+   **视需要**列。
+3. **执行**。
+4. **执行后回写** —— 更新 plan 对应 phase / 状态；**就地更新** `AGENTS.md` 对应
+   Stage 的交付记录（Stage 粒度，非逐 phase 追加）；若执行改动了路线图（新 Stage /
+   范围），一并更路线图层。
 
-### 验收准则（每个 plan 须满足）
+### 验收准则（只列不与步骤重复的）
 
-- [ ] 含：目标 & 验收标准、phase 分解、工时、决策点、不交付（scope 外）。
-- [ ] frontmatter 有「状态」字段：draft / approved / 执行中 / 已交付。
 - [ ] 所列事实（`file:line`、已实现 / 未实现判断）已**对当前分支核实**，非凭记忆。
-- [ ] 若改动路线图 → `AGENTS.md` 已回写（指针层，无细节复制）。
-- [ ] **每次执行后**（必做）→ plan 对应 phase / 状态已标记；`AGENTS.md` 对应 Stage
-  交付记录已加 / 更新一行。
+- [ ] `AGENTS.md` / plan / `CLAUDE.md` 三者无内容复制，只用指针互引。
+- [ ] 执行后 plan 与 `AGENTS.md` 状态已同步。
 
-### 唯一事实源（杜绝漂移）
+### 文档职责与边界（唯一事实源，杜绝漂移）
 
-| 内容 | 唯一所在 |
-|---|---|
-| 路线图 / 交付日志 | `AGENTS.md` |
-| 实施细节（phase / 工时 / 决策点） | `docs/superpowers/plans/` 下 plan 文档 |
-| 当前功能模型 + 编码约定 | 本文件（`CLAUDE.md`） |
+| 文档 | 职责（唯一拥有） | 边界（不放） |
+|---|---|---|
+| `CLAUDE.md` | 编码 / 协作约定、当前功能模型（§2 T0–T6） | 不放路线图、不放单次实施细节 |
+| `AGENTS.md` | 路线图、分阶段交付日志、指向 plan 的指针 | 不放 phase 级实施细节（指针引用） |
+| `docs/superpowers/plans/` | 单次工作的实施细节：phase / 工时 / 决策点 | 不放路线图（由 `AGENTS.md` 持有） |
+| `README.md` | 构建 / 测试入口 | — |
 
-三者互不复制内容，只用指针相互引用。
+四者互不复制内容，只用指针相互引用。
 
 ## Roadmap pointers
 
