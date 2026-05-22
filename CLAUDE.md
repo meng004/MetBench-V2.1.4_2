@@ -11,9 +11,15 @@ work fits in cleanly. For project intent and the staged plan, see
 
 ### 1. 目标
 
-反应堆物理科学计算软件的**系统级蜕变测试（System-level MT）基准平台** —— 以元模式
-驱动的蜕变关系（MR）自动发现并执行 MT，检出科学计算软件缺陷。现升级为 P-series MR
-库的「可执行存储 + MT 执行载体」。
+为 MT 研究与工程社区提供一个**完整的系统级蜕变测试（System-level MT）平台与基线**
+—— 提供 MT 工作流、程序 / MR / 测试记录的 CRUD，以及 SUT、MR 识别方法、MR 有效性
+验证、测试用例生成方法的**快速接入与原型实验**。以元模式驱动的蜕变关系（MR）自动
+发现并执行 MT，检出科学计算软件缺陷。
+
+原则上，凡求解**具有显式数学物理方程**的程序皆可作为 SUT。方程从数学上分 ODE / PDE
+两类，平台从中选取代表性强、流传广、使用多的方程与程序（选型见
+[`docs/t3-program-selection.md`](docs/t3-program-selection.md)）；反应堆物理 5 个核心
+控制方程为优先锚定域。
 
 平台面向**科研场景**，聚焦缺陷检出与 MR 库建设；不自研项目管理类功能 —— 未来如有
 需要，以对接成熟工具（数据推送 / 交换）的方式实现，不重复造同质功能。
@@ -49,9 +55,11 @@ work fits in cleanly. For project intent and the staged plan, see
 
 **T3 · 覆盖**
 
-反应堆物理 5 个核心控制方程（boltzmann / diffusion / bateman / fourier / NS）
-每个至少对应一个 SUT、可执行 MT；覆盖度量由 Coverage 子系统统计 5D 矩阵 / cell。
-*必要性：MR 库的方程维广度是论文核心交付；当前仅 boltzmann 有成熟覆盖。*
+覆盖代表性的数学物理方程 —— 按 ODE / PDE 选取流传广、使用多的方程，每个方程至少
+对应一个可执行 MT 的 SUT；反应堆物理 5 个核心控制方程（boltzmann / diffusion /
+bateman / fourier / NS）为优先锚定子集。覆盖度量由 Coverage 子系统统计；选型见
+[`docs/t3-program-selection.md`](docs/t3-program-selection.md)。*必要性：方程维广度
+是 MT 基线的核心交付；当前仅 boltzmann 有成熟覆盖。*
 
 **T4 · MR 识别**
 
