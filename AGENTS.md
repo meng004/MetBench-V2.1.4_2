@@ -236,7 +236,8 @@ NOETHER 元模式）。术语见 [`docs/GLOSSARY.md`](docs/GLOSSARY.md)。
 **交付状态**：v2.1.0/.1/.2 已发布；polish 批次 Anomaly severity/category 分级已并入
 main（PR #83）。Stage 8 主线：地基 5D tag schema（Phase 8.0）待落地；代表性 SUT 接入
 计划 **P1 已交付**（decay_chain / damped_oscillator / lotka_volterra 三个 ODE SUT +
-launcher catalog，2026-05-22）。
+launcher catalog，2026-05-22）。MR/程序元信息持久化计划 **P-A 已交付**（`ApproxEqual`
+等式断言 + `EqualityThresholds`，2026-05-22）。
 
 **暂缓**（Stage 9+ 候）：BNCT 硼中子放疗、故障注入 V3、论文 writeup。
 

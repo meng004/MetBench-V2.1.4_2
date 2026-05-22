@@ -116,6 +116,7 @@ public sealed class SystemMtMrLauncher : ISystemMtMrLauncher
         {
             new GreaterThanAssertion(),
             new LessThanAssertion(),
+            new ApproxEqualAssertion(),
         };
 
         var runner = new SystemMtRunner(
