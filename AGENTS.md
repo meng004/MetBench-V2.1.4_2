@@ -246,6 +246,18 @@ MP_mono 到 MP_inv）由 DP-2 转入本 Stage MR 库工作。
 
 **暂缓**（Stage 9+ 候）：BNCT 硼中子放疗、故障注入 V3、论文 writeup。
 
+**Stage 8 主线之外待完善**（2026-05-22 从原 `CLAUDE.md` §4 迁入）：
+
+- **变异模块增强** —— 语义变异与语法 / 句法变异的分型生成、等价变异体识别、最小
+  MR 完备子集搜寻。Stage 8 将产出 84 候选 MR，需客观证明其检错能力并剔除冗余；
+  等价变异体若不识别会人为压低杀死率、污染有效性结论；最小完备子集让 MT 以最少
+  MR 达到同等检错力、降低执行成本。
+- **5 个 UAT UI 缺口** —— Dashboard 导航入口、HTML 报告内嵌查看等。部分后端能力
+  已实现但 UI 上不可见，价值未释放（backlog：`docs/superpowers/plans/2026-05-21-uat-ui-gaps-backlog.md`）。
+- **DP-3 配置绑定** —— severity 阈值的 `appsettings` 绑定（WPF 侧）未接，现回退默认值。
+- **F11 m_adj 路径、第 5 个 SUT** —— 受外部依赖（OpenMOC 伴随模式、商业程序获取）
+  阻塞，被动监控中（见上方 W12 F11 与 [F13 RFC](docs/superpowers/plans/2026-05-17-f13-third-sut-rfc.md)）。
+
 **详细计划**（实施细节、phase 分解、工时、决策点以这些文档为准）：
 - [下一阶段开发计划](docs/superpowers/plans/2026-05-21-next-stage-development-plan.md) —— 按 T0–T6 的总排期（**当前**）
 - [代表性 SUT 接入计划](docs/superpowers/plans/2026-05-21-representative-sut-onboarding-plan.md) —— SUT 选型已放宽、home-grown 取消（**当前**）
