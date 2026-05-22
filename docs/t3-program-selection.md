@@ -33,7 +33,7 @@
 | **Diffusion** 中子扩散 | home-grown nodal 扩散 | —¹ | scikit-learn GP 自建 | DeepXDE 扩散 PINN 自建 |
 | **Bateman** 燃耗 | home-grown Bateman ODE | OpenMC depletion〔开源〕 | scikit-learn GP 自建 | DeepXDE ODE-PINN 自建 |
 | **Fourier** 热传导 | FEniCS〔开源〕 | —² | scikit-learn GP 自建 | DeepXDE 热传导 PINN 自建 |
-| **Navier-Stokes** 热工水力 | OpenFOAM〔开源〕 | —² | scikit-learn / CFD 代理 自建 | DeepXDE / Modulus NS-PINN 自建 |
+| **Navier-Stokes** 热工水力 | OpenFOAM〔开源〕 | —² | scikit-learn GP 自建 | DeepXDE NS-PINN 自建 |
 
 ¹ 蒙特卡洛解的是**输运**方程，不存在「解扩散方程的 MC 程序」；扩散 cell 里
 OpenMC 充当同源异构差分测试的高保真参考基准。
@@ -41,23 +41,37 @@ OpenMC 充当同源异构差分测试的高保真参考基准。
 
 ---
 
-## 3. 选型理由（按程序类型）
+## 3. 逐格选型与理由
 
-- **数值模拟**：能用真实开源生产码的就用 —— Boltzmann 选 **OpenMOC**（已接入）、
-  Fourier 选 **FEniCS**、NS 选 **OpenFOAM**（三者均开源、生产级，作 SUT 比 home-grown
-  更有说服力）。仅 diffusion（PARCS/DYN3D 全申请制，无好的开源生产码）与 bateman
-  （ORIGEN 申请制）的确定论格用 **home-grown 兜底**。
-- **概率（MC）**：只有 Boltzmann / Bateman 有意义 —— **OpenMC**（开源、已装）一程序
-  兼任两者（MC 中子输运 + `openmc.deplete` 燃耗）。diffusion / fourier / NS 无主流
-  MC 程序，留空。
-- **ML 代理模型**：反应堆物理无现成代理程序 → 统一用 **scikit-learn**（开源）自建
-  GP 代理，以同方程数值/MC 程序的输出作训练数据；不依赖 PyTorch / 论文 release。
-- **PINN**：同理无现成程序 → 用 **DeepXDE**（开源；扩散/热传导/NS 均为其经典基准）
-  自建，NS 另可选 NVIDIA Modulus。AGENTS.md 已将 PINN（D₄）排到 Stage 9。
+每个 cell 一个推荐程序；N/A 格说明原因。
+
+| 方程 | 程序类型 | 推荐程序 | 理由 |
+|---|---|---|---|
+| Boltzmann | 数值模拟 | OpenMOC | 唯一已接入的开源确定论（MOC）输运码，成熟稳定。 |
+| Boltzmann | 概率 | OpenMC | 唯一无获取门槛的开源 MC 输运码（MCNP 出口管制、Serpent 申请制）；已接入。 |
+| Boltzmann | ML 代理 | scikit-learn GP | 无现成反应堆代理程序；k_eff 为标量，GP 轻量够用，以 OpenMC 输出训练，不引 PyTorch。 |
+| Boltzmann | PINN | DeepXDE | 输运是积分-微分方程、无 turnkey 程序；DeepXDE 是最主流开源 PINN 框架，但此格属研究阶段、留 Stage 9。 |
+| Diffusion | 数值模拟 | home-grown nodal | PARCS/DYN3D 全申请制、无开源生产 nodal 码；节块法结构简单，自研 100% 可得、轻量可控。 |
+| Diffusion | 概率 | N/A | 蒙特卡洛解输运方程、不解扩散方程；此格以 OpenMC 输运解作差分参考。 |
+| Diffusion | ML 代理 | scikit-learn GP | 无现成代理；以 home-grown nodal 输出训练，GP 轻量。 |
+| Diffusion | PINN | DeepXDE | 扩散方程是 PINN 头号经典基准，DeepXDE 自带 worked example，改造成本最低。 |
+| Bateman | 数值模拟 | home-grown Bateman ODE | ORIGEN 申请制；Bateman 是线性 ODE 组，自研 CRAM/ODE 求解器简单可靠、100% 可得。 |
+| Bateman | 概率 | OpenMC depletion | OpenMC 内置 `openmc.deplete`（CRAM），开源、已接入，唯一无门槛的 MC 耦合燃耗。 |
+| Bateman | ML 代理 | scikit-learn GP | 无现成代理；核素浓度时间序列低维，GP 够用。 |
+| Bateman | PINN | DeepXDE | Bateman 是 ODE 组，DeepXDE 原生支持 ODE-PINN。 |
+| Fourier | 数值模拟 | FEniCS | 开源、生产级 FEM 库，Python 写轻量热传导 SUT，比 home-grown 更有 SUT 可信度。 |
+| Fourier | 概率 | N/A | 热传导的蒙特卡洛仅学术随机行走法，无主流程序。 |
+| Fourier | ML 代理 | scikit-learn GP | AGENTS.md Phase 8.4.1 明确 fourier×Surr 用 scikit-learn GP；温度低维，GP 够用。 |
+| Fourier | PINN | DeepXDE | 热传导方程是 PINN 最经典的 benchmark，DeepXDE example 最成熟。 |
+| Navier-Stokes | 数值模拟 | OpenFOAM | 开源、世界级 CFD 标准，生产级。 |
+| Navier-Stokes | 概率 | N/A | NS 无主流蒙特卡洛求解。 |
+| Navier-Stokes | ML 代理 | scikit-learn GP | 统一用 GP（压降/最大流速等标量量）；若需场级代理可换 FNO（neuraloperator，代价：引 PyTorch）。 |
+| Navier-Stokes | PINN | DeepXDE | NS 是 PINN 研究热点，DeepXDE 有 NS worked example；重负载场景可换 NVIDIA Modulus。 |
 
 **总原则**：现成程序优先选**完全开源的生产级**程序（OpenMOC / OpenMC / FEniCS /
 OpenFOAM）；仅在确无开源生产码时（diffusion、bateman 的确定论格）以 **home-grown**
-兜底；代理与 PINN 全行业无现成程序，用开源框架自建。
+兜底；ML 代理与 PINN 全行业无现成反应堆物理程序，统一用开源框架（scikit-learn /
+DeepXDE）自建。
 
 ---
 
