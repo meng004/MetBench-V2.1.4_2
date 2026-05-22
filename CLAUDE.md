@@ -323,6 +323,39 @@ optional gateway abstractions (`ILlmGateway`, `MutationCellRunner`,
 `IProcessExecutor`). Tests inject fakes, prod injects LiteDB + real
 process / LLM.
 
+## 计划工作流（superpowers plan）
+
+`docs/superpowers/plans/` 下的实施计划，遵循以下**闭环**制订与维护 —— 流程对每个
+session 透明、可核验。
+
+### 闭环
+
+1. **读 [`AGENTS.md`](AGENTS.md)** —— 路线图锚点：当前 Stage、已交付、下一步、相关 plan 指针。
+2. **顺指针读相关既有 plan** —— 避免重复造、保持衔接。
+3. **读本文件 §2 + 各节约定** —— 当前功能模型（T0–T6）与硬约束。
+4. **写 plan** —— 存 `docs/superpowers/plans/`，命名 `YYYY-MM-DD-<topic>-plan.md`。
+5. **执行**。
+6. **回写** —— 若计划改动路线图（新 Stage / 范围 / 状态），回写 `AGENTS.md`（只更
+   路线图层、不复制 plan 细节）；执行完更新 plan 的「状态」字段。
+
+### 验收准则（每个 plan 须满足）
+
+- [ ] 含：目标 & 验收标准、phase 分解、工时、决策点、不交付（scope 外）。
+- [ ] frontmatter 有「状态」字段：draft / approved / 执行中 / 已交付。
+- [ ] 所列事实（`file:line`、已实现 / 未实现判断）已**对当前分支核实**，非凭记忆。
+- [ ] 若改动路线图 → `AGENTS.md` 已回写（指针层，无细节复制）。
+- [ ] 执行完成 → plan「状态」改为已交付；`AGENTS.md` 对应 Stage 的交付记录已更新。
+
+### 唯一事实源（杜绝漂移）
+
+| 内容 | 唯一所在 |
+|---|---|
+| 路线图 / 交付日志 | `AGENTS.md` |
+| 实施细节（phase / 工时 / 决策点） | `docs/superpowers/plans/` 下 plan 文档 |
+| 当前功能模型 + 编码约定 | 本文件（`CLAUDE.md`） |
+
+三者互不复制内容，只用指针相互引用。
+
 ## Roadmap pointers
 
 - 📘 全息项目结构: [`docs/PROJECT-STRUCTURE.md`](docs/PROJECT-STRUCTURE.md)（含 4 SUT + 测试矩阵 + 命名约定）

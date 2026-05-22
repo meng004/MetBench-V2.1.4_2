@@ -12,6 +12,10 @@ This project is being extended from method/unit-level metamorphic testing (MT) t
 system/acceptance-level MT. The staged plan below is the current working
 baseline for architecture and implementation decisions.
 
+> 制订 / 维护 `docs/superpowers/plans/` 下的计划，遵循 [`CLAUDE.md`](CLAUDE.md)
+> 「计划工作流」闭环：读 AGENTS.md → 读相关 plan → 读 CLAUDE.md 约定 → 写 plan →
+> 回写 AGENTS.md（若改动路线图）。验收准则同见该节。
+
 ## Overall Direction
 
 MetBench will support Gherkin-based MR specifications, Reqnroll-based BDD
