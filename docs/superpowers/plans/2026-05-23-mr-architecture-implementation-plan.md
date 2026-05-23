@@ -208,7 +208,7 @@
 | Phase | 状态 | commit | 备注 |
 |---|---|---|---|
 | P0 | ✅ 已完成(2026-05-23) | (pending push) | 13 TDD 全过,全量回归 680/0fail/0skip。schema 字段添加无破坏,既有数据按默认值兼容。 |
-| P1 | 待启动 | — | — |
+| P1 | ✅ 已完成(2026-05-23) | (pending push) | 74 TDD 全过,全量回归 754/0fail/0skip。17 L0 数学基元注册入 TransformationRegistry。 |
 | P2 | 待启动 | — | — |
 | P3 | 待启动 | — | — |
 | P4 | 待启动 | — | — |
