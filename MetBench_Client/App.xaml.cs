@@ -14,7 +14,9 @@ using MetBench_IDAL;
 using MetBench_BLL;
 using MetBench_BLL.SystemMT;
 using MetBench_BLL.SystemMT.Anomaly;
+using MetBench_BLL.SystemMT.Bootstrap;
 using MetBench_BLL.SystemMT.Launcher;
+using MetBench_BLL.SystemMT.Metadata;
 using MetBench_BLL.SystemMT.Persistence;
 using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_BLL.SystemMT.Reporting;
@@ -157,6 +159,21 @@ namespace MetBench_Client
                 services.AddSystemMtRepositories();
                 services.AddScoped<IAnomalyService, AnomalyService>();
 
+                // === G-08b: metadata catalog DB + bootstrap ===
+                services.AddSingleton<ISystemMtMetadataRepository>(provider =>
+                {
+                    var dataDir = Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!;
+                    return new LiteDbSystemMtMetadataRepository(
+                        $"Filename={Path.Combine(dataDir, "MetadataSystemMT.Litedb")}");
+                });
+                services.AddScoped<LauncherCatalogV2Importer>(provider =>
+                    new LauncherCatalogV2Importer(
+                        (SystemMtLauncher)provider.GetRequiredService<ISystemMtLauncher>(),
+                        provider.GetRequiredService<IApplicationRepository>(),
+                        provider.GetRequiredService<IMetamorphicRelationRepository>(),
+                        provider.GetRequiredService<IMRBindingRepository>(),
+                        provider.GetRequiredService<IAuditLogRepository>()));
+
                 // === v2 Anomaly list page ===
                 services.AddScoped<Views.Pages.AnomalyListPage>();
                 services.AddScoped<ViewModels.AnomalyListViewModel>();
@@ -268,6 +285,11 @@ namespace MetBench_Client
         private async void OnStartup(object sender, StartupEventArgs e)
         {
             await _host.StartAsync();
+
+            // G-08b: idempotent catalog seed on every startup
+            var metaRepo = _host.Services.GetService<ISystemMtMetadataRepository>();
+            var importer = _host.Services.GetService<LauncherCatalogV2Importer>();
+            await SystemMtBootstrap.SeedCatalogsAsync(metaRepo, importer);
         }
 
         /// <summary>
