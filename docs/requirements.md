@@ -160,7 +160,7 @@
 | `bb06ae5` | **S8-P4** | 1D diffusion SUT 接入 + diffusion 方程：2 新 MR（843 pass，**G-03 完全闭合**，5 方程全覆盖）|
 | `7bbb746` | **S8-P5a** | V3 5D-tag schema entity + 7 enum + round-trip 测试（847 pass）|
 | `85aae2e` | **S8-P5b** | V3 IDAL + LiteDB repo + CRUD/5D 维度过滤 9 测试（856 pass）|
-| `<TBD-S8P5c>` | **S8-P5c** | V2→V3 MR 投影 migration + 7 测试（V2 字段映射到 5D enum + RigorClass 启发式，863 pass）|
+| `5fc6f15` | **S8-P5c** | V2→V3 MR 投影 migration + 7 测试（V2 字段映射到 5D enum + RigorClass 启发式，863 pass）|
 
 ## 12. 受控开发模式工作流
 
