@@ -1,5 +1,12 @@
 namespace MetBench_BLL.SystemMT;
 
+/// <summary>
+/// W1 系统级 MT runner — 已被 W2 <see cref="MetBench_BLL.SystemMT.Pipeline.SystemMtPipeline"/>
+/// 取代。本类标 <see cref="ObsoleteAttribute"/> 仅为保留 v1 兼容路径与既有测试覆盖；
+/// 新代码不得使用，将在 Stage 9 重构中彻底移除（mr-architecture §2 协议层 / 执行层分离）。
+/// </summary>
+[Obsolete("W1 system-MT execution path. New code must use ISystemMtPipeline (mr-architecture §2). " +
+          "Slated for Stage 9 removal. See G-07 in docs/requirements.md.")]
 public sealed class SystemMtRunner
 {
     private readonly CliProgramRunner _cliRunner;

@@ -1,3 +1,5 @@
+// 本文件覆盖 W1 SystemMtRunner，已被 W2 SystemMtPipeline 取代但保留至 Stage 9（G-07）。
+#pragma warning disable CS0618 // Obsolete SystemMtRunner
 using MetBench_BLL;
 using MetBench_BLL.SystemMT;
 using Xunit;

@@ -15,7 +15,7 @@
 | **测试文件** | `MetBench_SystemMT.Tests/` 下相对路径 | 单元 + BDD + UAT |
 | **测试结果** | `dotnet test MetBench_SystemMT.Tests` 最近一次基线 | `pass/skip/fail` 或缺口说明 |
 
-**基线**：2026-05-23（G-08 后），`dotnet test MetBench_SystemMT.Tests` = **834 pass / 0 fail**（OpenMC 跨程序场景在无 OpenMC 环境下首跑 skip / 二跑 warm 后 0 skip）。
+**基线**：2026-05-23（G-07/G-05 后），`dotnet test MetBench_SystemMT.Tests` = **839 pass / 0 fail**（OpenMC 跨程序场景在无 OpenMC 环境下首跑 skip / 二跑 warm 后 0 skip）。
 
 ## 1. T0 · 核心 —— 系统级 MT 流程
 
@@ -117,9 +117,9 @@
 | G-02 | F-T2-03（LiveCharts 数据层） | `MTVisualizationSerive` 跨平台部分无独立单测 | 数据形态修改无回归保护 | 视后续 P 编号补一组数据形态单测 |
 | G-03 | F-T3-03（反应堆 5 方程锚定） | diffusion + Navier-Stokes 两条 L2 解析解 / SUT 未落地 | T3 覆盖目标未达成 | 留待 Stage 8 后续 plan；不在 P0–P7 范围 |
 | G-04 | F-T6-02（语义变异 + 等价识别 + 最小 MR 子集） | 完全未实现 | Stage 8 变异模块增强未启动 | CLAUDE.md §2 / AGENTS Stage 8 "主线之外"已列为 backlog |
-| G-05 | F-MR-P7 | LaTeX→SymPy `[Obsolete]` 后无 grep 守卫单测，回归仅靠人工 | 未来若有人去 `[Obsolete]` 易漏 | 视需要在 `V2Schema/` 加一条 ObsoleteAttributeGuard 测试 |
+| ~~G-05~~ ✅ 已完成(2026-05-23) | F-MR-P7 | ~~LaTeX→SymPy `[Obsolete]` 后无 grep 守卫单测~~ | — | 已建 `Architecture/ObsoleteAttributeGuardTests.cs` 覆盖 `Latextosympy` + `Latextosympy_Await` + `SystemMtRunner`（5 测试） |
 | ~~G-06~~ ✅ 已完成(2026-05-23) | F-T1-04 / F-MR-P5 | ~~method MT 协议层未接入业务路径~~ | — | 已建 `IMtPipeline<TReq,TOut>` 共享抽象（BLL.Core/MT）+ `MethodMtPipeline`（BLL/MethodMT，实现协议层）+ `MethodMtRunRequest/Outcome` 数据 record + `MethodMtCatalogService` 扩 CRUD（Get/Update/Delete）+ `SystemMtPipeline` 加 IMtPipeline 显式接口实现；20 新测试（7 pipeline + 4 Bateman 参数化 AAA + 9 CRUD）；全量回归 810→830 pass。注：4 处 `Latextosympy*` 调用已澄清属 v1 展示衍生字段（不在 G-06 范围），归 G-11 处置 |
-| G-07 | F-T0-02 / F-T0-01 | **W1 引擎残留**：`SystemMtRunner` + `SystemMtTask` 仍由 `MetBench_Client/App.xaml.cs:130` DI 注册；测试 `SystemMtRunnerTests` / `SystemMtRunnerGeneratedFollowupTests` 在跑 | system 侧双轨未拆 | 拆 DI 注册 + 删 W1 测试 + 删 `SystemMtRunner` / `SystemMtTask` / `SystemMtCase` / `SystemMtResult` |
+| ~~G-07~~ ✅ 已完成(2026-05-23, 云端范围) | F-T0-02 / F-T0-01 | ~~W1 引擎残留~~ | — | 给 `SystemMtRunner` 加 `[Obsolete]`（顶层入口）；2 个 W1 测试加 file-level `#pragma warning disable CS0618` 抑制（按 §0.5.5 保留测试）；新增 ObsoleteAttributeGuardTests 覆盖（5 测试，与 G-05 合并）。深度审计发现完全删 W1 涉及 SystemMtResult/AnomalyClassifier/SystemMtResultRecord/ISystemMtResultRepository cross-cutting，属 Stage 9 大重构。**VM 端待做**：`App.xaml.cs:130` 的 `SystemMtRunner` DI 注册触发 CS0618 警告，VM 端按需移除 |
 | ~~G-08~~ ✅ 已完成(2026-05-23, 云端范围) | F-T1-04 / F-T0-03 | ~~catalog 双 seed 不自动同步~~ | — | 已建 `SystemMtBootstrap.SeedCatalogsAsync(metaRepo, importer)` 一次性 idempotent helper，串行调 `SystemMtMetadataCatalog.SeedAsync` + `LauncherCatalogV2Importer.Import`；4 新测试。**VM 端待做**（G-08b/G-11 候选）：`App.xaml.cs` 启动时调 `SystemMtBootstrap.SeedCatalogsAsync`。完整 source-of-truth 收口（launcher 改读 catalog 而非硬编码）属 Stage 9+ 重构 |
 | ~~G-09~~ ✅ 已完成(2026-05-23) | F-T3-02 / F-T1-04 | ~~projectile SUT 未进 launcher catalog~~ | — | 已补 `projectile-motion` EquationMetadata + `projectile-scale-v0` MrMetadata + MrBlueprint + `SUT/projectile/sample/standard.txt`；2 个 launcher 测试 + cascade 4 个 importer 测试更新；全量 809→810 pass |
 | G-10 | F-T1-04 | **CRUD 不全**：`EquationFunctionRecipe` 缺 Update/Delete；元信息层 (`ISystemMtMetadataRepository`) 全无 Delete；`MethodMtCatalogService` 公开方法 0 个（疑似仅构造时拒绝 MetaPattern） | 元信息一旦写入只能 Upsert 覆盖；无清理路径 | 视 UI/UAT 需要再补；目前 backlog（注：G-06 将补 `MethodMtCatalogService` MR-CRUD 子集） |
@@ -146,7 +146,8 @@
 | `75df630` | （文档） | §11 索引补登 |
 | `b047668` | （文档） | §10 追加 G-11/G-12/G-13（v1 清理 + PBT 升级占位） |
 | `7305230` | **G-06** | method MT 执行栈：IMtPipeline 共享抽象 + MethodMtPipeline + Catalog CRUD（830 pass） |
-| `<TBD-G-08>` | **G-08** | catalog 自动 bootstrap helper（云端范围；834 pass） |
+| `47cb96b` | **G-08** | catalog 自动 bootstrap helper（云端范围；834 pass） |
+| `<TBD-G-07>` | **G-07 + G-05** | `SystemMtRunner` 加 [Obsolete] + ObsoleteAttributeGuardTests 守卫（839 pass） |
 
 ## 12. 受控开发模式工作流
 
