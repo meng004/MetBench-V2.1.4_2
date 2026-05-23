@@ -118,6 +118,11 @@
 | G-03 | F-T3-03（反应堆 5 方程锚定） | diffusion + Navier-Stokes 两条 L2 解析解 / SUT 未落地 | T3 覆盖目标未达成 | 留待 Stage 8 后续 plan；不在 P0–P7 范围 |
 | G-04 | F-T6-02（语义变异 + 等价识别 + 最小 MR 子集） | 完全未实现 | Stage 8 变异模块增强未启动 | CLAUDE.md §2 / AGENTS Stage 8 "主线之外"已列为 backlog |
 | G-05 | F-MR-P7 | LaTeX→SymPy `[Obsolete]` 后无 grep 守卫单测，回归仅靠人工 | 未来若有人去 `[Obsolete]` 易漏 | 视需要在 `V2Schema/` 加一条 ObsoleteAttributeGuard 测试 |
+| G-06 | F-T1-04 / F-MR-P5 | **新 method MT 协议层未接入业务路径**：`MethodTransformationRegistry` / `MethodAssertionEvaluator` 零生产调用方；`MRRecommendationViewModel` / `MRManagementViewModel` / `AutoMRParser` / `MetamorphicRelationService` 仍走 `Latextosympy*` | method MT 实质未切换，只是协议层就位 | 需 method-level orchestrator + 4 处生产代码切换 + BDD 端到端 |
+| G-07 | F-T0-02 / F-T0-01 | **W1 引擎残留**：`SystemMtRunner` + `SystemMtTask` 仍由 `MetBench_Client/App.xaml.cs:130` DI 注册；测试 `SystemMtRunnerTests` / `SystemMtRunnerGeneratedFollowupTests` 在跑 | system 侧双轨未拆 | 拆 DI 注册 + 删 W1 测试 + 删 `SystemMtRunner` / `SystemMtTask` / `SystemMtCase` / `SystemMtResult` |
+| G-08 | F-T1-04 / F-T0-03 | **catalog 双 seed 不自动同步**：launcher 硬编码 8 `MrBlueprint` + `SystemMtMetadataCatalog` 静态 5 方程 8 MR + entity 表三处；`LauncherCatalogV2Importer` 不在启动路径自动跑 | 任何新 MR 需改 2-3 处；entity 表可能为空 | 启动时自动 Import + 单一 source-of-truth 收口（推荐 metadata catalog 主，launcher 派生） |
+| G-09 | F-T3-02 / F-T1-04 | **projectile SUT 未进 launcher catalog**：`SUT/projectile/` 有 python adapter + `ProjectileRange.feature` + step bindings，但 launcher 无 `MrBlueprint`、catalog 无 `EquationMetadata` / `MrMetadata` | `ISystemMtLauncher.ListAvailableAsync()` 不返回 projectile，无法 launcher 跑 | 补 1 个 EquationMetadata（projectile-motion）+ 1 个 MrMetadata + 1 个 MrBlueprint |
+| G-10 | F-T1-04 | **CRUD 不全**：`EquationFunctionRecipe` 缺 Update/Delete；元信息层 (`ISystemMtMetadataRepository`) 全无 Delete；`MethodMtCatalogService` 公开方法 0 个（疑似仅构造时拒绝 MetaPattern） | 元信息一旦写入只能 Upsert 覆盖；无清理路径 | 视 UI/UAT 需要再补；目前 backlog |
 
 ## 11. 与 P0–P7 对应的快速索引（执行历史）
 
@@ -132,6 +137,7 @@
 | `3991c52` | F-MR-P6 | BDD steps 切 W2 |
 | `17a6093` | F-MR-P7 | legacy Obsolete |
 | `266485e` | （文档） | plan 表中 commit hash 回填 |
+| `5856bd8` | （文档） | requirements.md 追溯矩阵初版 |
 
 ## 12. 受控开发模式工作流
 
