@@ -1,5 +1,5 @@
 ---
-状态: 待启动(2026-05-23 起草)
+状态: ✅ 全部完成(2026-05-23 P0–P7)
 目标: 实现 `docs/design/mr-architecture.md` 基线 —— 双轨 MR 协议层 + 方程作为函数容器
   + L0/L1/L2 算子分层 + 决策 B 查找规则 + 数学/断言库纪律。
 关联:
@@ -214,6 +214,6 @@
 | P4 | ✅ 已完成(2026-05-23) | (pending push) | 7 新测试全过,全量回归 790/0fail/0skip。BatemanAnalyticSolution L2；bateman.ScaleInitial L1 Recipe；launcher 用 EquationFunctionRegistry + TransformationResolver 取代 Composite；PipelineContext 加 EquationKey/EquationFunctionRegistry。 |
 | P5 | ✅ 已完成(2026-05-23) | (pending push) | 19 TDD 全过,全量回归 809/0fail/0skip。MethodTransformationRegistry（决策 B，委托 TransformationResolver）+ MethodAssertionEvaluator（less/greater/approx，拒噪声感知代码）。 |
 | P6 | ✅ 已完成(2026-05-23) | — | 809/809 全过，0 fail/0 skip。7 个 step 文件全部移除 W1 引擎类型（SystemMtRunner/MrTransformation/IMrAssertion/PythonInputAdapter）；改用 ISystemMtPipeline.ExecuteAsync(ctx)。新增 example_cli_input_parser.py / example_cli_output_parser.py（TestAssets）和 projectile_input_parser.py / projectile_output_parser.py（SUT/projectile）支持简单 SUT 的 v2 解析协议。Then 步骤适配 PipelineOutcome.SourceMetrics/FollowupMetrics/AssertionResult。grep 确认 Steps/ 无 W1 new 调用。 |
-| P7 | 待启动 | — | — |
+| P7 | ✅ 已完成(2026-05-23) | — | `[Obsolete]` 加 Latextosympy.cs + Latextosympy_Await.cs；AGENTS.md 指针回写；mr-architecture.md §8 实施序列全标 ✅ + landing status note。全量回归 809/809 全过。 |
 
 执行后须更新本表 + AGENTS.md Stage 8 + mr-architecture.md §8 实施序列状态。

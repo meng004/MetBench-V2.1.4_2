@@ -299,34 +299,39 @@ public sealed record SetAssertionInput(
 
 ## 8. 实施序列(对接 plan)
 
+> **落地状态（2026-05-23）**：序列 1–4 及 6 已全部落地，详见
+> [`docs/superpowers/plans/2026-05-23-mr-architecture-implementation-plan.md`](../superpowers/plans/2026-05-23-mr-architecture-implementation-plan.md)（P0–P7 全部 ✅）。
+> 序列 5（WPF 端）保留为 VM-side 后续工作，不属本 plan 范围。
+
 下列序列是 MR 协议层落地的最小依赖图,不替代具体 phase 排期(由 `docs/superpowers/plans/` 持有):
 
-1. **schema 入位**(可独立 commit):
+1. ✅ **schema 入位**(可独立 commit):
    - `MetamorphicRelation` 加 `EquationKey: string` + `ValueShape: string`(默认 `"scalar"`)
    - 新建 `EquationFunctionRecipe` 实体表 + IDAL/DAL
    - `EquationMetadata.Functions: List<EquationFunctionDescriptor>` 字段
 
-2. **接口与 registry**:
+2. ✅ **接口与 registry**:
    - 新建 `IEquationFunction` 接口
    - 新建 `EquationFunctionRegistry`(keyed by `(EquationKey, Name)`)
    - 新建 `RecipeBasedEquationFunction`(从 Recipe 解析 L0 组合)
    - 新建 `TransformationResolver.Resolve(mr)`(决策 B:通用先、方程命名空间后)
 
-3. **CRUD 扩展**:
+3. ✅ **CRUD 扩展**:
    - `SystemMtCatalogService.CreateEquationFunction(Recipe)` + Recipe 校验
-   - 待建 `MethodMtCatalogService`(对称 system,强制 Kind=method-level,拒绝 MetaPatternCode)
+   - `MethodMtCatalogService`(对称 system,强制 Kind=method-level,拒绝 MetaPatternCode)
 
-4. **样板方程**(推荐 Bateman):
+4. ✅ **样板方程**(Bateman):
    - L2 `bateman.AnalyticSolution`(C# `IEquationFunction`)
    - L1 `bateman.ScaleInitial`(Recipe,Composite × 3 ScaleField)
    - 改 launcher `decay-chain-scale-initial` MR 引用 `bateman.ScaleInitial`,替代当前内嵌的 3 步 CompositeTransform
 
-5. **WPF 端**(VM 编译验证):
+5. **WPF 端**(VM 编译验证，后续 Stage 8 工作):
    - 方程管理页 / 方程函数管理页 / MR 管理页
    - 调 `*CatalogService` API
 
-6. **legacy 路径标记**:
-   - `Latextosympy.cs` + LaTeX-pattern → sympy 执行路径标 `[Obsolete]`,新 MR 不再走此
+6. ✅ **legacy 路径标记**:
+   - `Latextosympy.cs` + `Latextosympy_Await.cs` 标 `[Obsolete]`,新 MR 不再走此
+   - BDD steps 切 W2 facade (P6)，清掉双引擎残留
 
 ---
 

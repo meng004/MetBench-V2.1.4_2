@@ -3,6 +3,7 @@ using System.Reflection;
 
 namespace MetBench_BLL
 {
+    [Obsolete("Legacy LaTeX→SymPy execution path. New MRs use MethodTransformationRegistry + EquationFunction (mr-architecture §5). This class is retained for v1 method-level MT read compatibility only.")]
     public class Latextosympy
     {
         // 解压文件的存储路径（默认系统的Temp路径）
