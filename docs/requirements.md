@@ -148,7 +148,7 @@
 | `7305230` | **G-06** | method MT 执行栈：IMtPipeline 共享抽象 + MethodMtPipeline + Catalog CRUD（830 pass） |
 | `47cb96b` | **G-08** | catalog 自动 bootstrap helper（云端范围；834 pass） |
 | `2c56b8a` | **G-07 + G-05** | `SystemMtRunner` 加 [Obsolete] + ObsoleteAttributeGuardTests 守卫（839 pass） |
-| `<TBD-G-10>` | **G-10** | ISystemMtMetadataRepository Delete + Recipe Update/Delete（848 pass） |
+| `4fc7f15` | **G-10** | ISystemMtMetadataRepository Delete + Recipe Update/Delete（848 pass） |
 
 ## 12. 受控开发模式工作流
 
