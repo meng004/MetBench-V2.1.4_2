@@ -61,14 +61,21 @@ public sealed class LauncherEndToEndOdeTests
         Assert.Empty(_anomalyService.Recorded);
     }
 
-    [Theory]
-    [InlineData("decay-chain-scale-initial")]
-    [InlineData("damped-oscillator-scale-state")]
-    public void Multi_step_mr_registers_composite_transformation_in_registry(string mrId)
+    [Fact]
+    public void Damped_oscillator_still_registers_composite_transformation_in_registry()
     {
-        // launcher ctor 已对多步 MR 调 TransformationRegistry.RegisterIfMissing
-        var t = TransformationRegistry.Get($"Composite-{mrId}");
+        // damped-oscillator 仍有多步 TransformSteps,走 CompositeTransform
+        var t = TransformationRegistry.Get("Composite-damped-oscillator-scale-state");
         Assert.IsType<CompositeTransform>(t);
+    }
+
+    [Fact]
+    public void Decay_chain_no_longer_registers_composite_uses_recipe()
+    {
+        // P4: decay-chain-scale-initial 改用 L1 Recipe(EquationKey="bateman"),
+        // 不再注册 Composite-decay-chain-scale-initial
+        Assert.Throws<KeyNotFoundException>(() =>
+            TransformationRegistry.Get("Composite-decay-chain-scale-initial"));
     }
 
     [Fact]

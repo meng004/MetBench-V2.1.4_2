@@ -1,4 +1,5 @@
 using System.Text.Json;
+using MetBench_BLL.Equations;
 using MetBench_BLL.SystemMT.Assertions;
 using MetBench_BLL.SystemMT.ParameterMapping;
 using MetBench_BLL.SystemMT.Transformations;
@@ -68,7 +69,9 @@ public sealed class SystemMtPipeline : ISystemMtPipeline
             // 2. Transforming — C# IMRTransformation 在内存 dict 上应用变换
             progress?.Report(PipelineStatus.Transforming);
             var resolver = FieldPathResolverFactory.For(ctx.PathSyntax);
-            var transformation = TransformationRegistry.Get(ctx.TransformationName);
+            var transformation = ctx.EquationFunctionRegistry is { } eqReg
+                ? new TransformationResolver(eqReg).Resolve(ctx.TransformationName, ctx.EquationKey)
+                : TransformationRegistry.Get(ctx.TransformationName);
             var followupDict = transformation.Apply(sourceDict, ctx.TargetFieldPath, ctx.Parameters);
 
             // 3. WritingFollowup — dict → JSON 临时文件 → 调 Python input_parser write

@@ -1,3 +1,5 @@
+using MetBench_BLL.Equations;
+using MetBench_BLL.Equations.Bateman;
 using MetBench_BLL.SystemMT.Anomaly;
 using MetBench_BLL.SystemMT.Assertions;
 using MetBench_BLL.SystemMT.Pipeline;
@@ -28,6 +30,7 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
     private readonly IAnomalyService _anomalyService;
     private readonly AnomalySeverityThresholds _severityThresholds;
     private readonly IReadOnlyDictionary<string, MrBlueprint> _mrCatalog;
+    private readonly EquationFunctionRegistry _equationFunctions;
 
     public SystemMtLauncher(
         LauncherOptions options,
@@ -42,10 +45,12 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
         _anomalyService = anomalyService ?? throw new ArgumentNullException(nameof(anomalyService));
         _severityThresholds = severityThresholds ?? AnomalySeverityThresholds.Default;
         _mrCatalog = BuildMrCatalog(options).ToDictionary(s => s.Mr.Id, StringComparer.Ordinal);
+        _equationFunctions = BuildEquationFunctionRegistry();
 
-        // Register CompositeTransform for multi-step MRs (decay-chain / damped-oscillator)。
-        // step.Parameters 留空,call-time params 经 PipelineContext.Parameters 注入。
-        foreach (var bp in _mrCatalog.Values.Where(b => b.TransformSteps.Count > 1))
+        // Register CompositeTransform for multi-step MRs that do NOT use a Recipe
+        // (EquationKey != "" means the recipe in _equationFunctions handles the composition).
+        foreach (var bp in _mrCatalog.Values
+            .Where(b => b.TransformSteps.Count > 1 && string.IsNullOrEmpty(b.EquationKey)))
         {
             var compositeName = CompositeNameFor(bp.Mr.Id);
             var blueprintRef = bp;
@@ -60,6 +65,27 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
                 return new CompositeTransform(compositeName, steps);
             });
         }
+    }
+
+    private static EquationFunctionRegistry BuildEquationFunctionRegistry()
+    {
+        var reg = new EquationFunctionRegistry();
+
+        // P4: bateman.ScaleInitial — L1 Recipe:按 factor 等比缩放三个初始量
+        const string batemanScaleInitialRecipe = """
+            {"compose":[
+              {"op":"ScaleField","path":"/initial/N_A","params":{"factor":"{factor}"}},
+              {"op":"ScaleField","path":"/initial/N_B","params":{"factor":"{factor}"}},
+              {"op":"ScaleField","path":"/initial/N_C","params":{"factor":"{factor}"}}
+            ]}
+            """;
+        reg.Register(new RecipeBasedEquationFunction(
+            "bateman", "ScaleInitial", "transformation", batemanScaleInitialRecipe));
+
+        // P4: bateman.AnalyticSolution — L2 解析解
+        reg.Register(new BatemanAnalyticSolution());
+
+        return reg;
     }
 
     private static string CompositeNameFor(string mrId) => $"Composite-{mrId}";
@@ -152,7 +178,13 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
             CatalogVersionSha: string.Empty,
             SutVersionSnapshot: string.Empty,
             MetbenchVersion: string.Empty,
-            TriggeredBy: "launcher");
+            TriggeredBy: "launcher")
+        {
+            // P4: 传入方程业务键 + 注册表，启用决策 B Recipe 查找
+            EquationKey = blueprint.EquationKey,
+            EquationFunctionRegistry = string.IsNullOrEmpty(blueprint.EquationKey)
+                ? null : _equationFunctions,
+        };
 
         var outcome = await _pipeline.ExecuteAsync(context, progress: null, cancellationToken)
             .ConfigureAwait(false);
@@ -440,13 +472,11 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
             Timeout: TimeSpan.FromSeconds(60),
             InputParserScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain_input_parser.py"),
             OutputParserScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain_output_parser.py"),
-            TransformSteps: new[]
-            {
-                new MrTransformStep("ScaleField", "/initial/N_A"),
-                new MrTransformStep("ScaleField", "/initial/N_B"),
-                new MrTransformStep("ScaleField", "/initial/N_C"),
-            },
-            AssertionTypeCode: "greater");
+            // P4: 使用 L1 Recipe（EquationFunctionRegistry["bateman","ScaleInitial"]）
+            // 单步声明；路径由 Recipe 内部各 ScaleField step 管理
+            TransformSteps: new[] { new MrTransformStep("ScaleInitial", "") },
+            AssertionTypeCode: "greater",
+            EquationKey: "bateman");
 
         yield return new MrBlueprint(
             new MrSummary(
@@ -518,7 +548,9 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
         string InputParserScriptPath,
         string OutputParserScriptPath,
         IReadOnlyList<MrTransformStep> TransformSteps,
-        string AssertionTypeCode);
+        string AssertionTypeCode,
+        // P4: 方程业务键（空 = 无关联；非空 = 走 EquationFunctionRegistry Recipe 查找）
+        string EquationKey = "");
 
     /// <summary>v2 pipeline 的单步变换规格。多步在 launcher.RunAsync 内包 <c>CompositeTransform</c>。</summary>
     private sealed record MrTransformStep(
