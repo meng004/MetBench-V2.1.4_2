@@ -212,7 +212,7 @@
 | P2 | ✅ 已完成(2026-05-23) | (pending push) | 18 TDD 全过,全量回归 772/0fail/0skip。IEquationFunction + EquationFunctionRegistry + RecipeBasedEquationFunction + TransformationResolver + UnknownTransformationException。 |
 | P3 | ✅ 已完成(2026-05-23) | (pending push) | 11 TDD 全过,全量回归 783/0fail/0skip。SystemMtCatalogService 加 Recipe CRUD + 校验链；新建 MethodMtCatalogService（Kind=method-level 强制 + MetaPatternCode 拒绝）。 |
 | P4 | ✅ 已完成(2026-05-23) | (pending push) | 7 新测试全过,全量回归 790/0fail/0skip。BatemanAnalyticSolution L2；bateman.ScaleInitial L1 Recipe；launcher 用 EquationFunctionRegistry + TransformationResolver 取代 Composite；PipelineContext 加 EquationKey/EquationFunctionRegistry。 |
-| P5 | 待启动 | — | — |
+| P5 | ✅ 已完成(2026-05-23) | (pending push) | 19 TDD 全过,全量回归 809/0fail/0skip。MethodTransformationRegistry（决策 B，委托 TransformationResolver）+ MethodAssertionEvaluator（less/greater/approx，拒噪声感知代码）。 |
 | P6 | 待启动 | — | — |
 | P7 | 待启动 | — | — |
 
