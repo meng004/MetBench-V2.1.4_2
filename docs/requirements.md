@@ -15,7 +15,7 @@
 | **测试文件** | `MetBench_SystemMT.Tests/` 下相对路径 | 单元 + BDD + UAT |
 | **测试结果** | `dotnet test MetBench_SystemMT.Tests` 最近一次基线 | `pass/skip/fail` 或缺口说明 |
 
-**基线**：2026-05-23（G-10 后，全建议顺序 G-09/G-06/G-08/G-07/G-05/G-10 完成），`dotnet test MetBench_SystemMT.Tests` = **848 pass / 0 fail**（OpenMC 跨程序场景在无 OpenMC 环境下首跑 skip / 二跑 warm 后 0 skip）。
+**基线**：2026-05-23（档 2.A.1/2.A.2/2.C 完成，next-stage P0 模型对齐 + G-02 LiveCharts 单测），`dotnet test MetBench_SystemMT.Tests` = **835 pass / 0 fail**（OpenMC 跨程序场景在无 OpenMC 环境下首跑 skip / 二跑 warm 后 0 skip）。基线变化：848 - 6 (mutmut) - 13 (Trend) + 6 (G-02) = 835。
 
 ## 1. T0 · 核心 —— 系统级 MT 流程
 
@@ -44,7 +44,7 @@
 |---|---|---|---|---|---|
 | F-T2-01 | AGENTS Stage 4 acceptance；CLAUDE.md §6 | HTML 报告渲染器 | `SystemMT/Reporting/HtmlSystemMtResultReportRenderer.cs`<br>`Reporting/ISystemMtResultReportRenderer.cs` | `Reporting/HtmlSystemMtResultReportRendererTests.cs` | ✅ pass |
 | F-T2-02 | AGENTS Stage 6 P8 | 5-scope 报告生成（Word / Excel / PDF） | `MetBench_BLL.Core/Reporting/SystemMtReportService.cs`<br>`MetBench_BLL/` 下的 Word/Excel/PDF 生成器（cross-platform 部分） | `V2Reporting/SystemMtReportServiceTests.cs` | ✅ pass |
-| F-T2-03 | CLAUDE.md §3 表注 | 跨平台 LiveCharts 数据层（`MTVisualizationSerive`） | `MetBench_BLL/MTVisualizationSerive.cs`（无 WPF 依赖部分） | ⚠ 无独立单测（图形组件 plotter 已迁 `MetBench_Client/Services/Plotting/`） | ☐ **缺口**：数据层测试未建 |
+| F-T2-03 | CLAUDE.md §3 表注 | 跨平台 LiveCharts 数据层（`MTVisualizationService`） | `MetBench_BLL/MTVisualizationService.cs`<br>+ 支撑类 `CsvDataReader.cs` / `ColumnDefinition.cs` / `PlotType.cs` / `Visualization/SeriesBuilder.cs` | `Bll/MtVisualizationServiceTests.cs`（6 测试） | ✅ pass |
 
 ## 4. T3 · 覆盖（代表性方程 × 程序类型）
 
@@ -114,7 +114,7 @@
 | 缺口编号 | 关联功能 | 缺口描述 | 影响范围 | 处置建议 |
 |---|---|---|---|---|
 | G-01 | F-T1-05（WPF 客户端） | 云端 CI 不能编译 WPF（`net8.0-windows7.0`），完全无自动测试覆盖 | WPF 页面行为只能 Windows 手动验证 | 维持现状（CLAUDE.md §3 已硬约束）；UAT runbook 已覆盖 |
-| G-02 | F-T2-03（LiveCharts 数据层） | `MTVisualizationSerive` 跨平台部分无独立单测 | 数据形态修改无回归保护 | 视后续 P 编号补一组数据形态单测 |
+| ~~G-02~~ ✅ 已完成(2026-05-23) | F-T2-03（LiveCharts 数据层） | ~~MTVisualizationService 跨平台部分无独立单测~~ | — | 新建 `Bll/MtVisualizationServiceTests.cs`（6 测试覆盖 Line/Scatter/Pie/未初始化/非法 PlotType/重复 Initialize） |
 | G-03 | F-T3-03（反应堆 5 方程锚定） | diffusion + Navier-Stokes 两条 L2 解析解 / SUT 未落地 | T3 覆盖目标未达成 | 留待 Stage 8 后续 plan；不在 P0–P7 范围 |
 | G-04 | F-T6-02（语义变异 + 等价识别 + 最小 MR 子集） | 完全未实现 | Stage 8 变异模块增强未启动 | CLAUDE.md §2 / AGENTS Stage 8 "主线之外"已列为 backlog |
 | ~~G-05~~ ✅ 已完成(2026-05-23) | F-MR-P7 | ~~LaTeX→SymPy `[Obsolete]` 后无 grep 守卫单测~~ | — | 已建 `Architecture/ObsoleteAttributeGuardTests.cs` 覆盖 `Latextosympy` + `Latextosympy_Await` + `SystemMtRunner`（5 测试） |
@@ -151,6 +151,9 @@
 | `4fc7f15` | **G-10** | ISystemMtMetadataRepository Delete + Recipe Update/Delete（848 pass） |
 | `dcf978a` | **G-07b** | App.xaml.cs 删除 SystemMtRunner DI 注册（VM 端；848 pass） |
 | `13b3447` | **G-08b** | App.xaml.cs 接入 SystemMtBootstrap：注册 metadata repo + importer，OnStartup seed（VM 端） |
+| `71665f3` | **档 2.A.1** | next-stage P0：删 AdversarialMutmutValidator + AdversarialCampaignSampler（842 pass）|
+| `88e757d` | **档 2.A.2** | next-stage P0：删 MetBench_BLL.Trend 子系统（829 pass）|
+| `<TBD-G-02>` | **G-02 / 档 2.C** | MTVisualizationService 数据层 6 单测（835 pass）|
 
 ## 12. 受控开发模式工作流
 
