@@ -449,6 +449,61 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
             TransformSteps: new[] { new MrTransformStep("ScaleField", "/initial/amplitude") },
             AssertionTypeCode: "greater");
 
+        // S8-P2: Fourier MR 库扩展（复用 heat-equation SUT）
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "fourier-timestep-convergence",
+                DisplayName: "1D heat equation — TimestepConvergence (forward-Euler refinement)",
+                SutName: "heat-equation",
+                TransformationName: "ScaleField",
+                AssertionName: "ApproxEqual",
+                ValueName: "max_u",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Time-step convergence MP_conv: doubling num_steps (halving the forward-Euler " +
+                    "time-step dt) must leave max_u(t_final) within Euler truncation tolerance — " +
+                    "the integrator is already at the fine-grid plateau given the chosen alpha.",
+                MrFamily: "Fourier.Convergence.Timestep"),
+            SampleCaseRelativePath: Path.Combine("heat_equation", "sample", "gaussian.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_input_adapter.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_output_adapter.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchHeatEq",
+            Timeout: TimeSpan.FromSeconds(60),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/params/num_steps") },
+            AssertionTypeCode: "approx",
+            EquationKey: "heat-equation-1d");
+
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "fourier-alpha-monotonic",
+                DisplayName: "1D heat equation — ScaleAlpha (diffusion monotonicity)",
+                SutName: "heat-equation",
+                TransformationName: "ScaleField",
+                AssertionName: "LessThan",
+                ValueName: "max_u",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Diffusion coefficient monotonicity MP_mono: at fixed t_final, larger alpha " +
+                    "causes faster diffusive smoothing of the initial profile, so scaling alpha " +
+                    "by factor > 1 must strictly decrease max_u(t_final).",
+                MrFamily: "Fourier.Scaling.Alpha"),
+            SampleCaseRelativePath: Path.Combine("heat_equation", "sample", "gaussian.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_input_adapter.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_output_adapter.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchHeatEq",
+            Timeout: TimeSpan.FromSeconds(60),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/params/alpha") },
+            AssertionTypeCode: "less",
+            EquationKey: "heat-equation-1d");
+
         yield return new MrBlueprint(
             new MrSummary(
                 Id: "decay-chain-scale-initial",

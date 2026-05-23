@@ -65,18 +65,50 @@ public sealed class SystemMtLauncherTests
     {
         var descriptors = await _launcher.ListAvailableAsync();
 
-        Assert.Equal(11, descriptors.Count);
+        Assert.Equal(13, descriptors.Count);
         Assert.Equal("bateman-mass-conservation", descriptors[0].Id);
         Assert.Equal("bateman-timestep-cauchy", descriptors[1].Id);
         Assert.Equal("damped-oscillator-scale-state", descriptors[2].Id);
         Assert.Equal("decay-chain-scale-initial", descriptors[3].Id);
-        Assert.Equal("heat-equation-amplitude", descriptors[4].Id);
-        Assert.Equal("lotka-volterra-scale-gamma", descriptors[5].Id);
-        Assert.Equal("openmc-pincell-nu-sigma-f", descriptors[6].Id);
-        Assert.Equal("openmc-pincell-sigma-a", descriptors[7].Id);
-        Assert.Equal("openmoc-pincell-nu-sigma-f", descriptors[8].Id);
-        Assert.Equal("openmoc-pincell-sigma-a", descriptors[9].Id);
-        Assert.Equal("projectile-scale-v0", descriptors[10].Id);
+        Assert.Equal("fourier-alpha-monotonic", descriptors[4].Id);
+        Assert.Equal("fourier-timestep-convergence", descriptors[5].Id);
+        Assert.Equal("heat-equation-amplitude", descriptors[6].Id);
+        Assert.Equal("lotka-volterra-scale-gamma", descriptors[7].Id);
+        Assert.Equal("openmc-pincell-nu-sigma-f", descriptors[8].Id);
+        Assert.Equal("openmc-pincell-sigma-a", descriptors[9].Id);
+        Assert.Equal("openmoc-pincell-nu-sigma-f", descriptors[10].Id);
+        Assert.Equal("openmoc-pincell-sigma-a", descriptors[11].Id);
+        Assert.Equal("projectile-scale-v0", descriptors[12].Id);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_fourier_timestep_convergence_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var conv = descriptors.Single(d => d.Id == "fourier-timestep-convergence");
+
+        Assert.Equal("heat-equation", conv.SutName);
+        Assert.Equal("ScaleField", conv.TransformationName);
+        Assert.Equal("ApproxEqual", conv.AssertionName);
+        Assert.Equal("max_u", conv.ValueName);
+        Assert.Equal("2", conv.DefaultParameters["factor"]);
+        Assert.Contains("step", conv.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Fourier.Convergence.Timestep", conv.MrFamily);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_fourier_alpha_monotonic_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var mono = descriptors.Single(d => d.Id == "fourier-alpha-monotonic");
+
+        Assert.Equal("heat-equation", mono.SutName);
+        Assert.Equal("ScaleField", mono.TransformationName);
+        Assert.Equal("LessThan", mono.AssertionName);
+        Assert.Equal("max_u", mono.ValueName);
+        Assert.Equal("2", mono.DefaultParameters["factor"]);
+        Assert.Contains("diffus", mono.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Fourier.Scaling.Alpha", mono.MrFamily);
     }
 
     [Fact]

@@ -179,6 +179,37 @@ public static class SystemMtMetadataCatalog
         },
         new MrMetadata
         {
+            MrId = "fourier-timestep-convergence",
+            EquationKey = "heat-equation-1d",
+            PhysicalMeaning =
+                "Forward-Euler 时间步收敛性：步长减半（num_steps 翻倍）后 max_u 在数值容差内不变 — " +
+                "若变化超出容差说明时间积分尚未收敛到细网格 plateau。",
+            InputTransformation = "num_steps → factor·num_steps（factor > 1）",
+            OutputRelation = "max_u(flw) ≈ max_u(src)（Euler 截断误差容差内）",
+            ComparisonType = MrComparisonType.Absolute,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "num_steps 缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "max_u", PhysicalMeaning = "终态峰值温度（输出）", ValueRange = "max_u > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "fourier-alpha-monotonic",
+            EquationKey = "heat-equation-1d",
+            PhysicalMeaning =
+                "扩散系数 α 越大，定时 t_final 内的扩散平滑越强，终态峰值温度 max_u 越小。",
+            InputTransformation = "α → factor·α（factor > 1）",
+            OutputRelation = "max_u(flw) < max_u(src)",
+            ComparisonType = MrComparisonType.Ordinal,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "α 缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "max_u", PhysicalMeaning = "终态峰值温度（输出）", ValueRange = "max_u > 0" },
+            },
+        },
+        new MrMetadata
+        {
             MrId = "decay-chain-scale-initial",
             EquationKey = "bateman",
             PhysicalMeaning =

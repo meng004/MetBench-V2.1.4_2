@@ -15,7 +15,7 @@
 | **测试文件** | `MetBench_SystemMT.Tests/` 下相对路径 | 单元 + BDD + UAT |
 | **测试结果** | `dotnet test MetBench_SystemMT.Tests` 最近一次基线 | `pass/skip/fail` 或缺口说明 |
 
-**基线**：2026-05-23（Stage 8 S8-P1 后），`dotnet test MetBench_SystemMT.Tests` = **837 pass / 0 fail**（OpenMC 跨程序场景在无 OpenMC 环境下首跑 skip / 二跑 warm 后 0 skip）。基线累计变化：848 - 6 (mutmut) - 13 (Trend) + 6 (G-02) + 2 (S8-P1) = 837。
+**基线**：2026-05-23（Stage 8 S8-P2 后），`dotnet test MetBench_SystemMT.Tests` = **839 pass / 0 fail**（OpenMC 跨程序场景在无 OpenMC 环境下首跑 skip / 二跑 warm 后 0 skip）。基线累计变化：848 - 6 (mutmut) - 13 (Trend) + 6 (G-02) + 2 (S8-P1) + 2 (S8-P2) = 839。
 
 ## 1. T0 · 核心 —— 系统级 MT 流程
 
@@ -51,7 +51,7 @@
 | 编号 | 需求来源 | 功能描述 | 实现文件 | 测试文件 | 测试结果 |
 |---|---|---|---|---|---|
 | F-T3-01 | AGENTS Stage 6 P8 | CoverageService 4 维报告 | `MetBench_BLL.Core/Coverage/CoverageService.cs`<br>`Coverage/CoverageReport.cs` | `V2Coverage/CoverageServiceTests.cs`<br>`V2Coverage/FakeCoverageRepositories.cs` | ✅ pass |
-| F-T3-02 | AGENTS Stage 8 | 代表性 SUT 接入（已落地：decay_chain / damped_oscillator / lotka_volterra / heat_equation / projectile / openmoc / openmc；**全部进入 launcher catalog + metadata catalog**）。**S8-P1（2026-05-23）扩 Bateman MR 库**：在 decay-chain SUT 上加 2 MR（`bateman-mass-conservation` m_inv + `bateman-timestep-cauchy` m_conv），共 11 MR / 6 方程；importer DeriveMetaPatternCode 扩 m_inv / m_conv 识别 | `SUT/decay_chain/`（含 `bateman` 方程实现）<br>`SUT/damped_oscillator/`<br>`SUT/lotka_volterra/`<br>`SUT/heat_equation/`<br>`SUT/projectile/`（+ `sample/standard.txt`）<br>`SUT/openmoc/`<br>`SUT/openmc/` | （上述各 SUT 的 Parser / Adapter / Smoke / Sample 测试，见 F-T1-02）<br>+ `Launcher/SystemMtLauncherTests.ListAvailableAsync_{projectile,bateman_mass_conservation,bateman_timestep_cauchy}_descriptor_has_expected_metadata` | ✅ pass |
+| F-T3-02 | AGENTS Stage 8 | 代表性 SUT 接入（已落地：decay_chain / damped_oscillator / lotka_volterra / heat_equation / projectile / openmoc / openmc；**全部进入 launcher catalog + metadata catalog**）。**S8-P1+P2（2026-05-23）扩 Bateman + Fourier MR 库**：S8-P1 在 decay-chain 上加 `bateman-mass-conservation` m_inv + `bateman-timestep-cauchy` m_conv；S8-P2 在 heat_equation 上加 `fourier-timestep-convergence` m_conv + `fourier-alpha-monotonic` m_mono。共 13 MR / 6 方程；importer DeriveMetaPatternCode 扩 m_inv / m_conv 识别 | `SUT/decay_chain/`（含 `bateman` 方程实现）<br>`SUT/damped_oscillator/`<br>`SUT/lotka_volterra/`<br>`SUT/heat_equation/`<br>`SUT/projectile/`（+ `sample/standard.txt`）<br>`SUT/openmoc/`<br>`SUT/openmc/` | （上述各 SUT 的 Parser / Adapter / Smoke / Sample 测试，见 F-T1-02）<br>+ `Launcher/SystemMtLauncherTests.ListAvailableAsync_{projectile,bateman_mass_conservation,bateman_timestep_cauchy}_descriptor_has_expected_metadata` | ✅ pass |
 | F-T3-03 | `docs/t3-program-selection.md` | 反应堆物理 5 方程锚定（boltzmann / diffusion / bateman / fourier / NS） | bateman: `Equations/Bateman/BatemanAnalyticSolution.cs`（L2）<br>boltzmann: 通过 OpenMOC/OpenMC SUT（无独立 L2）<br>fourier: 通过 heat_equation SUT<br>diffusion / NS: **未落地** | bateman: `SystemMT/Equations/BatemanP4Tests.cs` | ⚠ **缺口**：diffusion + NS 方程的 L2 / SUT 未落地 |
 
 ## 5. T4 · MR 识别
@@ -155,6 +155,7 @@
 | `88e757d` | **档 2.A.2** | next-stage P0：删 MetBench_BLL.Trend 子系统（829 pass）|
 | `8c7ddd5` | **G-02 / 档 2.C** | MTVisualizationService 数据层 6 单测（835 pass）|
 | `01fcba3` | **S8-P1** | Bateman MR 库扩展：`bateman-mass-conservation` (m_inv) + `bateman-timestep-cauchy` (m_conv) + importer 元模式识别扩展（837 pass）|
+| `<TBD-S8P2>` | **S8-P2** | Fourier MR 库扩展：`fourier-timestep-convergence` (m_conv) + `fourier-alpha-monotonic` (m_mono)（839 pass）|
 
 ## 12. 受控开发模式工作流
 
