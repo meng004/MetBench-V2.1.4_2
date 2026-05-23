@@ -15,7 +15,7 @@
 | **测试文件** | `MetBench_SystemMT.Tests/` 下相对路径 | 单元 + BDD + UAT |
 | **测试结果** | `dotnet test MetBench_SystemMT.Tests` 最近一次基线 | `pass/skip/fail` 或缺口说明 |
 
-**基线**：2026-05-23（Stage 8 S8-P5b 后），`dotnet test MetBench_SystemMT.Tests` = **856 pass / 0 fail**（OpenMC 跨程序场景在无 OpenMC 环境下首跑 skip / 二跑 warm 后 0 skip）。基线累计变化：848 - 6 (mutmut) - 13 (Trend) + 6 (G-02) + 2×4 (S8-P1..P4) + 4 (S8-P5a) + 9 (S8-P5b) = 856。MR 库 17 / 8 方程；V3 5D-tag schema entity + IDAL + LiteDB repo 已立（V2→V3 migration 待 S8-P5c）。
+**基线**：2026-05-23（Stage 8 S8-P5c 后），`dotnet test MetBench_SystemMT.Tests` = **863 pass / 0 fail**（OpenMC 跨程序场景在无 OpenMC 环境下首跑 skip / 二跑 warm 后 0 skip）。基线累计变化：848 - 6 (mutmut) - 13 (Trend) + 6 (G-02) + 2×4 (S8-P1..P4) + 4 (S8-P5a) + 9 (S8-P5b) + 7 (S8-P5c) = 863。MR 库 17 / 8 方程；V3 5D-tag schema 三层全立（entity + IDAL + DAL + V2→V3 migration）；S8-P6/P7/P8 留下次 PR。
 
 ## 1. T0 · 核心 —— 系统级 MT 流程
 
@@ -159,7 +159,8 @@
 | `f3bd535` | **S8-P3** | 1D subchannel SUT 接入 + navier-stokes 方程：2 新 MR（841 pass，G-03 部分闭合）|
 | `bb06ae5` | **S8-P4** | 1D diffusion SUT 接入 + diffusion 方程：2 新 MR（843 pass，**G-03 完全闭合**，5 方程全覆盖）|
 | `7bbb746` | **S8-P5a** | V3 5D-tag schema entity + 7 enum + round-trip 测试（847 pass）|
-| `<TBD-S8P5b>` | **S8-P5b** | V3 IDAL + LiteDB repo + CRUD/5D 维度过滤 9 测试（856 pass）|
+| `85aae2e` | **S8-P5b** | V3 IDAL + LiteDB repo + CRUD/5D 维度过滤 9 测试（856 pass）|
+| `<TBD-S8P5c>` | **S8-P5c** | V2→V3 MR 投影 migration + 7 测试（V2 字段映射到 5D enum + RigorClass 启发式，863 pass）|
 
 ## 12. 受控开发模式工作流
 
