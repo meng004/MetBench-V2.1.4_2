@@ -1,5 +1,8 @@
+using MetBench_BLL.SystemMT.Metadata;
+using MetBench_BLL.SystemMT.Transformations;
 using MetBench_Domain;
 using MetBench_IDAL;
+using System.Text.Json;
 
 namespace MetBench_BLL.SystemMT.Catalog;
 
@@ -30,17 +33,20 @@ public sealed class SystemMtCatalogService
     private readonly IMetamorphicRelationRepository _mrs;
     private readonly IMRBindingRepository _bindings;
     private readonly IAuditLogRepository _audit;
+    private readonly ISystemMtMetadataRepository? _meta;
 
     public SystemMtCatalogService(
         IApplicationRepository apps,
         IMetamorphicRelationRepository mrs,
         IMRBindingRepository bindings,
-        IAuditLogRepository audit)
+        IAuditLogRepository audit,
+        ISystemMtMetadataRepository? metadataRepo = null)
     {
         _apps = apps ?? throw new ArgumentNullException(nameof(apps));
         _mrs = mrs ?? throw new ArgumentNullException(nameof(mrs));
         _bindings = bindings ?? throw new ArgumentNullException(nameof(bindings));
         _audit = audit ?? throw new ArgumentNullException(nameof(audit));
+        _meta = metadataRepo;
     }
 
     // ==================== SUT (Application Kind=system-level) ====================
@@ -225,6 +231,72 @@ public sealed class SystemMtCatalogService
         if (ok) Audit(actor, "binding.delete", "MRBinding",
             existing.IdMRBinding.ToString(), $"mr={mrId} sut={sutId}");
         return ok;
+    }
+
+    // ==================== EquationFunction CRUD (P3) ====================
+
+    /// <summary>
+    /// 校验并持久化一个 L1 Recipe。校验：EquationKey/FunctionName 非空、RecipeJson 合法、
+    /// 每个 op 存在于 <see cref="TransformationRegistry"/>。
+    /// </summary>
+    public async Task CreateEquationFunctionAsync(
+        EquationFunctionRecipe recipe, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(recipe);
+        if (string.IsNullOrWhiteSpace(recipe.EquationKey))
+            throw new ArgumentException("EquationKey is required", nameof(recipe));
+        if (string.IsNullOrWhiteSpace(recipe.FunctionName))
+            throw new ArgumentException("FunctionName is required", nameof(recipe));
+
+        ValidateRecipeJson(recipe.RecipeJson);
+
+        var repo = _meta ?? throw new InvalidOperationException(
+            "CreateEquationFunctionAsync requires ISystemMtMetadataRepository");
+        await repo.UpsertRecipeAsync(recipe, ct);
+    }
+
+    /// <summary>按 (equationKey, functionName) 取 Recipe，缺失返回 null。</summary>
+    public async Task<EquationFunctionRecipe?> GetEquationFunctionAsync(
+        string equationKey, string functionName, CancellationToken ct = default)
+    {
+        if (_meta is null || string.IsNullOrWhiteSpace(equationKey) ||
+            string.IsNullOrWhiteSpace(functionName))
+            return null;
+        return await _meta.GetRecipeAsync(equationKey, functionName, ct);
+    }
+
+    /// <summary>列出指定方程下的全部 L1 Recipe，按 FunctionName 升序。</summary>
+    public async Task<IReadOnlyList<EquationFunctionRecipe>> ListEquationFunctionsAsync(
+        string equationKey, CancellationToken ct = default)
+    {
+        if (_meta is null || string.IsNullOrWhiteSpace(equationKey))
+            return Array.Empty<EquationFunctionRecipe>();
+        return await _meta.ListRecipesByEquationAsync(equationKey, ct);
+    }
+
+    private static void ValidateRecipeJson(string recipeJson)
+    {
+        List<string> ops;
+        try
+        {
+            using var doc = JsonDocument.Parse(recipeJson);
+            var compose = doc.RootElement.GetProperty("compose");
+            ops = compose.EnumerateArray()
+                .Select(s => s.GetProperty("op").GetString() ?? string.Empty)
+                .ToList();
+        }
+        catch (Exception ex) when (ex is JsonException or KeyNotFoundException or InvalidOperationException)
+        {
+            throw new ArgumentException($"Invalid RecipeJson: {ex.Message}", ex);
+        }
+
+        foreach (var op in ops)
+        {
+            if (!TransformationRegistry.AvailableNames.Contains(op))
+                throw new ArgumentException(
+                    $"Unknown op '{op}' in recipe. " +
+                    $"Registered: [{string.Join(", ", TransformationRegistry.AvailableNames)}]");
+        }
     }
 
     // ==================== helpers ====================
