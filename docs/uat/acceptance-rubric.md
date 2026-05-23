@@ -128,7 +128,7 @@
 |---|------|---------|------|------|------|
 | G1 | LiteDB Keyset 分页 | Passed ≥ 10, Failed 0 | 🟡 | | trx |
 | G2 | CI 性能基线 | `ci_perf_baseline.py` exit 0 + total < 120 s | 🟡 | | 日志 |
-| G3 | 多维 burst 检测 | Passed ≥ 4, Failed 0 | 🟢 | | trx |
+| G3 | ~~多维 burst 检测~~ | （已删除，next-stage P0：Trend 子系统下线） | — | — | — |
 | G4 | Coverage service 单测 | Passed ≥ 5, Failed 0 | 🟡 | | trx |
 | G5 | Anomaly service + commonality | Passed ≥ 8, Failed 0 | 🟡 | | trx |
 

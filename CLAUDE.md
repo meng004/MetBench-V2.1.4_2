@@ -330,11 +330,10 @@ Once a feature has been cloud-side TDD-tested, it lives in one of these
 | `MetBench_BLL.SystemMT.*` | Pipeline + Launcher + Persistence + Reporting | `SystemMtPipeline`, `ISystemMtMrLauncher`, `HtmlSystemMtResultReportRenderer` |
 | `MetBench_BLL.SystemMT.Anomaly` | Anomaly viewer + commonality | `AnomalyService`, `CommonalityReport` |
 | `MetBench_BLL.Discovery` | MR Discovery + Validation | `IMRDiscoverer`, `DiscoveryService`, `ValidationService`, `ILlmGateway` |
-| `MetBench_BLL.Discovery.Validators` | Day-1 validators | `EmpiricalValidator`, `TheoreticalLlmValidator`, `AdversarialMutmutValidator` |
+| `MetBench_BLL.Discovery.Validators` | Day-1 validators | `EmpiricalValidator`, `TheoreticalLlmValidator` |
 | `MetBench_BLL.Mutation` | Mutation campaign matrix | `MutationCampaignService`, `MutationCellRunner` |
 | `MetBench_BLL.Coverage` | 4-dim coverage report | `CoverageService`, `CoverageReport` |
-| `MetBench_BLL.Trend` | Weekly trend + WoW + burst detection | `TrendAnalysisService`, `WeeklyReport` |
-| `MetBench_BLL.Reporting` | 5-scope report generator | `SystemMtReportService` |
+| `MetBench_BLL.Reporting` | 4-scope report generator | `SystemMtReportService` |
 
 All services are stateless and inject only IDAL repository interfaces +
 optional gateway abstractions (`ILlmGateway`, `MutationCellRunner`,

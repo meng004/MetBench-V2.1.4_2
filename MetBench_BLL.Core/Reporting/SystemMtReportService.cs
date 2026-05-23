@@ -1,12 +1,12 @@
 using MetBench_BLL.Coverage;
-using MetBench_BLL.Trend;
 using MetBench_Domain;
 using MetBench_IDAL;
 
 namespace MetBench_BLL.Reporting;
 
 /// <summary>
-/// 5 Scope 报告生成 —— execution / anomaly / mutation-campaign / weekly / coverage。
+/// 4 Scope 报告生成 —— execution / anomaly / mutation-campaign / coverage。
+/// （Weekly scope 已删除，随 Trend 子系统于 next-stage P0 一并下线。）
 /// </summary>
 /// <remarks>
 /// 生成 markdown 文本（不写实际 HTML，由 <c>HtmlSystemMtResultReportRenderer</c> 后处理）+ 写 Report 表。
@@ -16,7 +16,6 @@ public sealed class SystemMtReportService
     public const string ScopeExecution = "single-execution";
     public const string ScopeAnomaly = "anomaly";
     public const string ScopeMutationCampaign = "single-campaign";
-    public const string ScopeWeekly = "weekly";
     public const string ScopeCoverage = "coverage";
 
     private readonly IReportRepository _reports;
@@ -62,14 +61,6 @@ public sealed class SystemMtReportService
         var cells = _mutationResults.GetByCampaign(campaignId).ToList();
         var content = BuildMutationMarkdown(campaign, cells);
         return Persist(ScopeMutationCampaign, campaignId.ToString(), contentPath, content);
-    }
-
-    public ReportRenderResult GenerateWeekly(WeeklyReport weekly, string contentPath)
-    {
-        var content = BuildWeeklyMarkdown(weekly);
-        return Persist(ScopeWeekly,
-            scopeRefId: weekly.WeekStartUtc.ToString("yyyy-MM-dd"),
-            contentPath: contentPath, content: content);
     }
 
     public ReportRenderResult GenerateCoverage(CoverageReport report, string contentPath)
@@ -140,18 +131,6 @@ public sealed class SystemMtReportService
             - Detection rate: {rate:P1}
             """;
     }
-
-    internal static string BuildWeeklyMarkdown(WeeklyReport w) => $"""
-        # Weekly Report — {w.WeekStartUtc:yyyy-MM-dd} → {w.WeekEndUtc:yyyy-MM-dd}
-        {w.Headline}
-
-        - Executions: {w.Executions} (prev: {w.ExecutionsWoW})
-        - Anomalies: {w.Anomalies} (prev: {w.AnomaliesWoW})
-        - Anomaly rate: {w.AnomalyRate:P1} (prev: {w.AnomalyRateWoW:P1})
-        - New known bugs: {w.NewKnownBugs}
-        - Promoted MRs: {w.PromotedMRs}
-        - Bursts: {(w.Bursts.Count == 0 ? "none" : string.Join(", ", w.Bursts.Select(b => $"{b.Dimension}={b.Key} ({b.SigmasAbove}σ)")))}
-        """;
 
     internal static string BuildCoverageMarkdown(CoverageReport r) => $"""
         # Coverage Report — {r.GeneratedAt:yyyy-MM-dd HH:mm:ss}Z

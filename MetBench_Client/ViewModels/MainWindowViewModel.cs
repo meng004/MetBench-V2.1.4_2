@@ -121,12 +121,6 @@ namespace MetBench_Client.ViewModels
             },
                      new NavigationViewItem()
             {
-                Content = "Trends",
-                Icon = new SymbolIcon { Symbol = SymbolRegular.DataTrending20 },
-                TargetPageType = typeof(Views.Pages.TrendDashboardPage)
-            },
-                     new NavigationViewItem()
-            {
                 Content = "MetaPatterns",
                 Icon = new SymbolIcon { Symbol = SymbolRegular.Shapes24 },
                 TargetPageType = typeof(Views.Pages.MetaPatternsPage)
