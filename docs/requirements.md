@@ -138,6 +138,8 @@
 | `17a6093` | F-MR-P7 | legacy Obsolete |
 | `266485e` | （文档） | plan 表中 commit hash 回填 |
 | `5856bd8` | （文档） | requirements.md 追溯矩阵初版 |
+| `8259093` | （文档） | §10 追加 G-06..G-10 |
+| `e0cceea` | **G-09** | projectile SUT 接入 launcher + metadata catalog（810 pass） |
 
 ## 12. 受控开发模式工作流
 
