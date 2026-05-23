@@ -15,7 +15,7 @@
 | **测试文件** | `MetBench_SystemMT.Tests/` 下相对路径 | 单元 + BDD + UAT |
 | **测试结果** | `dotnet test MetBench_SystemMT.Tests` 最近一次基线 | `pass/skip/fail` 或缺口说明 |
 
-**基线**：2026-05-23（Stage 8 S8-P5c 后），`dotnet test MetBench_SystemMT.Tests` = **863 pass / 0 fail**（OpenMC 跨程序场景在无 OpenMC 环境下首跑 skip / 二跑 warm 后 0 skip）。基线累计变化：848 - 6 (mutmut) - 13 (Trend) + 6 (G-02) + 2×4 (S8-P1..P4) + 4 (S8-P5a) + 9 (S8-P5b) + 7 (S8-P5c) = 863。MR 库 17 / 8 方程；V3 5D-tag schema 三层全立（entity + IDAL + DAL + V2→V3 migration）；S8-P6/P7/P8 留下次 PR。
+**基线**：2026-05-23（Stage 8 S8-P5c + 5-angle review 3 commits 修复后），`dotnet test MetBench_SystemMT.Tests` = **876 pass / 0 fail**（OpenMC 跨程序场景在无 OpenMC 环境下首跑 skip / 二跑 warm 后 0 skip）。基线累计：848 - 6 (mutmut) - 13 (Trend) + 6 (G-02) + 2×4 (S8-P1..P4) + 4 (S8-P5a) + 9 (S8-P5b) + 7 (S8-P5c) + 5 (review-fix-1：Tolerance/EquationKey/MapProgram) + 7 (enum pinning) + 1 (DeleteMr binding guard) = 876。MR 库 17 / 8 方程；V3 5D-tag schema 三层 + 数据链修复（Importer 写 EquationKey + Migration 通过 MRBinding lookup SUT）。
 
 ## 1. T0 · 核心 —— 系统级 MT 流程
 
@@ -161,6 +161,9 @@
 | `7bbb746` | **S8-P5a** | V3 5D-tag schema entity + 7 enum + round-trip 测试（847 pass）|
 | `85aae2e` | **S8-P5b** | V3 IDAL + LiteDB repo + CRUD/5D 维度过滤 9 测试（856 pass）|
 | `5fc6f15` | **S8-P5c** | V2→V3 MR 投影 migration + 7 测试（V2 字段映射到 5D enum + RigorClass 启发式，863 pass）|
+| `60f9910` | **review-fix-1** | critical 数据链 + Tolerance hard-code 修复（5 新测试，868 pass）|
+| `b8fdd85` | **review-fix-2** | cleanup misses — README/AGENTS/Report doc + UAT rubric/procedures + smokeshot Trends（doc-only，868 pass）|
+| `<TBD-rf3>` | **review-fix-3** | medium：DeleteMr binding guard + enum int 锁定 + SUT divide-by-zero/edge guard（+8 测试，876 pass）|
 
 ## 12. 受控开发模式工作流
 

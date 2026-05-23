@@ -4,6 +4,7 @@ namespace MetBench_Domain.V2.Enums;
 /// NOETHER 元模式分类，V3 MR 5D tag 第 3 维（What pattern of relation?）。
 /// 与既有 <c>MetamorphicRelation.MetaPatternCode</c> 字符串映射。
 /// </summary>
+/// <remarks>**APPEND-ONLY**：LiteDB BsonMapper 默认按底层 int 序列化；重排或插值会让历史行映射错误成员（Stage 8 P5 review）。新成员只追加末尾，并配 <c>V3EnumStabilityPinningTests</c> 守护。</remarks>
 public enum MetaPatternKind
 {
     /// <summary>未指定 / 自定义。</summary>

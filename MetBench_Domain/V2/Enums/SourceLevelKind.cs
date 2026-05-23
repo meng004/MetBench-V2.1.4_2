@@ -4,6 +4,7 @@ namespace MetBench_Domain.V2.Enums;
 /// MR 来源层级，V3 MR 5D tag 第 4 维（How was the MR identified?）。
 /// 与既有 <c>MetamorphicRelation.DiscoveryMethod</c> 字符串映射。
 /// </summary>
+/// <remarks>**APPEND-ONLY**：LiteDB BsonMapper 默认按底层 int 序列化；重排或插值会让历史行映射错误成员（Stage 8 P5 review）。新成员只追加末尾，并配 <c>V3EnumStabilityPinningTests</c> 守护。</remarks>
 public enum SourceLevelKind
 {
     /// <summary>未指定（v2 默认值）。</summary>

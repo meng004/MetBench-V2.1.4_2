@@ -40,15 +40,19 @@ Input JSON shape:
       }
     }
 
-Output JSON shape (key=value style, single-line scalars):
+Output JSON shape:
 
     {
       "T_out":           <outlet temperature [K]>,
       "delta_T":         <T_out - T_in [K]>,
-      "heat_input":      <q'' * P_h * L; total power input [W/m^2 * m = W/m]>,
+      "heat_input":      <q'' * P_h ; *per-unit-length* heat input [W/m]>,
       "delta_p":         <friction pressure drop [Pa]>,
       "channel_length":  <L echoed back [m]>
     }
+
+Note: `heat_input` is W/m (not total W). To recover total power, multiply by
+`channel_length`. This is intentional — keeping the per-unit-length form makes
+energy-conservation MRs trivially expressible without dividing by L.
 """
 
 from __future__ import annotations
@@ -76,6 +80,14 @@ def solve(case: dict) -> dict:
     G = float(bnd["mass_flux"])  # kg/(m^2 s)
     T_in = float(bnd["inlet_temperature"])
     qpp = float(bnd["heat_flux"])  # W/m^2
+
+    # Sanity guard: explicit ValueError beats silent inf/NaN in JSON output
+    if G <= 0:
+        raise ValueError(f"mass_flux must be > 0 (got {G})")
+    if cp <= 0 or A_xs <= 0:
+        raise ValueError(f"cp and A_xs must be > 0 (got cp={cp}, A_xs={A_xs})")
+    if rho <= 0 or D_h <= 0:
+        raise ValueError(f"density and hydraulic_diameter must be > 0 (got rho={rho}, D_h={D_h})")
 
     # Energy: T_out = T_in + q'' * P_h * L / (G * A_xs * c_p)
     heat_input_per_unit_length = qpp * P_h  # W/m

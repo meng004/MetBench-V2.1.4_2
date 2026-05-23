@@ -104,11 +104,17 @@ public sealed class MethodMtCatalogService
 
     /// <summary>
     /// 删除方法级 MR。
+    /// 若该 MR 仍有 active <see cref="MRBinding"/>，拒绝删除并返回 Blocked（对称
+    /// <see cref="SystemMtCatalogService.DeleteMr"/>，避免悬空 binding）。
     /// </summary>
     public DeleteOutcome DeleteMr(int mrId, string actor = "user")
     {
         var mr = GetMr(mrId);
         if (mr is null) return DeleteOutcome.NotFound;
+        var deps = _bindings.GetByMR(mrId);
+        if (deps.Any())
+            return DeleteOutcome.Blocked(
+                $"MR id={mrId} has {deps.Count} SUT binding(s); unbind first");
         var ok = _mrs.Remove(mr);
         if (ok) Audit(actor, "mr.delete", "MetamorphicRelation", mrId.ToString(), mr.Code);
         return ok ? DeleteOutcome.Deleted : DeleteOutcome.Blocked("repository refused delete");

@@ -3,6 +3,7 @@ namespace MetBench_Domain.V2.Enums;
 /// <summary>
 /// MR 关系类型 — 描述源/衍生输出之间的数学关系形态。
 /// </summary>
+/// <remarks>**APPEND-ONLY**：LiteDB BsonMapper 默认按底层 int 序列化；重排或插值会让历史行映射错误成员（Stage 8 P5 review）。新成员只追加末尾，并配 <c>V3EnumStabilityPinningTests</c> 守护。</remarks>
 public enum RelationKind
 {
     /// <summary>未指定。</summary>

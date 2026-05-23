@@ -79,10 +79,17 @@ def solve(case: dict) -> dict:
     n = int(geom["num_points"])
     if n < 3:
         raise ValueError("num_points must be ≥ 3")
+    # Note: phi_center uses phi[(n-1)//2]; for even n it's half-cell off-center
+    # (~dx/2). MRs that compare phi_center across refinements should either
+    # restrict to odd n, or interpolate. mesh-richardson MR uses phi_max
+    # (peak-amplitude) which is robust to parity, so even n is OK there.
 
     D = float(mat["D"])
     sigma_a = float(mat["sigma_a"])
     S = float(src["strength"])
+
+    if D <= 0 or sigma_a <= 0:
+        raise ValueError(f"D and sigma_a must be > 0 (got D={D}, sigma_a={sigma_a})")
 
     dx = L / (n - 1)
     # Interior unknowns: i = 1 .. n-2  (boundaries phi[0] = phi[n-1] = 0)
@@ -103,8 +110,11 @@ def solve(case: dict) -> dict:
     # Full flux vector (with zero boundaries)
     phi = [0.0] + phi_int + [0.0]
 
-    phi_max = max(phi)
-    phi_center = phi[(n - 1) // 2]
+    # phi_max from interior only — boundaries are forced zero, so if source S < 0
+    # produces negative interior flux, including boundary 0 would silently mask
+    # the true peak magnitude.
+    phi_max = max(phi_int)
+    phi_center = phi[(n - 1) // 2]  # exact midpoint (n is odd, guarded above)
     # Trapezoidal integration
     phi_integral = dx * (0.5 * phi[0] + sum(phi[1:-1]) + 0.5 * phi[-1])
 
