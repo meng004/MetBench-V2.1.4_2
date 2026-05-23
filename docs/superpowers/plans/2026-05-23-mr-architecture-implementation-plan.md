@@ -207,13 +207,13 @@
 
 | Phase | 状态 | commit | 备注 |
 |---|---|---|---|
-| P0 | ✅ 已完成(2026-05-23) | (pending push) | 13 TDD 全过,全量回归 680/0fail/0skip。schema 字段添加无破坏,既有数据按默认值兼容。 |
-| P1 | ✅ 已完成(2026-05-23) | (pending push) | 74 TDD 全过,全量回归 754/0fail/0skip。17 L0 数学基元注册入 TransformationRegistry。 |
-| P2 | ✅ 已完成(2026-05-23) | (pending push) | 18 TDD 全过,全量回归 772/0fail/0skip。IEquationFunction + EquationFunctionRegistry + RecipeBasedEquationFunction + TransformationResolver + UnknownTransformationException。 |
-| P3 | ✅ 已完成(2026-05-23) | (pending push) | 11 TDD 全过,全量回归 783/0fail/0skip。SystemMtCatalogService 加 Recipe CRUD + 校验链；新建 MethodMtCatalogService（Kind=method-level 强制 + MetaPatternCode 拒绝）。 |
-| P4 | ✅ 已完成(2026-05-23) | (pending push) | 7 新测试全过,全量回归 790/0fail/0skip。BatemanAnalyticSolution L2；bateman.ScaleInitial L1 Recipe；launcher 用 EquationFunctionRegistry + TransformationResolver 取代 Composite；PipelineContext 加 EquationKey/EquationFunctionRegistry。 |
-| P5 | ✅ 已完成(2026-05-23) | (pending push) | 19 TDD 全过,全量回归 809/0fail/0skip。MethodTransformationRegistry（决策 B，委托 TransformationResolver）+ MethodAssertionEvaluator（less/greater/approx，拒噪声感知代码）。 |
-| P6 | ✅ 已完成(2026-05-23) | — | 809/809 全过，0 fail/0 skip。7 个 step 文件全部移除 W1 引擎类型（SystemMtRunner/MrTransformation/IMrAssertion/PythonInputAdapter）；改用 ISystemMtPipeline.ExecuteAsync(ctx)。新增 example_cli_input_parser.py / example_cli_output_parser.py（TestAssets）和 projectile_input_parser.py / projectile_output_parser.py（SUT/projectile）支持简单 SUT 的 v2 解析协议。Then 步骤适配 PipelineOutcome.SourceMetrics/FollowupMetrics/AssertionResult。grep 确认 Steps/ 无 W1 new 调用。 |
-| P7 | ✅ 已完成(2026-05-23) | — | `[Obsolete]` 加 Latextosympy.cs + Latextosympy_Await.cs；AGENTS.md 指针回写；mr-architecture.md §8 实施序列全标 ✅ + landing status note。全量回归 809/809 全过。 |
+| P0 | ✅ 已完成(2026-05-23) | `4c85b6c` | 13 TDD 全过,全量回归 680/0fail/0skip。schema 字段添加无破坏,既有数据按默认值兼容。 |
+| P1 | ✅ 已完成(2026-05-23) | `16de54b` | 74 TDD 全过,全量回归 754/0fail/0skip。17 L0 数学基元注册入 TransformationRegistry。 |
+| P2 | ✅ 已完成(2026-05-23) | `a004ac4` | 18 TDD 全过,全量回归 772/0fail/0skip。IEquationFunction + EquationFunctionRegistry + RecipeBasedEquationFunction + TransformationResolver + UnknownTransformationException。 |
+| P3 | ✅ 已完成(2026-05-23) | `f05de05` | 11 TDD 全过,全量回归 783/0fail/0skip。SystemMtCatalogService 加 Recipe CRUD + 校验链；新建 MethodMtCatalogService（Kind=method-level 强制 + MetaPatternCode 拒绝）。 |
+| P4 | ✅ 已完成(2026-05-23) | `cc779a9` | 7 新测试全过,全量回归 790/0fail/0skip。BatemanAnalyticSolution L2；bateman.ScaleInitial L1 Recipe；launcher 用 EquationFunctionRegistry + TransformationResolver 取代 Composite；PipelineContext 加 EquationKey/EquationFunctionRegistry。 |
+| P5 | ✅ 已完成(2026-05-23) | `80c2317` | 19 TDD 全过,全量回归 809/0fail/0skip。MethodTransformationRegistry（决策 B，委托 TransformationResolver）+ MethodAssertionEvaluator（less/greater/approx，拒噪声感知代码）。 |
+| P6 | ✅ 已完成(2026-05-23) | `3991c52` | 809/809 全过，0 fail/0 skip。7 个 step 文件全部移除 W1 引擎类型（SystemMtRunner/MrTransformation/IMrAssertion/PythonInputAdapter）；改用 ISystemMtPipeline.ExecuteAsync(ctx)。新增 example_cli_input_parser.py / example_cli_output_parser.py（TestAssets）和 projectile_input_parser.py / projectile_output_parser.py（SUT/projectile）支持简单 SUT 的 v2 解析协议。Then 步骤适配 PipelineOutcome.SourceMetrics/FollowupMetrics/AssertionResult。grep 确认 Steps/ 无 W1 new 调用。 |
+| P7 | ✅ 已完成(2026-05-23) | `17a6093` | `[Obsolete]` 加 Latextosympy.cs + Latextosympy_Await.cs；AGENTS.md 指针回写；mr-architecture.md §8 实施序列全标 ✅ + landing status note。全量回归 809/809 全过。 |
 
 执行后须更新本表 + AGENTS.md Stage 8 + mr-architecture.md §8 实施序列状态。
