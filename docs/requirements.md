@@ -154,7 +154,7 @@
 | `71665f3` | **档 2.A.1** | next-stage P0：删 AdversarialMutmutValidator + AdversarialCampaignSampler（842 pass）|
 | `88e757d` | **档 2.A.2** | next-stage P0：删 MetBench_BLL.Trend 子系统（829 pass）|
 | `8c7ddd5` | **G-02 / 档 2.C** | MTVisualizationService 数据层 6 单测（835 pass）|
-| `<TBD-S8P1>` | **S8-P1** | Bateman MR 库扩展：`bateman-mass-conservation` (m_inv) + `bateman-timestep-cauchy` (m_conv) + importer 元模式识别扩展（837 pass）|
+| `01fcba3` | **S8-P1** | Bateman MR 库扩展：`bateman-mass-conservation` (m_inv) + `bateman-timestep-cauchy` (m_conv) + importer 元模式识别扩展（837 pass）|
 
 ## 12. 受控开发模式工作流
 
