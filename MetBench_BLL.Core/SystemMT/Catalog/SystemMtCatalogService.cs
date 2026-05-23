@@ -274,6 +274,43 @@ public sealed class SystemMtCatalogService
         return await _meta.ListRecipesByEquationAsync(equationKey, ct);
     }
 
+    /// <summary>
+    /// 更新一个已存在的 L1 Recipe（按 (EquationKey, FunctionName) 复合键）。
+    /// 校验同 Create：EquationKey/FunctionName 非空、RecipeJson 合法。
+    /// 由于底层是 Upsert，本方法语义上等同 Create；保留独立方法以便未来增加"必须存在"前置校验。
+    /// </summary>
+    public async Task UpdateEquationFunctionAsync(
+        EquationFunctionRecipe recipe, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(recipe);
+        if (string.IsNullOrWhiteSpace(recipe.EquationKey))
+            throw new ArgumentException("EquationKey is required", nameof(recipe));
+        if (string.IsNullOrWhiteSpace(recipe.FunctionName))
+            throw new ArgumentException("FunctionName is required", nameof(recipe));
+
+        ValidateRecipeJson(recipe.RecipeJson);
+
+        var repo = _meta ?? throw new InvalidOperationException(
+            "UpdateEquationFunctionAsync requires ISystemMtMetadataRepository");
+        var existing = await repo.GetRecipeAsync(recipe.EquationKey, recipe.FunctionName, ct);
+        if (existing is null)
+            throw new InvalidOperationException(
+                $"Recipe ({recipe.EquationKey}, {recipe.FunctionName}) not found; use CreateEquationFunctionAsync");
+        await repo.UpsertRecipeAsync(recipe, ct);
+    }
+
+    /// <summary>
+    /// 按 (EquationKey, FunctionName) 删除 L1 Recipe。返回是否实际删除。
+    /// </summary>
+    public async Task<bool> DeleteEquationFunctionAsync(
+        string equationKey, string functionName, CancellationToken ct = default)
+    {
+        if (_meta is null || string.IsNullOrWhiteSpace(equationKey) ||
+            string.IsNullOrWhiteSpace(functionName))
+            return false;
+        return await _meta.DeleteRecipeAsync(equationKey, functionName, ct);
+    }
+
     private static void ValidateRecipeJson(string recipeJson)
     {
         List<string> ops;

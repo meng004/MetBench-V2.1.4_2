@@ -225,5 +225,17 @@ public sealed class P3CatalogExtensionTests
         public Task<IReadOnlyList<EquationFunctionRecipe>> ListRecipesAsync(CancellationToken ct = default)
             => Task.FromResult<IReadOnlyList<EquationFunctionRecipe>>(
                 _recipes.OrderBy(r => r.EquationKey).ThenBy(r => r.FunctionName).ToList());
+
+        public Task<bool> DeleteEquationAsync(string eq, CancellationToken ct = default)
+            => Task.FromResult(_eqs.Remove(eq));
+
+        public Task<bool> DeleteMrAsync(string id, CancellationToken ct = default)
+            => Task.FromResult(_mrsM.Remove(id));
+
+        public Task<bool> DeleteRecipeAsync(string eq, string fn, CancellationToken ct = default)
+        {
+            var removed = _recipes.RemoveAll(r => r.EquationKey == eq && r.FunctionName == fn);
+            return Task.FromResult(removed > 0);
+        }
     }
 }

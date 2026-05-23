@@ -239,6 +239,35 @@ public sealed class LiteDbSystemMtMetadataRepository : ISystemMtMetadataReposito
         return Task.FromResult<IReadOnlyList<EquationFunctionRecipe>>(all);
     }
 
+    // ===== G-10 — Delete 路径 =====
+
+    public Task<bool> DeleteEquationAsync(string equationKey, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (string.IsNullOrEmpty(equationKey)) return Task.FromResult(false);
+        var deleted = _equations.DeleteMany(e => e.EquationKey == equationKey);
+        return Task.FromResult(deleted > 0);
+    }
+
+    public Task<bool> DeleteMrAsync(string mrId, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (string.IsNullOrEmpty(mrId)) return Task.FromResult(false);
+        var deleted = _mrs.DeleteMany(m => m.MrId == mrId);
+        return Task.FromResult(deleted > 0);
+    }
+
+    public Task<bool> DeleteRecipeAsync(string equationKey, string functionName,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (string.IsNullOrEmpty(equationKey) || string.IsNullOrEmpty(functionName))
+            return Task.FromResult(false);
+        var deleted = _recipes.DeleteMany(r =>
+            r.EquationKey == equationKey && r.FunctionName == functionName);
+        return Task.FromResult(deleted > 0);
+    }
+
     public void Dispose()
     {
         if (_disposed)

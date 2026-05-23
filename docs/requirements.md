@@ -15,7 +15,7 @@
 | **测试文件** | `MetBench_SystemMT.Tests/` 下相对路径 | 单元 + BDD + UAT |
 | **测试结果** | `dotnet test MetBench_SystemMT.Tests` 最近一次基线 | `pass/skip/fail` 或缺口说明 |
 
-**基线**：2026-05-23（G-07/G-05 后），`dotnet test MetBench_SystemMT.Tests` = **839 pass / 0 fail**（OpenMC 跨程序场景在无 OpenMC 环境下首跑 skip / 二跑 warm 后 0 skip）。
+**基线**：2026-05-23（G-10 后，全建议顺序 G-09/G-06/G-08/G-07/G-05/G-10 完成），`dotnet test MetBench_SystemMT.Tests` = **848 pass / 0 fail**（OpenMC 跨程序场景在无 OpenMC 环境下首跑 skip / 二跑 warm 后 0 skip）。
 
 ## 1. T0 · 核心 —— 系统级 MT 流程
 
@@ -122,7 +122,7 @@
 | ~~G-07~~ ✅ 已完成(2026-05-23, 云端范围) | F-T0-02 / F-T0-01 | ~~W1 引擎残留~~ | — | 给 `SystemMtRunner` 加 `[Obsolete]`（顶层入口）；2 个 W1 测试加 file-level `#pragma warning disable CS0618` 抑制（按 §0.5.5 保留测试）；新增 ObsoleteAttributeGuardTests 覆盖（5 测试，与 G-05 合并）。深度审计发现完全删 W1 涉及 SystemMtResult/AnomalyClassifier/SystemMtResultRecord/ISystemMtResultRepository cross-cutting，属 Stage 9 大重构。**VM 端待做**：`App.xaml.cs:130` 的 `SystemMtRunner` DI 注册触发 CS0618 警告，VM 端按需移除 |
 | ~~G-08~~ ✅ 已完成(2026-05-23, 云端范围) | F-T1-04 / F-T0-03 | ~~catalog 双 seed 不自动同步~~ | — | 已建 `SystemMtBootstrap.SeedCatalogsAsync(metaRepo, importer)` 一次性 idempotent helper，串行调 `SystemMtMetadataCatalog.SeedAsync` + `LauncherCatalogV2Importer.Import`；4 新测试。**VM 端待做**（G-08b/G-11 候选）：`App.xaml.cs` 启动时调 `SystemMtBootstrap.SeedCatalogsAsync`。完整 source-of-truth 收口（launcher 改读 catalog 而非硬编码）属 Stage 9+ 重构 |
 | ~~G-09~~ ✅ 已完成(2026-05-23) | F-T3-02 / F-T1-04 | ~~projectile SUT 未进 launcher catalog~~ | — | 已补 `projectile-motion` EquationMetadata + `projectile-scale-v0` MrMetadata + MrBlueprint + `SUT/projectile/sample/standard.txt`；2 个 launcher 测试 + cascade 4 个 importer 测试更新；全量 809→810 pass |
-| G-10 | F-T1-04 | **CRUD 不全**：`EquationFunctionRecipe` 缺 Update/Delete；元信息层 (`ISystemMtMetadataRepository`) 全无 Delete；`MethodMtCatalogService` 公开方法 0 个（疑似仅构造时拒绝 MetaPattern） | 元信息一旦写入只能 Upsert 覆盖；无清理路径 | 视 UI/UAT 需要再补；目前 backlog（注：G-06 将补 `MethodMtCatalogService` MR-CRUD 子集） |
+| ~~G-10~~ ✅ 已完成(2026-05-23) | F-T1-04 | ~~CRUD 不全~~ | — | (a) `ISystemMtMetadataRepository` 加 3 个 DeleteAsync（Equation / MR / Recipe）+ LiteDb 实现 + Fake repo 实现；(b) `SystemMtCatalogService` 加 `UpdateEquationFunctionAsync` / `DeleteEquationFunctionAsync`；(c) `MethodMtCatalogService` MR-CRUD 子集已在 G-06 落地。9 新测试。**剩余开口**：MR / Application binding 的 Delete cascade 语义（非本次范围） |
 | G-11 | F-T1-04（v1 兼容） | **v1 LaTeX 展示衍生字段路径清理**：`MetamorphicRelationService.Add/Update` + `AutoMRParser.ProduceMRs/Async` + `MRRecommendationViewModel` + `MRManagementViewModel` 共 4 处仍调 `Latextosympy*`（已 `[Obsolete]`）。`mr-architecture.md §4.1` 明确"LaTeX 仅展示、不驱动执行"，但 v1 数据形态下衍生字段仍存于 LiteDB | 与 method MT 执行栈正交，归 v1 数据展示路径迁移 | VM 端工作（云端不可编译 WPF）；待 method MT 执行栈（G-06）稳定后裁决：保留为 v1 兼容 / 拆迁至独立展示服务 / 直接删 |
 | G-12 | F-T1-04（远期 PBT 升级） | **method MT 升级到 property-based testing**：当前走 AAA + catalog-driven validator（G-06），未引入 FsCheck / Hedgehog 等 PBT 框架。PBT 与 MT 范式天然契合（property over many inputs + shrinking） | 当前 SUT 是解析解，无 bug 可找；MR 数个位数；PBT generator 工程量大于当前 MR 验证工程量 | 触发条件：method MR 数 ≥ 20 跨多方程 ∥ 接入有 bug 风险的真实 C# SUT。届时 catalog schema 加 input domain 字段，AAA 测试保留为基线、新增 PBT validator 作为第二层 |
 | G-13 | F-T3-02（远期 PBT 升级） | **system MT 在轻量 SUT 上叠加 PBT 做模糊测试**：当前 system MT 走 BDD `.feature`，OpenMOC/OpenMC 单 case 时长（30s / 5min）禁止 PBT；但 projectile / damped-oscillator / lotka-volterra / decay-chain 单 case < 1s，PBT 可行 | BDD 的领域沟通价值不可替代（OpenMOC/OpenMC 永远不走 PBT）；轻量 SUT 是 PBT 的合适载体 | 触发条件：轻量 SUT 的 BDD 稳定 + input generator 工程量预算允许。覆盖范围严格限制为 < 1s 单 case 的 ODE SUT |
@@ -147,7 +147,8 @@
 | `b047668` | （文档） | §10 追加 G-11/G-12/G-13（v1 清理 + PBT 升级占位） |
 | `7305230` | **G-06** | method MT 执行栈：IMtPipeline 共享抽象 + MethodMtPipeline + Catalog CRUD（830 pass） |
 | `47cb96b` | **G-08** | catalog 自动 bootstrap helper（云端范围；834 pass） |
-| `<TBD-G-07>` | **G-07 + G-05** | `SystemMtRunner` 加 [Obsolete] + ObsoleteAttributeGuardTests 守卫（839 pass） |
+| `2c56b8a` | **G-07 + G-05** | `SystemMtRunner` 加 [Obsolete] + ObsoleteAttributeGuardTests 守卫（839 pass） |
+| `<TBD-G-10>` | **G-10** | ISystemMtMetadataRepository Delete + Recipe Update/Delete（848 pass） |
 
 ## 12. 受控开发模式工作流
 

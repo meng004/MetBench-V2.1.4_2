@@ -55,4 +55,16 @@ public interface ISystemMtMetadataRepository
 
     /// <summary>列出全部 L1 recipe,按 (EquationKey, FunctionName) 升序。</summary>
     Task<IReadOnlyList<EquationFunctionRecipe>> ListRecipesAsync(CancellationToken cancellationToken = default);
+
+    // ===== G-10 — Delete 路径补齐 =====
+
+    /// <summary>按 EquationKey 删除一行。返回是否实际删除（不存在时返回 false）。</summary>
+    Task<bool> DeleteEquationAsync(string equationKey, CancellationToken cancellationToken = default);
+
+    /// <summary>按 MrId 删除一行。返回是否实际删除。</summary>
+    Task<bool> DeleteMrAsync(string mrId, CancellationToken cancellationToken = default);
+
+    /// <summary>按 (EquationKey, FunctionName) 删除一行 recipe。返回是否实际删除。</summary>
+    Task<bool> DeleteRecipeAsync(string equationKey, string functionName,
+        CancellationToken cancellationToken = default);
 }
