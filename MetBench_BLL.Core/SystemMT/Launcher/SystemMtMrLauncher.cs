@@ -266,7 +266,11 @@ public sealed class SystemMtMrLauncher : ISystemMtMrLauncher
             OutputAdapterScriptPath: Path.Combine(options.SutRoot, "openmoc", "openmoc_output_adapter.py"),
             PythonExecutable: options.OpenMocPython,
             WorkRootName: "MetBenchOpenMocNuSigmaF",
-            Timeout: TimeSpan.FromMinutes(2));
+            Timeout: TimeSpan.FromMinutes(2),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "openmoc", "openmoc_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "openmoc", "openmoc_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/materials/fuel/nu_sigma_f") },
+            AssertionTypeCode: "greater");
 
         yield return new MrBlueprint(
             new MrSummary(
@@ -287,7 +291,11 @@ public sealed class SystemMtMrLauncher : ISystemMtMrLauncher
             OutputAdapterScriptPath: Path.Combine(options.SutRoot, "openmoc", "openmoc_output_adapter.py"),
             PythonExecutable: options.OpenMocPython,
             WorkRootName: "MetBenchOpenMocSigmaA",
-            Timeout: TimeSpan.FromMinutes(2));
+            Timeout: TimeSpan.FromMinutes(2),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "openmoc", "openmoc_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "openmoc", "openmoc_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleFuelAbsorption", "/materials/fuel") },
+            AssertionTypeCode: "less");
 
         yield return new MrBlueprint(
             new MrSummary(
@@ -310,7 +318,11 @@ public sealed class SystemMtMrLauncher : ISystemMtMrLauncher
             OutputAdapterScriptPath: Path.Combine(options.SutRoot, "openmc", "openmc_output_adapter.py"),
             PythonExecutable: options.EffectiveOpenMcPython,
             WorkRootName: "MetBenchOpenMcNuSigmaF",
-            Timeout: TimeSpan.FromMinutes(5));
+            Timeout: TimeSpan.FromMinutes(5),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "openmc", "openmc_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "openmc", "openmc_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/materials/fuel/nu_sigma_f") },
+            AssertionTypeCode: "greater");
 
         yield return new MrBlueprint(
             new MrSummary(
@@ -332,7 +344,11 @@ public sealed class SystemMtMrLauncher : ISystemMtMrLauncher
             OutputAdapterScriptPath: Path.Combine(options.SutRoot, "openmc", "openmc_output_adapter.py"),
             PythonExecutable: options.EffectiveOpenMcPython,
             WorkRootName: "MetBenchOpenMcSigmaA",
-            Timeout: TimeSpan.FromMinutes(5));
+            Timeout: TimeSpan.FromMinutes(5),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "openmc", "openmc_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "openmc", "openmc_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleFuelAbsorption", "/materials/fuel") },
+            AssertionTypeCode: "less");
 
         yield return new MrBlueprint(
             new MrSummary(
@@ -354,7 +370,11 @@ public sealed class SystemMtMrLauncher : ISystemMtMrLauncher
             OutputAdapterScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_output_adapter.py"),
             PythonExecutable: options.SystemPython,
             WorkRootName: "MetBenchHeatEq",
-            Timeout: TimeSpan.FromSeconds(60));
+            Timeout: TimeSpan.FromSeconds(60),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/initial/amplitude") },
+            AssertionTypeCode: "greater");
 
         yield return new MrBlueprint(
             new MrSummary(
@@ -376,7 +396,16 @@ public sealed class SystemMtMrLauncher : ISystemMtMrLauncher
             OutputAdapterScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain_output_adapter.py"),
             PythonExecutable: options.SystemPython,
             WorkRootName: "MetBenchDecayChain",
-            Timeout: TimeSpan.FromSeconds(60));
+            Timeout: TimeSpan.FromSeconds(60),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain_output_parser.py"),
+            TransformSteps: new[]
+            {
+                new MrTransformStep("ScaleField", "/initial/N_A"),
+                new MrTransformStep("ScaleField", "/initial/N_B"),
+                new MrTransformStep("ScaleField", "/initial/N_C"),
+            },
+            AssertionTypeCode: "greater");
 
         yield return new MrBlueprint(
             new MrSummary(
@@ -398,7 +427,15 @@ public sealed class SystemMtMrLauncher : ISystemMtMrLauncher
             OutputAdapterScriptPath: Path.Combine(options.SutRoot, "damped_oscillator", "damped_oscillator_output_adapter.py"),
             PythonExecutable: options.SystemPython,
             WorkRootName: "MetBenchDampedOsc",
-            Timeout: TimeSpan.FromSeconds(60));
+            Timeout: TimeSpan.FromSeconds(60),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "damped_oscillator", "damped_oscillator_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "damped_oscillator", "damped_oscillator_output_parser.py"),
+            TransformSteps: new[]
+            {
+                new MrTransformStep("ScaleField", "/initial/x0"),
+                new MrTransformStep("ScaleField", "/initial/v0"),
+            },
+            AssertionTypeCode: "greater");
 
         yield return new MrBlueprint(
             new MrSummary(
@@ -420,7 +457,11 @@ public sealed class SystemMtMrLauncher : ISystemMtMrLauncher
             OutputAdapterScriptPath: Path.Combine(options.SutRoot, "lotka_volterra", "lotka_volterra_output_adapter.py"),
             PythonExecutable: options.SystemPython,
             WorkRootName: "MetBenchLotkaVolterra",
-            Timeout: TimeSpan.FromSeconds(60));
+            Timeout: TimeSpan.FromSeconds(60),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "lotka_volterra", "lotka_volterra_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "lotka_volterra", "lotka_volterra_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/params/gamma") },
+            AssertionTypeCode: "greater");
     }
 
     private sealed record MrBlueprint(
@@ -431,5 +472,15 @@ public sealed class SystemMtMrLauncher : ISystemMtMrLauncher
         string OutputAdapterScriptPath,
         string PythonExecutable,
         string WorkRootName,
-        TimeSpan Timeout);
+        TimeSpan Timeout,
+        // ↓ v2 pipeline data（P3.2 入位；P3.3 launcher.RunAsync 重写后消费）
+        string InputParserScriptPath,
+        string OutputParserScriptPath,
+        IReadOnlyList<MrTransformStep> TransformSteps,
+        string AssertionTypeCode);
+
+    /// <summary>v2 pipeline 的单步变换规格。多步在 launcher.RunAsync 内包 <c>CompositeTransform</c>。</summary>
+    private sealed record MrTransformStep(
+        string TransformationName,
+        string TargetFieldPath);
 }
