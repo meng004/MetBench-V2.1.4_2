@@ -15,7 +15,7 @@
 | **测试文件** | `MetBench_SystemMT.Tests/` 下相对路径 | 单元 + BDD + UAT |
 | **测试结果** | `dotnet test MetBench_SystemMT.Tests` 最近一次基线 | `pass/skip/fail` 或缺口说明 |
 
-**基线**：2026-05-23（Stage 8 S8-P4 后），`dotnet test MetBench_SystemMT.Tests` = **843 pass / 0 fail**（OpenMC 跨程序场景在无 OpenMC 环境下首跑 skip / 二跑 warm 后 0 skip）。基线累计变化：848 - 6 (mutmut) - 13 (Trend) + 6 (G-02) + 2×4 (S8-P1..P4) = 843。MR 库扩至 17 / 8 方程。
+**基线**：2026-05-23（Stage 8 S8-P5a 后），`dotnet test MetBench_SystemMT.Tests` = **847 pass / 0 fail**（OpenMC 跨程序场景在无 OpenMC 环境下首跑 skip / 二跑 warm 后 0 skip）。基线累计变化：848 - 6 (mutmut) - 13 (Trend) + 6 (G-02) + 2×4 (S8-P1..P4) + 4 (S8-P5a V3 schema) = 847。MR 库 17 / 8 方程；V3 5D-tag schema entity 已立（IDAL+DAL 待 S8-P5b）。
 
 ## 1. T0 · 核心 —— 系统级 MT 流程
 
@@ -157,7 +157,8 @@
 | `01fcba3` | **S8-P1** | Bateman MR 库扩展：`bateman-mass-conservation` (m_inv) + `bateman-timestep-cauchy` (m_conv) + importer 元模式识别扩展（837 pass）|
 | `0d119f3` | **S8-P2** | Fourier MR 库扩展：`fourier-timestep-convergence` (m_conv) + `fourier-alpha-monotonic` (m_mono)（839 pass）|
 | `f3bd535` | **S8-P3** | 1D subchannel SUT 接入 + navier-stokes 方程：2 新 MR（841 pass，G-03 部分闭合）|
-| `<TBD-S8P4>` | **S8-P4** | 1D diffusion SUT 接入 + diffusion 方程：2 新 MR（843 pass，**G-03 完全闭合**，5 方程全覆盖）|
+| `bb06ae5` | **S8-P4** | 1D diffusion SUT 接入 + diffusion 方程：2 新 MR（843 pass，**G-03 完全闭合**，5 方程全覆盖）|
+| `<TBD-S8P5a>` | **S8-P5a** | V3 5D-tag schema entity + 7 enum + round-trip 测试（847 pass）|
 
 ## 12. 受控开发模式工作流
 
