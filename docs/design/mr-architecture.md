@@ -94,7 +94,8 @@ MR 的三个核心概念在三个层次上的归属:
 
 - **语义**:关系成立 + 容差范围内 → pass;否则 fail。
 - **协议**:与 §3.2 同一组协议字段。
-- **执行**:FluentAssertions 在两套 Kind 下都可用(system 端已用扩展方法 + AssertionEvaluator;method 端直接 `.Should()`)。
+- **执行**:**FluentAssertions 是基础库**(system 端已用扩展方法 + AssertionEvaluator;method 端直接 `.Should()`)。**不重写已有 FA / MathNet 提供的功能**(见 §6.2)。
+- **不引入"断言 Recipe"层**:断言已是"按 code 分派 + 容差配置",数据驱动够用;加 `and`/`or` 多断言组合会引入逻辑 DSL,得不偿失;真要"多重断言"的 MR 拆成两个 MR 更清晰。
 
 ---
 
@@ -207,6 +208,28 @@ L2 `IEquationFunction` 实现**必须**首选既有数学库,不得重写其已�
 | 线性代数 | `MathNet.Numerics.LinearAlgebra` | ❌ |
 
 L2 实现的判据 = "**只写本方程的物理 / 数学语义,数值算子委托现成库**"。code review 把关。
+
+### 5.4 断言扩展的现成依赖库纪律(与 5.3 对称)
+
+断言体系 9 个 AssertionTypeCode:3 个直接用 FA 内置(`BeLessThan` / `BeGreaterThan` / `BeApproximately`),6 个 MetBench 物理/MC 专属扩展(`*WithNoiseFloor` / `BeApproximatelyEqualUnderTransform` / `HaveVarianceRatio` / `BePointwiseApproximately` / `AgreeWithReference`)—— 后者**包在 FA `.Should()` 链路上**,不是另起一套断言框架。
+
+加新 `AssertionTypeCode` 的标准路径(`assertion-extensions.md` §10.3 已明确,**≤3 处改动**):
+
+1. `AssertionTypeCodes` 加常量字符串
+2. `MetbenchAssertionExtensions` 加 FA 扩展方法 —— **用 FA + `MathNet` 现成功能,不自造统计/数值算子**
+3. `AssertionEvaluator` switch 加 case
+
+| 断言需求 | 用 | 不要自造 |
+|---|---|---|
+| 数值比对(<, >, ≈) | FA 内置 `BeLessThan` / `BeGreaterThan` / `BeApproximately` | ❌ |
+| 集合 / 向量逐元素带容差 | FA `BeEquivalentTo` + custom equivalence,或既有 `BePointwiseApproximately` | ❌ |
+| 分布等价 / KS 检验 / χ² | `MathNet.Numerics.Statistics.GoodnessOfFitTests` 包一层 FA 扩展 | ❌ |
+| t-test / 均值置信区间 | `MathNet.Numerics.Distributions.StudentT` 包一层 FA 扩展 | ❌ |
+| 向量 / 矩阵范数差 | `MathNet.Numerics.LinearAlgebra` 的 `Norm` | ❌ |
+| 相关性 / 协方差 | `MathNet.Numerics.Statistics.Correlation` | ❌ |
+| MetBench 物理专属(noise floor / variance ratio / cross-program agree) | 已有扩展,在其内部调 FA + MathNet | — |
+
+判据 = "**断言的"判定逻辑"留给 FA,"统计 / 数值"留给 MathNet,MetBench 只写"物理 / MC 语义"**"。code review 把关。
 
 ---
 
