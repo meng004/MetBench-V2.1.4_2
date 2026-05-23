@@ -23,11 +23,11 @@ public static class Flows
     // =====================================================================
     public static int NavAll(IntPtr hwnd, AutomationElement app, string outDir)
     {
-        string[] pages = { "Anomalies", "Discovery", "Mutation", "Coverage", "Trends" };
+        // Trends 页已删除（2026-05-23 next-stage P0：Trend 子系统下线）
+        string[] pages = { "Anomalies", "Discovery", "Mutation", "Coverage" };
         string[] shots = {
             "smoke-04-anomalies.png", "smoke-06-discovery.png",
-            "smoke-08-mutation.png",  "smoke-09-coverage.png",
-            "smoke-10-trends.png" };
+            "smoke-08-mutation.png",  "smoke-09-coverage.png" };
 
         int failed = 0;
         for (int i = 0; i < pages.Length; i++)

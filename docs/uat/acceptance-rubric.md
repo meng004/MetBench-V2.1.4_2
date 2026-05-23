@@ -74,7 +74,7 @@
 | # | 用例 | 通过准则 | 阻断 | 结果 | 证据 |
 |---|------|---------|------|------|------|
 | C1 | 真实 python sidecar 发现 | Passed ≥ 4, Failed 0 | 🔴 | | trx |
-| C2 | Empirical + LLM Validator | Passed ≥ 8, Failed 0 | 🔴 | | trx |
+| C2 | Empirical + LLM Validator | Passed ≥ 5, Failed 0 | 🔴 | | trx (2026-05-23 next-stage P0 移 AdversarialMutmutValidator 后 [Fact] 数 8→5) |
 | C3 | MRPairing m_cmp partner | Passed ≥ 11, Failed 0 | 🔴 | | trx |
 | C4 | Multi-LLM Consensus + κ | Passed ≥ 15, Failed 0 | 🟡 | | trx |
 | C5 | Validation Service E2E | Passed > 0, Failed 0 | 🔴 | | trx |
@@ -100,7 +100,7 @@
 
 | # | 用例 | 通过准则 | 阻断 | 结果 | 证据 |
 |---|------|---------|------|------|------|
-| E1 | Trend Dashboard 时间序列 | CartesianChart 折线 + hover + WoW 标注 | 🟡 | | 截图 |
+| E1 | ~~Trend Dashboard 时间序列~~ | （已删除，next-stage P0：Trend Dashboard + 子系统下线） | — | — | — |
 | E2 | Coverage Dashboard 4 维饼图 | 4 个 PieChart 均含 ≥ 2 扇区 + legend | 🟡 | | 截图 |
 | E3 | 报表导出 4 端 | `Word/Excel/PDF/HTML` 4 文件均生成 + 可打开 | 🔴 | | 4 文件 |
 | E4 | HTML 嵌入 WebView2 | 页内渲染正确，CSS / 表格无错位 | 🟡 | | 截图 |

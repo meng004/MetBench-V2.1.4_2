@@ -10,7 +10,7 @@ using Xunit;
 namespace MetBench_SystemMT.Tests.SystemMT.Launcher;
 
 /// <summary>
-/// 方向 2 — <see cref="LauncherCatalogV2Importer"/>:把 launcher 内部 8 MR 目录投影
+/// 方向 2 — <see cref="LauncherCatalogV2Importer"/>:把 launcher 内部 17 MR 目录投影
 /// 到 v2 实体表(Application + MetamorphicRelation + MRBinding),验证内容正确、
 /// 幂等、写审计、且不破坏 launcher 的运行时行为(对 MT 流程的再次验证)。
 /// </summary>

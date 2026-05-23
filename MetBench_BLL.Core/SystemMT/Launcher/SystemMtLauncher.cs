@@ -16,7 +16,7 @@ namespace MetBench_BLL.SystemMT.Launcher;
 /// </summary>
 /// <remarks>
 /// 计划见 docs/superpowers/plans/2026-05-22-systemmt-engine-unification-plan.md。
-/// 8 MR 的硬编码目录(<see cref="BuildMrCatalog"/>)是 v2 数据驱动 MR 目录全面
+/// 17 MR 的硬编码目录（S8-P1..P4 扩展前为 9）(<see cref="BuildMrCatalog"/>)是 v2 数据驱动 MR 目录全面
 /// 落地前的过渡形态;每个 blueprint 已含 v2 pipeline 规格(InputParser /
 /// OutputParser / TransformSteps / AssertionTypeCode)。多步 MR(decay-chain /
 /// damped-oscillator)在构造时把对应 <see cref="CompositeTransform"/> 注册到
@@ -91,7 +91,7 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
     private static string CompositeNameFor(string mrId) => $"Composite-{mrId}";
 
     /// <summary>
-    /// internal 暴露 launcher 内部 8 MR 目录的快照,供 <see cref="LauncherCatalogV2Importer"/>
+    /// internal 暴露 launcher 内部 MR 目录（17 entries as of S8-P4）的快照,供 <see cref="LauncherCatalogV2Importer"/>
     /// 把数据"导入"到 v2 实体表(Application + MetamorphicRelation + MRBinding)。
     /// </summary>
     internal IReadOnlyList<MrCatalogEntry> GetCatalogEntries() =>

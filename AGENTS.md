@@ -176,7 +176,7 @@ All cloud-side P1-P8 work shipped on `claude/continue-phase-2-AdZ6f`:
 | P5 | Reqnroll v2 steps + feature↔DB sync tools + migrations | — |
 | P6 | `AnomalyService` + `CommonalityReport` | Anomaly viewer page |
 | P7 | `Discovery` (IMRDiscoverer + 3 Validator + `ValidationService`) + `MutationCampaignService` | Discovery / Mutation pages |
-| P8 | `CoverageService` + `TrendAnalysisService` + `SystemMtReportService` (5 scope) + paper-package | Coverage / Trend dashboards, e2e demo |
+| P8 | `CoverageService` + ~~`TrendAnalysisService`~~ + `SystemMtReportService` (4 scope, was 5) + paper-package | Coverage dashboards, e2e demo (Trends 已于 next-stage P0 整体下线 2026-05-23) |
 
 Cloud-side test footprint (as of P8 ship): **321 xUnit pass / 2 skip / 0 fail
 + 27 Python pass**. WPF pages and end-to-end smoke against real
