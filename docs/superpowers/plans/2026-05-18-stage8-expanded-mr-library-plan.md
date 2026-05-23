@@ -308,3 +308,54 @@ V3 启动条件（待 Stage 9 详细 plan）：
 - 全 Cmrlibrary 57 + PWR 27 = 84 MR 完整入库 — 只入 Stage 8 17 cells 覆盖子集
 
 —— 文档结束。等 §13 决策 → 启动 Phase 8.0。
+
+---
+
+## §15 Phased execution rev（2026-05-23）—— 按对其他模块影响程度重排
+
+> **背景**：2026-05-23 评估时项目状态：848 pass / 0 fail；G-05..G-10 闭合；
+> next-stage P0 清理（mutmut + Trend）+ G-02 LiveCharts 单测启动在即。
+> 为控制质量、降低单 PR 风险，把原 §2..§6（Phase 8.0..8.3）按**对其他模块影响
+> 程度从小到大**重排，保留每 Phase 内容不变，只调整执行序列。
+>
+> **新顺序的核心理由**：先做"加法"（新增独立 SUT，与 G-09 projectile 同模式），
+> 再做"改造"（schema migration + tag 升级）。V2→V3 migration 是 S8-P5 设计时
+> 一次性工作，先入库的 4 个新 SUT MR 跟随 migration 升级，不增加额外成本。
+
+### §15.1 影响分级（L0–L6）
+
+| 级别 | 影响特征 |
+|---|---|
+| **L0** | 不改业务逻辑，删 dead code 或仅加单测 |
+| **L1** | 新增独立 SUT（同 G-09 模式），零 schema 改动 |
+| **L2** | 新 SUT + 触及跨程序对比路径 |
+| **L3** | 新建并行 schema（V3） + V2→V3 migration |
+| **L4** | 依赖 schema + 改既有 .feature 加 5D tag |
+| **L5** | 依赖 schema + 触及 LLM gateway |
+| **L6** | 端到端打通，依赖 L3/L4/L5 全部 |
+
+### §15.2 重排后的执行序
+
+| 新编号 | 原编号 | L | 内容 | 工时 | 依赖 |
+|---|---|---|---|---|---|
+| **S8-P1** | §6.3.1 (8.3.1) | L1 | home-grown bateman SUT 接入（接 `BatemanAnalyticSolution`） | 8h | — |
+| **S8-P2** | §6.3.2 (8.3.2) | L1 | home-grown fourier 1D SUT 接入（升级 heat_equation） | 4h | — |
+| **S8-P3** | §6.3.4 (8.3.4) | L1 | home-grown NS subchannel SUT + 新方程 `navier-stokes` 入 metadata catalog | 8h | — |
+| **S8-P4** | §6.3.3 (8.3.3) | L2 | home-grown diffusion nodal SUT + 新方程 `diffusion` + 跨程序对比 MR（vs OpenMOC） | 12–16h | — |
+| **S8-P5** | §2 (8.0) | L3 | 5D tag schema 地基（V3 实体 + 7 enum + IDAL + DAL + V2→V3 migration + BDD tag parser 扩展） | 12–16h | — |
+| **S8-P6** | §4 (8.2) | L4 | 现有 4 SUT + S8-P1..P4 新接入 4 SUT .feature 加 5D Gherkin tag | 4–8h | S8-P5 |
+| **S8-P7** | §3 (8.1) | L5 | meta-prompt engine 5D-aware 输出 | 16h | S8-P5 |
+| **S8-P8** | §5 (8.2.5) | L6 | 端到端 workflow 验证（5 MP × 多 SUT 扫描 + LLM + 三分支判定 + 反例归档） | 8h | S8-P5/6/7 |
+
+### §15.3 每 Phase 独立 commit + 受控开发
+
+按 `docs/requirements.md §12`：每 S8-P 独立 pre-flight → 用户确认 → TDD → commit + push → 回写 §10/§11。
+
+### §15.4 启动前置
+
+- 档 2.A：next-stage P0 模型对齐清理（删 mutmut + Trend，两个 commit）
+- 档 2.C：G-02 LiveCharts 数据层单测
+
+档 2.A + 2.C 完成后启动 S8-P1。
+
+—— §15 结束。
