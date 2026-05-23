@@ -150,7 +150,7 @@ MetamorphicRelation {
 
 | 层 | 谁写 | 写在哪 | 添加方式 | 例子 |
 |---|---|---|---|---|
-| **L0 通用原子算子** | 工程师(罕见,跨方程通用) | C# `IMRTransformation` + `TransformationRegistry` | 编译期注册 | `ScaleField` / `TranslateField` / `PermuteIndices` / `MirrorAxis` / `IdentityTransform` / `CompositeTransform` / 数学基础(`Negate` / `Add` / `Multiply` / `Power`) |
+| **L0 通用原子算子** | 工程师(罕见,跨方程通用) | C# `IMRTransformation` + `TransformationRegistry` | 编译期注册 | **变换类**:`ScaleField` / `TranslateField` / `PermuteIndices` / `MirrorAxis` / `IdentityTransform` / `CompositeTransform`<br>**数学基元**(调 `System.Math` / `MathNet.Numerics`,每个 ~10 行):`MathExp` / `MathLog` / `MathPow` / `MathSin` / `MathCos` / `MathSqrt` / `MathAbs` / `MathAdd` / `MathSub` / `MathMul` / `MathDiv` / `MathLinComb` / `Linspace` / `Sum` / `Mean` / `Max` / `Min` |
 | **L1 方程级"组合函数"** | **普通研究者**(UI / JSON) | 数据库 `EquationFunctionRecipe` 表 | **无代码,在 UI / 导入 JSON** | `bateman.ScaleInitial` = `Composite[ScaleField /initial/{N_A,N_B,N_C}]`;`heat_eq.ScaleAmplitude` = `ScaleField /initial/amplitude` |
 | **L2 方程专属"特殊算子"** | 工程师(罕见,需新数学) | C# `IEquationFunction` + 方程命名空间 | 编译期注册 | `bateman.AnalyticSolution`(解析三核素解);`openmoc.ScaleFuelAbsorption`(`sigma_t` 跨字段一致性) |
 
@@ -191,7 +191,22 @@ Recipe 用 JSON 表达 L0 原子算子的组合 + 参数绑定。**不引入任�
 | **P1**(数据驱动) | 普通研究者;常规缩放/平移/排列类 MR | ① UI 添方程(EquationMetadata) → ② UI 添方程函数(Recipe,选 L0 算子 + 参数绑定) → ③ UI 添 MR(选方程 + 函数 + 断言码 + 容差)→ ④(可选)绑 SUT | **否** |
 | **P2**(代码驱动) | 工程师;新数学算子 / 跨字段物理一致性 / 解析解 | 写 C# `IEquationFunction` impl + `[EquationFunction("...")]` 标注 + 编译入库 | **是**(每方程一次性投入,所有 MR 复用) |
 
-**对 Stage 8 84 候选 MR 库的预测**:绝大多数(线性缩放系)落 P1 路径,L0 + Recipe 够用;3-4 个高级 MR 落 P2(每方程的解析解 / 守恒律 / 物理一致性)。
+**对 Stage 8 84 候选 MR 库的预测**:绝大多数(线性缩放系)落 P1 路径,L0 + Recipe 够用;**有了 L0 数学基元后**,连解析解(例:Bateman 3 核素闭式)也能用 Recipe 表达 —— L2 真正剩下的只是"算法级"算子(ODE 迭代求解 / FFT / 优化 / 物理一致性多字段联合更新),5 个反应堆物理方程总共预计 ≤ 5 个 L2 算子。
+
+### 5.3 L2 实现的现成依赖库纪律
+
+L2 `IEquationFunction` 实现**必须**首选既有数学库,不得重写其已提供的算子。MetBench 已引入(`MetBench_BLL.Core.csproj`):
+
+| 数学需求 | 用 | 不要自造 |
+|---|---|---|
+| 闭式 exp/log/sin/cos/erf/gamma | `System.Math` / `MathNet.Numerics.SpecialFunctions` | ❌ |
+| ODE 求解(RK45) | `MathNet.Numerics.OdeSolvers.RungeKutta` | ❌ |
+| 数值积分 | `MathNet.Numerics.Integration` | ❌ |
+| FFT / 谱分析 | `MathNet.Numerics.IntegralTransforms.Fourier` | ❌ |
+| 概率分布 / 统计检验 | `MathNet.Numerics.Distributions` / `Statistics` | ❌ |
+| 线性代数 | `MathNet.Numerics.LinearAlgebra` | ❌ |
+
+L2 实现的判据 = "**只写本方程的物理 / 数学语义,数值算子委托现成库**"。code review 把关。
 
 ---
 
