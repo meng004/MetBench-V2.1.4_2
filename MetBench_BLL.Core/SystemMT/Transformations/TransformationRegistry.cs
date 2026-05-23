@@ -16,11 +16,12 @@ public static class TransformationRegistry
 {
     private static readonly Dictionary<string, Func<IMRTransformation>> _factories = new()
     {
-        ["Identity"]        = () => new IdentityTransform(),
-        ["ScaleField"]      = () => new ScaleField(),
-        ["TranslateField"]  = () => new TranslateField(),
-        ["PermuteIndices"]  = () => new PermuteIndices(),
-        ["MirrorAxis"]      = () => new MirrorAxis(),
+        ["Identity"]             = () => new IdentityTransform(),
+        ["ScaleField"]           = () => new ScaleField(),
+        ["TranslateField"]       = () => new TranslateField(),
+        ["PermuteIndices"]       = () => new PermuteIndices(),
+        ["MirrorAxis"]           = () => new MirrorAxis(),
+        ["ScaleFuelAbsorption"]  = () => new ScaleFuelAbsorption(),
     };
 
     /// <summary>取得名为 <paramref name="name"/> 的变换实例。</summary>
