@@ -6,19 +6,19 @@ using Xunit;
 
 namespace MetBench_SystemMT.Tests.SystemMT.Launcher;
 
-public sealed class SystemMtMrLauncherBatchTests
+public sealed class SystemMtLauncherBatchTests
 {
     private readonly FakeExecRepo _execs = new();
     private readonly FakeResultRepo _results = new();
     private readonly SystemMtExecutionRecorder _recorder;
     private readonly SystemMtPipeline _pipeline = new();
     private readonly RecordingAnomalyService _anomalyService = new();
-    private readonly SystemMtMrLauncher _launcher;
+    private readonly SystemMtLauncher _launcher;
 
-    public SystemMtMrLauncherBatchTests()
+    public SystemMtLauncherBatchTests()
     {
         _recorder = new SystemMtExecutionRecorder(_execs, _results);
-        _launcher = new SystemMtMrLauncher(
+        _launcher = new SystemMtLauncher(
             new LauncherOptions(
                 SutRoot: TestAssetPaths.AssetRoot(),
                 SystemPython: TestAssetPaths.PythonExecutable(),

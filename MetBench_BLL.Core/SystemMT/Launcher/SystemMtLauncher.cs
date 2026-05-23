@@ -6,7 +6,7 @@ using MetBench_BLL.SystemMT.Transformations;
 namespace MetBench_BLL.SystemMT.Launcher;
 
 /// <summary>
-/// Production implementation of <see cref="ISystemMtMrLauncher"/>.
+/// Production implementation of <see cref="ISystemMtLauncher"/>.
 /// Owns the MR registry; routes each MR through <see cref="ISystemMtPipeline"/>
 /// (v2 single-engine path) and persists outcomes via <see cref="SystemMtExecutionRecorder"/>
 /// as <c>Execution</c> + <c>Result</c>(+ <c>Anomaly</c>) into the unified
@@ -20,7 +20,7 @@ namespace MetBench_BLL.SystemMT.Launcher;
 /// damped-oscillator)在构造时把对应 <see cref="CompositeTransform"/> 注册到
 /// <see cref="TransformationRegistry"/>。
 /// </remarks>
-public sealed class SystemMtMrLauncher : ISystemMtMrLauncher
+public sealed class SystemMtLauncher : ISystemMtLauncher
 {
     private readonly LauncherOptions _options;
     private readonly ISystemMtPipeline _pipeline;
@@ -29,7 +29,7 @@ public sealed class SystemMtMrLauncher : ISystemMtMrLauncher
     private readonly AnomalySeverityThresholds _severityThresholds;
     private readonly IReadOnlyDictionary<string, MrBlueprint> _mrCatalog;
 
-    public SystemMtMrLauncher(
+    public SystemMtLauncher(
         LauncherOptions options,
         ISystemMtPipeline pipeline,
         SystemMtExecutionRecorder recorder,
@@ -63,6 +63,22 @@ public sealed class SystemMtMrLauncher : ISystemMtMrLauncher
     }
 
     private static string CompositeNameFor(string mrId) => $"Composite-{mrId}";
+
+    /// <summary>
+    /// internal 暴露 launcher 内部 8 MR 目录的快照,供 <see cref="LauncherCatalogV2Importer"/>
+    /// 把数据"导入"到 v2 实体表(Application + MetamorphicRelation + MRBinding)。
+    /// </summary>
+    internal IReadOnlyList<MrCatalogEntry> GetCatalogEntries() =>
+        _mrCatalog.Values
+            .Select(bp => new MrCatalogEntry(
+                bp.Mr,
+                bp.SampleCaseRelativePath,
+                bp.RunnerScriptPath,
+                bp.InputParserScriptPath,
+                bp.OutputParserScriptPath,
+                bp.AssertionTypeCode,
+                bp.TransformSteps[0].TransformationName))
+            .ToList();
 
     public Task<IReadOnlyList<MrSummary>> ListAvailableAsync(CancellationToken cancellationToken = default)
     {
@@ -509,3 +525,17 @@ public sealed class SystemMtMrLauncher : ISystemMtMrLauncher
         string TransformationName,
         string TargetFieldPath);
 }
+
+/// <summary>
+/// launcher 内部 MR 目录的对外快照,导入 v2 实体表时用。
+/// 字段是 <see cref="LauncherCatalogV2Importer"/> 真正用得到的子集
+/// (不含 PythonExecutable / WorkRootName / Timeout 等纯运行时配置)。
+/// </summary>
+internal sealed record MrCatalogEntry(
+    MrSummary Mr,
+    string SampleCaseRelativePath,
+    string RunnerScriptPath,
+    string InputParserScriptPath,
+    string OutputParserScriptPath,
+    string AssertionTypeCode,
+    string PrimaryTransformationName);

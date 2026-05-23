@@ -9,7 +9,7 @@ namespace MetBench_SystemMT.Tests.SystemMT.Launcher;
 
 /// <summary>
 /// 方向 1 — 3 个 ODE SUT 经 unified MT 流程端到端跑通的回归门:
-/// <c>SystemMtMrLauncher → SystemMtPipeline → SystemMtExecutionRecorder</c>。
+/// <c>SystemMtLauncher → SystemMtPipeline → SystemMtExecutionRecorder</c>。
 /// 此前 launcher 端到端在 CI 只有 heat-equation 一例覆盖,这里把 decay-chain /
 /// damped-oscillator / lotka-volterra 全部纳入(均靠 system python + scipy,CI 可达;
 /// openmoc / openmc 仍由 venv 门控,落在 VM UAT)。
@@ -21,12 +21,12 @@ public sealed class LauncherEndToEndOdeTests
     private readonly SystemMtExecutionRecorder _recorder;
     private readonly SystemMtPipeline _pipeline = new();
     private readonly RecordingAnomalyService _anomalyService = new();
-    private readonly SystemMtMrLauncher _launcher;
+    private readonly SystemMtLauncher _launcher;
 
     public LauncherEndToEndOdeTests()
     {
         _recorder = new SystemMtExecutionRecorder(_execs, _results);
-        _launcher = new SystemMtMrLauncher(
+        _launcher = new SystemMtLauncher(
             new LauncherOptions(
                 SutRoot: TestAssetPaths.AssetRoot(),
                 SystemPython: TestAssetPaths.PythonExecutable(),

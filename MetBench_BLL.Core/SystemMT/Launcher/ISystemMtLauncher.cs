@@ -7,7 +7,7 @@ namespace MetBench_BLL.SystemMT.Launcher;
 /// transformation + assertion combination, persisting the result, and
 /// returning a UI-friendly summary.
 /// </summary>
-public interface ISystemMtMrLauncher
+public interface ISystemMtLauncher
 {
     /// <summary>
     /// Enumerate the MRs this launcher knows about. Stable across

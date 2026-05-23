@@ -11,7 +11,7 @@ namespace MetBench_SystemMT.Tests.V2Anomaly;
 
 /// <summary>
 /// UC-B7 — 失败的 System MT run 必须流入 Anomalies 表。
-/// 覆盖:(a) AnomalyService.RecordAnomalyAsync 单元;(b)(c) SystemMtMrLauncher
+/// 覆盖:(a) AnomalyService.RecordAnomalyAsync 单元;(b)(c) SystemMtLauncher
 /// 把 PipelineOutcome FinalStatus=anomaly / ok 正反两向路由到 anomaly service。
 /// </summary>
 public sealed class AnomalyCreationOnFailureTests
@@ -53,7 +53,7 @@ public sealed class AnomalyCreationOnFailureTests
     }
 
     [Fact]
-    public async Task SystemMtMrLauncher_records_anomaly_when_outcome_is_anomaly()
+    public async Task SystemMtLauncher_records_anomaly_when_outcome_is_anomaly()
     {
         var recording = new RecordingAnomalyService();
         var launcher = MakeLauncher(recording);
@@ -77,7 +77,7 @@ public sealed class AnomalyCreationOnFailureTests
     }
 
     [Fact]
-    public async Task SystemMtMrLauncher_does_not_record_anomaly_when_outcome_is_ok()
+    public async Task SystemMtLauncher_does_not_record_anomaly_when_outcome_is_ok()
     {
         var recording = new RecordingAnomalyService();
         var launcher = MakeLauncher(recording);
@@ -94,7 +94,7 @@ public sealed class AnomalyCreationOnFailureTests
     }
 
     [Fact]
-    public async Task SystemMtMrLauncher_skips_anomaly_when_resultId_is_null()
+    public async Task SystemMtLauncher_skips_anomaly_when_resultId_is_null()
     {
         // error / timeout 状态下 recorder 不写 Result,resultId 为 null,不能链 anomaly。
         var recording = new RecordingAnomalyService();
@@ -117,7 +117,7 @@ public sealed class AnomalyCreationOnFailureTests
 
     // =================== fixtures ===================
 
-    private static SystemMtMrLauncher MakeLauncher(IAnomalyService anomalyService) =>
+    private static SystemMtLauncher MakeLauncher(IAnomalyService anomalyService) =>
         new(
             new LauncherOptions(SutRoot: "/tmp/dummy", SystemPython: "python3", OpenMocPython: "python3"),
             new SystemMtPipeline(),

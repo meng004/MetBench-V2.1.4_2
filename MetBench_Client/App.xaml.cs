@@ -149,7 +149,7 @@ namespace MetBench_Client
                 // Execution+Result+Anomaly。lifetime 改 Scoped 与 IExecutionRepository /
                 // IResultRepository / ISystemMtPipeline 一致。
                 services.AddScoped<SystemMtExecutionRecorder>();
-                services.AddScoped<ISystemMtMrLauncher, SystemMtMrLauncher>();
+                services.AddScoped<ISystemMtLauncher, SystemMtLauncher>();
                 services.AddSingleton<ISystemMtResultReportRenderer, HtmlSystemMtResultReportRenderer>();
 
                 services.AddScoped<Views.Pages.SystemMtExecutionPage>();

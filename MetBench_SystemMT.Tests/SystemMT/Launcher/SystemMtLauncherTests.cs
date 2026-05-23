@@ -7,19 +7,19 @@ using Xunit;
 
 namespace MetBench_SystemMT.Tests.SystemMT.Launcher;
 
-public sealed class SystemMtMrLauncherTests
+public sealed class SystemMtLauncherTests
 {
     private readonly FakeExecRepo _execs = new();
     private readonly FakeResultRepo _results = new();
     private readonly SystemMtExecutionRecorder _recorder;
     private readonly SystemMtPipeline _pipeline = new();
     private readonly RecordingAnomalyService _anomalyService = new();
-    private readonly SystemMtMrLauncher _launcher;
+    private readonly SystemMtLauncher _launcher;
 
-    public SystemMtMrLauncherTests()
+    public SystemMtLauncherTests()
     {
         _recorder = new SystemMtExecutionRecorder(_execs, _results);
-        _launcher = new SystemMtMrLauncher(
+        _launcher = new SystemMtLauncher(
             new LauncherOptions(
                 SutRoot: TestAssetPaths.AssetRoot(),
                 SystemPython: TestAssetPaths.PythonExecutable(),
@@ -33,7 +33,7 @@ public sealed class SystemMtMrLauncherTests
     public void Constructor_rejects_null_options()
     {
         Assert.Throws<ArgumentNullException>(() =>
-            new SystemMtMrLauncher(null!, _pipeline, _recorder, _anomalyService));
+            new SystemMtLauncher(null!, _pipeline, _recorder, _anomalyService));
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public sealed class SystemMtMrLauncherTests
     {
         var options = new LauncherOptions("/tmp", "python3", "python3");
         Assert.Throws<ArgumentNullException>(() =>
-            new SystemMtMrLauncher(options, null!, _recorder, _anomalyService));
+            new SystemMtLauncher(options, null!, _recorder, _anomalyService));
     }
 
     [Fact]
@@ -49,7 +49,7 @@ public sealed class SystemMtMrLauncherTests
     {
         var options = new LauncherOptions("/tmp", "python3", "python3");
         Assert.Throws<ArgumentNullException>(() =>
-            new SystemMtMrLauncher(options, _pipeline, null!, _anomalyService));
+            new SystemMtLauncher(options, _pipeline, null!, _anomalyService));
     }
 
     [Fact]
@@ -57,7 +57,7 @@ public sealed class SystemMtMrLauncherTests
     {
         var options = new LauncherOptions("/tmp", "python3", "python3");
         Assert.Throws<ArgumentNullException>(() =>
-            new SystemMtMrLauncher(options, _pipeline, _recorder, null!));
+            new SystemMtLauncher(options, _pipeline, _recorder, null!));
     }
 
     [Fact]

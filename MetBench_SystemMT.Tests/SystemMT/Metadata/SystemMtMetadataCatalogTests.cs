@@ -11,14 +11,14 @@ namespace MetBench_SystemMT.Tests.SystemMT.Metadata;
 public sealed class SystemMtMetadataCatalogTests : IDisposable
 {
     private readonly string _metaDbPath;
-    private readonly SystemMtMrLauncher _launcher;
+    private readonly SystemMtLauncher _launcher;
 
     public SystemMtMetadataCatalogTests()
     {
         var dir = Path.Combine(Path.GetTempPath(), "MetBenchMetaCatalogTests", Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(dir);
         _metaDbPath = Path.Combine(dir, "metadata.db");
-        _launcher = new SystemMtMrLauncher(
+        _launcher = new SystemMtLauncher(
             new LauncherOptions("/tmp", "python3", "python3"),
             new SystemMtPipeline(),
             new SystemMtExecutionRecorder(new FakeExecRepo(), new FakeResultRepo()),
