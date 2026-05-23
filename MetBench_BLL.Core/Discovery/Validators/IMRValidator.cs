@@ -10,9 +10,9 @@ namespace MetBench_BLL.Discovery.Validators;
 /// <list type="bullet">
 ///   <item><c>EmpiricalValidator</c>           — baseline 上跑该 MR，看一致成立。</item>
 ///   <item><c>TheoreticalLlmValidator</c>      — LLM 反向问"物理/数学上合理吗"。</item>
-///   <item><c>AdversarialMutmutValidator</c>   — 注入 mutation 看 MR 是否能检出（防 vacuous）。</item>
 /// </list>
 /// ≥ 2 个 validator 通过才能 promote 进 <see cref="MetamorphicRelation"/> 表。
+/// （AdversarialMutmutValidator 于 next-stage P0 已删除，T6 变异专属由 MutationCampaign 子系统承担。）
 /// </remarks>
 public interface IMRValidator
 {

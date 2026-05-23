@@ -214,13 +214,12 @@ namespace MetBench_Client
                 // === v2 Validation stack (P7) — T-C: 真实 sampler 替换 hardcoded stub ===
                 services.AddScoped<ValidationService>();
                 services.AddScoped<EmpiricalRepoSampler>();
-                services.AddScoped<AdversarialCampaignSampler>();
                 services.AddScoped<EmpiricalValidator>(provider =>
                     new EmpiricalValidator(provider.GetRequiredService<EmpiricalRepoSampler>().SampleAsync));
                 services.AddScoped<TheoreticalLlmValidator>(provider =>
                     new TheoreticalLlmValidator(provider.GetRequiredService<ILlmGateway>()));
-                services.AddScoped<AdversarialMutmutValidator>(provider =>
-                    new AdversarialMutmutValidator(provider.GetRequiredService<AdversarialCampaignSampler>().SampleAsync));
+                // AdversarialMutmutValidator + AdversarialCampaignSampler 已删除（next-stage P0
+                // 模型对齐：MR 识别收敛为 meta-prompt + multi-LLM 共识，T6 变异由 MutationCampaign 子系统承担）
                 services.AddScoped<Views.Pages.CandidateReviewPage>();
                 services.AddScoped<ViewModels.CandidateReviewViewModel>();
 

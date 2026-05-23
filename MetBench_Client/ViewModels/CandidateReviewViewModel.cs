@@ -19,7 +19,6 @@ public sealed partial class CandidateReviewViewModel : ObservableObject, INaviga
     private readonly ValidationService _validationService;
     private readonly EmpiricalValidator _empirical;
     private readonly TheoreticalLlmValidator _theoreticalLlm;
-    private readonly AdversarialMutmutValidator _adversarial;
     private readonly ICandidateMRRepository _candidateRepo;
     private readonly IValidationRunRepository _validationRunRepo;
 
@@ -35,7 +34,6 @@ public sealed partial class CandidateReviewViewModel : ObservableObject, INaviga
 
     [ObservableProperty] private bool _useEmpirical = true;
     [ObservableProperty] private bool _useTheoreticalLlm = true;
-    [ObservableProperty] private bool _useAdversarial = true;
 
     [ObservableProperty]
     private ValidationSummary? _lastSummary;
@@ -54,14 +52,12 @@ public sealed partial class CandidateReviewViewModel : ObservableObject, INaviga
         ValidationService validationService,
         EmpiricalValidator empirical,
         TheoreticalLlmValidator theoreticalLlm,
-        AdversarialMutmutValidator adversarial,
         ICandidateMRRepository candidateRepo,
         IValidationRunRepository validationRunRepo)
     {
         _validationService = validationService;
         _empirical = empirical;
         _theoreticalLlm = theoreticalLlm;
-        _adversarial = adversarial;
         _candidateRepo = candidateRepo;
         _validationRunRepo = validationRunRepo;
     }
@@ -100,7 +96,6 @@ public sealed partial class CandidateReviewViewModel : ObservableObject, INaviga
         var validators = new List<IMRValidator>();
         if (UseEmpirical) validators.Add(_empirical);
         if (UseTheoreticalLlm) validators.Add(_theoreticalLlm);
-        if (UseAdversarial) validators.Add(_adversarial);
         if (!validators.Any())
         {
             ErrorMessage = "Select at least one validator.";

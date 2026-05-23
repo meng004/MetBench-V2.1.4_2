@@ -83,41 +83,8 @@ public sealed class ValidatorTests
         Assert.Contains("empty-reply", outcome.DetailsJson);
     }
 
-    // ===== AdversarialMutmutValidator =====
-
-    [Fact]
-    public async Task Adversarial_passes_when_detection_rate_above_min()
-    {
-        var probes = new MutantProbe[]
-        {
-            new(1, false), new(2, false), new(3, true), new(4, true), new(5, false),
-        };
-        var v = new AdversarialMutmutValidator((_, _) =>
-            Task.FromResult((IReadOnlyList<MutantProbe>)probes), minDetectionRate: 0.4);
-        var outcome = await v.ValidateAsync(MakeCandidate());
-        Assert.True(outcome.Passed);
-        Assert.Contains("detectionRate", outcome.DetailsJson);
-    }
-
-    [Fact]
-    public async Task Adversarial_fails_when_no_detection()
-    {
-        var probes = new MutantProbe[] { new(1, true), new(2, true), new(3, true) };
-        var v = new AdversarialMutmutValidator((_, _) =>
-            Task.FromResult((IReadOnlyList<MutantProbe>)probes), minDetectionRate: 0.2);
-        var outcome = await v.ValidateAsync(MakeCandidate());
-        Assert.False(outcome.Passed);
-    }
-
-    [Fact]
-    public async Task Adversarial_fails_when_no_mutants()
-    {
-        var v = new AdversarialMutmutValidator((_, _) =>
-            Task.FromResult((IReadOnlyList<MutantProbe>)Array.Empty<MutantProbe>()));
-        var outcome = await v.ValidateAsync(MakeCandidate());
-        Assert.False(outcome.Passed);
-        Assert.Contains("no-mutants", outcome.DetailsJson);
-    }
+    // AdversarialMutmutValidator 测试段已删除（next-stage P0 模型对齐：
+    // MR 识别收敛为 meta-prompt + multi-LLM 共识，AdversarialMutmut 移出 T4 范围）。
 
     private static CandidateMR MakeCandidate() => new()
     {
