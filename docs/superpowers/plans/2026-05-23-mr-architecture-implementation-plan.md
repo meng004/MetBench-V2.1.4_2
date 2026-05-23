@@ -209,7 +209,7 @@
 |---|---|---|---|
 | P0 | ✅ 已完成(2026-05-23) | (pending push) | 13 TDD 全过,全量回归 680/0fail/0skip。schema 字段添加无破坏,既有数据按默认值兼容。 |
 | P1 | ✅ 已完成(2026-05-23) | (pending push) | 74 TDD 全过,全量回归 754/0fail/0skip。17 L0 数学基元注册入 TransformationRegistry。 |
-| P2 | 待启动 | — | — |
+| P2 | ✅ 已完成(2026-05-23) | (pending push) | 18 TDD 全过,全量回归 772/0fail/0skip。IEquationFunction + EquationFunctionRegistry + RecipeBasedEquationFunction + TransformationResolver + UnknownTransformationException。 |
 | P3 | 待启动 | — | — |
 | P4 | 待启动 | — | — |
 | P5 | 待启动 | — | — |
