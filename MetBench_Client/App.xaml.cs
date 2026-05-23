@@ -127,8 +127,6 @@ namespace MetBench_Client
                 services.AddScoped<InputGenerator>(provider =>
                     throw new InvalidOperationException(
                         "InputGenerator must be constructed with a per-task adapter path; resolve PythonInputAdapter and the adapter path from the task instead."));
-                services.AddScoped<SystemMtRunner>();
-
                 // Stage 4 launcher facade + persistence + reporting
                 services.AddSingleton(provider => new LauncherOptions(
                     SutRoot: Path.Combine(
