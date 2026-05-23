@@ -65,16 +65,48 @@ public sealed class SystemMtLauncherTests
     {
         var descriptors = await _launcher.ListAvailableAsync();
 
-        Assert.Equal(9, descriptors.Count);
-        Assert.Equal("damped-oscillator-scale-state", descriptors[0].Id);
-        Assert.Equal("decay-chain-scale-initial", descriptors[1].Id);
-        Assert.Equal("heat-equation-amplitude", descriptors[2].Id);
-        Assert.Equal("lotka-volterra-scale-gamma", descriptors[3].Id);
-        Assert.Equal("openmc-pincell-nu-sigma-f", descriptors[4].Id);
-        Assert.Equal("openmc-pincell-sigma-a", descriptors[5].Id);
-        Assert.Equal("openmoc-pincell-nu-sigma-f", descriptors[6].Id);
-        Assert.Equal("openmoc-pincell-sigma-a", descriptors[7].Id);
-        Assert.Equal("projectile-scale-v0", descriptors[8].Id);
+        Assert.Equal(11, descriptors.Count);
+        Assert.Equal("bateman-mass-conservation", descriptors[0].Id);
+        Assert.Equal("bateman-timestep-cauchy", descriptors[1].Id);
+        Assert.Equal("damped-oscillator-scale-state", descriptors[2].Id);
+        Assert.Equal("decay-chain-scale-initial", descriptors[3].Id);
+        Assert.Equal("heat-equation-amplitude", descriptors[4].Id);
+        Assert.Equal("lotka-volterra-scale-gamma", descriptors[5].Id);
+        Assert.Equal("openmc-pincell-nu-sigma-f", descriptors[6].Id);
+        Assert.Equal("openmc-pincell-sigma-a", descriptors[7].Id);
+        Assert.Equal("openmoc-pincell-nu-sigma-f", descriptors[8].Id);
+        Assert.Equal("openmoc-pincell-sigma-a", descriptors[9].Id);
+        Assert.Equal("projectile-scale-v0", descriptors[10].Id);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_bateman_mass_conservation_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var massConservation = descriptors.Single(d => d.Id == "bateman-mass-conservation");
+
+        Assert.Equal("decay-chain", massConservation.SutName);
+        Assert.Equal("ScaleField", massConservation.TransformationName);
+        Assert.Equal("ApproxEqual", massConservation.AssertionName);
+        Assert.Equal("total", massConservation.ValueName);
+        Assert.Equal("2", massConservation.DefaultParameters["factor"]);
+        Assert.Contains("conservation", massConservation.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Bateman.Invariance.MassConservation", massConservation.MrFamily);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_bateman_timestep_cauchy_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var cauchy = descriptors.Single(d => d.Id == "bateman-timestep-cauchy");
+
+        Assert.Equal("decay-chain", cauchy.SutName);
+        Assert.Equal("ScaleField", cauchy.TransformationName);
+        Assert.Equal("ApproxEqual", cauchy.AssertionName);
+        Assert.Equal("N_C_final", cauchy.ValueName);
+        Assert.Equal("2", cauchy.DefaultParameters["factor"]);
+        Assert.Contains("step", cauchy.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Bateman.Convergence.Timestep", cauchy.MrFamily);
     }
 
     [Fact]

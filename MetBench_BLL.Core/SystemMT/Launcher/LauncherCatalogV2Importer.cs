@@ -177,14 +177,15 @@ public sealed class LauncherCatalogV2Importer
 
     /// <summary>
     /// 从 launcher 的 MrFamily 字符串(如 "NeutronTransport.Scaling.NuSigmaF")反推
-    /// NOETHER 元模式代码。当前 8 个 MR 全是缩放 → 单调,落 m_mono。后续 MR 库扩
-    /// 展时按家族细化(m_inv / m_conv / m_cmp 等)。
+    /// NOETHER 元模式代码。识别 Scaling → m_mono、Invariance → m_inv、
+    /// Convergence → m_conv。后续 MR 库扩展可再增 m_cmp 等。
     /// </summary>
     private static string DeriveMetaPatternCode(string mrFamily)
     {
         if (string.IsNullOrEmpty(mrFamily)) return string.Empty;
-        // 启发式:8 个 launcher MR 全是单调缩放
         if (mrFamily.Contains("Scaling", StringComparison.Ordinal)) return "m_mono";
+        if (mrFamily.Contains("Invariance", StringComparison.Ordinal)) return "m_inv";
+        if (mrFamily.Contains("Convergence", StringComparison.Ordinal)) return "m_conv";
         return string.Empty;
     }
 }

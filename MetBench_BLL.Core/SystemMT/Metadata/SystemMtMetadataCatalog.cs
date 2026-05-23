@@ -194,6 +194,38 @@ public static class SystemMtMetadataCatalog
         },
         new MrMetadata
         {
+            MrId = "bateman-mass-conservation",
+            EquationKey = "bateman",
+            PhysicalMeaning =
+                "Bateman 衰变链 A→B→C 无生成无吸收，总核素数 total = N_A+N_B+N_C 守恒。" +
+                "改变衰变率 λ_A 不影响总数。",
+            InputTransformation = "λ_A → factor·λ_A（factor > 1）",
+            OutputRelation = "total(flw) ≈ total(src)（容差内严格等）",
+            ComparisonType = MrComparisonType.Absolute,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "λ_A 缩放倍率", ValueRange = "factor > 0" },
+                new() { Symbol = "total", PhysicalMeaning = "守恒总核素数（输出）", ValueRange = "total = N_A0+N_B0+N_C0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "bateman-timestep-cauchy",
+            EquationKey = "bateman",
+            PhysicalMeaning =
+                "RK4 时间步长 Cauchy 收敛：步长减半（num_steps 翻倍）应使数值解在 RK4 截断误差容差内不变 — " +
+                "若变化超出容差说明 RK4 尚未收敛到细网格 plateau。",
+            InputTransformation = "num_steps → factor·num_steps（factor > 1）",
+            OutputRelation = "N_C_final(flw) ≈ N_C_final(src)（RK4 截断误差容差内）",
+            ComparisonType = MrComparisonType.Absolute,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "num_steps 缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "N_C_final", PhysicalMeaning = "末端核素 C 的终态积累量（输出）", ValueRange = "N_C_final ≥ 0" },
+            },
+        },
+        new MrMetadata
+        {
             MrId = "damped-oscillator-scale-state",
             EquationKey = "damped-oscillator",
             PhysicalMeaning =

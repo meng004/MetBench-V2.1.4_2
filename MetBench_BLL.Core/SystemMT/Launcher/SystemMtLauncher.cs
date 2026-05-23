@@ -478,6 +478,61 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
             AssertionTypeCode: "greater",
             EquationKey: "bateman");
 
+        // S8-P1: Bateman MR 库扩展（复用 decay-chain SUT）
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "bateman-mass-conservation",
+                DisplayName: "Bateman — MassConservation (lambda invariance)",
+                SutName: "decay-chain",
+                TransformationName: "ScaleField",
+                AssertionName: "ApproxEqual",
+                ValueName: "total",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Mass conservation MP_inv: the Bateman chain A→B→C conserves total " +
+                    "nuclide count (no production/absorption). Scaling lambda_A must not " +
+                    "change the conserved total = N_A+N_B+N_C at t_final.",
+                MrFamily: "Bateman.Invariance.MassConservation"),
+            SampleCaseRelativePath: Path.Combine("decay_chain", "sample", "three_nuclide.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain_input_adapter.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain_output_adapter.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchDecayChain",
+            Timeout: TimeSpan.FromSeconds(60),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/params/lambda_A") },
+            AssertionTypeCode: "approx",
+            EquationKey: "bateman");
+
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "bateman-timestep-cauchy",
+                DisplayName: "Bateman — TimestepCauchy (RK4 convergence)",
+                SutName: "decay-chain",
+                TransformationName: "ScaleField",
+                AssertionName: "ApproxEqual",
+                ValueName: "N_C_final",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Time-step Cauchy convergence MP_conv: doubling num_steps (halving the " +
+                    "RK4 step size) must leave N_C_final within RK4 truncation tolerance — " +
+                    "the integrator is already at the fine-grid plateau.",
+                MrFamily: "Bateman.Convergence.Timestep"),
+            SampleCaseRelativePath: Path.Combine("decay_chain", "sample", "three_nuclide.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain_input_adapter.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain_output_adapter.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchDecayChain",
+            Timeout: TimeSpan.FromSeconds(60),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/params/num_steps") },
+            AssertionTypeCode: "approx",
+            EquationKey: "bateman");
+
         yield return new MrBlueprint(
             new MrSummary(
                 Id: "damped-oscillator-scale-state",
