@@ -65,7 +65,7 @@ public sealed class SystemMtLauncherTests
     {
         var descriptors = await _launcher.ListAvailableAsync();
 
-        Assert.Equal(13, descriptors.Count);
+        Assert.Equal(15, descriptors.Count);
         Assert.Equal("bateman-mass-conservation", descriptors[0].Id);
         Assert.Equal("bateman-timestep-cauchy", descriptors[1].Id);
         Assert.Equal("damped-oscillator-scale-state", descriptors[2].Id);
@@ -79,6 +79,38 @@ public sealed class SystemMtLauncherTests
         Assert.Equal("openmoc-pincell-nu-sigma-f", descriptors[10].Id);
         Assert.Equal("openmoc-pincell-sigma-a", descriptors[11].Id);
         Assert.Equal("projectile-scale-v0", descriptors[12].Id);
+        Assert.Equal("subchannel-flow-temperature-monotone", descriptors[13].Id);
+        Assert.Equal("subchannel-heat-flux-linearity", descriptors[14].Id);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_subchannel_flow_temperature_monotone_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var mono = descriptors.Single(d => d.Id == "subchannel-flow-temperature-monotone");
+
+        Assert.Equal("subchannel-1d", mono.SutName);
+        Assert.Equal("ScaleField", mono.TransformationName);
+        Assert.Equal("LessThan", mono.AssertionName);
+        Assert.Equal("delta_T", mono.ValueName);
+        Assert.Equal("2", mono.DefaultParameters["factor"]);
+        Assert.Contains("flow", mono.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Subchannel.Scaling.MassFlux", mono.MrFamily);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_subchannel_heat_flux_linearity_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var lin = descriptors.Single(d => d.Id == "subchannel-heat-flux-linearity");
+
+        Assert.Equal("subchannel-1d", lin.SutName);
+        Assert.Equal("ScaleField", lin.TransformationName);
+        Assert.Equal("GreaterThan", lin.AssertionName);
+        Assert.Equal("delta_T", lin.ValueName);
+        Assert.Equal("2", lin.DefaultParameters["factor"]);
+        Assert.Contains("heat", lin.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Subchannel.Scaling.HeatFlux", lin.MrFamily);
     }
 
     [Fact]

@@ -1,0 +1,18 @@
+{
+  "geometry": {
+    "channel_length":     1.0,
+    "cross_section_area": 1.0e-4,
+    "heated_perimeter":   0.04,
+    "hydraulic_diameter": 0.012
+  },
+  "fluid": {
+    "density":         750.0,
+    "specific_heat":   5200.0,
+    "friction_factor": 0.02
+  },
+  "boundary": {
+    "mass_flux":         4000.0,
+    "inlet_temperature": 560.0,
+    "heat_flux":         500000.0
+  }
+}

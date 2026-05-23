@@ -87,6 +87,25 @@ public static class SystemMtMetadataCatalog
         },
         new EquationMetadata
         {
+            EquationKey = "navier-stokes",
+            Name = "Navier-Stokes 方程（1D 单通道稳态简化）",
+            CanonicalForm =
+                "质量：G = const；动量：dp/dz = -f·G²/(2ρ·D_h)；能量：G·c_p·dT/dz = q''·P_h/A_xs",
+            SymbolSystem =
+                "G 质量流密度 [kg/(m²·s)]；p 压力 [Pa]；T 温度 [K]；ρ 密度 [kg/m³]；" +
+                "c_p 比热 [J/(kg·K)]；f Darcy 摩擦因子；D_h 水力直径 [m]；" +
+                "q'' 壁面热流密度 [W/m²]；P_h 加热周长 [m]；A_xs 横截面积 [m²]。",
+            Parameters = new List<EquationParameter>
+            {
+                new() { Symbol = "G", Description = "质量流密度", Unit = "kg/(m²·s)" },
+                new() { Symbol = "q''", Description = "壁面热流密度", Unit = "W/m²" },
+                new() { Symbol = "f", Description = "Darcy 摩擦因子（闭式输入）", Unit = "无量纲" },
+                new() { Symbol = "ΔT", Description = "出入口温升（输出）", Unit = "K" },
+                new() { Symbol = "Δp", Description = "通道压降（输出）", Unit = "Pa" },
+            },
+        },
+        new EquationMetadata
+        {
             EquationKey = "projectile-motion",
             Name = "射程方程（真空、平面、点抛体）",
             CanonicalForm = "R = v0²·sin(2θ)/g",
@@ -284,6 +303,37 @@ public static class SystemMtMetadataCatalog
             {
                 new() { Symbol = "factor", PhysicalMeaning = "γ（捕食者死亡率）缩放倍率", ValueRange = "factor > 1" },
                 new() { Symbol = "mean_prey", PhysicalMeaning = "时均猎物数（输出）", ValueRange = "mean_prey > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "subchannel-flow-temperature-monotone",
+            EquationKey = "navier-stokes",
+            PhysicalMeaning =
+                "由能量守恒 ΔT = q''·P_h·L/(G·A_xs·c_p)，固定热流密度 q'' 下，质量流密度 G " +
+                "越大，温升 ΔT 越小（流量越高，散热越好）。",
+            InputTransformation = "G → factor·G（factor > 1）",
+            OutputRelation = "ΔT(flw) < ΔT(src)（严格意义下 = ΔT(src) / factor）",
+            ComparisonType = MrComparisonType.Ordinal,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "G 缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "ΔT", PhysicalMeaning = "出口温升（输出）", ValueRange = "ΔT > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "subchannel-heat-flux-linearity",
+            EquationKey = "navier-stokes",
+            PhysicalMeaning =
+                "能量守恒在 q'' 上线性：定流量下 ΔT 与 q'' 成正比，故 q'' 翻倍必使 ΔT 翻倍。",
+            InputTransformation = "q'' → factor·q''（factor > 1）",
+            OutputRelation = "ΔT(flw) > ΔT(src)（严格意义下 = factor·ΔT(src)）",
+            ComparisonType = MrComparisonType.Ordinal,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "q'' 缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "ΔT", PhysicalMeaning = "出口温升（输出）", ValueRange = "ΔT > 0" },
             },
         },
         new MrMetadata

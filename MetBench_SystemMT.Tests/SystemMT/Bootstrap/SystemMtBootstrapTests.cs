@@ -36,17 +36,17 @@ public sealed class SystemMtBootstrapTests
 
         var result = await SystemMtBootstrap.SeedCatalogsAsync(_meta, importer);
 
-        // metadata seed: 6 equations + 13 MRs（S8-P2 后 9 + 2 + 2 = 13）
-        Assert.Equal(6, result.EquationsSeeded);
-        Assert.Equal(13, result.MrsSeeded);
-        Assert.Equal(6, (await _meta.ListEquationsAsync()).Count);
-        Assert.Equal(13, (await _meta.ListMrsAsync()).Count);
+        // metadata seed: 7 equations + 15 MRs（S8-P3 后 13 + 2 MR + 1 navier-stokes 方程 = 7eq/15MR）
+        Assert.Equal(7, result.EquationsSeeded);
+        Assert.Equal(15, result.MrsSeeded);
+        Assert.Equal(7, (await _meta.ListEquationsAsync()).Count);
+        Assert.Equal(15, (await _meta.ListMrsAsync()).Count);
 
-        // entity import: 7 SUT + 13 MR + 13 binding
+        // entity import: 8 SUT + 15 MR + 15 binding
         Assert.NotNull(result.ImportSummary);
-        Assert.Equal(7, result.ImportSummary!.ApplicationsCreated);
-        Assert.Equal(13, result.ImportSummary.MrsCreated);
-        Assert.Equal(13, result.ImportSummary.BindingsCreated);
+        Assert.Equal(8, result.ImportSummary!.ApplicationsCreated);
+        Assert.Equal(15, result.ImportSummary.MrsCreated);
+        Assert.Equal(15, result.ImportSummary.BindingsCreated);
     }
 
     [Fact]
@@ -57,15 +57,15 @@ public sealed class SystemMtBootstrapTests
         await SystemMtBootstrap.SeedCatalogsAsync(_meta, importer);
         var second = await SystemMtBootstrap.SeedCatalogsAsync(_meta, importer);
 
-        // metadata 仍是 6/13（upsert 而非追加）
-        Assert.Equal(6, (await _meta.ListEquationsAsync()).Count);
-        Assert.Equal(13, (await _meta.ListMrsAsync()).Count);
+        // metadata 仍是 7/15（upsert 而非追加）
+        Assert.Equal(7, (await _meta.ListEquationsAsync()).Count);
+        Assert.Equal(15, (await _meta.ListMrsAsync()).Count);
         // entity 第二次 created=0, existing 显示原有计数
         Assert.NotNull(second.ImportSummary);
         Assert.Equal(0, second.ImportSummary!.ApplicationsCreated);
-        Assert.Equal(7, second.ImportSummary.ApplicationsExisting);
+        Assert.Equal(8, second.ImportSummary.ApplicationsExisting);
         Assert.Equal(0, second.ImportSummary.MrsCreated);
-        Assert.Equal(13, second.ImportSummary.MrsExisting);
+        Assert.Equal(15, second.ImportSummary.MrsExisting);
     }
 
     [Fact]
@@ -78,7 +78,7 @@ public sealed class SystemMtBootstrapTests
         Assert.Equal(0, result.EquationsSeeded);
         Assert.Equal(0, result.MrsSeeded);
         Assert.NotNull(result.ImportSummary);
-        Assert.Equal(7, result.ImportSummary!.ApplicationsCreated);
+        Assert.Equal(8, result.ImportSummary!.ApplicationsCreated);
     }
 
     [Fact]
@@ -86,8 +86,8 @@ public sealed class SystemMtBootstrapTests
     {
         var result = await SystemMtBootstrap.SeedCatalogsAsync(_meta, launcherImporter: null);
 
-        Assert.Equal(6, result.EquationsSeeded);
-        Assert.Equal(13, result.MrsSeeded);
+        Assert.Equal(7, result.EquationsSeeded);
+        Assert.Equal(15, result.MrsSeeded);
         Assert.Null(result.ImportSummary);
         // entity 表未被改
         Assert.Empty(_apps.Data);

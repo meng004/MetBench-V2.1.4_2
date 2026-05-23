@@ -15,7 +15,7 @@
 | **测试文件** | `MetBench_SystemMT.Tests/` 下相对路径 | 单元 + BDD + UAT |
 | **测试结果** | `dotnet test MetBench_SystemMT.Tests` 最近一次基线 | `pass/skip/fail` 或缺口说明 |
 
-**基线**：2026-05-23（Stage 8 S8-P2 后），`dotnet test MetBench_SystemMT.Tests` = **839 pass / 0 fail**（OpenMC 跨程序场景在无 OpenMC 环境下首跑 skip / 二跑 warm 后 0 skip）。基线累计变化：848 - 6 (mutmut) - 13 (Trend) + 6 (G-02) + 2 (S8-P1) + 2 (S8-P2) = 839。
+**基线**：2026-05-23（Stage 8 S8-P3 后），`dotnet test MetBench_SystemMT.Tests` = **841 pass / 0 fail**（OpenMC 跨程序场景在无 OpenMC 环境下首跑 skip / 二跑 warm 后 0 skip）。基线累计变化：848 - 6 (mutmut) - 13 (Trend) + 6 (G-02) + 2 (S8-P1) + 2 (S8-P2) + 2 (S8-P3) = 841。MR 库扩至 15 / 7 方程。
 
 ## 1. T0 · 核心 —— 系统级 MT 流程
 
@@ -51,7 +51,7 @@
 | 编号 | 需求来源 | 功能描述 | 实现文件 | 测试文件 | 测试结果 |
 |---|---|---|---|---|---|
 | F-T3-01 | AGENTS Stage 6 P8 | CoverageService 4 维报告 | `MetBench_BLL.Core/Coverage/CoverageService.cs`<br>`Coverage/CoverageReport.cs` | `V2Coverage/CoverageServiceTests.cs`<br>`V2Coverage/FakeCoverageRepositories.cs` | ✅ pass |
-| F-T3-02 | AGENTS Stage 8 | 代表性 SUT 接入（已落地：decay_chain / damped_oscillator / lotka_volterra / heat_equation / projectile / openmoc / openmc；**全部进入 launcher catalog + metadata catalog**）。**S8-P1+P2（2026-05-23）扩 Bateman + Fourier MR 库**：S8-P1 在 decay-chain 上加 `bateman-mass-conservation` m_inv + `bateman-timestep-cauchy` m_conv；S8-P2 在 heat_equation 上加 `fourier-timestep-convergence` m_conv + `fourier-alpha-monotonic` m_mono。共 13 MR / 6 方程；importer DeriveMetaPatternCode 扩 m_inv / m_conv 识别 | `SUT/decay_chain/`（含 `bateman` 方程实现）<br>`SUT/damped_oscillator/`<br>`SUT/lotka_volterra/`<br>`SUT/heat_equation/`<br>`SUT/projectile/`（+ `sample/standard.txt`）<br>`SUT/openmoc/`<br>`SUT/openmc/` | （上述各 SUT 的 Parser / Adapter / Smoke / Sample 测试，见 F-T1-02）<br>+ `Launcher/SystemMtLauncherTests.ListAvailableAsync_{projectile,bateman_mass_conservation,bateman_timestep_cauchy}_descriptor_has_expected_metadata` | ✅ pass |
+| F-T3-02 | AGENTS Stage 8 | 代表性 SUT 接入（共 8 SUT / 7 方程：decay_chain / damped_oscillator / lotka_volterra / heat_equation / projectile / openmoc / openmc / **subchannel_1d**；**全部进入 launcher catalog + metadata catalog**）。**S8-P1+P2+P3（2026-05-23）扩 MR 库**：S8-P1 Bateman 2 MR；S8-P2 Fourier 2 MR；S8-P3 1D subchannel SUT 接入 + navier-stokes 新方程 + 2 MR（`subchannel-flow-temperature-monotone` m_mono + `subchannel-heat-flux-linearity` m_mono）。共 15 MR / 7 方程 | `SUT/decay_chain/`（含 `bateman` 方程实现）<br>`SUT/damped_oscillator/`<br>`SUT/lotka_volterra/`<br>`SUT/heat_equation/`<br>`SUT/projectile/`（+ `sample/standard.txt`）<br>`SUT/openmoc/`<br>`SUT/openmc/` | （上述各 SUT 的 Parser / Adapter / Smoke / Sample 测试，见 F-T1-02）<br>+ `Launcher/SystemMtLauncherTests.ListAvailableAsync_{projectile,bateman_mass_conservation,bateman_timestep_cauchy}_descriptor_has_expected_metadata` | ✅ pass |
 | F-T3-03 | `docs/t3-program-selection.md` | 反应堆物理 5 方程锚定（boltzmann / diffusion / bateman / fourier / NS） | bateman: `Equations/Bateman/BatemanAnalyticSolution.cs`（L2）<br>boltzmann: 通过 OpenMOC/OpenMC SUT（无独立 L2）<br>fourier: 通过 heat_equation SUT<br>diffusion / NS: **未落地** | bateman: `SystemMT/Equations/BatemanP4Tests.cs` | ⚠ **缺口**：diffusion + NS 方程的 L2 / SUT 未落地 |
 
 ## 5. T4 · MR 识别
@@ -115,7 +115,7 @@
 |---|---|---|---|---|
 | G-01 | F-T1-05（WPF 客户端） | 云端 CI 不能编译 WPF（`net8.0-windows7.0`），完全无自动测试覆盖 | WPF 页面行为只能 Windows 手动验证 | 维持现状（CLAUDE.md §3 已硬约束）；UAT runbook 已覆盖 |
 | ~~G-02~~ ✅ 已完成(2026-05-23) | F-T2-03（LiveCharts 数据层） | ~~MTVisualizationService 跨平台部分无独立单测~~ | — | 新建 `Bll/MtVisualizationServiceTests.cs`（6 测试覆盖 Line/Scatter/Pie/未初始化/非法 PlotType/重复 Initialize） |
-| G-03 | F-T3-03（反应堆 5 方程锚定） | diffusion + Navier-Stokes 两条 L2 解析解 / SUT 未落地 | T3 覆盖目标未达成 | 留待 Stage 8 后续 plan；不在 P0–P7 范围 |
+| G-03 | F-T3-03（反应堆 5 方程锚定） | ~~diffusion + Navier-Stokes~~ S8-P3 已加 **navier-stokes**（1D subchannel SUT + 2 MR）；剩 **diffusion** 待 S8-P4 接入 | T3 覆盖部分达成 | S8-P4 落 diffusion；G-03 部分闭合 |
 | G-04 | F-T6-02（语义变异 + 等价识别 + 最小 MR 子集） | 完全未实现 | Stage 8 变异模块增强未启动 | CLAUDE.md §2 / AGENTS Stage 8 "主线之外"已列为 backlog |
 | ~~G-05~~ ✅ 已完成(2026-05-23) | F-MR-P7 | ~~LaTeX→SymPy `[Obsolete]` 后无 grep 守卫单测~~ | — | 已建 `Architecture/ObsoleteAttributeGuardTests.cs` 覆盖 `Latextosympy` + `Latextosympy_Await` + `SystemMtRunner`（5 测试） |
 | ~~G-06~~ ✅ 已完成(2026-05-23) | F-T1-04 / F-MR-P5 | ~~method MT 协议层未接入业务路径~~ | — | 已建 `IMtPipeline<TReq,TOut>` 共享抽象（BLL.Core/MT）+ `MethodMtPipeline`（BLL/MethodMT，实现协议层）+ `MethodMtRunRequest/Outcome` 数据 record + `MethodMtCatalogService` 扩 CRUD（Get/Update/Delete）+ `SystemMtPipeline` 加 IMtPipeline 显式接口实现；20 新测试（7 pipeline + 4 Bateman 参数化 AAA + 9 CRUD）；全量回归 810→830 pass。注：4 处 `Latextosympy*` 调用已澄清属 v1 展示衍生字段（不在 G-06 范围），归 G-11 处置 |
@@ -155,7 +155,8 @@
 | `88e757d` | **档 2.A.2** | next-stage P0：删 MetBench_BLL.Trend 子系统（829 pass）|
 | `8c7ddd5` | **G-02 / 档 2.C** | MTVisualizationService 数据层 6 单测（835 pass）|
 | `01fcba3` | **S8-P1** | Bateman MR 库扩展：`bateman-mass-conservation` (m_inv) + `bateman-timestep-cauchy` (m_conv) + importer 元模式识别扩展（837 pass）|
-| `<TBD-S8P2>` | **S8-P2** | Fourier MR 库扩展：`fourier-timestep-convergence` (m_conv) + `fourier-alpha-monotonic` (m_mono)（839 pass）|
+| `0d119f3` | **S8-P2** | Fourier MR 库扩展：`fourier-timestep-convergence` (m_conv) + `fourier-alpha-monotonic` (m_mono)（839 pass）|
+| `<TBD-S8P3>` | **S8-P3** | 1D subchannel SUT 接入 + navier-stokes 方程：2 新 MR（841 pass，G-03 部分闭合）|
 
 ## 12. 受控开发模式工作流
 

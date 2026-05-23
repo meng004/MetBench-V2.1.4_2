@@ -669,6 +669,61 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
             OutputParserScriptPath: Path.Combine(options.SutRoot, "projectile", "projectile_output_parser.py"),
             TransformSteps: new[] { new MrTransformStep("ScaleField", "/v0") },
             AssertionTypeCode: "greater");
+
+        // S8-P3: 1D subchannel SUT + navier-stokes 方程接入
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "subchannel-flow-temperature-monotone",
+                DisplayName: "1D subchannel — ScaleMassFlux (flow ↑ ⇒ ΔT ↓)",
+                SutName: "subchannel-1d",
+                TransformationName: "ScaleField",
+                AssertionName: "LessThan",
+                ValueName: "delta_T",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Energy conservation MP_mono: at fixed wall heat flux q'' and inlet " +
+                    "temperature, ΔT = q''·P_h·L/(G·A_xs·c_p) is inversely proportional to " +
+                    "mass flux G — higher flow strictly decreases the outlet temperature rise.",
+                MrFamily: "Subchannel.Scaling.MassFlux"),
+            SampleCaseRelativePath: Path.Combine("subchannel_1d", "sample", "pwr_channel.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "subchannel_1d", "subchannel_1d.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "subchannel_1d", "subchannel_1d_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "subchannel_1d", "subchannel_1d_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchSubchannel",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "subchannel_1d", "subchannel_1d_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "subchannel_1d", "subchannel_1d_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/boundary/mass_flux") },
+            AssertionTypeCode: "less",
+            EquationKey: "navier-stokes");
+
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "subchannel-heat-flux-linearity",
+                DisplayName: "1D subchannel — ScaleHeatFlux (linearity in q'')",
+                SutName: "subchannel-1d",
+                TransformationName: "ScaleField",
+                AssertionName: "GreaterThan",
+                ValueName: "delta_T",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Energy conservation MP_mono (linearity in heat input): doubling the wall " +
+                    "heat flux q'' must strictly increase ΔT (in fact, by the same factor) " +
+                    "because energy balance is linear in q'' at constant flow.",
+                MrFamily: "Subchannel.Scaling.HeatFlux"),
+            SampleCaseRelativePath: Path.Combine("subchannel_1d", "sample", "pwr_channel.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "subchannel_1d", "subchannel_1d.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "subchannel_1d", "subchannel_1d_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "subchannel_1d", "subchannel_1d_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchSubchannel",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "subchannel_1d", "subchannel_1d_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "subchannel_1d", "subchannel_1d_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/boundary/heat_flux") },
+            AssertionTypeCode: "greater",
+            EquationKey: "navier-stokes");
     }
 
     private sealed record MrBlueprint(

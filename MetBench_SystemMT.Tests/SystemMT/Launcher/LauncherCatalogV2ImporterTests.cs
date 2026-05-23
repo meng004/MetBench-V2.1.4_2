@@ -43,11 +43,11 @@ public sealed class LauncherCatalogV2ImporterTests
     {
         var summary = _importer.Import();
 
-        Assert.Equal(7, summary.ApplicationsCreated);
-        Assert.Equal(7, _apps.Data.Count);
+        Assert.Equal(8, summary.ApplicationsCreated);
+        Assert.Equal(8, _apps.Data.Count);
         var sutNames = _apps.Data.Select(a => a.Name).OrderBy(n => n).ToArray();
         Assert.Equal(
-            new[] { "damped-oscillator", "decay-chain", "heat-equation", "lotka-volterra", "openmc", "openmoc", "projectile" },
+            new[] { "damped-oscillator", "decay-chain", "heat-equation", "lotka-volterra", "openmc", "openmoc", "projectile", "subchannel-1d" },
             sutNames);
         Assert.All(_apps.Data, a => Assert.Equal("system-level", a.Kind));
         Assert.All(_apps.Data, a => Assert.Equal("Python", a.ProgrammingLanguage));
@@ -58,8 +58,8 @@ public sealed class LauncherCatalogV2ImporterTests
     {
         var summary = _importer.Import();
 
-        Assert.Equal(13, summary.MrsCreated);
-        Assert.Equal(13, _mrs.Data.Count);
+        Assert.Equal(15, summary.MrsCreated);
+        Assert.Equal(15, _mrs.Data.Count);
         Assert.All(_mrs.Data, m => Assert.Equal("system-level", m.Kind));
         Assert.All(_mrs.Data, m => Assert.Equal("manual", m.DiscoveryMethod));
         // S8-P1 后元模式扩展：Scaling → m_mono / Invariance → m_inv / Convergence → m_conv
@@ -75,7 +75,7 @@ public sealed class LauncherCatalogV2ImporterTests
     {
         _importer.Import();
 
-        Assert.Equal(13, _bindings.Data.Count);
+        Assert.Equal(15, _bindings.Data.Count);
         foreach (var b in _bindings.Data)
         {
             Assert.NotNull(_mrs.Data.FirstOrDefault(m => m.IdMR == b.MRId));
@@ -130,8 +130,8 @@ public sealed class LauncherCatalogV2ImporterTests
         Assert.Equal("launcher.catalog.import", log.Action);
         Assert.Equal("launcher-import", log.Actor);
         Assert.Contains("applicationsCreated", log.DetailsJson);
-        Assert.Contains("\"mrsCreated\":13", log.DetailsJson);
-        Assert.Contains("\"bindingsCreated\":13", log.DetailsJson);
+        Assert.Contains("\"mrsCreated\":15", log.DetailsJson);
+        Assert.Contains("\"bindingsCreated\":15", log.DetailsJson);
     }
 
     [Fact]
@@ -141,22 +141,22 @@ public sealed class LauncherCatalogV2ImporterTests
         var second = _importer.Import();
 
         // 第 1 次:全部新建
-        Assert.Equal(7, first.ApplicationsCreated);
-        Assert.Equal(13, first.MrsCreated);
-        Assert.Equal(13, first.BindingsCreated);
+        Assert.Equal(8, first.ApplicationsCreated);
+        Assert.Equal(15, first.MrsCreated);
+        Assert.Equal(15, first.BindingsCreated);
 
         // 第 2 次:全部已存在
         Assert.Equal(0, second.ApplicationsCreated);
-        Assert.Equal(7, second.ApplicationsExisting);
+        Assert.Equal(8, second.ApplicationsExisting);
         Assert.Equal(0, second.MrsCreated);
-        Assert.Equal(13, second.MrsExisting);
+        Assert.Equal(15, second.MrsExisting);
         Assert.Equal(0, second.BindingsCreated);
-        Assert.Equal(13, second.BindingsExisting);
+        Assert.Equal(15, second.BindingsExisting);
 
         // 行数总和未变
-        Assert.Equal(7, _apps.Data.Count);
-        Assert.Equal(13, _mrs.Data.Count);
-        Assert.Equal(13, _bindings.Data.Count);
+        Assert.Equal(8, _apps.Data.Count);
+        Assert.Equal(15, _mrs.Data.Count);
+        Assert.Equal(15, _bindings.Data.Count);
         // 两次都写一条审计
         Assert.Equal(2, _audit.Data.Count);
     }
