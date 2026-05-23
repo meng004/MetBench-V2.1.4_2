@@ -91,5 +91,22 @@ namespace MetBench_Domain
 
         /// <summary>"method-level"（v1）或 "system-level"（v2）。</summary>
         public string Kind { get; set; } = "method-level";
+
+        // ===== mr-architecture P0 新增字段（详见 docs/design/mr-architecture.md §4.2 §7） =====
+
+        /// <summary>
+        /// 所属方程的稳定业务键(如 <c>bateman</c> / <c>heat-equation-1d</c>),
+        /// 与 <c>EquationMetadata.EquationKey</c> 对应。空字符串表示"未关联方程"
+        /// (向后兼容既有 v2 数据 + v1 method-level 行;v1 行默认空)。
+        /// 设计:`mr-architecture.md` §4.2。
+        /// </summary>
+        public string EquationKey { get; set; } = String.Empty;
+
+        /// <summary>
+        /// MR 操作的数据形态:<c>scalar</c>(默认) / <c>vector</c> / <c>field</c> /
+        /// <c>sample-set</c> / <c>case-set</c>。当前所有既有 MR 都是 scalar;预留以支持
+        /// 集合形态 L3/L4 演化(`mr-architecture.md` §7)。
+        /// </summary>
+        public string ValueShape { get; set; } = "scalar";
     }
 }

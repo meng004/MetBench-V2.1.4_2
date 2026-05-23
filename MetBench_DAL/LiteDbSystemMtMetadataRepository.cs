@@ -14,9 +14,11 @@ public sealed class LiteDbSystemMtMetadataRepository : ISystemMtMetadataReposito
 {
     private const string EquationCollection = "EquationMetadata";
     private const string MrCollection = "MrMetadata";
+    private const string RecipeCollection = "EquationFunctionRecipes";
     private readonly ILiteDatabase _database;
     private readonly ILiteCollection<EquationMetadata> _equations;
     private readonly ILiteCollection<MrMetadata> _mrs;
+    private readonly ILiteCollection<EquationFunctionRecipe> _recipes;
     private readonly bool _ownsDatabase;
     private bool _disposed;
 
@@ -45,6 +47,7 @@ public sealed class LiteDbSystemMtMetadataRepository : ISystemMtMetadataReposito
 
         _database.Mapper.Entity<EquationMetadata>().Id(x => x.Id, autoId: true);
         _database.Mapper.Entity<MrMetadata>().Id(x => x.Id, autoId: true);
+        _database.Mapper.Entity<EquationFunctionRecipe>().Id(x => x.Id, autoId: true);
 
         _equations = _database.GetCollection<EquationMetadata>(EquationCollection);
         _equations.EnsureIndex(x => x.EquationKey, unique: true);
@@ -52,6 +55,10 @@ public sealed class LiteDbSystemMtMetadataRepository : ISystemMtMetadataReposito
         _mrs = _database.GetCollection<MrMetadata>(MrCollection);
         _mrs.EnsureIndex(x => x.MrId, unique: true);
         _mrs.EnsureIndex(x => x.EquationKey, unique: false);
+
+        _recipes = _database.GetCollection<EquationFunctionRecipe>(RecipeCollection);
+        _recipes.EnsureIndex(x => x.EquationKey, unique: false);
+        // (EquationKey, FunctionName) 复合唯一靠 find-then-insert/update 守护,见 UpsertRecipeAsync。
     }
 
     public Task UpsertEquationAsync(EquationMetadata equation, CancellationToken cancellationToken = default)
@@ -159,6 +166,77 @@ public sealed class LiteDbSystemMtMetadataRepository : ISystemMtMetadataReposito
             .OrderBy(x => x.MrId)
             .ToList();
         return Task.FromResult<IReadOnlyList<MrMetadata>>(all);
+    }
+
+    public Task UpsertRecipeAsync(EquationFunctionRecipe recipe, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (recipe is null)
+        {
+            throw new ArgumentNullException(nameof(recipe));
+        }
+        if (string.IsNullOrWhiteSpace(recipe.EquationKey))
+        {
+            throw new ArgumentException("EquationKey is required", nameof(recipe));
+        }
+        if (string.IsNullOrWhiteSpace(recipe.FunctionName))
+        {
+            throw new ArgumentException("FunctionName is required", nameof(recipe));
+        }
+
+        var existing = _recipes.FindOne(x =>
+            x.EquationKey == recipe.EquationKey && x.FunctionName == recipe.FunctionName);
+        if (existing is null)
+        {
+            _recipes.Insert(recipe);
+        }
+        else
+        {
+            recipe.Id = existing.Id;
+            _recipes.Update(recipe);
+        }
+        return Task.CompletedTask;
+    }
+
+    public Task<EquationFunctionRecipe?> GetRecipeAsync(string equationKey, string functionName,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (string.IsNullOrWhiteSpace(equationKey) || string.IsNullOrWhiteSpace(functionName))
+        {
+            return Task.FromResult<EquationFunctionRecipe?>(null);
+        }
+        var found = _recipes.FindOne(x =>
+            x.EquationKey == equationKey && x.FunctionName == functionName);
+        return Task.FromResult<EquationFunctionRecipe?>(found);
+    }
+
+    public Task<IReadOnlyList<EquationFunctionRecipe>> ListRecipesByEquationAsync(string equationKey,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (string.IsNullOrWhiteSpace(equationKey))
+        {
+            return Task.FromResult<IReadOnlyList<EquationFunctionRecipe>>(Array.Empty<EquationFunctionRecipe>());
+        }
+        var matches = _recipes.Query()
+            .Where(x => x.EquationKey == equationKey)
+            .OrderBy(x => x.FunctionName)
+            .ToList();
+        return Task.FromResult<IReadOnlyList<EquationFunctionRecipe>>(matches);
+    }
+
+    public Task<IReadOnlyList<EquationFunctionRecipe>> ListRecipesAsync(CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        // LiteDB 不直接支持多字段 OrderBy;先 EquationKey 再内存中按 FunctionName 二级排序
+        var all = _recipes.Query()
+            .OrderBy(x => x.EquationKey)
+            .ToList()
+            .OrderBy(x => x.EquationKey, StringComparer.Ordinal)
+            .ThenBy(x => x.FunctionName, StringComparer.Ordinal)
+            .ToList();
+        return Task.FromResult<IReadOnlyList<EquationFunctionRecipe>>(all);
     }
 
     public void Dispose()

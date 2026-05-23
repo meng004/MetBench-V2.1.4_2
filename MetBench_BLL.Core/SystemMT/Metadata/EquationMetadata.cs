@@ -35,6 +35,13 @@ public sealed class EquationMetadata
 
     /// <summary>Per-parameter descriptions.</summary>
     public List<EquationParameter> Parameters { get; set; } = new();
+
+    /// <summary>
+    /// 本方程提供的数学函数目录(L1 Recipe + L2 C# 各自的描述符)。
+    /// 设计见 docs/design/mr-architecture.md §4.2 / §5.1。默认空集 —— 既有数据
+    /// 反序列化时此字段会回退到空列表,不影响兼容。
+    /// </summary>
+    public List<EquationFunctionDescriptor> Functions { get; set; } = new();
 }
 
 /// <summary>One symbol of an equation's parameter set.</summary>

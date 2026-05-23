@@ -36,4 +36,23 @@ public interface ISystemMtMetadataRepository
 
     /// <summary>All persisted MR metadata, ordered by MR id.</summary>
     Task<IReadOnlyList<MrMetadata>> ListMrsAsync(CancellationToken cancellationToken = default);
+
+    // ===== mr-architecture P0 — EquationFunctionRecipe(L1 数据驱动方程函数) =====
+
+    /// <summary>
+    /// 插入新 recipe 或按 <c>(EquationKey, FunctionName)</c> 复合键就地更新。
+    /// 校验由调用方(catalog service)做;本方法只做存储与查重。
+    /// </summary>
+    Task UpsertRecipeAsync(EquationFunctionRecipe recipe, CancellationToken cancellationToken = default);
+
+    /// <summary>按 <c>(EquationKey, FunctionName)</c> 取一行,缺失返回 <c>null</c>。</summary>
+    Task<EquationFunctionRecipe?> GetRecipeAsync(string equationKey, string functionName,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>列出指定方程下的全部 L1 recipe,按 FunctionName 升序。</summary>
+    Task<IReadOnlyList<EquationFunctionRecipe>> ListRecipesByEquationAsync(string equationKey,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>列出全部 L1 recipe,按 (EquationKey, FunctionName) 升序。</summary>
+    Task<IReadOnlyList<EquationFunctionRecipe>> ListRecipesAsync(CancellationToken cancellationToken = default);
 }
