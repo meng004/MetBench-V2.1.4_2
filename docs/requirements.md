@@ -145,7 +145,7 @@
 | `e0cceea` | **G-09** | projectile SUT 接入 launcher + metadata catalog（810 pass） |
 | `75df630` | （文档） | §11 索引补登 |
 | `b047668` | （文档） | §10 追加 G-11/G-12/G-13（v1 清理 + PBT 升级占位） |
-| `<TBD>` | **G-06** | method MT 执行栈：IMtPipeline 共享抽象 + MethodMtPipeline + Catalog CRUD（830 pass） |
+| `7305230` | **G-06** | method MT 执行栈：IMtPipeline 共享抽象 + MethodMtPipeline + Catalog CRUD（830 pass） |
 
 ## 12. 受控开发模式工作流
 
