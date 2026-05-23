@@ -65,22 +65,54 @@ public sealed class SystemMtLauncherTests
     {
         var descriptors = await _launcher.ListAvailableAsync();
 
-        Assert.Equal(15, descriptors.Count);
+        Assert.Equal(17, descriptors.Count);
         Assert.Equal("bateman-mass-conservation", descriptors[0].Id);
         Assert.Equal("bateman-timestep-cauchy", descriptors[1].Id);
         Assert.Equal("damped-oscillator-scale-state", descriptors[2].Id);
         Assert.Equal("decay-chain-scale-initial", descriptors[3].Id);
-        Assert.Equal("fourier-alpha-monotonic", descriptors[4].Id);
-        Assert.Equal("fourier-timestep-convergence", descriptors[5].Id);
-        Assert.Equal("heat-equation-amplitude", descriptors[6].Id);
-        Assert.Equal("lotka-volterra-scale-gamma", descriptors[7].Id);
-        Assert.Equal("openmc-pincell-nu-sigma-f", descriptors[8].Id);
-        Assert.Equal("openmc-pincell-sigma-a", descriptors[9].Id);
-        Assert.Equal("openmoc-pincell-nu-sigma-f", descriptors[10].Id);
-        Assert.Equal("openmoc-pincell-sigma-a", descriptors[11].Id);
-        Assert.Equal("projectile-scale-v0", descriptors[12].Id);
-        Assert.Equal("subchannel-flow-temperature-monotone", descriptors[13].Id);
-        Assert.Equal("subchannel-heat-flux-linearity", descriptors[14].Id);
+        Assert.Equal("diffusion-mesh-richardson", descriptors[4].Id);
+        Assert.Equal("diffusion-source-linearity", descriptors[5].Id);
+        Assert.Equal("fourier-alpha-monotonic", descriptors[6].Id);
+        Assert.Equal("fourier-timestep-convergence", descriptors[7].Id);
+        Assert.Equal("heat-equation-amplitude", descriptors[8].Id);
+        Assert.Equal("lotka-volterra-scale-gamma", descriptors[9].Id);
+        Assert.Equal("openmc-pincell-nu-sigma-f", descriptors[10].Id);
+        Assert.Equal("openmc-pincell-sigma-a", descriptors[11].Id);
+        Assert.Equal("openmoc-pincell-nu-sigma-f", descriptors[12].Id);
+        Assert.Equal("openmoc-pincell-sigma-a", descriptors[13].Id);
+        Assert.Equal("projectile-scale-v0", descriptors[14].Id);
+        Assert.Equal("subchannel-flow-temperature-monotone", descriptors[15].Id);
+        Assert.Equal("subchannel-heat-flux-linearity", descriptors[16].Id);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_diffusion_source_linearity_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var lin = descriptors.Single(d => d.Id == "diffusion-source-linearity");
+
+        Assert.Equal("diffusion-1d", lin.SutName);
+        Assert.Equal("ScaleField", lin.TransformationName);
+        Assert.Equal("GreaterThan", lin.AssertionName);
+        Assert.Equal("phi_max", lin.ValueName);
+        Assert.Equal("2", lin.DefaultParameters["factor"]);
+        Assert.Contains("source", lin.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Diffusion.Scaling.Source", lin.MrFamily);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_diffusion_mesh_richardson_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var rich = descriptors.Single(d => d.Id == "diffusion-mesh-richardson");
+
+        Assert.Equal("diffusion-1d", rich.SutName);
+        Assert.Equal("ScaleField", rich.TransformationName);
+        Assert.Equal("ApproxEqual", rich.AssertionName);
+        Assert.Equal("phi_max", rich.ValueName);
+        Assert.Equal("2", rich.DefaultParameters["factor"]);
+        Assert.Contains("mesh", rich.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Diffusion.Convergence.Mesh", rich.MrFamily);
     }
 
     [Fact]

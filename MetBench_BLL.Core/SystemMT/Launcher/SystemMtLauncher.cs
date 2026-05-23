@@ -724,6 +724,61 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
             TransformSteps: new[] { new MrTransformStep("ScaleField", "/boundary/heat_flux") },
             AssertionTypeCode: "greater",
             EquationKey: "navier-stokes");
+
+        // S8-P4: 1D diffusion SUT + diffusion 方程接入
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "diffusion-source-linearity",
+                DisplayName: "1D diffusion — ScaleSource (linearity)",
+                SutName: "diffusion-1d",
+                TransformationName: "ScaleField",
+                AssertionName: "GreaterThan",
+                ValueName: "phi_max",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Linearity MP_mono: the steady-state diffusion equation -D·φ″ + Σ_a·φ = S " +
+                    "is linear in the source S. Scaling S by factor > 1 must strictly increase " +
+                    "the peak flux φ_max (in fact, by the same factor).",
+                MrFamily: "Diffusion.Scaling.Source"),
+            SampleCaseRelativePath: Path.Combine("diffusion_1d", "sample", "slab.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "diffusion_1d", "diffusion_1d.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "diffusion_1d", "diffusion_1d_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "diffusion_1d", "diffusion_1d_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchDiffusion1d",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "diffusion_1d", "diffusion_1d_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "diffusion_1d", "diffusion_1d_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/source/strength") },
+            AssertionTypeCode: "greater",
+            EquationKey: "diffusion");
+
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "diffusion-mesh-richardson",
+                DisplayName: "1D diffusion — MeshRichardson (FD convergence)",
+                SutName: "diffusion-1d",
+                TransformationName: "ScaleField",
+                AssertionName: "ApproxEqual",
+                ValueName: "phi_max",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Mesh-refinement Richardson convergence MP_conv: doubling num_points (halving " +
+                    "the FD spacing dx) must leave φ_max within FD truncation tolerance — the " +
+                    "second-order scheme is already at the fine-mesh plateau.",
+                MrFamily: "Diffusion.Convergence.Mesh"),
+            SampleCaseRelativePath: Path.Combine("diffusion_1d", "sample", "slab.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "diffusion_1d", "diffusion_1d.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "diffusion_1d", "diffusion_1d_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "diffusion_1d", "diffusion_1d_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchDiffusion1d",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "diffusion_1d", "diffusion_1d_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "diffusion_1d", "diffusion_1d_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/geometry/num_points") },
+            AssertionTypeCode: "approx",
+            EquationKey: "diffusion");
     }
 
     private sealed record MrBlueprint(

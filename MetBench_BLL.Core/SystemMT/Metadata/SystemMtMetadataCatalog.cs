@@ -87,6 +87,22 @@ public static class SystemMtMetadataCatalog
         },
         new EquationMetadata
         {
+            EquationKey = "diffusion",
+            Name = "中子扩散方程（1D 单群稳态简化）",
+            CanonicalForm = "-D·∂²φ/∂x² + Σ_a·φ = S",
+            SymbolSystem =
+                "φ(x) 中子通量 [n/(cm²·s)]；D 扩散系数 [cm]；Σ_a 宏观吸收截面 [1/cm]；" +
+                "S(x) 外中子源 [n/(cm³·s)]；L_dif = √(D/Σ_a) 扩散长度 [cm]。",
+            Parameters = new List<EquationParameter>
+            {
+                new() { Symbol = "D", Description = "扩散系数", Unit = "cm" },
+                new() { Symbol = "Σ_a", Description = "宏观吸收截面", Unit = "1/cm" },
+                new() { Symbol = "S", Description = "外中子源", Unit = "n/(cm³·s)" },
+                new() { Symbol = "φ_max", Description = "峰值通量（输出）", Unit = "n/(cm²·s)" },
+            },
+        },
+        new EquationMetadata
+        {
             EquationKey = "navier-stokes",
             Name = "Navier-Stokes 方程（1D 单通道稳态简化）",
             CanonicalForm =
@@ -303,6 +319,38 @@ public static class SystemMtMetadataCatalog
             {
                 new() { Symbol = "factor", PhysicalMeaning = "γ（捕食者死亡率）缩放倍率", ValueRange = "factor > 1" },
                 new() { Symbol = "mean_prey", PhysicalMeaning = "时均猎物数（输出）", ValueRange = "mean_prey > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "diffusion-source-linearity",
+            EquationKey = "diffusion",
+            PhysicalMeaning =
+                "稳态扩散方程在源项 S 上线性：放大 S 必按同比例放大稳态通量 φ。" +
+                "故 φ_max 在 S 上严格单调（且严格意义下成 S∝φ_max 线性）。",
+            InputTransformation = "S → factor·S（factor > 1）",
+            OutputRelation = "φ_max(flw) > φ_max(src)（严格意义下 = factor·φ_max(src)）",
+            ComparisonType = MrComparisonType.Ordinal,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "S 缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "φ_max", PhysicalMeaning = "峰值通量（输出）", ValueRange = "φ_max > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "diffusion-mesh-richardson",
+            EquationKey = "diffusion",
+            PhysicalMeaning =
+                "网格细化 Richardson 收敛性：num_points 翻倍（dx 减半）后 φ_max 应在二阶 FD " +
+                "截断误差容差内不变 — 若变化超容差说明粗网格尚未收敛到细网格 plateau。",
+            InputTransformation = "num_points → factor·num_points（factor > 1）",
+            OutputRelation = "φ_max(flw) ≈ φ_max(src)（O(dx²) 截断误差容差内）",
+            ComparisonType = MrComparisonType.Absolute,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "num_points 缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "φ_max", PhysicalMeaning = "峰值通量（输出）", ValueRange = "φ_max > 0" },
             },
         },
         new MrMetadata
