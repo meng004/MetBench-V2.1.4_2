@@ -85,6 +85,20 @@ public static class SystemMtMetadataCatalog
                 new() { Symbol = "γ", Description = "捕食者死亡率", Unit = "1/t" },
             },
         },
+        new EquationMetadata
+        {
+            EquationKey = "projectile-motion",
+            Name = "射程方程（真空、平面、点抛体）",
+            CanonicalForm = "R = v0²·sin(2θ)/g",
+            SymbolSystem = "R 水平射程；v0 初速度大小；θ 抛射角（相对水平面）；g 重力加速度。",
+            Parameters = new List<EquationParameter>
+            {
+                new() { Symbol = "v0", Description = "初速度大小", Unit = "m/s" },
+                new() { Symbol = "θ", Description = "抛射角", Unit = "°" },
+                new() { Symbol = "g", Description = "重力加速度", Unit = "m/s²" },
+                new() { Symbol = "R", Description = "水平射程（输出）", Unit = "m" },
+            },
+        },
     };
 
     /// <summary>Structured metadata for every MR in the launcher catalog.</summary>
@@ -207,6 +221,21 @@ public static class SystemMtMetadataCatalog
             {
                 new() { Symbol = "factor", PhysicalMeaning = "γ（捕食者死亡率）缩放倍率", ValueRange = "factor > 1" },
                 new() { Symbol = "mean_prey", PhysicalMeaning = "时均猎物数（输出）", ValueRange = "mean_prey > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "projectile-scale-v0",
+            EquationKey = "projectile-motion",
+            PhysicalMeaning =
+                "由射程恒等式 R = v0²·sin(2θ)/g，放大初速度 v0 必单调抬高水平射程（严格意义下按 factor² 放大）。",
+            InputTransformation = "v0 → factor·v0（factor > 1）",
+            OutputRelation = "range(flw) > range(src)（严格意义下 = factor²·range(src)）",
+            ComparisonType = MrComparisonType.Ordinal,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "v0 缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "range", PhysicalMeaning = "水平射程（输出）", ValueRange = "range > 0" },
             },
         },
     };

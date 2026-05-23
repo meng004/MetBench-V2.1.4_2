@@ -533,6 +533,32 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
             OutputParserScriptPath: Path.Combine(options.SutRoot, "lotka_volterra", "lotka_volterra_output_parser.py"),
             TransformSteps: new[] { new MrTransformStep("ScaleField", "/params/gamma") },
             AssertionTypeCode: "greater");
+
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "projectile-scale-v0",
+                DisplayName: "Projectile range — ScaleV0 (R ∝ v0² monotonic)",
+                SutName: "projectile",
+                TransformationName: "ScaleField",
+                AssertionName: "GreaterThan",
+                ValueName: "range",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "By the projectile-motion identity R = v0²·sin(2θ)/g, scaling the " +
+                    "initial speed v0 by factor > 1 must monotonically increase the " +
+                    "horizontal range (in fact, by factor²).",
+                MrFamily: "Projectile.Scaling.V0"),
+            SampleCaseRelativePath: Path.Combine("projectile", "sample", "standard.txt"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "projectile", "projectile.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "projectile", "projectile_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "projectile", "projectile_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchProjectile",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "projectile", "projectile_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "projectile", "projectile_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/v0") },
+            AssertionTypeCode: "greater");
     }
 
     private sealed record MrBlueprint(

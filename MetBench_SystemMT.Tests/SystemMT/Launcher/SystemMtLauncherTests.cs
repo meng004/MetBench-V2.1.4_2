@@ -65,7 +65,7 @@ public sealed class SystemMtLauncherTests
     {
         var descriptors = await _launcher.ListAvailableAsync();
 
-        Assert.Equal(8, descriptors.Count);
+        Assert.Equal(9, descriptors.Count);
         Assert.Equal("damped-oscillator-scale-state", descriptors[0].Id);
         Assert.Equal("decay-chain-scale-initial", descriptors[1].Id);
         Assert.Equal("heat-equation-amplitude", descriptors[2].Id);
@@ -74,6 +74,22 @@ public sealed class SystemMtLauncherTests
         Assert.Equal("openmc-pincell-sigma-a", descriptors[5].Id);
         Assert.Equal("openmoc-pincell-nu-sigma-f", descriptors[6].Id);
         Assert.Equal("openmoc-pincell-sigma-a", descriptors[7].Id);
+        Assert.Equal("projectile-scale-v0", descriptors[8].Id);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_projectile_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var projectile = descriptors.Single(d => d.Id == "projectile-scale-v0");
+
+        Assert.Equal("projectile", projectile.SutName);
+        Assert.Equal("ScaleField", projectile.TransformationName);
+        Assert.Equal("GreaterThan", projectile.AssertionName);
+        Assert.Equal("range", projectile.ValueName);
+        Assert.Equal("2", projectile.DefaultParameters["factor"]);
+        Assert.Contains("v0", projectile.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Projectile.Scaling.V0", projectile.MrFamily);
     }
 
     [Fact]

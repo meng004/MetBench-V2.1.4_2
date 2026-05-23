@@ -15,7 +15,7 @@
 | **测试文件** | `MetBench_SystemMT.Tests/` 下相对路径 | 单元 + BDD + UAT |
 | **测试结果** | `dotnet test MetBench_SystemMT.Tests` 最近一次基线 | `pass/skip/fail` 或缺口说明 |
 
-**基线**：2026-05-23 head `266485e`，`dotnet test MetBench_SystemMT.Tests` = **809 pass / 0 fail**（首跑 3 个 OpenMC 跨程序场景在无 OpenMC 环境下 skip，二跑 warm 后 0 skip）。
+**基线**：2026-05-23（G-09 后），`dotnet test MetBench_SystemMT.Tests` = **810 pass / 0 fail**（OpenMC 跨程序场景在无 OpenMC 环境下首跑 skip / 二跑 warm 后 0 skip）。
 
 ## 1. T0 · 核心 —— 系统级 MT 流程
 
@@ -51,7 +51,7 @@
 | 编号 | 需求来源 | 功能描述 | 实现文件 | 测试文件 | 测试结果 |
 |---|---|---|---|---|---|
 | F-T3-01 | AGENTS Stage 6 P8 | CoverageService 4 维报告 | `MetBench_BLL.Core/Coverage/CoverageService.cs`<br>`Coverage/CoverageReport.cs` | `V2Coverage/CoverageServiceTests.cs`<br>`V2Coverage/FakeCoverageRepositories.cs` | ✅ pass |
-| F-T3-02 | AGENTS Stage 8 | 代表性 SUT 接入（已落地：decay_chain / damped_oscillator / lotka_volterra / heat_equation / projectile / openmoc / openmc） | `SUT/decay_chain/`<br>`SUT/damped_oscillator/`<br>`SUT/lotka_volterra/`<br>`SUT/heat_equation/`<br>`SUT/projectile/`<br>`SUT/openmoc/`<br>`SUT/openmc/` | （上述各 SUT 的 Parser / Adapter / Smoke / Sample 测试，见 F-T1-02） | ✅ pass |
+| F-T3-02 | AGENTS Stage 8 | 代表性 SUT 接入（已落地：decay_chain / damped_oscillator / lotka_volterra / heat_equation / projectile / openmoc / openmc；**全部进入 launcher catalog + metadata catalog**，2026-05-23 G-09） | `SUT/decay_chain/`<br>`SUT/damped_oscillator/`<br>`SUT/lotka_volterra/`<br>`SUT/heat_equation/`<br>`SUT/projectile/`（+ `sample/standard.txt`）<br>`SUT/openmoc/`<br>`SUT/openmc/` | （上述各 SUT 的 Parser / Adapter / Smoke / Sample 测试，见 F-T1-02）<br>+ `Launcher/SystemMtLauncherTests.ListAvailableAsync_projectile_descriptor_has_expected_metadata` | ✅ pass |
 | F-T3-03 | `docs/t3-program-selection.md` | 反应堆物理 5 方程锚定（boltzmann / diffusion / bateman / fourier / NS） | bateman: `Equations/Bateman/BatemanAnalyticSolution.cs`（L2）<br>boltzmann: 通过 OpenMOC/OpenMC SUT（无独立 L2）<br>fourier: 通过 heat_equation SUT<br>diffusion / NS: **未落地** | bateman: `SystemMT/Equations/BatemanP4Tests.cs` | ⚠ **缺口**：diffusion + NS 方程的 L2 / SUT 未落地 |
 
 ## 5. T4 · MR 识别
@@ -121,7 +121,7 @@
 | G-06 | F-T1-04 / F-MR-P5 | **新 method MT 协议层未接入业务路径**：`MethodTransformationRegistry` / `MethodAssertionEvaluator` 零生产调用方；`MRRecommendationViewModel` / `MRManagementViewModel` / `AutoMRParser` / `MetamorphicRelationService` 仍走 `Latextosympy*` | method MT 实质未切换，只是协议层就位 | 需 method-level orchestrator + 4 处生产代码切换 + BDD 端到端 |
 | G-07 | F-T0-02 / F-T0-01 | **W1 引擎残留**：`SystemMtRunner` + `SystemMtTask` 仍由 `MetBench_Client/App.xaml.cs:130` DI 注册；测试 `SystemMtRunnerTests` / `SystemMtRunnerGeneratedFollowupTests` 在跑 | system 侧双轨未拆 | 拆 DI 注册 + 删 W1 测试 + 删 `SystemMtRunner` / `SystemMtTask` / `SystemMtCase` / `SystemMtResult` |
 | G-08 | F-T1-04 / F-T0-03 | **catalog 双 seed 不自动同步**：launcher 硬编码 8 `MrBlueprint` + `SystemMtMetadataCatalog` 静态 5 方程 8 MR + entity 表三处；`LauncherCatalogV2Importer` 不在启动路径自动跑 | 任何新 MR 需改 2-3 处；entity 表可能为空 | 启动时自动 Import + 单一 source-of-truth 收口（推荐 metadata catalog 主，launcher 派生） |
-| G-09 | F-T3-02 / F-T1-04 | **projectile SUT 未进 launcher catalog**：`SUT/projectile/` 有 python adapter + `ProjectileRange.feature` + step bindings，但 launcher 无 `MrBlueprint`、catalog 无 `EquationMetadata` / `MrMetadata` | `ISystemMtLauncher.ListAvailableAsync()` 不返回 projectile，无法 launcher 跑 | 补 1 个 EquationMetadata（projectile-motion）+ 1 个 MrMetadata + 1 个 MrBlueprint |
+| ~~G-09~~ ✅ 已完成(2026-05-23) | F-T3-02 / F-T1-04 | ~~projectile SUT 未进 launcher catalog~~ | — | 已补 `projectile-motion` EquationMetadata + `projectile-scale-v0` MrMetadata + MrBlueprint + `SUT/projectile/sample/standard.txt`；2 个 launcher 测试 + cascade 4 个 importer 测试更新；全量 809→810 pass |
 | G-10 | F-T1-04 | **CRUD 不全**：`EquationFunctionRecipe` 缺 Update/Delete；元信息层 (`ISystemMtMetadataRepository`) 全无 Delete；`MethodMtCatalogService` 公开方法 0 个（疑似仅构造时拒绝 MetaPattern） | 元信息一旦写入只能 Upsert 覆盖；无清理路径 | 视 UI/UAT 需要再补；目前 backlog |
 
 ## 11. 与 P0–P7 对应的快速索引（执行历史）
