@@ -1,41 +1,68 @@
 using MetBench_BLL.SystemMT.Anomaly;
-using MetBench_BLL.SystemMT.Persistence;
+using MetBench_BLL.SystemMT.Assertions;
+using MetBench_BLL.SystemMT.Pipeline;
+using MetBench_BLL.SystemMT.Transformations;
 
 namespace MetBench_BLL.SystemMT.Launcher;
 
 /// <summary>
 /// Production implementation of <see cref="ISystemMtMrLauncher"/>.
-/// Owns the MR registry and routes MR ids to the correct
-/// SystemMtRunner construction. Persists every run via the injected
-/// <see cref="ISystemMtResultRepository"/>.
+/// Owns the MR registry; routes each MR through <see cref="ISystemMtPipeline"/>
+/// (v2 single-engine path) and persists outcomes via <see cref="SystemMtExecutionRecorder"/>
+/// as <c>Execution</c> + <c>Result</c>(+ <c>Anomaly</c>) into the unified
+/// <c>MR.Litedb</c> schema.
 /// </summary>
 /// <remarks>
-/// The MR list is hard-coded here on purpose: each MR binds a
-/// specific MR + transformation + assertion + value-name + sample-case
-/// quartet that has been validated end-to-end in the BDD test suite. Adding a
-/// new MR should be done by extending <see cref="BuildMrCatalog"/>
-/// after the corresponding adapter and assertion are landed.
+/// 计划见 docs/superpowers/plans/2026-05-22-systemmt-engine-unification-plan.md。
+/// 8 MR 的硬编码目录(<see cref="BuildMrCatalog"/>)是 v2 数据驱动 MR 目录全面
+/// 落地前的过渡形态;每个 blueprint 已含 v2 pipeline 规格(InputParser /
+/// OutputParser / TransformSteps / AssertionTypeCode)。多步 MR(decay-chain /
+/// damped-oscillator)在构造时把对应 <see cref="CompositeTransform"/> 注册到
+/// <see cref="TransformationRegistry"/>。
 /// </remarks>
 public sealed class SystemMtMrLauncher : ISystemMtMrLauncher
 {
     private readonly LauncherOptions _options;
-    private readonly ISystemMtResultRepository _repository;
+    private readonly ISystemMtPipeline _pipeline;
+    private readonly SystemMtExecutionRecorder _recorder;
     private readonly IAnomalyService _anomalyService;
     private readonly AnomalySeverityThresholds _severityThresholds;
     private readonly IReadOnlyDictionary<string, MrBlueprint> _mrCatalog;
 
     public SystemMtMrLauncher(
         LauncherOptions options,
-        ISystemMtResultRepository repository,
+        ISystemMtPipeline pipeline,
+        SystemMtExecutionRecorder recorder,
         IAnomalyService anomalyService,
         AnomalySeverityThresholds? severityThresholds = null)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
-        _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _pipeline = pipeline ?? throw new ArgumentNullException(nameof(pipeline));
+        _recorder = recorder ?? throw new ArgumentNullException(nameof(recorder));
         _anomalyService = anomalyService ?? throw new ArgumentNullException(nameof(anomalyService));
         _severityThresholds = severityThresholds ?? AnomalySeverityThresholds.Default;
         _mrCatalog = BuildMrCatalog(options).ToDictionary(s => s.Mr.Id, StringComparer.Ordinal);
+
+        // Register CompositeTransform for multi-step MRs (decay-chain / damped-oscillator)。
+        // step.Parameters 留空,call-time params 经 PipelineContext.Parameters 注入。
+        foreach (var bp in _mrCatalog.Values.Where(b => b.TransformSteps.Count > 1))
+        {
+            var compositeName = CompositeNameFor(bp.Mr.Id);
+            var blueprintRef = bp;
+            TransformationRegistry.RegisterIfMissing(compositeName, () =>
+            {
+                var steps = blueprintRef.TransformSteps
+                    .Select(s => new CompositeTransform.Step(
+                        TransformationRegistry.Get(s.TransformationName),
+                        s.TargetFieldPath,
+                        new Dictionary<string, string>()))
+                    .ToList();
+                return new CompositeTransform(compositeName, steps);
+            });
+        }
     }
+
+    private static string CompositeNameFor(string mrId) => $"Composite-{mrId}";
 
     public Task<IReadOnlyList<MrSummary>> ListAvailableAsync(CancellationToken cancellationToken = default)
     {
@@ -72,14 +99,10 @@ public sealed class SystemMtMrLauncher : ISystemMtMrLauncher
             }
         }
 
+        // Set up workdir + copy sample to source.in.json
         var workRoot = Path.Combine(Path.GetTempPath(), blueprint.WorkRootName, Guid.NewGuid().ToString("N"));
-        var sourceDir = Path.Combine(workRoot, "source");
-        var followUpDir = Path.Combine(workRoot, "followup");
-        Directory.CreateDirectory(sourceDir);
-        Directory.CreateDirectory(followUpDir);
-
-        var sourceInputPath = Path.Combine(sourceDir, "input.json");
-        var followUpInputPath = Path.Combine(followUpDir, "input.json");
+        Directory.CreateDirectory(workRoot);
+        var sourceInputPath = Path.Combine(workRoot, "source.in.json");
 
         var sampleSource = Path.Combine(_options.SutRoot, blueprint.SampleCaseRelativePath);
         if (!File.Exists(sampleSource))
@@ -90,76 +113,78 @@ public sealed class SystemMtMrLauncher : ISystemMtMrLauncher
         var sampleContent = await File.ReadAllTextAsync(sampleSource, cancellationToken).ConfigureAwait(false);
         await File.WriteAllTextAsync(sourceInputPath, sampleContent, cancellationToken).ConfigureAwait(false);
 
-        var program = new SystemProgram(
-            ProgramLanguage.Python,
-            blueprint.Mr.SutName,
-            blueprint.PythonExecutable,
-            $"{blueprint.RunnerScriptPath} --input {{input}} --output {{output}}",
-            blueprint.OutputAdapterScriptPath);
+        // Resolve transformation (single step direct;multi-step uses pre-registered composite)
+        var (transformName, targetFieldPath) = ResolveTransformation(blueprint);
 
-        var transformation = new MrTransformation(
-            blueprint.Mr.TransformationName,
-            parameters);
+        var context = new PipelineContext(
+            MrCode: blueprint.Mr.Id,
+            TransformationName: transformName,
+            AssertionTypeCode: blueprint.AssertionTypeCode,
+            ValueName: blueprint.Mr.ValueName,
+            TargetFieldPath: targetFieldPath,
+            PathSyntax: "json-pointer",
+            Parameters: parameters,
+            Tolerance: new AssertionTolerance(),
+            ExtraAssertionValues: null,
+            SutName: blueprint.Mr.SutName,
+            SourceCasePath: sourceInputPath,
+            WorkingDirectory: workRoot,
+            InputParserCommand: $"\"{blueprint.PythonExecutable}\" \"{blueprint.InputParserScriptPath}\"",
+            OutputParserCommand: $"\"{blueprint.PythonExecutable}\" \"{blueprint.OutputParserScriptPath}\"",
+            RunnerCommand: $"\"{blueprint.PythonExecutable}\" \"{blueprint.RunnerScriptPath}\"",
+            TimeoutSeconds: (int)blueprint.Timeout.TotalSeconds,
+            CatalogVersionSha: string.Empty,
+            SutVersionSnapshot: string.Empty,
+            MetbenchVersion: string.Empty,
+            TriggeredBy: "launcher");
 
-        var task = SystemMtTask.WithGeneratedFollowUp(
-            program,
-            new SystemMtCase("source", sourceInputPath, sourceDir, Path.Combine(sourceDir, "output.json")),
-            followUpCaseName: "follow-up",
-            followUpInputPath: followUpInputPath,
-            followUpWorkingDirectory: followUpDir,
-            followUpOutputPath: Path.Combine(followUpDir, "output.json"),
-            transformation,
-            blueprint.Mr.AssertionName,
-            blueprint.Timeout);
+        var outcome = await _pipeline.ExecuteAsync(context, progress: null, cancellationToken)
+            .ConfigureAwait(false);
 
-        var assertions = new IMrAssertion[]
-        {
-            new GreaterThanAssertion(),
-            new LessThanAssertion(),
-            new ApproxEqualAssertion(),
-        };
+        var recorded = _recorder.Record(context, outcome, mrInstanceId: -1);
 
-        var runner = new SystemMtRunner(
-            new CliProgramRunner(),
-            new PythonOutputAdapter(blueprint.PythonExecutable),
-            assertions,
-            new InputGenerator(
-                new PythonInputAdapter(blueprint.PythonExecutable),
-                blueprint.InputAdapterScriptPath));
-
-        var result = await runner.RunAsync(task, blueprint.Mr.ValueName, cancellationToken).ConfigureAwait(false);
-
-        var recordId = await _repository.SaveAsync(blueprint.Mr.DisplayName, result, cancellationToken).ConfigureAwait(false);
-
-        await RecordAnomalyIfFailedAsync(blueprint.Mr.DisplayName, recordId, result, cancellationToken).ConfigureAwait(false);
+        await RecordAnomalyIfFailedAsync(blueprint.Mr.DisplayName, recorded.ResultId, outcome, cancellationToken)
+            .ConfigureAwait(false);
 
         return new MrRunResult(
-            RecordId: recordId,
+            RecordId: recorded.ExecutionId.ToString(),
             MrId: mrId,
-            Passed: result.Passed,
-            FailureReason: result.FailureReason ?? string.Empty,
-            ValueName: result.Assertion.ValueName,
-            SourceValue: result.Assertion.SourceValue,
-            FollowUpValue: result.Assertion.FollowUpValue,
-            SourceElapsed: result.SourceRun.Elapsed,
-            FollowUpElapsed: result.FollowUpRun.Elapsed);
+            Passed: outcome.FinalStatus == PipelineStatus.Ok,
+            FailureReason: outcome.ErrorMessage ?? outcome.AssertionResult?.FailureReason ?? string.Empty,
+            ValueName: blueprint.Mr.ValueName,
+            SourceValue: outcome.AssertionResult?.SourceValue ?? 0.0,
+            FollowUpValue: outcome.AssertionResult?.FollowupValue ?? 0.0,
+            SourceElapsed: outcome.SourceElapsed,
+            FollowUpElapsed: outcome.FollowupElapsed);
+    }
+
+    private static (string TransformationName, string TargetFieldPath) ResolveTransformation(MrBlueprint blueprint)
+    {
+        if (blueprint.TransformSteps.Count == 1)
+        {
+            var s = blueprint.TransformSteps[0];
+            return (s.TransformationName, s.TargetFieldPath);
+        }
+        // 多步:由 ctor 已注册的 Composite 处理,TargetFieldPath 由 CompositeTransform 内部各 step 提供
+        return (CompositeNameFor(blueprint.Mr.Id), string.Empty);
     }
 
     /// <summary>
-    /// UC-B7 — 失败 run 自动建一条 Anomaly。internal 暴露给 V2Anomaly 测试做 wiring 验证
-    /// （InternalsVisibleTo MetBench_SystemMT.Tests）。
+    /// 失败 run 自动建一条 Anomaly,链 Result.IdResult。
+    /// internal 暴露给测试做 wiring 验证(InternalsVisibleTo MetBench_SystemMT.Tests)。
     /// </summary>
     internal async Task RecordAnomalyIfFailedAsync(
         string mrName,
-        string recordId,
-        SystemMtResult result,
+        Guid? resultId,
+        PipelineOutcome outcome,
         CancellationToken cancellationToken)
     {
-        if (result.Passed) return;
-        var severity = AnomalyClassifier.ClassifySeverity(result, _severityThresholds);
-        var category = AnomalyClassifier.ClassifyCategory(result);
+        if (outcome.FinalStatus == PipelineStatus.Ok) return;
+        if (resultId is null) return;  // error/timeout/cancelled 无 Result(recorder 未写)
+        var severity = AnomalyClassifier.ClassifySeverity(outcome, _severityThresholds);
+        var category = AnomalyClassifier.ClassifyCategory(outcome);
         await _anomalyService.RecordAnomalyAsync(
-            mrName, recordId, severity, category, cancellationToken).ConfigureAwait(false);
+            mrName, resultId.Value.ToString(), severity, category, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<IReadOnlyList<MrRunResult>> RunBatchAsync(

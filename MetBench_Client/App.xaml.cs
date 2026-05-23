@@ -145,7 +145,11 @@ namespace MetBench_Client
                     return new LiteDbSystemMtResultRepository($"Filename={dbPath}");
                 });
 
-                services.AddSingleton<ISystemMtMrLauncher, SystemMtMrLauncher>();
+                // P3.3 — launcher 经 SystemMtPipeline + SystemMtExecutionRecorder 落
+                // Execution+Result+Anomaly。lifetime 改 Scoped 与 IExecutionRepository /
+                // IResultRepository / ISystemMtPipeline 一致。
+                services.AddScoped<SystemMtExecutionRecorder>();
+                services.AddScoped<ISystemMtMrLauncher, SystemMtMrLauncher>();
                 services.AddSingleton<ISystemMtResultReportRenderer, HtmlSystemMtResultReportRenderer>();
 
                 services.AddScoped<Views.Pages.SystemMtExecutionPage>();

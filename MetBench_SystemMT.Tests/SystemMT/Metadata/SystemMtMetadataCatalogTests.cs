@@ -1,35 +1,33 @@
 using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Metadata;
+using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_DAL;
 using MetBench_SystemMT.Tests.V2Anomaly;
+using MetBench_SystemMT.Tests.V2Pipeline;
 using Xunit;
 
 namespace MetBench_SystemMT.Tests.SystemMT.Metadata;
 
 public sealed class SystemMtMetadataCatalogTests : IDisposable
 {
-    private readonly string _resultDbPath;
     private readonly string _metaDbPath;
-    private readonly LiteDbSystemMtResultRepository _resultRepo;
     private readonly SystemMtMrLauncher _launcher;
 
     public SystemMtMetadataCatalogTests()
     {
         var dir = Path.Combine(Path.GetTempPath(), "MetBenchMetaCatalogTests", Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(dir);
-        _resultDbPath = Path.Combine(dir, "results.db");
         _metaDbPath = Path.Combine(dir, "metadata.db");
-        _resultRepo = new LiteDbSystemMtResultRepository(_resultDbPath);
         _launcher = new SystemMtMrLauncher(
             new LauncherOptions("/tmp", "python3", "python3"),
-            _resultRepo,
+            new SystemMtPipeline(),
+            new SystemMtExecutionRecorder(new FakeExecRepo(), new FakeResultRepo()),
             new RecordingAnomalyService());
     }
 
     public void Dispose()
     {
-        _resultRepo.Dispose();
-        foreach (var p in new[] { _resultDbPath, _resultDbPath + "-log", _metaDbPath, _metaDbPath + "-log" })
+        foreach (var p in new[] { _metaDbPath, _metaDbPath + "-log" })
         {
             if (File.Exists(p)) File.Delete(p);
         }

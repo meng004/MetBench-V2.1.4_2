@@ -1,57 +1,55 @@
 using MetBench_BLL.SystemMT.Launcher;
-using MetBench_BLL.SystemMT.Persistence;
-using MetBench_DAL;
+using MetBench_BLL.SystemMT.Pipeline;
+using MetBench_Domain;
 using MetBench_SystemMT.Tests.V2Anomaly;
+using MetBench_SystemMT.Tests.V2Pipeline;
 using Xunit;
 
 namespace MetBench_SystemMT.Tests.SystemMT.Launcher;
 
-public sealed class SystemMtMrLauncherTests : IDisposable
+public sealed class SystemMtMrLauncherTests
 {
-    private readonly string _dbPath;
-    private readonly LiteDbSystemMtResultRepository _repository;
-    private readonly RecordingAnomalyService _anomalyService;
+    private readonly FakeExecRepo _execs = new();
+    private readonly FakeResultRepo _results = new();
+    private readonly SystemMtExecutionRecorder _recorder;
+    private readonly SystemMtPipeline _pipeline = new();
+    private readonly RecordingAnomalyService _anomalyService = new();
     private readonly SystemMtMrLauncher _launcher;
 
     public SystemMtMrLauncherTests()
     {
-        _dbPath = Path.Combine(
-            Path.GetTempPath(),
-            "MetBenchLauncherTests",
-            Guid.NewGuid().ToString("N") + ".db");
-        Directory.CreateDirectory(Path.GetDirectoryName(_dbPath)!);
-        _repository = new LiteDbSystemMtResultRepository(_dbPath);
-        _anomalyService = new RecordingAnomalyService();
+        _recorder = new SystemMtExecutionRecorder(_execs, _results);
         _launcher = new SystemMtMrLauncher(
             new LauncherOptions(
                 SutRoot: TestAssetPaths.AssetRoot(),
                 SystemPython: TestAssetPaths.PythonExecutable(),
                 OpenMocPython: TestAssetPaths.PythonExecutable()),
-            _repository,
+            _pipeline,
+            _recorder,
             _anomalyService);
-    }
-
-    public void Dispose()
-    {
-        _repository.Dispose();
-        if (File.Exists(_dbPath)) File.Delete(_dbPath);
-        var logFile = _dbPath + "-log";
-        if (File.Exists(logFile)) File.Delete(logFile);
     }
 
     [Fact]
     public void Constructor_rejects_null_options()
     {
         Assert.Throws<ArgumentNullException>(() =>
-            new SystemMtMrLauncher(null!, _repository, _anomalyService));
+            new SystemMtMrLauncher(null!, _pipeline, _recorder, _anomalyService));
     }
 
     [Fact]
-    public void Constructor_rejects_null_repository()
+    public void Constructor_rejects_null_pipeline()
     {
         var options = new LauncherOptions("/tmp", "python3", "python3");
         Assert.Throws<ArgumentNullException>(() =>
-            new SystemMtMrLauncher(options, null!, _anomalyService));
+            new SystemMtMrLauncher(options, null!, _recorder, _anomalyService));
+    }
+
+    [Fact]
+    public void Constructor_rejects_null_recorder()
+    {
+        var options = new LauncherOptions("/tmp", "python3", "python3");
+        Assert.Throws<ArgumentNullException>(() =>
+            new SystemMtMrLauncher(options, _pipeline, null!, _anomalyService));
     }
 
     [Fact]
@@ -59,7 +57,7 @@ public sealed class SystemMtMrLauncherTests : IDisposable
     {
         var options = new LauncherOptions("/tmp", "python3", "python3");
         Assert.Throws<ArgumentNullException>(() =>
-            new SystemMtMrLauncher(options, _repository, null!));
+            new SystemMtMrLauncher(options, _pipeline, _recorder, null!));
     }
 
     [Fact]
@@ -102,17 +100,14 @@ public sealed class SystemMtMrLauncherTests : IDisposable
             .GroupBy(d => d.MrFamily)
             .ToDictionary(g => g.Key, g => g.Select(d => d.Id).OrderBy(s => s, StringComparer.Ordinal).ToList());
 
-        // The "NuSigmaF" MR is exercised by both OpenMOC and OpenMC.
         Assert.Equal(
             new[] { "openmc-pincell-nu-sigma-f", "openmoc-pincell-nu-sigma-f" },
             byFamily["NeutronTransport.Scaling.NuSigmaF"]);
 
-        // The "SigmaA" MR is also exercised by both solvers.
         Assert.Equal(
             new[] { "openmc-pincell-sigma-a", "openmoc-pincell-sigma-a" },
             byFamily["NeutronTransport.Scaling.SigmaA"]);
 
-        // The heat-equation amplitude scaling is its own family (one SUT).
         Assert.Equal(
             new[] { "heat-equation-amplitude" },
             byFamily["Diffusion.Scaling.Amplitude"]);
@@ -155,24 +150,31 @@ public sealed class SystemMtMrLauncherTests : IDisposable
     }
 
     [Fact]
-    public async Task RunAsync_heat_equation_with_default_factor_passes_and_persists()
+    public async Task RunAsync_heat_equation_with_default_factor_passes_and_persists_execution_result()
     {
         var result = await _launcher.RunAsync("heat-equation-amplitude");
 
         Assert.True(result.Passed, result.FailureReason);
-        Assert.False(string.IsNullOrEmpty(result.RecordId));
+        Assert.True(Guid.TryParse(result.RecordId, out var execId));
         Assert.Equal("heat-equation-amplitude", result.MrId);
         Assert.Equal("max_u", result.ValueName);
         Assert.True(result.SourceValue > 0);
         Assert.True(result.FollowUpValue > result.SourceValue,
             $"follow-up max_u ({result.FollowUpValue}) should exceed source ({result.SourceValue}) with factor=2");
 
-        var persisted = await _repository.GetAsync(result.RecordId);
-        Assert.NotNull(persisted);
-        Assert.Equal("1D heat equation — ScaleAmplitude (linearity)", persisted!.MrName);
-        Assert.Equal("ScaleAmplitude", persisted.TransformationName);
-        Assert.Equal("2", persisted.TransformationParameters!["factor"]);
-        Assert.True(persisted.Passed);
+        // v2 schema:Execution + Result 各落 1 行,FK 一致
+        var exec = Assert.Single(_execs.Data);
+        var res = Assert.Single(_results.Data);
+        Assert.Equal(execId, exec.IdExecution);
+        Assert.Equal("ok", exec.Status);
+        Assert.Equal("launcher", exec.TriggeredBy);
+        Assert.False(string.IsNullOrEmpty(exec.ArtifactsDirectory));
+        Assert.Equal(execId, res.ExecutionId);
+        Assert.True(res.AssertionPassed);
+        Assert.Equal(result.SourceValue, res.SourceValue);
+        Assert.Equal(result.FollowUpValue, res.FollowupValue);
+        // 通过 run 不写 anomaly
+        Assert.Empty(_anomalyService.Recorded);
     }
 
     [Fact]
@@ -187,15 +189,17 @@ public sealed class SystemMtMrLauncherTests : IDisposable
         Assert.True(ratio is > 2.9 and < 3.1,
             $"factor=3 should yield ratio ~3.0, got {ratio:F4}");
 
-        var persisted = await _repository.GetAsync(result.RecordId);
-        Assert.Equal("3", persisted!.TransformationParameters!["factor"]);
+        // factor=3 → followup max_u ≈ 3 × source max_u
+        var res = Assert.Single(_results.Data);
+        var resultRatio = res.FollowupValue!.Value / res.SourceValue!.Value;
+        Assert.True(resultRatio is > 2.9 and < 3.1);
     }
 
     [Fact]
     public async Task RunAsync_persists_failure_when_assertion_fails()
     {
         // factor=0.5 halves the amplitude, so follow-up max_u < source max_u,
-        // which violates the GreaterThan assertion.
+        // which violates the "greater" assertion.
         var result = await _launcher.RunAsync(
             "heat-equation-amplitude",
             new Dictionary<string, string> { ["factor"] = "0.5" });
@@ -204,21 +208,26 @@ public sealed class SystemMtMrLauncherTests : IDisposable
         Assert.False(string.IsNullOrEmpty(result.FailureReason));
         Assert.True(result.FollowUpValue < result.SourceValue);
 
-        var persisted = await _repository.GetAsync(result.RecordId);
-        Assert.NotNull(persisted);
-        Assert.False(persisted!.Passed);
-        Assert.Equal(result.FailureReason, persisted.FailureReason);
+        var exec = Assert.Single(_execs.Data);
+        Assert.Equal("anomaly", exec.Status);
+        var res = Assert.Single(_results.Data);
+        Assert.False(res.AssertionPassed);
+        Assert.False(string.IsNullOrEmpty(res.FailureReason));
+        // 失败 → AnomalyService 应记录一条
+        Assert.Single(_anomalyService.Recorded);
+        Assert.Equal(res.IdResult.ToString(), _anomalyService.Recorded[0].ResultId);
     }
 
     [Fact]
-    public async Task RunAsync_two_runs_create_two_persisted_records()
+    public async Task RunAsync_two_runs_create_two_persisted_executions()
     {
         await _launcher.RunAsync("heat-equation-amplitude");
         await _launcher.RunAsync("heat-equation-amplitude");
 
-        var recent = await _repository.ListByMrNameAsync(
-            "1D heat equation — ScaleAmplitude (linearity)",
-            limit: 10);
-        Assert.Equal(2, recent.Count);
+        Assert.Equal(2, _execs.Data.Count);
+        Assert.Equal(2, _results.Data.Count);
+        Assert.All(_execs.Data, e => Assert.Equal("ok", e.Status));
+        // 两次 Execution.Id 不同
+        Assert.NotEqual(_execs.Data[0].IdExecution, _execs.Data[1].IdExecution);
     }
 }
