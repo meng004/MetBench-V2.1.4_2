@@ -1,5 +1,6 @@
 using System.Text.Json;
 using MetBench_BLL.Equations;
+using MetBench_BLL.MT;
 using MetBench_BLL.SystemMT.Assertions;
 using MetBench_BLL.SystemMT.ParameterMapping;
 using MetBench_BLL.SystemMT.Transformations;
@@ -16,8 +17,11 @@ namespace MetBench_BLL.SystemMT.Pipeline;
 ///   ok / anomaly / error / timeout
 ///
 /// 任意阶段失败：状态置 error/timeout，ErrorMessage 填充，跳过后续阶段，返回 PipelineOutcome。
+///
+/// 同时实现共享抽象 <see cref="IMtPipeline{TReq,TOut}"/>（mr-architecture.md §2 协议层共享），
+/// 与方法级 <see cref="MetBench_BLL.MethodMT.MethodMtPipeline"/> 对称。
 /// </remarks>
-public sealed class SystemMtPipeline : ISystemMtPipeline
+public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineContext, PipelineOutcome>
 {
     private readonly IProcessExecutor _processExecutor;
     private readonly AssertionEvaluator _assertionEvaluator;
@@ -29,6 +33,10 @@ public sealed class SystemMtPipeline : ISystemMtPipeline
         _processExecutor = processExecutor ?? new DefaultProcessExecutor();
         _assertionEvaluator = assertionEvaluator ?? new AssertionEvaluator();
     }
+
+    Task<PipelineOutcome> IMtPipeline<PipelineContext, PipelineOutcome>.ExecuteAsync(
+        PipelineContext request, CancellationToken cancellationToken)
+        => ExecuteAsync(request, progress: null, cancellationToken);
 
     public async Task<PipelineOutcome> ExecuteAsync(
         PipelineContext ctx,

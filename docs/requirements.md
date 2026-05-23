@@ -15,7 +15,7 @@
 | **测试文件** | `MetBench_SystemMT.Tests/` 下相对路径 | 单元 + BDD + UAT |
 | **测试结果** | `dotnet test MetBench_SystemMT.Tests` 最近一次基线 | `pass/skip/fail` 或缺口说明 |
 
-**基线**：2026-05-23（G-09 后），`dotnet test MetBench_SystemMT.Tests` = **810 pass / 0 fail**（OpenMC 跨程序场景在无 OpenMC 环境下首跑 skip / 二跑 warm 后 0 skip）。
+**基线**：2026-05-23（G-06 后），`dotnet test MetBench_SystemMT.Tests` = **830 pass / 0 fail**（OpenMC 跨程序场景在无 OpenMC 环境下首跑 skip / 二跑 warm 后 0 skip）。
 
 ## 1. T0 · 核心 —— 系统级 MT 流程
 
@@ -34,7 +34,7 @@
 | F-T1-01 | CLAUDE.md §2 T1；AGENTS Stage 1 | CLI runner：SUT 进程调用 + 超时 + 退出码 + 工作目录 | `SystemMT/CliProgramRunner.cs`<br>`Pipeline/IProcessExecutor.cs`<br>`Pipeline/DefaultProcessExecutor.cs`<br>`SystemMT/CliRunResult.cs` | `SystemMT/CliProgramRunnerTests.cs`<br>`V2Pipeline/DefaultProcessExecutorSmokeTests.cs` | ✅ pass |
 | F-T1-02 | CLAUDE.md §2 T1；AGENTS Stage 3 | I/O 文件适配（Python adapter） | `SystemMT/PythonInputAdapter.cs`<br>`SystemMT/PythonOutputAdapter.cs`<br>`SystemMT/InputCaseReader.cs` / `InputGenerator.cs` / `InputSamplePoint.cs`<br>SUT/openmoc/openmc/heat_equation/projectile/ 下的 `*_input_parser.py` / `*_output_parser.py` | `SystemMT/PythonInputAdapterTests.cs`<br>`SystemMT/PythonOutputAdapterTests.cs`<br>`SystemMT/OpenMocInputAdapterTests.cs` / `OpenMocOutputAdapterTests.cs` / `OpenMocSigmaAInputAdapterTests.cs`<br>`SystemMT/OpenMcInputAdapterTests.cs` / `OpenMcOutputAdapterTests.cs`<br>`SystemMT/HeatEquationInputAdapterTests.cs` / `HeatEquationOutputAdapterTests.cs`<br>`SystemMT/DampedOscillatorParserTests.cs` / `DecayChainParserTests.cs` / `LotkaVolterraParserTests.cs`<br>`SystemMT/InputCaseReaderTests.cs` / `InputGeneratorTests.cs` | ✅ pass |
 | F-T1-03 | CLAUDE.md §2 T1；AGENTS Stage 7 W12 | 同源异构差分测试（OpenMOC × OpenMC） | `Features/CrossProgramNeutronTransportMrs.feature`<br>`Steps/CrossProgramSteps.cs` | （同列） | ✅ pass（OpenMC 缺失时 3 场景 skip） |
-| F-T1-04 | CLAUDE.md §2 T1；AGENTS Stage 6 P5 | CRUD（程序 / 方程 / MR / 算例 / 测试过程） | `SystemMT/Catalog/SystemMtCatalogService.cs`<br>`Catalog/MethodMtCatalogService.cs`<br>`Metadata/EquationMetadata.cs` / `MrMetadata.cs` / `SystemMtMetadataCatalog.cs` / `EquationFunctionRecipe.cs` / `EquationFunctionDescriptor.cs`<br>`Metadata/ISystemMtMetadataRepository.cs`<br>`MetBench_DAL/LiteDbSystemMtMetadataRepository.cs` | `Catalog/SystemMtCatalogServiceTests.cs`<br>`Catalog/P3CatalogExtensionTests.cs`<br>`Metadata/LiteDbSystemMtMetadataRepositoryTests.cs`<br>`Metadata/SystemMtMetadataCatalogTests.cs` | ✅ pass |
+| F-T1-04 | CLAUDE.md §2 T1；AGENTS Stage 6 P5 | CRUD（程序 / 方程 / MR / 算例 / 测试过程；含 method-level MR CRUD，G-06 补齐） | `SystemMT/Catalog/SystemMtCatalogService.cs`<br>`Catalog/MethodMtCatalogService.cs`（CRUD: Create/Get/Find/List/Update/Delete + Kind 强制 + MetaPatternCode 拒绝）<br>`Metadata/EquationMetadata.cs` / `MrMetadata.cs` / `SystemMtMetadataCatalog.cs` / `EquationFunctionRecipe.cs` / `EquationFunctionDescriptor.cs`<br>`Metadata/ISystemMtMetadataRepository.cs`<br>`MetBench_DAL/LiteDbSystemMtMetadataRepository.cs` | `Catalog/SystemMtCatalogServiceTests.cs`<br>`Catalog/P3CatalogExtensionTests.cs`<br>`Metadata/LiteDbSystemMtMetadataRepositoryTests.cs`<br>`Metadata/SystemMtMetadataCatalogTests.cs`<br>`MethodMT/MethodMtCatalogCrudTests.cs`（9 测试） | ✅ pass |
 | F-T1-05 | CLAUDE.md §2 T1；AGENTS Stage 4 | WPF 客户端（操作入口 + 页面导航） | `MetBench_Client/` 全部（`net8.0-windows7.0`） | ⚠ **无云端测试**（WPF SDK Linux 不可编译） | ☐ **缺口**：UAT runbook 走 Windows 手动验证（`docs/uat/runbooks/windows-uat-round-1.md`） |
 | F-T1-06 | AGENTS Stage 6 P5 | Feature ↔ DB 同步工具与迁移 | `SystemMT/Launcher/LauncherCatalogV2Importer.cs` | `Launcher/LauncherCatalogV2ImporterTests.cs`<br>`V2Schema/V2SoftDeleteAndMigrationTests.cs` / `V2DbConfigRegistrationTests.cs` / `V2IndexConstraintTests.cs` / `V2RepositoryDIBindingTests.cs` / `V1CompatibilityTests.cs` | ✅ pass |
 
@@ -118,7 +118,7 @@
 | G-03 | F-T3-03（反应堆 5 方程锚定） | diffusion + Navier-Stokes 两条 L2 解析解 / SUT 未落地 | T3 覆盖目标未达成 | 留待 Stage 8 后续 plan；不在 P0–P7 范围 |
 | G-04 | F-T6-02（语义变异 + 等价识别 + 最小 MR 子集） | 完全未实现 | Stage 8 变异模块增强未启动 | CLAUDE.md §2 / AGENTS Stage 8 "主线之外"已列为 backlog |
 | G-05 | F-MR-P7 | LaTeX→SymPy `[Obsolete]` 后无 grep 守卫单测，回归仅靠人工 | 未来若有人去 `[Obsolete]` 易漏 | 视需要在 `V2Schema/` 加一条 ObsoleteAttributeGuard 测试 |
-| G-06 | F-T1-04 / F-MR-P5 | **新 method MT 协议层未接入业务路径**：`MethodTransformationRegistry` / `MethodAssertionEvaluator` 零生产调用方；`MRRecommendationViewModel` / `MRManagementViewModel` / `AutoMRParser` / `MetamorphicRelationService` 仍走 `Latextosympy*` | method MT 实质未切换，只是协议层就位 | 需 method-level orchestrator + 4 处生产代码切换 + BDD 端到端 |
+| ~~G-06~~ ✅ 已完成(2026-05-23) | F-T1-04 / F-MR-P5 | ~~method MT 协议层未接入业务路径~~ | — | 已建 `IMtPipeline<TReq,TOut>` 共享抽象（BLL.Core/MT）+ `MethodMtPipeline`（BLL/MethodMT，实现协议层）+ `MethodMtRunRequest/Outcome` 数据 record + `MethodMtCatalogService` 扩 CRUD（Get/Update/Delete）+ `SystemMtPipeline` 加 IMtPipeline 显式接口实现；20 新测试（7 pipeline + 4 Bateman 参数化 AAA + 9 CRUD）；全量回归 810→830 pass。注：4 处 `Latextosympy*` 调用已澄清属 v1 展示衍生字段（不在 G-06 范围），归 G-11 处置 |
 | G-07 | F-T0-02 / F-T0-01 | **W1 引擎残留**：`SystemMtRunner` + `SystemMtTask` 仍由 `MetBench_Client/App.xaml.cs:130` DI 注册；测试 `SystemMtRunnerTests` / `SystemMtRunnerGeneratedFollowupTests` 在跑 | system 侧双轨未拆 | 拆 DI 注册 + 删 W1 测试 + 删 `SystemMtRunner` / `SystemMtTask` / `SystemMtCase` / `SystemMtResult` |
 | G-08 | F-T1-04 / F-T0-03 | **catalog 双 seed 不自动同步**：launcher 硬编码 8 `MrBlueprint` + `SystemMtMetadataCatalog` 静态 5 方程 8 MR + entity 表三处；`LauncherCatalogV2Importer` 不在启动路径自动跑 | 任何新 MR 需改 2-3 处；entity 表可能为空 | 启动时自动 Import + 单一 source-of-truth 收口（推荐 metadata catalog 主，launcher 派生） |
 | ~~G-09~~ ✅ 已完成(2026-05-23) | F-T3-02 / F-T1-04 | ~~projectile SUT 未进 launcher catalog~~ | — | 已补 `projectile-motion` EquationMetadata + `projectile-scale-v0` MrMetadata + MrBlueprint + `SUT/projectile/sample/standard.txt`；2 个 launcher 测试 + cascade 4 个 importer 测试更新；全量 809→810 pass |
@@ -143,6 +143,9 @@
 | `5856bd8` | （文档） | requirements.md 追溯矩阵初版 |
 | `8259093` | （文档） | §10 追加 G-06..G-10 |
 | `e0cceea` | **G-09** | projectile SUT 接入 launcher + metadata catalog（810 pass） |
+| `75df630` | （文档） | §11 索引补登 |
+| `b047668` | （文档） | §10 追加 G-11/G-12/G-13（v1 清理 + PBT 升级占位） |
+| `<TBD>` | **G-06** | method MT 执行栈：IMtPipeline 共享抽象 + MethodMtPipeline + Catalog CRUD（830 pass） |
 
 ## 12. 受控开发模式工作流
 
