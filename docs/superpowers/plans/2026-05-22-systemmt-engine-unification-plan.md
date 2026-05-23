@@ -315,5 +315,17 @@ launcher 6 SUT 用 per-MR `*_input_adapter.py`（W1 模式）；pipeline 要通�
 ## 9. TDD 启动记录（P1）
 
 - 2026-05-22：P1 红→绿（见同日 commit）。
+
+## 10. 设计文档锚点
+
+本计划是 W2 替代 W1 的**执行**层；MR 协议层的**架构基线**已收口到独立设计文档:
+
+- 📐 [`docs/design/mr-architecture.md`](../../design/mr-architecture.md) ——
+  方法/系统双轨决策 · 共享 MR 协议层 · MetaPattern 仅 system-level ·
+  三概念分层(语义/协议/执行) · 方程作为数学函数容器 · L0/L1/L2 算子分层 ·
+  决策 B(通用 → 方程命名空间 的分级查找) · LaTeX 仅展示 ·
+  集合形态 L1/L2 覆盖、L3/L4 deferred · 实施序列 · 不做。
+
+新增方程函数 / 算子注册 / MR 类工作必须以该文档为依据;与之相左的实现需 RFC 改文档。
 </content>
 </invoke>
