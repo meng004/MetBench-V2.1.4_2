@@ -15,7 +15,7 @@
 | **测试文件** | `MetBench_SystemMT.Tests/` 下相对路径 | 单元 + BDD + UAT |
 | **测试结果** | `dotnet test MetBench_SystemMT.Tests` 最近一次基线 | `pass/skip/fail` 或缺口说明 |
 
-**基线**：2026-05-23（G-06 后），`dotnet test MetBench_SystemMT.Tests` = **830 pass / 0 fail**（OpenMC 跨程序场景在无 OpenMC 环境下首跑 skip / 二跑 warm 后 0 skip）。
+**基线**：2026-05-23（G-08 后），`dotnet test MetBench_SystemMT.Tests` = **834 pass / 0 fail**（OpenMC 跨程序场景在无 OpenMC 环境下首跑 skip / 二跑 warm 后 0 skip）。
 
 ## 1. T0 · 核心 —— 系统级 MT 流程
 
@@ -120,7 +120,7 @@
 | G-05 | F-MR-P7 | LaTeX→SymPy `[Obsolete]` 后无 grep 守卫单测，回归仅靠人工 | 未来若有人去 `[Obsolete]` 易漏 | 视需要在 `V2Schema/` 加一条 ObsoleteAttributeGuard 测试 |
 | ~~G-06~~ ✅ 已完成(2026-05-23) | F-T1-04 / F-MR-P5 | ~~method MT 协议层未接入业务路径~~ | — | 已建 `IMtPipeline<TReq,TOut>` 共享抽象（BLL.Core/MT）+ `MethodMtPipeline`（BLL/MethodMT，实现协议层）+ `MethodMtRunRequest/Outcome` 数据 record + `MethodMtCatalogService` 扩 CRUD（Get/Update/Delete）+ `SystemMtPipeline` 加 IMtPipeline 显式接口实现；20 新测试（7 pipeline + 4 Bateman 参数化 AAA + 9 CRUD）；全量回归 810→830 pass。注：4 处 `Latextosympy*` 调用已澄清属 v1 展示衍生字段（不在 G-06 范围），归 G-11 处置 |
 | G-07 | F-T0-02 / F-T0-01 | **W1 引擎残留**：`SystemMtRunner` + `SystemMtTask` 仍由 `MetBench_Client/App.xaml.cs:130` DI 注册；测试 `SystemMtRunnerTests` / `SystemMtRunnerGeneratedFollowupTests` 在跑 | system 侧双轨未拆 | 拆 DI 注册 + 删 W1 测试 + 删 `SystemMtRunner` / `SystemMtTask` / `SystemMtCase` / `SystemMtResult` |
-| G-08 | F-T1-04 / F-T0-03 | **catalog 双 seed 不自动同步**：launcher 硬编码 8 `MrBlueprint` + `SystemMtMetadataCatalog` 静态 5 方程 8 MR + entity 表三处；`LauncherCatalogV2Importer` 不在启动路径自动跑 | 任何新 MR 需改 2-3 处；entity 表可能为空 | 启动时自动 Import + 单一 source-of-truth 收口（推荐 metadata catalog 主，launcher 派生） |
+| ~~G-08~~ ✅ 已完成(2026-05-23, 云端范围) | F-T1-04 / F-T0-03 | ~~catalog 双 seed 不自动同步~~ | — | 已建 `SystemMtBootstrap.SeedCatalogsAsync(metaRepo, importer)` 一次性 idempotent helper，串行调 `SystemMtMetadataCatalog.SeedAsync` + `LauncherCatalogV2Importer.Import`；4 新测试。**VM 端待做**（G-08b/G-11 候选）：`App.xaml.cs` 启动时调 `SystemMtBootstrap.SeedCatalogsAsync`。完整 source-of-truth 收口（launcher 改读 catalog 而非硬编码）属 Stage 9+ 重构 |
 | ~~G-09~~ ✅ 已完成(2026-05-23) | F-T3-02 / F-T1-04 | ~~projectile SUT 未进 launcher catalog~~ | — | 已补 `projectile-motion` EquationMetadata + `projectile-scale-v0` MrMetadata + MrBlueprint + `SUT/projectile/sample/standard.txt`；2 个 launcher 测试 + cascade 4 个 importer 测试更新；全量 809→810 pass |
 | G-10 | F-T1-04 | **CRUD 不全**：`EquationFunctionRecipe` 缺 Update/Delete；元信息层 (`ISystemMtMetadataRepository`) 全无 Delete；`MethodMtCatalogService` 公开方法 0 个（疑似仅构造时拒绝 MetaPattern） | 元信息一旦写入只能 Upsert 覆盖；无清理路径 | 视 UI/UAT 需要再补；目前 backlog（注：G-06 将补 `MethodMtCatalogService` MR-CRUD 子集） |
 | G-11 | F-T1-04（v1 兼容） | **v1 LaTeX 展示衍生字段路径清理**：`MetamorphicRelationService.Add/Update` + `AutoMRParser.ProduceMRs/Async` + `MRRecommendationViewModel` + `MRManagementViewModel` 共 4 处仍调 `Latextosympy*`（已 `[Obsolete]`）。`mr-architecture.md §4.1` 明确"LaTeX 仅展示、不驱动执行"，但 v1 数据形态下衍生字段仍存于 LiteDB | 与 method MT 执行栈正交，归 v1 数据展示路径迁移 | VM 端工作（云端不可编译 WPF）；待 method MT 执行栈（G-06）稳定后裁决：保留为 v1 兼容 / 拆迁至独立展示服务 / 直接删 |
@@ -146,6 +146,7 @@
 | `75df630` | （文档） | §11 索引补登 |
 | `b047668` | （文档） | §10 追加 G-11/G-12/G-13（v1 清理 + PBT 升级占位） |
 | `7305230` | **G-06** | method MT 执行栈：IMtPipeline 共享抽象 + MethodMtPipeline + Catalog CRUD（830 pass） |
+| `<TBD-G-08>` | **G-08** | catalog 自动 bootstrap helper（云端范围；834 pass） |
 
 ## 12. 受控开发模式工作流
 
