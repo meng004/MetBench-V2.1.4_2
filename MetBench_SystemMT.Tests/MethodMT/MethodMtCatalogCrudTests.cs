@@ -168,4 +168,20 @@ public sealed class MethodMtCatalogCrudTests
 
         Assert.Equal(DeleteOutcome.NotFound, outcome);
     }
+
+    [Fact]
+    public void DeleteMr_blocked_when_active_binding_exists()
+    {
+        // S8-P5 review fix: DeleteMr 之前不查 MRBinding 就直接删，会留悬空 binding；
+        // 修复后对称 SystemMtCatalogService.DeleteMr — 有 active binding → Blocked。
+        var svc = MakeSvc();
+        var id = svc.CreateMr(MakeMr("mt-bind-block"));
+        _bindings.Add(new MetBench_Domain.MRBinding { MRId = id, ApplicationId = 1, Status = "active" });
+
+        var outcome = svc.DeleteMr(id);
+
+        Assert.Equal("blocked", outcome.Status);
+        Assert.Contains("binding", outcome.Reason!);
+        Assert.NotNull(svc.GetMr(id));  // 未删
+    }
 }

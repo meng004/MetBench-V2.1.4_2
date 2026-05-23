@@ -1,0 +1,13 @@
+{
+  "geometry": {
+    "length":     100.0,
+    "num_points": 101
+  },
+  "material": {
+    "D":       1.0,
+    "sigma_a": 0.01
+  },
+  "source": {
+    "strength": 1.0
+  }
+}

@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using MetBench_BLL.Coverage;
 using MetBench_BLL.Reporting;
-using MetBench_BLL.Trend;
 using MetBench_Domain;
 using MetBench_IDAL;
 using Xunit;
@@ -81,23 +80,7 @@ public sealed class SystemMtReportServiceTests : IDisposable
         Assert.Contains("Detection rate: 75", content);
     }
 
-    [Fact]
-    public void GenerateWeekly_writes_headline_into_report()
-    {
-        var (svc, fakes) = MakeService();
-        var weekly = new WeeklyReport(
-            DateTime.UtcNow.Date, DateTime.UtcNow.Date.AddDays(7),
-            10, 8, 2, 1, 0, 1, 0.2, 0.125, Array.Empty<AnomalyBurst>(),
-            "headline goes here");
-        var path = Path.Combine(_tmpDir, "weekly.md");
-
-        var result = svc.GenerateWeekly(weekly, path);
-
-        var content = File.ReadAllText(path);
-        Assert.Contains("Weekly Report", content);
-        Assert.Contains("headline goes here", content);
-        Assert.Equal("weekly", fakes.Reports.Data[0].Scope);
-    }
+    // GenerateWeekly 测试已删除（next-stage P0：Trend 子系统下线，5 scope → 4 scope）。
 
     [Fact]
     public void GenerateCoverage_renders_each_dimension()

@@ -10,7 +10,7 @@ using Xunit;
 namespace MetBench_SystemMT.Tests.SystemMT.Launcher;
 
 /// <summary>
-/// 方向 2 — <see cref="LauncherCatalogV2Importer"/>:把 launcher 内部 8 MR 目录投影
+/// 方向 2 — <see cref="LauncherCatalogV2Importer"/>:把 launcher 内部 17 MR 目录投影
 /// 到 v2 实体表(Application + MetamorphicRelation + MRBinding),验证内容正确、
 /// 幂等、写审计、且不破坏 launcher 的运行时行为(对 MT 流程的再次验证)。
 /// </summary>
@@ -43,11 +43,11 @@ public sealed class LauncherCatalogV2ImporterTests
     {
         var summary = _importer.Import();
 
-        Assert.Equal(7, summary.ApplicationsCreated);
-        Assert.Equal(7, _apps.Data.Count);
+        Assert.Equal(9, summary.ApplicationsCreated);
+        Assert.Equal(9, _apps.Data.Count);
         var sutNames = _apps.Data.Select(a => a.Name).OrderBy(n => n).ToArray();
         Assert.Equal(
-            new[] { "damped-oscillator", "decay-chain", "heat-equation", "lotka-volterra", "openmc", "openmoc", "projectile" },
+            new[] { "damped-oscillator", "decay-chain", "diffusion-1d", "heat-equation", "lotka-volterra", "openmc", "openmoc", "projectile", "subchannel-1d" },
             sutNames);
         Assert.All(_apps.Data, a => Assert.Equal("system-level", a.Kind));
         Assert.All(_apps.Data, a => Assert.Equal("Python", a.ProgrammingLanguage));
@@ -58,11 +58,16 @@ public sealed class LauncherCatalogV2ImporterTests
     {
         var summary = _importer.Import();
 
-        Assert.Equal(9, summary.MrsCreated);
-        Assert.Equal(9, _mrs.Data.Count);
+        Assert.Equal(17, summary.MrsCreated);
+        Assert.Equal(17, _mrs.Data.Count);
         Assert.All(_mrs.Data, m => Assert.Equal("system-level", m.Kind));
         Assert.All(_mrs.Data, m => Assert.Equal("manual", m.DiscoveryMethod));
-        Assert.All(_mrs.Data, m => Assert.Equal("m_mono", m.MetaPatternCode));
+        // S8-P1 后元模式扩展：Scaling → m_mono / Invariance → m_inv / Convergence → m_conv
+        var allowedMps = new HashSet<string> { "m_mono", "m_inv", "m_conv" };
+        Assert.All(_mrs.Data, m => Assert.Contains(m.MetaPatternCode, allowedMps));
+        // S8-P1 加 2 个 MR：bateman-mass-conservation (m_inv) + bateman-timestep-cauchy (m_conv)
+        Assert.Equal("m_inv", _mrs.Data.Single(m => m.Code == "bateman-mass-conservation").MetaPatternCode);
+        Assert.Equal("m_conv", _mrs.Data.Single(m => m.Code == "bateman-timestep-cauchy").MetaPatternCode);
     }
 
     [Fact]
@@ -70,7 +75,7 @@ public sealed class LauncherCatalogV2ImporterTests
     {
         _importer.Import();
 
-        Assert.Equal(9, _bindings.Data.Count);
+        Assert.Equal(17, _bindings.Data.Count);
         foreach (var b in _bindings.Data)
         {
             Assert.NotNull(_mrs.Data.FirstOrDefault(m => m.IdMR == b.MRId));
@@ -117,6 +122,19 @@ public sealed class LauncherCatalogV2ImporterTests
     }
 
     [Fact]
+    public void Import_MR_carries_EquationKey_from_blueprint()
+    {
+        // S8-P5 review fix: 之前 importer 漏写 EquationKey → V3 migration 全 collapse 到 Other
+        _importer.Import();
+
+        Assert.Equal("bateman", _mrs.Data.First(m => m.Code == "bateman-mass-conservation").EquationKey);
+        Assert.Equal("bateman", _mrs.Data.First(m => m.Code == "decay-chain-scale-initial").EquationKey);
+        Assert.Equal("heat-equation-1d", _mrs.Data.First(m => m.Code == "fourier-alpha-monotonic").EquationKey);
+        Assert.Equal("diffusion", _mrs.Data.First(m => m.Code == "diffusion-source-linearity").EquationKey);
+        Assert.Equal("navier-stokes", _mrs.Data.First(m => m.Code == "subchannel-flow-temperature-monotone").EquationKey);
+    }
+
+    [Fact]
     public void Import_writes_one_audit_log_entry_with_counts()
     {
         _importer.Import();
@@ -125,8 +143,8 @@ public sealed class LauncherCatalogV2ImporterTests
         Assert.Equal("launcher.catalog.import", log.Action);
         Assert.Equal("launcher-import", log.Actor);
         Assert.Contains("applicationsCreated", log.DetailsJson);
-        Assert.Contains("\"mrsCreated\":9", log.DetailsJson);
-        Assert.Contains("\"bindingsCreated\":9", log.DetailsJson);
+        Assert.Contains("\"mrsCreated\":17", log.DetailsJson);
+        Assert.Contains("\"bindingsCreated\":17", log.DetailsJson);
     }
 
     [Fact]
@@ -136,22 +154,22 @@ public sealed class LauncherCatalogV2ImporterTests
         var second = _importer.Import();
 
         // 第 1 次:全部新建
-        Assert.Equal(7, first.ApplicationsCreated);
-        Assert.Equal(9, first.MrsCreated);
-        Assert.Equal(9, first.BindingsCreated);
+        Assert.Equal(9, first.ApplicationsCreated);
+        Assert.Equal(17, first.MrsCreated);
+        Assert.Equal(17, first.BindingsCreated);
 
         // 第 2 次:全部已存在
         Assert.Equal(0, second.ApplicationsCreated);
-        Assert.Equal(7, second.ApplicationsExisting);
+        Assert.Equal(9, second.ApplicationsExisting);
         Assert.Equal(0, second.MrsCreated);
-        Assert.Equal(9, second.MrsExisting);
+        Assert.Equal(17, second.MrsExisting);
         Assert.Equal(0, second.BindingsCreated);
-        Assert.Equal(9, second.BindingsExisting);
+        Assert.Equal(17, second.BindingsExisting);
 
         // 行数总和未变
-        Assert.Equal(7, _apps.Data.Count);
-        Assert.Equal(9, _mrs.Data.Count);
-        Assert.Equal(9, _bindings.Data.Count);
+        Assert.Equal(9, _apps.Data.Count);
+        Assert.Equal(17, _mrs.Data.Count);
+        Assert.Equal(17, _bindings.Data.Count);
         // 两次都写一条审计
         Assert.Equal(2, _audit.Data.Count);
     }

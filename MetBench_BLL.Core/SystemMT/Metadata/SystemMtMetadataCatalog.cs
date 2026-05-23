@@ -87,6 +87,41 @@ public static class SystemMtMetadataCatalog
         },
         new EquationMetadata
         {
+            EquationKey = "diffusion",
+            Name = "中子扩散方程（1D 单群稳态简化）",
+            CanonicalForm = "-D·∂²φ/∂x² + Σ_a·φ = S",
+            SymbolSystem =
+                "φ(x) 中子通量 [n/(cm²·s)]；D 扩散系数 [cm]；Σ_a 宏观吸收截面 [1/cm]；" +
+                "S(x) 外中子源 [n/(cm³·s)]；L_dif = √(D/Σ_a) 扩散长度 [cm]。",
+            Parameters = new List<EquationParameter>
+            {
+                new() { Symbol = "D", Description = "扩散系数", Unit = "cm" },
+                new() { Symbol = "Σ_a", Description = "宏观吸收截面", Unit = "1/cm" },
+                new() { Symbol = "S", Description = "外中子源", Unit = "n/(cm³·s)" },
+                new() { Symbol = "φ_max", Description = "峰值通量（输出）", Unit = "n/(cm²·s)" },
+            },
+        },
+        new EquationMetadata
+        {
+            EquationKey = "navier-stokes",
+            Name = "Navier-Stokes 方程（1D 单通道稳态简化）",
+            CanonicalForm =
+                "质量：G = const；动量：dp/dz = -f·G²/(2ρ·D_h)；能量：G·c_p·dT/dz = q''·P_h/A_xs",
+            SymbolSystem =
+                "G 质量流密度 [kg/(m²·s)]；p 压力 [Pa]；T 温度 [K]；ρ 密度 [kg/m³]；" +
+                "c_p 比热 [J/(kg·K)]；f Darcy 摩擦因子；D_h 水力直径 [m]；" +
+                "q'' 壁面热流密度 [W/m²]；P_h 加热周长 [m]；A_xs 横截面积 [m²]。",
+            Parameters = new List<EquationParameter>
+            {
+                new() { Symbol = "G", Description = "质量流密度", Unit = "kg/(m²·s)" },
+                new() { Symbol = "q''", Description = "壁面热流密度", Unit = "W/m²" },
+                new() { Symbol = "f", Description = "Darcy 摩擦因子（闭式输入）", Unit = "无量纲" },
+                new() { Symbol = "ΔT", Description = "出入口温升（输出）", Unit = "K" },
+                new() { Symbol = "Δp", Description = "通道压降（输出）", Unit = "Pa" },
+            },
+        },
+        new EquationMetadata
+        {
             EquationKey = "projectile-motion",
             Name = "射程方程（真空、平面、点抛体）",
             CanonicalForm = "R = v0²·sin(2θ)/g",
@@ -179,6 +214,37 @@ public static class SystemMtMetadataCatalog
         },
         new MrMetadata
         {
+            MrId = "fourier-timestep-convergence",
+            EquationKey = "heat-equation-1d",
+            PhysicalMeaning =
+                "Forward-Euler 时间步收敛性：步长减半（num_steps 翻倍）后 max_u 在数值容差内不变 — " +
+                "若变化超出容差说明时间积分尚未收敛到细网格 plateau。",
+            InputTransformation = "num_steps → factor·num_steps（factor > 1）",
+            OutputRelation = "max_u(flw) ≈ max_u(src)（Euler 截断误差容差内）",
+            ComparisonType = MrComparisonType.Absolute,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "num_steps 缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "max_u", PhysicalMeaning = "终态峰值温度（输出）", ValueRange = "max_u > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "fourier-alpha-monotonic",
+            EquationKey = "heat-equation-1d",
+            PhysicalMeaning =
+                "扩散系数 α 越大，定时 t_final 内的扩散平滑越强，终态峰值温度 max_u 越小。",
+            InputTransformation = "α → factor·α（factor > 1）",
+            OutputRelation = "max_u(flw) < max_u(src)",
+            ComparisonType = MrComparisonType.Ordinal,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "α 缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "max_u", PhysicalMeaning = "终态峰值温度（输出）", ValueRange = "max_u > 0" },
+            },
+        },
+        new MrMetadata
+        {
             MrId = "decay-chain-scale-initial",
             EquationKey = "bateman",
             PhysicalMeaning =
@@ -189,6 +255,38 @@ public static class SystemMtMetadataCatalog
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "初始核素数缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "N_C_final", PhysicalMeaning = "末端核素 C 的终态积累量（输出）", ValueRange = "N_C_final ≥ 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "bateman-mass-conservation",
+            EquationKey = "bateman",
+            PhysicalMeaning =
+                "Bateman 衰变链 A→B→C 无生成无吸收，总核素数 total = N_A+N_B+N_C 守恒。" +
+                "改变衰变率 λ_A 不影响总数。",
+            InputTransformation = "λ_A → factor·λ_A（factor > 1）",
+            OutputRelation = "total(flw) ≈ total(src)（容差内严格等）",
+            ComparisonType = MrComparisonType.Absolute,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "λ_A 缩放倍率", ValueRange = "factor > 0" },
+                new() { Symbol = "total", PhysicalMeaning = "守恒总核素数（输出）", ValueRange = "total = N_A0+N_B0+N_C0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "bateman-timestep-cauchy",
+            EquationKey = "bateman",
+            PhysicalMeaning =
+                "RK4 时间步长 Cauchy 收敛：步长减半（num_steps 翻倍）应使数值解在 RK4 截断误差容差内不变 — " +
+                "若变化超出容差说明 RK4 尚未收敛到细网格 plateau。",
+            InputTransformation = "num_steps → factor·num_steps（factor > 1）",
+            OutputRelation = "N_C_final(flw) ≈ N_C_final(src)（RK4 截断误差容差内）",
+            ComparisonType = MrComparisonType.Absolute,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "num_steps 缩放倍率", ValueRange = "factor > 1" },
                 new() { Symbol = "N_C_final", PhysicalMeaning = "末端核素 C 的终态积累量（输出）", ValueRange = "N_C_final ≥ 0" },
             },
         },
@@ -221,6 +319,69 @@ public static class SystemMtMetadataCatalog
             {
                 new() { Symbol = "factor", PhysicalMeaning = "γ（捕食者死亡率）缩放倍率", ValueRange = "factor > 1" },
                 new() { Symbol = "mean_prey", PhysicalMeaning = "时均猎物数（输出）", ValueRange = "mean_prey > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "diffusion-source-linearity",
+            EquationKey = "diffusion",
+            PhysicalMeaning =
+                "稳态扩散方程在源项 S 上线性：放大 S 必按同比例放大稳态通量 φ。" +
+                "故 φ_max 在 S 上严格单调（且严格意义下成 S∝φ_max 线性）。",
+            InputTransformation = "S → factor·S（factor > 1）",
+            OutputRelation = "φ_max(flw) > φ_max(src)（严格意义下 = factor·φ_max(src)）",
+            ComparisonType = MrComparisonType.Ordinal,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "S 缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "φ_max", PhysicalMeaning = "峰值通量（输出）", ValueRange = "φ_max > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "diffusion-mesh-richardson",
+            EquationKey = "diffusion",
+            PhysicalMeaning =
+                "网格细化 Richardson 收敛性：num_points 翻倍（dx 减半）后 φ_max 应在二阶 FD " +
+                "截断误差容差内不变 — 若变化超容差说明粗网格尚未收敛到细网格 plateau。",
+            InputTransformation = "num_points → factor·num_points（factor > 1）",
+            OutputRelation = "φ_max(flw) ≈ φ_max(src)（O(dx²) 截断误差容差内）",
+            ComparisonType = MrComparisonType.Absolute,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "num_points 缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "φ_max", PhysicalMeaning = "峰值通量（输出）", ValueRange = "φ_max > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "subchannel-flow-temperature-monotone",
+            EquationKey = "navier-stokes",
+            PhysicalMeaning =
+                "由能量守恒 ΔT = q''·P_h·L/(G·A_xs·c_p)，固定热流密度 q'' 下，质量流密度 G " +
+                "越大，温升 ΔT 越小（流量越高，散热越好）。",
+            InputTransformation = "G → factor·G（factor > 1）",
+            OutputRelation = "ΔT(flw) < ΔT(src)（严格意义下 = ΔT(src) / factor）",
+            ComparisonType = MrComparisonType.Ordinal,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "G 缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "ΔT", PhysicalMeaning = "出口温升（输出）", ValueRange = "ΔT > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "subchannel-heat-flux-linearity",
+            EquationKey = "navier-stokes",
+            PhysicalMeaning =
+                "能量守恒在 q'' 上线性：定流量下 ΔT 与 q'' 成正比，故 q'' 翻倍必使 ΔT 翻倍。",
+            InputTransformation = "q'' → factor·q''（factor > 1）",
+            OutputRelation = "ΔT(flw) > ΔT(src)（严格意义下 = factor·ΔT(src)）",
+            ComparisonType = MrComparisonType.Ordinal,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "q'' 缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "ΔT", PhysicalMeaning = "出口温升（输出）", ValueRange = "ΔT > 0" },
             },
         },
         new MrMetadata

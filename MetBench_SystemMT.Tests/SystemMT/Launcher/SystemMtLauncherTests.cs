@@ -65,16 +65,144 @@ public sealed class SystemMtLauncherTests
     {
         var descriptors = await _launcher.ListAvailableAsync();
 
-        Assert.Equal(9, descriptors.Count);
-        Assert.Equal("damped-oscillator-scale-state", descriptors[0].Id);
-        Assert.Equal("decay-chain-scale-initial", descriptors[1].Id);
-        Assert.Equal("heat-equation-amplitude", descriptors[2].Id);
-        Assert.Equal("lotka-volterra-scale-gamma", descriptors[3].Id);
-        Assert.Equal("openmc-pincell-nu-sigma-f", descriptors[4].Id);
-        Assert.Equal("openmc-pincell-sigma-a", descriptors[5].Id);
-        Assert.Equal("openmoc-pincell-nu-sigma-f", descriptors[6].Id);
-        Assert.Equal("openmoc-pincell-sigma-a", descriptors[7].Id);
-        Assert.Equal("projectile-scale-v0", descriptors[8].Id);
+        Assert.Equal(17, descriptors.Count);
+        Assert.Equal("bateman-mass-conservation", descriptors[0].Id);
+        Assert.Equal("bateman-timestep-cauchy", descriptors[1].Id);
+        Assert.Equal("damped-oscillator-scale-state", descriptors[2].Id);
+        Assert.Equal("decay-chain-scale-initial", descriptors[3].Id);
+        Assert.Equal("diffusion-mesh-richardson", descriptors[4].Id);
+        Assert.Equal("diffusion-source-linearity", descriptors[5].Id);
+        Assert.Equal("fourier-alpha-monotonic", descriptors[6].Id);
+        Assert.Equal("fourier-timestep-convergence", descriptors[7].Id);
+        Assert.Equal("heat-equation-amplitude", descriptors[8].Id);
+        Assert.Equal("lotka-volterra-scale-gamma", descriptors[9].Id);
+        Assert.Equal("openmc-pincell-nu-sigma-f", descriptors[10].Id);
+        Assert.Equal("openmc-pincell-sigma-a", descriptors[11].Id);
+        Assert.Equal("openmoc-pincell-nu-sigma-f", descriptors[12].Id);
+        Assert.Equal("openmoc-pincell-sigma-a", descriptors[13].Id);
+        Assert.Equal("projectile-scale-v0", descriptors[14].Id);
+        Assert.Equal("subchannel-flow-temperature-monotone", descriptors[15].Id);
+        Assert.Equal("subchannel-heat-flux-linearity", descriptors[16].Id);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_diffusion_source_linearity_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var lin = descriptors.Single(d => d.Id == "diffusion-source-linearity");
+
+        Assert.Equal("diffusion-1d", lin.SutName);
+        Assert.Equal("ScaleField", lin.TransformationName);
+        Assert.Equal("GreaterThan", lin.AssertionName);
+        Assert.Equal("phi_max", lin.ValueName);
+        Assert.Equal("2", lin.DefaultParameters["factor"]);
+        Assert.Contains("source", lin.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Diffusion.Scaling.Source", lin.MrFamily);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_diffusion_mesh_richardson_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var rich = descriptors.Single(d => d.Id == "diffusion-mesh-richardson");
+
+        Assert.Equal("diffusion-1d", rich.SutName);
+        Assert.Equal("ScaleField", rich.TransformationName);
+        Assert.Equal("ApproxEqual", rich.AssertionName);
+        Assert.Equal("phi_max", rich.ValueName);
+        Assert.Equal("2", rich.DefaultParameters["factor"]);
+        Assert.Contains("mesh", rich.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Diffusion.Convergence.Mesh", rich.MrFamily);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_subchannel_flow_temperature_monotone_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var mono = descriptors.Single(d => d.Id == "subchannel-flow-temperature-monotone");
+
+        Assert.Equal("subchannel-1d", mono.SutName);
+        Assert.Equal("ScaleField", mono.TransformationName);
+        Assert.Equal("LessThan", mono.AssertionName);
+        Assert.Equal("delta_T", mono.ValueName);
+        Assert.Equal("2", mono.DefaultParameters["factor"]);
+        Assert.Contains("flow", mono.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Subchannel.Scaling.MassFlux", mono.MrFamily);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_subchannel_heat_flux_linearity_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var lin = descriptors.Single(d => d.Id == "subchannel-heat-flux-linearity");
+
+        Assert.Equal("subchannel-1d", lin.SutName);
+        Assert.Equal("ScaleField", lin.TransformationName);
+        Assert.Equal("GreaterThan", lin.AssertionName);
+        Assert.Equal("delta_T", lin.ValueName);
+        Assert.Equal("2", lin.DefaultParameters["factor"]);
+        Assert.Contains("heat", lin.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Subchannel.Scaling.HeatFlux", lin.MrFamily);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_fourier_timestep_convergence_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var conv = descriptors.Single(d => d.Id == "fourier-timestep-convergence");
+
+        Assert.Equal("heat-equation", conv.SutName);
+        Assert.Equal("ScaleField", conv.TransformationName);
+        Assert.Equal("ApproxEqual", conv.AssertionName);
+        Assert.Equal("max_u", conv.ValueName);
+        Assert.Equal("2", conv.DefaultParameters["factor"]);
+        Assert.Contains("step", conv.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Fourier.Convergence.Timestep", conv.MrFamily);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_fourier_alpha_monotonic_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var mono = descriptors.Single(d => d.Id == "fourier-alpha-monotonic");
+
+        Assert.Equal("heat-equation", mono.SutName);
+        Assert.Equal("ScaleField", mono.TransformationName);
+        Assert.Equal("LessThan", mono.AssertionName);
+        Assert.Equal("max_u", mono.ValueName);
+        Assert.Equal("2", mono.DefaultParameters["factor"]);
+        Assert.Contains("diffus", mono.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Fourier.Scaling.Alpha", mono.MrFamily);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_bateman_mass_conservation_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var massConservation = descriptors.Single(d => d.Id == "bateman-mass-conservation");
+
+        Assert.Equal("decay-chain", massConservation.SutName);
+        Assert.Equal("ScaleField", massConservation.TransformationName);
+        Assert.Equal("ApproxEqual", massConservation.AssertionName);
+        Assert.Equal("total", massConservation.ValueName);
+        Assert.Equal("2", massConservation.DefaultParameters["factor"]);
+        Assert.Contains("conservation", massConservation.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Bateman.Invariance.MassConservation", massConservation.MrFamily);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_bateman_timestep_cauchy_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var cauchy = descriptors.Single(d => d.Id == "bateman-timestep-cauchy");
+
+        Assert.Equal("decay-chain", cauchy.SutName);
+        Assert.Equal("ScaleField", cauchy.TransformationName);
+        Assert.Equal("ApproxEqual", cauchy.AssertionName);
+        Assert.Equal("N_C_final", cauchy.ValueName);
+        Assert.Equal("2", cauchy.DefaultParameters["factor"]);
+        Assert.Contains("step", cauchy.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Bateman.Convergence.Timestep", cauchy.MrFamily);
     }
 
     [Fact]

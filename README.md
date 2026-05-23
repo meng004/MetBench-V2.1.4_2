@@ -17,7 +17,7 @@ through a typed assertion layer.
 | UI (Windows) | Configure, launch, and monitor MT tasks | `MetBench_Client/` (WPF) |
 | Business orchestration (WPF) | Original method-level MT logic and DI composition | `MetBench_BLL/` |
 | Business orchestration (cross-platform) | System-level MT runner, assertions, adapters, persistence contracts | `MetBench_BLL.Core/` |
-| v2 system-MT services (cross-platform) | Anomaly · Discovery · Validation · Mutation · Coverage · Trend · Reporting | `MetBench_BLL.Core/` (sub-namespaces) |
+| v2 system-MT services (cross-platform) | Anomaly · Discovery · Validation · Mutation · Coverage · Reporting | `MetBench_BLL.Core/` (sub-namespaces) |
 | BDD execution | Reqnroll runs `.feature` files and dispatches to step bindings | `MetBench_SystemMT.Tests/` |
 | Persistence (v1 + v2) | LiteDB-backed run-result + 23-collection v2 schema | `MetBench_DAL/` |
 | Domain (v1 + v2) | Method-level entities + v2 4-level MR hierarchy entities | `MetBench_Domain/`, `MetBench_IDAL/` |

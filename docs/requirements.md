@@ -15,7 +15,7 @@
 | **测试文件** | `MetBench_SystemMT.Tests/` 下相对路径 | 单元 + BDD + UAT |
 | **测试结果** | `dotnet test MetBench_SystemMT.Tests` 最近一次基线 | `pass/skip/fail` 或缺口说明 |
 
-**基线**：2026-05-23（G-10 后，全建议顺序 G-09/G-06/G-08/G-07/G-05/G-10 完成），`dotnet test MetBench_SystemMT.Tests` = **848 pass / 0 fail**（OpenMC 跨程序场景在无 OpenMC 环境下首跑 skip / 二跑 warm 后 0 skip）。
+**基线**：2026-05-23（Stage 8 S8-P5c + 5-angle review 3 commits 修复后），`dotnet test MetBench_SystemMT.Tests` = **876 pass / 0 fail**（OpenMC 跨程序场景在无 OpenMC 环境下首跑 skip / 二跑 warm 后 0 skip）。基线累计：848 - 6 (mutmut) - 13 (Trend) + 6 (G-02) + 2×4 (S8-P1..P4) + 4 (S8-P5a) + 9 (S8-P5b) + 7 (S8-P5c) + 5 (review-fix-1：Tolerance/EquationKey/MapProgram) + 7 (enum pinning) + 1 (DeleteMr binding guard) = 876。MR 库 17 / 8 方程；V3 5D-tag schema 三层 + 数据链修复（Importer 写 EquationKey + Migration 通过 MRBinding lookup SUT）。
 
 ## 1. T0 · 核心 —— 系统级 MT 流程
 
@@ -44,14 +44,14 @@
 |---|---|---|---|---|---|
 | F-T2-01 | AGENTS Stage 4 acceptance；CLAUDE.md §6 | HTML 报告渲染器 | `SystemMT/Reporting/HtmlSystemMtResultReportRenderer.cs`<br>`Reporting/ISystemMtResultReportRenderer.cs` | `Reporting/HtmlSystemMtResultReportRendererTests.cs` | ✅ pass |
 | F-T2-02 | AGENTS Stage 6 P8 | 5-scope 报告生成（Word / Excel / PDF） | `MetBench_BLL.Core/Reporting/SystemMtReportService.cs`<br>`MetBench_BLL/` 下的 Word/Excel/PDF 生成器（cross-platform 部分） | `V2Reporting/SystemMtReportServiceTests.cs` | ✅ pass |
-| F-T2-03 | CLAUDE.md §3 表注 | 跨平台 LiveCharts 数据层（`MTVisualizationSerive`） | `MetBench_BLL/MTVisualizationSerive.cs`（无 WPF 依赖部分） | ⚠ 无独立单测（图形组件 plotter 已迁 `MetBench_Client/Services/Plotting/`） | ☐ **缺口**：数据层测试未建 |
+| F-T2-03 | CLAUDE.md §3 表注 | 跨平台 LiveCharts 数据层（`MTVisualizationService`） | `MetBench_BLL/MTVisualizationService.cs`<br>+ 支撑类 `CsvDataReader.cs` / `ColumnDefinition.cs` / `PlotType.cs` / `Visualization/SeriesBuilder.cs` | `Bll/MtVisualizationServiceTests.cs`（6 测试） | ✅ pass |
 
 ## 4. T3 · 覆盖（代表性方程 × 程序类型）
 
 | 编号 | 需求来源 | 功能描述 | 实现文件 | 测试文件 | 测试结果 |
 |---|---|---|---|---|---|
 | F-T3-01 | AGENTS Stage 6 P8 | CoverageService 4 维报告 | `MetBench_BLL.Core/Coverage/CoverageService.cs`<br>`Coverage/CoverageReport.cs` | `V2Coverage/CoverageServiceTests.cs`<br>`V2Coverage/FakeCoverageRepositories.cs` | ✅ pass |
-| F-T3-02 | AGENTS Stage 8 | 代表性 SUT 接入（已落地：decay_chain / damped_oscillator / lotka_volterra / heat_equation / projectile / openmoc / openmc；**全部进入 launcher catalog + metadata catalog**，2026-05-23 G-09） | `SUT/decay_chain/`<br>`SUT/damped_oscillator/`<br>`SUT/lotka_volterra/`<br>`SUT/heat_equation/`<br>`SUT/projectile/`（+ `sample/standard.txt`）<br>`SUT/openmoc/`<br>`SUT/openmc/` | （上述各 SUT 的 Parser / Adapter / Smoke / Sample 测试，见 F-T1-02）<br>+ `Launcher/SystemMtLauncherTests.ListAvailableAsync_projectile_descriptor_has_expected_metadata` | ✅ pass |
+| F-T3-02 | AGENTS Stage 8 | 代表性 SUT 接入（共 9 SUT / 8 方程：decay_chain / damped_oscillator / lotka_volterra / heat_equation / projectile / openmoc / openmc / subchannel_1d / **diffusion_1d**；**全部进入 launcher catalog + metadata catalog**）。**S8-P1..P4（2026-05-23）扩 MR 库**：S8-P1 Bateman 2 MR；S8-P2 Fourier 2 MR；S8-P3 1D subchannel SUT + navier-stokes + 2 MR；S8-P4 1D diffusion SUT + diffusion 方程 + 2 MR（`diffusion-source-linearity` m_mono + `diffusion-mesh-richardson` m_conv）。共 17 MR / 8 方程 | `SUT/decay_chain/`（含 `bateman` 方程实现）<br>`SUT/damped_oscillator/`<br>`SUT/lotka_volterra/`<br>`SUT/heat_equation/`<br>`SUT/projectile/`（+ `sample/standard.txt`）<br>`SUT/openmoc/`<br>`SUT/openmc/` | （上述各 SUT 的 Parser / Adapter / Smoke / Sample 测试，见 F-T1-02）<br>+ `Launcher/SystemMtLauncherTests.ListAvailableAsync_{projectile,bateman_mass_conservation,bateman_timestep_cauchy}_descriptor_has_expected_metadata` | ✅ pass |
 | F-T3-03 | `docs/t3-program-selection.md` | 反应堆物理 5 方程锚定（boltzmann / diffusion / bateman / fourier / NS） | bateman: `Equations/Bateman/BatemanAnalyticSolution.cs`（L2）<br>boltzmann: 通过 OpenMOC/OpenMC SUT（无独立 L2）<br>fourier: 通过 heat_equation SUT<br>diffusion / NS: **未落地** | bateman: `SystemMT/Equations/BatemanP4Tests.cs` | ⚠ **缺口**：diffusion + NS 方程的 L2 / SUT 未落地 |
 
 ## 5. T4 · MR 识别
@@ -98,7 +98,7 @@
 |---|---|---|---|---|---|
 | F-INFRA-01 | AGENTS Stage 6 P1 | DbConfig + 23 collections 实体 | `MetBench_Domain/*`<br>`MetBench_DAL/*`<br>DbConfig 初始化逻辑 | `V2Schema/DbConfigTests.cs`<br>`V2Schema/MetaPatternEntityTests.cs`<br>`V2Schema/MRBindingStatusTests.cs`<br>`V2Schema/V2EntityRoundtripTests.cs`<br>`V2Schema/V2IndexConstraintTests.cs`<br>`V2Schema/V2RepositoryDIBindingTests.cs`<br>`V2Schema/V2SoftDeleteAndMigrationTests.cs`<br>`V2Schema/V2DbConfigRegistrationTests.cs`<br>`V2Schema/V1CompatibilityTests.cs`<br>`V2Schema/UatRound1BugFixTests.cs` | ✅ pass |
 | F-INFRA-02 | AGENTS Stage 7 W12 | Keyset pagination（分页） | `MetBench_BLL.Core/Paging/{PageRequest, PagedResult, PagingViewModel}.cs` | `Paging/PagingTests.cs`<br>`Paging/PagingViewModelTests.cs`<br>`V2Pagination/KeysetPaginationTests.cs` | ✅ pass |
-| F-INFRA-03 | AGENTS Stage 6 P8 | Trend 分析 + 多维突发检测 | `MetBench_BLL.Core/Trend/{TrendAnalysisService, WeeklyReport}.cs` | `V2Trend/TrendAnalysisServiceTests.cs`<br>`V2Trend/MultiDimBurstDetectionTests.cs`<br>`V2Trend/FakeTrendRepositories.cs` | ✅ pass |
+| ~~F-INFRA-03~~ | AGENTS Stage 6 P8 | ~~Trend 分析 + 多维突发检测~~ | **已删除（次轮 P0 / 档 2.A.2，commit `88e757d`）** — Trend / Weekly / WoW / Burst 子系统整体下线（与项目当前科研主线正交，CLAUDE.md §2.1 指明对接成熟工具而非自研） | — | ~~~~ 已删除 |
 | F-INFRA-04 | AGENTS Stage 8 P-A | ApproxEqual 等式断言 + EqualityThresholds | `SystemMT/ApproxEqualAssertion.cs`<br>`SystemMT/EqualityThresholds.cs`<br>`SystemMT/Assertions/*.cs`<br>`SystemMT/GreaterThanAssertion.cs` / `LessThanAssertion.cs` / `IMrAssertion.cs` | `SystemMT/ApproxEqualAssertionTests.cs`<br>`SystemMT/GreaterThanAssertionTests.cs`<br>`SystemMT/LessThanAssertionTests.cs`<br>`V2Pipeline/AssertionEvaluatorTests.cs`<br>`V2Pipeline/AssertionExtensionsTests.cs` | ✅ pass |
 | F-INFRA-05 | AGENTS Stage 8 P-C | 方程 / MR 元信息 catalog + 漂移守卫 | `SystemMT/Metadata/{EquationMetadata, MrMetadata, SystemMtMetadataCatalog}.cs`<br>`MetBench_DAL/LiteDbSystemMtMetadataRepository.cs` | `SystemMT/Metadata/SystemMtMetadataCatalogTests.cs`<br>`SystemMT/Metadata/LiteDbSystemMtMetadataRepositoryTests.cs` | ✅ pass |
 | F-INFRA-06 | AGENTS Stage 8 P-B | 样本点级输入配对 | `SystemMT/InputSamplePoint.cs`<br>`SystemMT/InputCaseReader.cs`<br>`Persistence/SystemMtResultRecord.cs`（+InputSamples） | `SystemMT/InputCaseReaderTests.cs` | ✅ pass |
@@ -114,8 +114,8 @@
 | 缺口编号 | 关联功能 | 缺口描述 | 影响范围 | 处置建议 |
 |---|---|---|---|---|
 | G-01 | F-T1-05（WPF 客户端） | 云端 CI 不能编译 WPF（`net8.0-windows7.0`），完全无自动测试覆盖 | WPF 页面行为只能 Windows 手动验证 | 维持现状（CLAUDE.md §3 已硬约束）；UAT runbook 已覆盖 |
-| G-02 | F-T2-03（LiveCharts 数据层） | `MTVisualizationSerive` 跨平台部分无独立单测 | 数据形态修改无回归保护 | 视后续 P 编号补一组数据形态单测 |
-| G-03 | F-T3-03（反应堆 5 方程锚定） | diffusion + Navier-Stokes 两条 L2 解析解 / SUT 未落地 | T3 覆盖目标未达成 | 留待 Stage 8 后续 plan；不在 P0–P7 范围 |
+| ~~G-02~~ ✅ 已完成(2026-05-23) | F-T2-03（LiveCharts 数据层） | ~~MTVisualizationService 跨平台部分无独立单测~~ | — | 新建 `Bll/MtVisualizationServiceTests.cs`（6 测试覆盖 Line/Scatter/Pie/未初始化/非法 PlotType/重复 Initialize） |
+| ~~G-03~~ ✅ 已完成(2026-05-23) | F-T3-03（反应堆 5 方程锚定） | ~~diffusion + Navier-Stokes 两条 L2 解析解 / SUT 未落地~~ | T3 覆盖完成 | S8-P3 落 navier-stokes（1D subchannel SUT + 2 MR）；S8-P4 落 diffusion（1D FD SUT + 2 MR）。5 方程全覆盖（boltzmann / bateman / fourier / diffusion / navier-stokes） |
 | G-04 | F-T6-02（语义变异 + 等价识别 + 最小 MR 子集） | 完全未实现 | Stage 8 变异模块增强未启动 | CLAUDE.md §2 / AGENTS Stage 8 "主线之外"已列为 backlog |
 | ~~G-05~~ ✅ 已完成(2026-05-23) | F-MR-P7 | ~~LaTeX→SymPy `[Obsolete]` 后无 grep 守卫单测~~ | — | 已建 `Architecture/ObsoleteAttributeGuardTests.cs` 覆盖 `Latextosympy` + `Latextosympy_Await` + `SystemMtRunner`（5 测试） |
 | ~~G-06~~ ✅ 已完成(2026-05-23) | F-T1-04 / F-MR-P5 | ~~method MT 协议层未接入业务路径~~ | — | 已建 `IMtPipeline<TReq,TOut>` 共享抽象（BLL.Core/MT）+ `MethodMtPipeline`（BLL/MethodMT，实现协议层）+ `MethodMtRunRequest/Outcome` 数据 record + `MethodMtCatalogService` 扩 CRUD（Get/Update/Delete）+ `SystemMtPipeline` 加 IMtPipeline 显式接口实现；20 新测试（7 pipeline + 4 Bateman 参数化 AAA + 9 CRUD）；全量回归 810→830 pass。注：4 处 `Latextosympy*` 调用已澄清属 v1 展示衍生字段（不在 G-06 范围），归 G-11 处置 |
@@ -151,6 +151,19 @@
 | `4fc7f15` | **G-10** | ISystemMtMetadataRepository Delete + Recipe Update/Delete（848 pass） |
 | `dcf978a` | **G-07b** | App.xaml.cs 删除 SystemMtRunner DI 注册（VM 端；848 pass） |
 | `13b3447` | **G-08b** | App.xaml.cs 接入 SystemMtBootstrap：注册 metadata repo + importer，OnStartup seed（VM 端） |
+| `71665f3` | **档 2.A.1** | next-stage P0：删 AdversarialMutmutValidator + AdversarialCampaignSampler（842 pass）|
+| `88e757d` | **档 2.A.2** | next-stage P0：删 MetBench_BLL.Trend 子系统（829 pass）|
+| `8c7ddd5` | **G-02 / 档 2.C** | MTVisualizationService 数据层 6 单测（835 pass）|
+| `01fcba3` | **S8-P1** | Bateman MR 库扩展：`bateman-mass-conservation` (m_inv) + `bateman-timestep-cauchy` (m_conv) + importer 元模式识别扩展（837 pass）|
+| `0d119f3` | **S8-P2** | Fourier MR 库扩展：`fourier-timestep-convergence` (m_conv) + `fourier-alpha-monotonic` (m_mono)（839 pass）|
+| `f3bd535` | **S8-P3** | 1D subchannel SUT 接入 + navier-stokes 方程：2 新 MR（841 pass，G-03 部分闭合）|
+| `bb06ae5` | **S8-P4** | 1D diffusion SUT 接入 + diffusion 方程：2 新 MR（843 pass，**G-03 完全闭合**，5 方程全覆盖）|
+| `7bbb746` | **S8-P5a** | V3 5D-tag schema entity + 7 enum + round-trip 测试（847 pass）|
+| `85aae2e` | **S8-P5b** | V3 IDAL + LiteDB repo + CRUD/5D 维度过滤 9 测试（856 pass）|
+| `5fc6f15` | **S8-P5c** | V2→V3 MR 投影 migration + 7 测试（V2 字段映射到 5D enum + RigorClass 启发式，863 pass）|
+| `60f9910` | **review-fix-1** | critical 数据链 + Tolerance hard-code 修复（5 新测试，868 pass）|
+| `b8fdd85` | **review-fix-2** | cleanup misses — README/AGENTS/Report doc + UAT rubric/procedures + smokeshot Trends（doc-only，868 pass）|
+| `44a5d1b` | **review-fix-3** | medium：DeleteMr binding guard + enum int 锁定 + SUT divide-by-zero/edge guard（+8 测试，876 pass）|
 
 ## 12. 受控开发模式工作流
 

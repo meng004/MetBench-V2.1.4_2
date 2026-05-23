@@ -2,10 +2,12 @@ using MetBench_BLL.SystemMT.Bootstrap;
 using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Metadata;
 using MetBench_BLL.SystemMT.Pipeline;
+using MetBench_Domain.V2.Enums;
 using MetBench_SystemMT.Tests.SystemMT.Launcher;
 using MetBench_SystemMT.Tests.V2Anomaly;
 using MetBench_SystemMT.Tests.V2Pipeline;
 using Xunit;
+using V3MrLibrary = MetBench_SystemMT.Tests.V3MrLibrary;
 
 namespace MetBench_SystemMT.Tests.SystemMT.Bootstrap;
 
@@ -36,17 +38,17 @@ public sealed class SystemMtBootstrapTests
 
         var result = await SystemMtBootstrap.SeedCatalogsAsync(_meta, importer);
 
-        // metadata seed: 6 equations + 9 MRs (G-09 后)
-        Assert.Equal(6, result.EquationsSeeded);
-        Assert.Equal(9, result.MrsSeeded);
-        Assert.Equal(6, (await _meta.ListEquationsAsync()).Count);
-        Assert.Equal(9, (await _meta.ListMrsAsync()).Count);
+        // metadata seed: 8 equations + 17 MRs（S8-P4 后 + diffusion 方程 + 2 MR = 8eq/17MR）
+        Assert.Equal(8, result.EquationsSeeded);
+        Assert.Equal(17, result.MrsSeeded);
+        Assert.Equal(8, (await _meta.ListEquationsAsync()).Count);
+        Assert.Equal(17, (await _meta.ListMrsAsync()).Count);
 
-        // entity import: 7 SUT + 9 MR + 9 binding
+        // entity import: 9 SUT + 17 MR + 17 binding
         Assert.NotNull(result.ImportSummary);
-        Assert.Equal(7, result.ImportSummary!.ApplicationsCreated);
-        Assert.Equal(9, result.ImportSummary.MrsCreated);
-        Assert.Equal(9, result.ImportSummary.BindingsCreated);
+        Assert.Equal(9, result.ImportSummary!.ApplicationsCreated);
+        Assert.Equal(17, result.ImportSummary.MrsCreated);
+        Assert.Equal(17, result.ImportSummary.BindingsCreated);
     }
 
     [Fact]
@@ -57,15 +59,15 @@ public sealed class SystemMtBootstrapTests
         await SystemMtBootstrap.SeedCatalogsAsync(_meta, importer);
         var second = await SystemMtBootstrap.SeedCatalogsAsync(_meta, importer);
 
-        // metadata 仍是 6/9（upsert 而非追加）
-        Assert.Equal(6, (await _meta.ListEquationsAsync()).Count);
-        Assert.Equal(9, (await _meta.ListMrsAsync()).Count);
+        // metadata 仍是 8/17（upsert 而非追加）
+        Assert.Equal(8, (await _meta.ListEquationsAsync()).Count);
+        Assert.Equal(17, (await _meta.ListMrsAsync()).Count);
         // entity 第二次 created=0, existing 显示原有计数
         Assert.NotNull(second.ImportSummary);
         Assert.Equal(0, second.ImportSummary!.ApplicationsCreated);
-        Assert.Equal(7, second.ImportSummary.ApplicationsExisting);
+        Assert.Equal(9, second.ImportSummary.ApplicationsExisting);
         Assert.Equal(0, second.ImportSummary.MrsCreated);
-        Assert.Equal(9, second.ImportSummary.MrsExisting);
+        Assert.Equal(17, second.ImportSummary.MrsExisting);
     }
 
     [Fact]
@@ -78,7 +80,7 @@ public sealed class SystemMtBootstrapTests
         Assert.Equal(0, result.EquationsSeeded);
         Assert.Equal(0, result.MrsSeeded);
         Assert.NotNull(result.ImportSummary);
-        Assert.Equal(7, result.ImportSummary!.ApplicationsCreated);
+        Assert.Equal(9, result.ImportSummary!.ApplicationsCreated);
     }
 
     [Fact]
@@ -86,11 +88,34 @@ public sealed class SystemMtBootstrapTests
     {
         var result = await SystemMtBootstrap.SeedCatalogsAsync(_meta, launcherImporter: null);
 
-        Assert.Equal(6, result.EquationsSeeded);
-        Assert.Equal(9, result.MrsSeeded);
+        Assert.Equal(8, result.EquationsSeeded);
+        Assert.Equal(17, result.MrsSeeded);
         Assert.Null(result.ImportSummary);
+        Assert.Null(result.V3MigrationSummary);
         // entity 表未被改
         Assert.Empty(_apps.Data);
         Assert.Empty(_mrs.Data);
+    }
+
+    [Fact]
+    public async Task SeedCatalogsAsync_runs_V3_migration_when_context_provided()
+    {
+        // S8-P5 review fix: Bootstrap 新增 Phase 3 — V2 entity 表 → V3 5D-tag schema
+        var importer = MakeImporter();
+        var v3 = new V3MrLibrary.FakeV3Repo();
+        var v3Ctx = new V3MigrationContext(_mrs, v3, _bindings, _apps);
+
+        var result = await SystemMtBootstrap.SeedCatalogsAsync(_meta, importer, v3Ctx);
+
+        Assert.NotNull(result.V3MigrationSummary);
+        // 全部 17 system-level MR 应投影到 V3
+        Assert.Equal(17, result.V3MigrationSummary!.Created);
+        Assert.Equal(17, v3.Data.Count);
+        // 关键修复验证：EquationKey 现在能正确传到 V3
+        Assert.Equal(EquationKind.Bateman,
+            v3.Data.Single(m => m.MrCode == "bateman-mass-conservation").Equation);
+        // 关键修复验证：MapProgram 通过 binding+app lookup 正确识别 MC
+        Assert.Equal(ProgramKind.MC,
+            v3.Data.Single(m => m.MrCode == "openmc-pincell-nu-sigma-f").ProgramType);
     }
 }

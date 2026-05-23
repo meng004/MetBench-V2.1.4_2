@@ -16,7 +16,7 @@ namespace MetBench_BLL.SystemMT.Launcher;
 /// </summary>
 /// <remarks>
 /// 计划见 docs/superpowers/plans/2026-05-22-systemmt-engine-unification-plan.md。
-/// 8 MR 的硬编码目录(<see cref="BuildMrCatalog"/>)是 v2 数据驱动 MR 目录全面
+/// 17 MR 的硬编码目录（S8-P1..P4 扩展前为 9）(<see cref="BuildMrCatalog"/>)是 v2 数据驱动 MR 目录全面
 /// 落地前的过渡形态;每个 blueprint 已含 v2 pipeline 规格(InputParser /
 /// OutputParser / TransformSteps / AssertionTypeCode)。多步 MR(decay-chain /
 /// damped-oscillator)在构造时把对应 <see cref="CompositeTransform"/> 注册到
@@ -91,7 +91,7 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
     private static string CompositeNameFor(string mrId) => $"Composite-{mrId}";
 
     /// <summary>
-    /// internal 暴露 launcher 内部 8 MR 目录的快照,供 <see cref="LauncherCatalogV2Importer"/>
+    /// internal 暴露 launcher 内部 MR 目录（17 entries as of S8-P4）的快照,供 <see cref="LauncherCatalogV2Importer"/>
     /// 把数据"导入"到 v2 实体表(Application + MetamorphicRelation + MRBinding)。
     /// </summary>
     internal IReadOnlyList<MrCatalogEntry> GetCatalogEntries() =>
@@ -103,7 +103,8 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
                 bp.InputParserScriptPath,
                 bp.OutputParserScriptPath,
                 bp.AssertionTypeCode,
-                bp.TransformSteps[0].TransformationName))
+                bp.TransformSteps[0].TransformationName,
+                bp.EquationKey))
             .ToList();
 
     public Task<IReadOnlyList<MrSummary>> ListAvailableAsync(CancellationToken cancellationToken = default)
@@ -166,7 +167,7 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
             TargetFieldPath: targetFieldPath,
             PathSyntax: "json-pointer",
             Parameters: parameters,
-            Tolerance: new AssertionTolerance(),
+            Tolerance: blueprint.Tolerance ?? new AssertionTolerance(),
             ExtraAssertionValues: null,
             SutName: blueprint.Mr.SutName,
             SourceCasePath: sourceInputPath,
@@ -449,6 +450,63 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
             TransformSteps: new[] { new MrTransformStep("ScaleField", "/initial/amplitude") },
             AssertionTypeCode: "greater");
 
+        // S8-P2: Fourier MR 库扩展（复用 heat-equation SUT）
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "fourier-timestep-convergence",
+                DisplayName: "1D heat equation — TimestepConvergence (forward-Euler refinement)",
+                SutName: "heat-equation",
+                TransformationName: "ScaleField",
+                AssertionName: "ApproxEqual",
+                ValueName: "max_u",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Time-step convergence MP_conv: doubling num_steps (halving the forward-Euler " +
+                    "time-step dt) must leave max_u(t_final) within Euler truncation tolerance — " +
+                    "the integrator is already at the fine-grid plateau given the chosen alpha.",
+                MrFamily: "Fourier.Convergence.Timestep"),
+            SampleCaseRelativePath: Path.Combine("heat_equation", "sample", "gaussian.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_input_adapter.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_output_adapter.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchHeatEq",
+            Timeout: TimeSpan.FromSeconds(60),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/params/num_steps") },
+            AssertionTypeCode: "approx",
+            EquationKey: "heat-equation-1d",
+            // forward-Euler 1 阶 O(dt)；步长翻倍后 max_u 差 ~1e-3 量级；ToleranceRel=1e-2 → 充裕
+            Tolerance: new AssertionTolerance(ToleranceRel: 1e-2, ToleranceAbs: 1e-6));
+
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "fourier-alpha-monotonic",
+                DisplayName: "1D heat equation — ScaleAlpha (diffusion monotonicity)",
+                SutName: "heat-equation",
+                TransformationName: "ScaleField",
+                AssertionName: "LessThan",
+                ValueName: "max_u",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Diffusion coefficient monotonicity MP_mono: at fixed t_final, larger alpha " +
+                    "causes faster diffusive smoothing of the initial profile, so scaling alpha " +
+                    "by factor > 1 must strictly decrease max_u(t_final).",
+                MrFamily: "Fourier.Scaling.Alpha"),
+            SampleCaseRelativePath: Path.Combine("heat_equation", "sample", "gaussian.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_input_adapter.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_output_adapter.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchHeatEq",
+            Timeout: TimeSpan.FromSeconds(60),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/params/alpha") },
+            AssertionTypeCode: "less",
+            EquationKey: "heat-equation-1d");
+
         yield return new MrBlueprint(
             new MrSummary(
                 Id: "decay-chain-scale-initial",
@@ -477,6 +535,65 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
             TransformSteps: new[] { new MrTransformStep("ScaleInitial", "") },
             AssertionTypeCode: "greater",
             EquationKey: "bateman");
+
+        // S8-P1: Bateman MR 库扩展（复用 decay-chain SUT）
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "bateman-mass-conservation",
+                DisplayName: "Bateman — MassConservation (lambda invariance)",
+                SutName: "decay-chain",
+                TransformationName: "ScaleField",
+                AssertionName: "ApproxEqual",
+                ValueName: "total",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Mass conservation MP_inv: the Bateman chain A→B→C conserves total " +
+                    "nuclide count (no production/absorption). Scaling lambda_A must not " +
+                    "change the conserved total = N_A+N_B+N_C at t_final.",
+                MrFamily: "Bateman.Invariance.MassConservation"),
+            SampleCaseRelativePath: Path.Combine("decay_chain", "sample", "three_nuclide.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain_input_adapter.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain_output_adapter.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchDecayChain",
+            Timeout: TimeSpan.FromSeconds(60),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/params/lambda_A") },
+            AssertionTypeCode: "approx",
+            EquationKey: "bateman",
+            // 守恒 total ≈ N_A0+N_B0+N_C0=1000；RK4 累积截断误差 ~1e-6 量级；ToleranceRel=1e-6 → bound ≈ 1e-3
+            Tolerance: new AssertionTolerance(ToleranceRel: 1e-6, ToleranceAbs: 1e-9));
+
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "bateman-timestep-cauchy",
+                DisplayName: "Bateman — TimestepCauchy (RK4 convergence)",
+                SutName: "decay-chain",
+                TransformationName: "ScaleField",
+                AssertionName: "ApproxEqual",
+                ValueName: "N_C_final",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Time-step Cauchy convergence MP_conv: doubling num_steps (halving the " +
+                    "RK4 step size) must leave N_C_final within RK4 truncation tolerance — " +
+                    "the integrator is already at the fine-grid plateau.",
+                MrFamily: "Bateman.Convergence.Timestep"),
+            SampleCaseRelativePath: Path.Combine("decay_chain", "sample", "three_nuclide.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain_input_adapter.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain_output_adapter.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchDecayChain",
+            Timeout: TimeSpan.FromSeconds(60),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/params/num_steps") },
+            AssertionTypeCode: "approx",
+            EquationKey: "bateman",
+            // RK4 4 阶截断 O(dt^4)；步长翻倍后 max_u 差 ~1e-4 量级；ToleranceRel=1e-3 → 充裕
+            Tolerance: new AssertionTolerance(ToleranceRel: 1e-3, ToleranceAbs: 1e-6));
 
         yield return new MrBlueprint(
             new MrSummary(
@@ -559,6 +676,118 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
             OutputParserScriptPath: Path.Combine(options.SutRoot, "projectile", "projectile_output_parser.py"),
             TransformSteps: new[] { new MrTransformStep("ScaleField", "/v0") },
             AssertionTypeCode: "greater");
+
+        // S8-P3: 1D subchannel SUT + navier-stokes 方程接入
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "subchannel-flow-temperature-monotone",
+                DisplayName: "1D subchannel — ScaleMassFlux (flow ↑ ⇒ ΔT ↓)",
+                SutName: "subchannel-1d",
+                TransformationName: "ScaleField",
+                AssertionName: "LessThan",
+                ValueName: "delta_T",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Energy conservation MP_mono: at fixed wall heat flux q'' and inlet " +
+                    "temperature, ΔT = q''·P_h·L/(G·A_xs·c_p) is inversely proportional to " +
+                    "mass flux G — higher flow strictly decreases the outlet temperature rise.",
+                MrFamily: "Subchannel.Scaling.MassFlux"),
+            SampleCaseRelativePath: Path.Combine("subchannel_1d", "sample", "pwr_channel.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "subchannel_1d", "subchannel_1d.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "subchannel_1d", "subchannel_1d_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "subchannel_1d", "subchannel_1d_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchSubchannel",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "subchannel_1d", "subchannel_1d_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "subchannel_1d", "subchannel_1d_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/boundary/mass_flux") },
+            AssertionTypeCode: "less",
+            EquationKey: "navier-stokes");
+
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "subchannel-heat-flux-linearity",
+                DisplayName: "1D subchannel — ScaleHeatFlux (linearity in q'')",
+                SutName: "subchannel-1d",
+                TransformationName: "ScaleField",
+                AssertionName: "GreaterThan",
+                ValueName: "delta_T",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Energy conservation MP_mono (linearity in heat input): doubling the wall " +
+                    "heat flux q'' must strictly increase ΔT (in fact, by the same factor) " +
+                    "because energy balance is linear in q'' at constant flow.",
+                MrFamily: "Subchannel.Scaling.HeatFlux"),
+            SampleCaseRelativePath: Path.Combine("subchannel_1d", "sample", "pwr_channel.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "subchannel_1d", "subchannel_1d.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "subchannel_1d", "subchannel_1d_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "subchannel_1d", "subchannel_1d_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchSubchannel",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "subchannel_1d", "subchannel_1d_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "subchannel_1d", "subchannel_1d_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/boundary/heat_flux") },
+            AssertionTypeCode: "greater",
+            EquationKey: "navier-stokes");
+
+        // S8-P4: 1D diffusion SUT + diffusion 方程接入
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "diffusion-source-linearity",
+                DisplayName: "1D diffusion — ScaleSource (linearity)",
+                SutName: "diffusion-1d",
+                TransformationName: "ScaleField",
+                AssertionName: "GreaterThan",
+                ValueName: "phi_max",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Linearity MP_mono: the steady-state diffusion equation -D·φ″ + Σ_a·φ = S " +
+                    "is linear in the source S. Scaling S by factor > 1 must strictly increase " +
+                    "the peak flux φ_max (in fact, by the same factor).",
+                MrFamily: "Diffusion.Scaling.Source"),
+            SampleCaseRelativePath: Path.Combine("diffusion_1d", "sample", "slab.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "diffusion_1d", "diffusion_1d.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "diffusion_1d", "diffusion_1d_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "diffusion_1d", "diffusion_1d_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchDiffusion1d",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "diffusion_1d", "diffusion_1d_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "diffusion_1d", "diffusion_1d_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/source/strength") },
+            AssertionTypeCode: "greater",
+            EquationKey: "diffusion");
+
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "diffusion-mesh-richardson",
+                DisplayName: "1D diffusion — MeshRichardson (FD convergence)",
+                SutName: "diffusion-1d",
+                TransformationName: "ScaleField",
+                AssertionName: "ApproxEqual",
+                ValueName: "phi_max",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Mesh-refinement Richardson convergence MP_conv: doubling num_points (halving " +
+                    "the FD spacing dx) must leave φ_max within FD truncation tolerance — the " +
+                    "second-order scheme is already at the fine-mesh plateau.",
+                MrFamily: "Diffusion.Convergence.Mesh"),
+            SampleCaseRelativePath: Path.Combine("diffusion_1d", "sample", "slab.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "diffusion_1d", "diffusion_1d.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "diffusion_1d", "diffusion_1d_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "diffusion_1d", "diffusion_1d_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchDiffusion1d",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "diffusion_1d", "diffusion_1d_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "diffusion_1d", "diffusion_1d_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/geometry/num_points") },
+            AssertionTypeCode: "approx",
+            EquationKey: "diffusion",
+            // FD 2 阶 O(dx²)；网格加密后 phi_max 差 ~1e-4 量级（已 plateau）；ToleranceRel=1e-3 → 充裕
+            Tolerance: new AssertionTolerance(ToleranceRel: 1e-3, ToleranceAbs: 1e-6));
     }
 
     private sealed record MrBlueprint(
@@ -576,7 +805,10 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
         IReadOnlyList<MrTransformStep> TransformSteps,
         string AssertionTypeCode,
         // P4: 方程业务键（空 = 无关联；非空 = 走 EquationFunctionRegistry Recipe 查找）
-        string EquationKey = "");
+        string EquationKey = "",
+        // S8-P5 review fix: approx/scaled-equality MR 必须显式设容差；默认 0/0 会让
+        // BeApproximately(src, 0) 退化为 bit-exact equality，永远 fail 在数值噪声上
+        AssertionTolerance? Tolerance = null);
 
     /// <summary>v2 pipeline 的单步变换规格。多步在 launcher.RunAsync 内包 <c>CompositeTransform</c>。</summary>
     private sealed record MrTransformStep(
@@ -596,4 +828,5 @@ internal sealed record MrCatalogEntry(
     string InputParserScriptPath,
     string OutputParserScriptPath,
     string AssertionTypeCode,
-    string PrimaryTransformationName);
+    string PrimaryTransformationName,
+    string EquationKey);

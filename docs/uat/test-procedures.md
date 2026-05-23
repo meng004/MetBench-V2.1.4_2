@@ -412,7 +412,7 @@ dotnet test MetBench_SystemMT.Tests \
 ```
 
 **断言**:
-1. ✅ `Passed ≥ 8, Failed = 0`
+1. ✅ `Passed ≥ 5, Failed = 0`（2026-05-23 next-stage P0 移 AdversarialMutmutValidator 后 [Fact] 数 8→5）
 2. ✅ trx 包含至少一个 `EmpiricalValidator_*` 和一个 `TheoreticalLlm*` 命名的 fact
 
 ---
@@ -648,24 +648,10 @@ grep "WriteAudit_records_r_case_reproduced" MetBench_SystemMT.Tests/TestResults/
 
 ## 类别 E — 可视化 & 报表
 
-### UC-E1 Trend Dashboard — 时间序列（Manual UI）
+### ~~UC-E1 Trend Dashboard — 时间序列（Manual UI）~~
 
-**初始条件**:
-- §0 公共环境就绪
-- LiteDB 含 ≥ 1 周的历史 anomaly / pipeline 数据
-
-**操作步骤**:
-1. 进 **Trend Dashboard** 页
-2. 选 metric = `Anomaly Count`，时间窗口 = "最近 4 周"
-3. 点 "Refresh"
-4. 鼠标 hover 任一节点
-
-**断言**:
-1. ✅ CartesianChart 显示 4 周折线
-2. ✅ hover 显示每点 `(date, count)` tooltip
-3. ✅ 若有 WoW 变化 ≥ 20% 或 burst 期：节点高亮标注
-4. ✅ 刷新 < 3 s 完成
-5. ✅ 截图归档
+> **已删除（2026-05-23 next-stage P0）**：Trend Dashboard + 后端 TrendAnalysisService /
+> WeeklyReport / 多维 burst 子系统整体下线。详 commit `88e757d`。
 
 ---
 
@@ -922,20 +908,10 @@ python3 tools/ci_perf_baseline.py --trx MetBench_SystemMT.Tests/TestResults/uat-
 
 ---
 
-### UC-G3 多维 burst 检测
+### ~~UC-G3 多维 burst 检测~~
 
-**初始条件**:
-- §0 Linux 测试集就绪
-
-**操作步骤**:
-```bash
-dotnet test MetBench_SystemMT.Tests \
-  --filter "FullyQualifiedName~MultiDimBurstDetectionTests" \
-  --logger "trx;LogFileName=uc-g3.trx"
-```
-
-**断言**:
-1. ✅ `Passed ≥ 4, Failed = 0`
+> **已删除（2026-05-23 next-stage P0）**：MultiDimBurstDetectionTests 随 Trend 子系统
+> 整体下线。详 commit `88e757d`。
 
 ---
 

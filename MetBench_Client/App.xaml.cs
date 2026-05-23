@@ -24,7 +24,6 @@ using MetBench_BLL.Discovery;
 using MetBench_BLL.Discovery.Validators;
 using MetBench_BLL.Mutation;
 using MetBench_BLL.Coverage;
-using MetBench_BLL.Trend;
 using Wpf.Ui.Controls;
 using Wpf.Ui;
 using Stylet;
@@ -233,10 +232,7 @@ namespace MetBench_Client
                 services.AddScoped<Views.Pages.CoverageDashboardPage>();
                 services.AddScoped<ViewModels.CoverageDashboardViewModel>();
 
-                // === v2 Trend dashboard (P8) ===
-                services.AddScoped<TrendAnalysisService>();
-                services.AddScoped<Views.Pages.TrendDashboardPage>();
-                services.AddScoped<ViewModels.TrendDashboardViewModel>();
+                // Trend dashboard 已删除（next-stage P0：Trend 子系统下线）。
 
                 // === v2 MetaPatterns CRUD (F21 / PR-VM-3) ===
                 services.AddScoped<Views.Pages.MetaPatternsPage>();
