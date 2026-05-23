@@ -163,7 +163,7 @@
 | `5fc6f15` | **S8-P5c** | V2→V3 MR 投影 migration + 7 测试（V2 字段映射到 5D enum + RigorClass 启发式，863 pass）|
 | `60f9910` | **review-fix-1** | critical 数据链 + Tolerance hard-code 修复（5 新测试，868 pass）|
 | `b8fdd85` | **review-fix-2** | cleanup misses — README/AGENTS/Report doc + UAT rubric/procedures + smokeshot Trends（doc-only，868 pass）|
-| `<TBD-rf3>` | **review-fix-3** | medium：DeleteMr binding guard + enum int 锁定 + SUT divide-by-zero/edge guard（+8 测试，876 pass）|
+| `44a5d1b` | **review-fix-3** | medium：DeleteMr binding guard + enum int 锁定 + SUT divide-by-zero/edge guard（+8 测试，876 pass）|
 
 ## 12. 受控开发模式工作流
 
