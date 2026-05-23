@@ -3,12 +3,11 @@ using MetBench_Domain.V2;
 using MetBench_Domain.V2.Enums;
 using MetBench_IDAL;
 
-namespace MetBench_DAL.V2.Migrations;
+namespace MetBench_BLL.SystemMT.Migrations;
 
 /// <summary>
 /// V2 MR (<see cref="MetamorphicRelation"/>) → V3 MR (<see cref="MetamorphicRelationV3"/>)
-/// 投影迁移。读 v2 repository 全表，按字符串字段映射到 V3 enum，按 MrCode upsert
-/// 写入 V3 repository。
+/// 投影迁移。读 v2 repository 全表，按字段映射到 V3 enum，按 MrCode upsert 写入 V3。
 /// </summary>
 /// <remarks>
 /// 设计要点：
@@ -16,19 +15,30 @@ namespace MetBench_DAL.V2.Migrations;
 /// - **Kind 过滤**：只迁移 <c>Kind=="system-level"</c> 的 v2 行（method-level 由 method
 ///   端独立维护，不进入 V3 索引视图）
 /// - **不删 v2 数据**：V3 是只读索引视图，v2 仍是 source-of-truth
+/// - **ProgramKind 推断**：通过 MR.IdMR → MRBinding → Application.Name 查 SutName
+///   （而非依赖已 [Obsolete] 的 MR.ApplicationName 字段）。若 bindingRepo 或 appRepo 为
+///   null，则退化为 ProgramKind.Unspecified。
+/// - **重复 Code**：按 v2 表内同 Code 行后到者覆盖（last-wins，并增 Conflicts 计数）
 /// </remarks>
 public static class V3MetamorphicRelationMigration
 {
-    public sealed record MigrationSummary(int Created, int Updated, int SkippedNonSystem);
+    public sealed record MigrationSummary(int Created, int Updated, int SkippedNonSystem,
+        int Conflicts, int Failed);
 
     public static MigrationSummary MigrateAll(
         IMetamorphicRelationRepository v2Repo,
-        IMetamorphicRelationV3Repository v3Repo)
+        IMetamorphicRelationV3Repository v3Repo,
+        IMRBindingRepository? bindingRepo = null,
+        IApplicationRepository? appRepo = null)
     {
         ArgumentNullException.ThrowIfNull(v2Repo);
         ArgumentNullException.ThrowIfNull(v3Repo);
 
-        int created = 0, updated = 0, skippedNonSystem = 0;
+        // 预建 (MR.IdMR → SutName) 查找表，避免 N×M scan
+        var sutNameByMrId = BuildSutNameLookup(bindingRepo, appRepo);
+
+        int created = 0, updated = 0, skippedNonSystem = 0, conflicts = 0, failed = 0;
+        var seenCodes = new HashSet<string>(StringComparer.Ordinal);
         foreach (var v2 in v2Repo.GetAll())
         {
             if (!string.Equals(v2.Kind, "system-level", StringComparison.Ordinal))
@@ -37,30 +47,49 @@ public static class V3MetamorphicRelationMigration
                 continue;
             }
             if (string.IsNullOrEmpty(v2.Code)) continue; // 无业务键的行跳过
+            if (!seenCodes.Add(v2.Code)) conflicts++;
+
+            var sutName = sutNameByMrId.TryGetValue(v2.IdMR, out var sn) ? sn : string.Empty;
 
             var existing = v3Repo.GetByCode(v2.Code);
             var v3 = existing ?? new MetamorphicRelationV3 { IdV3 = Guid.NewGuid() };
-            Populate(v3, v2);
+            Populate(v3, v2, sutName);
+            bool ok;
             if (existing is null)
             {
-                v3Repo.Add(v3);
-                created++;
+                ok = v3Repo.Add(v3);
+                if (ok) created++; else failed++;
             }
             else
             {
-                v3Repo.Modify(v3);
-                updated++;
+                ok = v3Repo.Modify(v3);
+                if (ok) updated++; else failed++;
             }
         }
-        return new MigrationSummary(created, updated, skippedNonSystem);
+        return new MigrationSummary(created, updated, skippedNonSystem, conflicts, failed);
     }
 
-    private static void Populate(MetamorphicRelationV3 v3, MetamorphicRelation v2)
+    private static IReadOnlyDictionary<int, string> BuildSutNameLookup(
+        IMRBindingRepository? bindingRepo, IApplicationRepository? appRepo)
+    {
+        if (bindingRepo is null || appRepo is null)
+            return new Dictionary<int, string>();
+        var appNameById = appRepo.GetAll().ToDictionary(a => a.IdApplication, a => a.Name ?? string.Empty);
+        var result = new Dictionary<int, string>();
+        foreach (var b in bindingRepo.GetAll())
+        {
+            if (appNameById.TryGetValue(b.ApplicationId, out var name))
+                result[b.MRId] = name; // 一个 MR 多 SUT 时取任意（实际 launcher 是 1:1）
+        }
+        return result;
+    }
+
+    private static void Populate(MetamorphicRelationV3 v3, MetamorphicRelation v2, string sutName)
     {
         v3.MrCode = v2.Code;
         v3.Description = v2.Description ?? string.Empty;
         v3.Equation = MapEquation(v2.EquationKey);
-        v3.ProgramType = MapProgram(v2.ApplicationName, v2.EquationKey);
+        v3.ProgramType = MapProgram(sutName);
         v3.MetaPattern = MapMetaPattern(v2.MetaPatternCode);
         v3.SourceLevel = MapSourceLevel(v2.DiscoveryMethod);
         v3.FailureCorrelation = FailureCorrelationKind.None;
@@ -70,23 +99,29 @@ public static class V3MetamorphicRelationMigration
         v3.SyncedAt = DateTime.UtcNow;
     }
 
-    private static EquationKind MapEquation(string equationKey) => equationKey switch
+    private static EquationKind MapEquation(string? equationKey) => equationKey switch
     {
         "bateman" => EquationKind.Bateman,
         "heat-equation-1d" => EquationKind.Fourier,
         "neutron-transport" => EquationKind.Boltzmann,
         "diffusion" => EquationKind.Diffusion,
         "navier-stokes" => EquationKind.NavierStokes,
-        "" => EquationKind.Other,
+        null or "" => EquationKind.Unspecified,  // 语义修正：未指定 ≠ 非反应堆 (Other)
         _ => EquationKind.Other,
     };
 
-    private static ProgramKind MapProgram(string appName, string equationKey)
+    /// <summary>
+    /// 按 SUT 名推断 ProgramKind。空 sutName（缺 binding/app repos 或未注册）→ Unspecified。
+    /// </summary>
+    private static ProgramKind MapProgram(string? sutName)
     {
-        // 启发式：openmc 是 Monte Carlo，其他 SUT 都是数值/解析
-        if (appName.Contains("openmc", StringComparison.OrdinalIgnoreCase))
+        if (string.IsNullOrEmpty(sutName)) return ProgramKind.Unspecified;
+        if (sutName.Contains("openmc", StringComparison.OrdinalIgnoreCase))
             return ProgramKind.MC;
-        // bateman 通过 decay_chain RK4 是数值；projectile/subchannel 闭式
+        // projectile / subchannel-1d 是闭式代数（Analytic）；其余 ODE/FD/RK4 是 Num
+        if (sutName.Contains("projectile", StringComparison.OrdinalIgnoreCase)
+            || sutName.Contains("subchannel", StringComparison.OrdinalIgnoreCase))
+            return ProgramKind.Analytic;
         return ProgramKind.Num;
     }
 

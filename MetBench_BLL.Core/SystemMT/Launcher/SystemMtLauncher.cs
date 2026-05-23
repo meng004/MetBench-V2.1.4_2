@@ -103,7 +103,8 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
                 bp.InputParserScriptPath,
                 bp.OutputParserScriptPath,
                 bp.AssertionTypeCode,
-                bp.TransformSteps[0].TransformationName))
+                bp.TransformSteps[0].TransformationName,
+                bp.EquationKey))
             .ToList();
 
     public Task<IReadOnlyList<MrSummary>> ListAvailableAsync(CancellationToken cancellationToken = default)
@@ -166,7 +167,7 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
             TargetFieldPath: targetFieldPath,
             PathSyntax: "json-pointer",
             Parameters: parameters,
-            Tolerance: new AssertionTolerance(),
+            Tolerance: blueprint.Tolerance ?? new AssertionTolerance(),
             ExtraAssertionValues: null,
             SutName: blueprint.Mr.SutName,
             SourceCasePath: sourceInputPath,
@@ -475,7 +476,9 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
             OutputParserScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_output_parser.py"),
             TransformSteps: new[] { new MrTransformStep("ScaleField", "/params/num_steps") },
             AssertionTypeCode: "approx",
-            EquationKey: "heat-equation-1d");
+            EquationKey: "heat-equation-1d",
+            // forward-Euler 1 阶 O(dt)；步长翻倍后 max_u 差 ~1e-3 量级；ToleranceRel=1e-2 → 充裕
+            Tolerance: new AssertionTolerance(ToleranceRel: 1e-2, ToleranceAbs: 1e-6));
 
         yield return new MrBlueprint(
             new MrSummary(
@@ -559,7 +562,9 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
             OutputParserScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain_output_parser.py"),
             TransformSteps: new[] { new MrTransformStep("ScaleField", "/params/lambda_A") },
             AssertionTypeCode: "approx",
-            EquationKey: "bateman");
+            EquationKey: "bateman",
+            // 守恒 total ≈ N_A0+N_B0+N_C0=1000；RK4 累积截断误差 ~1e-6 量级；ToleranceRel=1e-6 → bound ≈ 1e-3
+            Tolerance: new AssertionTolerance(ToleranceRel: 1e-6, ToleranceAbs: 1e-9));
 
         yield return new MrBlueprint(
             new MrSummary(
@@ -586,7 +591,9 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
             OutputParserScriptPath: Path.Combine(options.SutRoot, "decay_chain", "decay_chain_output_parser.py"),
             TransformSteps: new[] { new MrTransformStep("ScaleField", "/params/num_steps") },
             AssertionTypeCode: "approx",
-            EquationKey: "bateman");
+            EquationKey: "bateman",
+            // RK4 4 阶截断 O(dt^4)；步长翻倍后 max_u 差 ~1e-4 量级；ToleranceRel=1e-3 → 充裕
+            Tolerance: new AssertionTolerance(ToleranceRel: 1e-3, ToleranceAbs: 1e-6));
 
         yield return new MrBlueprint(
             new MrSummary(
@@ -778,7 +785,9 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
             OutputParserScriptPath: Path.Combine(options.SutRoot, "diffusion_1d", "diffusion_1d_output_parser.py"),
             TransformSteps: new[] { new MrTransformStep("ScaleField", "/geometry/num_points") },
             AssertionTypeCode: "approx",
-            EquationKey: "diffusion");
+            EquationKey: "diffusion",
+            // FD 2 阶 O(dx²)；网格加密后 phi_max 差 ~1e-4 量级（已 plateau）；ToleranceRel=1e-3 → 充裕
+            Tolerance: new AssertionTolerance(ToleranceRel: 1e-3, ToleranceAbs: 1e-6));
     }
 
     private sealed record MrBlueprint(
@@ -796,7 +805,10 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
         IReadOnlyList<MrTransformStep> TransformSteps,
         string AssertionTypeCode,
         // P4: 方程业务键（空 = 无关联；非空 = 走 EquationFunctionRegistry Recipe 查找）
-        string EquationKey = "");
+        string EquationKey = "",
+        // S8-P5 review fix: approx/scaled-equality MR 必须显式设容差；默认 0/0 会让
+        // BeApproximately(src, 0) 退化为 bit-exact equality，永远 fail 在数值噪声上
+        AssertionTolerance? Tolerance = null);
 
     /// <summary>v2 pipeline 的单步变换规格。多步在 launcher.RunAsync 内包 <c>CompositeTransform</c>。</summary>
     private sealed record MrTransformStep(
@@ -816,4 +828,5 @@ internal sealed record MrCatalogEntry(
     string InputParserScriptPath,
     string OutputParserScriptPath,
     string AssertionTypeCode,
-    string PrimaryTransformationName);
+    string PrimaryTransformationName,
+    string EquationKey);

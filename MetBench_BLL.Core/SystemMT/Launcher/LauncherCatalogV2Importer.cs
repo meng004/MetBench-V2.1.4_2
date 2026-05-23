@@ -114,6 +114,9 @@ public sealed class LauncherCatalogV2Importer
                         ValueName = entry.Mr.ValueName,
                         MetaPatternCode = DeriveMetaPatternCode(entry.Mr.MrFamily),
                         DiscoveryMethod = "manual",
+                        // S8-P5 review fix: 把 launcher blueprint 的 EquationKey 显式投影到 MR row
+                        // （之前漏写，导致 V3 migration 全部 collapse 到 EquationKind.Other）
+                        EquationKey = entry.EquationKey,
                         CreatedAt = DateTime.UtcNow,
                         CreatedBy = actor,
                     };

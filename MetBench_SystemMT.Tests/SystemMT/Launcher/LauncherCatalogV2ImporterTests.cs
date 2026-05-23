@@ -122,6 +122,19 @@ public sealed class LauncherCatalogV2ImporterTests
     }
 
     [Fact]
+    public void Import_MR_carries_EquationKey_from_blueprint()
+    {
+        // S8-P5 review fix: 之前 importer 漏写 EquationKey → V3 migration 全 collapse 到 Other
+        _importer.Import();
+
+        Assert.Equal("bateman", _mrs.Data.First(m => m.Code == "bateman-mass-conservation").EquationKey);
+        Assert.Equal("bateman", _mrs.Data.First(m => m.Code == "decay-chain-scale-initial").EquationKey);
+        Assert.Equal("heat-equation-1d", _mrs.Data.First(m => m.Code == "fourier-alpha-monotonic").EquationKey);
+        Assert.Equal("diffusion", _mrs.Data.First(m => m.Code == "diffusion-source-linearity").EquationKey);
+        Assert.Equal("navier-stokes", _mrs.Data.First(m => m.Code == "subchannel-flow-temperature-monotone").EquationKey);
+    }
+
+    [Fact]
     public void Import_writes_one_audit_log_entry_with_counts()
     {
         _importer.Import();

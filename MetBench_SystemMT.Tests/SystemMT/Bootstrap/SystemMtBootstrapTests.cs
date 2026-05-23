@@ -2,10 +2,12 @@ using MetBench_BLL.SystemMT.Bootstrap;
 using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Metadata;
 using MetBench_BLL.SystemMT.Pipeline;
+using MetBench_Domain.V2.Enums;
 using MetBench_SystemMT.Tests.SystemMT.Launcher;
 using MetBench_SystemMT.Tests.V2Anomaly;
 using MetBench_SystemMT.Tests.V2Pipeline;
 using Xunit;
+using V3MrLibrary = MetBench_SystemMT.Tests.V3MrLibrary;
 
 namespace MetBench_SystemMT.Tests.SystemMT.Bootstrap;
 
@@ -89,8 +91,31 @@ public sealed class SystemMtBootstrapTests
         Assert.Equal(8, result.EquationsSeeded);
         Assert.Equal(17, result.MrsSeeded);
         Assert.Null(result.ImportSummary);
+        Assert.Null(result.V3MigrationSummary);
         // entity 表未被改
         Assert.Empty(_apps.Data);
         Assert.Empty(_mrs.Data);
+    }
+
+    [Fact]
+    public async Task SeedCatalogsAsync_runs_V3_migration_when_context_provided()
+    {
+        // S8-P5 review fix: Bootstrap 新增 Phase 3 — V2 entity 表 → V3 5D-tag schema
+        var importer = MakeImporter();
+        var v3 = new V3MrLibrary.FakeV3Repo();
+        var v3Ctx = new V3MigrationContext(_mrs, v3, _bindings, _apps);
+
+        var result = await SystemMtBootstrap.SeedCatalogsAsync(_meta, importer, v3Ctx);
+
+        Assert.NotNull(result.V3MigrationSummary);
+        // 全部 17 system-level MR 应投影到 V3
+        Assert.Equal(17, result.V3MigrationSummary!.Created);
+        Assert.Equal(17, v3.Data.Count);
+        // 关键修复验证：EquationKey 现在能正确传到 V3
+        Assert.Equal(EquationKind.Bateman,
+            v3.Data.Single(m => m.MrCode == "bateman-mass-conservation").Equation);
+        // 关键修复验证：MapProgram 通过 binding+app lookup 正确识别 MC
+        Assert.Equal(ProgramKind.MC,
+            v3.Data.Single(m => m.MrCode == "openmc-pincell-nu-sigma-f").ProgramType);
     }
 }

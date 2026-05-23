@@ -1,4 +1,4 @@
-using MetBench_DAL.V2.Migrations;
+using MetBench_BLL.SystemMT.Migrations;
 using MetBench_Domain;
 using MetBench_Domain.V2.Enums;
 using MetBench_SystemMT.Tests.SystemMT.Launcher;
@@ -79,7 +79,7 @@ public sealed class V3MigrationTests
     }
 
     [Fact]
-    public void MapEquation_maps_known_keys_else_Other()
+    public void MapEquation_maps_known_keys_else_Other_with_empty_as_Unspecified()
     {
         _v2.Add(MakeV2("a", equationKey: "bateman"));
         _v2.Add(MakeV2("b", equationKey: "heat-equation-1d"));
@@ -96,7 +96,9 @@ public sealed class V3MigrationTests
         Assert.Equal(EquationKind.Boltzmann, _v3.Data.Single(m => m.MrCode == "c").Equation);
         Assert.Equal(EquationKind.Diffusion, _v3.Data.Single(m => m.MrCode == "d").Equation);
         Assert.Equal(EquationKind.NavierStokes, _v3.Data.Single(m => m.MrCode == "e").Equation);
-        Assert.Equal(EquationKind.Other, _v3.Data.Single(m => m.MrCode == "f").Equation);
+        // S8-P5 review fix: 空 EquationKey → Unspecified（"未指定"），不是 Other（"非反应堆物理"）
+        Assert.Equal(EquationKind.Unspecified, _v3.Data.Single(m => m.MrCode == "f").Equation);
+        // 未知 key 仍 → Other
         Assert.Equal(EquationKind.Other, _v3.Data.Single(m => m.MrCode == "g").Equation);
     }
 
@@ -144,5 +146,57 @@ public sealed class V3MigrationTests
         Assert.Equal(RigorClassKind.A, _v3.Data.Single(m => m.MrCode == "inv-mr").RigorClass);
         Assert.Equal(RigorClassKind.B, _v3.Data.Single(m => m.MrCode == "conv-mr").RigorClass);
         Assert.Equal(RigorClassKind.C, _v3.Data.Single(m => m.MrCode == "mono-mr").RigorClass);
+    }
+
+    [Fact]
+    public void MapProgram_uses_MRBinding_to_Application_for_SUT_name_lookup()
+    {
+        // S8-P5 review fix: 之前 MapProgram 依赖已 [Obsolete] 的 v2.ApplicationName 字段，
+        // 而 LauncherCatalogV2Importer 从不写该字段 → 所有 OpenMC MR 误分类为 Num。
+        // 修复后通过 MR.IdMR → MRBinding → Application.Name 查 SutName。
+        var v2Mr1 = MakeV2("openmc-mr");
+        var v2Mr2 = MakeV2("openmoc-mr");
+        var v2Mr3 = MakeV2("subchannel-mr");
+        _v2.Add(v2Mr1); _v2.Add(v2Mr2); _v2.Add(v2Mr3);
+        // _v2.Add 自增 IdMR，从 1 起；记录实际 ID
+        var apps = new LauncherCatalogV2ImporterTests.FakeImporterAppRepo();
+        var openmcApp = new MetBench_Domain.Application { Name = "openmc" };
+        var openmocApp = new MetBench_Domain.Application { Name = "openmoc" };
+        var subApp = new MetBench_Domain.Application { Name = "subchannel-1d" };
+        apps.Add(openmcApp); apps.Add(openmocApp); apps.Add(subApp);
+        var bindings = new LauncherCatalogV2ImporterTests.FakeImporterBindingRepo();
+        bindings.Add(new MetBench_Domain.MRBinding { MRId = v2Mr1.IdMR, ApplicationId = openmcApp.IdApplication });
+        bindings.Add(new MetBench_Domain.MRBinding { MRId = v2Mr2.IdMR, ApplicationId = openmocApp.IdApplication });
+        bindings.Add(new MetBench_Domain.MRBinding { MRId = v2Mr3.IdMR, ApplicationId = subApp.IdApplication });
+
+        V3MetamorphicRelationMigration.MigrateAll(_v2, _v3, bindings, apps);
+
+        Assert.Equal(ProgramKind.MC, _v3.Data.Single(m => m.MrCode == "openmc-mr").ProgramType);
+        Assert.Equal(ProgramKind.Num, _v3.Data.Single(m => m.MrCode == "openmoc-mr").ProgramType);
+        Assert.Equal(ProgramKind.Analytic, _v3.Data.Single(m => m.MrCode == "subchannel-mr").ProgramType);
+    }
+
+    [Fact]
+    public void MapProgram_without_binding_repos_defaults_to_Unspecified()
+    {
+        _v2.Add(MakeV2("orphan"));
+
+        V3MetamorphicRelationMigration.MigrateAll(_v2, _v3);  // no bindingRepo / appRepo
+
+        Assert.Equal(ProgramKind.Unspecified, _v3.Data.Single(m => m.MrCode == "orphan").ProgramType);
+    }
+
+    [Fact]
+    public void MigrateAll_counts_duplicate_codes_as_Conflicts_last_wins()
+    {
+        _v2.Add(MakeV2("dup"));
+        var second = MakeV2("dup", equationKey: "heat-equation-1d");
+        _v2.Add(second);
+
+        var summary = V3MetamorphicRelationMigration.MigrateAll(_v2, _v3);
+
+        Assert.Equal(1, summary.Conflicts);
+        // last-wins: second row 的 equationKey 应在 V3 row 上
+        Assert.Equal(EquationKind.Fourier, _v3.Data.Single(m => m.MrCode == "dup").Equation);
     }
 }

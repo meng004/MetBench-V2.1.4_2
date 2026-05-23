@@ -1,5 +1,7 @@
 using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Metadata;
+using MetBench_BLL.SystemMT.Migrations;
+using MetBench_IDAL;
 
 namespace MetBench_BLL.SystemMT.Bootstrap;
 
@@ -23,22 +25,26 @@ namespace MetBench_BLL.SystemMT.Bootstrap;
 public sealed class SystemMtBootstrap
 {
     /// <summary>
-    /// 串行执行 catalog seed → entity 投影。两步均 idempotent，可在每次启动跑。
+    /// 串行执行 catalog seed → entity 投影。三步均 idempotent，可在每次启动跑。
     /// </summary>
     /// <param name="metadataRepository">元信息仓库；为 null 时跳过 metadata seed。</param>
     /// <param name="launcherImporter">launcher → entity 投影器；为 null 时跳过 entity import。</param>
+    /// <param name="v3Migration">V2→V3 投影；需 v2 MR repo + v3 MR repo + binding repo + app repo。
+    /// 为 null 时跳过 Phase 3（V3 5D-tag schema 视图不更新）。</param>
     /// <param name="actor">审计日志 actor 标识。</param>
     /// <param name="cancellationToken">取消令牌（metadata seed 阶段生效）。</param>
     /// <returns>本次 bootstrap 的摘要。</returns>
     public static async Task<BootstrapResult> SeedCatalogsAsync(
         ISystemMtMetadataRepository? metadataRepository,
         LauncherCatalogV2Importer? launcherImporter,
+        V3MigrationContext? v3Migration = null,
         string actor = "bootstrap",
         CancellationToken cancellationToken = default)
     {
         int equationsSeeded = 0;
         int mrsSeeded = 0;
         CatalogImportSummary? importSummary = null;
+        V3MetamorphicRelationMigration.MigrationSummary? v3Summary = null;
 
         // Phase 1: metadata DB seed（idempotent upsert）
         if (metadataRepository is not null)
@@ -54,12 +60,28 @@ public sealed class SystemMtBootstrap
             importSummary = launcherImporter.Import(actor);
         }
 
+        // Phase 3: V2 entity 表 → V3 5D-tag schema（idempotent upsert by MrCode）
+        if (v3Migration is not null)
+        {
+            v3Summary = V3MetamorphicRelationMigration.MigrateAll(
+                v3Migration.V2Mrs, v3Migration.V3Mrs,
+                v3Migration.Bindings, v3Migration.Apps);
+        }
+
         return new BootstrapResult(
             EquationsSeeded: equationsSeeded,
             MrsSeeded: mrsSeeded,
-            ImportSummary: importSummary);
+            ImportSummary: importSummary,
+            V3MigrationSummary: v3Summary);
     }
 }
+
+/// <summary>V3 migration 所需的 4 个 repo bundle。</summary>
+public sealed record V3MigrationContext(
+    IMetamorphicRelationRepository V2Mrs,
+    IMetamorphicRelationV3Repository V3Mrs,
+    IMRBindingRepository Bindings,
+    IApplicationRepository Apps);
 
 /// <summary>
 /// <see cref="SystemMtBootstrap.SeedCatalogsAsync"/> 的执行摘要。
@@ -67,4 +89,5 @@ public sealed class SystemMtBootstrap
 public sealed record BootstrapResult(
     int EquationsSeeded,
     int MrsSeeded,
-    CatalogImportSummary? ImportSummary);
+    CatalogImportSummary? ImportSummary,
+    V3MetamorphicRelationMigration.MigrationSummary? V3MigrationSummary = null);
