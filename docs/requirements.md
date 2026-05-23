@@ -120,7 +120,7 @@
 | ~~G-05~~ ✅ 已完成(2026-05-23) | F-MR-P7 | ~~LaTeX→SymPy `[Obsolete]` 后无 grep 守卫单测~~ | — | 已建 `Architecture/ObsoleteAttributeGuardTests.cs` 覆盖 `Latextosympy` + `Latextosympy_Await` + `SystemMtRunner`（5 测试） |
 | ~~G-06~~ ✅ 已完成(2026-05-23) | F-T1-04 / F-MR-P5 | ~~method MT 协议层未接入业务路径~~ | — | 已建 `IMtPipeline<TReq,TOut>` 共享抽象（BLL.Core/MT）+ `MethodMtPipeline`（BLL/MethodMT，实现协议层）+ `MethodMtRunRequest/Outcome` 数据 record + `MethodMtCatalogService` 扩 CRUD（Get/Update/Delete）+ `SystemMtPipeline` 加 IMtPipeline 显式接口实现；20 新测试（7 pipeline + 4 Bateman 参数化 AAA + 9 CRUD）；全量回归 810→830 pass。注：4 处 `Latextosympy*` 调用已澄清属 v1 展示衍生字段（不在 G-06 范围），归 G-11 处置 |
 | ~~G-07~~ ✅ 已完成(全部) | F-T0-02 / F-T0-01 | ~~W1 引擎残留~~ | — | 云端：`SystemMtRunner` 加 `[Obsolete]`；VM 端（G-07b）：`App.xaml.cs:130` DI 注册已删除（commit `dcf978a`）。深度审计发现完全删 W1 涉及 cross-cutting 重构，属 Stage 9 范围 |
-| ~~G-08~~ ✅ 已完成(2026-05-23, 云端范围) | F-T1-04 / F-T0-03 | ~~catalog 双 seed 不自动同步~~ | — | 已建 `SystemMtBootstrap.SeedCatalogsAsync(metaRepo, importer)` 一次性 idempotent helper，串行调 `SystemMtMetadataCatalog.SeedAsync` + `LauncherCatalogV2Importer.Import`；4 新测试。**VM 端待做**（G-08b/G-11 候选）：`App.xaml.cs` 启动时调 `SystemMtBootstrap.SeedCatalogsAsync`。完整 source-of-truth 收口（launcher 改读 catalog 而非硬编码）属 Stage 9+ 重构 |
+| ~~G-08~~ ✅ 已完成(全部) | F-T1-04 / F-T0-03 | ~~catalog 双 seed 不自动同步~~ | — | 云端：`SystemMtBootstrap.SeedCatalogsAsync` helper + 4 测试；VM 端（G-08b）：`App.xaml.cs` 注册 `ISystemMtMetadataRepository` + `LauncherCatalogV2Importer`，`OnStartup` 调 bootstrap（commit `13b3447`）。完整 source-of-truth 收口属 Stage 9+ 重构 |
 | ~~G-09~~ ✅ 已完成(2026-05-23) | F-T3-02 / F-T1-04 | ~~projectile SUT 未进 launcher catalog~~ | — | 已补 `projectile-motion` EquationMetadata + `projectile-scale-v0` MrMetadata + MrBlueprint + `SUT/projectile/sample/standard.txt`；2 个 launcher 测试 + cascade 4 个 importer 测试更新；全量 809→810 pass |
 | ~~G-10~~ ✅ 已完成(2026-05-23) | F-T1-04 | ~~CRUD 不全~~ | — | (a) `ISystemMtMetadataRepository` 加 3 个 DeleteAsync（Equation / MR / Recipe）+ LiteDb 实现 + Fake repo 实现；(b) `SystemMtCatalogService` 加 `UpdateEquationFunctionAsync` / `DeleteEquationFunctionAsync`；(c) `MethodMtCatalogService` MR-CRUD 子集已在 G-06 落地。9 新测试。**剩余开口**：MR / Application binding 的 Delete cascade 语义（非本次范围） |
 | G-11 | F-T1-04（v1 兼容） | **v1 LaTeX 展示衍生字段路径清理**：`MetamorphicRelationService.Add/Update` + `AutoMRParser.ProduceMRs/Async` + `MRRecommendationViewModel` + `MRManagementViewModel` 共 4 处仍调 `Latextosympy*`（已 `[Obsolete]`）。`mr-architecture.md §4.1` 明确"LaTeX 仅展示、不驱动执行"，但 v1 数据形态下衍生字段仍存于 LiteDB | 与 method MT 执行栈正交，归 v1 数据展示路径迁移 | VM 端工作（云端不可编译 WPF）；待 method MT 执行栈（G-06）稳定后裁决：保留为 v1 兼容 / 拆迁至独立展示服务 / 直接删 |
@@ -150,6 +150,7 @@
 | `2c56b8a` | **G-07 + G-05** | `SystemMtRunner` 加 [Obsolete] + ObsoleteAttributeGuardTests 守卫（839 pass） |
 | `4fc7f15` | **G-10** | ISystemMtMetadataRepository Delete + Recipe Update/Delete（848 pass） |
 | `dcf978a` | **G-07b** | App.xaml.cs 删除 SystemMtRunner DI 注册（VM 端；848 pass） |
+| `13b3447` | **G-08b** | App.xaml.cs 接入 SystemMtBootstrap：注册 metadata repo + importer，OnStartup seed（VM 端） |
 
 ## 12. 受控开发模式工作流
 
