@@ -31,8 +31,10 @@ public sealed class CompositeTransform : IMRTransformation
     public string ParametersSchema => "{}";  // 参数固化在 Steps 里
 
     /// <summary>
-    /// 应用全部 Step；每个 step 用自己的 TargetFieldPath + Parameters，
-    /// Apply 调用方传入的 targetFieldPath / parameters 被忽略。
+    /// 应用全部 Step；step.Parameters 非空则按构造时固化的参数（用于
+    /// "scale 1.5 再 translate 50" 这类异参数 step）；step.Parameters 为空则
+    /// 用 Apply 调用方传入的 <paramref name="parameters"/>（用于多步共享同一
+    /// runtime 参数的场景，如 launcher 对 decay-chain 多字段共用 factor）。
     /// </summary>
     public Dictionary<string, object?> Apply(
         IReadOnlyDictionary<string, object?> sourceData,
@@ -42,7 +44,8 @@ public sealed class CompositeTransform : IMRTransformation
         IReadOnlyDictionary<string, object?> current = sourceData;
         foreach (var step in _steps)
         {
-            current = step.Transformation.Apply(current, step.TargetFieldPath, step.Parameters);
+            var effective = step.Parameters.Count > 0 ? step.Parameters : parameters;
+            current = step.Transformation.Apply(current, step.TargetFieldPath, effective);
         }
         return new Dictionary<string, object?>(current);
     }
