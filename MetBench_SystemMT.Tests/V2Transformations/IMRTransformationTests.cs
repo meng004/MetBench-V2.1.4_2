@@ -224,6 +224,49 @@ public sealed class IMRTransformationTests
             new CompositeTransform("empty", new List<CompositeTransform.Step>()));
     }
 
+    [Fact]
+    public void CompositeTransform_uses_call_time_params_when_step_params_empty()
+    {
+        // launcher 的多步 MR（decay-chain / damped-oscillator）用空 step.Parameters
+        // 构造,运行期靠 PipelineContext.Parameters（含 factor）驱动每一步。
+        var steps = new List<CompositeTransform.Step>
+        {
+            new(new ScaleField(),
+                "materials.fuel.temperature_kelvin",
+                new Dictionary<string, string>()),  // 空 step.Parameters
+        };
+        var t = new CompositeTransform("CallTimeFactor", steps);
+        var source = MakePincellData();
+
+        var result = t.Apply(source, "ignored",
+            new Dictionary<string, string> { ["factor"] = "2.0" });
+
+        var fuel = (Dictionary<string, object?>)
+            ((Dictionary<string, object?>)result["materials"]!)["fuel"]!;
+        Assert.Equal(1200.0, fuel["temperature_kelvin"]);  // 600 × 2.0
+    }
+
+    [Fact]
+    public void CompositeTransform_prefers_step_params_when_both_present()
+    {
+        // 既有行为不变:step.Parameters 非空时,call-time params 被忽略。
+        var steps = new List<CompositeTransform.Step>
+        {
+            new(new ScaleField(),
+                "materials.fuel.temperature_kelvin",
+                new Dictionary<string, string> { ["factor"] = "1.5" }),  // step 固化 1.5
+        };
+        var t = new CompositeTransform("StepWins", steps);
+        var source = MakePincellData();
+
+        var result = t.Apply(source, "ignored",
+            new Dictionary<string, string> { ["factor"] = "999" });  // 应被忽略
+
+        var fuel = (Dictionary<string, object?>)
+            ((Dictionary<string, object?>)result["materials"]!)["fuel"]!;
+        Assert.Equal(900.0, fuel["temperature_kelvin"]);  // 600 × 1.5,非 599400
+    }
+
     // ============= TransformationRegistry =============
 
     [Fact]

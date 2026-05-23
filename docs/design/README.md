@@ -11,6 +11,7 @@
 | 文档 | 用途 | 谁应该读 |
 |------|------|--------|
 | [`v2-system-mt-architecture.md`](v2-system-mt-architecture.md) | 整体架构、模块清单、pipeline 数据流、实施路线 | 所有人 |
+| [`mr-architecture.md`](mr-architecture.md) | MR 协议层 + 方法/系统双轨决策 + 方程作为函数容器 + L0/L1/L2 算子分层 + 集合形态边界 | MR 库扩展者、新方程接入者、项目接手人 |
 | [`glossary.md`](glossary.md) | 术语表（4 级 MR 语义 + 各子系统术语） | 写代码、写文档、写 commit 之前必读 |
 | [`entity-model.md`](entity-model.md) | LiteDB schema 完整规格（23 collection） + ER 图 | 后端 / DB 开发者 |
 | [`assertion-extensions.md`](assertion-extensions.md) | FluentAssertions 扩展方法 API + AssertionEvaluator | 断言相关代码开发者 |

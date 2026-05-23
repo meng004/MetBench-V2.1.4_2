@@ -16,7 +16,7 @@ namespace MetBench_Client.ViewModels
 {
     public partial class SystemMtExecutionViewModel : ObservableObject, INavigationAware
     {
-        private readonly ISystemMtMrLauncher _launcher;
+        private readonly ISystemMtLauncher _launcher;
         private readonly ISystemMtResultRepository _repository;
         private readonly ISystemMtResultReportRenderer _reportRenderer;
         private bool _isInitialized;
@@ -45,7 +45,7 @@ namespace MetBench_Client.ViewModels
         private ObservableCollection<SystemMtResultRecord> _recentRuns = new();
 
         public SystemMtExecutionViewModel(
-            ISystemMtMrLauncher launcher,
+            ISystemMtLauncher launcher,
             ISystemMtResultRepository repository,
             ISystemMtResultReportRenderer reportRenderer)
         {

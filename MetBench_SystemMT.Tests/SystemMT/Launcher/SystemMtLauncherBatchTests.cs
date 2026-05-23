@@ -1,42 +1,31 @@
 using MetBench_BLL.SystemMT.Launcher;
-using MetBench_BLL.SystemMT.Persistence;
-using MetBench_DAL;
+using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_SystemMT.Tests.V2Anomaly;
+using MetBench_SystemMT.Tests.V2Pipeline;
 using Xunit;
 
 namespace MetBench_SystemMT.Tests.SystemMT.Launcher;
 
-public sealed class SystemMtMrLauncherBatchTests : IDisposable
+public sealed class SystemMtLauncherBatchTests
 {
-    private readonly string _dbPath;
-    private readonly LiteDbSystemMtResultRepository _repository;
-    private readonly RecordingAnomalyService _anomalyService;
-    private readonly SystemMtMrLauncher _launcher;
+    private readonly FakeExecRepo _execs = new();
+    private readonly FakeResultRepo _results = new();
+    private readonly SystemMtExecutionRecorder _recorder;
+    private readonly SystemMtPipeline _pipeline = new();
+    private readonly RecordingAnomalyService _anomalyService = new();
+    private readonly SystemMtLauncher _launcher;
 
-    public SystemMtMrLauncherBatchTests()
+    public SystemMtLauncherBatchTests()
     {
-        _dbPath = Path.Combine(
-            Path.GetTempPath(),
-            "MetBenchLauncherBatchTests",
-            Guid.NewGuid().ToString("N") + ".db");
-        Directory.CreateDirectory(Path.GetDirectoryName(_dbPath)!);
-        _repository = new LiteDbSystemMtResultRepository(_dbPath);
-        _anomalyService = new RecordingAnomalyService();
-        _launcher = new SystemMtMrLauncher(
+        _recorder = new SystemMtExecutionRecorder(_execs, _results);
+        _launcher = new SystemMtLauncher(
             new LauncherOptions(
                 SutRoot: TestAssetPaths.AssetRoot(),
                 SystemPython: TestAssetPaths.PythonExecutable(),
                 OpenMocPython: TestAssetPaths.PythonExecutable()),
-            _repository,
+            _pipeline,
+            _recorder,
             _anomalyService);
-    }
-
-    public void Dispose()
-    {
-        _repository.Dispose();
-        if (File.Exists(_dbPath)) File.Delete(_dbPath);
-        var logFile = _dbPath + "-log";
-        if (File.Exists(logFile)) File.Delete(logFile);
     }
 
     private static BatchMrRunRequest Req(string id, string? factor = null) =>
@@ -69,9 +58,8 @@ public sealed class SystemMtMrLauncherBatchTests : IDisposable
         Assert.Contains("index 1", error.Message);
         Assert.Contains("blank", error.Message, StringComparison.OrdinalIgnoreCase);
 
-        // Repository must be empty — no scenarios should have run.
-        var recent = await _repository.ListRecentAsync(10);
-        Assert.Empty(recent);
+        // 任何 scenario 都不应跑(pre-validation 在第一步)
+        Assert.Empty(_execs.Data);
     }
 
     [Fact]
@@ -87,8 +75,7 @@ public sealed class SystemMtMrLauncherBatchTests : IDisposable
         Assert.Contains("index 1", error.Message);
         Assert.Contains("not-a-real-scenario", error.Message);
 
-        var recent = await _repository.ListRecentAsync(10);
-        Assert.Empty(recent);
+        Assert.Empty(_execs.Data);
     }
 
     [Fact]
@@ -99,6 +86,7 @@ public sealed class SystemMtMrLauncherBatchTests : IDisposable
         Assert.Single(results);
         Assert.Equal("heat-equation-amplitude", results[0].MrId);
         Assert.True(results[0].Passed, results[0].FailureReason);
+        Assert.Single(_execs.Data);
     }
 
     [Fact]
@@ -117,17 +105,18 @@ public sealed class SystemMtMrLauncherBatchTests : IDisposable
         Assert.All(results, r => Assert.Equal("heat-equation-amplitude", r.MrId));
         Assert.All(results, r => Assert.True(r.Passed));
 
-        // Each persisted with its own RecordId
+        // 每次 RecordId 唯一
         Assert.Equal(3, results.Select(r => r.RecordId).Distinct().Count());
 
-        var recent = await _repository.ListRecentAsync(10);
-        Assert.Equal(3, recent.Count);
+        // v2 schema:3 Execution + 3 Result
+        Assert.Equal(3, _execs.Data.Count);
+        Assert.Equal(3, _results.Data.Count);
     }
 
     [Fact]
     public async Task RunBatchAsync_failure_in_one_scenario_does_not_stop_others()
     {
-        // factor=0.5 fails GreaterThan assertion; factor=2 passes. Mix them.
+        // factor=0.5 fails "greater" assertion; factor=2 passes. Mix them.
         var requests = new[]
         {
             Req("heat-equation-amplitude", "2"),       // PASS
@@ -142,6 +131,9 @@ public sealed class SystemMtMrLauncherBatchTests : IDisposable
         Assert.False(results[1].Passed);
         Assert.True(results[2].Passed);
         Assert.False(string.IsNullOrEmpty(results[1].FailureReason));
+
+        // 失败那次应建 1 个 Anomaly
+        Assert.Single(_anomalyService.Recorded);
     }
 
     [Fact]
@@ -188,7 +180,6 @@ public sealed class SystemMtMrLauncherBatchTests : IDisposable
                 progress: null,
                 cancellationToken: cts.Token));
 
-        var recent = await _repository.ListRecentAsync(10);
-        Assert.Empty(recent);
+        Assert.Empty(_execs.Data);
     }
 }

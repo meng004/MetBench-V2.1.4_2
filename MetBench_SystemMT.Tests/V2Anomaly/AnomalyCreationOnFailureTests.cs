@@ -1,9 +1,9 @@
 using System.Collections.ObjectModel;
-using MetBench_BLL.Paging;
-using MetBench_BLL.SystemMT;
 using MetBench_BLL.SystemMT.Anomaly;
+using MetBench_BLL.SystemMT.Assertions;
 using MetBench_BLL.SystemMT.Launcher;
-using MetBench_BLL.SystemMT.Persistence;
+using MetBench_BLL.SystemMT.Pipeline;
+using MetBench_SystemMT.Tests.V2Pipeline;
 using MetBench_Domain;
 using Xunit;
 
@@ -11,8 +11,8 @@ namespace MetBench_SystemMT.Tests.V2Anomaly;
 
 /// <summary>
 /// UC-B7 — 失败的 System MT run 必须流入 Anomalies 表。
-/// 覆盖：(a) AnomalyService.RecordAnomalyAsync 单元；(b)(c) SystemMtMrLauncher
-/// 把 Passed=false / Passed=true 正反两向路由到 anomaly service。
+/// 覆盖:(a) AnomalyService.RecordAnomalyAsync 单元;(b)(c) SystemMtLauncher
+/// 把 PipelineOutcome FinalStatus=anomaly / ok 正反两向路由到 anomaly service。
 /// </summary>
 public sealed class AnomalyCreationOnFailureTests
 {
@@ -53,75 +53,95 @@ public sealed class AnomalyCreationOnFailureTests
     }
 
     [Fact]
-    public async Task SystemMtMrLauncher_records_anomaly_when_result_passed_is_false()
+    public async Task SystemMtLauncher_records_anomaly_when_outcome_is_anomaly()
     {
         var recording = new RecordingAnomalyService();
-        var stubRepo = new StubResultRepository();
-        var launcher = new SystemMtMrLauncher(
-            new LauncherOptions(SutRoot: "/tmp/dummy", SystemPython: "python3", OpenMocPython: "python3"),
-            stubRepo,
-            recording);
+        var launcher = MakeLauncher(recording);
 
-        var resultId = Guid.NewGuid().ToString();
-        var failingResult = MakeResult(passed: false);
+        var resultId = Guid.NewGuid();
+        var failingOutcome = MakeOutcome(sourceValue: 1.13, followupValue: 1.10, finalStatus: PipelineStatus.Anomaly);
 
         await launcher.RecordAnomalyIfFailedAsync(
             mrName: "OpenMOC pin-cell — ScaleNuSigmaF (k_eff increases)",
-            recordId: resultId,
-            result: failingResult,
+            resultId: resultId,
+            outcome: failingOutcome,
             cancellationToken: default);
 
         Assert.Single(recording.Recorded);
         var call = recording.Recorded[0];
         Assert.Equal("OpenMOC pin-cell — ScaleNuSigmaF (k_eff increases)", call.MrName);
-        Assert.Equal(resultId, call.ResultId);
+        Assert.Equal(resultId.ToString(), call.ResultId);
+        // (1.13 → 1.10) ≈ 2.65% drop → "minor" bucket
         Assert.Equal("minor", call.Severity);
         Assert.Equal("single-point", call.Category);
     }
 
     [Fact]
-    public async Task SystemMtMrLauncher_does_not_record_anomaly_when_passed_true()
+    public async Task SystemMtLauncher_does_not_record_anomaly_when_outcome_is_ok()
     {
         var recording = new RecordingAnomalyService();
-        var stubRepo = new StubResultRepository();
-        var launcher = new SystemMtMrLauncher(
-            new LauncherOptions(SutRoot: "/tmp/dummy", SystemPython: "python3", OpenMocPython: "python3"),
-            stubRepo,
-            recording);
+        var launcher = MakeLauncher(recording);
 
-        var passingResult = MakeResult(passed: true);
+        var passingOutcome = MakeOutcome(sourceValue: 1.13, followupValue: 1.51, finalStatus: PipelineStatus.Ok);
 
         await launcher.RecordAnomalyIfFailedAsync(
             mrName: "OpenMOC pin-cell — ScaleNuSigmaF (k_eff increases)",
-            recordId: Guid.NewGuid().ToString(),
-            result: passingResult,
+            resultId: Guid.NewGuid(),
+            outcome: passingOutcome,
             cancellationToken: default);
+
+        Assert.Empty(recording.Recorded);
+    }
+
+    [Fact]
+    public async Task SystemMtLauncher_skips_anomaly_when_resultId_is_null()
+    {
+        // error / timeout 状态下 recorder 不写 Result,resultId 为 null,不能链 anomaly。
+        var recording = new RecordingAnomalyService();
+        var launcher = MakeLauncher(recording);
+
+        var errorOutcome = new PipelineOutcome(
+            FinalStatus: PipelineStatus.Error, ErrorMessage: "SUT crashed",
+            StartedAt: DateTime.UtcNow, FinishedAt: DateTime.UtcNow,
+            ArtifactsDirectory: "/tmp",
+            SourceInputPath: "", FollowupInputPath: "", SourceOutputPath: "", FollowupOutputPath: "",
+            SourceMetrics: null, FollowupMetrics: null, AssertionResult: null,
+            SourceElapsed: TimeSpan.Zero, FollowupElapsed: TimeSpan.Zero,
+            SourceExitCode: 1, FollowupExitCode: 0);
+
+        await launcher.RecordAnomalyIfFailedAsync(
+            mrName: "test", resultId: null, outcome: errorOutcome, cancellationToken: default);
 
         Assert.Empty(recording.Recorded);
     }
 
     // =================== fixtures ===================
 
-    private static SystemMtResult MakeResult(bool passed)
+    private static SystemMtLauncher MakeLauncher(IAnomalyService anomalyService) =>
+        new(
+            new LauncherOptions(SutRoot: "/tmp/dummy", SystemPython: "python3", OpenMocPython: "python3"),
+            new SystemMtPipeline(),
+            new SystemMtExecutionRecorder(new FakeExecRepo(), new FakeResultRepo()),
+            anomalyService);
+
+    private static PipelineOutcome MakeOutcome(
+        double sourceValue, double followupValue, string finalStatus)
     {
-        var sourceRun = new CliRunResult(
-            "source", 0, "stdout-source", string.Empty,
-            TimeSpan.FromSeconds(1.0), "/tmp/source/output.json", true, string.Empty);
-        var followUpRun = new CliRunResult(
-            "follow-up", 0, "stdout-followup", string.Empty,
-            TimeSpan.FromSeconds(1.0), "/tmp/followup/output.json", true, string.Empty);
-        var sourceOutput = new ParsedOutput(
-            new Dictionary<string, double> { ["k_eff"] = 1.13 },
-            new Dictionary<string, string>());
-        var followUpOutput = new ParsedOutput(
-            new Dictionary<string, double> { ["k_eff"] = passed ? 1.51 : 1.10 },
-            new Dictionary<string, string>());
-        var assertion = new SystemMtAssertionResult(
-            "GreaterThan", "k_eff", 1.13, passed ? 1.51 : 1.10, passed,
-            passed ? string.Empty : "MR violated");
-        return new SystemMtResult(
-            sourceRun, followUpRun, sourceOutput, followUpOutput, assertion,
-            passed, passed ? string.Empty : "MR violated");
+        var input = new AssertionInput(sourceValue, 0.0, followupValue, 0.0, "k_eff", null);
+        var assertion = finalStatus == PipelineStatus.Ok
+            ? SystemMtAssertionResultV2.PassedResult(input, "greater")
+            : SystemMtAssertionResultV2.FailedResult(input, "greater", "MR violated");
+        return new PipelineOutcome(
+            FinalStatus: finalStatus, ErrorMessage: null,
+            StartedAt: DateTime.UtcNow.AddSeconds(-1), FinishedAt: DateTime.UtcNow,
+            ArtifactsDirectory: "/tmp",
+            SourceInputPath: "/tmp/s.in", FollowupInputPath: "/tmp/f.in",
+            SourceOutputPath: "/tmp/s.out", FollowupOutputPath: "/tmp/f.out",
+            SourceMetrics: new Dictionary<string, double> { ["k_eff"] = sourceValue },
+            FollowupMetrics: new Dictionary<string, double> { ["k_eff"] = followupValue },
+            AssertionResult: assertion,
+            SourceElapsed: TimeSpan.FromSeconds(1), FollowupElapsed: TimeSpan.FromSeconds(1),
+            SourceExitCode: 0, FollowupExitCode: 0);
     }
 }
 
@@ -153,22 +173,4 @@ internal sealed class RecordingAnomalyService : IAnomalyService
     public bool TransitionStatus(Guid anomalyId, string newStatus, string? notes, string actor) => throw new NotImplementedException();
     public bool LinkToKnownBug(Guid anomalyId, int knownBugId, string actor) => throw new NotImplementedException();
     public bool UnlinkKnownBug(Guid anomalyId, string actor) => throw new NotImplementedException();
-}
-
-/// <summary>Minimal ISystemMtResultRepository stub — tests don't exercise persistence.</summary>
-internal sealed class StubResultRepository : ISystemMtResultRepository
-{
-    public Task<string> SaveAsync(string mrName, SystemMtResult result, CancellationToken cancellationToken = default)
-        => Task.FromResult(Guid.NewGuid().ToString());
-
-    public Task<SystemMtResultRecord?> GetAsync(string id, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException();
-    public Task<IReadOnlyList<SystemMtResultRecord>> ListRecentAsync(int limit = 100, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException();
-    public Task<IReadOnlyList<SystemMtResultRecord>> ListByMrNameAsync(string mrName, int limit = 100, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException();
-    public Task<PagedResult<SystemMtResultRecord>> ListPagedAsync(PageRequest request, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException();
-    public Task<PagedResult<SystemMtResultRecord>> ListPagedByMrNameAsync(string mrName, PageRequest request, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException();
 }

@@ -11,6 +11,7 @@
 
 | 文档 | 内容 |
 |------|------|
+| [`mr-architecture.md`](mr-architecture.md) | MR 协议层 + 双轨(method/system) + 方程作为函数容器 + L0/L1/L2 算子 + 集合形态边界 |
 | [`glossary.md`](glossary.md) | 术语表 — 4 级 MR 语义 + 全部专业术语 |
 | [`entity-model.md`](entity-model.md) | ER 图 + 21 个 LiteDB collection 完整 schema |
 | [`assertion-extensions.md`](assertion-extensions.md) | FluentAssertions 扩展方法 API 参考 |

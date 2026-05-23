@@ -1,3 +1,5 @@
+// 本文件覆盖 W1 SystemMtRunner，已被 W2 SystemMtPipeline 取代但保留至 Stage 9（G-07）。
+#pragma warning disable CS0618 // Obsolete SystemMtRunner
 using MetBench_BLL;
 using MetBench_BLL.SystemMT;
 using Xunit;
@@ -50,6 +52,12 @@ public sealed class SystemMtRunnerGeneratedFollowupTests
         Assert.True(result.InputGeneration!.Succeeded);
         Assert.Equal(4, result.Assertion.SourceValue);
         Assert.Equal(12, result.Assertion.FollowUpValue);
+
+        // P-B: the runner captures the source / transformed input pair.
+        Assert.NotNull(result.InputSamples);
+        var sample = Assert.Single(result.InputSamples!);
+        Assert.Equal(4.0, sample.SourceValue);
+        Assert.Equal(12.0, sample.FollowUpValue);
     }
 
     [Fact]

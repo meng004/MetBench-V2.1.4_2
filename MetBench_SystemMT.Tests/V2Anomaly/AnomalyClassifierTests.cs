@@ -1,5 +1,7 @@
 using MetBench_BLL.SystemMT;
 using MetBench_BLL.SystemMT.Anomaly;
+using MetBench_BLL.SystemMT.Assertions;
+using MetBench_BLL.SystemMT.Pipeline;
 using Xunit;
 
 namespace MetBench_SystemMT.Tests.V2Anomaly;
@@ -123,16 +125,100 @@ public sealed class AnomalyClassifierTests
     {
         var result = FailingResult(100.0, 105.0);
         Assert.Throws<ArgumentNullException>(
-            () => AnomalyClassifier.ClassifySeverity(null!, AnomalySeverityThresholds.Default));
+            () => AnomalyClassifier.ClassifySeverity((SystemMtResult)null!, AnomalySeverityThresholds.Default));
         Assert.Throws<ArgumentNullException>(
             () => AnomalyClassifier.ClassifySeverity(result, null!));
     }
 
     [Fact]
     public void ClassifyCategory_rejects_null_result()
-        => Assert.Throws<ArgumentNullException>(() => AnomalyClassifier.ClassifyCategory(null!));
+        => Assert.Throws<ArgumentNullException>(() => AnomalyClassifier.ClassifyCategory((SystemMtResult)null!));
 
-    // =================== fixture ===================
+    // =================== W2 PipelineOutcome overload ===================
+
+    [Theory]
+    [InlineData(100.0, 100.5, "noise")]
+    [InlineData(100.0, 105.0, "minor")]
+    [InlineData(100.0, 130.0, "major")]
+    [InlineData(100.0, 180.0, "critical")]
+    [InlineData(100.0, 70.0,  "major")]     // 下降方向
+    [InlineData(100.0, 40.0,  "critical")]  // 下降方向
+    public void ClassifySeverity_W2_buckets_by_delta_percent(
+        double sourceValue, double followupValue, string expected)
+    {
+        var outcome = MakeW2Outcome(sourceValue, followupValue);
+
+        var severity = AnomalyClassifier.ClassifySeverity(outcome, AnomalySeverityThresholds.Default);
+
+        Assert.Equal(expected, severity);
+    }
+
+    [Fact]
+    public void ClassifySeverity_W2_runner_exit_nonzero_is_critical()
+    {
+        var outcome = MakeW2Outcome(100.0, 100.0, sourceExitCode: 1);
+        Assert.Equal("critical",
+            AnomalyClassifier.ClassifySeverity(outcome, AnomalySeverityThresholds.Default));
+    }
+
+    [Fact]
+    public void ClassifySeverity_W2_source_near_zero_is_critical()
+    {
+        var outcome = MakeW2Outcome(1e-15, 1.0);
+        Assert.Equal("critical",
+            AnomalyClassifier.ClassifySeverity(outcome, AnomalySeverityThresholds.Default));
+    }
+
+    [Fact]
+    public void ClassifyCategory_W2_runner_failure()
+    {
+        var outcome = MakeW2Outcome(1.0, 1.0, followupExitCode: 1);
+        Assert.Equal("runner-failure", AnomalyClassifier.ClassifyCategory(outcome));
+    }
+
+    [Fact]
+    public void ClassifyCategory_W2_single_point_when_runners_succeed()
+    {
+        var outcome = MakeW2Outcome(1.0, 2.0);
+        Assert.Equal("single-point", AnomalyClassifier.ClassifyCategory(outcome));
+    }
+
+    [Fact]
+    public void ClassifySeverity_W2_rejects_null_outcome()
+        => Assert.Throws<ArgumentNullException>(() =>
+            AnomalyClassifier.ClassifySeverity((PipelineOutcome)null!, AnomalySeverityThresholds.Default));
+
+    [Fact]
+    public void ClassifyCategory_W2_rejects_null_outcome()
+        => Assert.Throws<ArgumentNullException>(() =>
+            AnomalyClassifier.ClassifyCategory((PipelineOutcome)null!));
+
+    private static PipelineOutcome MakeW2Outcome(
+        double sourceValue, double followupValue,
+        int sourceExitCode = 0, int followupExitCode = 0)
+    {
+        var assertion = new SystemMtAssertionResultV2(
+            AssertionTypeCode: "greater",
+            Passed: false,
+            SourceValue: sourceValue,
+            FollowupValue: followupValue,
+            ObservedDelta: followupValue - sourceValue,
+            ExpectedThreshold: null,
+            Expression: "test",
+            FailureReason: "MR violated");
+        return new PipelineOutcome(
+            FinalStatus: "anomaly", ErrorMessage: null,
+            StartedAt: DateTime.UtcNow, FinishedAt: DateTime.UtcNow,
+            ArtifactsDirectory: "/tmp",
+            SourceInputPath: "", FollowupInputPath: "",
+            SourceOutputPath: "", FollowupOutputPath: "",
+            SourceMetrics: null, FollowupMetrics: null,
+            AssertionResult: assertion,
+            SourceElapsed: TimeSpan.Zero, FollowupElapsed: TimeSpan.Zero,
+            SourceExitCode: sourceExitCode, FollowupExitCode: followupExitCode);
+    }
+
+    // =================== W1 fixture ===================
 
     private static SystemMtResult FailingResult(
         double sourceValue,

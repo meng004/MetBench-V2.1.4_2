@@ -1,0 +1,265 @@
+using System.Collections.ObjectModel;
+using MetBench_BLL.SystemMT.Launcher;
+using MetBench_BLL.SystemMT.Pipeline;
+using MetBench_Domain;
+using MetBench_IDAL;
+using MetBench_SystemMT.Tests.V2Anomaly;
+using MetBench_SystemMT.Tests.V2Pipeline;
+using Xunit;
+
+namespace MetBench_SystemMT.Tests.SystemMT.Launcher;
+
+/// <summary>
+/// 方向 2 — <see cref="LauncherCatalogV2Importer"/>:把 launcher 内部 8 MR 目录投影
+/// 到 v2 实体表(Application + MetamorphicRelation + MRBinding),验证内容正确、
+/// 幂等、写审计、且不破坏 launcher 的运行时行为(对 MT 流程的再次验证)。
+/// </summary>
+public sealed class LauncherCatalogV2ImporterTests
+{
+    private readonly FakeImporterAppRepo _apps = new();
+    private readonly FakeImporterMrRepo _mrs = new();
+    private readonly FakeImporterBindingRepo _bindings = new();
+    private readonly FakeImporterAuditRepo _audit = new();
+    private readonly FakeExecRepo _execs = new();
+    private readonly FakeResultRepo _results = new();
+    private readonly SystemMtLauncher _launcher;
+    private readonly LauncherCatalogV2Importer _importer;
+
+    public LauncherCatalogV2ImporterTests()
+    {
+        _launcher = new SystemMtLauncher(
+            new LauncherOptions(
+                SutRoot: TestAssetPaths.AssetRoot(),
+                SystemPython: TestAssetPaths.PythonExecutable(),
+                OpenMocPython: TestAssetPaths.PythonExecutable()),
+            new SystemMtPipeline(),
+            new SystemMtExecutionRecorder(_execs, _results),
+            new RecordingAnomalyService());
+        _importer = new LauncherCatalogV2Importer(_launcher, _apps, _mrs, _bindings, _audit);
+    }
+
+    [Fact]
+    public void Import_creates_one_Application_per_unique_SUT_with_system_level_kind()
+    {
+        var summary = _importer.Import();
+
+        Assert.Equal(7, summary.ApplicationsCreated);
+        Assert.Equal(7, _apps.Data.Count);
+        var sutNames = _apps.Data.Select(a => a.Name).OrderBy(n => n).ToArray();
+        Assert.Equal(
+            new[] { "damped-oscillator", "decay-chain", "heat-equation", "lotka-volterra", "openmc", "openmoc", "projectile" },
+            sutNames);
+        Assert.All(_apps.Data, a => Assert.Equal("system-level", a.Kind));
+        Assert.All(_apps.Data, a => Assert.Equal("Python", a.ProgrammingLanguage));
+    }
+
+    [Fact]
+    public void Import_creates_one_MetamorphicRelation_per_launcher_MR_with_v2_fields()
+    {
+        var summary = _importer.Import();
+
+        Assert.Equal(9, summary.MrsCreated);
+        Assert.Equal(9, _mrs.Data.Count);
+        Assert.All(_mrs.Data, m => Assert.Equal("system-level", m.Kind));
+        Assert.All(_mrs.Data, m => Assert.Equal("manual", m.DiscoveryMethod));
+        Assert.All(_mrs.Data, m => Assert.Equal("m_mono", m.MetaPatternCode));
+    }
+
+    [Fact]
+    public void Import_creates_MRBindings_with_valid_FK_to_MR_and_Application()
+    {
+        _importer.Import();
+
+        Assert.Equal(9, _bindings.Data.Count);
+        foreach (var b in _bindings.Data)
+        {
+            Assert.NotNull(_mrs.Data.FirstOrDefault(m => m.IdMR == b.MRId));
+            Assert.NotNull(_apps.Data.FirstOrDefault(a => a.IdApplication == b.ApplicationId));
+            Assert.Equal("active", b.Status);
+            Assert.False(string.IsNullOrEmpty(b.DefaultSampleCasePath));
+        }
+    }
+
+    [Fact]
+    public void Import_Application_carries_runner_and_parser_paths()
+    {
+        _importer.Import();
+
+        var openmoc = _apps.Data.First(a => a.Name == "openmoc");
+        Assert.Contains("openmoc_runner.py", openmoc.RunnerEntryPath!);
+        Assert.Contains("openmoc_input_parser.py", openmoc.InputParserPath!);
+        Assert.Contains("openmoc_output_parser.py", openmoc.OutputParserPath!);
+
+        // 注:ODE SUT 的 runner 用 <sut>.py 命名(decay_chain.py / damped_oscillator.py /
+        // lotka_volterra.py);openmoc/openmc 用 <sut>_runner.py。
+        var lotka = _apps.Data.First(a => a.Name == "lotka-volterra");
+        Assert.Contains("lotka_volterra.py", lotka.RunnerEntryPath!);
+        Assert.Contains("lotka_volterra_input_parser.py", lotka.InputParserPath!);
+    }
+
+    [Fact]
+    public void Import_MR_carries_transformation_assertion_value_name()
+    {
+        _importer.Import();
+
+        var nsf = _mrs.Data.First(m => m.Code == "openmoc-pincell-nu-sigma-f");
+        Assert.Equal("ScaleField", nsf.TransformationName);
+        Assert.Equal("greater", nsf.AssertionTypeCode);
+        Assert.Equal("k_eff", nsf.ValueName);
+
+        var sigmaA = _mrs.Data.First(m => m.Code == "openmoc-pincell-sigma-a");
+        Assert.Equal("ScaleFuelAbsorption", sigmaA.TransformationName);
+        Assert.Equal("less", sigmaA.AssertionTypeCode);
+
+        var lotka = _mrs.Data.First(m => m.Code == "lotka-volterra-scale-gamma");
+        Assert.Equal("ScaleField", lotka.TransformationName);
+        Assert.Equal("mean_prey", lotka.ValueName);
+    }
+
+    [Fact]
+    public void Import_writes_one_audit_log_entry_with_counts()
+    {
+        _importer.Import();
+
+        var log = Assert.Single(_audit.Data);
+        Assert.Equal("launcher.catalog.import", log.Action);
+        Assert.Equal("launcher-import", log.Actor);
+        Assert.Contains("applicationsCreated", log.DetailsJson);
+        Assert.Contains("\"mrsCreated\":9", log.DetailsJson);
+        Assert.Contains("\"bindingsCreated\":9", log.DetailsJson);
+    }
+
+    [Fact]
+    public void Import_is_idempotent_on_second_run_no_duplicate_rows()
+    {
+        var first = _importer.Import();
+        var second = _importer.Import();
+
+        // 第 1 次:全部新建
+        Assert.Equal(7, first.ApplicationsCreated);
+        Assert.Equal(9, first.MrsCreated);
+        Assert.Equal(9, first.BindingsCreated);
+
+        // 第 2 次:全部已存在
+        Assert.Equal(0, second.ApplicationsCreated);
+        Assert.Equal(7, second.ApplicationsExisting);
+        Assert.Equal(0, second.MrsCreated);
+        Assert.Equal(9, second.MrsExisting);
+        Assert.Equal(0, second.BindingsCreated);
+        Assert.Equal(9, second.BindingsExisting);
+
+        // 行数总和未变
+        Assert.Equal(7, _apps.Data.Count);
+        Assert.Equal(9, _mrs.Data.Count);
+        Assert.Equal(9, _bindings.Data.Count);
+        // 两次都写一条审计
+        Assert.Equal(2, _audit.Data.Count);
+    }
+
+    [Fact]
+    public void Import_accepts_custom_actor_in_audit_log()
+    {
+        _importer.Import(actor: "test-actor");
+
+        var log = Assert.Single(_audit.Data);
+        Assert.Equal("test-actor", log.Actor);
+    }
+
+    [Fact]
+    public void Constructor_rejects_null_arguments()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            new LauncherCatalogV2Importer(null!, _apps, _mrs, _bindings, _audit));
+        Assert.Throws<ArgumentNullException>(() =>
+            new LauncherCatalogV2Importer(_launcher, null!, _mrs, _bindings, _audit));
+        Assert.Throws<ArgumentNullException>(() =>
+            new LauncherCatalogV2Importer(_launcher, _apps, null!, _bindings, _audit));
+        Assert.Throws<ArgumentNullException>(() =>
+            new LauncherCatalogV2Importer(_launcher, _apps, _mrs, null!, _audit));
+        Assert.Throws<ArgumentNullException>(() =>
+            new LauncherCatalogV2Importer(_launcher, _apps, _mrs, _bindings, null!));
+    }
+
+    [Fact]
+    public async Task Import_then_RunAsync_heat_equation_still_produces_execution_result()
+    {
+        // 「对 MT 流程的再次验证」:导入数据后,launcher 仍能跑通端到端 MR
+        _importer.Import();
+
+        var result = await _launcher.RunAsync("heat-equation-amplitude");
+
+        Assert.True(result.Passed, result.FailureReason);
+        var exec = Assert.Single(_execs.Data);
+        var res = Assert.Single(_results.Data);
+        Assert.Equal("ok", exec.Status);
+        Assert.True(res.AssertionPassed);
+        Assert.Equal(exec.IdExecution, res.ExecutionId);
+    }
+
+    // ====================== fakes (auto-id) ======================
+
+    internal sealed class FakeImporterAppRepo : IApplicationRepository
+    {
+        public List<Application> Data { get; } = new();
+        private int _nextId = 1;
+        public ObservableCollection<Application> GetAll() => new(Data);
+        public Application Get(int id) => Data.First(a => a.IdApplication == id);
+        public ObservableCollection<Application> Get(Application e) => new(Data);
+        public bool Add(Application e) { e.IdApplication = _nextId++; Data.Add(e); return true; }
+        public bool Modify(Application e) => true;
+        public bool Remove(Application e) => Data.Remove(e);
+        public int Get(string name) => Data.FirstOrDefault(a => a.Name == name)?.IdApplication ?? -1;
+        public ObservableCollection<Applications_QueryResultData> GetAll_MIX() => new();
+        public ObservableCollection<Applications_QueryResultData> GetByName(string name) => new();
+        public bool IsDuplicate(Application app, bool excludeSelf) => false;
+    }
+
+    internal sealed class FakeImporterMrRepo : IMetamorphicRelationRepository
+    {
+        public List<MetamorphicRelation> Data { get; } = new();
+        private int _nextId = 1;
+        public DatatoImage datatoImage { get; set; } = null!;
+        public ObservableCollection<MetamorphicRelation> GetAll() => new(Data);
+        public MetamorphicRelation Get(int id) => Data.First(m => m.IdMR == id);
+        public ObservableCollection<MetamorphicRelation> Get(MetamorphicRelation e) => new(Data);
+        public bool Add(MetamorphicRelation e) { e.IdMR = _nextId++; Data.Add(e); return true; }
+        public bool Modify(MetamorphicRelation e) => true;
+        public bool Remove(MetamorphicRelation e) => Data.Remove(e);
+        public ObservableCollection<MetamorphicRelations_QueryResultData> GetAll_MIX() => new();
+        public ObservableCollection<MetamorphicRelations_QueryResultData> Get(MetamorphicRelation m, string d) => new();
+        public ObservableCollection<MetamorphicRelations_QueryResultData> GetAll_MIXTwoTable() => new();
+        public bool IsDuplicate(MetamorphicRelation m, bool excludeSelf = false) => false;
+    }
+
+    internal sealed class FakeImporterBindingRepo : IMRBindingRepository
+    {
+        public List<MRBinding> Data { get; } = new();
+        private int _nextId = 1;
+        public ObservableCollection<MRBinding> GetAll() => new(Data);
+        public MRBinding Get(int id) => Data.First(b => b.IdMRBinding == id);
+        public ObservableCollection<MRBinding> Get(MRBinding e) => new(Data);
+        public bool Add(MRBinding e) { e.IdMRBinding = _nextId++; Data.Add(e); return true; }
+        public bool Modify(MRBinding e) => true;
+        public bool Remove(MRBinding e) => Data.Remove(e);
+        public ObservableCollection<MRBinding> GetByMR(int mrId) => new(Data.Where(b => b.MRId == mrId).ToList());
+        public ObservableCollection<MRBinding> GetByApplication(int appId) => new(Data.Where(b => b.ApplicationId == appId).ToList());
+        public ObservableCollection<MRBinding> GetActive() => new(Data.Where(b => b.Status == "active").ToList());
+        public ObservableCollection<MRBinding> GetByStatus(string s) => new(Data.Where(b => b.Status == s).ToList());
+    }
+
+    internal sealed class FakeImporterAuditRepo : IAuditLogRepository
+    {
+        public List<AuditLog> Data { get; } = new();
+        public ObservableCollection<AuditLog> GetAll() => new(Data);
+        public AuditLog? Get(Guid id) => Data.FirstOrDefault(l => l.IdLog == id);
+        public ObservableCollection<AuditLog> Get(AuditLog e) => new(Data);
+        public bool Add(AuditLog e) { Data.Add(e); return true; }
+        public bool Modify(AuditLog e) => true;
+        public bool Remove(AuditLog e) => Data.Remove(e);
+        public ObservableCollection<AuditLog> GetPage(int p, int s) => new(Data.Skip(p * s).Take(s).ToList());
+        public int Count() => Data.Count;
+        public ObservableCollection<AuditLog> GetByDateRange(DateTime f, DateTime t) => new();
+        public ObservableCollection<AuditLog> GetByAction(string a) => new(Data.Where(l => l.Action == a).ToList());
+        public ObservableCollection<AuditLog> GetByTargetEntity(string et, string eid) => new();
+    }
+}

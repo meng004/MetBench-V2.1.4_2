@@ -3,6 +3,7 @@ using System.Reflection;
 
 namespace MetBench_BLL
 {
+    [Obsolete("Legacy LaTeX→SymPy async execution path. New MRs use MethodTransformationRegistry + EquationFunction (mr-architecture §5). This class is retained for v1 method-level MT read compatibility only.")]
     public class Latextosympy_Await
     {
         private static readonly object lockObject = new object();

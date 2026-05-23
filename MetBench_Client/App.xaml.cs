@@ -14,7 +14,9 @@ using MetBench_IDAL;
 using MetBench_BLL;
 using MetBench_BLL.SystemMT;
 using MetBench_BLL.SystemMT.Anomaly;
+using MetBench_BLL.SystemMT.Bootstrap;
 using MetBench_BLL.SystemMT.Launcher;
+using MetBench_BLL.SystemMT.Metadata;
 using MetBench_BLL.SystemMT.Persistence;
 using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_BLL.SystemMT.Reporting;
@@ -127,8 +129,6 @@ namespace MetBench_Client
                 services.AddScoped<InputGenerator>(provider =>
                     throw new InvalidOperationException(
                         "InputGenerator must be constructed with a per-task adapter path; resolve PythonInputAdapter and the adapter path from the task instead."));
-                services.AddScoped<SystemMtRunner>();
-
                 // Stage 4 launcher facade + persistence + reporting
                 services.AddSingleton(provider => new LauncherOptions(
                     SutRoot: Path.Combine(
@@ -145,7 +145,11 @@ namespace MetBench_Client
                     return new LiteDbSystemMtResultRepository($"Filename={dbPath}");
                 });
 
-                services.AddSingleton<ISystemMtMrLauncher, SystemMtMrLauncher>();
+                // P3.3 — launcher 经 SystemMtPipeline + SystemMtExecutionRecorder 落
+                // Execution+Result+Anomaly。lifetime 改 Scoped 与 IExecutionRepository /
+                // IResultRepository / ISystemMtPipeline 一致。
+                services.AddScoped<SystemMtExecutionRecorder>();
+                services.AddScoped<ISystemMtLauncher, SystemMtLauncher>();
                 services.AddSingleton<ISystemMtResultReportRenderer, HtmlSystemMtResultReportRenderer>();
 
                 services.AddScoped<Views.Pages.SystemMtExecutionPage>();
@@ -154,6 +158,21 @@ namespace MetBench_Client
                 // === v2 SystemMT repositories (LiteDB) + Anomaly stack ===
                 services.AddSystemMtRepositories();
                 services.AddScoped<IAnomalyService, AnomalyService>();
+
+                // === G-08b: metadata catalog DB + bootstrap ===
+                services.AddSingleton<ISystemMtMetadataRepository>(provider =>
+                {
+                    var dataDir = Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!;
+                    return new LiteDbSystemMtMetadataRepository(
+                        $"Filename={Path.Combine(dataDir, "MetadataSystemMT.Litedb")}");
+                });
+                services.AddScoped<LauncherCatalogV2Importer>(provider =>
+                    new LauncherCatalogV2Importer(
+                        (SystemMtLauncher)provider.GetRequiredService<ISystemMtLauncher>(),
+                        provider.GetRequiredService<IApplicationRepository>(),
+                        provider.GetRequiredService<IMetamorphicRelationRepository>(),
+                        provider.GetRequiredService<IMRBindingRepository>(),
+                        provider.GetRequiredService<IAuditLogRepository>()));
 
                 // === v2 Anomaly list page ===
                 services.AddScoped<Views.Pages.AnomalyListPage>();
@@ -195,13 +214,12 @@ namespace MetBench_Client
                 // === v2 Validation stack (P7) — T-C: 真实 sampler 替换 hardcoded stub ===
                 services.AddScoped<ValidationService>();
                 services.AddScoped<EmpiricalRepoSampler>();
-                services.AddScoped<AdversarialCampaignSampler>();
                 services.AddScoped<EmpiricalValidator>(provider =>
                     new EmpiricalValidator(provider.GetRequiredService<EmpiricalRepoSampler>().SampleAsync));
                 services.AddScoped<TheoreticalLlmValidator>(provider =>
                     new TheoreticalLlmValidator(provider.GetRequiredService<ILlmGateway>()));
-                services.AddScoped<AdversarialMutmutValidator>(provider =>
-                    new AdversarialMutmutValidator(provider.GetRequiredService<AdversarialCampaignSampler>().SampleAsync));
+                // AdversarialMutmutValidator + AdversarialCampaignSampler 已删除（next-stage P0
+                // 模型对齐：MR 识别收敛为 meta-prompt + multi-LLM 共识，T6 变异由 MutationCampaign 子系统承担）
                 services.AddScoped<Views.Pages.CandidateReviewPage>();
                 services.AddScoped<ViewModels.CandidateReviewViewModel>();
 
@@ -266,6 +284,11 @@ namespace MetBench_Client
         private async void OnStartup(object sender, StartupEventArgs e)
         {
             await _host.StartAsync();
+
+            // G-08b: idempotent catalog seed on every startup
+            var metaRepo = _host.Services.GetService<ISystemMtMetadataRepository>();
+            var importer = _host.Services.GetService<LauncherCatalogV2Importer>();
+            await SystemMtBootstrap.SeedCatalogsAsync(metaRepo, importer);
         }
 
         /// <summary>

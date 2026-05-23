@@ -1,3 +1,4 @@
+using MetBench_BLL.Equations;
 using MetBench_BLL.SystemMT.Assertions;
 
 namespace MetBench_BLL.SystemMT.Pipeline;
@@ -36,4 +37,17 @@ public sealed record PipelineContext(
     string SutVersionSnapshot,
     string MetbenchVersion,
     string TriggeredBy
-);
+)
+{
+    /// <summary>
+    /// 所属方程的稳定业务键（如 <c>bateman</c>）；空字符串表示无关联方程。
+    /// 供 TransformationResolver 决策 B 查找方程命名空间函数（P4 L1 Recipe 支持）。
+    /// </summary>
+    public string EquationKey { get; init; } = string.Empty;
+
+    /// <summary>
+    /// 方程函数注册表（可选）；若提供，pipeline 使用 TransformationResolver 解析变换，
+    /// 可命中 L1 Recipe。未提供时退回全局 TransformationRegistry。
+    /// </summary>
+    public EquationFunctionRegistry? EquationFunctionRegistry { get; init; }
+}
