@@ -57,7 +57,8 @@ flowchart TB
     Pipeline --> Eval
     Pipeline --> Trans
   end
-  Pipeline --> ERA["Execution + Result + Anomaly"]
+  Pipeline --> Outcome["PipelineOutcome (返回值;pipeline 不持久化)"]
+  Outcome -. "由 service 层调用方写入<br/>(P1 SystemMtExecutionRecorder 抽出此原语)" .-> ERA["Execution + Result + Anomaly"]
   ERA --> DB2[("MR.Litedb")]
 
   Cov["CoverageService"] --> DB2
@@ -163,8 +164,10 @@ classDiagram
   class ILlmGateway { <<interface>> }
   class NullLlmGateway
   class OpenAiCompatibleLlmGateway
+  class DeepSeekLlmGateway
   ILlmGateway <|.. NullLlmGateway
   ILlmGateway <|.. OpenAiCompatibleLlmGateway
+  ILlmGateway <|.. DeepSeekLlmGateway
 
   class IScgGraphBuilder { <<interface>> }
   class IScgPatternMiner { <<interface>> }
@@ -181,8 +184,10 @@ classDiagram
   ScgHeuristicDiscoverer ..> IScgPatternMiner : uses
 ```
 
-> `ScgHeuristicDiscoverer` / `*ScgGraphBuilder` / `RuleBasedScgPatternMiner` /
-> `OpenAiCompatibleLlmGateway` / `MultiLlmConsensusValidator` 均**未接 DI**，仅测试可达。
+> `DeepSeekLlmGateway`（住在跨项目 `MetBench_BLL/Discovery/`，非 `MetBench_BLL.Core`）
+> 是 prod 实际接入的 `ILlmGateway` 实现；`ScgHeuristicDiscoverer` / `*ScgGraphBuilder` /
+> `RuleBasedScgPatternMiner` / `OpenAiCompatibleLlmGateway` / `MultiLlmConsensusValidator`
+> 均**未接 DI**，仅测试可达。
 
 ### 3.3 DAL 仓储家族
 
