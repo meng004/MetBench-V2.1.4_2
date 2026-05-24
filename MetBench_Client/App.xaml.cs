@@ -19,6 +19,7 @@ using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Metadata;
 using MetBench_BLL.SystemMT.Persistence;
 using MetBench_BLL.SystemMT.Pipeline;
+using MetBench_BLL.SystemMT.Catalog;
 using MetBench_BLL.SystemMT.Reporting;
 using MetBench_BLL.Discovery;
 using MetBench_BLL.Discovery.Validators;
@@ -148,6 +149,9 @@ namespace MetBench_Client
                 // Execution+Result+Anomaly。lifetime 改 Scoped 与 IExecutionRepository /
                 // IResultRepository / ISystemMtPipeline 一致。
                 services.AddScoped<SystemMtExecutionRecorder>();
+                services.AddSingleton<IMrCatalogProvider>(provider =>
+                    new ManifestMrCatalogProvider(
+                        provider.GetRequiredService<LauncherOptions>()));
                 services.AddScoped<ISystemMtLauncher, SystemMtLauncher>();
                 services.AddSingleton<ISystemMtResultReportRenderer, HtmlSystemMtResultReportRenderer>();
 
