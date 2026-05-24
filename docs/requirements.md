@@ -179,6 +179,7 @@
 | `2005909` | **G-X3 Task 5** | Execution evidence models + V3MrIdRef + repo contract (4 model tests, 948 → 952) |
 | `5f9d27d` | **G-X3 Task 6 step 1** | LiteDb evidence repository + roundtrip tests (+7 tests, 952 → 959) |
 | _(pending)_ | **G-X3 Task 6 step 2** | SystemMtExecutionRecorder write-through evidence + V3 lookup (+6 tests, 959 → 965) |
+| `fe864ec` | **G-X3 VM** | App.xaml.cs registers ManifestMrCatalogProvider for IMrCatalogProvider DI (unblocks Task 7 fallback removal) |
 
 ## 12. 受控开发模式工作流
 
