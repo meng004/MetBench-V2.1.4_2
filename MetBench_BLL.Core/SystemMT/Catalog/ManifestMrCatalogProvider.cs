@@ -50,6 +50,19 @@ public sealed class ManifestMrCatalogProvider : IMrCatalogProvider
 
     public string SourceDescription => $"Manifest:{_options.SutRoot}";
 
+    /// <summary>
+    /// Manifest authors write JSON paths with forward slashes (cross-platform convention);
+    /// the hardcoded launcher catalog builds paths via <c>Path.Combine</c>, which uses the
+    /// platform's <see cref="Path.DirectorySeparatorChar"/>. Normalize the JSON-loaded relative
+    /// path to the platform's separator so manifest-derived strings match the hardcoded
+    /// strings byte-for-byte on every OS (Windows parity regression discovered post PR #91).
+    /// </summary>
+    private static string NormalizeRelativePath(string relativePath) =>
+        string.IsNullOrEmpty(relativePath)
+            ? relativePath
+            : relativePath.Replace('/', Path.DirectorySeparatorChar)
+                          .Replace('\\', Path.DirectorySeparatorChar);
+
     public IReadOnlyList<MrCatalogEntry> Load()
     {
         var entries = new List<MrCatalogEntry>();
@@ -130,15 +143,15 @@ public sealed class ManifestMrCatalogProvider : IMrCatalogProvider
 
         return new MrCatalogEntry(
             Mr: mr,
-            SampleCaseRelativePath: Path.Combine(sutDir, binding.SampleCaseRelativePath),
-            RunnerScriptPath: Path.Combine(_options.SutRoot, sutDir, program.RunnerScriptRelativePath),
-            InputAdapterScriptPath: Path.Combine(_options.SutRoot, sutDir, inputAdapterRel),
-            OutputAdapterScriptPath: Path.Combine(_options.SutRoot, sutDir, outputAdapterRel),
+            SampleCaseRelativePath: Path.Combine(sutDir, NormalizeRelativePath(binding.SampleCaseRelativePath)),
+            RunnerScriptPath: Path.Combine(_options.SutRoot, sutDir, NormalizeRelativePath(program.RunnerScriptRelativePath)),
+            InputAdapterScriptPath: Path.Combine(_options.SutRoot, sutDir, NormalizeRelativePath(inputAdapterRel)),
+            OutputAdapterScriptPath: Path.Combine(_options.SutRoot, sutDir, NormalizeRelativePath(outputAdapterRel)),
             PythonExecutable: pythonExecutable,
             WorkRootName: binding.WorkRootName,
             Timeout: TimeSpan.FromSeconds(binding.TimeoutSeconds),
-            InputParserScriptPath: Path.Combine(_options.SutRoot, sutDir, program.InputParserScriptRelativePath),
-            OutputParserScriptPath: Path.Combine(_options.SutRoot, sutDir, program.OutputParserScriptRelativePath),
+            InputParserScriptPath: Path.Combine(_options.SutRoot, sutDir, NormalizeRelativePath(program.InputParserScriptRelativePath)),
+            OutputParserScriptPath: Path.Combine(_options.SutRoot, sutDir, NormalizeRelativePath(program.OutputParserScriptRelativePath)),
             TransformSteps: binding.TransformSteps
                 .Select(s => new MrCatalogTransformStep(s.TransformationName, s.TargetFieldPath))
                 .ToList(),

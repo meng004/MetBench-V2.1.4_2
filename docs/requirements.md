@@ -180,6 +180,7 @@
 | `5f9d27d` | **G-X3 Task 6 step 1** | LiteDb evidence repository + roundtrip tests (+7 tests, 952 → 959) |
 | _(pending)_ | **G-X3 Task 6 step 2** | SystemMtExecutionRecorder write-through evidence + V3 lookup (+6 tests, 959 → 965) |
 | `fe864ec` | **G-X3 VM** | App.xaml.cs registers ManifestMrCatalogProvider for IMrCatalogProvider DI (unblocks Task 7 fallback removal) |
+| _(pending)_ | **G-X3 hotfix** | ManifestMrCatalogProvider 路径分隔符规范化 — fixes Windows CatalogParityTests 回归 from PR #91（VM round-4 surfaced；+2 tests pin normalization on both OSes） |
 
 ## 12. 受控开发模式工作流
 

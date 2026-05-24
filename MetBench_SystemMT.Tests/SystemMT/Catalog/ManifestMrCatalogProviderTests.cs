@@ -89,7 +89,56 @@ public sealed class ManifestMrCatalogProviderTests : System.IDisposable
         Assert.Equal(Path.Combine(_tmpRoot, "test_sut_dir", "runner.py"), e.RunnerScriptPath);
         Assert.Equal(Path.Combine(_tmpRoot, "test_sut_dir", "in_parser.py"), e.InputParserScriptPath);
         Assert.Equal(Path.Combine(_tmpRoot, "test_sut_dir", "out_parser.py"), e.OutputParserScriptPath);
-        Assert.Equal(Path.Combine("test_sut_dir", "sample/case.json"), e.SampleCaseRelativePath);
+        // Sample path in JSON uses forward slash ("sample/case.json"); provider normalizes
+        // it to the platform separator so manifest output matches the hardcoded Path.Combine
+        // style byte-for-byte on every OS (Windows parity regression fix).
+        Assert.Equal(Path.Combine("test_sut_dir", "sample", "case.json"), e.SampleCaseRelativePath);
+    }
+
+    [Fact]
+    public void Load_normalizes_forward_slash_in_relative_path_to_platform_separator()
+    {
+        // Regression fix: in PR #91 the manifest's JSON forward-slash sample path
+        // ("sample/pincell.json") was Path.Combined onto the sut dir without normalization,
+        // producing "openmoc\sample/pincell.json" on Windows (mixed separators) that did not
+        // match the hardcoded launcher's "openmoc\sample\pincell.json", breaking
+        // CatalogParityTests on Windows. After the fix the manifest emits clean separators.
+        var json = ValidSingleMrManifest.Replace(
+            "\"sample_case_relative_path\": \"sample/case.json\"",
+            "\"sample_case_relative_path\": \"sample/case.json\"");  // already forward-slash; the fixture default
+        WriteManifest("normalize_dir", json);
+
+        var entries = new ManifestMrCatalogProvider(Opts()).Load();
+        var entry = Assert.Single(entries);
+
+        // SampleCaseRelativePath should use ONLY the platform separator, never a foreign one.
+        var foreignSeparator = Path.DirectorySeparatorChar == '/' ? '\\' : '/';
+        Assert.DoesNotContain(foreignSeparator, entry.SampleCaseRelativePath);
+
+        // And it must equal the same Path.Combine sequence the hardcoded launcher would build.
+        Assert.Equal(
+            Path.Combine("normalize_dir", "sample", "case.json"),
+            entry.SampleCaseRelativePath);
+    }
+
+    [Fact]
+    public void Load_normalizes_backslash_in_relative_path_to_platform_separator()
+    {
+        // Belt-and-suspenders: if a manifest author writes a Windows-style backslash in JSON
+        // (uncommon but valid JSON when properly escaped), normalize it the same way.
+        var json = ValidSingleMrManifest.Replace(
+            "\"sample_case_relative_path\": \"sample/case.json\"",
+            "\"sample_case_relative_path\": \"sample\\\\case.json\"");
+        WriteManifest("backslash_dir", json);
+
+        var entries = new ManifestMrCatalogProvider(Opts()).Load();
+        var entry = Assert.Single(entries);
+
+        var foreignSeparator = Path.DirectorySeparatorChar == '/' ? '\\' : '/';
+        Assert.DoesNotContain(foreignSeparator, entry.SampleCaseRelativePath);
+        Assert.Equal(
+            Path.Combine("backslash_dir", "sample", "case.json"),
+            entry.SampleCaseRelativePath);
     }
 
     [Fact]
