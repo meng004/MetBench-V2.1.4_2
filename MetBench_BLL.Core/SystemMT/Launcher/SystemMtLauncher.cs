@@ -821,7 +821,12 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
 /// 字段是 <see cref="LauncherCatalogV2Importer"/> 真正用得到的子集
 /// (不含 PythonExecutable / WorkRootName / Timeout 等纯运行时配置)。
 /// </summary>
-internal sealed record MrCatalogEntry(
+/// <remarks>
+/// Public visibility so <see cref="MetBench_BLL.SystemMT.Catalog.IMrCatalogProvider"/>
+/// (also public) can expose this record across the launcher↔provider boundary.
+/// Task 2 will add a <c>FromBlueprint</c> factory method here.
+/// </remarks>
+public sealed record MrCatalogEntry(
     MrSummary Mr,
     string SampleCaseRelativePath,
     string RunnerScriptPath,
