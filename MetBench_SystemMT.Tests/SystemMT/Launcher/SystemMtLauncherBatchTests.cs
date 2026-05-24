@@ -1,5 +1,6 @@
 using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Pipeline;
+using MetBench_BLL.SystemMT.Catalog;
 using MetBench_SystemMT.Tests.V2Anomaly;
 using MetBench_SystemMT.Tests.V2Pipeline;
 using Xunit;
@@ -25,7 +26,11 @@ public sealed class SystemMtLauncherBatchTests
                 OpenMocPython: TestAssetPaths.PythonExecutable()),
             _pipeline,
             _recorder,
-            _anomalyService);
+            _anomalyService,
+            new ManifestMrCatalogProvider(new LauncherOptions(
+                SutRoot: TestAssetPaths.AssetRoot(),
+                SystemPython: TestAssetPaths.PythonExecutable(),
+                OpenMocPython: TestAssetPaths.PythonExecutable())));
     }
 
     private static BatchMrRunRequest Req(string id, string? factor = null) =>

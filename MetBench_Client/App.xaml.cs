@@ -153,6 +153,8 @@ namespace MetBench_Client
                     new ManifestMrCatalogProvider(
                         provider.GetRequiredService<LauncherOptions>()));
                 services.AddScoped<ISystemMtLauncher, SystemMtLauncher>();
+                services.AddScoped<ISystemMtCatalogReader>(provider =>
+                    (ISystemMtCatalogReader)provider.GetRequiredService<ISystemMtLauncher>());
                 services.AddSingleton<ISystemMtResultReportRenderer, HtmlSystemMtResultReportRenderer>();
 
                 services.AddScoped<Views.Pages.SystemMtExecutionPage>();
@@ -171,7 +173,7 @@ namespace MetBench_Client
                 });
                 services.AddScoped<LauncherCatalogV2Importer>(provider =>
                     new LauncherCatalogV2Importer(
-                        (SystemMtLauncher)provider.GetRequiredService<ISystemMtLauncher>(),
+                        provider.GetRequiredService<ISystemMtCatalogReader>(),
                         provider.GetRequiredService<IApplicationRepository>(),
                         provider.GetRequiredService<IMetamorphicRelationRepository>(),
                         provider.GetRequiredService<IMRBindingRepository>(),

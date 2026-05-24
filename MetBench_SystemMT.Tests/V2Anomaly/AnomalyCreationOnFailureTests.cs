@@ -1,8 +1,10 @@
 using System.Collections.ObjectModel;
 using MetBench_BLL.SystemMT.Anomaly;
+using MetBench_BLL.SystemMT.Catalog;
 using MetBench_BLL.SystemMT.Assertions;
 using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Pipeline;
+using MetBench_SystemMT.Tests.SystemMT;
 using MetBench_SystemMT.Tests.V2Pipeline;
 using MetBench_Domain;
 using Xunit;
@@ -119,10 +121,17 @@ public sealed class AnomalyCreationOnFailureTests
 
     private static SystemMtLauncher MakeLauncher(IAnomalyService anomalyService) =>
         new(
-            new LauncherOptions(SutRoot: "/tmp/dummy", SystemPython: "python3", OpenMocPython: "python3"),
+            new LauncherOptions(
+                SutRoot: TestAssetPaths.AssetRoot(),
+                SystemPython: TestAssetPaths.PythonExecutable(),
+                OpenMocPython: TestAssetPaths.PythonExecutable()),
             new SystemMtPipeline(),
             new SystemMtExecutionRecorder(new FakeExecRepo(), new FakeResultRepo()),
-            anomalyService);
+            anomalyService,
+            new ManifestMrCatalogProvider(new LauncherOptions(
+                SutRoot: TestAssetPaths.AssetRoot(),
+                SystemPython: TestAssetPaths.PythonExecutable(),
+                OpenMocPython: TestAssetPaths.PythonExecutable())));
 
     private static PipelineOutcome MakeOutcome(
         double sourceValue, double followupValue, string finalStatus)

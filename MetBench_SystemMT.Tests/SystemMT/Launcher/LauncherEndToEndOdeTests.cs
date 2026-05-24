@@ -1,5 +1,6 @@
 using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Pipeline;
+using MetBench_BLL.SystemMT.Catalog;
 using MetBench_BLL.SystemMT.Transformations;
 using MetBench_SystemMT.Tests.V2Anomaly;
 using MetBench_SystemMT.Tests.V2Pipeline;
@@ -33,7 +34,11 @@ public sealed class LauncherEndToEndOdeTests
                 OpenMocPython: TestAssetPaths.PythonExecutable()),
             _pipeline,
             _recorder,
-            _anomalyService);
+            _anomalyService,
+            new ManifestMrCatalogProvider(new LauncherOptions(
+                SutRoot: TestAssetPaths.AssetRoot(),
+                SystemPython: TestAssetPaths.PythonExecutable(),
+                OpenMocPython: TestAssetPaths.PythonExecutable())));
     }
 
     [Theory]

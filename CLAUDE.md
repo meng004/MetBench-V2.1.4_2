@@ -155,8 +155,11 @@ AI 可用于分类、摘要、草拟、解释等语言任务。路由、重试�
 **T0 · 核心 —— 系统级 MT 流程**
 
 测试输入生成 → 衍生输入转换 → 执行 SUT → 验证源/衍生输出是否满足 MR。实现为
-System-MT 引擎 + Launcher facade（`ISystemMtMrLauncher` 单一入口）+ LiteDB 持久化。
+System-MT 引擎 + Launcher facade（`ISystemMtLauncher` 单一入口）+ LiteDB 持久化。
 **验收标准：流程端到端走通**，不以覆盖全部方程为准（覆盖见 T3）。
+当前 `main`（2026-05-24 @ `5691727`）已切到 `ISystemMtLauncher` / `SystemMtLauncher`
++ provider-backed catalog 路径；WPF 默认注册 `ManifestMrCatalogProvider`，但 launcher
+launcher 已移除生产路径的 `HardcodedMrCatalogProvider` 过渡 fallback，现要求显式注入 `IMrCatalogProvider`。
 
 **T1 · 直接支撑与操作入口**
 
@@ -197,7 +200,7 @@ MT 检出的违例进入异常调查工作流（查询 / 过滤 / 状态机 / �
 
 | Project | Target framework | Where it runs | Notes |
 |---------|------------------|---------------|-------|
-| `MetBench_BLL.Core/` | `net8.0` | Anywhere (incl. Linux CI) | All cross-platform business logic. **System-MT runner, adapters, persistence contracts, reporting renderer, launcher facade live here.** |
+| `MetBench_BLL.Core/` | `net8.0` | Anywhere (incl. Linux CI) | All cross-platform business logic. **System-MT pipeline, provider-backed launcher facade, persistence contracts, reporting renderer, metadata/evidence path live here.** |
 | `MetBench_Domain/`, `MetBench_IDAL/` | `net8.0` | Anywhere | Legacy method-level entities + DAL contracts. |
 | `MetBench_DAL/` | `net8.0` | Anywhere | LiteDB-backed implementations. References `MetBench_BLL.Core` for the new system-MT result repository. |
 | `MetBench_BLL/` | `net8.0` | Anywhere (incl. Linux CI) | Legacy method-level MT business orchestration + cross-platform `MTVisualizationSerive` (LiveCharts data, no WPF) + Word/Excel/PDF report generators. **WPF chart plotters were extracted to `MetBench_Client/Services/Plotting/`** so BLL stays portable. |
@@ -252,13 +255,17 @@ ViewModels/SomeViewModel.cs        (logic)
 The launcher facade in `MetBench_BLL.Core/SystemMT/Launcher/` exposes the **only** entry point WPF code should use to run a system-level metamorphic test:
 
 ```csharp
-ISystemMtMrLauncher
+ISystemMtLauncher
     Task<IReadOnlyList<MrSummary>> ListAvailableAsync(ct)
     Task<MrRunResult> RunAsync(mrId, parameterOverrides?, ct)
     Task<IReadOnlyList<MrRunResult>> RunBatchAsync(requests, progress?, ct)
 ```
 
-> 历史命名（已废弃）：`ISystemMtScenarioLauncher` / `ScenarioDescriptor` / `ScenarioRunResult` / `scenarioId` 等。post-W12（PR #58）彻底改名以消除与 BDD Gherkin Scenario 的撞名混淆。Persistence 层的 `ScenarioName` 字段同步改为 `MrName` 并附 LiteDB 自动 schema migration（PR #62）。详见 [`docs/PROJECT-STRUCTURE.md`](docs/PROJECT-STRUCTURE.md) §8。
+> 历史命名（已废弃）：`ISystemMtMrLauncher` / `SystemMtMrLauncher` / `ISystemMtScenarioLauncher`
+> / `ScenarioDescriptor` / `ScenarioRunResult` / `scenarioId` 等。当前 `main` 已统一为
+> `ISystemMtLauncher` / `SystemMtLauncher`。Persistence 层的 `ScenarioName` 字段同步改为
+> `MrName` 并附 LiteDB 自动 schema migration（PR #62）。详见
+> [`docs/PROJECT-STRUCTURE.md`](docs/PROJECT-STRUCTURE.md)。
 
 **Type-leakage rule** — public method signatures use only:
 
@@ -285,11 +292,23 @@ services.AddSingleton<ISystemMtResultRepository>(provider =>
     return new LiteDbSystemMtResultRepository($"Filename={Path.Combine(dataDir, "SystemMT.Litedb")}");
 });
 
-services.AddSingleton<ISystemMtMrLauncher, SystemMtMrLauncher>();
+services.AddSingleton<IMrCatalogProvider>(provider =>
+    new ManifestMrCatalogProvider(
+        provider.GetRequiredService<LauncherOptions>()));
+
+services.AddScoped<ISystemMtLauncher, SystemMtLauncher>();
 services.AddSingleton<ISystemMtResultReportRenderer, HtmlSystemMtResultReportRenderer>();
 ```
 
 The system-MT LiteDB file (`SystemMT.Litedb`) is intentionally separate from the legacy MetBench DB (`MR.Litedb`) — `LiteDbSystemMtResultRepository` uses an isolated `BsonMapper` so the two schemas never interact.
+
+Current caveats on `main`:
+
+- `App.xaml.cs` now resolves `ISystemMtCatalogReader` for `LauncherCatalogV2Importer`;
+  the concrete cast from `ISystemMtLauncher` to `SystemMtLauncher` has been removed.
+- `SystemMtExecutionRecorder` now writes `ExecutionEvidence.SampleTraces` for the current target field
+  using source / follow-up input snapshots plus follow-up output metrics
+  until sample-level capture is wired in.
 
 ## 7. Async & UI-thread conventions
 
@@ -327,7 +346,7 @@ Once a feature has been cloud-side TDD-tested, it lives in one of these
 
 | Namespace | Purpose | Key types |
 |-----------|---------|-----------|
-| `MetBench_BLL.SystemMT.*` | Pipeline + Launcher + Persistence + Reporting | `SystemMtPipeline`, `ISystemMtMrLauncher`, `HtmlSystemMtResultReportRenderer` |
+| `MetBench_BLL.SystemMT.*` | Pipeline + Launcher + Persistence + Reporting | `SystemMtPipeline`, `ISystemMtLauncher`, `HtmlSystemMtResultReportRenderer` |
 | `MetBench_BLL.SystemMT.Anomaly` | Anomaly viewer + commonality | `AnomalyService`, `CommonalityReport` |
 | `MetBench_BLL.Discovery` | MR Discovery + Validation | `IMRDiscoverer`, `DiscoveryService`, `ValidationService`, `ILlmGateway` |
 | `MetBench_BLL.Discovery.Validators` | Day-1 validators | `EmpiricalValidator`, `TheoreticalLlmValidator` |

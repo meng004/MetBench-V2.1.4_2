@@ -2,8 +2,13 @@
 
 > **版本**: 2.0 草案
 > **日期**: 2026-05-13
-> **状态**: 基线文档 — 后续 8 周开发的依据
+> **状态**: 基线文档；2026-05-24 已按当前 `main` 做有限事实同步
 > **目标读者**: 实验室研究人员、平台开发者、协作者
+
+> **当前实现状态注记（2026-05-24）**：
+> 1. 运行时已切到 provider-backed catalog 路径：`IMrCatalogProvider` + `ManifestMrCatalogProvider`。
+> 2. `ExecutionEvidence` / `V3MrIdRef` / recorder write-through 已进入执行路径。
+> 3. Trend 子系统已于 next-stage P0 下线，本文保留的 Trend 相关内容仅作为历史设计背景；不得再把它理解为当前活跃运行时模块。
 
 ## 文档结构
 
@@ -50,7 +55,7 @@ MetBench v2 是**工程级**系统级 metamorphic testing（MT）平台，面向
 │  • SUT / MR / Adapter / Runtime CRUD 页                            │
 │  • Execution 启动 + 实时进度页                                       │
 │  • Anomaly 列表 + 详情 + 一键重放页                                  │
-│  • Coverage Dashboard + Trend Dashboard                            │
+│  • Coverage Dashboard                                              │
 │  • dashboard.html 嵌入页（聚合视图）                                  │
 └────────────────────────┬─────────────────────────────────────────┘
                          ↓ in-proc method call
@@ -71,7 +76,7 @@ MetBench v2 是**工程级**系统级 metamorphic testing（MT）平台，面向
 │                                                                    │
 │  ┌─ 模块（按 §4）─────────────────────────────────────────┐       │
 │  │  Runtime / SUT / Adapter / MR / Discovery /            │       │
-│  │  Mutation / Anomaly / Replay / Trend / Coverage /      │       │
+│  │  Mutation / Anomaly / Replay / Coverage /              │       │
 │  │  Reports / Audit                                       │       │
 │  └────────────────────────────────────────────────────────┘       │
 └────────────────────────┬─────────────────────────────────────────┘
@@ -176,9 +181,9 @@ MetBench v2 是**工程级**系统级 metamorphic testing（MT）平台，面向
 | M9 | **Mutation** | `MetBench_BLL.Core.Mutation` | MutationOperator + Campaign + Result 分析 |
 | M10 | **Anomaly** | `MetBench_BLL.Core.Anomaly` | 异常列表 + 详情 + Replay |
 | M11 | **Coverage** | `MetBench_BLL.Core.Coverage` | 多维覆盖率计算 |
-| M12 | **Trend** | `MetBench_BLL.Core.Trend` | 趋势分析 + 周报生成 |
-
 每个模块独立 namespace + DI registration + 单元测试，**无横向依赖**（通过 Repository 接口解耦）。
+当前运行时额外包含一个收敛中的 catalog/evidence 子主线：`IMrCatalogProvider` /
+`ManifestMrCatalogProvider` / `SystemMtExecutionRecorder` / `ExecutionEvidence`。
 
 ---
 
@@ -200,7 +205,6 @@ MetBench v2 是**工程级**系统级 metamorphic testing（MT）平台，面向
 | Mutation 子系统 | 4 个新实体（Operator / Mutant / Campaign / Result） | §8 |
 | Anomaly 重放 | 同 MRInstance + 同 SUT 版本重跑，自动对比 | §9 |
 | Coverage 维度 | MetaPattern / SUT×MR / Bug / Mutation 四维 | §10 |
-| 趋势分析 | TrendAnalysisService 周报 + WPF 仪表盘 | §11 |
 | 报告 | HTML / PDF，多 Scope（单跑 / Campaign / 周报 / 月报） | §12 |
 
 ---
@@ -383,7 +387,10 @@ public async Task<ReplayResult> ReplayAsync(Guid anomalyId, CancellationToken ct
 
 ---
 
-## 11. 趋势分析
+## 11. 历史设计残页（Trend 已下线，不代表当前运行时）
+
+> 以下 Trend 片段保留为历史设计记录，帮助解释旧文档 / 旧提交中的命名来源。
+> 它们**不再**代表 2026-05-24 `main` 的现行运行时；当前主线已移除 Trend 子系统。
 
 ```csharp
 public class TrendAnalysisService

@@ -1,6 +1,7 @@
 using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Metadata;
 using MetBench_BLL.SystemMT.Pipeline;
+using MetBench_BLL.SystemMT.Catalog;
 using MetBench_DAL;
 using MetBench_SystemMT.Tests.V2Anomaly;
 using MetBench_SystemMT.Tests.V2Pipeline;
@@ -18,11 +19,16 @@ public sealed class SystemMtMetadataCatalogTests : IDisposable
         var dir = Path.Combine(Path.GetTempPath(), "MetBenchMetaCatalogTests", Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(dir);
         _metaDbPath = Path.Combine(dir, "metadata.db");
+        var launcherOptions = new LauncherOptions(
+            SutRoot: TestAssetPaths.AssetRoot(),
+            SystemPython: TestAssetPaths.PythonExecutable(),
+            OpenMocPython: TestAssetPaths.PythonExecutable());
         _launcher = new SystemMtLauncher(
-            new LauncherOptions("/tmp", "python3", "python3"),
+            launcherOptions,
             new SystemMtPipeline(),
             new SystemMtExecutionRecorder(new FakeExecRepo(), new FakeResultRepo()),
-            new RecordingAnomalyService());
+            new RecordingAnomalyService(),
+            new ManifestMrCatalogProvider(launcherOptions));
     }
 
     public void Dispose()

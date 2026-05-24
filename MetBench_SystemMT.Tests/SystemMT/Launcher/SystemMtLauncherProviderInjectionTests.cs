@@ -13,9 +13,8 @@ using Xunit;
 namespace MetBench_SystemMT.Tests.SystemMT.Launcher;
 
 /// <summary>
-/// Phase C (Task 3) acceptance: an injected <see cref="IMrCatalogProvider"/> drives the launcher's
-/// runnable MR set. Without injection, the launcher falls back to <c>HardcodedMrCatalogProvider</c>
-/// (transitional, slated for Task 7 removal).
+/// Acceptance: an injected <see cref="IMrCatalogProvider"/> drives the launcher's
+/// runnable MR set, and launcher construction rejects a missing provider.
 /// </summary>
 public sealed class SystemMtLauncherProviderInjectionTests
 {
@@ -81,15 +80,30 @@ public sealed class SystemMtLauncherProviderInjectionTests
     }
 
     [Fact]
-    public async Task ListAvailableAsync_without_provider_falls_back_to_hardcoded_17_MRs()
+    public void Constructor_without_catalog_provider_throws()
     {
-        // Phase C fallback: no catalogProvider → HardcodedMrCatalogProvider.
-        // Task 7 will remove the fallback and require explicit injection.
-        var launcher = new SystemMtLauncher(
+        Assert.Throws<ArgumentNullException>(() => new SystemMtLauncher(
             options: Opts(),
             pipeline: new SystemMtPipeline(),
             recorder: new SystemMtExecutionRecorder(new FakeExecRepo(), new FakeResultRepo()),
-            anomalyService: new RecordingAnomalyService());
+            anomalyService: new RecordingAnomalyService(),
+            catalogProvider: null!));
+    }
+
+    [Fact]
+    public async Task Manifest_provider_yields_runnable_catalog_without_hardcoded_fallback()
+    {
+        var opts = new LauncherOptions(
+            SutRoot: TestAssetPaths.AssetRoot(),
+            SystemPython: "python3",
+            OpenMocPython: "python3");
+
+        var launcher = new SystemMtLauncher(
+            options: opts,
+            pipeline: new SystemMtPipeline(),
+            recorder: new SystemMtExecutionRecorder(new FakeExecRepo(), new FakeResultRepo()),
+            anomalyService: new RecordingAnomalyService(),
+            catalogProvider: new ManifestMrCatalogProvider(opts));
 
         var items = await launcher.ListAvailableAsync();
 

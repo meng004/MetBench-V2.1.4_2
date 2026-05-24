@@ -41,6 +41,9 @@ UC-B7 初次跑命中 **cross-track bug**: 生产 `LiteDbSystemMtResultRepositor
 
 ### _待写_
 
+### 2026-05-24 baseline-solidification
+本轮不是新的 UAT 轮次，而是对当前工作树做基线固化核查。最初完整 `dotnet test MetBench_SystemMT.Tests --no-restore` 暴露 1 个回归：`OpenMocOutputAdapterTests.ParseAsync_returns_keff_iterations_and_converged`，根因是 Python `Path.resolve()` 把 `/var/...` 展开成 `/private/var/...`。修复 `SUT/openmoc/openmoc_output_adapter.py` 后，完整 `dotnet test MetBench_SystemMT.Tests --no-restore --logger "trx;LogFileName=baseline-2026-05-24-current.trx"` 返回 **961 pass / 0 fail / 8 skip / 969 total**；测试工件已固化为 [`round-3-limeng-2026-05-24/baseline-2026-05-24-current.trx`](/Users/limeng/Codes/苏永成-蜕变测试系统代码与文档资料/MetBench-V2.1.4_2/docs/uat/reports/round-3-limeng-2026-05-24/baseline-2026-05-24-current.trx)。该结果已随提交 `373bb59` 落库，现应视为“最新本地已提交可审计绿基线”；`763e067` 则降为前一轮历史精确绿基线参考。
+
 ---
 
 ## Release 决策矩阵

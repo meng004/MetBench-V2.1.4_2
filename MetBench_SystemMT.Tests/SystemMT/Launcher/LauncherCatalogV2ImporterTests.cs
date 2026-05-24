@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using MetBench_BLL.SystemMT.Catalog;
 using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_Domain;
@@ -25,16 +26,51 @@ public sealed class LauncherCatalogV2ImporterTests
     private readonly SystemMtLauncher _launcher;
     private readonly LauncherCatalogV2Importer _importer;
 
+    private static MrCatalogEntry FakeEntry(string mrId, string sutName) =>
+        new(
+            Mr: new MrSummary(
+                Id: mrId,
+                DisplayName: "fake",
+                SutName: sutName,
+                TransformationName: "ScaleField",
+                AssertionName: "GreaterThan",
+                ValueName: "y",
+                DefaultParameters: new Dictionary<string, string>(),
+                Description: "test",
+                MrFamily: "test"),
+            SampleCaseRelativePath: "fake/sample.json",
+            RunnerScriptPath: "/tmp/runner.py",
+            InputAdapterScriptPath: "/tmp/in_adapter.py",
+            OutputAdapterScriptPath: "/tmp/out_adapter.py",
+            PythonExecutable: "python3",
+            WorkRootName: "MetBenchFake",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: "/tmp/in_parser.py",
+            OutputParserScriptPath: "/tmp/out_parser.py",
+            TransformSteps: new[] { new MrCatalogTransformStep("ScaleField", "/x") },
+            AssertionTypeCode: "greater",
+            EquationKey: "",
+            Tolerance: null);
+
+    private sealed class FakeCatalogReader : ISystemMtCatalogReader
+    {
+        private readonly IReadOnlyList<MrCatalogEntry> _entries;
+        public FakeCatalogReader(IReadOnlyList<MrCatalogEntry> entries) => _entries = entries;
+        public IReadOnlyList<MrCatalogEntry> GetCatalogEntries() => _entries;
+    }
+
     public LauncherCatalogV2ImporterTests()
     {
+        var launcherOptions = new LauncherOptions(
+            SutRoot: TestAssetPaths.AssetRoot(),
+            SystemPython: TestAssetPaths.PythonExecutable(),
+            OpenMocPython: TestAssetPaths.PythonExecutable());
         _launcher = new SystemMtLauncher(
-            new LauncherOptions(
-                SutRoot: TestAssetPaths.AssetRoot(),
-                SystemPython: TestAssetPaths.PythonExecutable(),
-                OpenMocPython: TestAssetPaths.PythonExecutable()),
+            launcherOptions,
             new SystemMtPipeline(),
             new SystemMtExecutionRecorder(_execs, _results),
-            new RecordingAnomalyService());
+            new RecordingAnomalyService(),
+            new ManifestMrCatalogProvider(launcherOptions));
         _importer = new LauncherCatalogV2Importer(_launcher, _apps, _mrs, _bindings, _audit);
     }
 
@@ -196,6 +232,28 @@ public sealed class LauncherCatalogV2ImporterTests
             new LauncherCatalogV2Importer(_launcher, _apps, _mrs, null!, _audit));
         Assert.Throws<ArgumentNullException>(() =>
             new LauncherCatalogV2Importer(_launcher, _apps, _mrs, _bindings, null!));
+    }
+
+    [Fact]
+    public void Import_reads_entries_from_catalog_reader_abstraction()
+    {
+        var importer = new LauncherCatalogV2Importer(
+            new FakeCatalogReader(new[]
+            {
+                FakeEntry("reader-only-mr", "reader-sut"),
+            }),
+            _apps,
+            _mrs,
+            _bindings,
+            _audit);
+
+        var summary = importer.Import();
+
+        Assert.Equal(1, summary.ApplicationsCreated);
+        Assert.Equal(1, summary.MrsCreated);
+        Assert.Equal(1, summary.BindingsCreated);
+        Assert.Equal("reader-sut", Assert.Single(_apps.Data).Name);
+        Assert.Equal("reader-only-mr", Assert.Single(_mrs.Data).Code);
     }
 
     [Fact]

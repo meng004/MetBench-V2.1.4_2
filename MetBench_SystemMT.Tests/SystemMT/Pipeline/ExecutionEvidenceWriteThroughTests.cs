@@ -179,22 +179,44 @@ public sealed class ExecutionEvidenceWriteThroughTests
     }
 
     [Fact]
-    public async Task Record_evidence_SampleTraces_is_empty_until_pipeline_step3_lands()
+    public async Task Record_evidence_writes_sample_trace_for_target_field()
     {
-        // Task 6 step 2 deliberately leaves SampleTraces empty — pipeline parse-phase
-        // capture lands in step 3. This test pins the contract so a future step-3 PR
-        // can flip the assertion to "non-empty" without churning the call site.
         var execRepo = new FakeExecRepo();
         var resRepo = new FakeResultRepo();
         var evRepo = new InMemoryEvidenceRepo();
         var v3Repo = new InMemoryV3Repo();
+        var tempDir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "metbench-evidence-tests", Guid.NewGuid().ToString("N"));
+        System.IO.Directory.CreateDirectory(tempDir);
+        var sourcePath = System.IO.Path.Combine(tempDir, "source.json");
+        var followupPath = System.IO.Path.Combine(tempDir, "followup.json");
+        await System.IO.File.WriteAllTextAsync(sourcePath, """{"initial":{"amplitude":1.0}}""");
+        await System.IO.File.WriteAllTextAsync(followupPath, """{"initial":{"amplitude":2.0}}""");
 
-        var recorder = new SystemMtExecutionRecorder(execRepo, resRepo, evRepo, v3Repo);
-        var recorded = recorder.Record(CtxFor("heat-equation-amplitude"), OkOutcome(), mrInstanceId: 1);
+        try
+        {
+            var recorder = new SystemMtExecutionRecorder(execRepo, resRepo, evRepo, v3Repo);
+            var recorded = recorder.Record(
+                CtxFor("heat-equation-amplitude") with { SourceCasePath = sourcePath },
+                OkOutcome() with
+                {
+                    FollowupInputPath = followupPath,
+                    FollowupMetrics = new Dictionary<string, double> { ["max_u"] = 3.5 },
+                },
+                mrInstanceId: 1);
 
-        var evidence = await evRepo.GetByExecutionAsync(recorded.ExecutionId);
-        Assert.NotNull(evidence);
-        Assert.Empty(evidence!.SampleTraces);
+            var evidence = await evRepo.GetByExecutionAsync(recorded.ExecutionId);
+            Assert.NotNull(evidence);
+            var trace = Assert.Single(evidence!.SampleTraces);
+            Assert.Equal("max_u", trace.VariableName);
+            Assert.Equal("/initial/amplitude", trace.Path);
+            Assert.Equal("1.0", trace.SourceValueJson);
+            Assert.Equal("2.0", trace.TransformedValueJson);
+            Assert.Equal("3.5", trace.OutputValueJson);
+        }
+        finally
+        {
+            try { System.IO.Directory.Delete(tempDir, recursive: true); } catch { }
+        }
     }
 
     private sealed class InMemoryEvidenceRepo : IExecutionEvidenceRepository

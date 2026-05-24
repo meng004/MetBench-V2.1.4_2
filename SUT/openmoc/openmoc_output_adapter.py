@@ -42,7 +42,7 @@ def parse_output(output_file: str) -> dict:
         "values": values,
         "metadata": {
             "adapter": "openmoc",
-            "outputFile": str(output_path.resolve()),
+            "outputFile": str(output_path.absolute()),
         },
     }
 
