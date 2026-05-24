@@ -128,6 +128,7 @@
 | G-11 ⚖ 已裁决(2026-05-23)：保留至 Stage 9 | F-T1-04（v1 兼容） | **v1 LaTeX 展示衍生字段路径**：`MetamorphicRelationService.Add/Update` + `AutoMRParser.ProduceMRs/Async` + `MRRecommendationViewModel` + `MRManagementViewModel` 共 4 处调 `Latextosympy*`（已 `[Obsolete]`）。与 method MT 执行栈（G-06）完全正交，不影响新功能 | v1 UI 展示完整，`ObsoleteAttributeGuardTests` 守卫防止新增调用 | **裁决(a)：保留为 v1 兼容**，不做额外修改。**Stage 9 清理义务**：届时须删除 `Latextosympy` / `Latextosympy_Await` 类、4 处调用、LiteDB 中的 SymPy 文本 + PNG 衍生字段，并迁移已有 MR 记录。此决策由用户于 2026-05-23 确认 |
 | G-12 | F-T1-04（远期 PBT 升级） | **method MT 升级到 property-based testing**：当前走 AAA + catalog-driven validator（G-06），未引入 FsCheck / Hedgehog 等 PBT 框架。PBT 与 MT 范式天然契合（property over many inputs + shrinking） | 当前 SUT 是解析解，无 bug 可找；MR 数个位数；PBT generator 工程量大于当前 MR 验证工程量 | 触发条件：method MR 数 ≥ 20 跨多方程 ∥ 接入有 bug 风险的真实 C# SUT。届时 catalog schema 加 input domain 字段，AAA 测试保留为基线、新增 PBT validator 作为第二层 |
 | G-13 | F-T3-02（远期 PBT 升级） | **system MT 在轻量 SUT 上叠加 PBT 做模糊测试**：当前 system MT 走 BDD `.feature`，OpenMOC/OpenMC 单 case 时长（30s / 5min）禁止 PBT；但 projectile / damped-oscillator / lotka-volterra / decay-chain 单 case < 1s，PBT 可行 | BDD 的领域沟通价值不可替代（OpenMOC/OpenMC 永远不走 PBT）；轻量 SUT 是 PBT 的合适载体 | 触发条件：轻量 SUT 的 BDD 稳定 + input generator 工程量预算允许。覆盖范围严格限制为 < 1s 单 case 的 ODE SUT |
+| G-X3-CatalogConvergence | F-T0-02 / F-T1-04 / F-T0-03 | **System-MT catalog 双事实源 + 硬编码 launcher 收敛**：当前 `SystemMtLauncher.BuildBlueprints()` 私有方法硬编码全部 17 MR × 9 SUT 蓝图，与 `LiteDbSystemMtMetadataRepository`（catalog 元信息）+ `MetamorphicRelationV3` LiteDB 表（PR #88 V3 5D-tag schema）三者并存，**修改任一处都需手工同步另两处**；同时执行记录 `SystemMtResultRecord` 只持久化 summary 级（无样本点级 evidence、无 V3 IdV3 反向链接） | T0 执行路径无单一事实源；Stage 8 主线 MR 库扩张 → 蓝图体积失控；V3 schema landed 但 unwired（未进 pipeline 写入路径） | 收敛方案见 [`docs/superpowers/specs/2026-05-24-systemmt-catalog-convergence-design.md`](superpowers/specs/2026-05-24-systemmt-catalog-convergence-design.md) v3 / 实施 [`docs/superpowers/plans/2026-05-24-systemmt-catalog-convergence-plan.md`](superpowers/plans/2026-05-24-systemmt-catalog-convergence-plan.md) v2（8 任务，3 PR：PR-A 蓝图→Provider，PR-B 样本级 evidence + V3 写入，PR-C 删除 hardcoded + 文档同步） |
 
 ## 11. 与 P0–P7 对应的快速索引（执行历史）
 
@@ -168,6 +169,7 @@
 | `44a5d1b` | **review-fix-3** | medium：DeleteMr binding guard + enum int 锁定 + SUT divide-by-zero/edge guard（+8 测试，876 pass）|
 | `254c167` | **G-X1-Adv** | CandidateReviewPage.xaml 删除 UseAdversarial CheckBox（VM 端 binding error 消除） |
 | `1479962` | **G-X2-LatexGuard** | LegacyPathBoundaryTests：v1 LaTeX 调用边界守卫（2 测试，878 pass） |
+| _(pending)_ | **G-X3 docs** | Catalog convergence spec v3 + plan v2 + §10/§11/AGENTS 指针（doc-only，无测试基线变化）|
 
 ## 12. 受控开发模式工作流
 

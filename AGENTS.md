@@ -266,6 +266,7 @@ MP_mono 到 MP_inv）由 DP-2 转入本 Stage MR 库工作。
 - [meta-prompt MR 识别引擎计划](docs/superpowers/plans/2026-05-18-meta-prompt-mr-discovery-plan.md)
 - [Stage 8 MR 库原始详细计划](docs/superpowers/plans/2026-05-18-stage8-expanded-mr-library-plan.md) —— 定位放宽前所写，其「5 方程 + home-grown」部分以上述「当前」文档为准
 - [MR 协议层 + 方程函数容器实施计划](docs/superpowers/plans/2026-05-23-mr-architecture-implementation-plan.md) —— P0–P7 全部完成（2026-05-23）：L0 数学基元 17 算子、IEquationFunction + Recipe 执行器、Bateman L2 解析解 + L1 Recipe、method 侧执行栈、BDD steps 切 W2 facade、LaTeX→SymPy 路径标 Obsolete
+- [SystemMT Catalog Convergence Spec v3](docs/superpowers/specs/2026-05-24-systemmt-catalog-convergence-design.md) + [实施 Plan v2](docs/superpowers/plans/2026-05-24-systemmt-catalog-convergence-plan.md) —— 收敛 `SystemMtLauncher.BuildBlueprints()` 硬编码 catalog → provider-backed manifest（`IMrCatalogProvider`），同时打通 V3 5D-tag schema 写入路径 + 样本点级 execution evidence。8 任务 / 3 PR slices（PR-A → PR-C）；登记于 `docs/requirements.md` §10 G-X3-CatalogConvergence
 
 > 本节原含「5 方程 × 4 程序类型 + 4 home-grown」的详细 phase 拆解；因定位放宽，
 > 细节已迁移并更新至上述 plans —— AGENTS.md 只保留路线图层面的高层描述与指针。
