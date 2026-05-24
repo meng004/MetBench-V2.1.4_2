@@ -15,7 +15,7 @@
 | **测试文件** | `MetBench_SystemMT.Tests/` 下相对路径 | 单元 + BDD + UAT |
 | **测试结果** | `dotnet test MetBench_SystemMT.Tests` 最近一次基线 | `pass/skip/fail` 或缺口说明 |
 
-**基线**：最新已提交、可审计精确绿基线来自提交 `763e067`（PR #93）—— `dotnet test MetBench_SystemMT.Tests` = **965 pass / 0 fail**。当前 `main` 已前进到 `5691727`（PR #94：ManifestMrCatalogProvider 路径分隔符 hotfix）；本轮 2026-05-24 在当前工作树执行完整 `dotnet test MetBench_SystemMT.Tests --no-restore --logger "trx;LogFileName=baseline-2026-05-24-current.trx"`，得到 **961 pass / 0 fail / 8 skip / 969 total**，TRX 已固化到 [`docs/uat/reports/round-3-limeng-2026-05-24/baseline-2026-05-24-current.trx`](/Users/limeng/Codes/苏永成-蜕变测试系统代码与文档资料/MetBench-V2.1.4_2/docs/uat/reports/round-3-limeng-2026-05-24/baseline-2026-05-24-current.trx)。这说明当前工作树已恢复为绿，但在未提交前，它仍应视为“当前工作树绿结果”，不能替代 `763e067` 的“已提交可审计基线”表述。另：2026-05-24 Windows 侧已知旧回执仍是 `dotnet build MetBench_Client/MetBench_Client.csproj` 0 编译错误、约 17.47s；本轮最新代码的 Windows 回执仍待补记。
+**基线**：最新本地已提交、可审计精确绿基线是提交 `373bb59`（2026-05-24，`feat(systemmt): align catalog runtime and solidify baseline`）—— `dotnet test MetBench_SystemMT.Tests --no-restore --logger "trx;LogFileName=baseline-2026-05-24-current.trx"` = **961 pass / 0 fail / 8 skip / 969 total**，TRX 已固化到 [`docs/uat/reports/round-3-limeng-2026-05-24/baseline-2026-05-24-current.trx`](/Users/limeng/Codes/苏永成-蜕变测试系统代码与文档资料/MetBench-V2.1.4_2/docs/uat/reports/round-3-limeng-2026-05-24/baseline-2026-05-24-current.trx)。`origin/main` 当前仍停在 `5691727`（PR #94：ManifestMrCatalogProvider 路径分隔符 hotfix），因此 `373bb59` 代表“本地已提交的新基线”，尚未成为远端共享基线。历史已提交精确绿基线 `763e067`（PR #93）= **965 pass / 0 fail** 继续保留为前一轮参考。另：2026-05-24 Windows 侧已知旧回执仍是 `dotnet build MetBench_Client/MetBench_Client.csproj` 0 编译错误、约 17.47s；本轮最新代码的 Windows 回执仍待补记。
 
 ## 1. T0 · 核心 —— 系统级 MT 流程
 

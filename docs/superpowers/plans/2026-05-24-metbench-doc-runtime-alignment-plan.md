@@ -472,11 +472,11 @@ Expected:
 
 ```text
 - requirements / project-structure / dashboard 已统一到同一当前口径
-- 当前口径：763e067 = 最近已提交可审计精确绿基线；2026-05-24 工作树 = 961 pass / 0 fail / 8 skip
+- 当前口径：`373bb59` = 最新本地已提交可审计精确绿基线；`763e067` = 前一轮历史精确绿基线；2026-05-24 最新结果 = 961 pass / 0 fail / 8 skip
 - 历史 521 / 876 / 965 仍保留在各自历史语境中，不再冒充“当前唯一 baseline”
 ```
 
-- [ ] **Step 4: 提交**
+- [x] **Step 4: 提交**
 
 ```bash
 rtk git add docs/requirements.md docs/PROJECT-STRUCTURE.md docs/uat/reports/dashboard.md

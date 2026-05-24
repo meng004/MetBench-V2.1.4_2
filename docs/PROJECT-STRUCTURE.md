@@ -87,9 +87,9 @@ SUT 接入到框架的 hook：
 | **ColdStart** | — | `ColdStart/` | 1 | 1 |
 
 **测试总数对照**：
-- 最新已提交、可审计精确 Linux / cloud 绿基线：提交 `763e067`（PR #93）声明 **965 pass / 0 fail**
-- 当前 2026-05-24 工作树全量实跑：`dotnet test MetBench_SystemMT.Tests --no-restore --logger "trx;LogFileName=baseline-2026-05-24-current.trx"` = **961 pass / 0 fail / 8 skip / 969 total**
-- 当前工作树 TRX：[`docs/uat/reports/round-3-limeng-2026-05-24/baseline-2026-05-24-current.trx`](/Users/limeng/Codes/苏永成-蜕变测试系统代码与文档资料/MetBench-V2.1.4_2/docs/uat/reports/round-3-limeng-2026-05-24/baseline-2026-05-24-current.trx)
+- 最新本地已提交、可审计精确 Linux / cloud 绿基线：提交 `373bb59` = **961 pass / 0 fail / 8 skip / 969 total**
+- 对应 TRX：[`docs/uat/reports/round-3-limeng-2026-05-24/baseline-2026-05-24-current.trx`](/Users/limeng/Codes/苏永成-蜕变测试系统代码与文档资料/MetBench-V2.1.4_2/docs/uat/reports/round-3-limeng-2026-05-24/baseline-2026-05-24-current.trx)
+- 历史已提交精确绿基线参考：提交 `763e067`（PR #93）声明 **965 pass / 0 fail**
 - 当前 Windows WPF 已知旧基线：2026-05-24 在 Parallels Win11 上 `dotnet build MetBench_Client/MetBench_Client.csproj` **0 编译错误**，约 `17.47s`；本轮最新代码回执待补
 - UAT BDD filter（`FullyQualifiedName~UAT`）：**48 Pass / 0 Skip**
 - BDD smoke（Features filter）：**30 Pass / 1 Skip**
