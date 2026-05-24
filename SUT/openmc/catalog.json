@@ -1,0 +1,72 @@
+{
+  "sut_name": "openmc",
+  "program": {
+    "program_name": "openmc",
+    "equation": "Boltzmann",
+    "equation_key": "",
+    "program_type": "MC",
+    "runner_script_relative_path": "openmc_runner.py",
+    "input_parser_script_relative_path": "openmc_input_parser.py",
+    "output_parser_script_relative_path": "openmc_output_parser.py",
+    "input_adapter_script_relative_path": "openmc_input_adapter.py",
+    "output_adapter_script_relative_path": "openmc_output_adapter.py",
+    "python_executable_kind": "openmc"
+  },
+  "mrs": [
+    {
+      "mr_id": "openmc-pincell-nu-sigma-f",
+      "sut_name": "openmc",
+      "display_name": "OpenMC pin-cell — ScaleNuSigmaF (k_eff increases)",
+      "description": "Monte Carlo counterpart of the OpenMOC ScaleNuSigmaF MR. Scaling the fuel material's nu-sigma-f cross section by factor > 1 must monotonically increase k_eff in OpenMC's multi-group eigenvalue solve, just as it does in OpenMOC's deterministic transport solve. Same MR, different solver.",
+      "mr_family": "NeutronTransport.Scaling.NuSigmaF",
+      "transformation_name": "ScaleNuSigmaF",
+      "assertion_type_code": "greater",
+      "assertion_name": "GreaterThan",
+      "value_name": "k_eff",
+      "default_parameters": { "factor": "1.5" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/materials/fuel/nu_sigma_f" }
+      ],
+      "tolerance_rel": 0,
+      "tolerance_abs": 0,
+      "noise_aware": false,
+      "equation_key": "",
+      "equation": "Boltzmann",
+      "program_type": "MC",
+      "meta_pattern": "Mono",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "sample_case_relative_path": "sample/pincell.json",
+      "work_root_name": "MetBenchOpenMcNuSigmaF",
+      "timeout_seconds": 300
+    },
+    {
+      "mr_id": "openmc-pincell-sigma-a",
+      "sut_name": "openmc",
+      "display_name": "OpenMC pin-cell — ScaleFuelSigmaA (k_eff decreases)",
+      "description": "Monte Carlo counterpart of the OpenMOC ScaleFuelSigmaA MR. Scaling fuel absorption by factor > 1 must monotonically decrease k_eff in OpenMC's multi-group eigenvalue solve.",
+      "mr_family": "NeutronTransport.Scaling.SigmaA",
+      "transformation_name": "ScaleFuelSigmaA",
+      "assertion_type_code": "less",
+      "assertion_name": "LessThan",
+      "value_name": "k_eff",
+      "default_parameters": { "factor": "1.5" },
+      "transform_steps": [
+        { "transformation_name": "ScaleFuelAbsorption", "target_field_path": "/materials/fuel" }
+      ],
+      "tolerance_rel": 0,
+      "tolerance_abs": 0,
+      "noise_aware": false,
+      "equation_key": "",
+      "equation": "Boltzmann",
+      "program_type": "MC",
+      "meta_pattern": "Mono",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "input_adapter_script_relative_path": "openmc_input_adapter_sigma_a.py",
+      "sample_case_relative_path": "sample/pincell.json",
+      "work_root_name": "MetBenchOpenMcSigmaA",
+      "timeout_seconds": 300
+    }
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "sut_name": "heat-equation",
+  "program": {
+    "program_name": "heat-equation",
+    "equation": "Fourier",
+    "equation_key": "heat-equation-1d",
+    "program_type": "Num",
+    "runner_script_relative_path": "heat_equation.py",
+    "input_parser_script_relative_path": "heat_equation_input_parser.py",
+    "output_parser_script_relative_path": "heat_equation_output_parser.py",
+    "input_adapter_script_relative_path": "heat_equation_input_adapter.py",
+    "output_adapter_script_relative_path": "heat_equation_output_adapter.py",
+    "python_executable_kind": "system"
+  },
+  "mrs": [
+    {
+      "mr_id": "heat-equation-amplitude",
+      "sut_name": "heat-equation",
+      "display_name": "1D heat equation — ScaleAmplitude (linearity)",
+      "description": "1D heat equation with homogeneous Dirichlet BCs is linear in the initial profile. Scaling the initial amplitude by factor > 1 must scale max_u at t_final by the same factor.",
+      "mr_family": "Diffusion.Scaling.Amplitude",
+      "transformation_name": "ScaleAmplitude",
+      "assertion_type_code": "greater",
+      "assertion_name": "GreaterThan",
+      "value_name": "max_u",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/initial/amplitude" }
+      ],
+      "tolerance_rel": 0,
+      "tolerance_abs": 0,
+      "noise_aware": false,
+      "equation_key": "",
+      "equation": "Fourier",
+      "program_type": "Num",
+      "meta_pattern": "Mono",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "sample_case_relative_path": "sample/gaussian.json",
+      "work_root_name": "MetBenchHeatEq",
+      "timeout_seconds": 60
+    },
+    {
+      "mr_id": "fourier-timestep-convergence",
+      "sut_name": "heat-equation",
+      "display_name": "1D heat equation — TimestepConvergence (forward-Euler refinement)",
+      "description": "Time-step convergence MP_conv: doubling num_steps (halving the forward-Euler time-step dt) must leave max_u(t_final) within Euler truncation tolerance — the integrator is already at the fine-grid plateau given the chosen alpha.",
+      "mr_family": "Fourier.Convergence.Timestep",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "approx",
+      "assertion_name": "ApproxEqual",
+      "value_name": "max_u",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/params/num_steps" }
+      ],
+      "tolerance_rel": 0.01,
+      "tolerance_abs": 1e-6,
+      "noise_aware": false,
+      "equation_key": "heat-equation-1d",
+      "equation": "Fourier",
+      "program_type": "Num",
+      "meta_pattern": "Conv",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "sample_case_relative_path": "sample/gaussian.json",
+      "work_root_name": "MetBenchHeatEq",
+      "timeout_seconds": 60
+    },
+    {
+      "mr_id": "fourier-alpha-monotonic",
+      "sut_name": "heat-equation",
+      "display_name": "1D heat equation — ScaleAlpha (diffusion monotonicity)",
+      "description": "Diffusion coefficient monotonicity MP_mono: at fixed t_final, larger alpha causes faster diffusive smoothing of the initial profile, so scaling alpha by factor > 1 must strictly decrease max_u(t_final).",
+      "mr_family": "Fourier.Scaling.Alpha",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "less",
+      "assertion_name": "LessThan",
+      "value_name": "max_u",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/params/alpha" }
+      ],
+      "tolerance_rel": 0,
+      "tolerance_abs": 0,
+      "noise_aware": false,
+      "equation_key": "heat-equation-1d",
+      "equation": "Fourier",
+      "program_type": "Num",
+      "meta_pattern": "Mono",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "sample_case_relative_path": "sample/gaussian.json",
+      "work_root_name": "MetBenchHeatEq",
+      "timeout_seconds": 60
+    }
+  ]
+}

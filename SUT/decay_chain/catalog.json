@@ -1,0 +1,98 @@
+{
+  "sut_name": "decay-chain",
+  "program": {
+    "program_name": "decay-chain",
+    "equation": "Bateman",
+    "equation_key": "bateman",
+    "program_type": "Num",
+    "runner_script_relative_path": "decay_chain.py",
+    "input_parser_script_relative_path": "decay_chain_input_parser.py",
+    "output_parser_script_relative_path": "decay_chain_output_parser.py",
+    "input_adapter_script_relative_path": "decay_chain_input_adapter.py",
+    "output_adapter_script_relative_path": "decay_chain_output_adapter.py",
+    "python_executable_kind": "system"
+  },
+  "mrs": [
+    {
+      "mr_id": "decay-chain-scale-initial",
+      "sut_name": "decay-chain",
+      "display_name": "Decay chain — ScaleInitial (linearity)",
+      "description": "The 3-nuclide Bateman decay chain A→B→C is linear in the initial quantities. Scaling every initial N by factor > 1 must scale the accumulated end-nuclide N_C_final by the same factor.",
+      "mr_family": "Bateman.Scaling.Initial",
+      "transformation_name": "ScaleInitial",
+      "assertion_type_code": "greater",
+      "assertion_name": "GreaterThan",
+      "value_name": "N_C_final",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleInitial", "target_field_path": "" }
+      ],
+      "tolerance_rel": 0,
+      "tolerance_abs": 0,
+      "noise_aware": false,
+      "equation_key": "bateman",
+      "equation": "Bateman",
+      "program_type": "Num",
+      "meta_pattern": "Mono",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "sample_case_relative_path": "sample/three_nuclide.json",
+      "work_root_name": "MetBenchDecayChain",
+      "timeout_seconds": 60
+    },
+    {
+      "mr_id": "bateman-mass-conservation",
+      "sut_name": "decay-chain",
+      "display_name": "Bateman — MassConservation (lambda invariance)",
+      "description": "Mass conservation MP_inv: the Bateman chain A→B→C conserves total nuclide count (no production/absorption). Scaling lambda_A must not change the conserved total = N_A+N_B+N_C at t_final.",
+      "mr_family": "Bateman.Invariance.MassConservation",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "approx",
+      "assertion_name": "ApproxEqual",
+      "value_name": "total",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/params/lambda_A" }
+      ],
+      "tolerance_rel": 1e-6,
+      "tolerance_abs": 1e-9,
+      "noise_aware": false,
+      "equation_key": "bateman",
+      "equation": "Bateman",
+      "program_type": "Num",
+      "meta_pattern": "Inv",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "sample_case_relative_path": "sample/three_nuclide.json",
+      "work_root_name": "MetBenchDecayChain",
+      "timeout_seconds": 60
+    },
+    {
+      "mr_id": "bateman-timestep-cauchy",
+      "sut_name": "decay-chain",
+      "display_name": "Bateman — TimestepCauchy (RK4 convergence)",
+      "description": "Time-step Cauchy convergence MP_conv: doubling num_steps (halving the RK4 step size) must leave N_C_final within RK4 truncation tolerance — the integrator is already at the fine-grid plateau.",
+      "mr_family": "Bateman.Convergence.Timestep",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "approx",
+      "assertion_name": "ApproxEqual",
+      "value_name": "N_C_final",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/params/num_steps" }
+      ],
+      "tolerance_rel": 1e-3,
+      "tolerance_abs": 1e-6,
+      "noise_aware": false,
+      "equation_key": "bateman",
+      "equation": "Bateman",
+      "program_type": "Num",
+      "meta_pattern": "Conv",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "sample_case_relative_path": "sample/three_nuclide.json",
+      "work_root_name": "MetBenchDecayChain",
+      "timeout_seconds": 60
+    }
+  ]
+}

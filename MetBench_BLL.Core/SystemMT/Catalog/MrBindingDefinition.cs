@@ -84,12 +84,21 @@ public sealed class MrBindingDefinition
         if (TransformSteps.Count == 0)
             throw new CatalogValidationException(
                 $"MrBindingDefinition '{MrId}' must declare at least one transform step");
+
+        // Recipe-based single-step MRs (EquationKey set, exactly one step, empty path) defer
+        // path resolution to the EquationFunctionRegistry recipe (e.g. decay-chain-scale-initial
+        // with TransformationName="ScaleInitial" + EquationKey="bateman").
+        var isSingleStepRecipe =
+            TransformSteps.Count == 1
+            && !string.IsNullOrWhiteSpace(EquationKey)
+            && string.IsNullOrWhiteSpace(TransformSteps[0]?.TargetFieldPath);
+
         for (var i = 0; i < TransformSteps.Count; i++)
         {
             if (TransformSteps[i] is null)
                 throw new CatalogValidationException(
                     $"MrBindingDefinition '{MrId}' TransformSteps[{i}] must not be null");
-            TransformSteps[i].Validate(MrId, i);
+            TransformSteps[i].Validate(MrId, i, allowEmptyPath: isSingleStepRecipe);
         }
 
         // Tolerance invariants (carry PR #88 review-fix-1 lesson):

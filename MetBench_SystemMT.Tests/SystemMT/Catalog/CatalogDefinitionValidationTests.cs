@@ -183,6 +183,34 @@ public sealed class CatalogDefinitionValidationTests
     }
 
     [Fact]
+    public void MrTransformStepDefinition_allows_empty_TargetFieldPath_for_single_step_recipe_MR()
+    {
+        // Mirrors the existing decay-chain-scale-initial pattern in LegacyCatalogFactory:
+        // single step "ScaleInitial" + empty path + EquationKey="bateman" → recipe-based.
+        var b = GoodBinding(mrId: "decay-chain-scale-initial", sutName: "decay-chain");
+        b.EquationKey = "bateman";
+        b.TransformSteps = new() { new MrTransformStepDefinition { TransformationName = "ScaleInitial", TargetFieldPath = "" } };
+
+        b.Validate();
+    }
+
+    [Fact]
+    public void MrTransformStepDefinition_still_rejects_empty_path_when_multi_step_with_EquationKey()
+    {
+        // Recipe escape applies ONLY to single-step bindings. Multi-step with recipe-shaped
+        // empty path is ambiguous — fall back to strict path requirement.
+        var b = GoodBinding();
+        b.EquationKey = "bateman";
+        b.TransformSteps = new()
+        {
+            Step("ScaleField", "/x"),
+            new MrTransformStepDefinition { TransformationName = "ScaleField", TargetFieldPath = "" },
+        };
+
+        Assert.Throws<CatalogValidationException>(() => b.Validate());
+    }
+
+    [Fact]
     public void MrTransformStepDefinition_error_message_carries_owner_MrId_and_step_index()
     {
         var b = GoodBinding();
