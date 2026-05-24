@@ -1,0 +1,9 @@
+kind: MrSpec
+mr_id: invalid-mr
+name: Missing nested kind
+predicates:
+  - predicate_id: p1
+    left_role: a
+    right_role: b
+    metric: k_eff
+    operator: Less

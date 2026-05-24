@@ -1,0 +1,32 @@
+kind: MrSpec
+mr_id: dif-phy-doppler-negative
+name: Negative Doppler coefficient
+description: T_fuel increase broadens resonance absorption and decreases k_eff.
+tags:
+  equation_key: Diffusion
+  program_type: Deterministic
+  pattern: P2_Mono
+parameters:
+  delta_t:
+    kind: ConstantParameter
+    value: 50.0
+roles:
+  baseline:
+    kind: Baseline
+  hotter:
+    kind: Followup
+projections:
+  k_eff:
+    kind: ScalarProjection
+    path: /results/k_eff
+predicates:
+  - kind: BinaryComparison
+    predicate_id: hotter-k-eff-lower
+    left_role: hotter
+    right_role: baseline
+    metric: k_eff
+    operator: Less
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 1.0e-8
+  rtol: 1.0e-5

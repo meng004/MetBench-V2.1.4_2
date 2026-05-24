@@ -1,0 +1,9 @@
+mr_id: invalid-mr
+name: Missing root kind
+predicates:
+  - kind: BinaryComparison
+    predicate_id: p1
+    left_role: a
+    right_role: b
+    metric: k_eff
+    operator: Less

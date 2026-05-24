@@ -1,0 +1,11 @@
+kind: MrSpec
+mr_id: invalid-mr
+name: Legacy assertion name
+assertion_name: GreaterThan
+predicates:
+  - kind: BinaryComparison
+    predicate_id: p1
+    left_role: a
+    right_role: b
+    metric: k_eff
+    operator: Less
