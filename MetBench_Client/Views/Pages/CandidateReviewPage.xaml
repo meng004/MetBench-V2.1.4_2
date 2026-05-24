@@ -83,10 +83,6 @@
                     <CheckBox Content="theoretical-llm"
                               IsChecked="{Binding ViewModel.UseTheoreticalLlm, Mode=TwoWay}"
                               Margin="0,0,16,0" VerticalAlignment="Center" />
-                    <CheckBox Content="adversarial-mutmut"
-                              IsChecked="{Binding ViewModel.UseAdversarial, Mode=TwoWay}"
-                              Margin="0,0,24,0" VerticalAlignment="Center" />
-
                     <ui:Button Appearance="Primary"
                                Content="Validate selected"
                                Icon="{ui:SymbolIcon CheckmarkCircle24}"

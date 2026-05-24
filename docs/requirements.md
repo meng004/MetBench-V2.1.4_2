@@ -123,6 +123,8 @@
 | ~~G-08~~ ✅ 已完成(全部) | F-T1-04 / F-T0-03 | ~~catalog 双 seed 不自动同步~~ | — | 云端：`SystemMtBootstrap.SeedCatalogsAsync` helper + 4 测试；VM 端（G-08b）：`App.xaml.cs` 注册 `ISystemMtMetadataRepository` + `LauncherCatalogV2Importer`，`OnStartup` 调 bootstrap（commit `13b3447`）。完整 source-of-truth 收口属 Stage 9+ 重构 |
 | ~~G-09~~ ✅ 已完成(2026-05-23) | F-T3-02 / F-T1-04 | ~~projectile SUT 未进 launcher catalog~~ | — | 已补 `projectile-motion` EquationMetadata + `projectile-scale-v0` MrMetadata + MrBlueprint + `SUT/projectile/sample/standard.txt`；2 个 launcher 测试 + cascade 4 个 importer 测试更新；全量 809→810 pass |
 | ~~G-10~~ ✅ 已完成(2026-05-23) | F-T1-04 | ~~CRUD 不全~~ | — | (a) `ISystemMtMetadataRepository` 加 3 个 DeleteAsync（Equation / MR / Recipe）+ LiteDb 实现 + Fake repo 实现；(b) `SystemMtCatalogService` 加 `UpdateEquationFunctionAsync` / `DeleteEquationFunctionAsync`；(c) `MethodMtCatalogService` MR-CRUD 子集已在 G-06 落地。9 新测试。**剩余开口**：MR / Application binding 的 Delete cascade 语义（非本次范围） |
+| G-X1-Adv ✅ 已完成(2026-05-24) | F-T1-05（WPF 客户端） | PR #88 删 `CandidateReviewViewModel.UseAdversarial`，XAML CheckBox 残留 binding error | WPF 云端不可编译，binding 错误在 VM 启动后才可见 | 删除 `CandidateReviewPage.xaml` 中 adversarial-mutmut CheckBox 元素（commit `254c167`） |
+| G-X2-LatexGuard ✅ 已完成(2026-05-24) | F-T1-04（v1 兼容守卫） | G-11 裁决配套守护测试：grep 断言 4 处 `Latextosympy*` 调用仅存在于指定 v1 兼容路径，新增调用即失败 | 新 MR 误用 LaTeX 老路径无感知 | 新建 `Architecture/LegacyPathBoundaryTests.cs`（2 测试，878 pass，commit `1479962`） |
 | G-11 ⚖ 已裁决(2026-05-23)：保留至 Stage 9 | F-T1-04（v1 兼容） | **v1 LaTeX 展示衍生字段路径**：`MetamorphicRelationService.Add/Update` + `AutoMRParser.ProduceMRs/Async` + `MRRecommendationViewModel` + `MRManagementViewModel` 共 4 处调 `Latextosympy*`（已 `[Obsolete]`）。与 method MT 执行栈（G-06）完全正交，不影响新功能 | v1 UI 展示完整，`ObsoleteAttributeGuardTests` 守卫防止新增调用 | **裁决(a)：保留为 v1 兼容**，不做额外修改。**Stage 9 清理义务**：届时须删除 `Latextosympy` / `Latextosympy_Await` 类、4 处调用、LiteDB 中的 SymPy 文本 + PNG 衍生字段，并迁移已有 MR 记录。此决策由用户于 2026-05-23 确认 |
 | G-12 | F-T1-04（远期 PBT 升级） | **method MT 升级到 property-based testing**：当前走 AAA + catalog-driven validator（G-06），未引入 FsCheck / Hedgehog 等 PBT 框架。PBT 与 MT 范式天然契合（property over many inputs + shrinking） | 当前 SUT 是解析解，无 bug 可找；MR 数个位数；PBT generator 工程量大于当前 MR 验证工程量 | 触发条件：method MR 数 ≥ 20 跨多方程 ∥ 接入有 bug 风险的真实 C# SUT。届时 catalog schema 加 input domain 字段，AAA 测试保留为基线、新增 PBT validator 作为第二层 |
 | G-13 | F-T3-02（远期 PBT 升级） | **system MT 在轻量 SUT 上叠加 PBT 做模糊测试**：当前 system MT 走 BDD `.feature`，OpenMOC/OpenMC 单 case 时长（30s / 5min）禁止 PBT；但 projectile / damped-oscillator / lotka-volterra / decay-chain 单 case < 1s，PBT 可行 | BDD 的领域沟通价值不可替代（OpenMOC/OpenMC 永远不走 PBT）；轻量 SUT 是 PBT 的合适载体 | 触发条件：轻量 SUT 的 BDD 稳定 + input generator 工程量预算允许。覆盖范围严格限制为 < 1s 单 case 的 ODE SUT |
@@ -164,6 +166,8 @@
 | `60f9910` | **review-fix-1** | critical 数据链 + Tolerance hard-code 修复（5 新测试，868 pass）|
 | `b8fdd85` | **review-fix-2** | cleanup misses — README/AGENTS/Report doc + UAT rubric/procedures + smokeshot Trends（doc-only，868 pass）|
 | `44a5d1b` | **review-fix-3** | medium：DeleteMr binding guard + enum int 锁定 + SUT divide-by-zero/edge guard（+8 测试，876 pass）|
+| `254c167` | **G-X1-Adv** | CandidateReviewPage.xaml 删除 UseAdversarial CheckBox（VM 端 binding error 消除） |
+| `1479962` | **G-X2-LatexGuard** | LegacyPathBoundaryTests：v1 LaTeX 调用边界守卫（2 测试，878 pass） |
 
 ## 12. 受控开发模式工作流
 
