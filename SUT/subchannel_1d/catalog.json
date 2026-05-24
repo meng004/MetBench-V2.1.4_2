@@ -1,0 +1,71 @@
+{
+  "sut_name": "subchannel-1d",
+  "program": {
+    "program_name": "subchannel-1d",
+    "equation": "NavierStokes",
+    "equation_key": "navier-stokes",
+    "program_type": "Num",
+    "runner_script_relative_path": "subchannel_1d.py",
+    "input_parser_script_relative_path": "subchannel_1d_input_parser.py",
+    "output_parser_script_relative_path": "subchannel_1d_output_parser.py",
+    "input_adapter_script_relative_path": "subchannel_1d_input_parser.py",
+    "output_adapter_script_relative_path": "subchannel_1d_output_parser.py",
+    "python_executable_kind": "system"
+  },
+  "mrs": [
+    {
+      "mr_id": "subchannel-flow-temperature-monotone",
+      "sut_name": "subchannel-1d",
+      "display_name": "1D subchannel — ScaleMassFlux (flow ↑ ⇒ ΔT ↓)",
+      "description": "Energy conservation MP_mono: at fixed wall heat flux q'' and inlet temperature, ΔT = q''·P_h·L/(G·A_xs·c_p) is inversely proportional to mass flux G — higher flow strictly decreases the outlet temperature rise.",
+      "mr_family": "Subchannel.Scaling.MassFlux",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "less",
+      "assertion_name": "LessThan",
+      "value_name": "delta_T",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/boundary/mass_flux" }
+      ],
+      "tolerance_rel": 0,
+      "tolerance_abs": 0,
+      "noise_aware": false,
+      "equation_key": "navier-stokes",
+      "equation": "NavierStokes",
+      "program_type": "Num",
+      "meta_pattern": "Mono",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "sample_case_relative_path": "sample/pwr_channel.json",
+      "work_root_name": "MetBenchSubchannel",
+      "timeout_seconds": 30
+    },
+    {
+      "mr_id": "subchannel-heat-flux-linearity",
+      "sut_name": "subchannel-1d",
+      "display_name": "1D subchannel — ScaleHeatFlux (linearity in q'')",
+      "description": "Energy conservation MP_mono (linearity in heat input): doubling the wall heat flux q'' must strictly increase ΔT (in fact, by the same factor) because energy balance is linear in q'' at constant flow.",
+      "mr_family": "Subchannel.Scaling.HeatFlux",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "greater",
+      "assertion_name": "GreaterThan",
+      "value_name": "delta_T",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/boundary/heat_flux" }
+      ],
+      "tolerance_rel": 0,
+      "tolerance_abs": 0,
+      "noise_aware": false,
+      "equation_key": "navier-stokes",
+      "equation": "NavierStokes",
+      "program_type": "Num",
+      "meta_pattern": "Mono",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "sample_case_relative_path": "sample/pwr_channel.json",
+      "work_root_name": "MetBenchSubchannel",
+      "timeout_seconds": 30
+    }
+  ]
+}

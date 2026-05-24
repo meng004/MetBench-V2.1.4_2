@@ -170,6 +170,12 @@
 | `254c167` | **G-X1-Adv** | CandidateReviewPage.xaml 删除 UseAdversarial CheckBox（VM 端 binding error 消除） |
 | `1479962` | **G-X2-LatexGuard** | LegacyPathBoundaryTests：v1 LaTeX 调用边界守卫（2 测试，878 pass） |
 | _(pending)_ | **G-X3 docs** | Catalog convergence spec v3 + plan v2 + §10/§11/AGENTS 指针（doc-only，无测试基线变化）|
+| `290b927` | **G-X3 Task 1** | Catalog definition models + IMrCatalogProvider boundary (878→884, then amended 884→919 after 15-finding self-review) |
+| `953da7b` | **G-X3 Task 2a** | refactor: extract LegacyCatalogFactory from SystemMtLauncher (919 → 919, behavior-preserving) |
+| `e5aade8` | **G-X3 Task 2b** | HardcodedMrCatalogProvider + 8 smoke tests (919 → 927) |
+| `9f74d69` | **G-X3 Task 2c** | ManifestMrCatalogProvider + 9 catalog.json + 12 manifest tests + 2 parity tests (927 → 943) |
+| `c923063` | **G-X3 Task 3** | Inject IMrCatalogProvider into SystemMtLauncher; MrCatalogEntry 8 → 13 fields; ToBlueprint inverse; 3 injection tests (943 → 946) |
+| _(pending)_ | **G-X3 Task 4** | [Obsolete] on HardcodedMrCatalogProvider + sunset guard (+2 tests, 946 → 948) |
 
 ## 12. 受控开发模式工作流
 

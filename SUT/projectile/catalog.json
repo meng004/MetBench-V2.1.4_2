@@ -1,0 +1,44 @@
+{
+  "sut_name": "projectile",
+  "program": {
+    "program_name": "projectile",
+    "equation": "Projectile",
+    "equation_key": "",
+    "program_type": "Num",
+    "runner_script_relative_path": "projectile.py",
+    "input_parser_script_relative_path": "projectile_input_parser.py",
+    "output_parser_script_relative_path": "projectile_output_parser.py",
+    "input_adapter_script_relative_path": "projectile_input_parser.py",
+    "output_adapter_script_relative_path": "projectile_output_parser.py",
+    "python_executable_kind": "system"
+  },
+  "mrs": [
+    {
+      "mr_id": "projectile-scale-v0",
+      "sut_name": "projectile",
+      "display_name": "Projectile range — ScaleV0 (R ∝ v0² monotonic)",
+      "description": "By the projectile-motion identity R = v0²·sin(2θ)/g, scaling the initial speed v0 by factor > 1 must monotonically increase the horizontal range (in fact, by factor²).",
+      "mr_family": "Projectile.Scaling.V0",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "greater",
+      "assertion_name": "GreaterThan",
+      "value_name": "range",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/v0" }
+      ],
+      "tolerance_rel": 0,
+      "tolerance_abs": 0,
+      "noise_aware": false,
+      "equation_key": "",
+      "equation": "Projectile",
+      "program_type": "Num",
+      "meta_pattern": "Mono",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "sample_case_relative_path": "sample/standard.txt",
+      "work_root_name": "MetBenchProjectile",
+      "timeout_seconds": 30
+    }
+  ]
+}

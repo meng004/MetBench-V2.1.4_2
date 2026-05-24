@@ -1,0 +1,44 @@
+{
+  "sut_name": "lotka-volterra",
+  "program": {
+    "program_name": "lotka-volterra",
+    "equation": "LotkaVolterra",
+    "equation_key": "",
+    "program_type": "Num",
+    "runner_script_relative_path": "lotka_volterra.py",
+    "input_parser_script_relative_path": "lotka_volterra_input_parser.py",
+    "output_parser_script_relative_path": "lotka_volterra_output_parser.py",
+    "input_adapter_script_relative_path": "lotka_volterra_input_adapter.py",
+    "output_adapter_script_relative_path": "lotka_volterra_output_adapter.py",
+    "python_executable_kind": "system"
+  },
+  "mrs": [
+    {
+      "mr_id": "lotka-volterra-scale-gamma",
+      "sut_name": "lotka-volterra",
+      "display_name": "Lotka-Volterra — ScaleGamma (mean-prey identity)",
+      "description": "By the Lotka-Volterra time-average identity ⟨prey⟩ = gamma / delta, scaling the predator death rate gamma by factor > 1 must increase the time-averaged prey population mean_prey.",
+      "mr_family": "LotkaVolterra.Scaling.Gamma",
+      "transformation_name": "ScaleGamma",
+      "assertion_type_code": "greater",
+      "assertion_name": "GreaterThan",
+      "value_name": "mean_prey",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/params/gamma" }
+      ],
+      "tolerance_rel": 0,
+      "tolerance_abs": 0,
+      "noise_aware": false,
+      "equation_key": "",
+      "equation": "LotkaVolterra",
+      "program_type": "Num",
+      "meta_pattern": "Mono",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "sample_case_relative_path": "sample/classic.json",
+      "work_root_name": "MetBenchLotkaVolterra",
+      "timeout_seconds": 60
+    }
+  ]
+}

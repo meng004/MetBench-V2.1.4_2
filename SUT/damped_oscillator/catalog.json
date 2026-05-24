@@ -1,0 +1,45 @@
+{
+  "sut_name": "damped-oscillator",
+  "program": {
+    "program_name": "damped-oscillator",
+    "equation": "DampedOscillator",
+    "equation_key": "",
+    "program_type": "Num",
+    "runner_script_relative_path": "damped_oscillator.py",
+    "input_parser_script_relative_path": "damped_oscillator_input_parser.py",
+    "output_parser_script_relative_path": "damped_oscillator_output_parser.py",
+    "input_adapter_script_relative_path": "damped_oscillator_input_adapter.py",
+    "output_adapter_script_relative_path": "damped_oscillator_output_adapter.py",
+    "python_executable_kind": "system"
+  },
+  "mrs": [
+    {
+      "mr_id": "damped-oscillator-scale-state",
+      "sut_name": "damped-oscillator",
+      "display_name": "Damped oscillator — ScaleInitialState (linearity)",
+      "description": "The damped harmonic oscillator is linear and homogeneous in the initial state (x0, v0). Scaling the initial state by factor > 1 must scale the peak absolute displacement by the same factor.",
+      "mr_family": "Oscillator.Scaling.InitialState",
+      "transformation_name": "ScaleInitialState",
+      "assertion_type_code": "greater",
+      "assertion_name": "GreaterThan",
+      "value_name": "max_abs_displacement",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/initial/x0" },
+        { "transformation_name": "ScaleField", "target_field_path": "/initial/v0" }
+      ],
+      "tolerance_rel": 0,
+      "tolerance_abs": 0,
+      "noise_aware": false,
+      "equation_key": "",
+      "equation": "DampedOscillator",
+      "program_type": "Num",
+      "meta_pattern": "Mono",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "sample_case_relative_path": "sample/underdamped.json",
+      "work_root_name": "MetBenchDampedOsc",
+      "timeout_seconds": 60
+    }
+  ]
+}

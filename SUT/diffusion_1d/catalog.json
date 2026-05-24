@@ -1,0 +1,71 @@
+{
+  "sut_name": "diffusion-1d",
+  "program": {
+    "program_name": "diffusion-1d",
+    "equation": "Diffusion",
+    "equation_key": "diffusion",
+    "program_type": "Num",
+    "runner_script_relative_path": "diffusion_1d.py",
+    "input_parser_script_relative_path": "diffusion_1d_input_parser.py",
+    "output_parser_script_relative_path": "diffusion_1d_output_parser.py",
+    "input_adapter_script_relative_path": "diffusion_1d_input_parser.py",
+    "output_adapter_script_relative_path": "diffusion_1d_output_parser.py",
+    "python_executable_kind": "system"
+  },
+  "mrs": [
+    {
+      "mr_id": "diffusion-source-linearity",
+      "sut_name": "diffusion-1d",
+      "display_name": "1D diffusion — ScaleSource (linearity)",
+      "description": "Linearity MP_mono: the steady-state diffusion equation -D·φ″ + Σ_a·φ = S is linear in the source S. Scaling S by factor > 1 must strictly increase the peak flux φ_max (in fact, by the same factor).",
+      "mr_family": "Diffusion.Scaling.Source",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "greater",
+      "assertion_name": "GreaterThan",
+      "value_name": "phi_max",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/source/strength" }
+      ],
+      "tolerance_rel": 0,
+      "tolerance_abs": 0,
+      "noise_aware": false,
+      "equation_key": "diffusion",
+      "equation": "Diffusion",
+      "program_type": "Num",
+      "meta_pattern": "Mono",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "sample_case_relative_path": "sample/slab.json",
+      "work_root_name": "MetBenchDiffusion1d",
+      "timeout_seconds": 30
+    },
+    {
+      "mr_id": "diffusion-mesh-richardson",
+      "sut_name": "diffusion-1d",
+      "display_name": "1D diffusion — MeshRichardson (FD convergence)",
+      "description": "Mesh-refinement Richardson convergence MP_conv: doubling num_points (halving the FD spacing dx) must leave φ_max within FD truncation tolerance — the second-order scheme is already at the fine-mesh plateau.",
+      "mr_family": "Diffusion.Convergence.Mesh",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "approx",
+      "assertion_name": "ApproxEqual",
+      "value_name": "phi_max",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/geometry/num_points" }
+      ],
+      "tolerance_rel": 1e-3,
+      "tolerance_abs": 1e-6,
+      "noise_aware": false,
+      "equation_key": "diffusion",
+      "equation": "Diffusion",
+      "program_type": "Num",
+      "meta_pattern": "Conv",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "sample_case_relative_path": "sample/slab.json",
+      "work_root_name": "MetBenchDiffusion1d",
+      "timeout_seconds": 30
+    }
+  ]
+}
