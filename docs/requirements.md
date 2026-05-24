@@ -176,6 +176,9 @@
 | `9f74d69` | **G-X3 Task 2c** | ManifestMrCatalogProvider + 9 catalog.json + 12 manifest tests + 2 parity tests (927 → 943) |
 | `c923063` | **G-X3 Task 3** | Inject IMrCatalogProvider into SystemMtLauncher; MrCatalogEntry 8 → 13 fields; ToBlueprint inverse; 3 injection tests (943 → 946) |
 | _(pending)_ | **G-X3 Task 4** | [Obsolete] on HardcodedMrCatalogProvider + sunset guard (+2 tests, 946 → 948) |
+| `2005909` | **G-X3 Task 5** | Execution evidence models + V3MrIdRef + repo contract (4 model tests, 948 → 952) |
+| `5f9d27d` | **G-X3 Task 6 step 1** | LiteDb evidence repository + roundtrip tests (+7 tests, 952 → 959) |
+| _(pending)_ | **G-X3 Task 6 step 2** | SystemMtExecutionRecorder write-through evidence + V3 lookup (+6 tests, 959 → 965) |
 
 ## 12. 受控开发模式工作流
 

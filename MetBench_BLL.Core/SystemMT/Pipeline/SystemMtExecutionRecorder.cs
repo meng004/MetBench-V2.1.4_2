@@ -1,3 +1,4 @@
+using MetBench_BLL.SystemMT.Persistence;
 using MetBench_Domain;
 using MetBench_IDAL;
 
@@ -22,13 +23,19 @@ public sealed class SystemMtExecutionRecorder
 {
     private readonly IExecutionRepository _executions;
     private readonly IResultRepository _results;
+    private readonly IExecutionEvidenceRepository? _evidence;
+    private readonly IMetamorphicRelationV3Repository? _v3;
 
     public SystemMtExecutionRecorder(
         IExecutionRepository executions,
-        IResultRepository results)
+        IResultRepository results,
+        IExecutionEvidenceRepository? evidence = null,
+        IMetamorphicRelationV3Repository? v3 = null)
     {
         _executions = executions ?? throw new ArgumentNullException(nameof(executions));
         _results = results ?? throw new ArgumentNullException(nameof(results));
+        _evidence = evidence;
+        _v3 = v3;
     }
 
     /// <summary>
@@ -91,7 +98,44 @@ public sealed class SystemMtExecutionRecorder
             FollowupExitCode = outcome.FollowupExitCode,
         });
 
+        // Phase D (Task 6 step 2): write sample-level evidence alongside summary when both
+        // the evidence repo and the V3 MR repo are injected. Sample traces are left empty
+        // until Task 6 step 3 wires per-variable capture into SystemMtPipeline.
+        if (_evidence is not null)
+        {
+            WriteEvidence(executionId, context, outcome);
+        }
+
         return new RecordedExecution(executionId, resultId);
+    }
+
+    private void WriteEvidence(Guid executionId, PipelineContext context, PipelineOutcome outcome)
+    {
+        var v3 = _v3?.GetByCode(context.MrCode);
+        var snapshot = new ExecutionMetadataSnapshot
+        {
+            MrId = context.MrCode,
+            V3MrIdRef = v3?.IdV3 ?? Guid.Empty,
+            SutName = context.SutName,
+            Equation = v3?.Equation.ToString() ?? string.Empty,
+            ProgramType = v3?.ProgramType.ToString() ?? string.Empty,
+            MetaPattern = v3?.MetaPattern.ToString() ?? string.Empty,
+            SourceLevel = v3?.SourceLevel.ToString() ?? string.Empty,
+            FailureCorrelation = v3?.FailureCorrelation.ToString() ?? string.Empty,
+            MetbenchVersion = context.MetbenchVersion,
+        };
+
+        var evidence = new ExecutionEvidence
+        {
+            IdEvidence = Guid.NewGuid(),
+            ExecutionId = executionId,
+            Metadata = snapshot,
+            SampleTraces = new(),               // Task 6 step 3 lands per-variable triples
+            TransformationParameters = new Dictionary<string, string>(context.Parameters),
+            RecordedAtUtc = outcome.FinishedAt.ToUniversalTime(),
+        };
+        // Recorder is sync; evidence write also runs sync (LiteDB).
+        _evidence!.SaveAsync(evidence).GetAwaiter().GetResult();
     }
 
     private static Dictionary<string, double> ToMutable(
