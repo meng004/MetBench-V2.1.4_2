@@ -15,7 +15,7 @@
 | **测试文件** | `MetBench_SystemMT.Tests/` 下相对路径 | 单元 + BDD + UAT |
 | **测试结果** | `dotnet test MetBench_SystemMT.Tests` 最近一次基线 | `pass/skip/fail` 或缺口说明 |
 
-**基线**：2026-05-23（Stage 8 S8-P5c + 5-angle review 3 commits 修复后），`dotnet test MetBench_SystemMT.Tests` = **876 pass / 0 fail**（OpenMC 跨程序场景在无 OpenMC 环境下首跑 skip / 二跑 warm 后 0 skip）。基线累计：848 - 6 (mutmut) - 13 (Trend) + 6 (G-02) + 2×4 (S8-P1..P4) + 4 (S8-P5a) + 9 (S8-P5b) + 7 (S8-P5c) + 5 (review-fix-1：Tolerance/EquationKey/MapProgram) + 7 (enum pinning) + 1 (DeleteMr binding guard) = 876。MR 库 17 / 8 方程；V3 5D-tag schema 三层 + 数据链修复（Importer 写 EquationKey + Migration 通过 MRBinding lookup SUT）。
+**基线**：最新已提交、可审计精确绿基线来自提交 `763e067`（PR #93）—— `dotnet test MetBench_SystemMT.Tests` = **965 pass / 0 fail**。当前 `main` 已前进到 `5691727`（PR #94：ManifestMrCatalogProvider 路径分隔符 hotfix）；本轮 2026-05-24 在当前工作树执行完整 `dotnet test MetBench_SystemMT.Tests --no-restore --logger "trx;LogFileName=baseline-2026-05-24-current.trx"`，得到 **961 pass / 0 fail / 8 skip / 969 total**，TRX 已固化到 [`docs/uat/reports/round-3-limeng-2026-05-24/baseline-2026-05-24-current.trx`](/Users/limeng/Codes/苏永成-蜕变测试系统代码与文档资料/MetBench-V2.1.4_2/docs/uat/reports/round-3-limeng-2026-05-24/baseline-2026-05-24-current.trx)。这说明当前工作树已恢复为绿，但在未提交前，它仍应视为“当前工作树绿结果”，不能替代 `763e067` 的“已提交可审计基线”表述。另：2026-05-24 Windows 侧已知旧回执仍是 `dotnet build MetBench_Client/MetBench_Client.csproj` 0 编译错误、约 17.47s；本轮最新代码的 Windows 回执仍待补记。
 
 ## 1. T0 · 核心 —— 系统级 MT 流程
 
@@ -52,14 +52,14 @@
 |---|---|---|---|---|---|
 | F-T3-01 | AGENTS Stage 6 P8 | CoverageService 4 维报告 | `MetBench_BLL.Core/Coverage/CoverageService.cs`<br>`Coverage/CoverageReport.cs` | `V2Coverage/CoverageServiceTests.cs`<br>`V2Coverage/FakeCoverageRepositories.cs` | ✅ pass |
 | F-T3-02 | AGENTS Stage 8 | 代表性 SUT 接入（共 9 SUT / 8 方程：decay_chain / damped_oscillator / lotka_volterra / heat_equation / projectile / openmoc / openmc / subchannel_1d / **diffusion_1d**；**全部进入 launcher catalog + metadata catalog**）。**S8-P1..P4（2026-05-23）扩 MR 库**：S8-P1 Bateman 2 MR；S8-P2 Fourier 2 MR；S8-P3 1D subchannel SUT + navier-stokes + 2 MR；S8-P4 1D diffusion SUT + diffusion 方程 + 2 MR（`diffusion-source-linearity` m_mono + `diffusion-mesh-richardson` m_conv）。共 17 MR / 8 方程 | `SUT/decay_chain/`（含 `bateman` 方程实现）<br>`SUT/damped_oscillator/`<br>`SUT/lotka_volterra/`<br>`SUT/heat_equation/`<br>`SUT/projectile/`（+ `sample/standard.txt`）<br>`SUT/openmoc/`<br>`SUT/openmc/` | （上述各 SUT 的 Parser / Adapter / Smoke / Sample 测试，见 F-T1-02）<br>+ `Launcher/SystemMtLauncherTests.ListAvailableAsync_{projectile,bateman_mass_conservation,bateman_timestep_cauchy}_descriptor_has_expected_metadata` | ✅ pass |
-| F-T3-03 | `docs/t3-program-selection.md` | 反应堆物理 5 方程锚定（boltzmann / diffusion / bateman / fourier / NS） | bateman: `Equations/Bateman/BatemanAnalyticSolution.cs`（L2）<br>boltzmann: 通过 OpenMOC/OpenMC SUT（无独立 L2）<br>fourier: 通过 heat_equation SUT<br>diffusion / NS: **未落地** | bateman: `SystemMT/Equations/BatemanP4Tests.cs` | ⚠ **缺口**：diffusion + NS 方程的 L2 / SUT 未落地 |
+| F-T3-03 | `docs/t3-program-selection.md` | 反应堆物理 5 方程锚定（boltzmann / diffusion / bateman / fourier / NS） | bateman: `Equations/Bateman/BatemanAnalyticSolution.cs`（L2）<br>boltzmann: 通过 OpenMOC/OpenMC SUT（无独立 L2）<br>fourier: 通过 heat_equation SUT<br>diffusion: 通过 `SUT/diffusion_1d/`<br>NS: 通过 `SUT/subchannel_1d/` | bateman: `SystemMT/Equations/BatemanP4Tests.cs`<br>diffusion / NS 相关 launcher / parser / smoke tests 见 F-T1-02 / F-T3-02 | ✅ pass（5 方程锚定已闭合；非每个方程都要求独立 L2 实现） |
 
 ## 5. T4 · MR 识别
 
 | 编号 | 需求来源 | 功能描述 | 实现文件 | 测试文件 | 测试结果 |
 |---|---|---|---|---|---|
 | F-T4-01 | CLAUDE.md §2 T4；AGENTS Stage 6 P7 | IMRDiscoverer 框架 + 三技术路线（meta-prompt / LLM-native / SCG-heuristic） | `MetBench_BLL.Core/Discovery/IMRDiscoverer.cs`<br>`Discovery/MetaPatternDiscoverer.cs`<br>`Discovery/LlmNativeDiscoverer.cs`<br>`Discovery/ScgHeuristicDiscoverer.cs`<br>`Discovery/DiscoveryService.cs`<br>`Discovery/CandidateMrProposal.cs` / `MetaPatternSeed.cs` / `DiscoveryMethodSeed.cs` / `MrFeatureGenerator.cs` / `JsonFileScgGraphBuilder.cs` / `RuleBasedScgPatternMiner.cs` | `V2Discovery/DiscoveryServiceTests.cs`<br>`V2Discovery/DiscovererParsingTests.cs`<br>`V2Discovery/MetaPatternDiscovererIntegrationTests.cs`<br>`V2Discovery/ScgHeuristicDiscovererTests.cs`<br>`V2Discovery/JsonFileScgGraphBuilderTests.cs`<br>`V2Discovery/MrFeatureGeneratorTests.cs`<br>`V2Discovery/DiscoveryMethodSeedTests.cs` | ✅ pass |
-| F-T4-02 | AGENTS Stage 6 P7 | ValidationService + 3 Validator（Empirical / Theoretical-LLM / Adversarial-Mutmut） | `Discovery/ValidationService.cs`<br>`Discovery/Validators/EmpiricalValidator.cs` / `EmpiricalRepoSampler.cs`<br>`Discovery/Validators/TheoreticalLlmValidator.cs`<br>`Discovery/Validators/AdversarialMutmutValidator.cs` / `AdversarialCampaignSampler.cs`<br>`Discovery/Validators/IMRValidator.cs`<br>`Discovery/MrSchemaValidationService.cs`<br>`Discovery/NullLlmGateway.cs` / `OpenAiCompatibleLlmGateway.cs` / `ILlmGateway.cs` | `V2Discovery/ValidationServiceTests.cs`<br>`V2Discovery/ValidatorTests.cs`<br>`V2Discovery/RealSamplerTests.cs`<br>`V2Discovery/MrSchemaValidationServiceTests.cs`<br>`V2Discovery/OpenAiCompatibleLlmGatewayTests.cs` | ✅ pass |
+| F-T4-02 | AGENTS Stage 6 P7 | ValidationService + 当前保留 validator 组合（Empirical / Theoretical-LLM / Multi-LLM 共识） | `Discovery/ValidationService.cs`<br>`Discovery/Validators/EmpiricalValidator.cs` / `EmpiricalRepoSampler.cs`<br>`Discovery/Validators/TheoreticalLlmValidator.cs`<br>`Discovery/Validators/IMRValidator.cs`<br>`Discovery/MultiLlmConsensusValidator.cs`<br>`Discovery/MrSchemaValidationService.cs`<br>`Discovery/NullLlmGateway.cs` / `OpenAiCompatibleLlmGateway.cs` / `ILlmGateway.cs` | `V2Discovery/ValidationServiceTests.cs`<br>`V2Discovery/ValidatorTests.cs`<br>`V2Discovery/RealSamplerTests.cs`<br>`V2Discovery/MrSchemaValidationServiceTests.cs`<br>`V2Discovery/OpenAiCompatibleLlmGatewayTests.cs`<br>`V2Discovery/MultiLlmConsensusValidatorTests.cs` | ✅ pass |
 | F-T4-03 | AGENTS Stage 7 W11.2 | Multi-LLM 共识（DeepSeek + OpenAI + Claude） | `Discovery/MultiLlmConsensusValidator.cs` | `V2Discovery/MultiLlmConsensusValidatorTests.cs`<br>`Experiments/MultiLlmRealExperiment.cs`（env-gated） | ✅ pass（live run env-gated） |
 | F-T4-04 | AGENTS Stage 8 | MR pairing（"程序集 × MR 集"配对） | `Discovery/MRPairingService.cs` | `V2Discovery/MRPairingServiceTests.cs` | ✅ pass |
 
@@ -128,7 +128,7 @@
 | G-11 ⚖ 已裁决(2026-05-23)：保留至 Stage 9 | F-T1-04（v1 兼容） | **v1 LaTeX 展示衍生字段路径**：`MetamorphicRelationService.Add/Update` + `AutoMRParser.ProduceMRs/Async` + `MRRecommendationViewModel` + `MRManagementViewModel` 共 4 处调 `Latextosympy*`（已 `[Obsolete]`）。与 method MT 执行栈（G-06）完全正交，不影响新功能 | v1 UI 展示完整，`ObsoleteAttributeGuardTests` 守卫防止新增调用 | **裁决(a)：保留为 v1 兼容**，不做额外修改。**Stage 9 清理义务**：届时须删除 `Latextosympy` / `Latextosympy_Await` 类、4 处调用、LiteDB 中的 SymPy 文本 + PNG 衍生字段，并迁移已有 MR 记录。此决策由用户于 2026-05-23 确认 |
 | G-12 | F-T1-04（远期 PBT 升级） | **method MT 升级到 property-based testing**：当前走 AAA + catalog-driven validator（G-06），未引入 FsCheck / Hedgehog 等 PBT 框架。PBT 与 MT 范式天然契合（property over many inputs + shrinking） | 当前 SUT 是解析解，无 bug 可找；MR 数个位数；PBT generator 工程量大于当前 MR 验证工程量 | 触发条件：method MR 数 ≥ 20 跨多方程 ∥ 接入有 bug 风险的真实 C# SUT。届时 catalog schema 加 input domain 字段，AAA 测试保留为基线、新增 PBT validator 作为第二层 |
 | G-13 | F-T3-02（远期 PBT 升级） | **system MT 在轻量 SUT 上叠加 PBT 做模糊测试**：当前 system MT 走 BDD `.feature`，OpenMOC/OpenMC 单 case 时长（30s / 5min）禁止 PBT；但 projectile / damped-oscillator / lotka-volterra / decay-chain 单 case < 1s，PBT 可行 | BDD 的领域沟通价值不可替代（OpenMOC/OpenMC 永远不走 PBT）；轻量 SUT 是 PBT 的合适载体 | 触发条件：轻量 SUT 的 BDD 稳定 + input generator 工程量预算允许。覆盖范围严格限制为 < 1s 单 case 的 ODE SUT |
-| G-X3-CatalogConvergence | F-T0-02 / F-T1-04 / F-T0-03 | **System-MT catalog 双事实源 + 硬编码 launcher 收敛**：当前 `SystemMtLauncher.BuildBlueprints()` 私有方法硬编码全部 17 MR × 9 SUT 蓝图，与 `LiteDbSystemMtMetadataRepository`（catalog 元信息）+ `MetamorphicRelationV3` LiteDB 表（PR #88 V3 5D-tag schema）三者并存，**修改任一处都需手工同步另两处**；同时执行记录 `SystemMtResultRecord` 只持久化 summary 级（无样本点级 evidence、无 V3 IdV3 反向链接） | T0 执行路径无单一事实源；Stage 8 主线 MR 库扩张 → 蓝图体积失控；V3 schema landed 但 unwired（未进 pipeline 写入路径） | 收敛方案见 [`docs/superpowers/specs/2026-05-24-systemmt-catalog-convergence-design.md`](superpowers/specs/2026-05-24-systemmt-catalog-convergence-design.md) v3 / 实施 [`docs/superpowers/plans/2026-05-24-systemmt-catalog-convergence-plan.md`](superpowers/plans/2026-05-24-systemmt-catalog-convergence-plan.md) v2（8 任务，3 PR：PR-A 蓝图→Provider，PR-B 样本级 evidence + V3 写入，PR-C 删除 hardcoded + 文档同步） |
+| G-X3-CatalogConvergence | F-T0-02 / F-T1-04 / F-T0-03 | **System-MT catalog 收敛已推进但未闭环**：`SystemMtLauncher` 已接入 `IMrCatalogProvider`，WPF 默认注册 `ManifestMrCatalogProvider`，launcher 生产 fallback 已删除，`LauncherCatalogV2Importer` 已改依赖 `ISystemMtCatalogReader`，ExecutionEvidence / V3MrIdRef / LiteDB evidence repository / recorder write-through 已合入，`SampleTraces` 已开始写入目标字段级 source / transformed / output triples | 双事实源压力已从“纯硬编码 catalog”降到“manifest 默认 + evidence 覆盖粒度仍可扩展” | 后续收敛重点应转为：扩展 sample trace 粒度、补 Windows 侧构建回执，并同步文档与基线叙事 |
 
 ## 11. 与 P0–P7 对应的快速索引（执行历史）
 
@@ -169,18 +169,18 @@
 | `44a5d1b` | **review-fix-3** | medium：DeleteMr binding guard + enum int 锁定 + SUT divide-by-zero/edge guard（+8 测试，876 pass）|
 | `254c167` | **G-X1-Adv** | CandidateReviewPage.xaml 删除 UseAdversarial CheckBox（VM 端 binding error 消除） |
 | `1479962` | **G-X2-LatexGuard** | LegacyPathBoundaryTests：v1 LaTeX 调用边界守卫（2 测试，878 pass） |
-| _(pending)_ | **G-X3 docs** | Catalog convergence spec v3 + plan v2 + §10/§11/AGENTS 指针（doc-only，无测试基线变化）|
+| `792cc46` | **G-X3 docs** | Catalog convergence spec v3 + plan v2 + §10/§11/AGENTS 指针（doc-only，无测试基线变化）|
 | `290b927` | **G-X3 Task 1** | Catalog definition models + IMrCatalogProvider boundary (878→884, then amended 884→919 after 15-finding self-review) |
 | `953da7b` | **G-X3 Task 2a** | refactor: extract LegacyCatalogFactory from SystemMtLauncher (919 → 919, behavior-preserving) |
 | `e5aade8` | **G-X3 Task 2b** | HardcodedMrCatalogProvider + 8 smoke tests (919 → 927) |
 | `9f74d69` | **G-X3 Task 2c** | ManifestMrCatalogProvider + 9 catalog.json + 12 manifest tests + 2 parity tests (927 → 943) |
 | `c923063` | **G-X3 Task 3** | Inject IMrCatalogProvider into SystemMtLauncher; MrCatalogEntry 8 → 13 fields; ToBlueprint inverse; 3 injection tests (943 → 946) |
-| _(pending)_ | **G-X3 Task 4** | [Obsolete] on HardcodedMrCatalogProvider + sunset guard (+2 tests, 946 → 948) |
+| `73d3e36` | **G-X3 Task 4** | [Obsolete] on HardcodedMrCatalogProvider + sunset guard（并入 PR #91，948 pass） |
 | `2005909` | **G-X3 Task 5** | Execution evidence models + V3MrIdRef + repo contract (4 model tests, 948 → 952) |
 | `5f9d27d` | **G-X3 Task 6 step 1** | LiteDb evidence repository + roundtrip tests (+7 tests, 952 → 959) |
-| _(pending)_ | **G-X3 Task 6 step 2** | SystemMtExecutionRecorder write-through evidence + V3 lookup (+6 tests, 959 → 965) |
+| `763e067` | **G-X3 Task 6 step 2** | SystemMtExecutionRecorder write-through evidence + V3 lookup (+6 tests, 959 → 965) |
 | `fe864ec` | **G-X3 VM** | App.xaml.cs registers ManifestMrCatalogProvider for IMrCatalogProvider DI (unblocks Task 7 fallback removal) |
-| _(pending)_ | **G-X3 hotfix** | ManifestMrCatalogProvider 路径分隔符规范化 — fixes Windows CatalogParityTests 回归 from PR #91（VM round-4 surfaced；+2 tests pin normalization on both OSes） |
+| `5691727` | **G-X3 hotfix** | ManifestMrCatalogProvider 路径分隔符规范化 — fixes Windows CatalogParityTests 回归 from PR #91（并入 `main`；HEAD 精确 pass 数待核实） |
 
 ## 12. 受控开发模式工作流
 

@@ -17,13 +17,13 @@ namespace MetBench_BLL.SystemMT.Launcher;
 /// </summary>
 /// <remarks>
 /// 计划见 docs/superpowers/plans/2026-05-22-systemmt-engine-unification-plan.md。
-/// 17 MR 的硬编码目录（S8-P1..P4 扩展前为 9）(<see cref="LegacyCatalogFactory.Build"/>)是 v2 数据驱动 MR 目录全面
-/// 落地前的过渡形态;每个 blueprint 已含 v2 pipeline 规格(InputParser /
-/// OutputParser / TransformSteps / AssertionTypeCode)。多步 MR(decay-chain /
-/// damped-oscillator)在构造时把对应 <see cref="CompositeTransform"/> 注册到
-/// <see cref="TransformationRegistry"/>。
+/// 当前 launcher 只接受显式注入的 <see cref="IMrCatalogProvider"/>，不再保留
+/// 生产路径的硬编码 fallback；每个 blueprint 已含 v2 pipeline 规格
+/// (InputParser / OutputParser / TransformSteps / AssertionTypeCode)。
+/// 多步 MR(decay-chain / damped-oscillator)在构造时把对应
+/// <see cref="CompositeTransform"/> 注册到 <see cref="TransformationRegistry"/>。
 /// </remarks>
-public sealed class SystemMtLauncher : ISystemMtLauncher
+public sealed class SystemMtLauncher : ISystemMtLauncher, ISystemMtCatalogReader
 {
     private readonly LauncherOptions _options;
     private readonly ISystemMtPipeline _pipeline;
@@ -38,22 +38,16 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
         ISystemMtPipeline pipeline,
         SystemMtExecutionRecorder recorder,
         IAnomalyService anomalyService,
-        IMrCatalogProvider? catalogProvider = null,
+        IMrCatalogProvider catalogProvider,
         AnomalySeverityThresholds? severityThresholds = null)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _pipeline = pipeline ?? throw new ArgumentNullException(nameof(pipeline));
         _recorder = recorder ?? throw new ArgumentNullException(nameof(recorder));
         _anomalyService = anomalyService ?? throw new ArgumentNullException(nameof(anomalyService));
+        ArgumentNullException.ThrowIfNull(catalogProvider);
         _severityThresholds = severityThresholds ?? AnomalySeverityThresholds.Default;
-        // Phase C: provider-backed catalog. When no provider is supplied (legacy DI sites that
-        // haven't yet registered IMrCatalogProvider — e.g. WPF App.xaml.cs pre-Task-3-VM), fall
-        // back to the transitional HardcodedMrCatalogProvider. Task 4 marks Hardcoded obsolete;
-        // Task 7 removes both the fallback and Hardcoded entirely once VM-side DI is registered.
-#pragma warning disable CS0618 // intentional transitional fallback
-        var provider = catalogProvider ?? new HardcodedMrCatalogProvider(options);
-#pragma warning restore CS0618
-        _mrCatalog = provider.Load()
+        _mrCatalog = catalogProvider.Load()
             .Select(entry => entry.ToBlueprint())
             .ToDictionary(b => b.Mr.Id, StringComparer.Ordinal);
         _equationFunctions = BuildEquationFunctionRegistry();
@@ -105,7 +99,7 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
     /// internal 暴露 launcher 内部 MR 目录（17 entries as of S8-P4）的快照,供 <see cref="LauncherCatalogV2Importer"/>
     /// 把数据"导入"到 v2 实体表(Application + MetamorphicRelation + MRBinding)。
     /// </summary>
-    internal IReadOnlyList<MrCatalogEntry> GetCatalogEntries() =>
+    public IReadOnlyList<MrCatalogEntry> GetCatalogEntries() =>
         _mrCatalog.Values.Select(MrCatalogEntry.FromBlueprint).ToList();
 
     public Task<IReadOnlyList<MrSummary>> ListAvailableAsync(CancellationToken cancellationToken = default)

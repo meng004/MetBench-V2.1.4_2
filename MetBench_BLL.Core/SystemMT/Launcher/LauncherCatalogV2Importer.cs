@@ -5,15 +5,15 @@ using MetBench_IDAL;
 namespace MetBench_BLL.SystemMT.Launcher;
 
 /// <summary>
-/// 把 <see cref="SystemMtLauncher"/> 的硬编码 MR 目录(8 个 MrBlueprint)
+/// 把 runnable System-MT catalog 的只读视图
 /// 投影到 v2 实体表:每个 SUT → <see cref="Application"/>,每个 MR →
 /// <see cref="MetamorphicRelation"/>,绑定 → <see cref="MRBinding"/>。
 /// </summary>
 /// <remarks>
-/// 目的:让 Coverage / Trend / Reporting / Discovery 等 v2 子系统能用 IDAL
-/// 接口枚举 launcher 当前提供的 MR 与 SUT,不再依赖 launcher 进程内的硬编码
-/// 目录。本类**不**修改 launcher 的 RunAsync 行为(launcher 仍读自己的内部
-/// 目录);它只是把同样的数据**额外**写一份到 v2 表里。
+/// 目的:让 Coverage / Reporting / Discovery 等 v2 子系统能用 IDAL
+/// 接口枚举当前 runnable catalog,而不依赖 <see cref="SystemMtLauncher"/> 具体类。
+/// 本类**不**修改 launcher 的 RunAsync 行为;它只是把同样的数据**额外**写一份到
+/// v2 表里。
 ///
 /// 幂等:重复导入不创建重复行,通过 (Name + Kind="system-level") /
 /// (Code + Kind="system-level") / (MRId + ApplicationId) 三元组做查重。
@@ -23,20 +23,20 @@ namespace MetBench_BLL.SystemMT.Launcher;
 /// </remarks>
 public sealed class LauncherCatalogV2Importer
 {
-    private readonly SystemMtLauncher _launcher;
+    private readonly ISystemMtCatalogReader _catalogReader;
     private readonly IApplicationRepository _apps;
     private readonly IMetamorphicRelationRepository _mrs;
     private readonly IMRBindingRepository _bindings;
     private readonly IAuditLogRepository _audit;
 
     public LauncherCatalogV2Importer(
-        SystemMtLauncher launcher,
+        ISystemMtCatalogReader catalogReader,
         IApplicationRepository apps,
         IMetamorphicRelationRepository mrs,
         IMRBindingRepository bindings,
         IAuditLogRepository audit)
     {
-        _launcher = launcher ?? throw new ArgumentNullException(nameof(launcher));
+        _catalogReader = catalogReader ?? throw new ArgumentNullException(nameof(catalogReader));
         _apps = apps ?? throw new ArgumentNullException(nameof(apps));
         _mrs = mrs ?? throw new ArgumentNullException(nameof(mrs));
         _bindings = bindings ?? throw new ArgumentNullException(nameof(bindings));
@@ -49,7 +49,7 @@ public sealed class LauncherCatalogV2Importer
     /// <param name="actor">审计 actor 标识(默认 "launcher-import")。</param>
     public CatalogImportSummary Import(string actor = "launcher-import")
     {
-        var entries = _launcher.GetCatalogEntries();
+        var entries = _catalogReader.GetCatalogEntries();
         var summary = new CatalogImportSummary();
 
         var existingApps = _apps.GetAll().ToList();

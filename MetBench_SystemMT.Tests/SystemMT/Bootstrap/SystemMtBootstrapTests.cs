@@ -1,8 +1,10 @@
 using MetBench_BLL.SystemMT.Bootstrap;
+using MetBench_BLL.SystemMT.Catalog;
 using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Metadata;
 using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_Domain.V2.Enums;
+using MetBench_SystemMT.Tests.SystemMT;
 using MetBench_SystemMT.Tests.SystemMT.Launcher;
 using MetBench_SystemMT.Tests.V2Anomaly;
 using MetBench_SystemMT.Tests.V2Pipeline;
@@ -23,10 +25,17 @@ public sealed class SystemMtBootstrapTests
     private readonly Catalog.P3CatalogExtensionTests.FakeMetadataRepo _meta = new();
 
     private SystemMtLauncher MakeLauncher() =>
-        new(new LauncherOptions("/tmp", "python3", "python3"),
+        new(new LauncherOptions(
+                SutRoot: TestAssetPaths.AssetRoot(),
+                SystemPython: TestAssetPaths.PythonExecutable(),
+                OpenMocPython: TestAssetPaths.PythonExecutable()),
             new SystemMtPipeline(),
             new SystemMtExecutionRecorder(new FakeExecRepo(), new FakeResultRepo()),
-            new RecordingAnomalyService());
+            new RecordingAnomalyService(),
+            new ManifestMrCatalogProvider(new LauncherOptions(
+                SutRoot: TestAssetPaths.AssetRoot(),
+                SystemPython: TestAssetPaths.PythonExecutable(),
+                OpenMocPython: TestAssetPaths.PythonExecutable())));
 
     private LauncherCatalogV2Importer MakeImporter() =>
         new(MakeLauncher(), _apps, _mrs, _bindings, _audit);

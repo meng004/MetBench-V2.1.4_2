@@ -234,15 +234,28 @@ NOETHER 元模式）。术语见 [`docs/GLOSSARY.md`](docs/GLOSSARY.md)。
 - **Goal 2** — cells × 元模式矩阵 + 84 条候选 MR 母集落地（T3 覆盖）。
 
 **交付状态**：v2.1.0/.1/.2 已发布；polish 批次 Anomaly severity/category 分级已并入
-main（PR #83）。Stage 8 主线：地基 5D tag schema（Phase 8.0）待落地；代表性 SUT 接入
-计划 **P1 已交付**（decay_chain / damped_oscillator / lotka_volterra 三个 ODE SUT +
-launcher catalog，2026-05-22）。MR/程序元信息持久化计划 **P-A + P-C + P-B 全交付**
+main（PR #83）。Stage 8 已启动并进入 catalog convergence 主线：代表性 SUT 接入计划
+**P1 已交付**（decay_chain / damped_oscillator / lotka_volterra 三个 ODE SUT +
+launcher catalog，2026-05-22）；MR/程序元信息持久化计划 **P-A + P-C + P-B 已交付**
 （2026-05-22）—— P-A：`ApproxEqual` 等式断言 + `EqualityThresholds`；P-C：方程 / MR
 元信息 schema（`EquationMetadata` / `MrMetadata` + `LiteDbSystemMtMetadataRepository`
 + 5 方程 8 MR seed catalog + 漂移守卫）；P-B：运行记录扩样本点级输入配对
-（`InputSamplePoint` / `InputCaseReader` + `SystemMtResultRecord.InputSamples`）。该计划的
-**缩放等式 assertion**（`flw≈k·src`，需扩 `IMrAssertion` 签名，升 P1 的 3 条齐次 MR 由
-MP_mono 到 MP_inv）由 DP-2 转入本 Stage MR 库工作。
+（`InputSamplePoint` / `InputCaseReader` + `SystemMtResultRecord.InputSamples`）。
+
+2026-05-24 当前 `main` 已继续合入 G-X3 catalog convergence 的 PR #91 / #92 / #93 / #94：
+
+- `IMrCatalogProvider` 已进入 `SystemMtLauncher`，WPF 默认注册 `ManifestMrCatalogProvider`。
+- `ExecutionEvidence` / `V3MrIdRef` / LiteDB evidence repository / recorder write-through
+  已落地到运行路径。
+- Windows parity hotfix（路径分隔符规范化）已并入 `main`。
+
+**当前仍未闭环的项**：
+
+- `SystemMtLauncher` 已移除生产路径的 `HardcodedMrCatalogProvider` fallback，launcher 现要求显式注入 `IMrCatalogProvider`。
+- `LauncherCatalogV2Importer` 已改依赖 `ISystemMtCatalogReader`，`App.xaml.cs` 不再对 `ISystemMtLauncher` 做具体类强转。
+- `ExecutionEvidence.SampleTraces` 已开始写入目标字段的 source / transformed / output triples；样本级 evidence 不再是空壳。
+- 当前主要待补项转为：扩大 sample trace 覆盖粒度，并补 Windows 侧 `MetBench_Client` 构建回执。
+- `flw≈k·src` 缩放等式 assertion 仍未实现，P1 的 3 条齐次 MR 仍未从 MP_mono 升到 MP_inv。
 
 **暂缓**（Stage 9+ 候）：BNCT 硼中子放疗、故障注入 V3、论文 writeup。
 

@@ -1,6 +1,7 @@
 using MetBench_BLL.SystemMT.Persistence;
 using MetBench_Domain;
 using MetBench_IDAL;
+using System.Text.Json;
 
 namespace MetBench_BLL.SystemMT.Pipeline;
 
@@ -130,12 +131,101 @@ public sealed class SystemMtExecutionRecorder
             IdEvidence = Guid.NewGuid(),
             ExecutionId = executionId,
             Metadata = snapshot,
-            SampleTraces = new(),               // Task 6 step 3 lands per-variable triples
+            SampleTraces = BuildSampleTraces(context, outcome),
             TransformationParameters = new Dictionary<string, string>(context.Parameters),
             RecordedAtUtc = outcome.FinishedAt.ToUniversalTime(),
         };
         // Recorder is sync; evidence write also runs sync (LiteDB).
         _evidence!.SaveAsync(evidence).GetAwaiter().GetResult();
+    }
+
+    private static List<ExecutionSampleTrace> BuildSampleTraces(PipelineContext context, PipelineOutcome outcome)
+    {
+        if (string.IsNullOrWhiteSpace(context.TargetFieldPath)
+            || string.IsNullOrWhiteSpace(context.SourceCasePath)
+            || string.IsNullOrWhiteSpace(outcome.FollowupInputPath)
+            || !File.Exists(context.SourceCasePath)
+            || !File.Exists(outcome.FollowupInputPath))
+        {
+            return new();
+        }
+
+        if (!TryReadJsonValue(context.SourceCasePath, context.TargetFieldPath, out var sourceValue)
+            || !TryReadJsonValue(outcome.FollowupInputPath, context.TargetFieldPath, out var transformedValue))
+        {
+            return new();
+        }
+
+        var outputValue = outcome.FollowupMetrics is not null
+            && outcome.FollowupMetrics.TryGetValue(context.ValueName, out var metric)
+            ? JsonSerializer.Serialize(metric)
+            : string.Empty;
+
+        return new()
+        {
+            new ExecutionSampleTrace
+            {
+                VariableName = context.ValueName,
+                Path = context.TargetFieldPath,
+                SourceValueJson = sourceValue,
+                TransformedValueJson = transformedValue,
+                OutputValueJson = outputValue,
+            }
+        };
+    }
+
+    private static bool TryReadJsonValue(string filePath, string jsonPointer, out string valueJson)
+    {
+        valueJson = string.Empty;
+        using var document = JsonDocument.Parse(File.ReadAllText(filePath));
+        if (!TryResolveJsonPointer(document.RootElement, jsonPointer, out var value))
+        {
+            return false;
+        }
+
+        valueJson = value.GetRawText();
+        return true;
+    }
+
+    private static bool TryResolveJsonPointer(JsonElement root, string jsonPointer, out JsonElement value)
+    {
+        value = root;
+        if (string.IsNullOrEmpty(jsonPointer) || jsonPointer == "/")
+        {
+            return true;
+        }
+
+        if (!jsonPointer.StartsWith("/", StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        foreach (var rawSegment in jsonPointer.Split('/', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var segment = rawSegment.Replace("~1", "/").Replace("~0", "~");
+            if (value.ValueKind == JsonValueKind.Object)
+            {
+                if (!value.TryGetProperty(segment, out value))
+                {
+                    return false;
+                }
+
+                continue;
+            }
+
+            if (value.ValueKind == JsonValueKind.Array
+                && int.TryParse(segment, out var index)
+                && index >= 0
+                && index < value.GetArrayLength())
+            {
+                value = value[index];
+                continue;
+            }
+
+            return false;
+        }
+
+        return true;
     }
 
     private static Dictionary<string, double> ToMutable(
