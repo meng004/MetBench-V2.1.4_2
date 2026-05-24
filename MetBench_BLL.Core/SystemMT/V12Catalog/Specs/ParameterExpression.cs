@@ -4,8 +4,7 @@ namespace MetBench_BLL.SystemMT.V12Catalog.Specs;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "kind")]
 [JsonDerivedType(typeof(ConstantParameterExpression), "ConstantParameter")]
-public abstract record ParameterExpression(string Kind);
+public abstract record ParameterExpression;
 
 public sealed record ConstantParameterExpression(
-    string Kind,
-    double Value) : ParameterExpression(Kind);
+    double Value) : ParameterExpression;
