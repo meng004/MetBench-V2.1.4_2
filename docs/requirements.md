@@ -176,6 +176,7 @@
 | `9f74d69` | **G-X3 Task 2c** | ManifestMrCatalogProvider + 9 catalog.json + 12 manifest tests + 2 parity tests (927 → 943) |
 | `c923063` | **G-X3 Task 3** | Inject IMrCatalogProvider into SystemMtLauncher; MrCatalogEntry 8 → 13 fields; ToBlueprint inverse; 3 injection tests (943 → 946) |
 | _(pending)_ | **G-X3 Task 4** | [Obsolete] on HardcodedMrCatalogProvider + sunset guard (+2 tests, 946 → 948) |
+| _(pending)_ | **G-X3 VM** | App.xaml.cs registers ManifestMrCatalogProvider for IMrCatalogProvider DI (unblocks Task 7 fallback removal) |
 
 ## 12. 受控开发模式工作流
 
