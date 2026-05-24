@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
+using MetBench_BLL.SystemMT.V12Catalog.Validation;
 
 namespace MetBench_BLL.SystemMT.V12Catalog.Specs;
 
@@ -11,6 +13,12 @@ public sealed record PropertySpec(
     PropertyCaseSpec? Case,
     IReadOnlyDictionary<string, ProjectionSpec>? Projections,
     IReadOnlyList<PropertyPredicateSpec> Assertions,
-    ToleranceSpec? DefaultTolerance);
+    ToleranceSpec? DefaultTolerance)
+{
+    [JsonIgnore]
+    public FiveDTags FiveDTags => FiveDTags.FromTags(Tags);
+
+    public ValidationResult Validate() => new PropertySpecValidator(ValidationRegistry.Default).Validate(this);
+}
 
 public sealed record PropertyCaseSpec(string Kind);

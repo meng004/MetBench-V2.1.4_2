@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
+using MetBench_BLL.SystemMT.V12Catalog.Validation;
 
 namespace MetBench_BLL.SystemMT.V12Catalog.Specs;
 
@@ -12,6 +14,16 @@ public sealed record MrSpec(
     IReadOnlyDictionary<string, RunRoleSpec>? Roles,
     IReadOnlyDictionary<string, ProjectionSpec>? Projections,
     IReadOnlyList<PredicateSpec> Predicates,
-    ToleranceSpec? DefaultTolerance);
+    ToleranceSpec? DefaultTolerance)
+{
+    [JsonIgnore]
+    public FiveDTags FiveDTags => FiveDTags.FromTags(Tags);
 
-public sealed record RunRoleSpec(string Kind);
+    public ValidationResult Validate() => new MrSpecValidator(ValidationRegistry.Default).Validate(this);
+}
+
+public sealed record RunRoleSpec(string Kind)
+{
+    public MethodBinding? MethodBinding { get; init; }
+    public IReadOnlyList<TransformStepSpec>? Transforms { get; init; }
+}
