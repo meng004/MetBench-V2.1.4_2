@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // tests intentionally reference the obsolete types they guard
 using System.Reflection;
 using MetBench_BLL.SystemMT;
 using Xunit;
@@ -19,12 +20,23 @@ public sealed class ObsoleteAttributeGuardTests
     [InlineData(typeof(MetBench_BLL.Latextosympy))]
     [InlineData(typeof(MetBench_BLL.Latextosympy_Await))]
     [InlineData(typeof(SystemMtRunner))]
+    [InlineData(typeof(MetBench_BLL.SystemMT.Catalog.HardcodedMrCatalogProvider))]
     public void Legacy_type_must_carry_ObsoleteAttribute(Type type)
     {
         var attr = type.GetCustomAttribute<ObsoleteAttribute>();
         Assert.NotNull(attr);
         Assert.False(string.IsNullOrWhiteSpace(attr.Message),
             $"{type.Name} [Obsolete] must carry a non-empty message explaining the replacement path.");
+    }
+
+    [Fact]
+    public void HardcodedMrCatalogProvider_obsolete_message_points_to_ManifestMrCatalogProvider()
+    {
+        var attr = typeof(MetBench_BLL.SystemMT.Catalog.HardcodedMrCatalogProvider)
+            .GetCustomAttribute<ObsoleteAttribute>();
+        Assert.NotNull(attr);
+        Assert.Contains("ManifestMrCatalogProvider", attr.Message);
+        Assert.Contains("Task 7", attr.Message);
     }
 
     [Fact]

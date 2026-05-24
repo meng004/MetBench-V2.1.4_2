@@ -10,8 +10,13 @@ namespace MetBench_BLL.SystemMT.Catalog;
 /// blueprints from <see cref="LegacyCatalogFactory"/>. Same 17 MR × 9 SUT entries
 /// as the pre-Phase-B launcher; provided so Task 3 can switch the launcher to
 /// provider-backed loading without changing behavior. Slated for removal in Task 7
-/// once the manifest-backed catalog has shipped.
+/// once the manifest-backed catalog has shipped and is the WPF default.
 /// </summary>
+[Obsolete(
+    "Transitional Phase B/C wrapper around the hardcoded LegacyCatalogFactory. " +
+    "New code should depend on ManifestMrCatalogProvider (data-driven SUT/<sut>/catalog.json). " +
+    "Slated for removal in Task 7 of the catalog convergence plan; LegacyCatalogFactory + " +
+    "this wrapper will be deleted once VM-side DI registers ManifestMrCatalogProvider explicitly.")]
 public sealed class HardcodedMrCatalogProvider : IMrCatalogProvider
 {
     private readonly LauncherOptions _options;

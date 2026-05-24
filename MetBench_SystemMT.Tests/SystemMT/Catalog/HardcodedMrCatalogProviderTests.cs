@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // tests intentionally exercise the obsolete transitional provider
 using System.Linq;
 using MetBench_BLL.SystemMT.Catalog;
 using MetBench_BLL.SystemMT.Launcher;

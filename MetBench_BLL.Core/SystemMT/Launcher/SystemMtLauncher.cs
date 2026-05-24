@@ -50,7 +50,9 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
         // haven't yet registered IMrCatalogProvider — e.g. WPF App.xaml.cs pre-Task-3-VM), fall
         // back to the transitional HardcodedMrCatalogProvider. Task 4 marks Hardcoded obsolete;
         // Task 7 removes both the fallback and Hardcoded entirely once VM-side DI is registered.
+#pragma warning disable CS0618 // intentional transitional fallback
         var provider = catalogProvider ?? new HardcodedMrCatalogProvider(options);
+#pragma warning restore CS0618
         _mrCatalog = provider.Load()
             .Select(entry => entry.ToBlueprint())
             .ToDictionary(b => b.Mr.Id, StringComparer.Ordinal);

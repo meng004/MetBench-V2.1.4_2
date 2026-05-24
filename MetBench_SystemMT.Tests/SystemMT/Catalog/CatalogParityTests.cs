@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // parity test intentionally compares against the obsolete hardcoded provider
 using System.Collections.Generic;
 using System.Linq;
 using MetBench_BLL.SystemMT.Catalog;

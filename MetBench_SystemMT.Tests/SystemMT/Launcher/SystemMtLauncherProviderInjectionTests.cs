@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // injection test exercises obsolete HardcodedMrCatalogProvider for parity
 using System;
 using System.Collections.Generic;
 using System.Linq;
