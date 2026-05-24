@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using MetBench_BLL.SystemMT.Assertions;
 using MetBench_BLL.SystemMT.Launcher;
 
 namespace MetBench_BLL.SystemMT.Catalog;
@@ -94,11 +95,28 @@ public sealed class ManifestMrCatalogProvider : IMrCatalogProvider
 
     private MrCatalogEntry MapToEntry(ProgramDefinition program, MrBindingDefinition binding, string sutDir)
     {
-        // Adapter paths (per-binding override falls back to program-level) are carried by
-        // MrBindingDefinition + ProgramDefinition but not by the 8-field MrCatalogEntry export.
-        // Task 3 expands the export shape (or reconstructs MrBlueprint) — at that point the
-        // overrides will be plumbed through. Suppress unused-local warnings for Phase B by
-        // keeping the resolution implicit in the definition objects themselves.
+        var inputAdapterRel = !string.IsNullOrEmpty(binding.InputAdapterScriptRelativePath)
+            ? binding.InputAdapterScriptRelativePath
+            : program.InputAdapterScriptRelativePath;
+        var outputAdapterRel = !string.IsNullOrEmpty(binding.OutputAdapterScriptRelativePath)
+            ? binding.OutputAdapterScriptRelativePath
+            : program.OutputAdapterScriptRelativePath;
+
+        var pythonExecutable = program.PythonExecutableKind switch
+        {
+            PythonExecutableKinds.OpenMoc => _options.OpenMocPython,
+            PythonExecutableKinds.OpenMc => _options.EffectiveOpenMcPython,
+            _ => _options.SystemPython,
+        };
+
+        var tolerance = (binding.NoiseAware || binding.ToleranceRel > 0 || binding.ToleranceAbs > 0)
+            ? new AssertionTolerance(
+                NoiseAware: binding.NoiseAware,
+                ToleranceRel: binding.ToleranceRel,
+                ToleranceAbs: binding.ToleranceAbs,
+                NoiseMultiplier: binding.NoiseMultiplier)
+            : null;
+
         var mr = new MrSummary(
             Id: binding.MrId,
             DisplayName: binding.DisplayName,
@@ -114,10 +132,18 @@ public sealed class ManifestMrCatalogProvider : IMrCatalogProvider
             Mr: mr,
             SampleCaseRelativePath: Path.Combine(sutDir, binding.SampleCaseRelativePath),
             RunnerScriptPath: Path.Combine(_options.SutRoot, sutDir, program.RunnerScriptRelativePath),
+            InputAdapterScriptPath: Path.Combine(_options.SutRoot, sutDir, inputAdapterRel),
+            OutputAdapterScriptPath: Path.Combine(_options.SutRoot, sutDir, outputAdapterRel),
+            PythonExecutable: pythonExecutable,
+            WorkRootName: binding.WorkRootName,
+            Timeout: TimeSpan.FromSeconds(binding.TimeoutSeconds),
             InputParserScriptPath: Path.Combine(_options.SutRoot, sutDir, program.InputParserScriptRelativePath),
             OutputParserScriptPath: Path.Combine(_options.SutRoot, sutDir, program.OutputParserScriptRelativePath),
+            TransformSteps: binding.TransformSteps
+                .Select(s => new MrCatalogTransformStep(s.TransformationName, s.TargetFieldPath))
+                .ToList(),
             AssertionTypeCode: binding.AssertionTypeCode,
-            PrimaryTransformationName: binding.TransformSteps[0].TransformationName,
-            EquationKey: binding.EquationKey);
+            EquationKey: binding.EquationKey,
+            Tolerance: tolerance);
     }
 }

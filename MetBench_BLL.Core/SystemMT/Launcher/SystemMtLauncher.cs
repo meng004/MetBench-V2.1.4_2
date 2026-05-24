@@ -2,6 +2,7 @@ using MetBench_BLL.Equations;
 using MetBench_BLL.Equations.Bateman;
 using MetBench_BLL.SystemMT.Anomaly;
 using MetBench_BLL.SystemMT.Assertions;
+using MetBench_BLL.SystemMT.Catalog;
 using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_BLL.SystemMT.Transformations;
 
@@ -37,6 +38,7 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
         ISystemMtPipeline pipeline,
         SystemMtExecutionRecorder recorder,
         IAnomalyService anomalyService,
+        IMrCatalogProvider? catalogProvider = null,
         AnomalySeverityThresholds? severityThresholds = null)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
@@ -44,7 +46,14 @@ public sealed class SystemMtLauncher : ISystemMtLauncher
         _recorder = recorder ?? throw new ArgumentNullException(nameof(recorder));
         _anomalyService = anomalyService ?? throw new ArgumentNullException(nameof(anomalyService));
         _severityThresholds = severityThresholds ?? AnomalySeverityThresholds.Default;
-        _mrCatalog = LegacyCatalogFactory.Build(options).ToDictionary(s => s.Mr.Id, StringComparer.Ordinal);
+        // Phase C: provider-backed catalog. When no provider is supplied (legacy DI sites that
+        // haven't yet registered IMrCatalogProvider — e.g. WPF App.xaml.cs pre-Task-3-VM), fall
+        // back to the transitional HardcodedMrCatalogProvider. Task 4 marks Hardcoded obsolete;
+        // Task 7 removes both the fallback and Hardcoded entirely once VM-side DI is registered.
+        var provider = catalogProvider ?? new HardcodedMrCatalogProvider(options);
+        _mrCatalog = provider.Load()
+            .Select(entry => entry.ToBlueprint())
+            .ToDictionary(b => b.Mr.Id, StringComparer.Ordinal);
         _equationFunctions = BuildEquationFunctionRegistry();
 
         // Register CompositeTransform for multi-step MRs that do NOT use a Recipe
@@ -354,24 +363,60 @@ public sealed record MrCatalogEntry(
     MrSummary Mr,
     string SampleCaseRelativePath,
     string RunnerScriptPath,
+    string InputAdapterScriptPath,
+    string OutputAdapterScriptPath,
+    string PythonExecutable,
+    string WorkRootName,
+    TimeSpan Timeout,
     string InputParserScriptPath,
     string OutputParserScriptPath,
+    IReadOnlyList<MrCatalogTransformStep> TransformSteps,
     string AssertionTypeCode,
-    string PrimaryTransformationName,
-    string EquationKey)
+    string EquationKey,
+    AssertionTolerance? Tolerance)
 {
+    /// <summary>UI convenience: first step's transformation name (engine name, not display).</summary>
+    public string PrimaryTransformationName =>
+        TransformSteps.Count > 0 ? TransformSteps[0].TransformationName : string.Empty;
+
     /// <summary>
-    /// Project an internal <see cref="MrBlueprint"/> to the public catalog-entry snapshot
-    /// consumed by <see cref="MetBench_BLL.SystemMT.Catalog.IMrCatalogProvider"/> implementations
-    /// and <see cref="LauncherCatalogV2Importer"/>.
+    /// Project an internal <see cref="MrBlueprint"/> to the public catalog-entry snapshot.
     /// </summary>
     internal static MrCatalogEntry FromBlueprint(MrBlueprint bp) =>
         new(bp.Mr,
             bp.SampleCaseRelativePath,
             bp.RunnerScriptPath,
+            bp.InputAdapterScriptPath,
+            bp.OutputAdapterScriptPath,
+            bp.PythonExecutable,
+            bp.WorkRootName,
+            bp.Timeout,
             bp.InputParserScriptPath,
             bp.OutputParserScriptPath,
+            bp.TransformSteps.Select(s => new MrCatalogTransformStep(s.TransformationName, s.TargetFieldPath)).ToList(),
             bp.AssertionTypeCode,
-            bp.TransformSteps[0].TransformationName,
-            bp.EquationKey);
+            bp.EquationKey,
+            bp.Tolerance);
+
+    /// <summary>
+    /// Inverse of <see cref="FromBlueprint"/>; reconstructs the runtime blueprint for launcher consumption.
+    /// </summary>
+    internal MrBlueprint ToBlueprint() =>
+        new(Mr,
+            SampleCaseRelativePath,
+            RunnerScriptPath,
+            InputAdapterScriptPath,
+            OutputAdapterScriptPath,
+            PythonExecutable,
+            WorkRootName,
+            Timeout,
+            InputParserScriptPath,
+            OutputParserScriptPath,
+            TransformSteps.Select(s => new MrTransformStep(s.TransformationName, s.TargetFieldPath)).ToList(),
+            AssertionTypeCode,
+            EquationKey,
+            Tolerance);
 }
+
+/// <summary>Public mirror of internal MrTransformStep for IMrCatalogProvider boundary.</summary>
+public sealed record MrCatalogTransformStep(string TransformationName, string TargetFieldPath);
