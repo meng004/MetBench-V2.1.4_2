@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace MetBench_BLL.SystemMT.V12Catalog.Specs;
@@ -5,6 +6,7 @@ namespace MetBench_BLL.SystemMT.V12Catalog.Specs;
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "kind")]
 [JsonDerivedType(typeof(BinaryComparisonPredicate), "BinaryComparison")]
 [JsonDerivedType(typeof(ScaledEqualityPredicate), "ScaledEquality")]
+[JsonDerivedType(typeof(ErrorMonotonicPredicate), "ErrorMonotonic")]
 public abstract record PredicateSpec(string PredicateId);
 
 public sealed record BinaryComparisonPredicate(
@@ -21,3 +23,10 @@ public sealed record ScaledEqualityPredicate(
     string Metric,
     ParameterExpression Factor,
     double Exponent) : PredicateSpec(PredicateId);
+
+public sealed record ErrorMonotonicPredicate(
+    string PredicateId,
+    IReadOnlyList<string> OrderedRoles,
+    string ReferenceRole,
+    string Metric,
+    NormKind NormKind) : PredicateSpec(PredicateId);
