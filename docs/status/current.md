@@ -20,12 +20,12 @@
 
 | Field | Value |
 |---|---|
-| Latest code-test baseline commit | `970c7f9` |
-| Baseline source | PR #124, `feat(systemmt): map dormant legacy assertion codes to typed predicates` |
+| Latest code-test baseline commit | `a0d1add` |
+| Baseline source | PR #126, `feat(systemmt): render typed verification evidence in html report` |
 | Test command | `dotnet test MetBench_SystemMT.Tests --no-build` |
-| Result | `1065 pass / 0 fail / 8 skip` |
+| Result | `1072 pass / 0 fail / 8 skip` |
 | Reason skips are not zero | Skips are the OpenMOC / OpenMC integration tests that skip cleanly when the matching Python venv is missing (per `CLAUDE.md` §8). They are environment-dependent and not regression. |
-| Prior baselines | `7798515` (PR #123, live typed verification wiring) was `1062 / 0 / 8`; `ad0bb4b` (PR #121, ExecutionEvidence v2 PR-C0) was `1061 / 0 / 8`; `5d4dcc7` (PR #119, PR-D verification-semantics convergence cleanup) was `1048 / 0 / 8`; `e839214` (PR #110) remains the v1.2 retrospective historical baseline. |
+| Prior baselines | `970c7f9` (PR #124, dormant legacy code mapping) was `1065 / 0 / 8`; `7798515` (PR #123, live typed verification wiring) was `1062 / 0 / 8`; `ad0bb4b` (PR #121, ExecutionEvidence v2 PR-C0) was `1061 / 0 / 8`; `5d4dcc7` (PR #119, PR-D verification-semantics convergence cleanup) was `1048 / 0 / 8`; `e839214` (PR #110) remains the v1.2 retrospective historical baseline. |
 
 ## 3. Stage 8 Completion Snapshot
 
@@ -40,6 +40,7 @@
 | ExecutionEvidence v2 schema and recorder | Controlled — PR-C0 merged | PR #121 added the nullable `TypedVerification` block on `ExecutionEvidence` plus 3 supporting POCOs, a stateless mapper, and a recorder overload. LiteDB collection layout, `IdEvidence` BSON id, `ExecutionId` unique index, `SystemMtResultRecord`, `ISystemMtLauncher`, `MrRunResult`, and `HtmlSystemMtResultReportRenderer` signatures all unchanged. `MrRunResultShapeLockTests` pins the facade. |
 | Live typed verification wiring | Controlled — PR-123 merged | PR #123 captures the typed `(MrSpec, PredicateSpec, VerificationResult)` triple inside `SystemMtPipeline.ExecuteAsync`, carries it through three nullable init-only properties on `PipelineOutcome`, and `SystemMtExecutionRecorder` now reads them via outcome-fallback precedence. Live evidence rows produced by the System MT pipeline now populate `ExecutionEvidence.TypedVerification`; `Live_pipeline_outcome_carries_typed_triple_into_evidence_without_explicit_typed_args` is the regression guard. |
 | Dormant legacy assertion code mapping | Controlled — PR-124 merged for the 4 representable codes; 2 noise-aware codes remain intentionally fail-closed | PR #124 added `MapVarianceRatio`, `MapFluxPointwise`, `MapCrossProgramAgree`, and an `approx-invariant -> BinaryComparisonPredicate(Equal)` case to `LegacyAssertionPredicateMapper`. The two noise-aware scalar codes (`less-noise-aware`, `greater-noise-aware`) remain fail-closed because the Typed Semantic Catalog scalar predicates cannot yet carry `SourceStd` / `FollowupStd` / `NoiseMultiplier` inputs; `Noise_aware_scalar_codes_fail_closed_with_documented_reason` pins the documented exception message. |
+| Evidence-aware HTML report rendering | Controlled — PR-126 merged | PR #126 extended `HtmlSystemMtResultReportRenderer` and `ISystemMtResultReportRenderer` with an evidence-aware overload `Render(records, IReadOnlyDictionary<Guid, ExecutionEvidence>?, ReportContext?)` that surfaces `ExecutionEvidence.TypedVerification` (SpecId / SpecKind / Predicate / Status / Diagnostic / SkipOrInvalidReason / ordered PropertyPredicates) in the per-row `<details>` block. The legacy two-arg overload delegates to the new one with `evidenceByExecutionId: null`, so callers without an evidence dictionary render byte-identical HTML. `Render_without_evidence_dictionary_matches_legacy_overload_byte_identical` pins that contract. |
 | System MT architecture re-review | Controlled | Recorded in `docs/superpowers/specs/2026-05-25-systemmt-architecture-review-post-evidence-v2.md` at `ad0bb4b`. Method MT isolation, Typed Catalog upward independence, launcher facade insulation, and W1 cleanup all verified by `grep` audit. |
 
 ## 4. Active Control Documents
@@ -50,7 +51,6 @@
 | `docs/superpowers/plans/2026-05-25-metbench-active-plan-index.md` | Active plan registry |
 | `docs/superpowers/plans/2026-05-25-metbench-governed-next-stage-plan.md` | Current governed next-stage master plan |
 | `docs/superpowers/specs/2026-05-25-metbench-macro-assessment-and-risk-audit.md` | Macro map and risk audit |
-| `docs/superpowers/specs/2026-05-25-executionevidence-v2-design.md` | ExecutionEvidence v2 design: typed verification persistence block, recorder mapping, compatibility contract, PR-C scope boundaries |
 | `docs/superpowers/specs/2026-05-25-systemmt-architecture-review-post-evidence-v2.md` | Post-PR-D / post-PR-C0 System MT dependency-boundary audit: Method MT isolation, Typed Catalog upward independence, launcher facade insulation, W1 cleanup verification |
 | `docs/superpowers/templates/pr-gate-checklist.md` | Required PR checklist template |
 
@@ -70,21 +70,21 @@ The following documents are projections of the ledger and their own domain. They
 | Risk | Status | Required next step |
 |---|---|---|
 | Verification semantics convergence | Controlled | Convergence is closed via PR #115 (PR-B), PR #118 (PR-C), PR #119 (PR-D). Maintenance only: keep `SemanticCatalogBoundaryTests` and `SemanticCatalogNamingBoundaryTests` green; future typed-predicate extensions must add new typed predicates in `MetBench_BLL.Core/SystemMT/Catalog/Typed/` and extend `LegacyAssertionPredicateMapper` rather than re-introducing legacy assertion classes. |
-| ExecutionEvidence final shape | Controlled — PR-123 wired live flow | PR #121 implemented the typed-verification persistence block + recorder projection (PR-C0). PR #123 then wired `SystemMtPipeline.ExecuteAsync` to carry the typed `(MrSpec, PredicateSpec, VerificationResult)` triple through `PipelineOutcome`, and `SystemMtExecutionRecorder` reads it via outcome-fallback precedence; live evidence rows now populate `ExecutionEvidence.TypedVerification`. `Live_pipeline_outcome_carries_typed_triple_into_evidence_without_explicit_typed_args` is the regression guard. |
-| Codegraph and architecture re-review | Controlled | Recorded in `docs/superpowers/specs/2026-05-25-systemmt-architecture-review-post-evidence-v2.md` against `ad0bb4b`. All four audit questions pass: Method MT isolation, Typed Catalog upward independence, launcher facade insulation, W1 cleanup. Refresh required only when the next System MT cross-cutting change lands. PR-123 / PR-124 did not introduce any new cross-module dependency (Pipeline → Catalog/Typed already audited; Persistence still consumes typed runtime only via the mapper). |
-| Windows verification policy | Partially controlled | Use PR gate classification now; write the dedicated Windows policy before the next Windows-touching PR. PR-B/C/D and PR #121 / #122 / #123 / #124 were all Linux-only and did not require Windows validation. |
+| ExecutionEvidence final shape | Controlled — full lifecycle closed | PR #121 implemented the typed-verification persistence block + recorder projection (PR-C0). PR #123 wired `SystemMtPipeline.ExecuteAsync` to carry the typed `(MrSpec, PredicateSpec, VerificationResult)` triple through `PipelineOutcome` so live evidence rows now populate `ExecutionEvidence.TypedVerification`. PR #126 closed the design's last deferred deliverable by extending `HtmlSystemMtResultReportRenderer` with an evidence-aware overload that surfaces the typed block in HTML reports. The ExecutionEvidence v2 design's full lifecycle (data → persistence → recorder → renderer) is now end-to-end. `Live_pipeline_outcome_carries_typed_triple_into_evidence_without_explicit_typed_args` and `Render_without_evidence_dictionary_matches_legacy_overload_byte_identical` together pin the regression contract. |
+| Codegraph and architecture re-review | Controlled | Recorded in `docs/superpowers/specs/2026-05-25-systemmt-architecture-review-post-evidence-v2.md` against `ad0bb4b`. All four audit questions pass: Method MT isolation, Typed Catalog upward independence, launcher facade insulation, W1 cleanup. Refresh required only when the next System MT cross-cutting change lands. PR #123 / #124 / #126 did not introduce any new cross-module dependency (Pipeline → Catalog/Typed already audited; Persistence still consumes typed runtime only via the mapper; Reporting still only consumes Persistence POCOs, not typed-runtime types). |
+| Windows verification policy | Partially controlled | Use PR gate classification now; write the dedicated Windows policy before the next Windows-touching PR. PR-B/C/D and PR #121 / #122 / #123 / #124 / #125 / #126 were all Linux-only and did not require Windows validation. |
 | Legacy assertion code mapping | Controlled — 4 mapped, 2 intentionally fail-closed | PR #124 mapped `approx-invariant` → `BinaryComparisonPredicate(Equal)`, `variance-ratio` → `VarianceRatioPredicate`, `flux-pointwise-approx` → `FieldEqualityPredicate` (Identity pairing), and `cross-program-agree` → `CrossMethodComparisonPredicate(Equal)`. **Intentionally fail-closed** with documented reason: `less-noise-aware` and `greater-noise-aware` — the legacy scalar form takes `SourceStd` / `FollowupStd` / `NoiseMultiplier`, which the Typed Semantic Catalog scalar predicates do not yet carry. Before adopting these two codes in any future MR catalog binding, a noise-aware typed predicate (e.g. `NoiseAwareBinaryComparisonPredicate(SourceStd, FollowupStd, NoiseMultiplier, Operator)`) must be added under `MetBench_BLL.Core/SystemMT/Catalog/Typed/Specs/`, validated, kernel-implemented, and then exposed via a new `LegacyAssertionPredicateMapper.MapNoiseAwareScalar(...)` overload. |
 | Active vs historical plan drift | Controlled but must be maintained | Keep the active plan index current whenever a phase changes |
 
 ## 7. Current Execution Order
 
-Verification-semantics convergence (PR-A → PR-D, #114 / #115 / #118 / #119), ExecutionEvidence v2 PR-C0 (#121), the post-convergence architecture audit (#122), the live typed verification wiring (#123), and the dormant legacy code mapping (#124) are all merged. The next stage proceeds in this order:
+Verification-semantics convergence (PR-A → PR-D, #114 / #115 / #118 / #119), ExecutionEvidence v2 (PR-A0 #116, PR-C0 #121, live wiring #123, evidence-aware reporting #126), the post-convergence architecture audit (#122), the dormant legacy code mapping (#124), and the status ledger refreshes (#120 / #125 / #127) are all merged. The ExecutionEvidence v2 design's full lifecycle is now closed. The next stage proceeds in this order:
 
 1. Maintain this ledger as the current status source.
 2. Use the active plan index to select work.
 3. When the first MR catalog binding actually adopts `less-noise-aware` or `greater-noise-aware`, add a noise-aware typed predicate to `MetBench_BLL.Core/SystemMT/Catalog/Typed/Specs/` (e.g. `NoiseAwareBinaryComparisonPredicate`), implement its kernel + validator, and extend `LegacyAssertionPredicateMapper` with a `MapNoiseAwareScalar(...)` overload. Until such a binding exists, the two noise-aware codes remain intentionally fail-closed.
 4. Design Windows verification policy before any next Windows-touching PR. Until then, all PRs must stay inside the Linux-CI-validated cross-platform projects.
-5. Only then proceed to implementation PRs for configuration, UI-facing work, or evidence-aware report rendering.
+5. Only then proceed to implementation PRs for the next stage (T2 visualization extensions, T3 coverage extensions, T4 MR discovery, T5 anomaly investigation, T6 mutation testing). A new scoped plan must be registered in the active plan index §1 before such work begins.
 
 ## 8. Update Triggers
 
