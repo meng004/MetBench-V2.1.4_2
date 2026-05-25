@@ -75,7 +75,7 @@ public sealed class SystemMtLauncherProviderInjectionTests
         Assert.Equal(2, items.Count);
         Assert.Contains(items, m => m.Id == "provider-only-mr-a");
         Assert.Contains(items, m => m.Id == "provider-only-mr-b");
-        // Critically: the launcher does NOT also surface the 19 hardcoded MRs alongside.
+        // Critically: the launcher does NOT also surface the 21 hardcoded MRs alongside.
         Assert.DoesNotContain(items, m => m.Id == "openmoc-pincell-nu-sigma-f");
     }
 
@@ -107,7 +107,7 @@ public sealed class SystemMtLauncherProviderInjectionTests
 
         var items = await launcher.ListAvailableAsync();
 
-        Assert.Equal(19, items.Count);
+        Assert.Equal(21, items.Count);
         Assert.Contains(items, m => m.Id == "openmoc-pincell-nu-sigma-f");
     }
 

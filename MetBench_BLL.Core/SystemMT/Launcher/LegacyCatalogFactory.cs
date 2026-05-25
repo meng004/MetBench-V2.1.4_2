@@ -542,5 +542,68 @@ internal static class LegacyCatalogFactory
             // solution exactly to machine precision; halving dx changes u_max by ~1e-15.
             // ToleranceRel=1e-3 + Atol=1e-6 is far more than needed; keep parity with diffusion-mesh-richardson.
             Tolerance: new AssertionTolerance(ToleranceRel: 1e-3, ToleranceAbs: 1e-6));
+
+        // T3 expansion: 1D linear advection SUT + Advection 方程接入（first hyperbolic-PDE
+        // SUT after Poisson; pure-stdlib first-order upwind FD with periodic boundaries）.
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "advection-amplitude-linearity",
+                DisplayName: "1D advection — ScaleInitial (amplitude linearity)",
+                SutName: "advection-1d",
+                TransformationName: "ScaleField",
+                AssertionName: "GreaterThan",
+                ValueName: "peak_amplitude",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Linearity MP_mono: the 1D advection equation u_t + v·u_x = 0 is linear " +
+                    "in the initial condition. Scaling the initial Gaussian amplitude by " +
+                    "factor > 1 must strictly increase the final peak amplitude (and in fact " +
+                    "scale it by the same factor exactly, since the conservative upwind scheme " +
+                    "preserves linearity).",
+                MrFamily: "Advection.Scaling.Amplitude"),
+            SampleCaseRelativePath: Path.Combine("advection_1d", "sample", "standard.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "advection_1d", "advection_1d.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "advection_1d", "advection_1d_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "advection_1d", "advection_1d_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchAdvection1d",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "advection_1d", "advection_1d_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "advection_1d", "advection_1d_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/initial/amplitude") },
+            AssertionTypeCode: "greater",
+            EquationKey: "advection");
+
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "advection-mesh-conservation",
+                DisplayName: "1D advection — MeshRefinement (mass conservation)",
+                SutName: "advection-1d",
+                TransformationName: "ScaleField",
+                AssertionName: "ApproxEqual",
+                ValueName: "mass_integral",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Mass conservation MP_inv: the conservative first-order upwind scheme " +
+                    "with periodic boundaries preserves the integral ∫u dx to floating-point " +
+                    "precision. Doubling num_points changes the initial-condition sampling " +
+                    "by O(dx²) but the per-step mass conservation is exact; the final " +
+                    "mass_integral must agree within tight FD tolerance.",
+                MrFamily: "Advection.Invariance.Mass"),
+            SampleCaseRelativePath: Path.Combine("advection_1d", "sample", "standard.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "advection_1d", "advection_1d.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "advection_1d", "advection_1d_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "advection_1d", "advection_1d_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchAdvection1d",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "advection_1d", "advection_1d_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "advection_1d", "advection_1d_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/geometry/num_points") },
+            AssertionTypeCode: "approx",
+            EquationKey: "advection",
+            // 一阶迎风格式严格守恒 ∫u dx；网格加密 200→400 时 mass_integral 仅因初始 Gaussian
+            // 采样差异变化 O(dx²) ~ 4e-9（实测）；ToleranceRel=1e-3 + Atol=1e-6 充裕。
+            Tolerance: new AssertionTolerance(ToleranceRel: 1e-3, ToleranceAbs: 1e-6));
     }
 }

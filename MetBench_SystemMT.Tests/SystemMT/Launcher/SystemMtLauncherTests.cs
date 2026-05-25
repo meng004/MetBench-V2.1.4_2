@@ -72,26 +72,58 @@ public sealed class SystemMtLauncherTests
     {
         var descriptors = await _launcher.ListAvailableAsync();
 
-        Assert.Equal(19, descriptors.Count);
-        Assert.Equal("bateman-mass-conservation", descriptors[0].Id);
-        Assert.Equal("bateman-timestep-cauchy", descriptors[1].Id);
-        Assert.Equal("damped-oscillator-scale-state", descriptors[2].Id);
-        Assert.Equal("decay-chain-scale-initial", descriptors[3].Id);
-        Assert.Equal("diffusion-mesh-richardson", descriptors[4].Id);
-        Assert.Equal("diffusion-source-linearity", descriptors[5].Id);
-        Assert.Equal("fourier-alpha-monotonic", descriptors[6].Id);
-        Assert.Equal("fourier-timestep-convergence", descriptors[7].Id);
-        Assert.Equal("heat-equation-amplitude", descriptors[8].Id);
-        Assert.Equal("lotka-volterra-scale-gamma", descriptors[9].Id);
-        Assert.Equal("openmc-pincell-nu-sigma-f", descriptors[10].Id);
-        Assert.Equal("openmc-pincell-sigma-a", descriptors[11].Id);
-        Assert.Equal("openmoc-pincell-nu-sigma-f", descriptors[12].Id);
-        Assert.Equal("openmoc-pincell-sigma-a", descriptors[13].Id);
-        Assert.Equal("poisson-mesh-richardson", descriptors[14].Id);
-        Assert.Equal("poisson-source-superposition", descriptors[15].Id);
-        Assert.Equal("projectile-scale-v0", descriptors[16].Id);
-        Assert.Equal("subchannel-flow-temperature-monotone", descriptors[17].Id);
-        Assert.Equal("subchannel-heat-flux-linearity", descriptors[18].Id);
+        Assert.Equal(21, descriptors.Count);
+        Assert.Equal("advection-amplitude-linearity", descriptors[0].Id);
+        Assert.Equal("advection-mesh-conservation", descriptors[1].Id);
+        Assert.Equal("bateman-mass-conservation", descriptors[2].Id);
+        Assert.Equal("bateman-timestep-cauchy", descriptors[3].Id);
+        Assert.Equal("damped-oscillator-scale-state", descriptors[4].Id);
+        Assert.Equal("decay-chain-scale-initial", descriptors[5].Id);
+        Assert.Equal("diffusion-mesh-richardson", descriptors[6].Id);
+        Assert.Equal("diffusion-source-linearity", descriptors[7].Id);
+        Assert.Equal("fourier-alpha-monotonic", descriptors[8].Id);
+        Assert.Equal("fourier-timestep-convergence", descriptors[9].Id);
+        Assert.Equal("heat-equation-amplitude", descriptors[10].Id);
+        Assert.Equal("lotka-volterra-scale-gamma", descriptors[11].Id);
+        Assert.Equal("openmc-pincell-nu-sigma-f", descriptors[12].Id);
+        Assert.Equal("openmc-pincell-sigma-a", descriptors[13].Id);
+        Assert.Equal("openmoc-pincell-nu-sigma-f", descriptors[14].Id);
+        Assert.Equal("openmoc-pincell-sigma-a", descriptors[15].Id);
+        Assert.Equal("poisson-mesh-richardson", descriptors[16].Id);
+        Assert.Equal("poisson-source-superposition", descriptors[17].Id);
+        Assert.Equal("projectile-scale-v0", descriptors[18].Id);
+        Assert.Equal("subchannel-flow-temperature-monotone", descriptors[19].Id);
+        Assert.Equal("subchannel-heat-flux-linearity", descriptors[20].Id);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_advection_amplitude_linearity_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var lin = descriptors.Single(d => d.Id == "advection-amplitude-linearity");
+
+        Assert.Equal("advection-1d", lin.SutName);
+        Assert.Equal("ScaleField", lin.TransformationName);
+        Assert.Equal("GreaterThan", lin.AssertionName);
+        Assert.Equal("peak_amplitude", lin.ValueName);
+        Assert.Equal("2", lin.DefaultParameters["factor"]);
+        Assert.Contains("amplitude", lin.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Advection.Scaling.Amplitude", lin.MrFamily);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_advection_mesh_conservation_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var cons = descriptors.Single(d => d.Id == "advection-mesh-conservation");
+
+        Assert.Equal("advection-1d", cons.SutName);
+        Assert.Equal("ScaleField", cons.TransformationName);
+        Assert.Equal("ApproxEqual", cons.AssertionName);
+        Assert.Equal("mass_integral", cons.ValueName);
+        Assert.Equal("2", cons.DefaultParameters["factor"]);
+        Assert.Contains("conservation", cons.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Advection.Invariance.Mass", cons.MrFamily);
     }
 
     [Fact]

@@ -1,0 +1,71 @@
+{
+  "sut_name": "advection-1d",
+  "program": {
+    "program_name": "advection-1d",
+    "equation": "Advection",
+    "equation_key": "advection",
+    "program_type": "Num",
+    "runner_script_relative_path": "advection_1d.py",
+    "input_parser_script_relative_path": "advection_1d_input_parser.py",
+    "output_parser_script_relative_path": "advection_1d_output_parser.py",
+    "input_adapter_script_relative_path": "advection_1d_input_parser.py",
+    "output_adapter_script_relative_path": "advection_1d_output_parser.py",
+    "python_executable_kind": "system"
+  },
+  "mrs": [
+    {
+      "mr_id": "advection-amplitude-linearity",
+      "sut_name": "advection-1d",
+      "display_name": "1D advection — ScaleInitial (amplitude linearity)",
+      "description": "Linearity MP_mono: the 1D advection equation u_t + v·u_x = 0 is linear in the initial condition. Scaling the initial Gaussian amplitude by factor > 1 must strictly increase the final peak amplitude (and in fact scale it by the same factor exactly, since the conservative upwind scheme preserves linearity).",
+      "mr_family": "Advection.Scaling.Amplitude",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "greater",
+      "assertion_name": "GreaterThan",
+      "value_name": "peak_amplitude",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/initial/amplitude" }
+      ],
+      "tolerance_rel": 0,
+      "tolerance_abs": 0,
+      "noise_aware": false,
+      "equation_key": "advection",
+      "equation": "Advection",
+      "program_type": "Num",
+      "meta_pattern": "Mono",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "sample_case_relative_path": "sample/standard.json",
+      "work_root_name": "MetBenchAdvection1d",
+      "timeout_seconds": 30
+    },
+    {
+      "mr_id": "advection-mesh-conservation",
+      "sut_name": "advection-1d",
+      "display_name": "1D advection — MeshRefinement (mass conservation)",
+      "description": "Mass conservation MP_inv: the conservative first-order upwind scheme with periodic boundaries preserves the integral ∫u dx to floating-point precision. Doubling num_points changes the initial-condition sampling by O(dx²) but the per-step mass conservation is exact; the final mass_integral must agree within tight FD tolerance.",
+      "mr_family": "Advection.Invariance.Mass",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "approx",
+      "assertion_name": "ApproxEqual",
+      "value_name": "mass_integral",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/geometry/num_points" }
+      ],
+      "tolerance_rel": 1e-3,
+      "tolerance_abs": 1e-6,
+      "noise_aware": false,
+      "equation_key": "advection",
+      "equation": "Advection",
+      "program_type": "Num",
+      "meta_pattern": "Inv",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "sample_case_relative_path": "sample/standard.json",
+      "work_root_name": "MetBenchAdvection1d",
+      "timeout_seconds": 30
+    }
+  ]
+}
