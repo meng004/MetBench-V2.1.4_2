@@ -4,6 +4,7 @@
 > 一切新增 / 修改须先在本表登记功能编号（`F-Tn-xx` / `F-MR-Pn`），未登记禁止新增代码。
 > 每次只处理一个功能编号；改动前需说明：(1) 涉及编号、(2) 修改文件、(3) 新增测试、(4) 不动模块。
 > 没有测试对应的功能不算完成；没有功能编号对应的代码不允许随意新增。
+> 当前主线头、测试绿基线、活跃计划和开放风险以 [`docs/status/current.md`](status/current.md) 为唯一状态账本；本表只负责需求-实现-测试追溯投影。
 
 ## 0. 编号规则与文档边界
 
@@ -15,7 +16,7 @@
 | **测试文件** | `MetBench_SystemMT.Tests/` 下相对路径 | 单元 + BDD + UAT |
 | **测试结果** | `dotnet test MetBench_SystemMT.Tests` 最近一次基线 | `pass/skip/fail` 或缺口说明 |
 
-**基线**：当前共享、可审计精确绿基线是 `origin/main` 提交 `e839214`（2026-05-25，PR #110：`fix(v12-pr10): verify invalid golden fixture via invalidspec`）—— `dotnet test MetBench_SystemMT.Tests --no-restore` = **1043 pass / 0 fail / 0 skip**。历史参考基线继续保留：`373bb59`（2026-05-24，961 / 0 / 8 / 969，runtime alignment 固化轮次）与 `763e067`（PR #93，965 / 0 / 0）。Windows 侧 2026-05-24 已知回执仍是 `dotnet build MetBench_Client/MetBench_Client.csproj` 0 编译错误、约 17.47s；该回执是 WPF 旧基线参考，不再代表当前 Linux/cloud 共享测试基线。
+**基线**：当前共享、可审计精确代码绿基线是提交 `e839214`（2026-05-25，PR #110：`fix(v12-pr10): verify invalid golden fixture via invalidspec`）—— `dotnet test MetBench_SystemMT.Tests --no-restore` = **1043 pass / 0 fail / 0 skip**。当前 `origin/main` 头提交由 [`docs/status/current.md`](status/current.md) 规定为从 git 实时解析，不在本表重复定义。历史参考基线继续保留：`373bb59`（2026-05-24，961 / 0 / 8 / 969，runtime alignment 固化轮次）与 `763e067`（PR #93，965 / 0 / 0）。Windows 侧 2026-05-24 已知回执仍是 `dotnet build MetBench_Client/MetBench_Client.csproj` 0 编译错误、约 17.47s；该回执是 WPF 旧基线参考，不再代表当前 Linux/cloud 共享测试基线。
 
 ## 1. T0 · 核心 —— 系统级 MT 流程
 
@@ -196,7 +197,7 @@
 | `0ea8207` | **G-X4 / v1.2 PR-8** | property runtime path（1031 pass） |
 | `428297c` | **G-X4 / v1.2 PR-9** | exponential growth runtime |
 | `406ae15` | **G-X4 / v1.2 PR-10** | typed migration + coverage gates；显式 inventory 收口为 **44 MR + 4 Property** |
-| `e839214` | **G-X4 / v1.2 PR-10 review-fix** | invalid golden fixture / coverage semantics retrospective hardening（**1043 pass / 0 fail / 0 skip**，当前 `origin/main`） |
+| `e839214` | **G-X4 / v1.2 PR-10 review-fix** | invalid golden fixture / coverage semantics retrospective hardening（**1043 pass / 0 fail / 0 skip**，当前共享代码测试绿基线） |
 
 ## 12. 受控开发模式工作流
 

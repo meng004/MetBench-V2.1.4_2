@@ -1,8 +1,9 @@
 # MetBench 项目结构
 
-> **更新时间**: 2026-05-25（`main` @ `e839214`）
+> **结构快照基线**: 2026-05-25（代码测试基线 `e839214`）
 > **目标读者**: 新加入仓库的开发者 / 验收员 / reviewer。文档全息呈现仓库当前结构 + SUT 测试覆盖 + MetBench 框架测试覆盖。
 > **更详细的设计**: [`AGENTS.md`](../AGENTS.md)（roadmap）· [`CLAUDE.md`](../CLAUDE.md)（agent 注意事项）· [`docs/design/`](design/)（架构）
+> **当前状态账本**: [`docs/status/current.md`](status/current.md)。本文件只投影结构与测试矩阵，不重新定义当前主线状态。
 
 ---
 
@@ -16,7 +17,7 @@
 | **`MetBench_IDAL/`** | `net8.0` | Anywhere | DAL 接口合约 |
 | **`MetBench_DAL/`** | `net8.0` | Anywhere | LiteDB 持久化：v1 run-result + v2 24-collection schema |
 | **`MetBench_Client/`** | `net8.0-windows7.0` | **Windows only** | WPF UI 应用，入口点；引 `Wpf.Ui` + `CommunityToolkit.Mvvm` + LiveCharts WPF |
-| **`MetBench_SystemMT.Tests/`** | `net8.0` | Anywhere | xUnit + Reqnroll：跨平台事实源测试。当前共享精确基线见下文：`origin/main@e839214` = **1043 pass / 0 fail / 0 skip**。 |
+| **`MetBench_SystemMT.Tests/`** | `net8.0` | Anywhere | xUnit + Reqnroll：跨平台事实源测试。当前共享精确代码绿基线见下文：`e839214` = **1043 pass / 0 fail / 0 skip**。 |
 
 **硬规则**（cloud 与 Windows 端协作）：
 
@@ -200,11 +201,11 @@ WPF 的 `MetBench_Client/` 因 SDK targets 限制 **不在 Linux CI 编译**；�
 | 项 | 状态 | 计划 |
 |---|---|---|
 | **m_adj** (adjoint MR 族) | 🟢 路径 A 被动监控在线 | 等 OpenMOC 上游 adjoint export → 评估 patch → MetaPattern Status `out-of-scope` → `active` |
-| **第 5 SUT** (SU2 / FEniCS) | 🟡 未启动 | 等 v2.1 发版 + reviewer 反馈决定要否补跨域 SUT |
-| **WPF UI 验收** | 🟡 round-1 跑动中 | Windows 端按 `windows-uat-round-1.md` 跑通 → dashboard `PASS` → tag `release-v2.1.0` |
+| **第 5 SUT** (SU2 / FEniCS) | 🟡 未启动 | 等 reviewer 反馈和顶层路线决策决定要否补跨域 SUT |
+| **WPF UI 验收** | 🟢 v2.1.0 round-1 已完成 | 后续 WPF/UI 变更按 PR Gate Windows 分类补 build / run-and-log / UI-visible 回执 |
 | **`HandyControl` → `Microsoft.Xaml.Behaviors.Wpf`** | 🟡 旧代码兼容 | v2.2+ refactor 跟 UI 整改一起做 |
 | **6 个 `Service` 拼写修正废弃别名** | 🟢 v2.2 删除 | `[Obsolete]` 已标 1 版 |
 
 ---
 
-最后更新：`main` @ `e839214`。下次主要结构变更（接新 SUT / 扩展 sample-level evidence 粒度 / 推进下一阶段 assertion 语义与配置接线 / 改命名约定）后更新本文件。
+最后结构快照：代码测试基线 `e839214`。下次主要结构变更（接新 SUT / 扩展 sample-level evidence 粒度 / 推进下一阶段 assertion 语义与配置接线 / 改命名约定）后更新本文件。
