@@ -15,7 +15,7 @@
 | **测试文件** | `MetBench_SystemMT.Tests/` 下相对路径 | 单元 + BDD + UAT |
 | **测试结果** | `dotnet test MetBench_SystemMT.Tests` 最近一次基线 | `pass/skip/fail` 或缺口说明 |
 
-**基线**：最新本地已提交、可审计精确绿基线是提交 `373bb59`（2026-05-24，`feat(systemmt): align catalog runtime and solidify baseline`）—— `dotnet test MetBench_SystemMT.Tests --no-restore --logger "trx;LogFileName=baseline-2026-05-24-current.trx"` = **961 pass / 0 fail / 8 skip / 969 total**，TRX 已固化到 [`docs/uat/reports/round-3-limeng-2026-05-24/baseline-2026-05-24-current.trx`](/Users/limeng/Codes/苏永成-蜕变测试系统代码与文档资料/MetBench-V2.1.4_2/docs/uat/reports/round-3-limeng-2026-05-24/baseline-2026-05-24-current.trx)。`origin/main` 当前仍停在 `5691727`（PR #94：ManifestMrCatalogProvider 路径分隔符 hotfix），因此 `373bb59` 代表“本地已提交的新基线”，尚未成为远端共享基线。历史已提交精确绿基线 `763e067`（PR #93）= **965 pass / 0 fail** 继续保留为前一轮参考。另：2026-05-24 Windows 侧已知旧回执仍是 `dotnet build MetBench_Client/MetBench_Client.csproj` 0 编译错误、约 17.47s；本轮最新代码的 Windows 回执仍待补记。
+**基线**：当前共享、可审计精确绿基线是 `origin/main` 提交 `8bd734f`（2026-05-25，PR #104：`feat(v12-pr6): add field and derived invariant runtime`）—— `dotnet test MetBench_SystemMT.Tests --no-restore` = **1015 pass / 0 fail / 0 skip**。历史参考基线继续保留：`373bb59`（2026-05-24，961 / 0 / 8 / 969，runtime alignment 固化轮次）与 `763e067`（PR #93，965 / 0 / 0）。Windows 侧 2026-05-24 已知回执仍是 `dotnet build MetBench_Client/MetBench_Client.csproj` 0 编译错误、约 17.47s；该回执是 WPF 旧基线参考，不再代表当前 Linux/cloud 共享测试基线。
 
 ## 1. T0 · 核心 —— 系统级 MT 流程
 
@@ -106,6 +106,8 @@
 | F-INFRA-08 | AGENTS Stage 6 P3 | FieldPathResolver（JsonPointer / Namelist / McnpCard） | `SystemMT/ParameterMapping/FieldPathResolverFactory.cs`<br>`ParameterMapping/IFieldPathResolver.cs`<br>`ParameterMapping/{JsonPointerResolver, NamelistKeyResolver, McnpCardResolver}.cs` | `V2Transformations/FieldPathResolverTests.cs` | ✅ pass |
 | F-INFRA-09 | AGENTS Stage 1 | ApplicationService + 冷启动集成 | `MetBench_BLL/ApplicationService.cs` 等 | `Bll/ApplicationServiceTests.cs`<br>`ColdStart/ColdStartIntegrationTests.cs` | ✅ pass |
 | F-INFRA-10 | AGENTS Stage 7 W12 | UAT 双轨（21 BDD wrapper + 4 cloud-covered cross-ref） | `MetBench_SystemMT.Tests/Features/Uat/UC-*.feature`<br>`Steps/UatRubricSteps.cs`<br>`docs/uat/test-procedures.md` / `acceptance-rubric.md` / `runbooks/windows-uat-round-1.md` | `Features/Uat/UC-C*.feature.cs` / `UC-F*.feature.cs` / `UC-G*.feature.cs`（共 21 个）<br>`Steps/UatRubricSteps.cs` | ✅ pass |
+| F-INFRA-11 | AGENTS Stage 8；v1.2 PR #97 / #99 | **MR 验证统一设计 v1.2 基础层**：YAML/typed catalog foundation + anti-legacy lint + typed semantic model + fail-closed validator | `MetBench_BLL.Core/SystemMT/V12Catalog/Schema/*`<br>`Serialization/V12CatalogSerializer.cs`<br>`Lint/V12CatalogAntiLegacyLinter.cs`<br>`Specs/{MrSpec, PropertySpec, PredicateSpec, PropertyPredicateSpec, ProjectionSpec, ToleranceSpec, ShapeSpec, ParameterExpression, FiveDTags, MethodBinding, TransformStepSpec, FieldPairing}.cs`<br>`Validation/{ValidationRegistry, MrSpecValidator, PropertySpecValidator, BinaryComparisonPredicateValidator, ScaledEqualityPredicateValidator, ErrorMonotonicPredicateValidator, BoundPropertyPredicateValidator, SharedReferenceResolver, ParameterExpressionResolver, ToleranceCompatibilityChecker}.cs` | `SystemMT/V12Catalog/V12CatalogSerializationTests.cs`<br>`V12CatalogLintTests.cs`<br>`V12TypedModelTests.cs`<br>`V12ValidationContractTests.cs`<br>`V12CatalogSemanticValidationTests.cs`<br>`ErrorMonotonicPredicateValidatorTests.cs` | ✅ pass |
+| F-INFRA-12 | AGENTS Stage 8；v1.2 PR #100–#104 | **MR 验证统一设计 v1.2 运行时（已合并至 PR-6）**：scalar runtime / applicability / 5 态状态 / convergence / sequence shape / subadditive / field equality / derived invariant | `MetBench_BLL.Core/SystemMT/V12Catalog/Runtime/{PredicateDispatcher, VerificationContext, VerificationResult, VerificationDiagnostic, DiagnosticContext, VerifyStatus, RoleOutput, DeterministicScalarToleranceEvaluator, BinaryComparisonKernel, ScaledEqualityKernel, ErrorMonotonicKernel, SequenceShapeKernel, SubadditiveKernel, FieldEqualityKernel, DerivedInvariantKernel, SequenceValue, Field2DValue}.cs`<br>`Validation/ApplicabilityEvaluator.cs`<br>`Derived/{FiniteDifferenceDerivedExpression, CoefficientOfVariation, MassNumberSum, L2Norm, LinfNorm, FieldRegionMean, ScalarSubtract}.cs` | `SystemMT/V12Catalog/BinaryComparisonKernelTests.cs`<br>`ScaledEqualityKernelTests.cs`<br>`ApplicabilityModelTests.cs`<br>`ApplicabilityEvaluatorTests.cs`<br>`VerificationStatusFlowTests.cs`<br>`PredicateDispatcherTests.cs`<br>`ReferenceRoleModelTests.cs`<br>`ErrorMonotonicKernelTests.cs`<br>`SequenceShapeModelTests.cs`<br>`SequenceShapeKernelTests.cs`<br>`SubadditiveKernelTests.cs`<br>`DerivedExpressionTests.cs`<br>`FieldModelTests.cs`<br>`FieldEqualityKernelTests.cs`<br>`DerivedInvariantKernelTests.cs`<br>`V12RuntimeContractTests.cs` | ✅ pass |
 
 ## 10. 缺口清单（gap report）
 
@@ -129,6 +131,7 @@
 | G-12 | F-T1-04（远期 PBT 升级） | **method MT 升级到 property-based testing**：当前走 AAA + catalog-driven validator（G-06），未引入 FsCheck / Hedgehog 等 PBT 框架。PBT 与 MT 范式天然契合（property over many inputs + shrinking） | 当前 SUT 是解析解，无 bug 可找；MR 数个位数；PBT generator 工程量大于当前 MR 验证工程量 | 触发条件：method MR 数 ≥ 20 跨多方程 ∥ 接入有 bug 风险的真实 C# SUT。届时 catalog schema 加 input domain 字段，AAA 测试保留为基线、新增 PBT validator 作为第二层 |
 | G-13 | F-T3-02（远期 PBT 升级） | **system MT 在轻量 SUT 上叠加 PBT 做模糊测试**：当前 system MT 走 BDD `.feature`，OpenMOC/OpenMC 单 case 时长（30s / 5min）禁止 PBT；但 projectile / damped-oscillator / lotka-volterra / decay-chain 单 case < 1s，PBT 可行 | BDD 的领域沟通价值不可替代（OpenMOC/OpenMC 永远不走 PBT）；轻量 SUT 是 PBT 的合适载体 | 触发条件：轻量 SUT 的 BDD 稳定 + input generator 工程量预算允许。覆盖范围严格限制为 < 1s 单 case 的 ODE SUT |
 | G-X3-CatalogConvergence | F-T0-02 / F-T1-04 / F-T0-03 | **System-MT catalog 收敛已推进但未闭环**：`SystemMtLauncher` 已接入 `IMrCatalogProvider`，WPF 默认注册 `ManifestMrCatalogProvider`，launcher 生产 fallback 已删除，`LauncherCatalogV2Importer` 已改依赖 `ISystemMtCatalogReader`，ExecutionEvidence / V3MrIdRef / LiteDB evidence repository / recorder write-through 已合入，`SampleTraces` 已开始写入目标字段级 source / transformed / output triples | 双事实源压力已从“纯硬编码 catalog”降到“manifest 默认 + evidence 覆盖粒度仍可扩展” | 后续收敛重点应转为：扩展 sample trace 粒度、补 Windows 侧构建回执，并同步文档与基线叙事 |
+| G-X4-V12Verification | F-INFRA-11 / F-INFRA-12 | **MR 验证统一设计 v1.2 已成为正式 Stage 8 子主线，但未闭环**：`origin/main` 已合并 PR-0..PR-6（typed catalog foundation、fail-closed validator、scalar runtime、applicability/status、reference convergence、sequence/subadditive、field/derived invariant），`MetBench_BLL.Core/SystemMT/V12Catalog/` 已是正式执行 IR 代码面 | 主线已具备 schema + validate + 多类 runtime kernel 的最小闭环；不再是“只有设计稿” | 后续仍需完成 PR-7 statistical + cross-method、PR-8 property runtime、PR-9 exponential growth、PR-10 43 MR + 4 Property migration + coverage gates；在 PR-10 前不得宣称 47/47 完成 |
 
 ## 11. 与 P0–P7 对应的快速索引（执行历史）
 
@@ -180,7 +183,15 @@
 | `5f9d27d` | **G-X3 Task 6 step 1** | LiteDb evidence repository + roundtrip tests (+7 tests, 952 → 959) |
 | `763e067` | **G-X3 Task 6 step 2** | SystemMtExecutionRecorder write-through evidence + V3 lookup (+6 tests, 959 → 965) |
 | `fe864ec` | **G-X3 VM** | App.xaml.cs registers ManifestMrCatalogProvider for IMrCatalogProvider DI (unblocks Task 7 fallback removal) |
-| `5691727` | **G-X3 hotfix** | ManifestMrCatalogProvider 路径分隔符规范化 — fixes Windows CatalogParityTests 回归 from PR #91（并入 `main`；HEAD 精确 pass 数待核实） |
+| `5691727` | **G-X3 hotfix** | ManifestMrCatalogProvider 路径分隔符规范化 — fixes Windows CatalogParityTests 回归 from PR #91（历史主线节点） |
+| `ba7a9a1` | **G-X4 / v1.2 PR-0** | typed catalog foundation + anti-legacy lint 入主线 |
+| `dce8378` | **G-X4 docs** | PR-1..PR-10 master roadmap + per-PR plans 入主线 |
+| `ded74fc` | **G-X4 / v1.2 PR-1** | typed model + fail-closed validators（979 pass） |
+| `bfa3097` | **G-X4 / v1.2 PR-2** | scalar verification runtime（两层 review 前仍走本地 review；后已补 retrospective review） |
+| `7f2aca3` | **G-X4 / v1.2 PR-3** | applicability gating + verify statuses（990 pass） |
+| `bbac97f` | **G-X4 / v1.2 PR-4** | reference / convergence runtime（994 pass） |
+| `cac2b94` | **G-X4 / v1.2 PR-5** | sequence shape + subadditive runtime（1006 pass） |
+| `8bd734f` | **G-X4 / v1.2 PR-6** | field + derived invariant runtime（**1015 pass / 0 fail / 0 skip**，当前 `origin/main`） |
 
 ## 12. 受控开发模式工作流
 

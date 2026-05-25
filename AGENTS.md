@@ -234,7 +234,11 @@ NOETHER 元模式）。术语见 [`docs/GLOSSARY.md`](docs/GLOSSARY.md)。
 - **Goal 2** — cells × 元模式矩阵 + 84 条候选 MR 母集落地（T3 覆盖）。
 
 **交付状态**：v2.1.0/.1/.2 已发布；polish 批次 Anomaly severity/category 分级已并入
-main（PR #83）。Stage 8 已启动并进入 catalog convergence 主线：代表性 SUT 接入计划
+main（PR #83）。Stage 8 已启动并进入两条并行但顺序依赖的子主线：
+- **catalog convergence / metadata / evidence 主线**（PR #91–#95）；
+- **MR 验证统一设计 v1.2 主线**（PR #97–#104 已合并至 `PR-6`）。
+
+catalog convergence 线已完成：代表性 SUT 接入计划
 **P1 已交付**（decay_chain / damped_oscillator / lotka_volterra 三个 ODE SUT +
 launcher catalog，2026-05-22）；MR/程序元信息持久化计划 **P-A + P-C + P-B 已交付**
 （2026-05-22）—— P-A：`ApproxEqual` 等式断言 + `EqualityThresholds`；P-C：方程 / MR
@@ -242,20 +246,37 @@ launcher catalog，2026-05-22）；MR/程序元信息持久化计划 **P-A + P-C
 + 5 方程 8 MR seed catalog + 漂移守卫）；P-B：运行记录扩样本点级输入配对
 （`InputSamplePoint` / `InputCaseReader` + `SystemMtResultRecord.InputSamples`）。
 
-2026-05-24 当前 `main` 已继续合入 G-X3 catalog convergence 的 PR #91 / #92 / #93 / #94：
+2026-05-25 当前 `main`（`8bd734f`）已继续合入 G-X3 catalog convergence 的 PR #91 / #92 / #93 / #94 以及 runtime alignment PR #95：
 
 - `IMrCatalogProvider` 已进入 `SystemMtLauncher`，WPF 默认注册 `ManifestMrCatalogProvider`。
 - `ExecutionEvidence` / `V3MrIdRef` / LiteDB evidence repository / recorder write-through
   已落地到运行路径。
 - Windows parity hotfix（路径分隔符规范化）已并入 `main`。
 
+**MR 验证统一设计 v1.2（正式 Stage 8 子主线）**：
+
+- 设计源：[`docs/superpowers/specs/2026-05-25-mr-verification-v1.2-codex-ready.md`](docs/superpowers/specs/2026-05-25-mr-verification-v1.2-codex-ready.md)
+- 总路线图：[`docs/superpowers/plans/2026-05-25-mr-verification-v12-master-roadmap.md`](docs/superpowers/plans/2026-05-25-mr-verification-v12-master-roadmap.md)
+- 当前已合并到 `main` 的 PR：
+  - PR #97 / `ba7a9a1` — PR-0 typed catalog foundation
+  - PR #99 / `ded74fc` — PR-1 typed model + fail-closed validators
+  - PR #100 / `bfa3097` — PR-2 scalar verification runtime
+  - PR #101 / `7f2aca3` — PR-3 applicability + verify statuses
+  - PR #102 / `bbac97f` — PR-4 reference / convergence runtime
+  - PR #103 / `cac2b94` — PR-5 sequence shape + subadditive runtime
+  - PR #104 / `8bd734f` — PR-6 field + derived invariant runtime
+- 这意味着 `MetBench_BLL.Core/SystemMT/V12Catalog/` 已从“设计稿配套目录”升级为正式代码面：
+  目前主线已有 schema / anti-legacy lint / serializer / typed spec / fail-closed validator /
+  scalar runtime / applicability / convergence / sequence / field / derived invariant。
+- 尚未合并：PR-7 statistical + cross-method、PR-8 property runtime、PR-9 exponential growth、
+  PR-10 43 MR + 4 Property migration + coverage gates。**不要把 47/47 覆盖写成已完成事实。**
+
 **当前仍未闭环的项**：
 
-- `SystemMtLauncher` 已移除生产路径的 `HardcodedMrCatalogProvider` fallback，launcher 现要求显式注入 `IMrCatalogProvider`。
-- `LauncherCatalogV2Importer` 已改依赖 `ISystemMtCatalogReader`，`App.xaml.cs` 不再对 `ISystemMtLauncher` 做具体类强转。
-- `ExecutionEvidence.SampleTraces` 已开始写入目标字段的 source / transformed / output triples；样本级 evidence 不再是空壳。
-- 当前主要待补项转为：扩大 sample trace 覆盖粒度，并补 Windows 侧 `MetBench_Client` 构建回执。
+- `ExecutionEvidence.SampleTraces` 已开始写入目标字段的 source / transformed / output triples；当前待补的是更细粒度的多变量 / 多路径 trace。
 - `flw≈k·src` 缩放等式 assertion 仍未实现，P1 的 3 条齐次 MR 仍未从 MP_mono 升到 MP_inv。
+- v1.2 主线当前只到 PR-6；统计值 / cross-method / property runtime / exponential growth / 47 项迁移 gate 仍未闭环。
+- Windows 侧对 `8bd734f` 之后后续新增主线代码的回执，需要按双环境 runbook 持续补记。
 
 **暂缓**（Stage 9+ 候）：BNCT 硼中子放疗、故障注入 V3、论文 writeup。
 
@@ -280,6 +301,7 @@ launcher catalog，2026-05-22）；MR/程序元信息持久化计划 **P-A + P-C
 - [Stage 8 MR 库原始详细计划](docs/superpowers/plans/2026-05-18-stage8-expanded-mr-library-plan.md) —— 定位放宽前所写，其「5 方程 + home-grown」部分以上述「当前」文档为准
 - [MR 协议层 + 方程函数容器实施计划](docs/superpowers/plans/2026-05-23-mr-architecture-implementation-plan.md) —— P0–P7 全部完成（2026-05-23）：L0 数学基元 17 算子、IEquationFunction + Recipe 执行器、Bateman L2 解析解 + L1 Recipe、method 侧执行栈、BDD steps 切 W2 facade、LaTeX→SymPy 路径标 Obsolete
 - [SystemMT Catalog Convergence Spec v3](docs/superpowers/specs/2026-05-24-systemmt-catalog-convergence-design.md) + [实施 Plan v2](docs/superpowers/plans/2026-05-24-systemmt-catalog-convergence-plan.md) —— 收敛 `SystemMtLauncher.BuildBlueprints()` 硬编码 catalog → provider-backed manifest（`IMrCatalogProvider`），同时打通 V3 5D-tag schema 写入路径 + 样本点级 execution evidence。8 任务 / 3 PR slices（PR-A → PR-C）；登记于 `docs/requirements.md` §10 G-X3-CatalogConvergence
+- [MR 验证统一设计 v1.2](docs/superpowers/specs/2026-05-25-mr-verification-v1.2-codex-ready.md) + [PR-0..PR-10 总路线图](docs/superpowers/plans/2026-05-25-mr-verification-v12-master-roadmap.md) —— typed semantic model + fail-closed validator + staged verifier kernels；当前 `main` 已合并至 PR-6
 
 > 本节原含「5 方程 × 4 程序类型 + 4 home-grown」的详细 phase 拆解；因定位放宽，
 > 细节已迁移并更新至上述 plans —— AGENTS.md 只保留路线图层面的高层描述与指针。

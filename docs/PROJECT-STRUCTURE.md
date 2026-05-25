@@ -1,6 +1,6 @@
 # MetBench 项目结构
 
-> **更新时间**: 2026-05-24（`main` @ `5691727`）
+> **更新时间**: 2026-05-25（`main` @ `8bd734f`）
 > **目标读者**: 新加入仓库的开发者 / 验收员 / reviewer。文档全息呈现仓库当前结构 + SUT 测试覆盖 + MetBench 框架测试覆盖。
 > **更详细的设计**: [`AGENTS.md`](../AGENTS.md)（roadmap）· [`CLAUDE.md`](../CLAUDE.md)（agent 注意事项）· [`docs/design/`](design/)（架构）
 
@@ -10,13 +10,13 @@
 
 | 项目 | Target | 跑哪里 | 用途 |
 |---|---|---|---|
-| **`MetBench_BLL.Core/`** | `net8.0` | Linux + Windows + CI | 跨平台 BLL：System-MT pipeline / provider-backed launcher / adapters / persistence contracts / reporting / anomaly / discovery / mutation / coverage。2026-05-24 当前主线已切到 `IMrCatalogProvider` + `ManifestMrCatalogProvider`，launcher 生产路径已不再保留 `HardcodedMrCatalogProvider` fallback。 |
+| **`MetBench_BLL.Core/`** | `net8.0` | Linux + Windows + CI | 跨平台 BLL：System-MT pipeline / provider-backed launcher / adapters / persistence contracts / reporting / anomaly / discovery / mutation / coverage。2026-05-25 当前主线已切到 `IMrCatalogProvider` + `ManifestMrCatalogProvider`，launcher 生产路径已不再保留 `HardcodedMrCatalogProvider` fallback；`SystemMT/V12Catalog/` 也已成为正式 Stage 8 执行 IR 代码面。 |
 | **`MetBench_BLL/`** | `net8.0` | Linux + Windows + CI | WPF 侧 BLL：v1 方法级 MT 主流程 + Word/Excel/PDF 报表生成器 + LiveCharts 数据 service（无 WPF 依赖） |
 | **`MetBench_Domain/`** | `net8.0` | Anywhere | 域实体：v1 方法级 + v2 四级 MR 层级（MetaPattern → MRSchema → MRBinding → MRInstance → Execution） |
 | **`MetBench_IDAL/`** | `net8.0` | Anywhere | DAL 接口合约 |
 | **`MetBench_DAL/`** | `net8.0` | Anywhere | LiteDB 持久化：v1 run-result + v2 24-collection schema |
 | **`MetBench_Client/`** | `net8.0-windows7.0` | **Windows only** | WPF UI 应用，入口点；引 `Wpf.Ui` + `CommunityToolkit.Mvvm` + LiveCharts WPF |
-| **`MetBench_SystemMT.Tests/`** | `net8.0` | Anywhere | xUnit + Reqnroll：跨平台事实源测试。最新可审计精确基线见下文；当前本地 `dotnet test` 运行成功，但环境仅返回 “completed”，未给精确通过数。 |
+| **`MetBench_SystemMT.Tests/`** | `net8.0` | Anywhere | xUnit + Reqnroll：跨平台事实源测试。当前共享精确基线见下文：`origin/main@8bd734f` = **1015 pass / 0 fail / 0 skip**。 |
 
 **硬规则**（cloud 与 Windows 端协作）：
 
@@ -44,7 +44,7 @@ SUT 接入到框架的 hook：
 - Python runner（`<sut>_runner.py`）—— stdin/CLI args 入参，stdout JSON 出参
 - input adapter（一或多个 `<sut>_input_adapter*.py`）—— 实现 MR transformation 对入参文件的具体改写
 - output adapter（`<sut>_output_adapter.py`）—— 把 SUT 自然输出转成统一 metrics JSON
-- `catalog.json`—— 2026-05-24 当前 manifest-backed catalog 的事实源；WPF 默认通过 `ManifestMrCatalogProvider` 读取
+- `catalog.json`—— 2026-05-25 当前 manifest-backed catalog 的事实源；WPF 默认通过 `ManifestMrCatalogProvider` 读取
 - 可选 `scg.json`—— SCG-Heuristic discoverer 用的因果图（含 nodes + edges）
 
 ---
@@ -84,12 +84,12 @@ SUT 接入到框架的 hook：
 | **Pagination** (Keyset) | `MetBench_BLL.Paging` + `MetBench_DAL.V2.*` | `V2Pagination/` | 5 | 54 |
 | **Schema / Entity** (round-trip + soft-delete + migration) | `MetBench_Domain.V2` | `V2Schema/` | 5 | 9 |
 | **Transformations** (v2 IMRTransformation) | `MetBench_BLL.Discovery.Transformations` | `V2Transformations/` | 3 | 20 |
+| **V12Catalog** (typed semantic model + validator + verifier runtime，PR-0..PR-6) | `MetBench_BLL.SystemMT.V12Catalog.*` | `SystemMT/V12Catalog/` | 22 | 47 |
 | **ColdStart** | — | `ColdStart/` | 1 | 1 |
 
 **测试总数对照**：
-- 最新本地已提交、可审计精确 Linux / cloud 绿基线：提交 `373bb59` = **961 pass / 0 fail / 8 skip / 969 total**
-- 对应 TRX：[`docs/uat/reports/round-3-limeng-2026-05-24/baseline-2026-05-24-current.trx`](/Users/limeng/Codes/苏永成-蜕变测试系统代码与文档资料/MetBench-V2.1.4_2/docs/uat/reports/round-3-limeng-2026-05-24/baseline-2026-05-24-current.trx)
-- 历史已提交精确绿基线参考：提交 `763e067`（PR #93）声明 **965 pass / 0 fail**
+- 当前共享精确 Linux / cloud 绿基线：提交 `8bd734f`（PR #104）= **1015 pass / 0 fail / 0 skip**
+- v1.2 之前的历史参考基线：`373bb59` = **961 / 0 / 8 / 969**；`763e067`（PR #93）= **965 / 0 / 0**
 - 当前 Windows WPF 已知旧基线：2026-05-24 在 Parallels Win11 上 `dotnet build MetBench_Client/MetBench_Client.csproj` **0 编译错误**，约 `17.47s`；本轮最新代码回执待补
 - UAT BDD filter（`FullyQualifiedName~UAT`）：**48 Pass / 0 Skip**
 - BDD smoke（Features filter）：**30 Pass / 1 Skip**
@@ -172,6 +172,7 @@ WPF 的 `MetBench_Client/` 因 SDK targets 限制 **不在 Linux CI 编译**；�
 - `SystemMtLauncher` 已从硬编码蓝图切到 provider-backed catalog，构造函数现要求显式注入 `IMrCatalogProvider`，生产路径不再静默 fallback。
 - `SystemMtExecutionRecorder` 已写入 `ExecutionEvidence`、`V3MrIdRef` 与目标字段级 `SampleTraces`（source / transformed / output triples）；更细粒度的多变量 trace 仍可后续扩展。
 - `LauncherCatalogV2Importer` 已通过 `ISystemMtCatalogReader` 读取 runnable catalog，`App.xaml.cs` 不再依赖 `SystemMtLauncher` 具体类强转。
+- `MetBench_BLL.Core/SystemMT/V12Catalog/` 已合入 PR-0..PR-6：typed schema / anti-legacy lint / fail-closed validator / scalar/applicability/convergence/sequence/field/derived runtime 均为主线事实；PR-7..PR-10 仍未合入。
 - `.codegraph/` 是本地图谱索引产物，不属于仓库正式架构的一部分，也不应纳入结构文档或版本化事实源。
 
 ## §10 接入新 SUT 的 checklist
@@ -204,4 +205,4 @@ WPF 的 `MetBench_Client/` 因 SDK targets 限制 **不在 Linux CI 编译**；�
 
 ---
 
-最后更新：`main` @ `5691727`。下次主要结构变更（接新 SUT / 收敛 launcher/provider / 改命名约定）后更新本文件。
+最后更新：`main` @ `8bd734f`。下次主要结构变更（接新 SUT / 推进 v1.2 PR-7..PR-10 / 收敛 launcher/provider / 改命名约定）后更新本文件。
