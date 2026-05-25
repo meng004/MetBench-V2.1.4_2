@@ -74,10 +74,11 @@ The next stage must proceed in this order:
 
 1. Maintain this ledger as the current status source.
 2. Use the active plan index to select work.
-3. Design Windows verification policy.
-4. Execute verification semantics convergence PR-A and PR-B from `docs/superpowers/plans/2026-05-25-verification-semantics-convergence-implementation-plan.md`; keep PR-C gated until the ledger allows assertion-runtime implementation under the current ExecutionEvidence v2 decision state.
+3. Execute verification semantics convergence PR-A and PR-B from `docs/superpowers/plans/2026-05-25-verification-semantics-convergence-implementation-plan.md`; these are docs/naming work and must preserve runtime behavior.
+4. Design Windows verification policy before the next Windows-touching PR.
 5. Design ExecutionEvidence v2.
-6. Only then proceed to implementation PRs for assertion semantics, evidence, configuration, or UI-facing work.
+6. Execute verification semantics convergence PR-C and PR-D only after the ledger allows assertion-runtime implementation under the current ExecutionEvidence v2 decision state.
+7. Only then proceed to implementation PRs for evidence, configuration, or UI-facing work.
 
 ## 8. Update Triggers
 

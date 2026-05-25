@@ -293,7 +293,7 @@ with:
 MetBench_SystemMT.Tests.SystemMT.Catalog.Typed
 ```
 
-Update `MetBench_SystemMT.Tests/SystemMT/TestAssetPaths.cs`:
+Update `MetBench_SystemMT.Tests/SystemMT/TestAssetPaths.cs` and replace all callers of the old phase-named asset helpers with the new typed names in the same PR:
 
 ```csharp
 namespace MetBench_SystemMT.Tests.SystemMT;
@@ -301,9 +301,8 @@ namespace MetBench_SystemMT.Tests.SystemMT;
 internal static class TestAssetPaths
 {
     public static string TypedCatalogRoot() => Path.Combine(AssetRoot(), "SystemMT", "Catalog", "Typed");
-    public static string V12CatalogRoot() => TypedCatalogRoot();
-    public static string V12MrSample => Path.Combine(TypedCatalogRoot(), "samples", "mr-sample.yaml");
-    public static string V12PropertySample => Path.Combine(TypedCatalogRoot(), "samples", "property-sample.yaml");
+    public static string TypedMrSample => Path.Combine(TypedCatalogRoot(), "samples", "mr-sample.yaml");
+    public static string TypedPropertySample => Path.Combine(TypedCatalogRoot(), "samples", "property-sample.yaml");
 
     public static string AssetRoot()
     {
@@ -376,8 +375,8 @@ public sealed class LegacyAssertionPredicateMapperTests
 
         var binary = Assert.IsType<BinaryComparisonPredicate>(predicate);
         Assert.Equal(expectedOperator, binary.Operator);
-        Assert.Equal("followup", binary.ActualRole);
-        Assert.Equal("source", binary.ExpectedRole);
+        Assert.Equal("followup", binary.LeftRole);
+        Assert.Equal("source", binary.RightRole);
         Assert.Equal("k_eff", binary.Metric);
     }
 
@@ -393,7 +392,7 @@ public sealed class LegacyAssertionPredicateMapperTests
 
         var scaled = Assert.IsType<ScaledEqualityPredicate>(predicate);
         Assert.Equal("followup", scaled.ActualRole);
-        Assert.Equal("source", scaled.ExpectedRole);
+        Assert.Equal("source", scaled.ReferenceRole);
         Assert.Equal("delta_T", scaled.Metric);
         Assert.Equal(1.0, scaled.Exponent);
     }
@@ -445,9 +444,9 @@ public static class LegacyAssertionPredicateMapper
         };
 
         return new BinaryComparisonPredicate(
-            Id: $"{metric}-{op.ToLowerInvariant()}",
-            ActualRole: actualRole,
-            ExpectedRole: expectedRole,
+            PredicateId: $"{metric}-{op.ToLowerInvariant()}",
+            LeftRole: actualRole,
+            RightRole: expectedRole,
             Metric: metric,
             Operator: op);
     }
@@ -460,9 +459,9 @@ public static class LegacyAssertionPredicateMapper
         double exponent)
     {
         return new ScaledEqualityPredicate(
-            Id: $"{metric}-scaled-equality",
+            PredicateId: $"{metric}-scaled-equality",
             ActualRole: actualRole,
-            ExpectedRole: expectedRole,
+            ReferenceRole: expectedRole,
             Metric: metric,
             Factor: factor,
             Exponent: exponent);
@@ -505,24 +504,29 @@ public sealed class SystemMtPipelineTypedRuntimeTests
     public void Typed_runtime_factory_builds_context_from_scalar_outputs()
     {
         var spec = new MrSpec(
-            Kind: "MrSpec",
-            Id: "diffusion-source-linearity",
-            Title: "Diffusion source linearity",
-            Tags: new FiveDTags("Diffusion", "Physics", "Scaling", "Positive", "System"),
-            Roles: new[]
+            "MrSpec",
+            "diffusion-source-linearity",
+            "Diffusion source linearity",
+            null,
+            new Dictionary<string, string>(),
+            new Dictionary<string, ParameterExpression>
             {
-                new RunRoleSpec("source", "Source"),
-                new RunRoleSpec("followup", "Followup"),
+                ["factor"] = new ConstantParameterExpression(2.0)
             },
-            Parameters: new[] { new ParameterSpec("factor", "double", "2") },
-            MethodBindings: Array.Empty<MethodBinding>(),
-            Transform: Array.Empty<TransformStepSpec>(),
-            Projections: new ProjectionSpec[] { new ScalarProjectionSpec("phi_max", "phi_max") },
-            Predicates: new PredicateSpec[]
+            new Dictionary<string, RunRoleSpec>
             {
-                new ScaledEqualityPredicate("phi-scaled", "followup", "source", "phi_max", new MrParameterRefExpression("factor"), 1.0),
+                ["source"] = new("Baseline"),
+                ["followup"] = new("Followup")
             },
-            Applicability: null);
+            new Dictionary<string, ProjectionSpec>
+            {
+                ["phi_max"] = new ScalarProjectionSpec("/results/phi_max")
+            },
+            new PredicateSpec[]
+            {
+                new ScaledEqualityPredicate("phi-scaled", "followup", "source", "phi_max", new MrParameterRefExpression("factor"), 1.0)
+            },
+            new DeterministicToleranceSpec(1e-6, 1e-4));
 
         var context = TypedVerificationContextFactory.FromScalarOutputs(
             spec,
@@ -551,6 +555,7 @@ Expected: FAIL because `TypedVerificationContextFactory` does not exist.
 - [ ] **Step 3: Implement typed context factory**
 
 ```csharp
+using System.Globalization;
 using MetBench_BLL.SystemMT.Catalog.Typed.Runtime;
 using MetBench_BLL.SystemMT.Catalog.Typed.Specs;
 using MetBench_BLL.SystemMT.Catalog.Typed.Validation;
@@ -579,7 +584,12 @@ public static class TypedVerificationContextFactory
             ["followup"] = new RoleOutput("followup", followupScalars),
         };
 
-        return new VerificationContext(spec, roles, parameterValues);
+        var inputs = parameterValues.ToDictionary(
+            pair => pair.Key,
+            pair => double.Parse(pair.Value, CultureInfo.InvariantCulture),
+            StringComparer.Ordinal);
+
+        return new VerificationContext(spec, roles, inputs);
     }
 }
 ```
@@ -681,7 +691,7 @@ var verification = new PredicateDispatcher().Dispatch(typedPredicate, verificati
 var assertionResult = verification.Assertion;
 ```
 
-If `TypedSpecFactory` is required, create `MetBench_BLL.Core/SystemMT/Catalog/Typed/Migration/TypedSpecFactory.cs` with a minimal scalar `MrSpec` containing roles `source` and `followup`, one scalar projection for `ctx.ValueName`, and the passed predicate.
+If `TypedSpecFactory` is required, create `MetBench_BLL.Core/SystemMT/Catalog/Typed/Migration/TypedSpecFactory.cs` with a minimal scalar `MrSpec` containing roles `source` and `followup`, one scalar projection for `ctx.ValueName`, the passed predicate, and `ctx.Parameters` converted into `ConstantParameterExpression` entries where values parse as invariant-culture doubles.
 
 - [ ] **Step 4: Preserve launcher results while changing assertion source**
 

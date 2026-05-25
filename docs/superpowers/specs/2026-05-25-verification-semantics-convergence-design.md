@@ -1,7 +1,7 @@
 # Verification Semantics Convergence Design
 
 > **Date**: 2026-05-25
-> **Status**: Approved design direction, pending implementation plans
+> **Status**: Approved design direction with registered implementation plan
 > **Scope**: System MT verification semantics, Method MT isolation, typed catalog naming, and legacy assertion migration policy.
 
 ---
