@@ -44,6 +44,12 @@ public sealed class OrderedSequenceShapePredicateValidator
         {
             errors.Add(new ValidationError($"predicates[{predicate.PredicateId}].metric", $"Unknown metric '{predicate.Metric}'."));
         }
+        else if (spec.Projections is null ||
+                 !spec.Projections.TryGetValue(predicate.Metric, out var projection) ||
+                 projection is not ScalarProjectionSpec)
+        {
+            errors.Add(new ValidationError($"predicates[{predicate.PredicateId}].metric", $"Metric '{predicate.Metric}' must use ScalarProjection."));
+        }
 
         if (predicate.Shape is ExponentialGrowthSpec exponential)
         {
