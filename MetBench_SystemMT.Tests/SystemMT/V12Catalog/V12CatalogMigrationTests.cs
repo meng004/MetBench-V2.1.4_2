@@ -1,6 +1,8 @@
 using System.IO;
+using System.Text;
 using MetBench_BLL.SystemMT.V12Catalog.Serialization;
 using Xunit;
+using YamlDotNet.RepresentationModel;
 
 namespace MetBench_SystemMT.Tests.SystemMT.V12Catalog;
 
@@ -36,9 +38,10 @@ internal static class MigrationLoader
         foreach (var file in Directory.EnumerateFiles(root, "*.yaml", SearchOption.AllDirectories))
         {
             var yaml = File.ReadAllText(file);
-            foreach (var document in SplitDocuments(yaml))
+            foreach (var document in EnumerateDocuments(yaml))
             {
-                if (document.Contains("kind: MrSpec", System.StringComparison.Ordinal))
+                var kind = ReadRootKind(document);
+                if (string.Equals(kind, "MrSpec", System.StringComparison.Ordinal))
                 {
                     totalMrSpecs++;
                     var spec = V12CatalogSerializer.DeserializeMrSpec(document);
@@ -47,7 +50,7 @@ internal static class MigrationLoader
                         validMrSpecs++;
                     }
                 }
-                else if (document.Contains("kind: PropertySpec", System.StringComparison.Ordinal))
+                else if (string.Equals(kind, "PropertySpec", System.StringComparison.Ordinal))
                 {
                     totalPropertySpecs++;
                     var spec = V12CatalogSerializer.DeserializePropertySpec(document);
@@ -62,17 +65,43 @@ internal static class MigrationLoader
         return new MigrationLoadReport(validMrSpecs, validPropertySpecs, totalMrSpecs, totalPropertySpecs);
     }
 
-    private static System.Collections.Generic.IEnumerable<string> SplitDocuments(string yaml)
+    private static System.Collections.Generic.IEnumerable<string> EnumerateDocuments(string yaml)
     {
-        var normalized = yaml.Replace("\r\n", "\n");
-        foreach (var chunk in normalized.Split("\n---\n", System.StringSplitOptions.RemoveEmptyEntries))
+        using var reader = new StringReader(yaml);
+        var stream = new YamlStream();
+        stream.Load(reader);
+
+        foreach (var document in stream.Documents)
         {
-            var trimmed = chunk.Trim();
-            if (trimmed.Length > 0)
+            var writer = new StringWriter(new StringBuilder());
+            var single = new YamlStream(document);
+            single.Save(writer, false);
+            var serialized = writer.ToString().Trim();
+            if (serialized.Length > 0)
+                yield return serialized;
+        }
+    }
+
+    private static string? ReadRootKind(string yaml)
+    {
+        using var reader = new StringReader(yaml);
+        var stream = new YamlStream();
+        stream.Load(reader);
+
+        if (stream.Documents.Count == 0 || stream.Documents[0].RootNode is not YamlMappingNode mapping)
+            return null;
+
+        foreach (var entry in mapping.Children)
+        {
+            if (entry.Key is YamlScalarNode key &&
+                string.Equals(key.Value, "kind", System.StringComparison.Ordinal) &&
+                entry.Value is YamlScalarNode value)
             {
-                yield return trimmed;
+                return value.Value;
             }
         }
+
+        return null;
     }
 }
 

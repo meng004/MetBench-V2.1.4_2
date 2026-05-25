@@ -121,6 +121,7 @@ Instead it should produce:
 4. explicit coverage accounting that distinguishes:
    - catalog denominator
    - validate-pass count
-   - runnable execution count
+   - runnable fixture count
+   - executed fixture count
 
 This keeps the denominator honest without inventing fake executability.

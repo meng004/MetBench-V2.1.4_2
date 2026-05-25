@@ -102,6 +102,41 @@ default_tolerance:
         Assert.True(result.Assertion?.Passed);
     }
 
+    [Fact]
+    public void Validator_rejects_non_scalar_projection_for_ordered_sequence_shape()
+    {
+        var spec = new MrSpec(
+            "MrSpec",
+            "dif-phy-09",
+            "Differential rod worth forms bell shape",
+            null,
+            new Dictionary<string, string> { ["equation_key"] = "Diffusion", ["program_type"] = "Deterministic" },
+            null,
+            new Dictionary<string, RunRoleSpec>
+            {
+                ["h0"] = new("Baseline"),
+                ["h1"] = new("Followup"),
+            },
+            new Dictionary<string, ProjectionSpec>
+            {
+                ["diff_worth"] = new Field2DProjectionSpec("/results/diff_worth", 2, 2),
+            },
+            new PredicateSpec[]
+            {
+                new OrderedSequenceShapePredicate(
+                    "bell-shape",
+                    new[] { "h0", "h1" },
+                    "diff_worth",
+                    new BellShapeSpec()),
+            },
+            new DeterministicToleranceSpec(0.0, 0.0));
+
+        var result = spec.Validate();
+
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, error => error.Path.Contains(".metric", System.StringComparison.Ordinal));
+    }
+
     private static RoleOutput ScalarRole(string role, string metric, double value) =>
         new(role, new Dictionary<string, double> { [metric] = value });
 }

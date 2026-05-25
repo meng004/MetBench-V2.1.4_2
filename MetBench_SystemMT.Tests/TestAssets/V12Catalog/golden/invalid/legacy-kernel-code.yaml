@@ -1,7 +1,7 @@
 kind: MrSpec
-mr_id: golden-invalid-legacy
-name: Golden invalid fixture with legacy field
-description: Invalid fixture retained to assert anti-legacy linting.
+mr_id: golden-invalid-missing-role
+name: Golden invalid fixture with unresolved role
+description: Deserializes successfully but must fail validation and dispatch as InvalidSpec.
 roles:
   baseline:
     kind: Baseline
@@ -11,12 +11,11 @@ projections:
     path: /results/k_eff
 predicates:
   - kind: BinaryComparison
-    predicate_id: legacy-invalid
-    left_role: baseline
+    predicate_id: unresolved-followup
+    left_role: followup
     right_role: baseline
     metric: k_eff
     operator: Equal
-kernel_code: MP_eq
 default_tolerance:
   kind: DeterministicTolerance
   atol: 0.0
