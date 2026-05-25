@@ -2,6 +2,9 @@ using System.Text.Json;
 using MetBench_BLL.Equations;
 using MetBench_BLL.MT;
 using MetBench_BLL.SystemMT.Assertions;
+using MetBench_BLL.SystemMT.Catalog.Typed.Migration;
+using MetBench_BLL.SystemMT.Catalog.Typed.Runtime;
+using MetBench_BLL.SystemMT.Catalog.Typed.Specs;
 using MetBench_BLL.SystemMT.ParameterMapping;
 using MetBench_BLL.SystemMT.Transformations;
 
@@ -24,14 +27,14 @@ namespace MetBench_BLL.SystemMT.Pipeline;
 public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineContext, PipelineOutcome>
 {
     private readonly IProcessExecutor _processExecutor;
-    private readonly AssertionEvaluator _assertionEvaluator;
+    private readonly IPredicateDispatcher _predicateDispatcher;
 
     public SystemMtPipeline(
         IProcessExecutor? processExecutor = null,
-        AssertionEvaluator? assertionEvaluator = null)
+        IPredicateDispatcher? predicateDispatcher = null)
     {
         _processExecutor = processExecutor ?? new DefaultProcessExecutor();
-        _assertionEvaluator = assertionEvaluator ?? new AssertionEvaluator();
+        _predicateDispatcher = predicateDispatcher ?? new PredicateDispatcher();
     }
 
     Task<PipelineOutcome> IMtPipeline<PipelineContext, PipelineOutcome>.ExecuteAsync(
@@ -127,18 +130,10 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
             var sourceMetrics = ExtractMetrics(sourceOutDict);
             var followupMetrics = ExtractMetrics(followupOutDict);
 
-            // 7. Asserting
+            // 7. Asserting — typed predicate dispatch only; legacy string codes are
+            // mapped fail-closed via LegacyAssertionPredicateMapper (PR-C).
             progress?.Report(PipelineStatus.Asserting);
-            var input = new AssertionInput(
-                SourceValue: sourceMetrics.TryGetValue(ctx.ValueName, out var sv) ? sv : 0.0,
-                SourceStd: sourceMetrics.TryGetValue($"{ctx.ValueName}_std", out var ss) ? ss : 0.0,
-                FollowupValue: followupMetrics.TryGetValue(ctx.ValueName, out var fv) ? fv : 0.0,
-                FollowupStd: followupMetrics.TryGetValue($"{ctx.ValueName}_std", out var fs) ? fs : 0.0,
-                ValueName: ctx.ValueName,
-                ExtraValues: ctx.ExtraAssertionValues);
-
-            var assertionResult = _assertionEvaluator.Evaluate(
-                input, ctx.Tolerance, ctx.AssertionTypeCode);
+            var assertionResult = EvaluateAssertion(ctx, sourceMetrics, followupMetrics);
 
             // 8. Final
             var finalStatus = assertionResult.Passed ? PipelineStatus.Ok : PipelineStatus.Anomaly;
@@ -239,4 +234,81 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
         JsonValueKind.Null   => (object?)null,
         _ => null,
     };
+
+    /// <summary>
+    /// 经典 less/greater/approx 和 scaling 走 LegacyAssertionPredicateMapper → 类型化谓词；
+    /// 类型化路径直接执行 PredicateDispatcher，避免再次走旧 AssertionEvaluator。
+    /// 未识别的旧 AssertionTypeCode 直接 fail-closed，返回 UnknownType 结果。
+    /// </summary>
+    private SystemMtAssertionResultV2 EvaluateAssertion(
+        PipelineContext ctx,
+        IReadOnlyDictionary<string, double> sourceMetrics,
+        IReadOnlyDictionary<string, double> followupMetrics)
+    {
+        MrSpec spec;
+        PredicateSpec predicate;
+        try
+        {
+            if (ctx.TypedSpec is { } providedSpec && ctx.TypedPredicate is { } providedPredicate)
+            {
+                spec = providedSpec;
+                predicate = providedPredicate;
+            }
+            else
+            {
+                predicate = LegacyAssertionPredicateMapper.MapScalar(
+                    ctx.AssertionTypeCode,
+                    actualRole: "followup",
+                    expectedRole: "source",
+                    metric: ctx.ValueName);
+                spec = TypedSpecFactory.ForLegacyScalar(
+                    mrCode: ctx.MrCode,
+                    valueName: ctx.ValueName,
+                    predicate: predicate,
+                    toleranceAbs: ctx.Tolerance.ToleranceAbs,
+                    toleranceRel: ctx.Tolerance.ToleranceRel);
+            }
+        }
+        catch (ArgumentException ex)
+        {
+            return SystemMtAssertionResultV2.UnknownType(ctx.AssertionTypeCode) with
+            {
+                FailureReason = ex.Message,
+            };
+        }
+
+        VerificationContext verificationContext;
+        try
+        {
+            verificationContext = TypedVerificationContextFactory.FromScalarOutputs(
+                spec,
+                sourceMetrics,
+                followupMetrics,
+                ctx.Parameters);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return SystemMtAssertionResultV2.UnknownType(ctx.AssertionTypeCode) with
+            {
+                FailureReason = ex.Message,
+            };
+        }
+
+        var verification = _predicateDispatcher.Dispatch(predicate, verificationContext);
+        if (verification.Assertion is { } typedAssertion)
+        {
+            return typedAssertion;
+        }
+
+        var diagnosticReason = verification.Context?.Reason ?? verification.Status.ToString();
+        return new SystemMtAssertionResultV2(
+            AssertionTypeCode: ctx.AssertionTypeCode,
+            Passed: false,
+            SourceValue: sourceMetrics.TryGetValue(ctx.ValueName, out var sv) ? sv : (double?)null,
+            FollowupValue: followupMetrics.TryGetValue(ctx.ValueName, out var fv) ? fv : (double?)null,
+            ObservedDelta: null,
+            ExpectedThreshold: null,
+            Expression: $"{verification.Status} on '{ctx.ValueName}'",
+            FailureReason: diagnosticReason);
+    }
 }
