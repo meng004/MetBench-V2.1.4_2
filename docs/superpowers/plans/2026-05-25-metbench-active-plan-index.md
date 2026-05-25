@@ -93,9 +93,9 @@ Any new coding task must be derived from the active master plan or from a scoped
 - `MrRunResultShapeLockTests` 接管 launcher facade 防漂移守卫；`TypedVerificationEvidenceRoundtripTests` 接管 legacy / v2 双向兼容守卫；`Live_pipeline_outcome_carries_typed_triple_into_evidence_without_explicit_typed_args` 接管 live pipeline 写入守卫；`Render_without_evidence_dictionary_matches_legacy_overload_byte_identical` 接管渲染器无证据路径字节级守卫。
 - 设计与实施计划均退役为历史参考；后续若需扩展 evidence 粒度或重大 schema 变更须另立 design + plan，再注册到本索引 §1 / §2。
 
-### 验证语义收敛续作 + evidence-aware reporting + anomaly annotation/correctness（已合并）
+### 验证语义收敛续作 + evidence-aware reporting + anomaly annotation/correctness + T3 Poisson 1D（已合并）
 
-- 无独立文件（PR #123 / #124 / #126 / #128 / #130 / #132 直接在主线推进）
+- 无独立文件（PR #123 / #124 / #126 / #128 / #130 / #132 / #134 直接在主线推进）
 
 **原因**:
 
@@ -106,6 +106,7 @@ Any new coding task must be derived from the active master plan or from a scoped
 - PR #128 给 `SystemMtReportService` 加 optional `IExecutionEvidenceRepository?` ctor 参数，markdown 执行报告同样投影 `TypedVerification`。Legacy 5-arg ctor 与 single-arg `BuildExecutionMarkdown` 仍存在；既有测试不需修改。
 - PR #130 给 `IAnomalyService.RecordAnomalyAsync` 加 optional `string? typedVerificationSummary` 参数，`SystemMtLauncher.RecordAnomalyIfFailedAsync` 把 `PipelineOutcome.TypedVerification` 投影成 `typed=<Status> metric=<Metric> predicate=<id> (<Kind>) residual=… tolerance=…` 一行摘要，写入 `Anomaly.Notes` 与 `anomaly.created` 审计 `detailsJson`。无 typed verification 时 byte-identical to PR-129。
 - PR #132 修正了一个 bug：`Status=SkippedMissingObservable / SkippedNotApplicable / InvalidSpec` 的 typed verification 之前会因 `SystemMtAssertionResultV2.Passed=false` 的 fallback 而被 launcher 错误归类为 Anomaly。`RecordAnomalyIfFailedAsync` 现在对这三种非-Failed 状态早返，避免误报。`Status=Failed` 与遗留非-typed 失败仍生成 Anomaly。
+- PR #134 启动 T3 扩展，加首个椭圆 PDE SUT（`SUT/poisson_1d/`，pure-stdlib Thomas 三对角求解器，无需 venv，云端 CI 可跑），加 `poisson` `EquationMetadata` 和两条 MR（`poisson-source-superposition` m_mono 线性叠加 + `poisson-mesh-richardson` m_conv）。同时**通过演示验证 T1**：新 SUT 接入只改 SUT 文件 + catalog 接线 + 计数测试，未触 Pipeline / Persistence / Reporting / Launcher 类体 / DAL —— 证明 T1 的 CLI runner / Python adapter / catalog provider / launcher facade 已稳定可附加。Inventory 改为 10 SUT / 9 方程 / 19 MR；`EquationKind` enum 不变（poisson → `Other`；APPEND-ONLY 保持，5 反应堆方程仍为 canonical）。
 - 后续触发条件（noise-aware 旧码被新增 catalog binding 采用 → 加噪声感知 typed predicate）记录在 `docs/status/current.md` §7。
 
 ---
