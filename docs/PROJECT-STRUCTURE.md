@@ -1,6 +1,6 @@
 # MetBench 项目结构
 
-> **更新时间**: 2026-05-25（`main` @ `8bd734f`）
+> **更新时间**: 2026-05-25（`main` @ `e839214`）
 > **目标读者**: 新加入仓库的开发者 / 验收员 / reviewer。文档全息呈现仓库当前结构 + SUT 测试覆盖 + MetBench 框架测试覆盖。
 > **更详细的设计**: [`AGENTS.md`](../AGENTS.md)（roadmap）· [`CLAUDE.md`](../CLAUDE.md)（agent 注意事项）· [`docs/design/`](design/)（架构）
 
@@ -16,7 +16,7 @@
 | **`MetBench_IDAL/`** | `net8.0` | Anywhere | DAL 接口合约 |
 | **`MetBench_DAL/`** | `net8.0` | Anywhere | LiteDB 持久化：v1 run-result + v2 24-collection schema |
 | **`MetBench_Client/`** | `net8.0-windows7.0` | **Windows only** | WPF UI 应用，入口点；引 `Wpf.Ui` + `CommunityToolkit.Mvvm` + LiveCharts WPF |
-| **`MetBench_SystemMT.Tests/`** | `net8.0` | Anywhere | xUnit + Reqnroll：跨平台事实源测试。当前共享精确基线见下文：`origin/main@8bd734f` = **1015 pass / 0 fail / 0 skip**。 |
+| **`MetBench_SystemMT.Tests/`** | `net8.0` | Anywhere | xUnit + Reqnroll：跨平台事实源测试。当前共享精确基线见下文：`origin/main@e839214` = **1043 pass / 0 fail / 0 skip**。 |
 
 **硬规则**（cloud 与 Windows 端协作）：
 
@@ -84,11 +84,12 @@ SUT 接入到框架的 hook：
 | **Pagination** (Keyset) | `MetBench_BLL.Paging` + `MetBench_DAL.V2.*` | `V2Pagination/` | 5 | 54 |
 | **Schema / Entity** (round-trip + soft-delete + migration) | `MetBench_Domain.V2` | `V2Schema/` | 5 | 9 |
 | **Transformations** (v2 IMRTransformation) | `MetBench_BLL.Discovery.Transformations` | `V2Transformations/` | 3 | 20 |
-| **V12Catalog** (typed semantic model + validator + verifier runtime，PR-0..PR-6) | `MetBench_BLL.SystemMT.V12Catalog.*` | `SystemMT/V12Catalog/` | 22 | 47 |
+| **V12Catalog** (typed semantic model + validator + verifier runtime，PR-0..PR-10 + review-fix) | `MetBench_BLL.SystemMT.V12Catalog.*` | `SystemMT/V12Catalog/` | 39 | 82 |
 | **ColdStart** | — | `ColdStart/` | 1 | 1 |
 
 **测试总数对照**：
-- 当前共享精确 Linux / cloud 绿基线：提交 `8bd734f`（PR #104）= **1015 pass / 0 fail / 0 skip**
+- 当前共享精确 Linux / cloud 绿基线：提交 `e839214`（PR #110）= **1043 pass / 0 fail / 0 skip**
+- v1.2 迁移 / gate 当前真相层：**44 MR + 4 Property** 已进入 typed catalog 工件、golden fixtures 与 coverage gate
 - v1.2 之前的历史参考基线：`373bb59` = **961 / 0 / 8 / 969**；`763e067`（PR #93）= **965 / 0 / 0**
 - 当前 Windows WPF 已知旧基线：2026-05-24 在 Parallels Win11 上 `dotnet build MetBench_Client/MetBench_Client.csproj` **0 编译错误**，约 `17.47s`；本轮最新代码回执待补
 - UAT BDD filter（`FullyQualifiedName~UAT`）：**48 Pass / 0 Skip**
@@ -172,7 +173,8 @@ WPF 的 `MetBench_Client/` 因 SDK targets 限制 **不在 Linux CI 编译**；�
 - `SystemMtLauncher` 已从硬编码蓝图切到 provider-backed catalog，构造函数现要求显式注入 `IMrCatalogProvider`，生产路径不再静默 fallback。
 - `SystemMtExecutionRecorder` 已写入 `ExecutionEvidence`、`V3MrIdRef` 与目标字段级 `SampleTraces`（source / transformed / output triples）；更细粒度的多变量 trace 仍可后续扩展。
 - `LauncherCatalogV2Importer` 已通过 `ISystemMtCatalogReader` 读取 runnable catalog，`App.xaml.cs` 不再依赖 `SystemMtLauncher` 具体类强转。
-- `MetBench_BLL.Core/SystemMT/V12Catalog/` 已合入 PR-0..PR-6：typed schema / anti-legacy lint / fail-closed validator / scalar/applicability/convergence/sequence/field/derived runtime 均为主线事实；PR-7..PR-10 仍未合入。
+- `MetBench_BLL.Core/SystemMT/V12Catalog/` 已合入 PR-0..PR-10，并由 PR #110 完成 retrospective review-fix：typed schema / anti-legacy lint / fail-closed validator / scalar / applicability / convergence / sequence / field / derived / statistical / cross-method / property / exponential-growth runtime 与 typed migration + coverage gate 均为主线事实。
+- inventory 口径以仓库 migration 资产与 gate 为准：当前主线事实是 **44 MR + 4 Property**，不要再沿用旧的“43 MR + 4 Property”汇总说法。
 - `.codegraph/` 是本地图谱索引产物，不属于仓库正式架构的一部分，也不应纳入结构文档或版本化事实源。
 
 ## §10 接入新 SUT 的 checklist
@@ -205,4 +207,4 @@ WPF 的 `MetBench_Client/` 因 SDK targets 限制 **不在 Linux CI 编译**；�
 
 ---
 
-最后更新：`main` @ `8bd734f`。下次主要结构变更（接新 SUT / 推进 v1.2 PR-7..PR-10 / 收敛 launcher/provider / 改命名约定）后更新本文件。
+最后更新：`main` @ `e839214`。下次主要结构变更（接新 SUT / 扩展 sample-level evidence 粒度 / 推进下一阶段 assertion 语义与配置接线 / 改命名约定）后更新本文件。
