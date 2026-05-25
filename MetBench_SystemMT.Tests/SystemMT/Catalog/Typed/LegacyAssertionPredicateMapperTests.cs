@@ -7,13 +7,21 @@ namespace MetBench_SystemMT.Tests.SystemMT.Catalog.Typed;
 
 /// <summary>
 /// Migration-input contract for the legacy-string-code to typed-predicate mapper.
-/// Scope (verification-semantics convergence PR-C):
-///   less    -> BinaryComparisonPredicate(Operator=Less)
-///   greater -> BinaryComparisonPredicate(Operator=Greater)
-///   approx  -> BinaryComparisonPredicate(Operator=Equal)
+/// Scope (verification-semantics convergence PR-C + PR-124 dormant-code extension):
+///   less              -> BinaryComparisonPredicate(Operator=Less)
+///   greater           -> BinaryComparisonPredicate(Operator=Greater)
+///   approx            -> BinaryComparisonPredicate(Operator=Equal)
+///   approx-invariant  -> BinaryComparisonPredicate(Operator=Equal) (scalar form; deterministic tolerance)
 ///   scaling flw = k * src -> ScaledEqualityPredicate
+///   variance-ratio        -> VarianceRatioPredicate
+///   flux-pointwise-approx -> FieldEqualityPredicate (Identity pairing)
+///   cross-program-agree   -> CrossMethodComparisonPredicate(Operator=Equal)
+///
+/// Intentional fail-closed (typed model cannot yet represent std/noise scalar semantics):
+///   less-noise-aware, greater-noise-aware
+///
 /// Any other legacy code is rejected fail-closed; the typed runtime
-/// has no production fallback to AssertionEvaluator after this PR.
+/// has no production fallback to AssertionEvaluator after PR-D.
 /// </summary>
 public sealed class LegacyAssertionPredicateMapperTests
 {
@@ -21,6 +29,7 @@ public sealed class LegacyAssertionPredicateMapperTests
     [InlineData("less", "Less")]
     [InlineData("greater", "Greater")]
     [InlineData("approx", "Equal")]
+    [InlineData("approx-invariant", "Equal")]
     public void Scalar_assertion_codes_map_to_binary_comparison(string code, string expectedOperator)
     {
         var predicate = LegacyAssertionPredicateMapper.MapScalar(
@@ -74,18 +83,148 @@ public sealed class LegacyAssertionPredicateMapperTests
     [Theory]
     [InlineData("less-noise-aware")]
     [InlineData("greater-noise-aware")]
-    [InlineData("approx-invariant")]
-    [InlineData("variance-ratio")]
-    [InlineData("flux-pointwise-approx")]
-    [InlineData("cross-program-agree")]
+    public void Noise_aware_scalar_codes_fail_closed_with_documented_reason(string code)
+    {
+        var ex = Assert.Throws<ArgumentException>(() =>
+            LegacyAssertionPredicateMapper.MapScalar(code, "followup", "source", "k_eff"));
+
+        Assert.Contains("noise-aware", ex.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("not yet representable", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Theory]
     [InlineData("string-switch-new-code")]
     [InlineData("")]
-    public void Unknown_or_out_of_scope_legacy_code_is_rejected_fail_closed(string code)
+    public void Unknown_legacy_code_is_rejected_fail_closed(string code)
     {
         var ex = Assert.Throws<ArgumentException>(() =>
             LegacyAssertionPredicateMapper.MapScalar(code, "followup", "source", "k_eff"));
 
         Assert.Contains("Unsupported legacy assertion code", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Variance_ratio_maps_to_variance_ratio_predicate()
+    {
+        var predicate = LegacyAssertionPredicateMapper.MapVarianceRatio(
+            lowSampleRole: "coarse",
+            highSampleRole: "refined",
+            statisticalMetric: "k_eff",
+            sampleRatio: new ConstantParameterExpression(4.0),
+            sigmaMultiplier: 3.0);
+
+        var variance = Assert.IsType<VarianceRatioPredicate>(predicate);
+        Assert.Equal("coarse", variance.LowSampleRole);
+        Assert.Equal("refined", variance.HighSampleRole);
+        Assert.Equal("k_eff", variance.StatisticalMetric);
+        var ratio = Assert.IsType<ConstantParameterExpression>(variance.SampleRatio);
+        Assert.Equal(4.0, ratio.Value);
+        Assert.Equal(3.0, variance.Tolerance.SigmaMultiplier);
+        Assert.False(string.IsNullOrEmpty(variance.PredicateId));
+    }
+
+    [Fact]
+    public void Variance_ratio_rejects_null_or_invalid_inputs()
+    {
+        Assert.Throws<ArgumentException>(() =>
+            LegacyAssertionPredicateMapper.MapVarianceRatio(
+                lowSampleRole: "",
+                highSampleRole: "refined",
+                statisticalMetric: "k_eff",
+                sampleRatio: new ConstantParameterExpression(4.0),
+                sigmaMultiplier: 3.0));
+        Assert.Throws<ArgumentNullException>(() =>
+            LegacyAssertionPredicateMapper.MapVarianceRatio(
+                lowSampleRole: "coarse",
+                highSampleRole: "refined",
+                statisticalMetric: "k_eff",
+                sampleRatio: null!,
+                sigmaMultiplier: 3.0));
+    }
+
+    [Fact]
+    public void Flux_pointwise_approx_maps_to_field_equality_with_identity_pairing()
+    {
+        var predicate = LegacyAssertionPredicateMapper.MapFluxPointwise(
+            leftRole: "followup",
+            rightRole: "source",
+            leftMetric: "flux",
+            rightMetric: "flux",
+            norm: "L2",
+            atol: 1e-4,
+            rtol: 1e-3);
+
+        var field = Assert.IsType<FieldEqualityPredicate>(predicate);
+        Assert.Equal("followup", field.LeftRole);
+        Assert.Equal("source", field.RightRole);
+        Assert.Equal("flux", field.LeftMetric);
+        Assert.Equal("flux", field.RightMetric);
+        Assert.IsType<IdentityFieldPairing>(field.Pairing);
+        Assert.Equal("L2", field.Tolerance.Norm);
+        Assert.Equal(1e-4, field.Tolerance.Atol);
+        Assert.Equal(1e-3, field.Tolerance.Rtol);
+    }
+
+    [Fact]
+    public void Flux_pointwise_approx_rejects_invalid_inputs()
+    {
+        Assert.Throws<ArgumentException>(() =>
+            LegacyAssertionPredicateMapper.MapFluxPointwise(
+                leftRole: "",
+                rightRole: "source",
+                leftMetric: "flux",
+                rightMetric: "flux",
+                norm: "L2",
+                atol: 0.0,
+                rtol: 0.0));
+        Assert.Throws<ArgumentException>(() =>
+            LegacyAssertionPredicateMapper.MapFluxPointwise(
+                leftRole: "followup",
+                rightRole: "source",
+                leftMetric: "flux",
+                rightMetric: "flux",
+                norm: "",
+                atol: 0.0,
+                rtol: 0.0));
+    }
+
+    [Fact]
+    public void Cross_program_agree_maps_to_cross_method_comparison_predicate()
+    {
+        var predicate = LegacyAssertionPredicateMapper.MapCrossProgramAgree(
+            leftRole: "openmoc",
+            rightRole: "openmc",
+            metric: "k_eff",
+            atol: 0.0,
+            rtol: 5e-3);
+
+        var cross = Assert.IsType<CrossMethodComparisonPredicate>(predicate);
+        Assert.Equal("openmoc", cross.LeftRole);
+        Assert.Equal("openmc", cross.RightRole);
+        Assert.Equal("k_eff", cross.Metric);
+        Assert.Equal("Equal", cross.Operator);
+        Assert.Equal(0.0, cross.Tolerance.Atol);
+        Assert.Equal(5e-3, cross.Tolerance.Rtol);
+        Assert.False(string.IsNullOrEmpty(cross.PredicateId));
+    }
+
+    [Fact]
+    public void Cross_program_agree_rejects_invalid_inputs()
+    {
+        Assert.Throws<ArgumentException>(() =>
+            LegacyAssertionPredicateMapper.MapCrossProgramAgree(
+                leftRole: "",
+                rightRole: "openmc",
+                metric: "k_eff",
+                atol: 0.0,
+                rtol: 5e-3));
+        Assert.Throws<ArgumentException>(() =>
+            LegacyAssertionPredicateMapper.MapCrossProgramAgree(
+                leftRole: "openmoc",
+                rightRole: "openmc",
+                metric: "",
+                atol: 0.0,
+                rtol: 5e-3));
     }
 
     [Fact]
