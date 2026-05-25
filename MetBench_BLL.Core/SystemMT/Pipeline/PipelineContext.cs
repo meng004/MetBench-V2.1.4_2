@@ -1,5 +1,6 @@
 using MetBench_BLL.Equations;
 using MetBench_BLL.SystemMT.Assertions;
+using MetBench_BLL.SystemMT.Catalog.Typed.Specs;
 
 namespace MetBench_BLL.SystemMT.Pipeline;
 
@@ -50,4 +51,18 @@ public sealed record PipelineContext(
     /// 可命中 L1 Recipe。未提供时退回全局 TransformationRegistry。
     /// </summary>
     public EquationFunctionRegistry? EquationFunctionRegistry { get; init; }
+
+    /// <summary>
+    /// Optional pre-validated Typed Semantic Catalog spec. When set together with
+    /// <see cref="TypedPredicate"/>, the pipeline uses the typed predicate
+    /// dispatcher directly and skips the legacy-code mapper.
+    /// </summary>
+    public MrSpec? TypedSpec { get; init; }
+
+    /// <summary>
+    /// Optional pre-validated Typed Semantic Catalog predicate paired with
+    /// <see cref="TypedSpec"/>. When null, the pipeline synthesizes one from
+    /// <see cref="AssertionTypeCode"/> via the legacy migration mapper.
+    /// </summary>
+    public PredicateSpec? TypedPredicate { get; init; }
 }
