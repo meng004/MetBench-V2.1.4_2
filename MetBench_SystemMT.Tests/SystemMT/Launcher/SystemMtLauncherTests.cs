@@ -72,7 +72,7 @@ public sealed class SystemMtLauncherTests
     {
         var descriptors = await _launcher.ListAvailableAsync();
 
-        Assert.Equal(21, descriptors.Count);
+        Assert.Equal(23, descriptors.Count);
         Assert.Equal("advection-amplitude-linearity", descriptors[0].Id);
         Assert.Equal("advection-mesh-conservation", descriptors[1].Id);
         Assert.Equal("bateman-mass-conservation", descriptors[2].Id);
@@ -94,6 +94,8 @@ public sealed class SystemMtLauncherTests
         Assert.Equal("projectile-scale-v0", descriptors[18].Id);
         Assert.Equal("subchannel-flow-temperature-monotone", descriptors[19].Id);
         Assert.Equal("subchannel-heat-flux-linearity", descriptors[20].Id);
+        Assert.Equal("wave-amplitude-linearity", descriptors[21].Id);
+        Assert.Equal("wave-mesh-energy-convergence", descriptors[22].Id);
     }
 
     [Fact]
@@ -124,6 +126,36 @@ public sealed class SystemMtLauncherTests
         Assert.Equal("2", cons.DefaultParameters["factor"]);
         Assert.Contains("conservation", cons.Description, StringComparison.OrdinalIgnoreCase);
         Assert.Equal("Advection.Invariance.Mass", cons.MrFamily);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_wave_amplitude_linearity_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var lin = descriptors.Single(d => d.Id == "wave-amplitude-linearity");
+
+        Assert.Equal("wave-1d", lin.SutName);
+        Assert.Equal("ScaleField", lin.TransformationName);
+        Assert.Equal("GreaterThan", lin.AssertionName);
+        Assert.Equal("peak_amplitude", lin.ValueName);
+        Assert.Equal("2", lin.DefaultParameters["factor"]);
+        Assert.Contains("amplitude", lin.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Wave.Scaling.Amplitude", lin.MrFamily);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_wave_mesh_energy_convergence_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var conv = descriptors.Single(d => d.Id == "wave-mesh-energy-convergence");
+
+        Assert.Equal("wave-1d", conv.SutName);
+        Assert.Equal("ScaleField", conv.TransformationName);
+        Assert.Equal("ApproxEqual", conv.AssertionName);
+        Assert.Equal("energy_proxy", conv.ValueName);
+        Assert.Equal("2", conv.DefaultParameters["factor"]);
+        Assert.Contains("convergence", conv.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Wave.Convergence.Energy", conv.MrFamily);
     }
 
     [Fact]

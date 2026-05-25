@@ -1,0 +1,71 @@
+{
+  "sut_name": "wave-1d",
+  "program": {
+    "program_name": "wave-1d",
+    "equation": "Wave",
+    "equation_key": "wave",
+    "program_type": "Num",
+    "runner_script_relative_path": "wave_1d.py",
+    "input_parser_script_relative_path": "wave_1d_input_parser.py",
+    "output_parser_script_relative_path": "wave_1d_output_parser.py",
+    "input_adapter_script_relative_path": "wave_1d_input_parser.py",
+    "output_adapter_script_relative_path": "wave_1d_output_parser.py",
+    "python_executable_kind": "system"
+  },
+  "mrs": [
+    {
+      "mr_id": "wave-amplitude-linearity",
+      "sut_name": "wave-1d",
+      "display_name": "1D wave — ScaleInitial (amplitude linearity)",
+      "description": "Linearity MP_mono: the 1D linear wave equation u_tt = c²·u_xx is linear in the initial condition. Scaling the initial Gaussian amplitude by factor > 1 must strictly increase the final peak amplitude (and in fact scale it by the same factor exactly under the linear leapfrog discretisation).",
+      "mr_family": "Wave.Scaling.Amplitude",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "greater",
+      "assertion_name": "GreaterThan",
+      "value_name": "peak_amplitude",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/initial/amplitude" }
+      ],
+      "tolerance_rel": 0,
+      "tolerance_abs": 0,
+      "noise_aware": false,
+      "equation_key": "wave",
+      "equation": "Wave",
+      "program_type": "Num",
+      "meta_pattern": "Mono",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "sample_case_relative_path": "sample/standard.json",
+      "work_root_name": "MetBenchWave1d",
+      "timeout_seconds": 30
+    },
+    {
+      "mr_id": "wave-mesh-energy-convergence",
+      "sut_name": "wave-1d",
+      "display_name": "1D wave — MeshRefinement (energy proxy convergence)",
+      "description": "Mesh-refinement convergence MP_conv: the second-order leapfrog scheme converges as O(dx², dt²). Doubling num_points (with internal dt halving to keep Courant = 0.5) must leave the integrated energy proxy 0.5·∫u² dx within FD truncation tolerance — for a smooth Gaussian initial pulse the L² invariant is preserved to near machine precision under refinement.",
+      "mr_family": "Wave.Convergence.Energy",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "approx",
+      "assertion_name": "ApproxEqual",
+      "value_name": "energy_proxy",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/geometry/num_points" }
+      ],
+      "tolerance_rel": 1e-3,
+      "tolerance_abs": 1e-6,
+      "noise_aware": false,
+      "equation_key": "wave",
+      "equation": "Wave",
+      "program_type": "Num",
+      "meta_pattern": "Conv",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "sample_case_relative_path": "sample/standard.json",
+      "work_root_name": "MetBenchWave1d",
+      "timeout_seconds": 30
+    }
+  ]
+}
