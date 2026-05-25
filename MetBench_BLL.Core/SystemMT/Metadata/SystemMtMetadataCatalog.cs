@@ -155,6 +155,24 @@ public static class SystemMtMetadataCatalog
         },
         new EquationMetadata
         {
+            EquationKey = "wave",
+            Name = "1D 线性波动方程（齐次 Dirichlet 边界、零初始速度）",
+            CanonicalForm = "∂²u/∂t² = c²·∂²u/∂x²,  x ∈ [0, L],  u(0,t)=u(L,t)=0,  u_t(x,0)=0",
+            SymbolSystem =
+                "u(x,t) 位移场；c 波速；L 区域长度；初始 Gaussian u₀(x)。" +
+                "d'Alembert 解将零初始速度的 Gaussian 拆成两半幅度对称行波；" +
+                "在 c=const 与 Dirichlet 反射下能量泛函 0.5·∫(u_t² + c²·u_x²)dx 严格守恒，" +
+                "本 SUT 用代理 0.5·∫u² dx（L² 能量代理）作为输出。",
+            Parameters = new List<EquationParameter>
+            {
+                new() { Symbol = "c", Description = "波速", Unit = "无量纲" },
+                new() { Symbol = "u₀(x)", Description = "初始 Gaussian 脉冲（amplitude / center / sigma 参数化）", Unit = "无量纲" },
+                new() { Symbol = "peak_amplitude", Description = "末时刻 |u| 峰值（输出）", Unit = "无量纲" },
+                new() { Symbol = "energy_proxy", Description = "0.5·∫u² dx 数值能量代理（输出）", Unit = "无量纲" },
+            },
+        },
+        new EquationMetadata
+        {
             EquationKey = "projectile-motion",
             Name = "射程方程（真空、平面、点抛体）",
             CanonicalForm = "R = v0²·sin(2θ)/g",
@@ -451,6 +469,40 @@ public static class SystemMtMetadataCatalog
             {
                 new() { Symbol = "factor", PhysicalMeaning = "num_points 缩放倍率", ValueRange = "factor > 1" },
                 new() { Symbol = "mass_integral", PhysicalMeaning = "∫u dx 守恒量（输出）", ValueRange = "mass_integral > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "wave-amplitude-linearity",
+            EquationKey = "wave",
+            PhysicalMeaning =
+                "线性叠加：1D 线性波动方程 u_tt = c²·u_xx 关于初始条件严格线性。" +
+                "初始 Gaussian amplitude → factor·amplitude（factor > 1）必使末时刻 |u| 峰值严格放大，" +
+                "且在线性 leapfrog 离散下精确按同比例 = factor·peak_amplitude(src)。",
+            InputTransformation = "amplitude → factor·amplitude（factor > 1）",
+            OutputRelation = "peak_amplitude(flw) > peak_amplitude(src)（严格意义下 = factor·peak_amplitude(src)）",
+            ComparisonType = MrComparisonType.Ordinal,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "初始幅度缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "peak_amplitude", PhysicalMeaning = "末时刻 |u| 峰值（输出）", ValueRange = "peak_amplitude > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "wave-mesh-energy-convergence",
+            EquationKey = "wave",
+            PhysicalMeaning =
+                "网格细化收敛：2 阶 leapfrog 格式 O(dx²,dt²) 收敛。num_points 翻倍（内部 dt 同步减半保持 Courant=0.5）" +
+                "后末时刻 L² 能量代理 0.5·∫u² dx 应在 FD 截断容差内不变。光滑 Gaussian 初值下" +
+                "细化效应远低于 O(dx²) 显式截断，本测试可视为 plateau 检测。",
+            InputTransformation = "num_points → factor·num_points（factor > 1）",
+            OutputRelation = "energy_proxy(flw) ≈ energy_proxy(src)（O(dx²) 截断容差内）",
+            ComparisonType = MrComparisonType.Absolute,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "num_points 缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "energy_proxy", PhysicalMeaning = "0.5·∫u² dx 能量代理（输出）", ValueRange = "energy_proxy > 0" },
             },
         },
         new MrMetadata

@@ -1,0 +1,18 @@
+{
+  "geometry": {
+    "length":     1.0,
+    "num_points": 201
+  },
+  "initial": {
+    "amplitude": 1.0,
+    "center":    0.5,
+    "sigma":     0.05
+  },
+  "wave": {
+    "speed": 1.0
+  },
+  "time": {
+    "t_final":   0.25,
+    "num_steps": 400
+  }
+}

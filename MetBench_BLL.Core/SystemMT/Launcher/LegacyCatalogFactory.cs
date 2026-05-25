@@ -605,5 +605,67 @@ internal static class LegacyCatalogFactory
             // 一阶迎风格式严格守恒 ∫u dx；网格加密 200→400 时 mass_integral 仅因初始 Gaussian
             // 采样差异变化 O(dx²) ~ 4e-9（实测）；ToleranceRel=1e-3 + Atol=1e-6 充裕。
             Tolerance: new AssertionTolerance(ToleranceRel: 1e-3, ToleranceAbs: 1e-6));
+
+        // T3 expansion: 1D linear wave SUT + Wave 方程接入（second hyperbolic-PDE SUT after
+        // Advection; pure-stdlib second-order leapfrog FD with Dirichlet boundaries）.
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "wave-amplitude-linearity",
+                DisplayName: "1D wave — ScaleInitial (amplitude linearity)",
+                SutName: "wave-1d",
+                TransformationName: "ScaleField",
+                AssertionName: "GreaterThan",
+                ValueName: "peak_amplitude",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Linearity MP_mono: the 1D linear wave equation u_tt = c²·u_xx is linear " +
+                    "in the initial condition. Scaling the initial Gaussian amplitude by " +
+                    "factor > 1 must strictly increase the final peak amplitude (and in fact " +
+                    "scale it by the same factor exactly under the linear leapfrog discretisation).",
+                MrFamily: "Wave.Scaling.Amplitude"),
+            SampleCaseRelativePath: Path.Combine("wave_1d", "sample", "standard.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "wave_1d", "wave_1d.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "wave_1d", "wave_1d_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "wave_1d", "wave_1d_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchWave1d",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "wave_1d", "wave_1d_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "wave_1d", "wave_1d_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/initial/amplitude") },
+            AssertionTypeCode: "greater",
+            EquationKey: "wave");
+
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "wave-mesh-energy-convergence",
+                DisplayName: "1D wave — MeshRefinement (energy proxy convergence)",
+                SutName: "wave-1d",
+                TransformationName: "ScaleField",
+                AssertionName: "ApproxEqual",
+                ValueName: "energy_proxy",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Mesh-refinement convergence MP_conv: the second-order leapfrog scheme " +
+                    "converges as O(dx², dt²). Doubling num_points (with internal dt halving to " +
+                    "keep Courant = 0.5) must leave the integrated energy proxy 0.5·∫u² dx " +
+                    "within FD truncation tolerance — for a smooth Gaussian initial pulse the " +
+                    "L² invariant is preserved to near machine precision under refinement.",
+                MrFamily: "Wave.Convergence.Energy"),
+            SampleCaseRelativePath: Path.Combine("wave_1d", "sample", "standard.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "wave_1d", "wave_1d.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "wave_1d", "wave_1d_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "wave_1d", "wave_1d_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchWave1d",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "wave_1d", "wave_1d_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "wave_1d", "wave_1d_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/geometry/num_points") },
+            AssertionTypeCode: "approx",
+            EquationKey: "wave",
+            // 二阶 leapfrog 在平滑 Gaussian 上 L² 不变量到机器精度；num_points 翻倍（dt 内部
+            // 同步减半保持 Courant=0.5）后 energy_proxy 实测变化 ~1e-12；ToleranceRel=1e-3 + Atol=1e-6 充裕。
+            Tolerance: new AssertionTolerance(ToleranceRel: 1e-3, ToleranceAbs: 1e-6));
     }
 }
