@@ -8,6 +8,8 @@ namespace MetBench_BLL.SystemMT.V12Catalog.Specs;
 [JsonDerivedType(typeof(ScaledEqualityPredicate), "ScaledEquality")]
 [JsonDerivedType(typeof(ErrorMonotonicPredicate), "ErrorMonotonic")]
 [JsonDerivedType(typeof(SubadditivePredicate), "Subadditive")]
+[JsonDerivedType(typeof(FieldEqualityPredicate), "FieldEquality")]
+[JsonDerivedType(typeof(DerivedInvariantPredicate), "DerivedInvariant")]
 public abstract record PredicateSpec(string PredicateId);
 
 public sealed record BinaryComparisonPredicate(
@@ -37,3 +39,21 @@ public sealed record SubadditivePredicate(
     double DeltaA,
     double DeltaB,
     double DeltaAB) : PredicateSpec(PredicateId);
+
+public sealed record FieldEqualityPredicate(
+    string PredicateId,
+    string LeftRole,
+    string RightRole,
+    string LeftMetric,
+    string RightMetric,
+    FieldPairing Pairing,
+    FieldNormToleranceSpec Tolerance) : PredicateSpec(PredicateId);
+
+public sealed record DerivedInvariantPredicate(
+    string PredicateId,
+    string LeftRole,
+    string RightRole,
+    string LeftMetric,
+    string RightMetric,
+    string DerivedMetric,
+    DeterministicToleranceSpec Tolerance) : PredicateSpec(PredicateId);

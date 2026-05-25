@@ -10,6 +10,8 @@ public sealed class PredicateDispatcher : IPredicateDispatcher
     private readonly BinaryComparisonKernel _binary = new();
     private readonly ScaledEqualityKernel _scaled = new();
     private readonly ErrorMonotonicKernel _errorMonotonic = new();
+    private readonly FieldEqualityKernel _fieldEquality = new();
+    private readonly DerivedInvariantKernel _derivedInvariant = new();
 
     public VerificationResult Dispatch(PredicateSpec predicate, VerificationContext context)
     {
@@ -34,6 +36,8 @@ public sealed class PredicateDispatcher : IPredicateDispatcher
             BinaryComparisonPredicate binary => _binary.Evaluate(binary, context),
             ScaledEqualityPredicate scaled => _scaled.Evaluate(scaled, context),
             ErrorMonotonicPredicate monotonic => _errorMonotonic.Evaluate(monotonic, context),
+            FieldEqualityPredicate field => _fieldEquality.Evaluate(field, context),
+            DerivedInvariantPredicate derived => _derivedInvariant.Evaluate(derived, context),
             _ => throw new ArgumentException($"Unsupported predicate type '{predicate.GetType().Name}'.", nameof(predicate))
         };
     }
@@ -50,6 +54,12 @@ public sealed class PredicateDispatcher : IPredicateDispatcher
             ErrorMonotonicPredicate monotonic =>
                 context.TryGetMetric(monotonic.ReferenceRole, monotonic.Metric, out _) &&
                 HasAllOrderedRoleMetrics(monotonic, context),
+            FieldEqualityPredicate field =>
+                context.TryGetField(field.LeftRole, field.LeftMetric, out _) &&
+                context.TryGetField(field.RightRole, field.RightMetric, out _),
+            DerivedInvariantPredicate derived =>
+                context.TryGetField(derived.LeftRole, derived.LeftMetric, out _) &&
+                context.TryGetField(derived.RightRole, derived.RightMetric, out _),
             _ => true
         };
 
