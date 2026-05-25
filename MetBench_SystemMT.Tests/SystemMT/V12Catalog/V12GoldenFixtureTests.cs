@@ -95,7 +95,12 @@ internal static class GoldenFixtureVerifier
 
         foreach (var file in inventory.Buckets["invalid"])
         {
-            Assert.ThrowsAny<System.Exception>(() => V12CatalogSerializer.DeserializeMrSpec(File.ReadAllText(file)));
+            var spec = V12CatalogSerializer.DeserializeMrSpec(File.ReadAllText(file));
+            Assert.False(spec.Validate().IsValid);
+            var result = new PredicateDispatcher().Dispatch(
+                spec.Predicates.Single(),
+                new VerificationContext(spec, new Dictionary<string, RoleOutput>()));
+            Assert.Equal(VerifyStatus.InvalidSpec, result.Status);
             invalid++;
         }
 
