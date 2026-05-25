@@ -8,6 +8,7 @@ namespace MetBench_BLL.SystemMT.V12Catalog.Specs;
 [JsonDerivedType(typeof(SignChangeSpec), "SignChange")]
 [JsonDerivedType(typeof(NonMonotonicSpec), "NonMonotonic")]
 [JsonDerivedType(typeof(ConstantSlopeSpec), "ConstantSlope")]
+[JsonDerivedType(typeof(ExponentialGrowthSpec), "ExponentialGrowth")]
 public abstract record ShapeSpec;
 
 public sealed record BellShapeSpec() : ShapeSpec;
@@ -19,3 +20,5 @@ public sealed record SignChangeSpec() : ShapeSpec;
 public sealed record NonMonotonicSpec() : ShapeSpec;
 
 public sealed record ConstantSlopeSpec() : ShapeSpec;
+
+public sealed record ExponentialGrowthSpec() : ShapeSpec;

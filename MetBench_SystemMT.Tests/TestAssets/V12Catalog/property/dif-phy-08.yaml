@@ -1,0 +1,25 @@
+kind: PropertySpec
+property_id: dif-phy-08
+name: Edge mean lower than center mean
+description: Encodes edge_minus_center < 0 as a scalar bound property.
+tags:
+  equation_key: Diffusion
+  program_type: Deterministic
+case:
+  kind: Base
+projections:
+  edge_minus_center:
+    kind: ScalarProjection
+    path: /results/edge_minus_center
+assertions:
+  - kind: BoundProperty
+    predicate_id: edge-lower-than-center
+    metric: edge_minus_center
+    operator: Less
+    bound:
+      kind: ConstantParameter
+      value: 0.0
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0

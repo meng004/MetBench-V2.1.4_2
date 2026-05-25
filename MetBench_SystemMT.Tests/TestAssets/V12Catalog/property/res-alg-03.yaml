@@ -1,0 +1,32 @@
+kind: PropertySpec
+property_id: res-alg-03
+name: Dancoff factor bounded range
+description: Dancoff factor must stay within [0, 1].
+tags:
+  equation_key: Resonance
+  program_type: Deterministic
+case:
+  kind: Base
+projections:
+  dancoff:
+    kind: ScalarProjection
+    path: /results/dancoff_factor
+assertions:
+  - kind: BoundProperty
+    predicate_id: lower
+    metric: dancoff
+    operator: GreaterOrEqual
+    bound:
+      kind: ConstantParameter
+      value: 0.0
+  - kind: BoundProperty
+    predicate_id: upper
+    metric: dancoff
+    operator: LessOrEqual
+    bound:
+      kind: ConstantParameter
+      value: 1.0
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0

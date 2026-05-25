@@ -29,6 +29,7 @@ public sealed class PropertySpecValidator : ISpecValidator<PropertySpec>
             var result = assertion switch
             {
                 BoundPropertyPredicate bound => _registry.BoundPropertyValidator.Validate(bound, spec),
+                ShapePropertyPredicate shape => _registry.ShapePropertyValidator.Validate(shape, spec),
                 _ => ValidationResult.Invalid(new ValidationError($"assertions[{assertion.PredicateId}]", $"Unsupported property predicate type '{assertion.GetType().Name}'."))
             };
             errors.AddRange(result.Errors);

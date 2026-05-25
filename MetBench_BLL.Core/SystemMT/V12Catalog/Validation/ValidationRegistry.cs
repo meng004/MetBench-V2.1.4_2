@@ -17,6 +17,7 @@ public sealed class ValidationRegistry
     public FieldProportionalityPredicateValidator FieldProportionalityValidator { get; }
     public DerivedInvariantPredicateValidator DerivedInvariantValidator { get; }
     public BoundPropertyPredicateValidator BoundPropertyValidator { get; }
+    public ShapePropertyPredicateValidator ShapePropertyValidator { get; }
 
     public ValidationRegistry()
     {
@@ -29,5 +30,6 @@ public sealed class ValidationRegistry
         FieldProportionalityValidator = new FieldProportionalityPredicateValidator();
         DerivedInvariantValidator = new DerivedInvariantPredicateValidator();
         BoundPropertyValidator = new BoundPropertyPredicateValidator(ReferenceResolver, ParameterResolver);
+        ShapePropertyValidator = new ShapePropertyPredicateValidator(ReferenceResolver);
     }
 }
