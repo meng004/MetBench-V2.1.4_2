@@ -537,7 +537,8 @@ public sealed class SystemMtPipelineTypedRuntimeTests
         var result = new PredicateDispatcher().Dispatch(spec.Predicates.Single(), context);
 
         Assert.Equal(VerifyStatus.Passed, result.Status);
-        Assert.True(result.Passed);
+        Assert.NotNull(result.Assertion);
+        Assert.True(result.Assertion.Passed);
     }
 }
 ```
