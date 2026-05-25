@@ -12,6 +12,7 @@
 |---|---|---|---|
 | `docs/superpowers/plans/2026-05-25-metbench-governed-next-stage-plan.md` | Active | Governance-first next-stage planning; blocks further implementation until the named design ambiguities are resolved | Expires when semantic-convergence, Evidence v2, Windows verification policy, and transition plan are completed and replaced by a new implementation plan |
 | `docs/superpowers/plans/2026-05-25-verification-semantics-convergence-implementation-plan.md` | Active scoped plan | Implementation sequence for verification semantics convergence: PR-A design lock, PR-B naming migration, PR-C runtime convergence, PR-D guard cleanup | Expires when PR-D is merged and the status ledger marks verification semantics convergence controlled |
+| `docs/superpowers/plans/2026-05-25-executionevidence-v2-implementation-plan.md` | Active scoped plan | Implementation sequence for ExecutionEvidence v2: PR-A0 design lock and PR-C0 schema/recorder projection that unblocks verification-semantics PR-C | Expires when PR-C0 is merged and the status ledger marks ExecutionEvidence v2 implemented |
 
 Any new coding task must be derived from the active master plan or from a scoped successor plan registered here.
 
@@ -26,6 +27,7 @@ Any new coding task must be derived from the active master plan or from a scoped
 | `docs/superpowers/specs/2026-05-25-metbench-macro-assessment-and-risk-audit.md` | Active | Macro assessment and risk audit for the Stage 8 to next-stage transition | Expires when the next macro assessment supersedes it |
 | `docs/superpowers/specs/2026-05-25-mr-verification-v1.2-codex-ready.md` | Active reference | v1.2 typed semantic model and verifier design already implemented through the current roadmap | Expires when a v1.3 verification design supersedes it |
 | `docs/superpowers/specs/2026-05-25-verification-semantics-convergence-design.md` | Active | Locks System MT verification semantics convergence, Method MT isolation, `SystemMT/Catalog/Typed` naming, and legacy assertion migration/removal policy | Expires when runtime convergence and guard cleanup PRs complete or a newer verification semantics design supersedes it |
+| `docs/superpowers/specs/2026-05-25-executionevidence-v2-design.md` | Active | Locks ExecutionEvidence v2 schema, recorder projection, compatibility contract with `SystemMtResultRecord` and `ISystemMtLauncher`, and PR-C scope boundaries | Expires only by explicit replacement PR when a future major evidence redesign supersedes it |
 | `docs/superpowers/templates/pr-gate-checklist.md` | Active | Required PR gate checklist for scope, facts, tests, Windows classification, review, and merge | Expires only by explicit replacement PR |
 
 ### 条件性活跃
