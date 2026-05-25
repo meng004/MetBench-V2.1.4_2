@@ -74,4 +74,28 @@ public sealed class VerificationContext
 
         return value;
     }
+
+    public bool TryGetStatistical(string role, string metric, out StatisticalValue value)
+    {
+        if (!RoleOutputs.TryGetValue(role, out var roleOutput) ||
+            roleOutput.Statistics is null ||
+            !roleOutput.Statistics.TryGetValue(metric, out var statisticalValue))
+        {
+            value = default!;
+            return false;
+        }
+
+        value = statisticalValue;
+        return true;
+    }
+
+    public StatisticalValue GetStatistical(string role, string metric)
+    {
+        if (!TryGetStatistical(role, metric, out var value))
+        {
+            throw new ArgumentException($"Unknown statistical metric '{metric}' for role '{role}'.", nameof(metric));
+        }
+
+        return value;
+    }
 }

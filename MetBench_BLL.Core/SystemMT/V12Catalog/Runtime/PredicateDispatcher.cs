@@ -9,8 +9,11 @@ public sealed class PredicateDispatcher : IPredicateDispatcher
     private readonly ApplicabilityEvaluator _applicability = new();
     private readonly BinaryComparisonKernel _binary = new();
     private readonly ScaledEqualityKernel _scaled = new();
+    private readonly CrossMethodComparisonKernel _crossMethod = new();
     private readonly ErrorMonotonicKernel _errorMonotonic = new();
+    private readonly VarianceRatioKernel _varianceRatio = new();
     private readonly FieldEqualityKernel _fieldEquality = new();
+    private readonly FieldProportionalityKernel _fieldProportionality = new();
     private readonly DerivedInvariantKernel _derivedInvariant = new();
 
     public VerificationResult Dispatch(PredicateSpec predicate, VerificationContext context)
@@ -35,8 +38,11 @@ public sealed class PredicateDispatcher : IPredicateDispatcher
         {
             BinaryComparisonPredicate binary => _binary.Evaluate(binary, context),
             ScaledEqualityPredicate scaled => _scaled.Evaluate(scaled, context),
+            CrossMethodComparisonPredicate crossMethod => _crossMethod.Evaluate(crossMethod, context),
             ErrorMonotonicPredicate monotonic => _errorMonotonic.Evaluate(monotonic, context),
+            VarianceRatioPredicate varianceRatio => _varianceRatio.Evaluate(varianceRatio, context),
             FieldEqualityPredicate field => _fieldEquality.Evaluate(field, context),
+            FieldProportionalityPredicate fieldProportionality => _fieldProportionality.Evaluate(fieldProportionality, context),
             DerivedInvariantPredicate derived => _derivedInvariant.Evaluate(derived, context),
             _ => throw new ArgumentException($"Unsupported predicate type '{predicate.GetType().Name}'.", nameof(predicate))
         };
@@ -51,12 +57,21 @@ public sealed class PredicateDispatcher : IPredicateDispatcher
             ScaledEqualityPredicate scaled =>
                 context.TryGetMetric(scaled.ActualRole, scaled.Metric, out _) &&
                 context.TryGetMetric(scaled.ReferenceRole, scaled.Metric, out _),
+            CrossMethodComparisonPredicate crossMethod =>
+                context.TryGetMetric(crossMethod.LeftRole, crossMethod.Metric, out _) &&
+                context.TryGetMetric(crossMethod.RightRole, crossMethod.Metric, out _),
             ErrorMonotonicPredicate monotonic =>
                 context.TryGetMetric(monotonic.ReferenceRole, monotonic.Metric, out _) &&
                 HasAllOrderedRoleMetrics(monotonic, context),
+            VarianceRatioPredicate varianceRatio =>
+                context.TryGetStatistical(varianceRatio.LowSampleRole, varianceRatio.StatisticalMetric, out _) &&
+                context.TryGetStatistical(varianceRatio.HighSampleRole, varianceRatio.StatisticalMetric, out _),
             FieldEqualityPredicate field =>
                 context.TryGetField(field.LeftRole, field.LeftMetric, out _) &&
                 context.TryGetField(field.RightRole, field.RightMetric, out _),
+            FieldProportionalityPredicate fieldProportionality =>
+                context.TryGetField(fieldProportionality.LeftRole, fieldProportionality.LeftMetric, out _) &&
+                context.TryGetField(fieldProportionality.RightRole, fieldProportionality.RightMetric, out _),
             DerivedInvariantPredicate derived =>
                 context.TryGetField(derived.LeftRole, derived.LeftMetric, out _) &&
                 context.TryGetField(derived.RightRole, derived.RightMetric, out _),

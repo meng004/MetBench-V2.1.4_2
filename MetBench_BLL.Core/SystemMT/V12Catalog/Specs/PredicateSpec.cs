@@ -6,9 +6,12 @@ namespace MetBench_BLL.SystemMT.V12Catalog.Specs;
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "kind")]
 [JsonDerivedType(typeof(BinaryComparisonPredicate), "BinaryComparison")]
 [JsonDerivedType(typeof(ScaledEqualityPredicate), "ScaledEquality")]
+[JsonDerivedType(typeof(CrossMethodComparisonPredicate), "CrossMethodComparison")]
 [JsonDerivedType(typeof(ErrorMonotonicPredicate), "ErrorMonotonic")]
+[JsonDerivedType(typeof(VarianceRatioPredicate), "VarianceRatio")]
 [JsonDerivedType(typeof(SubadditivePredicate), "Subadditive")]
 [JsonDerivedType(typeof(FieldEqualityPredicate), "FieldEquality")]
+[JsonDerivedType(typeof(FieldProportionalityPredicate), "FieldProportionality")]
 [JsonDerivedType(typeof(DerivedInvariantPredicate), "DerivedInvariant")]
 public abstract record PredicateSpec(string PredicateId);
 
@@ -27,12 +30,28 @@ public sealed record ScaledEqualityPredicate(
     ParameterExpression Factor,
     double Exponent) : PredicateSpec(PredicateId);
 
+public sealed record CrossMethodComparisonPredicate(
+    string PredicateId,
+    string LeftRole,
+    string RightRole,
+    string Metric,
+    string Operator,
+    DeterministicToleranceSpec Tolerance) : PredicateSpec(PredicateId);
+
 public sealed record ErrorMonotonicPredicate(
     string PredicateId,
     IReadOnlyList<string> OrderedRoles,
     string ReferenceRole,
     string Metric,
     NormKind NormKind) : PredicateSpec(PredicateId);
+
+public sealed record VarianceRatioPredicate(
+    string PredicateId,
+    string LowSampleRole,
+    string HighSampleRole,
+    string StatisticalMetric,
+    ParameterExpression SampleRatio,
+    StatisticalToleranceSpec Tolerance) : PredicateSpec(PredicateId);
 
 public sealed record SubadditivePredicate(
     string PredicateId,
@@ -47,6 +66,21 @@ public sealed record FieldEqualityPredicate(
     string LeftMetric,
     string RightMetric,
     FieldPairing Pairing,
+    FieldNormToleranceSpec Tolerance) : PredicateSpec(PredicateId);
+
+public enum ConstantEstimator
+{
+    LeastSquaresThroughOrigin,
+    MedianRatio
+}
+
+public sealed record FieldProportionalityPredicate(
+    string PredicateId,
+    string LeftRole,
+    string RightRole,
+    string LeftMetric,
+    string RightMetric,
+    ConstantEstimator Estimator,
     FieldNormToleranceSpec Tolerance) : PredicateSpec(PredicateId);
 
 public sealed record DerivedInvariantPredicate(

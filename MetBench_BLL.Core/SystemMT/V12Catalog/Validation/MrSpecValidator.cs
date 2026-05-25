@@ -43,8 +43,11 @@ public sealed class MrSpecValidator : ISpecValidator<MrSpec>
             {
                 BinaryComparisonPredicate binary => _registry.BinaryComparisonValidator.Validate(binary, spec),
                 ScaledEqualityPredicate scaled => _registry.ScaledEqualityValidator.Validate(scaled, spec),
+                CrossMethodComparisonPredicate crossMethod => _registry.CrossMethodValidator.Validate(crossMethod, spec),
                 ErrorMonotonicPredicate monotonic => _registry.ErrorMonotonicValidator.Validate(monotonic, spec),
+                VarianceRatioPredicate varianceRatio => _registry.VarianceRatioValidator.Validate(varianceRatio, spec),
                 FieldEqualityPredicate field => _registry.FieldEqualityValidator.Validate(field, spec),
+                FieldProportionalityPredicate fieldProportionality => _registry.FieldProportionalityValidator.Validate(fieldProportionality, spec),
                 DerivedInvariantPredicate derived => _registry.DerivedInvariantValidator.Validate(derived, spec),
                 _ => ValidationResult.Invalid(new ValidationError($"predicates[{predicate.PredicateId}]", $"Unsupported predicate type '{predicate.GetType().Name}'."))
             };
