@@ -21,4 +21,8 @@ public sealed record NonMonotonicSpec() : ShapeSpec;
 
 public sealed record ConstantSlopeSpec() : ShapeSpec;
 
-public sealed record ExponentialGrowthSpec() : ShapeSpec;
+public sealed record ExponentialGrowthSpec(
+    ParameterExpression ExpectedRate,
+    double RateTolerance,
+    double ResidualRelTolerance,
+    double MinRSquared) : ShapeSpec;
