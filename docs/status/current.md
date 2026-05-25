@@ -63,7 +63,7 @@ The following documents are projections of the ledger and their own domain. They
 
 | Risk | Status | Required next step |
 |---|---|---|
-| Verification semantics convergence | Design locked and planned | Use `docs/superpowers/specs/2026-05-25-verification-semantics-convergence-design.md` and execute `docs/superpowers/plans/2026-05-25-verification-semantics-convergence-implementation-plan.md` in PR-A through PR-D order |
+| Verification semantics convergence | Design locked and planned | Use `docs/superpowers/specs/2026-05-25-verification-semantics-convergence-design.md` and execute `docs/superpowers/plans/2026-05-25-verification-semantics-convergence-implementation-plan.md`; PR-C remains gated by the ExecutionEvidence v2 decision state unless it proves evidence schema is unchanged |
 | ExecutionEvidence final shape | Open | Write Evidence v2 design after semantic-convergence decisions are stable |
 | Windows verification policy | Partially controlled | Use PR gate classification now; write the dedicated Windows policy before the next Windows-touching PR |
 | Active vs historical plan drift | Controlled but must be maintained | Keep the active plan index current whenever a phase changes |
@@ -75,7 +75,7 @@ The next stage must proceed in this order:
 1. Maintain this ledger as the current status source.
 2. Use the active plan index to select work.
 3. Design Windows verification policy.
-4. Execute verification semantics convergence PR-A through PR-D from `docs/superpowers/plans/2026-05-25-verification-semantics-convergence-implementation-plan.md`.
+4. Execute verification semantics convergence PR-A and PR-B from `docs/superpowers/plans/2026-05-25-verification-semantics-convergence-implementation-plan.md`; keep PR-C gated until the ledger allows assertion-runtime implementation under the current ExecutionEvidence v2 decision state.
 5. Design ExecutionEvidence v2.
 6. Only then proceed to implementation PRs for assertion semantics, evidence, configuration, or UI-facing work.
 

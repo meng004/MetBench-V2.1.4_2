@@ -16,6 +16,8 @@
 - Verify a clean worktree before editing: `rtk git status --short --branch`.
 - Do not change Method MT behavior in this plan.
 - Do not change WPF or Windows-only code in PR-B, PR-C, or PR-D unless tests prove the launcher constructor or DI wiring requires it.
+- PR-B may proceed after PR-A because it is a behavior-preserving naming migration.
+- PR-C must not start until the status ledger explicitly allows assertion-runtime implementation. If ExecutionEvidence v2 is still open, PR-C must either wait for that design or prove in its PR checklist that result/evidence/reporting schema is unchanged.
 - Run `rtk dotnet test MetBench_SystemMT.Tests --no-restore` before review for each PR.
 - Use two-layer review before push: implementation self-review plus independent code-review pass.
 
@@ -963,4 +965,4 @@ Expected:
 
 ## Execution Handoff
 
-After PR-A is merged, execute PR-B, PR-C, and PR-D in order. Do not start PR-C until PR-B is merged into `main`; do not start PR-D until PR-C is merged into `main`.
+After PR-A is merged, PR-B may execute as the behavior-preserving naming migration. Do not start PR-C until PR-B is merged into `main` and `docs/status/current.md` allows assertion-runtime implementation under the current ExecutionEvidence v2 decision state. Do not start PR-D until PR-C is merged into `main`.
