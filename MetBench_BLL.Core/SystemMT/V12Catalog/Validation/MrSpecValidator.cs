@@ -42,6 +42,7 @@ public sealed class MrSpecValidator : ISpecValidator<MrSpec>
             var result = predicate switch
             {
                 BinaryComparisonPredicate binary => _registry.BinaryComparisonValidator.Validate(binary, spec),
+                ScaledEqualityPredicate scaled => _registry.ScaledEqualityValidator.Validate(scaled, spec),
                 _ => ValidationResult.Invalid(new ValidationError($"predicates[{predicate.PredicateId}]", $"Unsupported predicate type '{predicate.GetType().Name}'."))
             };
             errors.AddRange(result.Errors);
