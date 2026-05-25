@@ -9,11 +9,13 @@ public sealed class ValidationRegistry
     public ToleranceCompatibilityChecker ToleranceChecker { get; } = new();
 
     public BinaryComparisonPredicateValidator BinaryComparisonValidator { get; }
+    public ScaledEqualityPredicateValidator ScaledEqualityValidator { get; }
     public BoundPropertyPredicateValidator BoundPropertyValidator { get; }
 
     public ValidationRegistry()
     {
         BinaryComparisonValidator = new BinaryComparisonPredicateValidator(ReferenceResolver);
+        ScaledEqualityValidator = new ScaledEqualityPredicateValidator(ReferenceResolver, ParameterResolver);
         BoundPropertyValidator = new BoundPropertyPredicateValidator(ReferenceResolver, ParameterResolver);
     }
 }
