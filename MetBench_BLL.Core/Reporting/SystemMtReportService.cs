@@ -1,4 +1,7 @@
+using System.Globalization;
+using System.Text;
 using MetBench_BLL.Coverage;
+using MetBench_BLL.SystemMT.Persistence;
 using MetBench_Domain;
 using MetBench_IDAL;
 
@@ -23,26 +26,30 @@ public sealed class SystemMtReportService
     private readonly IAnomalyRepository _anomalies;
     private readonly IMutationCampaignRepository _campaigns;
     private readonly IMutationResultRepository _mutationResults;
+    private readonly IExecutionEvidenceRepository? _evidence;
 
     public SystemMtReportService(
         IReportRepository reports,
         IExecutionRepository executions,
         IAnomalyRepository anomalies,
         IMutationCampaignRepository campaigns,
-        IMutationResultRepository mutationResults)
+        IMutationResultRepository mutationResults,
+        IExecutionEvidenceRepository? evidence = null)
     {
         _reports = reports;
         _executions = executions;
         _anomalies = anomalies;
         _campaigns = campaigns;
         _mutationResults = mutationResults;
+        _evidence = evidence;
     }
 
     public ReportRenderResult GenerateExecution(Guid executionId, string contentPath)
     {
         var exec = _executions.Get(executionId)
             ?? throw new InvalidOperationException($"Execution {executionId} not found");
-        var content = BuildExecutionMarkdown(exec);
+        var evidence = _evidence?.GetByExecutionAsync(executionId).GetAwaiter().GetResult();
+        var content = BuildExecutionMarkdown(exec, evidence?.TypedVerification);
         return Persist(ScopeExecution, executionId.ToString(), contentPath, content);
     }
 
@@ -87,17 +94,85 @@ public sealed class SystemMtReportService
         return new ReportRenderResult(report.IdReport, scope, contentPath, content);
     }
 
-    internal static string BuildExecutionMarkdown(Execution e) => $"""
-        # Execution Report
-        - id: {e.IdExecution}
-        - MRInstance: {e.MRInstanceId}
-        - Status: {e.Status}
-        - Triggered by: {e.TriggeredBy}
-        - Queued: {e.QueuedAt:yyyy-MM-dd HH:mm:ss}Z
-        - Finished: {e.FinishedAt:yyyy-MM-dd HH:mm:ss}Z
-        - SUT version: {e.SutVersionSnapshot}
-        - MetBench version: {e.MetbenchVersion}
-        """;
+    internal static string BuildExecutionMarkdown(Execution e) =>
+        BuildExecutionMarkdown(e, typedVerification: null);
+
+    internal static string BuildExecutionMarkdown(Execution e, TypedVerificationEvidence? typedVerification)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("# Execution Report");
+        sb.AppendLine($"- id: {e.IdExecution}");
+        sb.AppendLine($"- MRInstance: {e.MRInstanceId}");
+        sb.AppendLine($"- Status: {e.Status}");
+        sb.AppendLine($"- Triggered by: {e.TriggeredBy}");
+        sb.AppendLine($"- Queued: {e.QueuedAt:yyyy-MM-dd HH:mm:ss}Z");
+        sb.AppendLine($"- Finished: {e.FinishedAt:yyyy-MM-dd HH:mm:ss}Z");
+        sb.AppendLine($"- SUT version: {e.SutVersionSnapshot}");
+        sb.Append($"- MetBench version: {e.MetbenchVersion}");
+
+        if (typedVerification is { } typed)
+        {
+            sb.AppendLine();
+            AppendTypedVerificationMarkdown(sb, typed);
+        }
+
+        return sb.ToString();
+    }
+
+    private static void AppendTypedVerificationMarkdown(StringBuilder sb, TypedVerificationEvidence typed)
+    {
+        var inv = CultureInfo.InvariantCulture;
+        sb.AppendLine();
+        sb.AppendLine("## Typed verification");
+        if (!string.IsNullOrEmpty(typed.SpecKind))
+        {
+            sb.AppendLine($"- Spec kind: {typed.SpecKind}");
+        }
+        if (!string.IsNullOrEmpty(typed.SpecId))
+        {
+            sb.AppendLine($"- Spec ID: {typed.SpecId}");
+        }
+        if (!string.IsNullOrEmpty(typed.PredicateId))
+        {
+            sb.AppendLine($"- Predicate: {typed.PredicateId} ({typed.PredicateKind})");
+        }
+        if (!string.IsNullOrEmpty(typed.Status))
+        {
+            sb.AppendLine($"- Status: {typed.Status}");
+        }
+        if (typed.Diagnostic is { } d)
+        {
+            sb.AppendLine($"- Expected: {d.Expected.ToString("G", inv)}");
+            sb.AppendLine($"- Actual: {d.Actual.ToString("G", inv)}");
+            sb.AppendLine($"- Residual: {d.Residual.ToString("G", inv)}");
+            sb.AppendLine($"- Tolerance: {d.Tolerance.ToString("G", inv)}");
+        }
+        if (!string.IsNullOrEmpty(typed.SkipOrInvalidReason))
+        {
+            sb.AppendLine($"- Skip reason: {typed.SkipOrInvalidReason}");
+        }
+        if (typed.PropertyPredicates is { Count: > 0 })
+        {
+            sb.AppendLine("- Property predicates:");
+            foreach (var p in typed.PropertyPredicates)
+            {
+                sb.Append($"  - `{p.PredicateId}` ({p.PredicateKind}) - status: {p.Status}");
+                if (p.Residual.HasValue)
+                {
+                    sb.Append($"; residual={p.Residual.Value.ToString("G", inv)}");
+                }
+                if (p.Tolerance.HasValue)
+                {
+                    sb.Append($"; tolerance={p.Tolerance.Value.ToString("G", inv)}");
+                }
+                if (!string.IsNullOrEmpty(p.Reason))
+                {
+                    sb.Append($"; reason: {p.Reason}");
+                }
+                sb.AppendLine();
+            }
+        }
+    }
 
     internal static string BuildAnomalyMarkdown(MetBench_Domain.Anomaly a) => $"""
         # Anomaly Report
