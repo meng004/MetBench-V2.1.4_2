@@ -62,7 +62,7 @@ public sealed class ExecutablePropertyFixturesTests
     }
 
     [Fact]
-    public void KinPhy02_is_schema_valid_but_not_executable_yet()
+    public void KinPhy02_is_executable_after_pr9()
     {
         var spec = Load("kin-phy-02.yaml");
 
@@ -74,10 +74,11 @@ public sealed class ExecutablePropertyFixturesTests
                 spec,
                 sequences: new Dictionary<string, SequenceValue>
                 {
-                    ["power_history"] = new(new[] { 1.0, 1.2, 1.5, 1.9 })
+                    ["power_history"] = new(new[] { 1.0, 2.0, 4.1 }, new[] { 0.0, 1.0, 2.0 })
                 }));
 
-        Assert.Equal(PropertyStatus.InvalidSpec, result.Status);
+        Assert.NotEqual(PropertyStatus.InvalidSpec, result.Status);
+        Assert.True(result.Passed);
     }
 
     private static PropertySpec Load(string fileName) =>

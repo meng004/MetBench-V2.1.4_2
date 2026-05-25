@@ -27,6 +27,11 @@ public sealed class SequenceShapeKernel
                 new VerificationDiagnostic(samples.Count, samples.Count, 0.0, 0.0));
         }
 
+        if (shape is ExponentialGrowthSpec exponential)
+        {
+            return EvaluateExponentialGrowth(exponential, sequence);
+        }
+
         var (passed, worstPoint) = shape switch
         {
             BellShapeSpec => EvaluateBell(samples),
@@ -50,6 +55,55 @@ public sealed class SequenceShapeKernel
         return VerificationResult.FromAssertion(
             assertion,
             new VerificationDiagnostic(samples.Count, samples.Count, passed ? 0.0 : 1.0, 0.0));
+    }
+
+    private static VerificationResult EvaluateExponentialGrowth(ExponentialGrowthSpec shape, SequenceValue sequence)
+    {
+        var samples = sequence.Samples;
+        for (var i = 0; i < samples.Count; i++)
+        {
+            if (samples[i] <= 0.0)
+            {
+                var failure = new SystemMtAssertionResultV2(
+                    "SequenceShape",
+                    false,
+                    samples[i],
+                    samples[i],
+                    0.0,
+                    0.0,
+                    "ExponentialGrowth over sequence",
+                    $"All exponential-growth samples must be positive; offending_index={i}.");
+
+                return VerificationResult.FromAssertion(
+                    failure,
+                    new VerificationDiagnostic(0.0, samples[i], 0.0, 0.0));
+            }
+        }
+
+        var fit = LogLinearFit.Compute(sequence.EffectiveXValues, samples);
+        var expectedRate = ResolveExpectedRate(shape.ExpectedRate);
+        var rateResidual = Math.Abs(fit.Slope - expectedRate);
+        var denominator = Math.Max(1e-12, Math.Sqrt(fit.SumSquaredTotal));
+        var fitResidualRel = Math.Sqrt(fit.SumSquaredResidual) / denominator;
+        var passed = rateResidual <= shape.RateTolerance &&
+                     fitResidualRel <= shape.ResidualRelTolerance &&
+                     fit.RSquared >= shape.MinRSquared;
+
+        var assertion = new SystemMtAssertionResultV2(
+            "SequenceShape",
+            passed,
+            expectedRate,
+            fit.Slope,
+            rateResidual,
+            shape.RateTolerance,
+            "ExponentialGrowth over sequence",
+            passed
+                ? null
+                : $"expected_rate={expectedRate}; estimated_rate={fit.Slope}; rate_residual={rateResidual}; fit_residual_rel={fitResidualRel}; r_squared={fit.RSquared}; worst_point={fit.WorstPointIndex}");
+
+        return VerificationResult.FromAssertion(
+            assertion,
+            new VerificationDiagnostic(expectedRate, fit.Slope, rateResidual, shape.ResidualRelTolerance));
     }
 
     private static (bool Passed, int WorstPoint) EvaluateBell(IReadOnlyList<double> samples) =>
@@ -194,4 +248,11 @@ public sealed class SequenceShapeKernel
 
         return index;
     }
+
+    private static double ResolveExpectedRate(ParameterExpression expression) =>
+        expression switch
+        {
+            ConstantParameterExpression constant => constant.Value,
+            _ => throw new ArgumentException($"Unsupported expected-rate expression '{expression.GetType().Name}'.", nameof(expression))
+        };
 }

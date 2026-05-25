@@ -17,6 +17,12 @@ assertions:
     metric: power_history
     shape:
       kind: ExponentialGrowth
+      expected_rate:
+        kind: ConstantParameter
+        value: 0.69314718056
+      rate_tolerance: 0.05
+      residual_rel_tolerance: 0.05
+      min_r_squared: 0.99
 default_tolerance:
   kind: DeterministicTolerance
   atol: 0.0
