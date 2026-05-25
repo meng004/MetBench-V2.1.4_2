@@ -11,7 +11,7 @@
 | Plan | Status | Scope | Expiry condition |
 |---|---|---|---|
 | `docs/superpowers/plans/2026-05-25-metbench-governed-next-stage-plan.md` | Active | Governance-first next-stage planning; blocks further implementation until the named design ambiguities are resolved | Expires when semantic-convergence, Evidence v2, Windows verification policy, and transition plan are completed and replaced by a new implementation plan |
-| `docs/superpowers/plans/2026-05-25-executionevidence-v2-implementation-plan.md` | Active scoped plan | Implementation sequence for ExecutionEvidence v2: PR-A0 design lock (merged) and PR-C0 schema/recorder projection (open). PR-C0 is now the next-priority scoped plan after the verification-semantics convergence closed. | Expires when PR-C0 is merged and the status ledger marks ExecutionEvidence v2 implemented |
+| (no active scoped plan) | — | Verification-semantics convergence PR-A through PR-D and ExecutionEvidence v2 PR-A0 / PR-C0 are merged. The next-priority follow-ups (pipeline → recorder typed-input wiring; typed predicates for the 6 unmapped legacy codes) are tracked as `docs/status/current.md` §7 steps; no new scoped plan has been opened yet. | A new scoped plan must be registered here before any new cross-cutting System MT work begins. |
 
 Any new coding task must be derived from the active master plan or from a scoped successor plan registered here.
 
@@ -25,7 +25,8 @@ Any new coding task must be derived from the active master plan or from a scoped
 | `docs/superpowers/specs/2026-05-25-metbench-project-control-rules.md` | Active | Control charter: source hierarchy, gates, review, status refresh | Expires only by explicit replacement PR |
 | `docs/superpowers/specs/2026-05-25-metbench-macro-assessment-and-risk-audit.md` | Active | Macro assessment and risk audit for the Stage 8 to next-stage transition | Expires when the next macro assessment supersedes it |
 | `docs/superpowers/specs/2026-05-25-mr-verification-v1.2-codex-ready.md` | Active reference | v1.2 typed semantic model and verifier design already implemented through the current roadmap | Expires when a v1.3 verification design supersedes it |
-| `docs/superpowers/specs/2026-05-25-executionevidence-v2-design.md` | Active | Locks ExecutionEvidence v2 schema, recorder projection, compatibility contract with `SystemMtResultRecord` and `ISystemMtLauncher`, and PR-C scope boundaries | Expires only by explicit replacement PR when a future major evidence redesign supersedes it |
+| `docs/superpowers/specs/2026-05-25-executionevidence-v2-design.md` | Active | Locks ExecutionEvidence v2 schema, recorder projection, compatibility contract with `SystemMtResultRecord` and `ISystemMtLauncher`, and PR-C scope boundaries. PR-C0 (#121) has merged the schema slice; remaining future work is pipeline-to-recorder typed-input wiring and evidence-aware reporting. | Expires only by explicit replacement PR when a future major evidence redesign supersedes it |
+| `docs/superpowers/specs/2026-05-25-systemmt-architecture-review-post-evidence-v2.md` | Active | Post-PR-D / post-PR-C0 System MT dependency-boundary audit; baseline reference for future architecture-impact reviews. | Refresh required (not necessarily expiring) when the next System MT cross-cutting change lands. |
 | `docs/superpowers/templates/pr-gate-checklist.md` | Active | Required PR gate checklist for scope, facts, tests, Windows classification, review, and merge | Expires only by explicit replacement PR |
 
 ### 条件性活跃
@@ -80,6 +81,17 @@ Any new coding task must be derived from the active master plan or from a scoped
 - 设计目标“Method MT 隔离 + System MT 全部走 Typed Semantic Catalog + W1 IMrAssertion 路径下线”已闭环。
 - `SemanticCatalogBoundaryTests` 与 `SemanticCatalogNamingBoundaryTests` 接管事后回潮守卫，参见 `docs/status/current.md` §6 Verification semantics convergence 行。
 - 设计与计划保留为历史参考；新工作不得从这两个文件衍生执行排程。
+
+### ExecutionEvidence v2 schema 链（已合并）
+
+- `docs/superpowers/plans/2026-05-25-executionevidence-v2-implementation-plan.md`
+
+**原因**:
+
+- PR-A0 设计 lock（#116）与 PR-C0 schema/recorder（#121）已合并 `origin/main`。
+- 设计目标“nullable TypedVerification block + 三个支撑 POCO + 无生产端 schema break”已闭环。
+- `MrRunResultShapeLockTests` 接管 launcher facade 防漂移守卫；`TypedVerificationEvidenceRoundtripTests` 接管 legacy / v2 双向兼容守卫。
+- 设计 `docs/superpowers/specs/2026-05-25-executionevidence-v2-design.md` 仍 Active 用于后续 pipeline 接线与 evidence-aware 报告渲染；实施计划已退役。
 
 ---
 
