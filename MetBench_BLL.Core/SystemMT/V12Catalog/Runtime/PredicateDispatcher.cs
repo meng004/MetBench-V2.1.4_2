@@ -9,6 +9,7 @@ public sealed class PredicateDispatcher : IPredicateDispatcher
     private readonly ApplicabilityEvaluator _applicability = new();
     private readonly BinaryComparisonKernel _binary = new();
     private readonly ScaledEqualityKernel _scaled = new();
+    private readonly ErrorMonotonicKernel _errorMonotonic = new();
 
     public VerificationResult Dispatch(PredicateSpec predicate, VerificationContext context)
     {
@@ -32,6 +33,7 @@ public sealed class PredicateDispatcher : IPredicateDispatcher
         {
             BinaryComparisonPredicate binary => _binary.Evaluate(binary, context),
             ScaledEqualityPredicate scaled => _scaled.Evaluate(scaled, context),
+            ErrorMonotonicPredicate monotonic => _errorMonotonic.Evaluate(monotonic, context),
             _ => throw new ArgumentException($"Unsupported predicate type '{predicate.GetType().Name}'.", nameof(predicate))
         };
     }
@@ -45,6 +47,22 @@ public sealed class PredicateDispatcher : IPredicateDispatcher
             ScaledEqualityPredicate scaled =>
                 context.TryGetMetric(scaled.ActualRole, scaled.Metric, out _) &&
                 context.TryGetMetric(scaled.ReferenceRole, scaled.Metric, out _),
+            ErrorMonotonicPredicate monotonic =>
+                context.TryGetMetric(monotonic.ReferenceRole, monotonic.Metric, out _) &&
+                HasAllOrderedRoleMetrics(monotonic, context),
             _ => true
         };
+
+    private static bool HasAllOrderedRoleMetrics(ErrorMonotonicPredicate monotonic, VerificationContext context)
+    {
+        foreach (var role in monotonic.OrderedRoles)
+        {
+            if (!context.TryGetMetric(role, monotonic.Metric, out _))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

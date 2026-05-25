@@ -10,12 +10,14 @@ public sealed class ValidationRegistry
 
     public BinaryComparisonPredicateValidator BinaryComparisonValidator { get; }
     public ScaledEqualityPredicateValidator ScaledEqualityValidator { get; }
+    public ErrorMonotonicPredicateValidator ErrorMonotonicValidator { get; }
     public BoundPropertyPredicateValidator BoundPropertyValidator { get; }
 
     public ValidationRegistry()
     {
         BinaryComparisonValidator = new BinaryComparisonPredicateValidator(ReferenceResolver);
         ScaledEqualityValidator = new ScaledEqualityPredicateValidator(ReferenceResolver, ParameterResolver);
+        ErrorMonotonicValidator = new ErrorMonotonicPredicateValidator(ReferenceResolver);
         BoundPropertyValidator = new BoundPropertyPredicateValidator(ReferenceResolver, ParameterResolver);
     }
 }
