@@ -2,7 +2,7 @@ namespace MetBench_BLL.SystemMT.Assertions;
 
 /// <summary>
 /// v2 断言结果（不与 Stage 4 SystemMtAssertionResult 冲突；
-/// 后者由 v1 IMrAssertion 体系产出）。
+/// 后者属于已退役的 W1 接口体系，仅留作历史持久化兼容）。
 /// </summary>
 /// <param name="AssertionTypeCode">用了哪种 AssertionTypeCode。</param>
 /// <param name="Passed">是否通过。</param>
