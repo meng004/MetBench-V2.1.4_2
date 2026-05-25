@@ -43,6 +43,6 @@ public sealed class BinaryComparisonKernel : IVerifierKernel<BinaryComparisonPre
             $"{predicate.LeftRole}.{predicate.Metric} {predicate.Operator} {predicate.RightRole}.{predicate.Metric}",
             passed ? null : $"BinaryComparison {predicate.Operator} failed: actual={actual}, expected={expected}, residual={residual}, tolerance={computedTolerance}");
 
-        return new VerificationResult(assertion, new VerificationDiagnostic(expected, actual, residual, computedTolerance));
+        return VerificationResult.FromAssertion(assertion, new VerificationDiagnostic(expected, actual, residual, computedTolerance));
     }
 }

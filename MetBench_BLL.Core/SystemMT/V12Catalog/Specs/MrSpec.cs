@@ -16,6 +16,8 @@ public sealed record MrSpec(
     IReadOnlyList<PredicateSpec> Predicates,
     ToleranceSpec? DefaultTolerance)
 {
+    public ApplicabilitySpec? Applicability { get; init; }
+
     [JsonIgnore]
     public FiveDTags FiveDTags => FiveDTags.FromTags(Tags);
 

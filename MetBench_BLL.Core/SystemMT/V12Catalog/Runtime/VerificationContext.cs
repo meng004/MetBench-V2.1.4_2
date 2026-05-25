@@ -1,34 +1,49 @@
 using System;
 using System.Collections.Generic;
 using MetBench_BLL.SystemMT.V12Catalog.Specs;
+using MetBench_BLL.SystemMT.V12Catalog.Validation;
 
 namespace MetBench_BLL.SystemMT.V12Catalog.Runtime;
 
 public sealed class VerificationContext
 {
-    public VerificationContext(MrSpec spec, IReadOnlyDictionary<string, RoleOutput> roleOutputs)
+    public VerificationContext(
+        MrSpec spec,
+        IReadOnlyDictionary<string, RoleOutput> roleOutputs,
+        IReadOnlyDictionary<string, double>? inputs = null)
     {
         Spec = spec ?? throw new ArgumentException("Validated spec is required.", nameof(spec));
         RoleOutputs = roleOutputs ?? throw new ArgumentNullException(nameof(roleOutputs));
-
-        var validation = spec.Validate();
-        if (!validation.IsValid)
-        {
-            throw new ArgumentException("VerificationContext requires a validated spec.", nameof(spec));
-        }
+        Inputs = inputs ?? new Dictionary<string, double>();
+        SpecValidation = spec.Validate();
     }
 
     public MrSpec Spec { get; }
     public IReadOnlyDictionary<string, RoleOutput> RoleOutputs { get; }
+    public IReadOnlyDictionary<string, double> Inputs { get; }
+    public ValidationResult SpecValidation { get; }
 
-    public double GetMetric(string role, string metric)
+    public bool TryGetMetric(string role, string metric, out double value)
     {
         if (!RoleOutputs.TryGetValue(role, out var roleOutput))
         {
-            throw new ArgumentException($"Unknown role output '{role}'.", nameof(role));
+            value = default;
+            return false;
         }
 
-        if (!roleOutput.Metrics.TryGetValue(metric, out var value))
+        if (!roleOutput.Metrics.TryGetValue(metric, out var metricValue))
+        {
+            value = default;
+            return false;
+        }
+
+        value = metricValue;
+        return true;
+    }
+
+    public double GetMetric(string role, string metric)
+    {
+        if (!TryGetMetric(role, metric, out var value))
         {
             throw new ArgumentException($"Unknown metric '{metric}' for role '{role}'.", nameof(metric));
         }

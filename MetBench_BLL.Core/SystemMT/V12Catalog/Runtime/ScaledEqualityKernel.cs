@@ -32,7 +32,7 @@ public sealed class ScaledEqualityKernel : IVerifierKernel<ScaledEqualityPredica
             $"{predicate.ActualRole}.{predicate.Metric} ~= factor^{predicate.Exponent} * {predicate.ReferenceRole}.{predicate.Metric}",
             passed ? null : $"ScaledEquality failed: actual={actual}, expected={expected}, residual={residual}, tolerance={computedTolerance}");
 
-        return new VerificationResult(assertion, new VerificationDiagnostic(expected, actual, residual, computedTolerance));
+        return VerificationResult.FromAssertion(assertion, new VerificationDiagnostic(expected, actual, residual, computedTolerance));
     }
 
     private double ResolveFactor(ParameterExpression expression, MrSpec spec) =>
