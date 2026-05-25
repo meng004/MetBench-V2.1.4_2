@@ -481,5 +481,66 @@ internal static class LegacyCatalogFactory
             EquationKey: "diffusion",
             // FD 2 阶 O(dx²)；网格加密后 phi_max 差 ~1e-4 量级（已 plateau）；ToleranceRel=1e-3 → 充裕
             Tolerance: new AssertionTolerance(ToleranceRel: 1e-3, ToleranceAbs: 1e-6));
+
+        // T3 expansion: 1D Poisson SUT + Poisson 方程（broader elliptic PDE coverage
+        // beyond the 5 reactor anchors）.
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "poisson-source-superposition",
+                DisplayName: "1D Poisson — ScaleSource (linearity)",
+                SutName: "poisson-1d",
+                TransformationName: "ScaleField",
+                AssertionName: "GreaterThan",
+                ValueName: "u_max",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Superposition / linearity MP_mono: the 1D Poisson equation -u'' = f " +
+                    "is linear in the source f. Scaling f by factor > 1 must strictly increase " +
+                    "the peak amplitude u_max (and in fact scale it by the same factor exactly).",
+                MrFamily: "Poisson.Scaling.Source"),
+            SampleCaseRelativePath: Path.Combine("poisson_1d", "sample", "standard.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "poisson_1d", "poisson_1d.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "poisson_1d", "poisson_1d_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "poisson_1d", "poisson_1d_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchPoisson1d",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "poisson_1d", "poisson_1d_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "poisson_1d", "poisson_1d_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/source/strength") },
+            AssertionTypeCode: "greater",
+            EquationKey: "poisson");
+
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "poisson-mesh-richardson",
+                DisplayName: "1D Poisson — MeshRichardson (FD convergence)",
+                SutName: "poisson-1d",
+                TransformationName: "ScaleField",
+                AssertionName: "ApproxEqual",
+                ValueName: "u_max",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Mesh-refinement Richardson convergence MP_conv: doubling num_points " +
+                    "(halving the FD spacing dx) must leave u_max within O(dx²) FD truncation " +
+                    "tolerance — the second-order central-difference scheme is already at the " +
+                    "fine-mesh plateau.",
+                MrFamily: "Poisson.Convergence.Mesh"),
+            SampleCaseRelativePath: Path.Combine("poisson_1d", "sample", "standard.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "poisson_1d", "poisson_1d.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "poisson_1d", "poisson_1d_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "poisson_1d", "poisson_1d_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchPoisson1d",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "poisson_1d", "poisson_1d_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "poisson_1d", "poisson_1d_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/geometry/num_points") },
+            AssertionTypeCode: "approx",
+            EquationKey: "poisson",
+            // 2nd-order central FD with constant source resolves the quadratic analytic
+            // solution exactly to machine precision; halving dx changes u_max by ~1e-15.
+            // ToleranceRel=1e-3 + Atol=1e-6 is far more than needed; keep parity with diffusion-mesh-richardson.
+            Tolerance: new AssertionTolerance(ToleranceRel: 1e-3, ToleranceAbs: 1e-6));
     }
 }
