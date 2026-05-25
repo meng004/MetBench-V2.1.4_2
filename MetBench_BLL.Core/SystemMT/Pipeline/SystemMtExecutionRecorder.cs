@@ -1,7 +1,11 @@
+using MetBench_BLL.SystemMT.Catalog.Typed.Property;
+using MetBench_BLL.SystemMT.Catalog.Typed.Runtime;
+using MetBench_BLL.SystemMT.Catalog.Typed.Specs;
 using MetBench_BLL.SystemMT.Persistence;
 using MetBench_Domain;
 using MetBench_IDAL;
 using System.Text.Json;
+using TypedPropertyResult = MetBench_BLL.SystemMT.Catalog.Typed.Property.PropertyResult;
 
 namespace MetBench_BLL.SystemMT.Pipeline;
 
@@ -50,7 +54,12 @@ public sealed class SystemMtExecutionRecorder
         PipelineContext context,
         PipelineOutcome outcome,
         int mrInstanceId,
-        Guid? batchId = null)
+        Guid? batchId = null,
+        VerificationResult? typedVerification = null,
+        TypedPropertyResult? typedProperty = null,
+        MrSpec? typedSpec = null,
+        PredicateSpec? typedPredicate = null,
+        PropertySpec? typedPropertySpec = null)
     {
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(outcome);
@@ -104,13 +113,29 @@ public sealed class SystemMtExecutionRecorder
         // until Task 6 step 3 wires per-variable capture into SystemMtPipeline.
         if (_evidence is not null)
         {
-            WriteEvidence(executionId, context, outcome);
+            WriteEvidence(
+                executionId,
+                context,
+                outcome,
+                typedVerification,
+                typedProperty,
+                typedSpec,
+                typedPredicate,
+                typedPropertySpec);
         }
 
         return new RecordedExecution(executionId, resultId);
     }
 
-    private void WriteEvidence(Guid executionId, PipelineContext context, PipelineOutcome outcome)
+    private void WriteEvidence(
+        Guid executionId,
+        PipelineContext context,
+        PipelineOutcome outcome,
+        VerificationResult? typedVerification = null,
+        TypedPropertyResult? typedProperty = null,
+        MrSpec? typedSpec = null,
+        PredicateSpec? typedPredicate = null,
+        PropertySpec? typedPropertySpec = null)
     {
         var v3 = _v3?.GetByCode(context.MrCode);
         var snapshot = new ExecutionMetadataSnapshot
@@ -135,6 +160,21 @@ public sealed class SystemMtExecutionRecorder
             TransformationParameters = new Dictionary<string, string>(context.Parameters),
             RecordedAtUtc = outcome.FinishedAt.ToUniversalTime(),
         };
+
+        // ExecutionEvidence v2 (PR-C0): project typed verifier output when the
+        // caller wired it in. Recorder does not synthesise typed inputs from
+        // the legacy assertion result; absence means TypedVerification stays null.
+        if (typedVerification is not null && typedSpec is not null && typedPredicate is not null)
+        {
+            evidence.TypedVerification = TypedVerificationEvidenceMapper
+                .FromVerificationResult(typedSpec, typedPredicate, typedVerification);
+        }
+        else if (typedProperty is not null && typedPropertySpec is not null)
+        {
+            evidence.TypedVerification = TypedVerificationEvidenceMapper
+                .FromPropertyResult(typedPropertySpec, typedProperty);
+        }
+
         // Recorder is sync; evidence write also runs sync (LiteDB).
         _evidence!.SaveAsync(evidence).GetAwaiter().GetResult();
     }
