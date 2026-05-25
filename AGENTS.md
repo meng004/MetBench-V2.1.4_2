@@ -286,6 +286,12 @@ launcher catalog，2026-05-22）；MR/程序元信息持久化计划 **P-A + P-C
 
 **暂缓**（Stage 9+ 候）：BNCT 硼中子放疗、故障注入 V3、论文 writeup。
 
+**执行控制入口**：
+
+- [项目控制规则](docs/superpowers/specs/2026-05-25-metbench-project-control-rules.md) —— 单一事实源、PR 闸门、两层 review、状态刷新、双环境回执的正式约束
+- [活跃计划索引](docs/superpowers/plans/2026-05-25-metbench-active-plan-index.md) —— 当前哪些计划仍有效、哪些仅作历史参考
+- [全貌版图评估与隐患审计](docs/superpowers/specs/2026-05-25-metbench-macro-assessment-and-risk-audit.md) —— 当前主线逻辑合理性、验收状态与编程前必须清除的隐患
+
 **Stage 8 主线之外待完善**（2026-05-22 从原 `CLAUDE.md` §4 迁入）：
 
 - **变异模块增强** —— 语义变异与语法 / 句法变异的分型生成、等价变异体识别、最小
@@ -308,6 +314,7 @@ launcher catalog，2026-05-22）；MR/程序元信息持久化计划 **P-A + P-C
 - [MR 协议层 + 方程函数容器实施计划](docs/superpowers/plans/2026-05-23-mr-architecture-implementation-plan.md) —— P0–P7 全部完成（2026-05-23）：L0 数学基元 17 算子、IEquationFunction + Recipe 执行器、Bateman L2 解析解 + L1 Recipe、method 侧执行栈、BDD steps 切 W2 facade、LaTeX→SymPy 路径标 Obsolete
 - [SystemMT Catalog Convergence Spec v3](docs/superpowers/specs/2026-05-24-systemmt-catalog-convergence-design.md) + [实施 Plan v2](docs/superpowers/plans/2026-05-24-systemmt-catalog-convergence-plan.md) —— 收敛 `SystemMtLauncher.BuildBlueprints()` 硬编码 catalog → provider-backed manifest（`IMrCatalogProvider`），同时打通 V3 5D-tag schema 写入路径 + 样本点级 execution evidence。8 任务 / 3 PR slices（PR-A → PR-C）；登记于 `docs/requirements.md` §10 G-X3-CatalogConvergence
 - [MR 验证统一设计 v1.2](docs/superpowers/specs/2026-05-25-mr-verification-v1.2-codex-ready.md) + [PR-0..PR-10 总路线图](docs/superpowers/plans/2026-05-25-mr-verification-v12-master-roadmap.md) —— typed semantic model + fail-closed validator + staged verifier kernels；当前 `main` 已完成 PR-0..PR-10 并包含 retrospective review-fix（PR #110）
+- [治理版下一阶段主计划](docs/superpowers/plans/2026-05-25-metbench-governed-next-stage-plan.md) —— 先治理、消歧、定活跃计划与 Windows 回执制度，再允许继续扩 assertion / evidence / config 路径
 
 > 本节原含「5 方程 × 4 程序类型 + 4 home-grown」的详细 phase 拆解；因定位放宽，
 > 细节已迁移并更新至上述 plans —— AGENTS.md 只保留路线图层面的高层描述与指针。
