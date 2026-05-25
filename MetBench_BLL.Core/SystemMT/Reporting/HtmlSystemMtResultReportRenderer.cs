@@ -10,6 +10,12 @@ public sealed class HtmlSystemMtResultReportRenderer : ISystemMtResultReportRend
     private static readonly CultureInfo Inv = CultureInfo.InvariantCulture;
 
     public string Render(IEnumerable<SystemMtResultRecord> records, ReportContext? context = null)
+        => Render(records, evidenceByExecutionId: null, context);
+
+    public string Render(
+        IEnumerable<SystemMtResultRecord> records,
+        IReadOnlyDictionary<Guid, ExecutionEvidence>? evidenceByExecutionId,
+        ReportContext? context = null)
     {
         if (records is null) throw new ArgumentNullException(nameof(records));
         var ctx = context ?? new ReportContext();
@@ -55,7 +61,13 @@ public sealed class HtmlSystemMtResultReportRenderer : ISystemMtResultReportRend
             sb.AppendLine("<tbody>");
             foreach (var r in list)
             {
-                RenderRow(sb, r);
+                TypedVerificationEvidence? typed = null;
+                if (evidenceByExecutionId is not null
+                    && evidenceByExecutionId.TryGetValue(r.Id, out var ev))
+                {
+                    typed = ev?.TypedVerification;
+                }
+                RenderRow(sb, r, typed);
             }
             sb.AppendLine("</tbody>");
             sb.AppendLine("</table>");
@@ -66,7 +78,7 @@ public sealed class HtmlSystemMtResultReportRenderer : ISystemMtResultReportRend
         return sb.ToString();
     }
 
-    private static void RenderRow(StringBuilder sb, SystemMtResultRecord r)
+    private static void RenderRow(StringBuilder sb, SystemMtResultRecord r, TypedVerificationEvidence? typed = null)
     {
         var rowClass = r.Passed ? "row-pass" : "row-fail";
         sb.Append("<tr class=\"").Append(rowClass).AppendLine("\">");
@@ -126,9 +138,87 @@ public sealed class HtmlSystemMtResultReportRenderer : ISystemMtResultReportRend
               .Append(FormatNumericDict(r.FollowUpMetrics))
               .AppendLine("</dd>");
         }
+        if (typed is not null)
+        {
+            AppendTypedVerification(sb, typed);
+        }
         sb.AppendLine("</dl>");
         sb.AppendLine("</details>");
         sb.AppendLine("</td></tr>");
+    }
+
+    private static void AppendTypedVerification(StringBuilder sb, TypedVerificationEvidence typed)
+    {
+        if (!string.IsNullOrEmpty(typed.SpecId))
+        {
+            AppendField(sb, "Spec ID", typed.SpecId);
+        }
+        if (!string.IsNullOrEmpty(typed.SpecKind))
+        {
+            AppendField(sb, "Spec kind", typed.SpecKind);
+        }
+        if (!string.IsNullOrEmpty(typed.PredicateId))
+        {
+            AppendField(sb, "Predicate", $"{typed.PredicateId} ({typed.PredicateKind})");
+        }
+        if (!string.IsNullOrEmpty(typed.Status))
+        {
+            sb.Append("<dt>Typed status</dt><dd><span class=\"badge typed-status-")
+              .Append(Esc(typed.Status.ToLowerInvariant()))
+              .Append("\">")
+              .Append(Esc(typed.Status))
+              .AppendLine("</span></dd>");
+        }
+        if (typed.Diagnostic is { } d)
+        {
+            AppendField(sb, "Expected", d.Expected.ToString("G", Inv));
+            AppendField(sb, "Actual", d.Actual.ToString("G", Inv));
+            AppendField(sb, "Residual", d.Residual.ToString("G", Inv));
+            AppendField(sb, "Tolerance", d.Tolerance.ToString("G", Inv));
+        }
+        if (!string.IsNullOrEmpty(typed.SkipOrInvalidReason))
+        {
+            AppendField(sb, "Skip reason", typed.SkipOrInvalidReason!);
+        }
+        if (typed.PropertyPredicates is { Count: > 0 })
+        {
+            sb.AppendLine("<dt>Property predicates</dt><dd>");
+            sb.AppendLine("<ol class=\"property-predicates\">");
+            foreach (var p in typed.PropertyPredicates)
+            {
+                sb.Append("<li><code>").Append(Esc(p.PredicateId)).Append("</code> (")
+                  .Append(Esc(p.PredicateKind)).Append(") - status: <span class=\"badge typed-status-")
+                  .Append(Esc((p.Status ?? string.Empty).ToLowerInvariant()))
+                  .Append("\">").Append(Esc(p.Status)).Append("</span>");
+                if (p.Residual.HasValue)
+                {
+                    sb.Append("; residual=<code>")
+                      .Append(Esc(p.Residual.Value.ToString("G", Inv)))
+                      .Append("</code>");
+                }
+                if (p.Tolerance.HasValue)
+                {
+                    sb.Append("; tolerance=<code>")
+                      .Append(Esc(p.Tolerance.Value.ToString("G", Inv)))
+                      .Append("</code>");
+                }
+                if (!string.IsNullOrEmpty(p.ExpectedJson))
+                {
+                    sb.Append("; expected=<code>").Append(Esc(p.ExpectedJson!)).Append("</code>");
+                }
+                if (!string.IsNullOrEmpty(p.ActualJson))
+                {
+                    sb.Append("; actual=<code>").Append(Esc(p.ActualJson!)).Append("</code>");
+                }
+                if (!string.IsNullOrEmpty(p.Reason))
+                {
+                    sb.Append("; reason: ").Append(Esc(p.Reason!));
+                }
+                sb.AppendLine("</li>");
+            }
+            sb.AppendLine("</ol>");
+            sb.AppendLine("</dd>");
+        }
     }
 
     private static void AppendField(StringBuilder sb, string label, string value)
