@@ -1,6 +1,9 @@
 using System.Collections.ObjectModel;
+using System.Threading;
+using System.Threading.Tasks;
 using MetBench_BLL.Coverage;
 using MetBench_BLL.Reporting;
+using MetBench_BLL.SystemMT.Persistence;
 using MetBench_Domain;
 using MetBench_IDAL;
 using Xunit;
@@ -113,11 +116,209 @@ public sealed class SystemMtReportServiceTests : IDisposable
             svc.GenerateExecution(Guid.NewGuid(), path));
     }
 
+    // ---- PR-128: evidence-aware execution markdown ----
+
+    [Fact]
+    public void GenerateExecution_without_evidence_repo_does_not_include_typed_section()
+    {
+        var (svc, fakes) = MakeService();
+        var execId = Guid.NewGuid();
+        fakes.Executions.Add(new Execution
+        {
+            IdExecution = execId, MRInstanceId = 5, Status = "ok",
+            TriggeredBy = "alice", QueuedAt = DateTime.UtcNow,
+            SutVersionSnapshot = "v1.2", MetbenchVersion = "v2.1",
+        });
+        var path = Path.Combine(_tmpDir, "exec.md");
+
+        svc.GenerateExecution(execId, path);
+        var content = File.ReadAllText(path);
+
+        Assert.DoesNotContain("Typed verification", content);
+        Assert.DoesNotContain("Spec kind", content);
+    }
+
+    [Fact]
+    public void GenerateExecution_with_evidence_repo_but_no_evidence_row_does_not_include_typed_section()
+    {
+        var (svc, fakes) = MakeServiceWithEvidence(out var evRepo);
+        var execId = Guid.NewGuid();
+        fakes.Executions.Add(new Execution
+        {
+            IdExecution = execId, MRInstanceId = 5, Status = "ok",
+            TriggeredBy = "alice", QueuedAt = DateTime.UtcNow,
+            SutVersionSnapshot = "v1.2", MetbenchVersion = "v2.1",
+        });
+        var path = Path.Combine(_tmpDir, "exec-noev.md");
+
+        svc.GenerateExecution(execId, path);
+        var content = File.ReadAllText(path);
+
+        Assert.DoesNotContain("Typed verification", content);
+    }
+
+    [Fact]
+    public void GenerateExecution_appends_typed_mr_verification_section_when_evidence_present()
+    {
+        var (svc, fakes) = MakeServiceWithEvidence(out var evRepo);
+        var execId = Guid.NewGuid();
+        fakes.Executions.Add(new Execution
+        {
+            IdExecution = execId, MRInstanceId = 5, Status = "ok",
+            TriggeredBy = "alice", QueuedAt = DateTime.UtcNow,
+            SutVersionSnapshot = "v1.2", MetbenchVersion = "v2.1",
+        });
+        evRepo.Data[execId] = new ExecutionEvidence
+        {
+            IdEvidence = Guid.NewGuid(),
+            ExecutionId = execId,
+            TypedVerification = new TypedVerificationEvidence
+            {
+                SpecId = "heat-equation-amplitude",
+                SpecKind = "MrSpec",
+                PredicateId = "amplitude-greater",
+                PredicateKind = "BinaryComparison",
+                Status = "Passed",
+                Passed = true,
+                Diagnostic = new TypedDiagnosticEvidence
+                {
+                    Expected = 1.13,
+                    Actual = 1.51,
+                    Residual = 0.38,
+                    Tolerance = 1e-6,
+                },
+            },
+        };
+
+        var path = Path.Combine(_tmpDir, "exec-with-ev.md");
+        svc.GenerateExecution(execId, path);
+        var content = File.ReadAllText(path);
+
+        Assert.Contains("## Typed verification", content);
+        Assert.Contains("Spec kind: MrSpec", content);
+        Assert.Contains("Spec ID: heat-equation-amplitude", content);
+        Assert.Contains("Predicate: amplitude-greater (BinaryComparison)", content);
+        Assert.Contains("Status: Passed", content);
+        Assert.Contains("Expected: 1.13", content);
+        Assert.Contains("Actual: 1.51", content);
+        Assert.Contains("Residual: 0.38", content);
+        Assert.Contains("Tolerance: 1E-06", content);
+    }
+
+    [Fact]
+    public void GenerateExecution_typed_skipped_evidence_shows_reason_and_omits_diagnostic()
+    {
+        var (svc, fakes) = MakeServiceWithEvidence(out var evRepo);
+        var execId = Guid.NewGuid();
+        fakes.Executions.Add(new Execution
+        {
+            IdExecution = execId, MRInstanceId = 5, Status = "ok",
+            TriggeredBy = "alice", QueuedAt = DateTime.UtcNow,
+            SutVersionSnapshot = "v1.2", MetbenchVersion = "v2.1",
+        });
+        evRepo.Data[execId] = new ExecutionEvidence
+        {
+            IdEvidence = Guid.NewGuid(),
+            ExecutionId = execId,
+            TypedVerification = new TypedVerificationEvidence
+            {
+                SpecId = "heat-equation-amplitude",
+                SpecKind = "MrSpec",
+                Status = "SkippedMissingObservable",
+                Passed = null,
+                Diagnostic = null,
+                SkipOrInvalidReason = "Required observable is missing.",
+            },
+        };
+
+        var path = Path.Combine(_tmpDir, "exec-skipped.md");
+        svc.GenerateExecution(execId, path);
+        var content = File.ReadAllText(path);
+
+        Assert.Contains("Status: SkippedMissingObservable", content);
+        Assert.Contains("Skip reason: Required observable is missing.", content);
+        Assert.DoesNotContain("Expected:", content);
+        Assert.DoesNotContain("Tolerance:", content);
+    }
+
+    [Fact]
+    public void GenerateExecution_typed_property_evidence_lists_predicates_in_order()
+    {
+        var (svc, fakes) = MakeServiceWithEvidence(out var evRepo);
+        var execId = Guid.NewGuid();
+        fakes.Executions.Add(new Execution
+        {
+            IdExecution = execId, MRInstanceId = 5, Status = "ok",
+            TriggeredBy = "alice", QueuedAt = DateTime.UtcNow,
+            SutVersionSnapshot = "v1.2", MetbenchVersion = "v2.1",
+        });
+        evRepo.Data[execId] = new ExecutionEvidence
+        {
+            IdEvidence = Guid.NewGuid(),
+            ExecutionId = execId,
+            TypedVerification = new TypedVerificationEvidence
+            {
+                SpecId = "neutron-flux-positivity",
+                SpecKind = "PropertySpec",
+                Status = "Violated",
+                Passed = false,
+                PropertyPredicates = new List<TypedPropertyPredicateEvidence>
+                {
+                    new() { PredicateId = "phi-nonneg",        PredicateKind = "Bound", Status = "Held"     },
+                    new() { PredicateId = "phi-shape-monotone", PredicateKind = "Shape", Status = "Violated", Reason = "Decrease at index 4" },
+                },
+            },
+        };
+
+        var path = Path.Combine(_tmpDir, "exec-prop.md");
+        svc.GenerateExecution(execId, path);
+        var content = File.ReadAllText(path);
+
+        Assert.Contains("Spec kind: PropertySpec", content);
+        Assert.Contains("Status: Violated", content);
+        var nonnegIdx = content.IndexOf("phi-nonneg", StringComparison.Ordinal);
+        var shapeIdx = content.IndexOf("phi-shape-monotone", StringComparison.Ordinal);
+        Assert.True(nonnegIdx > 0 && shapeIdx > nonnegIdx,
+            $"Property predicates must render in source order; got nonnegIdx={nonnegIdx}, shapeIdx={shapeIdx}.");
+        Assert.Contains("Decrease at index 4", content);
+    }
+
+    private static (SystemMtReportService Svc, FakeBundle Fakes) MakeServiceWithEvidence(out FakeEvidenceRepo evRepo)
+    {
+        var fakes = new FakeBundle();
+        evRepo = new FakeEvidenceRepo();
+        var svc = new SystemMtReportService(
+            fakes.Reports, fakes.Executions,
+            fakes.Anomalies, fakes.Campaigns, fakes.Cells,
+            evRepo);
+        return (svc, fakes);
+    }
+
     private static (SystemMtReportService, FakeBundle) MakeService()
     {
         var fakes = new FakeBundle();
         return (new SystemMtReportService(fakes.Reports, fakes.Executions,
             fakes.Anomalies, fakes.Campaigns, fakes.Cells), fakes);
+    }
+}
+
+internal sealed class FakeEvidenceRepo : IExecutionEvidenceRepository
+{
+    public Dictionary<Guid, ExecutionEvidence> Data { get; } = new();
+
+    public Task SaveAsync(ExecutionEvidence evidence, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(evidence);
+        cancellationToken.ThrowIfCancellationRequested();
+        Data[evidence.ExecutionId] = evidence;
+        return Task.CompletedTask;
+    }
+
+    public Task<ExecutionEvidence?> GetByExecutionAsync(Guid executionId, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        Data.TryGetValue(executionId, out var ev);
+        return Task.FromResult<ExecutionEvidence?>(ev);
     }
 }
 
