@@ -1,39 +1,37 @@
 # MetBench 活跃计划索引
 
-> **日期**: 2026-05-25  
-> **状态**: 生效  
+> **日期**: 2026-05-25
+> **状态**: 生效
 > **目的**: 明确哪些计划仍指导当前开发，哪些只是历史记录，防止执行和监控误取旧计划。
 
 ---
 
 ## 1. 当前唯一活跃主计划
 
-### Active Master Plan
+| Plan | Status | Scope | Expiry condition |
+|---|---|---|---|
+| `docs/superpowers/plans/2026-05-25-metbench-governed-next-stage-plan.md` | Active | Governance-first next-stage planning; blocks further implementation until the named design ambiguities are resolved | Expires when semantic-convergence, Evidence v2, Windows verification policy, and transition plan are completed and replaced by a new implementation plan |
 
-- `docs/superpowers/plans/2026-05-25-metbench-governed-next-stage-plan.md`
-
-**用途**:
-
-- 作为当前唯一主计划
-- 用于下一阶段治理、消歧和实现重排
-- 任何新编码任务都必须从这份计划分解出来
+Any new coding task must be derived from the active master plan or from a successor plan registered here.
 
 ---
 
 ## 2. 当前活跃设计文档
 
-以下文档仍是当前执行依据：
-
-- `docs/superpowers/specs/2026-05-25-metbench-project-control-rules.md`
-- `docs/superpowers/specs/2026-05-25-metbench-macro-assessment-and-risk-audit.md`
-- `docs/superpowers/specs/2026-05-25-mr-verification-v1.2-codex-ready.md`
+| Document | Status | Scope | Expiry condition |
+|---|---|---|---|
+| `docs/status/current.md` | Active | Single current-status ledger for monitoring, handoff, baseline, active plan, and open risks | Expires only when replaced by a newer status ledger path |
+| `docs/superpowers/specs/2026-05-25-metbench-project-control-rules.md` | Active | Control charter: source hierarchy, gates, review, status refresh | Expires only by explicit replacement PR |
+| `docs/superpowers/specs/2026-05-25-metbench-macro-assessment-and-risk-audit.md` | Active | Macro assessment and risk audit for the Stage 8 to next-stage transition | Expires when the next macro assessment supersedes it |
+| `docs/superpowers/specs/2026-05-25-mr-verification-v1.2-codex-ready.md` | Active reference | v1.2 typed semantic model and verifier design already implemented through the current roadmap | Expires when a v1.3 verification design supersedes it |
+| `docs/superpowers/templates/pr-gate-checklist.md` | Active | Required PR gate checklist for scope, facts, tests, Windows classification, review, and merge | Expires only by explicit replacement PR |
 
 ### 条件性活跃
 
-以下文档在对应主题被重新推进前保持参考有效，但不得单独充当主计划：
-
-- `docs/superpowers/specs/2026-05-24-systemmt-catalog-convergence-design.md`
-- `docs/superpowers/plans/2026-05-24-systemmt-catalog-convergence-plan.md`
+| Document | Status | Scope | Expiry condition |
+|---|---|---|---|
+| `docs/superpowers/specs/2026-05-24-systemmt-catalog-convergence-design.md` | Conditional reference | Catalog convergence design history and evidence-model context | Expires when Evidence v2 design supersedes the relevant sections |
+| `docs/superpowers/plans/2026-05-24-systemmt-catalog-convergence-plan.md` | Conditional reference | Catalog convergence implementation history | Expires when the active transition plan no longer references it |
 
 ---
 
@@ -92,4 +90,5 @@
 1. 如果一份计划未出现在本索引的 Active 或 条件性活跃 中，则默认视为历史计划。
 2. 监控输出不得直接从历史计划中提取“当前状态”。
 3. 新阶段开启时，必须先更新本索引，再开启实现。
-4. 如果活跃计划与四份核心事实源冲突，以四份核心事实源为准，并立即修正索引。
+4. 如果活跃计划与 `docs/status/current.md` 冲突，以状态账本为准，并同步修正索引和投影文档。
+5. 如果投影文档之间冲突，先回到状态账本裁决，再修正对应投影文档。

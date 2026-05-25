@@ -157,7 +157,7 @@ AI 可用于分类、摘要、草拟、解释等语言任务。路由、重试�
 测试输入生成 → 衍生输入转换 → 执行 SUT → 验证源/衍生输出是否满足 MR。实现为
 System-MT 引擎 + Launcher facade（`ISystemMtLauncher` 单一入口）+ LiteDB 持久化。
 **验收标准：流程端到端走通**，不以覆盖全部方程为准（覆盖见 T3）。
-当前 `main`（2026-05-25 @ `e839214`）已切到 `ISystemMtLauncher` / `SystemMtLauncher`
+截至代码测试基线 `e839214`（2026-05-25），System-MT 已切到 `ISystemMtLauncher` / `SystemMtLauncher`
 + provider-backed catalog 路径；WPF 默认注册 `ManifestMrCatalogProvider`，但 launcher
 launcher 已移除生产路径的 `HardcodedMrCatalogProvider` 过渡 fallback，现要求显式注入 `IMrCatalogProvider`。
 
@@ -262,7 +262,7 @@ ISystemMtLauncher
 ```
 
 > 历史命名（已废弃）：`ISystemMtMrLauncher` / `SystemMtMrLauncher` / `ISystemMtScenarioLauncher`
-> / `ScenarioDescriptor` / `ScenarioRunResult` / `scenarioId` 等。当前 `main` 已统一为
+> / `ScenarioDescriptor` / `ScenarioRunResult` / `scenarioId` 等。当前代码线已统一为
 > `ISystemMtLauncher` / `SystemMtLauncher`。Persistence 层的 `ScenarioName` 字段同步改为
 > `MrName` 并附 LiteDB 自动 schema migration（PR #62）。详见
 > [`docs/PROJECT-STRUCTURE.md`](docs/PROJECT-STRUCTURE.md)。
@@ -379,6 +379,7 @@ session 透明、可核验。
 1. **读上下文** —— `AGENTS.md`（路线图：当前 Stage、下一步）+ 顺指针读相关既有
    plan + 本文件 §2 与各节约定（功能模型 T0–T6、硬约束）。
    如遇计划过多、阶段切换或状态冲突，先读
+   `docs/status/current.md`、
    `docs/superpowers/specs/2026-05-25-metbench-project-control-rules.md`
    和
    `docs/superpowers/plans/2026-05-25-metbench-active-plan-index.md`，
@@ -397,16 +398,17 @@ session 透明、可核验。
 - [ ] `AGENTS.md` / plan / `CLAUDE.md` 三者无内容复制，只用指针互引。
 - [ ] 执行后 plan 与 `AGENTS.md` 状态已同步。
 
-### 11.3 文档职责与边界（唯一事实源，杜绝漂移）
+### 11.3 文档职责与边界（状态账本 + 投影文档，杜绝漂移）
 
-| 文档 | 职责（唯一拥有） | 边界（不放） |
+| 文档 | 职责 | 边界（不放） |
 |---|---|---|
-| `CLAUDE.md` | 编码 / 协作约定、当前功能模型（§2 T0–T6） | 不放路线图、不放单次实施细节 |
-| `AGENTS.md` | 路线图、分阶段交付日志、指向 plan 的指针 | 不放 phase 级实施细节（指针引用） |
-| `docs/superpowers/plans/` | 单次工作的实施细节：phase / 工时 / 决策点 | 不放路线图（由 `AGENTS.md` 持有） |
+| `docs/status/current.md` | 当前状态账本：主线状态解释、代码测试基线、活跃风险、执行顺序 | 不复制实时 `origin/main` 头提交；由 git 实时解析 |
+| `CLAUDE.md` | 编码 / 协作约定、当前功能模型投影（§2 T0–T6） | 不放路线图、不放单次实施细节 |
+| `AGENTS.md` | 路线图、分阶段交付日志、指向 plan 的投影 | 不放 phase 级实施细节（指针引用） |
+| `docs/superpowers/plans/` | 单次工作的实施细节、活跃计划索引、phase / 工时 / 决策点 | 不重新定义当前状态账本 |
 | `README.md` | 构建 / 测试入口 | — |
 
-四者互不复制内容，只用指针相互引用。
+这些文档互不复制状态结论，只用指针相互引用；若有冲突，先读 `docs/status/current.md`，再读 project-control rules 与 active plan index。
 
 ## 12. Roadmap pointers
 
@@ -414,4 +416,5 @@ session 透明、可核验。
 - 🧭 Staged plan: [`AGENTS.md`](AGENTS.md)（含 Stage 7 W11-W12 交付清单）
 - 📜 Release Notes: [`RELEASE_NOTES.md`](RELEASE_NOTES.md)（v2.1.0 涉及 PR 一览）
 - 🗒 Per-stage implementation plans: [`docs/superpowers/plans/`](docs/superpowers/plans/)
-- 🟢 当前活跃 RFC: [`docs/superpowers/plans/2026-05-17-f11-status.md`](docs/superpowers/plans/2026-05-17-f11-status.md)（F11 m_adj 月度监控）
+- 🟢 当前活跃计划索引: [`docs/superpowers/plans/2026-05-25-metbench-active-plan-index.md`](docs/superpowers/plans/2026-05-25-metbench-active-plan-index.md)
+- 🗂 历史 RFC 参考: [`docs/superpowers/plans/2026-05-17-f11-status.md`](docs/superpowers/plans/2026-05-17-f11-status.md)（F11 m_adj 月度监控）

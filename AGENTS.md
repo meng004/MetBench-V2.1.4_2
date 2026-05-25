@@ -246,7 +246,7 @@ launcher catalog，2026-05-22）；MR/程序元信息持久化计划 **P-A + P-C
 + 5 方程 8 MR seed catalog + 漂移守卫）；P-B：运行记录扩样本点级输入配对
 （`InputSamplePoint` / `InputCaseReader` + `SystemMtResultRecord.InputSamples`）。
 
-2026-05-25 当前 `main`（`e839214`）已继续合入 G-X3 catalog convergence 的 PR #91 / #92 / #93 / #94 以及 runtime alignment PR #95：
+截至代码测试基线 `e839214`，G-X3 catalog convergence 的 PR #91 / #92 / #93 / #94 以及 runtime alignment PR #95 已合入主线：
 
 - `IMrCatalogProvider` 已进入 `SystemMtLauncher`，WPF 默认注册 `ManifestMrCatalogProvider`。
 - `ExecutionEvidence` / `V3MrIdRef` / LiteDB evidence repository / recorder write-through
@@ -288,6 +288,7 @@ launcher catalog，2026-05-22）；MR/程序元信息持久化计划 **P-A + P-C
 
 **执行控制入口**：
 
+- [当前状态账本](docs/status/current.md) —— 当前主线头、测试绿基线、活跃计划、风险、Windows 回执状态的唯一状态源
 - [项目控制规则](docs/superpowers/specs/2026-05-25-metbench-project-control-rules.md) —— 单一事实源、PR 闸门、两层 review、状态刷新、双环境回执的正式约束
 - [活跃计划索引](docs/superpowers/plans/2026-05-25-metbench-active-plan-index.md) —— 当前哪些计划仍有效、哪些仅作历史参考
 - [全貌版图评估与隐患审计](docs/superpowers/specs/2026-05-25-metbench-macro-assessment-and-risk-audit.md) —— 当前主线逻辑合理性、验收状态与编程前必须清除的隐患
@@ -304,17 +305,19 @@ launcher catalog，2026-05-22）；MR/程序元信息持久化计划 **P-A + P-C
 - **F11 m_adj 路径、第 5 个 SUT** —— 受外部依赖（OpenMOC 伴随模式、商业程序获取）
   阻塞，被动监控中（见上方 W12 F11 与 [F13 RFC](docs/superpowers/plans/2026-05-17-f13-third-sut-rfc.md)）。
 
-**详细计划**（实施细节、phase 分解、工时、决策点以这些文档为准）：
-- [下一阶段开发计划](docs/superpowers/plans/2026-05-21-next-stage-development-plan.md) —— 按 T0–T6 的总排期（**当前**）
-- [代表性 SUT 接入计划](docs/superpowers/plans/2026-05-21-representative-sut-onboarding-plan.md) —— SUT 选型已放宽、home-grown 取消（**当前**）
+**详细计划**（当前执行入口先看 active index；历史计划只作背景参考）：
+- [当前状态账本](docs/status/current.md) + [活跃计划索引](docs/superpowers/plans/2026-05-25-metbench-active-plan-index.md) —— 当前状态、活跃计划与历史计划隔离口径
+- [治理版下一阶段主计划](docs/superpowers/plans/2026-05-25-metbench-governed-next-stage-plan.md) —— 当前主计划：先治理、消歧、定 Windows 回执制度，再允许继续扩 assertion / evidence / config 路径
+- [下一阶段开发计划](docs/superpowers/plans/2026-05-21-next-stage-development-plan.md) —— 历史总排期参考，不再作为活跃主计划
+- [代表性 SUT 接入计划](docs/superpowers/plans/2026-05-21-representative-sut-onboarding-plan.md) —— 历史 SUT 选型参考，不再作为活跃主计划
 - [MR/程序元信息持久化计划](docs/superpowers/plans/2026-05-22-mr-program-metadata-persistence-plan.md) —— P-A/P-C/P-B 核心三 phase 全交付
 - 程序选型：[`docs/t3-program-selection.md`](docs/t3-program-selection.md)
 - [meta-prompt MR 识别引擎计划](docs/superpowers/plans/2026-05-18-meta-prompt-mr-discovery-plan.md)
 - [Stage 8 MR 库原始详细计划](docs/superpowers/plans/2026-05-18-stage8-expanded-mr-library-plan.md) —— 定位放宽前所写，其「5 方程 + home-grown」部分以上述「当前」文档为准
 - [MR 协议层 + 方程函数容器实施计划](docs/superpowers/plans/2026-05-23-mr-architecture-implementation-plan.md) —— P0–P7 全部完成（2026-05-23）：L0 数学基元 17 算子、IEquationFunction + Recipe 执行器、Bateman L2 解析解 + L1 Recipe、method 侧执行栈、BDD steps 切 W2 facade、LaTeX→SymPy 路径标 Obsolete
 - [SystemMT Catalog Convergence Spec v3](docs/superpowers/specs/2026-05-24-systemmt-catalog-convergence-design.md) + [实施 Plan v2](docs/superpowers/plans/2026-05-24-systemmt-catalog-convergence-plan.md) —— 收敛 `SystemMtLauncher.BuildBlueprints()` 硬编码 catalog → provider-backed manifest（`IMrCatalogProvider`），同时打通 V3 5D-tag schema 写入路径 + 样本点级 execution evidence。8 任务 / 3 PR slices（PR-A → PR-C）；登记于 `docs/requirements.md` §10 G-X3-CatalogConvergence
-- [MR 验证统一设计 v1.2](docs/superpowers/specs/2026-05-25-mr-verification-v1.2-codex-ready.md) + [PR-0..PR-10 总路线图](docs/superpowers/plans/2026-05-25-mr-verification-v12-master-roadmap.md) —— typed semantic model + fail-closed validator + staged verifier kernels；当前 `main` 已完成 PR-0..PR-10 并包含 retrospective review-fix（PR #110）
-- [治理版下一阶段主计划](docs/superpowers/plans/2026-05-25-metbench-governed-next-stage-plan.md) —— 先治理、消歧、定活跃计划与 Windows 回执制度，再允许继续扩 assertion / evidence / config 路径
+- [MR 验证统一设计 v1.2](docs/superpowers/specs/2026-05-25-mr-verification-v1.2-codex-ready.md) + [PR-0..PR-10 总路线图](docs/superpowers/plans/2026-05-25-mr-verification-v12-master-roadmap.md) —— typed semantic model + fail-closed validator + staged verifier kernels；截至代码测试基线 `e839214` 已完成 PR-0..PR-10 并包含 retrospective review-fix（PR #110）
+- [PR Gate Checklist](docs/superpowers/templates/pr-gate-checklist.md) —— 每个 PR 必须使用或在 Layer-2 review 中逐项覆盖的状态 / 测试 / Windows 分类清单
 
 > 本节原含「5 方程 × 4 程序类型 + 4 home-grown」的详细 phase 拆解；因定位放宽，
 > 细节已迁移并更新至上述 plans —— AGENTS.md 只保留路线图层面的高层描述与指针。
