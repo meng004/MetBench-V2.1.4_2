@@ -1,4 +1,6 @@
 using MetBench_BLL.SystemMT.Assertions;
+using MetBench_BLL.SystemMT.Catalog.Typed.Runtime;
+using MetBench_BLL.SystemMT.Catalog.Typed.Specs;
 
 namespace MetBench_BLL.SystemMT.Pipeline;
 
@@ -21,4 +23,21 @@ public sealed record PipelineOutcome(
     TimeSpan SourceElapsed,
     TimeSpan FollowupElapsed,
     int SourceExitCode,
-    int FollowupExitCode);
+    int FollowupExitCode)
+{
+    /// <summary>
+    /// Typed Semantic Catalog spec used at runtime, captured for downstream
+    /// evidence projection. PR-123 wires `SystemMtPipeline.ExecuteAsync` to
+    /// populate this so `SystemMtExecutionRecorder.Record` can project the
+    /// typed verification into `ExecutionEvidence.TypedVerification` without
+    /// each caller re-passing the triple. Init-only so the positional ctor
+    /// surface stays unchanged.
+    /// </summary>
+    public MrSpec? TypedSpec { get; init; }
+
+    /// <summary>Typed predicate dispatched against <see cref="TypedSpec"/>; null when the typed path was not taken.</summary>
+    public PredicateSpec? TypedPredicate { get; init; }
+
+    /// <summary>Typed verifier result for <see cref="TypedPredicate"/>; null when the typed path was not taken.</summary>
+    public VerificationResult? TypedVerification { get; init; }
+}
