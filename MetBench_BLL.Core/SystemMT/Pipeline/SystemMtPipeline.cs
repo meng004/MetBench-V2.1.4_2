@@ -133,7 +133,8 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
             // 7. Asserting — typed predicate dispatch only; legacy string codes are
             // mapped fail-closed via LegacyAssertionPredicateMapper (PR-C).
             progress?.Report(PipelineStatus.Asserting);
-            var assertionResult = EvaluateAssertion(ctx, sourceMetrics, followupMetrics);
+            var (assertionResult, typedSpec, typedPredicate, typedVerification) =
+                EvaluateAssertion(ctx, sourceMetrics, followupMetrics);
 
             // 8. Final
             var finalStatus = assertionResult.Passed ? PipelineStatus.Ok : PipelineStatus.Anomaly;
@@ -155,7 +156,12 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
                 SourceElapsed: srcElapsed,
                 FollowupElapsed: flwElapsed,
                 SourceExitCode: srcExitCode,
-                FollowupExitCode: flwExitCode);
+                FollowupExitCode: flwExitCode)
+            {
+                TypedSpec = typedSpec,
+                TypedPredicate = typedPredicate,
+                TypedVerification = typedVerification,
+            };
         }
         catch (OperationCanceledException)
         {
@@ -239,11 +245,14 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
     /// 经典 less/greater/approx 和 scaling 走 LegacyAssertionPredicateMapper → 类型化谓词；
     /// 类型化路径直接执行 PredicateDispatcher，避免再次走旧 AssertionEvaluator。
     /// 未识别的旧 AssertionTypeCode 直接 fail-closed，返回 UnknownType 结果。
+    /// 返回 4 元组：传统断言结果 + 类型化 (spec, predicate, verification) 三元组，
+    /// 供 PipelineOutcome 把类型化证据带回给 SystemMtExecutionRecorder（PR-123）。
     /// </summary>
-    private SystemMtAssertionResultV2 EvaluateAssertion(
-        PipelineContext ctx,
-        IReadOnlyDictionary<string, double> sourceMetrics,
-        IReadOnlyDictionary<string, double> followupMetrics)
+    private (SystemMtAssertionResultV2 Assertion, MrSpec? TypedSpec, PredicateSpec? TypedPredicate, VerificationResult? TypedVerification)
+        EvaluateAssertion(
+            PipelineContext ctx,
+            IReadOnlyDictionary<string, double> sourceMetrics,
+            IReadOnlyDictionary<string, double> followupMetrics)
     {
         MrSpec spec;
         PredicateSpec predicate;
@@ -271,10 +280,11 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
         }
         catch (ArgumentException ex)
         {
-            return SystemMtAssertionResultV2.UnknownType(ctx.AssertionTypeCode) with
+            var unknown = SystemMtAssertionResultV2.UnknownType(ctx.AssertionTypeCode) with
             {
                 FailureReason = ex.Message,
             };
+            return (unknown, null, null, null);
         }
 
         VerificationContext verificationContext;
@@ -288,20 +298,21 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
         }
         catch (InvalidOperationException ex)
         {
-            return SystemMtAssertionResultV2.UnknownType(ctx.AssertionTypeCode) with
+            var unknown = SystemMtAssertionResultV2.UnknownType(ctx.AssertionTypeCode) with
             {
                 FailureReason = ex.Message,
             };
+            return (unknown, spec, predicate, null);
         }
 
         var verification = _predicateDispatcher.Dispatch(predicate, verificationContext);
         if (verification.Assertion is { } typedAssertion)
         {
-            return typedAssertion;
+            return (typedAssertion, spec, predicate, verification);
         }
 
         var diagnosticReason = verification.Context?.Reason ?? verification.Status.ToString();
-        return new SystemMtAssertionResultV2(
+        var fallback = new SystemMtAssertionResultV2(
             AssertionTypeCode: ctx.AssertionTypeCode,
             Passed: false,
             SourceValue: sourceMetrics.TryGetValue(ctx.ValueName, out var sv) ? sv : (double?)null,
@@ -310,5 +321,6 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
             ExpectedThreshold: null,
             Expression: $"{verification.Status} on '{ctx.ValueName}'",
             FailureReason: diagnosticReason);
+        return (fallback, spec, predicate, verification);
     }
 }

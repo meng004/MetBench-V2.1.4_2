@@ -161,13 +161,20 @@ public sealed class SystemMtExecutionRecorder
             RecordedAtUtc = outcome.FinishedAt.ToUniversalTime(),
         };
 
-        // ExecutionEvidence v2 (PR-C0): project typed verifier output when the
-        // caller wired it in. Recorder does not synthesise typed inputs from
-        // the legacy assertion result; absence means TypedVerification stays null.
-        if (typedVerification is not null && typedSpec is not null && typedPredicate is not null)
+        // ExecutionEvidence v2: project typed verifier output. Precedence is
+        // explicit Record(...) parameters first (used by unit tests that want
+        // to inject a hand-crafted triple), then fall back to the typed
+        // triple the live SystemMtPipeline attached to PipelineOutcome (PR-123).
+        // Property results have no PipelineOutcome carrier today and stay on
+        // the explicit-parameter path; absence means TypedVerification null.
+        var effectiveVerification = typedVerification ?? outcome.TypedVerification;
+        var effectiveSpec = typedSpec ?? outcome.TypedSpec;
+        var effectivePredicate = typedPredicate ?? outcome.TypedPredicate;
+
+        if (effectiveVerification is not null && effectiveSpec is not null && effectivePredicate is not null)
         {
             evidence.TypedVerification = TypedVerificationEvidenceMapper
-                .FromVerificationResult(typedSpec, typedPredicate, typedVerification);
+                .FromVerificationResult(effectiveSpec, effectivePredicate, effectiveVerification);
         }
         else if (typedProperty is not null && typedPropertySpec is not null)
         {

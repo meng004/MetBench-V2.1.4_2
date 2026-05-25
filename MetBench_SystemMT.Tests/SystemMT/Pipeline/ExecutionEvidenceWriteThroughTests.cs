@@ -285,6 +285,155 @@ public sealed class ExecutionEvidenceWriteThroughTests
         Assert.Null(evidence!.TypedVerification);
     }
 
+    [Fact]
+    public async Task Live_pipeline_outcome_carries_typed_triple_into_evidence_without_explicit_typed_args()
+    {
+        // Wires PR-C0's TypedVerification block all the way through the live
+        // SystemMtPipeline → SystemMtExecutionRecorder loop, without the
+        // caller having to hand the typed triple in explicitly. The pipeline
+        // captures the typed (MrSpec, PredicateSpec, VerificationResult)
+        // produced by the dispatcher, attaches them to PipelineOutcome via
+        // init-only properties, and the recorder reads them when no override
+        // is supplied.
+        var tempDir = System.IO.Path.Combine(System.IO.Path.GetTempPath(),
+            "metbench-pipeline-typed-evidence", Guid.NewGuid().ToString("N"));
+        System.IO.Directory.CreateDirectory(tempDir);
+        var sourcePath = System.IO.Path.Combine(tempDir, "source.in.json");
+        await System.IO.File.WriteAllTextAsync(sourcePath,
+            "{\"materials\":{\"fuel\":{\"temperature_kelvin\":600.0}}}");
+
+        try
+        {
+            var sourceOut = new
+            {
+                values = new Dictionary<string, double> { ["k_eff"] = 1.13 },
+                metadata = new Dictionary<string, string> { ["adapter"] = "test" },
+            };
+            var followupOut = new
+            {
+                values = new Dictionary<string, double> { ["k_eff"] = 0.51 },
+                metadata = new Dictionary<string, string> { ["adapter"] = "test" },
+            };
+
+            var fake = new V2Pipeline.FakeProcessExecutor(cmd =>
+            {
+                if (cmd.Contains("input-parser parse"))
+                {
+                    var data = new Dictionary<string, object?>
+                    {
+                        ["materials"] = new Dictionary<string, object?>
+                        {
+                            ["fuel"] = new Dictionary<string, object?>
+                            {
+                                ["temperature_kelvin"] = 600.0,
+                            },
+                        },
+                    };
+                    return new ProcessResult(
+                        0, System.Text.Json.JsonSerializer.Serialize(data), "", TimeSpan.FromMilliseconds(5), false);
+                }
+                if (cmd.Contains("input-parser write"))
+                    return new ProcessResult(0, "{}", "", TimeSpan.FromMilliseconds(5), false);
+                if (cmd.Contains("runner"))
+                {
+                    var outPath = ExtractOutputArg(cmd);
+                    var which = cmd.Contains(sourcePath) ? (object)sourceOut : followupOut;
+                    System.IO.File.WriteAllText(outPath, System.Text.Json.JsonSerializer.Serialize(which));
+                    return new ProcessResult(0, "", "", TimeSpan.FromMilliseconds(10), false);
+                }
+                if (cmd.Contains("output-parser"))
+                {
+                    var outPath = ExtractOutputFileArg(cmd);
+                    return new ProcessResult(0, System.IO.File.ReadAllText(outPath), "", TimeSpan.FromMilliseconds(5), false);
+                }
+                return new ProcessResult(1, "", "Unknown command", TimeSpan.Zero, false);
+            });
+
+            var ctx = new PipelineContext(
+                MrCode: "heat-equation-amplitude",
+                TransformationName: "ScaleField",
+                AssertionTypeCode: "less",
+                ValueName: "k_eff",
+                TargetFieldPath: "materials.fuel.temperature_kelvin",
+                PathSyntax: "json-pointer",
+                Parameters: new Dictionary<string, string> { ["factor"] = "1.5" },
+                Tolerance: new AssertionTolerance(),
+                ExtraAssertionValues: null,
+                SutName: "test-sut",
+                SourceCasePath: sourcePath,
+                WorkingDirectory: tempDir,
+                InputParserCommand: "input-parser",
+                OutputParserCommand: "output-parser",
+                RunnerCommand: "runner",
+                TimeoutSeconds: 30,
+                CatalogVersionSha: "test-sha",
+                SutVersionSnapshot: "test-sut-v1",
+                MetbenchVersion: "v2.2-dev",
+                TriggeredBy: "test");
+
+            var pipeline = new SystemMtPipeline(fake);
+            var outcome = await pipeline.ExecuteAsync(ctx);
+
+            Assert.Equal(PipelineStatus.Ok, outcome.FinalStatus);
+            Assert.NotNull(outcome.AssertionResult);
+
+            var execRepo = new FakeExecRepo();
+            var resRepo = new FakeResultRepo();
+            var evRepo = new InMemoryEvidenceRepo();
+            var v3Repo = new InMemoryV3Repo();
+
+            // Production call site (SystemMtLauncher.RunAsync line 188) passes
+            // no typed args; the recorder must pick them up from the outcome.
+            var recorder = new SystemMtExecutionRecorder(execRepo, resRepo, evRepo, v3Repo);
+            var recorded = recorder.Record(ctx, outcome, mrInstanceId: -1);
+
+            var evidence = await evRepo.GetByExecutionAsync(recorded.ExecutionId);
+            Assert.NotNull(evidence);
+
+            var typed = evidence!.TypedVerification;
+            Assert.NotNull(typed);
+            Assert.Equal("MrSpec", typed!.SpecKind);
+            Assert.False(string.IsNullOrEmpty(typed.PredicateId));
+            Assert.Equal("BinaryComparison", typed.PredicateKind);
+            Assert.Equal("Passed", typed.Status);
+            Assert.True(typed.Passed);
+            Assert.NotNull(typed.Diagnostic);
+            // Less: expected = source = 1.13, actual = followup = 0.51
+            Assert.Equal(1.13, typed.Diagnostic!.Expected);
+            Assert.Equal(0.51, typed.Diagnostic.Actual);
+            Assert.True(typed.Diagnostic.Residual >= 0.0);
+
+            // Existing legacy v1 evidence fields must still round-trip.
+            Assert.Equal("heat-equation-amplitude", evidence.Metadata.MrId);
+            Assert.Equal("v2.2-dev", evidence.Metadata.MetbenchVersion);
+            Assert.Equal("1.5", evidence.TransformationParameters["factor"]);
+        }
+        finally
+        {
+            try { System.IO.Directory.Delete(tempDir, recursive: true); } catch { }
+        }
+    }
+
+    private static string ExtractOutputArg(string cmd)
+    {
+        const string marker = "--output \"";
+        var i = cmd.IndexOf(marker, StringComparison.Ordinal);
+        if (i < 0) throw new InvalidOperationException("No --output arg in " + cmd);
+        var start = i + marker.Length;
+        var end = cmd.IndexOf('"', start);
+        return cmd.Substring(start, end - start);
+    }
+
+    private static string ExtractOutputFileArg(string cmd)
+    {
+        const string marker = "--output-file \"";
+        var i = cmd.IndexOf(marker, StringComparison.Ordinal);
+        if (i < 0) throw new InvalidOperationException("No --output-file arg in " + cmd);
+        var start = i + marker.Length;
+        var end = cmd.IndexOf('"', start);
+        return cmd.Substring(start, end - start);
+    }
+
     private sealed class InMemoryEvidenceRepo : IExecutionEvidenceRepository
     {
         private readonly List<ExecutionEvidence> _store = new();
