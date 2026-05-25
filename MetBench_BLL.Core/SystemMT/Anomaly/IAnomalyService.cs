@@ -27,10 +27,17 @@ public interface IAnomalyService
     /// 在 Status="new" 起手，DiscoveredAt=UtcNow，写一条 anomaly.created 审计。
     /// </summary>
     /// <param name="resultId">SystemMtResultRecord.Id，Guid 字符串。</param>
+    /// <param name="typedVerificationSummary">
+    /// 可选的 typed verification 文本摘要（由 SystemMtLauncher 从 PipelineOutcome.TypedVerification
+    /// 投影），格式示例：<c>"typed=Failed predicate=k_eff-greater (BinaryComparison) residual=0.62 tolerance=1E-06"</c>。
+    /// 提供时会写入 <see cref="MetBench_Domain.Anomaly.Notes"/> 与 anomaly.created 审计的 detailsJson；
+    /// 不提供时 Notes 留空，detailsJson 不增加该字段，与 PR-130 之前一致。
+    /// </param>
     Task<MetBench_Domain.Anomaly> RecordAnomalyAsync(
         string mrName,
         string resultId,
         string severity,
         string category,
+        string? typedVerificationSummary = null,
         CancellationToken cancellationToken = default);
 }

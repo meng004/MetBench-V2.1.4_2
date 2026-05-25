@@ -227,8 +227,76 @@ public sealed class SystemMtLauncher : ISystemMtLauncher, ISystemMtCatalogReader
         if (resultId is null) return;  // error/timeout/cancelled 无 Result(recorder 未写)
         var severity = AnomalyClassifier.ClassifySeverity(outcome, _severityThresholds);
         var category = AnomalyClassifier.ClassifyCategory(outcome);
+        var typedSummary = BuildTypedVerificationSummary(outcome);
         await _anomalyService.RecordAnomalyAsync(
-            mrName, resultId.Value.ToString(), severity, category, cancellationToken).ConfigureAwait(false);
+            mrName, resultId.Value.ToString(), severity, category,
+            typedVerificationSummary: typedSummary,
+            cancellationToken: cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Projects <see cref="PipelineOutcome.TypedVerification"/> to a one-line
+    /// summary string for inclusion in the anomaly's Notes and audit detailsJson.
+    /// Returns null when the outcome did not carry a typed verification result.
+    /// </summary>
+    internal static string? BuildTypedVerificationSummary(PipelineOutcome outcome)
+    {
+        var verification = outcome.TypedVerification;
+        var predicate = outcome.TypedPredicate;
+        if (verification is null)
+        {
+            return null;
+        }
+
+        var inv = System.Globalization.CultureInfo.InvariantCulture;
+        var parts = new System.Collections.Generic.List<string>
+        {
+            $"typed={verification.Status}",
+        };
+        if (predicate is not null)
+        {
+            var kind = predicate switch
+            {
+                MetBench_BLL.SystemMT.Catalog.Typed.Specs.BinaryComparisonPredicate => "BinaryComparison",
+                MetBench_BLL.SystemMT.Catalog.Typed.Specs.ScaledEqualityPredicate => "ScaledEquality",
+                MetBench_BLL.SystemMT.Catalog.Typed.Specs.CrossMethodComparisonPredicate => "CrossMethodComparison",
+                MetBench_BLL.SystemMT.Catalog.Typed.Specs.VarianceRatioPredicate => "VarianceRatio",
+                MetBench_BLL.SystemMT.Catalog.Typed.Specs.FieldEqualityPredicate => "FieldEquality",
+                MetBench_BLL.SystemMT.Catalog.Typed.Specs.FieldProportionalityPredicate => "FieldProportionality",
+                MetBench_BLL.SystemMT.Catalog.Typed.Specs.DerivedInvariantPredicate => "DerivedInvariant",
+                MetBench_BLL.SystemMT.Catalog.Typed.Specs.OrderedSequenceShapePredicate => "OrderedSequenceShape",
+                MetBench_BLL.SystemMT.Catalog.Typed.Specs.ErrorMonotonicPredicate => "ErrorMonotonic",
+                MetBench_BLL.SystemMT.Catalog.Typed.Specs.SubadditivePredicate => "Subadditive",
+                _ => predicate.GetType().Name,
+            };
+            parts.Add($"predicate={predicate.PredicateId} ({kind})");
+        }
+        if (verification.Diagnostic is { } d)
+        {
+            parts.Add($"residual={d.Residual.ToString("G", inv)}");
+            parts.Add($"tolerance={d.Tolerance.ToString("G", inv)}");
+        }
+        if (verification.Context?.Reason is { } reason && !string.IsNullOrEmpty(reason))
+        {
+            parts.Add($"reason: {reason}");
+        }
+
+        // Include the metric name when it's available on the predicate; this
+        // makes the summary self-describing for cross-MR comparison.
+        var metric = predicate switch
+        {
+            MetBench_BLL.SystemMT.Catalog.Typed.Specs.BinaryComparisonPredicate b => b.Metric,
+            MetBench_BLL.SystemMT.Catalog.Typed.Specs.ScaledEqualityPredicate s => s.Metric,
+            MetBench_BLL.SystemMT.Catalog.Typed.Specs.CrossMethodComparisonPredicate c => c.Metric,
+            MetBench_BLL.SystemMT.Catalog.Typed.Specs.VarianceRatioPredicate v => v.StatisticalMetric,
+            _ => null,
+        };
+        if (!string.IsNullOrEmpty(metric))
+        {
+            parts.Insert(1, $"metric={metric}");
+        }
+
+        return string.Join(" ", parts);
     }
 
     public async Task<IReadOnlyList<MrRunResult>> RunBatchAsync(
