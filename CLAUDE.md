@@ -378,6 +378,11 @@ session 透明、可核验。
 
 1. **读上下文** —— `AGENTS.md`（路线图：当前 Stage、下一步）+ 顺指针读相关既有
    plan + 本文件 §2 与各节约定（功能模型 T0–T6、硬约束）。
+   如遇计划过多、阶段切换或状态冲突，先读
+   `docs/superpowers/specs/2026-05-25-metbench-project-control-rules.md`
+   和
+   `docs/superpowers/plans/2026-05-25-metbench-active-plan-index.md`，
+   只按活跃计划执行，不把历史计划当当前真相层。
 2. **写 plan** —— 存 `docs/superpowers/plans/`（`YYYY-MM-DD-<topic>-plan.md`）；
    含目标 & 验收标准、frontmatter「状态」字段；phase / 工时 / 决策点 / 不交付
    **视需要**列。
