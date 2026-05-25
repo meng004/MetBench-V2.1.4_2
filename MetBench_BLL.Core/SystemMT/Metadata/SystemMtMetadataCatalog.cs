@@ -122,6 +122,22 @@ public static class SystemMtMetadataCatalog
         },
         new EquationMetadata
         {
+            EquationKey = "poisson",
+            Name = "Poisson 方程（1D 静态、Dirichlet 零边界）",
+            CanonicalForm = "-u''(x) = f,  x ∈ [0, L],  u(0) = u(L) = 0",
+            SymbolSystem =
+                "u(x) 解（如静电势、稳态位移、稳态温度场等通用椭圆 PDE 解）；" +
+                "f 体源（常数或分布）；L 区域长度；u_max 内部峰值（输出）。" +
+                "常数源 f 时解析解 u(x) = f·x·(L-x)/2，u_max = f·L²/8。",
+            Parameters = new List<EquationParameter>
+            {
+                new() { Symbol = "f", Description = "体源强度", Unit = "无量纲" },
+                new() { Symbol = "L", Description = "区域长度", Unit = "无量纲" },
+                new() { Symbol = "u_max", Description = "内部峰值（输出）", Unit = "无量纲" },
+            },
+        },
+        new EquationMetadata
+        {
             EquationKey = "projectile-motion",
             Name = "射程方程（真空、平面、点抛体）",
             CanonicalForm = "R = v0²·sin(2θ)/g",
@@ -351,6 +367,39 @@ public static class SystemMtMetadataCatalog
             {
                 new() { Symbol = "factor", PhysicalMeaning = "num_points 缩放倍率", ValueRange = "factor > 1" },
                 new() { Symbol = "φ_max", PhysicalMeaning = "峰值通量（输出）", ValueRange = "φ_max > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "poisson-source-superposition",
+            EquationKey = "poisson",
+            PhysicalMeaning =
+                "线性叠加：1D Poisson -u'' = f 在源 f 上严格线性。" +
+                "f → factor·f（factor > 1）必使 u_max 严格放大（解析下精确按同比例 = factor·u_max(src)）。",
+            InputTransformation = "f → factor·f（factor > 1）",
+            OutputRelation = "u_max(flw) > u_max(src)（严格意义下 = factor·u_max(src)）",
+            ComparisonType = MrComparisonType.Ordinal,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "源缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "u_max", PhysicalMeaning = "峰值幅度（输出）", ValueRange = "u_max > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "poisson-mesh-richardson",
+            EquationKey = "poisson",
+            PhysicalMeaning =
+                "网格细化 Richardson 收敛性：num_points 翻倍（dx 减半）后 u_max 应在 O(dx²) 中心差分 " +
+                "截断误差容差内不变 — 若变化超容差说明粗网格尚未收敛到细网格 plateau。" +
+                "由于常源 Poisson 解析解 u(x)=f·x·(L-x)/2 是 2 次多项式，2 阶 FD 在足够细网格下应等于解析解。",
+            InputTransformation = "num_points → factor·num_points（factor > 1）",
+            OutputRelation = "u_max(flw) ≈ u_max(src)（O(dx²) 截断误差容差内）",
+            ComparisonType = MrComparisonType.Absolute,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "num_points 缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "u_max", PhysicalMeaning = "峰值幅度（输出）", ValueRange = "u_max > 0" },
             },
         },
         new MrMetadata

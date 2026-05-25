@@ -72,7 +72,7 @@ public sealed class SystemMtLauncherTests
     {
         var descriptors = await _launcher.ListAvailableAsync();
 
-        Assert.Equal(17, descriptors.Count);
+        Assert.Equal(19, descriptors.Count);
         Assert.Equal("bateman-mass-conservation", descriptors[0].Id);
         Assert.Equal("bateman-timestep-cauchy", descriptors[1].Id);
         Assert.Equal("damped-oscillator-scale-state", descriptors[2].Id);
@@ -87,9 +87,41 @@ public sealed class SystemMtLauncherTests
         Assert.Equal("openmc-pincell-sigma-a", descriptors[11].Id);
         Assert.Equal("openmoc-pincell-nu-sigma-f", descriptors[12].Id);
         Assert.Equal("openmoc-pincell-sigma-a", descriptors[13].Id);
-        Assert.Equal("projectile-scale-v0", descriptors[14].Id);
-        Assert.Equal("subchannel-flow-temperature-monotone", descriptors[15].Id);
-        Assert.Equal("subchannel-heat-flux-linearity", descriptors[16].Id);
+        Assert.Equal("poisson-mesh-richardson", descriptors[14].Id);
+        Assert.Equal("poisson-source-superposition", descriptors[15].Id);
+        Assert.Equal("projectile-scale-v0", descriptors[16].Id);
+        Assert.Equal("subchannel-flow-temperature-monotone", descriptors[17].Id);
+        Assert.Equal("subchannel-heat-flux-linearity", descriptors[18].Id);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_poisson_source_superposition_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var lin = descriptors.Single(d => d.Id == "poisson-source-superposition");
+
+        Assert.Equal("poisson-1d", lin.SutName);
+        Assert.Equal("ScaleField", lin.TransformationName);
+        Assert.Equal("GreaterThan", lin.AssertionName);
+        Assert.Equal("u_max", lin.ValueName);
+        Assert.Equal("2", lin.DefaultParameters["factor"]);
+        Assert.Contains("source", lin.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Poisson.Scaling.Source", lin.MrFamily);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_poisson_mesh_richardson_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var rich = descriptors.Single(d => d.Id == "poisson-mesh-richardson");
+
+        Assert.Equal("poisson-1d", rich.SutName);
+        Assert.Equal("ScaleField", rich.TransformationName);
+        Assert.Equal("ApproxEqual", rich.AssertionName);
+        Assert.Equal("u_max", rich.ValueName);
+        Assert.Equal("2", rich.DefaultParameters["factor"]);
+        Assert.Contains("mesh", rich.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Poisson.Convergence.Mesh", rich.MrFamily);
     }
 
     [Fact]

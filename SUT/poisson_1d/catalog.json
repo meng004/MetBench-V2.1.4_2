@@ -1,0 +1,71 @@
+{
+  "sut_name": "poisson-1d",
+  "program": {
+    "program_name": "poisson-1d",
+    "equation": "Poisson",
+    "equation_key": "poisson",
+    "program_type": "Num",
+    "runner_script_relative_path": "poisson_1d.py",
+    "input_parser_script_relative_path": "poisson_1d_input_parser.py",
+    "output_parser_script_relative_path": "poisson_1d_output_parser.py",
+    "input_adapter_script_relative_path": "poisson_1d_input_parser.py",
+    "output_adapter_script_relative_path": "poisson_1d_output_parser.py",
+    "python_executable_kind": "system"
+  },
+  "mrs": [
+    {
+      "mr_id": "poisson-source-superposition",
+      "sut_name": "poisson-1d",
+      "display_name": "1D Poisson — ScaleSource (linearity)",
+      "description": "Superposition / linearity MP_mono: the 1D Poisson equation -u'' = f is linear in the source f. Scaling f by factor > 1 must strictly increase the peak amplitude u_max (and in fact scale it by the same factor exactly).",
+      "mr_family": "Poisson.Scaling.Source",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "greater",
+      "assertion_name": "GreaterThan",
+      "value_name": "u_max",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/source/strength" }
+      ],
+      "tolerance_rel": 0,
+      "tolerance_abs": 0,
+      "noise_aware": false,
+      "equation_key": "poisson",
+      "equation": "Poisson",
+      "program_type": "Num",
+      "meta_pattern": "Mono",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "sample_case_relative_path": "sample/standard.json",
+      "work_root_name": "MetBenchPoisson1d",
+      "timeout_seconds": 30
+    },
+    {
+      "mr_id": "poisson-mesh-richardson",
+      "sut_name": "poisson-1d",
+      "display_name": "1D Poisson — MeshRichardson (FD convergence)",
+      "description": "Mesh-refinement Richardson convergence MP_conv: doubling num_points (halving the FD spacing dx) must leave u_max within O(dx²) FD truncation tolerance — the second-order central-difference scheme is already at the fine-mesh plateau.",
+      "mr_family": "Poisson.Convergence.Mesh",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "approx",
+      "assertion_name": "ApproxEqual",
+      "value_name": "u_max",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/geometry/num_points" }
+      ],
+      "tolerance_rel": 1e-3,
+      "tolerance_abs": 1e-6,
+      "noise_aware": false,
+      "equation_key": "poisson",
+      "equation": "Poisson",
+      "program_type": "Num",
+      "meta_pattern": "Conv",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "sample_case_relative_path": "sample/standard.json",
+      "work_root_name": "MetBenchPoisson1d",
+      "timeout_seconds": 30
+    }
+  ]
+}
