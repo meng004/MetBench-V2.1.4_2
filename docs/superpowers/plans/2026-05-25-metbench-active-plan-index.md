@@ -6,13 +6,14 @@
 
 ---
 
-## 1. 当前唯一活跃主计划
+## 1. 当前活跃主计划与范围计划
 
 | Plan | Status | Scope | Expiry condition |
 |---|---|---|---|
 | `docs/superpowers/plans/2026-05-25-metbench-governed-next-stage-plan.md` | Active | Governance-first next-stage planning; blocks further implementation until the named design ambiguities are resolved | Expires when semantic-convergence, Evidence v2, Windows verification policy, and transition plan are completed and replaced by a new implementation plan |
+| `docs/superpowers/plans/2026-05-25-verification-semantics-convergence-implementation-plan.md` | Active scoped plan | Implementation sequence for verification semantics convergence: PR-A design lock, PR-B naming migration, PR-C runtime convergence, PR-D guard cleanup | Expires when PR-D is merged and the status ledger marks verification semantics convergence controlled |
 
-Any new coding task must be derived from the active master plan or from a successor plan registered here.
+Any new coding task must be derived from the active master plan or from a scoped successor plan registered here.
 
 ---
 
@@ -24,6 +25,7 @@ Any new coding task must be derived from the active master plan or from a succes
 | `docs/superpowers/specs/2026-05-25-metbench-project-control-rules.md` | Active | Control charter: source hierarchy, gates, review, status refresh | Expires only by explicit replacement PR |
 | `docs/superpowers/specs/2026-05-25-metbench-macro-assessment-and-risk-audit.md` | Active | Macro assessment and risk audit for the Stage 8 to next-stage transition | Expires when the next macro assessment supersedes it |
 | `docs/superpowers/specs/2026-05-25-mr-verification-v1.2-codex-ready.md` | Active reference | v1.2 typed semantic model and verifier design already implemented through the current roadmap | Expires when a v1.3 verification design supersedes it |
+| `docs/superpowers/specs/2026-05-25-verification-semantics-convergence-design.md` | Active | Locks System MT verification semantics convergence, Method MT isolation, `SystemMT/Catalog/Typed` naming, and legacy assertion migration/removal policy | Expires when runtime convergence and guard cleanup PRs complete or a newer verification semantics design supersedes it |
 | `docs/superpowers/templates/pr-gate-checklist.md` | Active | Required PR gate checklist for scope, facts, tests, Windows classification, review, and merge | Expires only by explicit replacement PR |
 
 ### 条件性活跃
