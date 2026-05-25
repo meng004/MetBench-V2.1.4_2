@@ -12,25 +12,25 @@ public sealed class HardcodedMrCatalogProviderTests
         new(SutRoot: "/tmp/sut", SystemPython: "python3", OpenMocPython: "python3");
 
     [Fact]
-    public void Load_pins_19_entries()
+    public void Load_pins_21_entries()
     {
         var p = new HardcodedMrCatalogProvider(Opts());
 
         var entries = p.Load();
 
-        // Branch state after PR #88 (S8-P1..P4) + T3 Poisson 1D (+2 MR): 19 MR × 10 SUT.
-        Assert.Equal(19, entries.Count);
+        // Branch state after PR #88 (S8-P1..P4) + T3 Poisson 1D + T3 Advection 1D (+2 MR each): 21 MR × 11 SUT.
+        Assert.Equal(21, entries.Count);
     }
 
     [Fact]
-    public void Load_spans_10_distinct_SUTs()
+    public void Load_spans_11_distinct_SUTs()
     {
         var p = new HardcodedMrCatalogProvider(Opts());
 
         var entries = p.Load();
 
         var distinctSuts = entries.Select(e => e.Mr.SutName).Distinct().ToList();
-        Assert.Equal(10, distinctSuts.Count);
+        Assert.Equal(11, distinctSuts.Count);
         Assert.Contains("openmoc", distinctSuts);
         Assert.Contains("openmc", distinctSuts);
         Assert.Contains("heat-equation", distinctSuts);
@@ -41,6 +41,7 @@ public sealed class HardcodedMrCatalogProviderTests
         Assert.Contains("subchannel-1d", distinctSuts);
         Assert.Contains("diffusion-1d", distinctSuts);
         Assert.Contains("poisson-1d", distinctSuts);
+        Assert.Contains("advection-1d", distinctSuts);
     }
 
     [Fact]

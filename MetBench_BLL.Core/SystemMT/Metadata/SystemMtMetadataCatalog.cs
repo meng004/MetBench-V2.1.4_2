@@ -138,6 +138,23 @@ public static class SystemMtMetadataCatalog
         },
         new EquationMetadata
         {
+            EquationKey = "advection",
+            Name = "1D 线性输运方程（周期边界）",
+            CanonicalForm = "∂u/∂t + v·∂u/∂x = 0,  x ∈ [0, L],  周期 BC",
+            SymbolSystem =
+                "u(x,t) 输运标量（如浓度、温度被动场、密度等）；v 输运速度（标量，符号决定方向）；" +
+                "L 区域长度；解析解为纯平移 u(x,t) = u₀(x - v·t mod L)。" +
+                "对周期边界条件，∫u dx 严格守恒（独立于 dx / dt）；峰值幅度在一阶迎风格式下因数值耗散而减小。",
+            Parameters = new List<EquationParameter>
+            {
+                new() { Symbol = "v", Description = "输运速度", Unit = "无量纲" },
+                new() { Symbol = "u₀(x)", Description = "初始 Gaussian 脉冲（amplitude / center / sigma 参数化）", Unit = "无量纲" },
+                new() { Symbol = "peak_amplitude", Description = "末时刻峰值幅度（输出）", Unit = "无量纲" },
+                new() { Symbol = "mass_integral", Description = "∫u dx 数值守恒量（输出）", Unit = "无量纲" },
+            },
+        },
+        new EquationMetadata
+        {
             EquationKey = "projectile-motion",
             Name = "射程方程（真空、平面、点抛体）",
             CanonicalForm = "R = v0²·sin(2θ)/g",
@@ -400,6 +417,40 @@ public static class SystemMtMetadataCatalog
             {
                 new() { Symbol = "factor", PhysicalMeaning = "num_points 缩放倍率", ValueRange = "factor > 1" },
                 new() { Symbol = "u_max", PhysicalMeaning = "峰值幅度（输出）", ValueRange = "u_max > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "advection-amplitude-linearity",
+            EquationKey = "advection",
+            PhysicalMeaning =
+                "线性叠加：1D 线性输运方程 u_t + v·u_x = 0 关于初始条件严格线性。" +
+                "初始 Gaussian amplitude → factor·amplitude（factor > 1）必使末时刻峰值幅度严格放大，" +
+                "且在守恒迎风格式下精确按同比例 = factor·peak_amplitude(src)。",
+            InputTransformation = "amplitude → factor·amplitude（factor > 1）",
+            OutputRelation = "peak_amplitude(flw) > peak_amplitude(src)（严格意义下 = factor·peak_amplitude(src)）",
+            ComparisonType = MrComparisonType.Ordinal,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "初始幅度缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "peak_amplitude", PhysicalMeaning = "末时刻峰值幅度（输出）", ValueRange = "peak_amplitude > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "advection-mesh-conservation",
+            EquationKey = "advection",
+            PhysicalMeaning =
+                "质量守恒不变性：1D 线性输运方程在周期边界下 ∫u dx 严格守恒；一阶迎风离散下" +
+                "格式逐步守恒（独立于 dx / dt）。num_points 翻倍只改变初始条件采样误差（O(dx²)），" +
+                "末时刻 mass_integral 应在 FD 截断容差内不变。",
+            InputTransformation = "num_points → factor·num_points（factor > 1）",
+            OutputRelation = "mass_integral(flw) ≈ mass_integral(src)（O(dx²) 初始采样误差容差内）",
+            ComparisonType = MrComparisonType.Absolute,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "num_points 缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "mass_integral", PhysicalMeaning = "∫u dx 守恒量（输出）", ValueRange = "mass_integral > 0" },
             },
         },
         new MrMetadata
