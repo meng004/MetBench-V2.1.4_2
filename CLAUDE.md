@@ -157,7 +157,7 @@ AI 可用于分类、摘要、草拟、解释等语言任务。路由、重试�
 测试输入生成 → 衍生输入转换 → 执行 SUT → 验证源/衍生输出是否满足 MR。实现为
 System-MT 引擎 + Launcher facade（`ISystemMtLauncher` 单一入口）+ LiteDB 持久化。
 **验收标准：流程端到端走通**，不以覆盖全部方程为准（覆盖见 T3）。
-当前 `main`（2026-05-24 @ `5691727`）已切到 `ISystemMtLauncher` / `SystemMtLauncher`
+当前 `main`（2026-05-25 @ `8bd734f`）已切到 `ISystemMtLauncher` / `SystemMtLauncher`
 + provider-backed catalog 路径；WPF 默认注册 `ManifestMrCatalogProvider`，但 launcher
 launcher 已移除生产路径的 `HardcodedMrCatalogProvider` 过渡 fallback，现要求显式注入 `IMrCatalogProvider`。
 
@@ -309,6 +309,14 @@ Current caveats on `main`:
 - `SystemMtExecutionRecorder` now writes `ExecutionEvidence.SampleTraces` for the current target field
   using source / follow-up input snapshots plus follow-up output metrics
   until sample-level capture is wired in.
+- `MetBench_BLL.Core/SystemMT/V12Catalog/` is now a live Stage 8 execution surface rather than a proposal-only folder:
+  PR #97–#104 have merged `PR-0` through `PR-6` of the v1.2 roadmap
+  (`ba7a9a1` → `8bd734f`), covering typed schema foundation, fail-closed validators,
+  scalar runtime, applicability/status gating, convergence, sequence/subadditive,
+  and field/derived-invariant runtime.
+- The v1.2 line is **not complete yet** on `main`: statistical/cross-method,
+  property runtime, exponential-growth runtime, and full 47/47 migration gates remain future work
+  (`PR-7`..`PR-10` in `docs/superpowers/plans/2026-05-25-mr-verification-v12-master-roadmap.md`).
 
 ## 7. Async & UI-thread conventions
 
