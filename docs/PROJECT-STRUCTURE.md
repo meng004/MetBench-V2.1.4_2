@@ -11,7 +11,7 @@
 
 | 项目 | Target | 跑哪里 | 用途 |
 |---|---|---|---|
-| **`MetBench_BLL.Core/`** | `net8.0` | Linux + Windows + CI | 跨平台 BLL：System-MT pipeline / provider-backed launcher / adapters / persistence contracts / reporting / anomaly / discovery / mutation / coverage。2026-05-25 当前主线已切到 `IMrCatalogProvider` + `ManifestMrCatalogProvider`，launcher 生产路径已不再保留 `HardcodedMrCatalogProvider` fallback；`SystemMT/V12Catalog/` 也已成为正式 Stage 8 执行 IR 代码面。 |
+| **`MetBench_BLL.Core/`** | `net8.0` | Linux + Windows + CI | 跨平台 BLL：System-MT pipeline / provider-backed launcher / adapters / persistence contracts / reporting / anomaly / discovery / mutation / coverage。2026-05-25 当前主线已切到 `IMrCatalogProvider` + `ManifestMrCatalogProvider`，launcher 生产路径已不再保留 `HardcodedMrCatalogProvider` fallback；Typed Semantic Catalog 正式代码面位于 `SystemMT/Catalog/Typed/`（原 `SystemMT/V12Catalog/`，PR #115 重命名永久化）；pipeline 断言阶段经 PR #118 已切到 `PredicateDispatcher`，W1 `IMrAssertion` 路径在 PR #119 已从生产侧删除。 |
 | **`MetBench_BLL/`** | `net8.0` | Linux + Windows + CI | WPF 侧 BLL：v1 方法级 MT 主流程 + Word/Excel/PDF 报表生成器 + LiveCharts 数据 service（无 WPF 依赖） |
 | **`MetBench_Domain/`** | `net8.0` | Anywhere | 域实体：v1 方法级 + v2 四级 MR 层级（MetaPattern → MRSchema → MRBinding → MRInstance → Execution） |
 | **`MetBench_IDAL/`** | `net8.0` | Anywhere | DAL 接口合约 |
@@ -58,7 +58,7 @@ SUT 接入到框架的 hook：
 | **OpenMC** | `OpenMcInputAdapterTests` (5) + `OpenMcOutputAdapterTests` (5) + `OpenMcRunnerSmokeTests` (1) = **11** | (共用 `CrossProgramNeutronTransportMrs.feature`) | 2（跨程序 examples） | `openmc-pincell-nu-sigma-f` · `openmc-pincell-sigma-a` |
 | **Heat Equation** | `HeatEquationInputAdapterTests` (2) + `HeatEquationOutputAdapterTests` (4) = **6** | `HeatEquationAmplitude.feature` | 1 | `heat-equation-amplitude` |
 | **Projectile** | (依靠 `CliProgramRunnerTests` 通用覆盖) | `ProjectileRange.feature` | 1 | — (仅 BDD，未 Launcher 注册) |
-| **跨 SUT 通用** | `MrTransformationTests` · `InputGeneratorTests` · `GreaterThanAssertionTests` · `LessThanAssertionTests` | `SystemLevelCliMt.feature` · `SystemLevelGeneratedFollowup.feature` | 2 | — |
+| **跨 SUT 通用** | `MrTransformationTests` · `InputGeneratorTests`（PR #119 `GreaterThanAssertionTests` / `LessThanAssertionTests` 已随 W1 类删除；同语义现由 `Catalog/Typed/BinaryComparisonKernelTests` 覆盖） | `SystemLevelCliMt.feature` · `SystemLevelGeneratedFollowup.feature` | 2 | — |
 
 **SUT 系统级 MR 总数（2026-05-24）**：
 - launcher / manifest catalog：**17** MR-on-SUT 绑定
@@ -79,19 +79,19 @@ SUT 接入到框架的 hook：
 | **Coverage** (4 维) | `MetBench_BLL.Coverage` | `V2Coverage/` | 1 | 18 |
 | **Reporting** (HTML + 5-scope service) | `MetBench_BLL.Reporting` + `MetBench_BLL.SystemMT.Reporting` | `Reporting/` + `V2Reporting/` | 2 | 17 |
 | **Mutation** (campaign × matrix) | `MetBench_BLL.Mutation` | `V2Mutation/` | 1 | 8 |
-| **Pipeline** (v2 orchestration + Replay + AssertionEvaluator) | `MetBench_BLL.SystemMT.Pipeline.*` | `V2Pipeline/` | 6 | 48 |
+| **Pipeline** (v2 orchestration + Replay + typed predicate dispatch；PR #118 起断言阶段已切到 `Catalog/Typed/Runtime/PredicateDispatcher`，`AssertionEvaluator` 不在生产路径，仅 V2Pipeline 单测保留) | `MetBench_BLL.SystemMT.Pipeline.*` | `V2Pipeline/` | 6 | 48 |
 | **RCaseRepro** (论文核心 - F9) | `MetBench_BLL.SystemMT.RCase` | `V2RCaseRepro/` | 1 | 11 |
 | **Persistence (LiteDB)** | `MetBench_BLL.SystemMT.Persistence` + `MetBench_DAL` | `SystemMT/Persistence/` + `V2Schema/` | 2 | 7 + 22 |
 | **Pagination** (Keyset) | `MetBench_BLL.Paging` + `MetBench_DAL.V2.*` | `V2Pagination/` | 5 | 54 |
 | **Schema / Entity** (round-trip + soft-delete + migration) | `MetBench_Domain.V2` | `V2Schema/` | 5 | 9 |
 | **Transformations** (v2 IMRTransformation) | `MetBench_BLL.Discovery.Transformations` | `V2Transformations/` | 3 | 20 |
-| **V12Catalog** (typed semantic model + validator + verifier runtime，PR-0..PR-10 + review-fix) | `MetBench_BLL.SystemMT.V12Catalog.*` | `SystemMT/V12Catalog/` | 39 | 82 |
+| **Typed Semantic Catalog** (typed semantic model + validator + verifier runtime + migration helpers，v1.2 PR-0..PR-10 + review-fix + PR-B/C/D 收敛) | `MetBench_BLL.SystemMT.Catalog.Typed.*` | `SystemMT/Catalog/Typed/` | 41 | 102 |
 | **ColdStart** | — | `ColdStart/` | 1 | 1 |
 
 **测试总数对照**：
-- 当前共享精确 Linux / cloud 绿基线：提交 `e839214`（PR #110）= **1043 pass / 0 fail / 0 skip**
+- 当前共享精确 Linux / cloud 绿基线：提交 `5d4dcc7`（PR #119）= **1048 pass / 0 fail / 8 skip / 1056 total**（8 skip 为 OpenMOC / OpenMC 集成测试，未安装 Python venv 时干净跳过，与回归无关）
 - v1.2 迁移 / gate 当前真相层：**44 MR + 4 Property** 已进入 typed catalog 工件、golden fixtures 与 coverage gate
-- v1.2 之前的历史参考基线：`373bb59` = **961 / 0 / 8 / 969**；`763e067`（PR #93）= **965 / 0 / 0**
+- 历史参考基线：`e839214`（PR #110）= **1043 pass / 0 fail / 0 skip**（PR-B/C/D 前）；`373bb59` = **961 / 0 / 8 / 969**；`763e067`（PR #93）= **965 / 0 / 0**
 - 当前 Windows WPF 已知旧基线：2026-05-24 在 Parallels Win11 上 `dotnet build MetBench_Client/MetBench_Client.csproj` **0 编译错误**，约 `17.47s`；本轮最新代码回执待补
 - UAT BDD filter（`FullyQualifiedName~UAT`）：**48 Pass / 0 Skip**
 - BDD smoke（Features filter）：**30 Pass / 1 Skip**
@@ -174,7 +174,8 @@ WPF 的 `MetBench_Client/` 因 SDK targets 限制 **不在 Linux CI 编译**；�
 - `SystemMtLauncher` 已从硬编码蓝图切到 provider-backed catalog，构造函数现要求显式注入 `IMrCatalogProvider`，生产路径不再静默 fallback。
 - `SystemMtExecutionRecorder` 已写入 `ExecutionEvidence`、`V3MrIdRef` 与目标字段级 `SampleTraces`（source / transformed / output triples）；更细粒度的多变量 trace 仍可后续扩展。
 - `LauncherCatalogV2Importer` 已通过 `ISystemMtCatalogReader` 读取 runnable catalog，`App.xaml.cs` 不再依赖 `SystemMtLauncher` 具体类强转。
-- `MetBench_BLL.Core/SystemMT/V12Catalog/` 已合入 PR-0..PR-10，并由 PR #110 完成 retrospective review-fix：typed schema / anti-legacy lint / fail-closed validator / scalar / applicability / convergence / sequence / field / derived / statistical / cross-method / property / exponential-growth runtime 与 typed migration + coverage gate 均为主线事实。
+- `MetBench_BLL.Core/SystemMT/Catalog/Typed/`（原 `SystemMT/V12Catalog/`，PR #115 重命名永久化）已合入 PR-0..PR-10，并由 PR #110 完成 retrospective review-fix：typed schema / anti-legacy lint / fail-closed validator / scalar / applicability / convergence / sequence / field / derived / statistical / cross-method / property / exponential-growth runtime 与 typed migration + coverage gate 均为主线事实。PR #118 进一步把 System MT pipeline 断言阶段切到 `Catalog/Typed/Runtime/PredicateDispatcher`；PR #119 在 `Architecture/SemanticCatalogBoundaryTests.cs` 加守卫并删除 W1 `IMrAssertion` / `ApproxEqualAssertion` / `GreaterThanAssertion` / `LessThanAssertion` / `SystemMtRunner` / `EqualityThresholds`。
+- `MetBench_BLL.Core/SystemMT/Catalog/Typed/Migration/` 是把 legacy assertion-type-code（`less` / `greater` / `approx` + `flw = k * src`）映射到 typed predicate 的唯一生产入口（`LegacyAssertionPredicateMapper` / `TypedSpecFactory` / `TypedVerificationContextFactory`）；其它生产路径不得直接构造 `BinaryComparisonPredicate` / `ScaledEqualityPredicate` 从字符串。
 - inventory 口径以仓库 migration 资产与 gate 为准：当前主线事实是 **44 MR + 4 Property**，不要再沿用旧的“43 MR + 4 Property”汇总说法。
 - `.codegraph/` 是本地图谱索引产物，不属于仓库正式架构的一部分，也不应纳入结构文档或版本化事实源。
 

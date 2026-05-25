@@ -20,11 +20,12 @@
 
 | Field | Value |
 |---|---|
-| Latest code-test baseline commit | `e839214` |
-| Baseline source | PR #110, `fix(v12-pr10): harden review follow-up coverage semantics` |
-| Test command | `dotnet test MetBench_SystemMT.Tests --no-restore` |
-| Result | `1043 pass / 0 fail / 0 skip` |
-| Reason current head differs | PR #111 and PR #112 are documentation/governance-only changes and do not refresh the code-test baseline |
+| Latest code-test baseline commit | `5d4dcc7` |
+| Baseline source | PR #119, `test(systemmt): guard typed semantic runtime boundary` |
+| Test command | `dotnet test MetBench_SystemMT.Tests --no-build` |
+| Result | `1048 pass / 0 fail / 8 skip` |
+| Reason skips are not zero | Skips are the OpenMOC / OpenMC integration tests that skip cleanly when the matching Python venv is missing (per `CLAUDE.md` §8). They are environment-dependent and not regression. |
+| Prior baseline | `e839214` (PR #110) was the v1.2 retrospective code-test baseline; superseded by the PR-B/C/D verification-semantics convergence merges (#115, #118, #119). |
 
 ## 3. Stage 8 Completion Snapshot
 
@@ -35,6 +36,7 @@
 | v1.2 inventory denominator | `44 MR + 4 Property` | PR #109 / PR #110 migration and coverage gates |
 | Documentation truth-source alignment | Complete through PR #111 | PR #111 |
 | Governance baseline | Complete through PR #112 | PR #112 |
+| Verification semantics convergence | Controlled — convergence closed | PR #115 (PR-B typed catalog rename), PR #118 (PR-C typed predicate runtime), PR #119 (PR-D architecture guards + W1 cleanup). System MT pipeline assertion stage now runs only on Typed Semantic Catalog predicates; the W1 `IMrAssertion` interface and its `Approx/Greater/Less` implementations plus `SystemMtRunner` and `EqualityThresholds` are removed from production. `SemanticCatalogBoundaryTests` prevents re-introduction. |
 
 ## 4. Active Control Documents
 
@@ -43,10 +45,8 @@
 | `docs/superpowers/specs/2026-05-25-metbench-project-control-rules.md` | Control charter: source hierarchy, gates, review, status refresh |
 | `docs/superpowers/plans/2026-05-25-metbench-active-plan-index.md` | Active plan registry |
 | `docs/superpowers/plans/2026-05-25-metbench-governed-next-stage-plan.md` | Current governed next-stage master plan |
-| `docs/superpowers/plans/2026-05-25-verification-semantics-convergence-implementation-plan.md` | Scoped implementation plan for verification semantics convergence PR-A through PR-D |
 | `docs/superpowers/plans/2026-05-25-executionevidence-v2-implementation-plan.md` | Scoped implementation plan for ExecutionEvidence v2 (PR-A0 design lock and PR-C0 schema/recorder) |
 | `docs/superpowers/specs/2026-05-25-metbench-macro-assessment-and-risk-audit.md` | Macro map and risk audit |
-| `docs/superpowers/specs/2026-05-25-verification-semantics-convergence-design.md` | Verification semantics convergence design: System MT typed semantics, Method MT isolation, and legacy assertion migration/removal |
 | `docs/superpowers/specs/2026-05-25-executionevidence-v2-design.md` | ExecutionEvidence v2 design: typed verification persistence block, recorder mapping, compatibility contract, PR-C scope boundaries |
 | `docs/superpowers/templates/pr-gate-checklist.md` | Required PR checklist template |
 
@@ -65,22 +65,23 @@ The following documents are projections of the ledger and their own domain. They
 
 | Risk | Status | Required next step |
 |---|---|---|
-| Verification semantics convergence | PR-C authorized with evidence-stability guard | PR-C may proceed only if its PR checklist proves ExecutionEvidence/reporting/persistence schema is unchanged; otherwise stop and implement the relevant ExecutionEvidence v2 slice first. Execute `docs/superpowers/plans/2026-05-25-verification-semantics-convergence-implementation-plan.md` under that guard; PR-D follows after PR-C merge. |
-| ExecutionEvidence final shape | Design locked | Use `docs/superpowers/specs/2026-05-25-executionevidence-v2-design.md` and execute `docs/superpowers/plans/2026-05-25-executionevidence-v2-implementation-plan.md`; PR-C0 of that plan implements the schema and recorder projection and unblocks PR-C of verification semantics convergence |
-| Windows verification policy | Partially controlled | Use PR gate classification now; write the dedicated Windows policy before the next Windows-touching PR |
+| Verification semantics convergence | Controlled | Convergence is closed via PR #115 (PR-B), PR #118 (PR-C), PR #119 (PR-D). Maintenance only: keep `SemanticCatalogBoundaryTests` and `SemanticCatalogNamingBoundaryTests` green; if a future PR needs to extend typed predicate semantics (e.g. for the unmapped legacy codes `less-noise-aware`, `greater-noise-aware`, `approx-invariant`, `variance-ratio`, `flux-pointwise-approx`, `cross-program-agree`), add new typed predicates in `MetBench_BLL.Core/SystemMT/Catalog/Typed/` and extend `LegacyAssertionPredicateMapper` rather than re-introducing legacy assertion classes. |
+| ExecutionEvidence final shape | Design locked; implementation outstanding | Execute `docs/superpowers/plans/2026-05-25-executionevidence-v2-implementation-plan.md` PR-C0 (typed verification persistence block + recorder projection). Schema rules and acceptance criteria are pinned by `docs/superpowers/specs/2026-05-25-executionevidence-v2-design.md`. This is now the largest open structural risk after the verification-semantics convergence. |
+| Codegraph and architecture re-review | Pending | After PR-B / PR-C / PR-D moved the typed catalog and assertion runtime, refresh the architecture / dependency graph to verify (1) `MetBench_BLL.Core/SystemMT/Catalog/Typed/` boundaries, (2) pipeline → typed dispatcher → persistence linkage, (3) Method MT isolation from System MT typed catalog. Required before any new SystemMT cross-cutting work. |
+| Windows verification policy | Partially controlled | Use PR gate classification now; write the dedicated Windows policy before the next Windows-touching PR. PR-B/C/D were Linux-only and did not require Windows validation. |
+| Unmapped legacy assertion codes | Dormant in CI; tracked | The 6 codes outside PR-C scope (`less-noise-aware`, `greater-noise-aware`, `approx-invariant`, `variance-ratio`, `flux-pointwise-approx`, `cross-program-agree`) now fail-closed when used through the System MT pipeline. No active test or catalog binding uses them through the pipeline today; surface check required before any MR catalog entry adopts them. Follow-up PR: extend `LegacyAssertionPredicateMapper` with the matching typed predicates already in `Catalog/Typed/` (`VarianceRatioPredicate`, `CrossMethodComparisonPredicate`, `FieldEqualityPredicate`, `FieldProportionalityPredicate`). |
 | Active vs historical plan drift | Controlled but must be maintained | Keep the active plan index current whenever a phase changes |
 
 ## 7. Current Execution Order
 
-The next stage must proceed in this order:
+Verification-semantics convergence (PR-A → PR-D) is closed on `origin/main` (PR #114 / #115 / #118 / #119). The next stage proceeds in this order:
 
 1. Maintain this ledger as the current status source.
 2. Use the active plan index to select work.
-3. Execute verification semantics convergence PR-A and PR-B from `docs/superpowers/plans/2026-05-25-verification-semantics-convergence-implementation-plan.md`; these are docs/naming work and must preserve runtime behavior.
-4. Design Windows verification policy before the next Windows-touching PR.
-5. Execute ExecutionEvidence v2 per `docs/superpowers/plans/2026-05-25-executionevidence-v2-implementation-plan.md` (PR-A0 design lock then PR-C0 schema and recorder).
-6. Execute verification semantics PR-C only under the evidence-stability guard; PR-D follows after PR-C merge. PR-C is authorized only if its PR checklist proves ExecutionEvidence/reporting/persistence schema is unchanged; otherwise stop and implement the relevant ExecutionEvidence v2 slice first. The ExecutionEvidence v2 implementation slices in `docs/superpowers/plans/2026-05-25-executionevidence-v2-implementation-plan.md` remain active future work and are not superseded by this authorization.
-7. Only then proceed to implementation PRs for evidence, configuration, or UI-facing work.
+3. Execute ExecutionEvidence v2 PR-C0 from `docs/superpowers/plans/2026-05-25-executionevidence-v2-implementation-plan.md` (schema + recorder projection). This is the next largest open structural risk after the verification-semantics convergence.
+4. Refresh the codegraph / architecture review covering `MetBench_BLL.Core/SystemMT/Catalog/Typed/`, the pipeline → typed dispatcher → persistence path, and Method MT isolation. Required before any new SystemMT cross-cutting work is opened.
+5. Design Windows verification policy before any next Windows-touching PR. Until then, all PRs must stay inside the Linux-CI-validated cross-platform projects.
+6. Only then proceed to implementation PRs for configuration, UI-facing work, or typed-predicate extensions for the unmapped legacy assertion codes.
 
 ## 8. Update Triggers
 
