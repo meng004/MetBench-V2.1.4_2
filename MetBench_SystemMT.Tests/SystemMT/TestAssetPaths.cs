@@ -2,9 +2,9 @@ namespace MetBench_SystemMT.Tests.SystemMT;
 
 internal static class TestAssetPaths
 {
-    public static string V12CatalogRoot() => Path.Combine(AssetRoot(), "V12Catalog");
-    public static string V12MrSample => Path.Combine(V12CatalogRoot(), "samples", "mr-sample.yaml");
-    public static string V12PropertySample => Path.Combine(V12CatalogRoot(), "samples", "property-sample.yaml");
+    public static string TypedCatalogRoot() => Path.Combine(AssetRoot(), "SystemMT", "Catalog", "Typed");
+    public static string TypedMrSample => Path.Combine(TypedCatalogRoot(), "samples", "mr-sample.yaml");
+    public static string TypedPropertySample => Path.Combine(TypedCatalogRoot(), "samples", "property-sample.yaml");
 
     public static string AssetRoot()
     {
