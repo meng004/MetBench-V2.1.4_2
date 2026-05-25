@@ -5,6 +5,7 @@ namespace MetBench_BLL.SystemMT.V12Catalog.Specs;
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "kind")]
 [JsonDerivedType(typeof(DeterministicToleranceSpec), "DeterministicTolerance")]
 [JsonDerivedType(typeof(FieldNormToleranceSpec), "FieldNormTolerance")]
+[JsonDerivedType(typeof(StatisticalToleranceSpec), "StatisticalTolerance")]
 public abstract record ToleranceSpec;
 
 public sealed record DeterministicToleranceSpec(
@@ -15,3 +16,6 @@ public sealed record FieldNormToleranceSpec(
     string Norm,
     double Atol,
     double Rtol) : ToleranceSpec;
+
+public sealed record StatisticalToleranceSpec(
+    double SigmaMultiplier) : ToleranceSpec;
