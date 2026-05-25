@@ -50,4 +50,28 @@ public sealed class VerificationContext
 
         return value;
     }
+
+    public bool TryGetField(string role, string metric, out Field2DValue value)
+    {
+        if (!RoleOutputs.TryGetValue(role, out var roleOutput) ||
+            roleOutput.Fields is null ||
+            !roleOutput.Fields.TryGetValue(metric, out var fieldValue))
+        {
+            value = default!;
+            return false;
+        }
+
+        value = fieldValue;
+        return true;
+    }
+
+    public Field2DValue GetField(string role, string metric)
+    {
+        if (!TryGetField(role, metric, out var value))
+        {
+            throw new ArgumentException($"Unknown field '{metric}' for role '{role}'.", nameof(metric));
+        }
+
+        return value;
+    }
 }
