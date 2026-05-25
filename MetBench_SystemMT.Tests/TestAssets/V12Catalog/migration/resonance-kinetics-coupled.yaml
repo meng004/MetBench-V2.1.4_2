@@ -1,0 +1,441 @@
+kind: MrSpec
+mr_id: res-alg-01
+name: Subgroup convergence
+description: More subgroups should reduce reference error.
+tags:
+  equation_key: Resonance
+  program_type: Deterministic
+  source_report_id: MR-Res-Alg-01
+  sut_key: openmc
+roles:
+  subgroup8:
+    kind: Baseline
+  subgroup16:
+    kind: Followup
+  reference:
+    kind: Reference
+projections:
+  sigma_eff:
+    kind: ScalarProjection
+    path: /results/sigma_eff
+predicates:
+  - kind: ErrorMonotonic
+    predicate_id: subgroup-convergence
+    ordered_roles: [subgroup8, subgroup16]
+    reference_role: reference
+    metric: sigma_eff
+    norm_kind: Absolute
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0
+---
+kind: MrSpec
+mr_id: res-alg-02
+name: Dilution cross section weakens self shielding
+description: Higher dilution should shrink the gap to the infinite-dilution limit.
+tags:
+  equation_key: Resonance
+  program_type: Deterministic
+  source_report_id: MR-Res-Alg-02
+  sut_key: openmc
+roles:
+  low_dilution:
+    kind: Baseline
+  high_dilution:
+    kind: Followup
+projections:
+  infinite_dilution_gap:
+    kind: ScalarProjection
+    path: /results/infinite_dilution_gap
+predicates:
+  - kind: BinaryComparison
+    predicate_id: dilution-monotonic
+    left_role: high_dilution
+    right_role: low_dilution
+    metric: infinite_dilution_gap
+    operator: Less
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 1.0e-8
+  rtol: 1.0e-5
+---
+kind: MrSpec
+mr_id: res-alg-04
+name: Temperature broadening raises effective absorption
+description: Higher temperature should raise the broadened absorption metric.
+tags:
+  equation_key: Resonance
+  program_type: Deterministic
+  source_report_id: MR-Res-Alg-04
+  sut_key: openmc
+roles:
+  cold:
+    kind: Baseline
+  hot:
+    kind: Followup
+projections:
+  sigma_a_eff_u238:
+    kind: ScalarProjection
+    path: /results/sigma_a_eff_u238
+predicates:
+  - kind: BinaryComparison
+    predicate_id: temperature-broadening
+    left_role: hot
+    right_role: cold
+    metric: sigma_a_eff_u238
+    operator: Greater
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 1.0e-8
+  rtol: 1.0e-5
+---
+kind: MrSpec
+mr_id: kin-phy-01
+name: Subcritical asymptotic power monotonicity
+description: Weaker negative reactivity should leave a higher asymptotic power level.
+tags:
+  equation_key: Kinetics
+  program_type: Deterministic
+  source_report_id: MR-Kin-Phy-01
+  sut_key: damped_oscillator
+roles:
+  strong_subcritical:
+    kind: Baseline
+  weak_subcritical:
+    kind: Followup
+projections:
+  asymptotic_power:
+    kind: ScalarProjection
+    path: /results/asymptotic_power
+predicates:
+  - kind: BinaryComparison
+    predicate_id: asymptotic-power-monotonic
+    left_role: weak_subcritical
+    right_role: strong_subcritical
+    metric: asymptotic_power
+    operator: Greater
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 1.0e-8
+  rtol: 1.0e-5
+---
+kind: MrSpec
+mr_id: kin-phy-03
+name: Stable period decreases with positive reactivity
+description: Higher prompt-subcritical reactivity should shorten the stable period.
+tags:
+  equation_key: Kinetics
+  program_type: Deterministic
+  source_report_id: MR-Kin-Phy-03
+  sut_key: damped_oscillator
+roles:
+  low_reactivity:
+    kind: Baseline
+  high_reactivity:
+    kind: Followup
+projections:
+  stable_period:
+    kind: ScalarProjection
+    path: /results/stable_period
+predicates:
+  - kind: BinaryComparison
+    predicate_id: stable-period-monotonic
+    left_role: high_reactivity
+    right_role: low_reactivity
+    metric: stable_period
+    operator: Less
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 1.0e-8
+  rtol: 1.0e-5
+---
+kind: MrSpec
+mr_id: kin-alg-01
+name: Time-step convergence
+description: Smaller time steps should reduce reference error.
+tags:
+  equation_key: Kinetics
+  program_type: Deterministic
+  source_report_id: MR-Kin-Alg-01
+  sut_key: damped_oscillator
+roles:
+  coarse_dt:
+    kind: Baseline
+  fine_dt:
+    kind: Followup
+  reference:
+    kind: Reference
+projections:
+  power_error:
+    kind: ScalarProjection
+    path: /results/power_error
+predicates:
+  - kind: ErrorMonotonic
+    predicate_id: timestep-convergence
+    ordered_roles: [coarse_dt, fine_dt]
+    reference_role: reference
+    metric: power_error
+    norm_kind: Absolute
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0
+---
+kind: MrSpec
+mr_id: cpl-app-01
+name: Gadolinium depletion follows an S shape
+description: Ordered burnup points should form an S-shaped k_inf trajectory.
+tags:
+  equation_key: CoupledApplication
+  program_type: Deterministic
+  source_report_id: MR-Cpl-App-01
+  sut_key: openmc
+roles:
+  bu0:
+    kind: Baseline
+  bu1:
+    kind: Followup
+  bu2:
+    kind: Followup
+  bu3:
+    kind: Followup
+  bu4:
+    kind: Followup
+projections:
+  k_inf:
+    kind: ScalarProjection
+    path: /results/k_inf
+predicates:
+  - kind: OrderedSequenceShape
+    predicate_id: gd-s-shape
+    ordered_roles: [bu0, bu1, bu2, bu3, bu4]
+    metric: k_inf
+    shape:
+      kind: SShape
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0
+---
+kind: MrSpec
+mr_id: cpl-app-02
+name: More gadolinium suppresses initial reactivity
+description: Higher gadolinium content lowers beginning-of-life k_inf.
+tags:
+  equation_key: CoupledApplication
+  program_type: Deterministic
+  source_report_id: MR-Cpl-App-02
+  sut_key: openmc
+roles:
+  low_gd:
+    kind: Baseline
+  high_gd:
+    kind: Followup
+projections:
+  bol_k_inf:
+    kind: ScalarProjection
+    path: /results/bol_k_inf
+predicates:
+  - kind: BinaryComparison
+    predicate_id: gadolinium-suppression
+    left_role: high_gd
+    right_role: low_gd
+    metric: bol_k_inf
+    operator: Less
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 1.0e-8
+  rtol: 1.0e-5
+---
+kind: MrSpec
+mr_id: cpl-app-03
+name: Enrichment extends cycle length
+description: Higher enrichment should increase end-of-cycle burnup.
+tags:
+  equation_key: CoupledApplication
+  program_type: Deterministic
+  source_report_id: MR-Cpl-App-03
+  sut_key: openmc
+roles:
+  low_enrichment:
+    kind: Baseline
+  high_enrichment:
+    kind: Followup
+projections:
+  eoc_burnup:
+    kind: ScalarProjection
+    path: /results/eoc_burnup
+predicates:
+  - kind: BinaryComparison
+    predicate_id: enrichment-cycle-length
+    left_role: high_enrichment
+    right_role: low_enrichment
+    metric: eoc_burnup
+    operator: Greater
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 1.0e-8
+  rtol: 1.0e-5
+---
+kind: MrSpec
+mr_id: cpl-app-04
+name: ITC changes sign across boron conditions
+description: Ordered boron points should force an ITC sign change.
+tags:
+  equation_key: CoupledApplication
+  program_type: Deterministic
+  source_report_id: MR-Cpl-App-04
+  sut_key: openmc
+roles:
+  cb0:
+    kind: Baseline
+  cb1:
+    kind: Followup
+  cb2:
+    kind: Followup
+  cb3:
+    kind: Followup
+projections:
+  itc:
+    kind: ScalarProjection
+    path: /results/itc
+predicates:
+  - kind: OrderedSequenceShape
+    predicate_id: itc-sign-change
+    ordered_roles: [cb0, cb1, cb2, cb3]
+    metric: itc
+    shape:
+      kind: SignChange
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0
+---
+kind: MrSpec
+mr_id: cpl-app-05
+name: Shutdown margin has an extremum over burnup
+description: Ordered burnup points should make shutdown margin non-monotonic.
+tags:
+  equation_key: CoupledApplication
+  program_type: Deterministic
+  source_report_id: MR-Cpl-App-05
+  sut_key: openmc
+roles:
+  bu0:
+    kind: Baseline
+  bu1:
+    kind: Followup
+  bu2:
+    kind: Followup
+  bu3:
+    kind: Followup
+projections:
+  shutdown_margin:
+    kind: ScalarProjection
+    path: /results/shutdown_margin
+predicates:
+  - kind: OrderedSequenceShape
+    predicate_id: sdm-nonmonotonic
+    ordered_roles: [bu0, bu1, bu2, bu3]
+    metric: shutdown_margin
+    shape:
+      kind: NonMonotonic
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0
+---
+kind: MrSpec
+mr_id: cpl-app-06
+name: Power coefficient remains negative
+description: With feedback enabled, higher power should lower k_eff.
+tags:
+  equation_key: CoupledApplication
+  program_type: Deterministic
+  source_report_id: MR-Cpl-App-06
+  sut_key: openmc
+roles:
+  low_power:
+    kind: Baseline
+  high_power:
+    kind: Followup
+projections:
+  k_eff:
+    kind: ScalarProjection
+    path: /results/k_eff
+predicates:
+  - kind: BinaryComparison
+    predicate_id: negative-power-coefficient
+    left_role: high_power
+    right_role: low_power
+    metric: k_eff
+    operator: Less
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 1.0e-8
+  rtol: 1.0e-5
+---
+kind: MrSpec
+mr_id: cpl-app-07
+name: Differential boron worth is approximately constant
+description: Ordered small perturbations should yield a constant-slope differential-worth sequence.
+tags:
+  equation_key: CoupledApplication
+  program_type: Deterministic
+  source_report_id: MR-Cpl-App-07
+  sut_key: openmc
+roles:
+  dc0:
+    kind: Baseline
+  dc1:
+    kind: Followup
+  dc2:
+    kind: Followup
+  dc3:
+    kind: Followup
+projections:
+  differential_boron_worth:
+    kind: ScalarProjection
+    path: /results/differential_boron_worth
+predicates:
+  - kind: OrderedSequenceShape
+    predicate_id: boron-worth-constant
+    ordered_roles: [dc0, dc1, dc2, dc3]
+    metric: differential_boron_worth
+    shape:
+      kind: ConstantSlope
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0
+---
+kind: MrSpec
+mr_id: cpl-app-08
+name: Low-leakage loading lowers the peak factor
+description: Low-leakage loading should reduce the assembly power peak factor.
+tags:
+  equation_key: CoupledApplication
+  program_type: Deterministic
+  source_report_id: MR-Cpl-App-08
+  sut_key: openmc
+roles:
+  out_in:
+    kind: Baseline
+  low_leakage:
+    kind: Followup
+projections:
+  peak_factor:
+    kind: ScalarProjection
+    path: /results/peak_factor
+predicates:
+  - kind: BinaryComparison
+    predicate_id: loading-peak-order
+    left_role: low_leakage
+    right_role: out_in
+    metric: peak_factor
+    operator: Less
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 1.0e-8
+  rtol: 1.0e-5

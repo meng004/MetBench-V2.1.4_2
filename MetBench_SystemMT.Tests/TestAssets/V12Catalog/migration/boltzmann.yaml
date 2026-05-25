@@ -1,0 +1,259 @@
+kind: MrSpec
+mr_id: bol-phy-01
+name: Flux normalization invariance
+description: Scaling source power should not change k_eff.
+tags:
+  equation_key: Boltzmann
+  program_type: Deterministic
+  source_report_id: MR-Bol-Phy-01
+  sut_key: openmoc
+roles:
+  base_power:
+    kind: Baseline
+  scaled_power:
+    kind: Followup
+projections:
+  k_eff:
+    kind: ScalarProjection
+    path: /results/k_eff
+predicates:
+  - kind: BinaryComparison
+    predicate_id: normalization-invariant
+    left_role: scaled_power
+    right_role: base_power
+    metric: k_eff
+    operator: Equal
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 1.0e-8
+  rtol: 1.0e-5
+---
+kind: MrSpec
+mr_id: bol-phy-02
+name: Absorption cross section monotonicity
+description: Higher absorption lowers k_eff.
+tags:
+  equation_key: Boltzmann
+  program_type: Deterministic
+  source_report_id: MR-Bol-Phy-02
+  sut_key: openmoc
+roles:
+  low_absorption:
+    kind: Baseline
+  high_absorption:
+    kind: Followup
+projections:
+  k_eff:
+    kind: ScalarProjection
+    path: /results/k_eff
+predicates:
+  - kind: BinaryComparison
+    predicate_id: absorption-monotonic
+    left_role: high_absorption
+    right_role: low_absorption
+    metric: k_eff
+    operator: Less
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 1.0e-8
+  rtol: 1.0e-5
+---
+kind: MrSpec
+mr_id: bol-phy-03
+name: Fission cross section monotonicity
+description: Higher fission production raises k_eff.
+tags:
+  equation_key: Boltzmann
+  program_type: Deterministic
+  source_report_id: MR-Bol-Phy-03
+  sut_key: openmoc
+roles:
+  low_fission:
+    kind: Baseline
+  high_fission:
+    kind: Followup
+projections:
+  k_eff:
+    kind: ScalarProjection
+    path: /results/k_eff
+predicates:
+  - kind: BinaryComparison
+    predicate_id: fission-monotonic
+    left_role: high_fission
+    right_role: low_fission
+    metric: k_eff
+    operator: Greater
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 1.0e-8
+  rtol: 1.0e-5
+---
+kind: MrSpec
+mr_id: bol-phy-04
+name: P0 scattering overestimates hydrogenous k_eff
+description: P0 scattering should overpredict the P1 result in hydrogenous cases.
+tags:
+  equation_key: Boltzmann
+  program_type: CrossMethod
+  source_report_id: MR-Bol-Phy-04
+  sut_key: openmoc
+roles:
+  p0:
+    kind: Baseline
+    method_binding:
+      method_code: Scattering
+      variant: P0
+  p1:
+    kind: Followup
+    method_binding:
+      method_code: Scattering
+      variant: P1
+projections:
+  k_eff:
+    kind: ScalarProjection
+    path: /results/k_eff
+predicates:
+  - kind: CrossMethodComparison
+    predicate_id: p0-overpredicts
+    left_role: p0
+    right_role: p1
+    metric: k_eff
+    operator: Greater
+    tolerance:
+      kind: DeterministicTolerance
+      atol: 0.0
+      rtol: 0.0
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0
+---
+kind: MrSpec
+mr_id: bol-phy-05
+name: Vacuum boundary yields lower k_eff than reflection
+description: Vacuum leakage lowers k_eff compared with reflective boundaries.
+tags:
+  equation_key: Boltzmann
+  program_type: Deterministic
+  source_report_id: MR-Bol-Phy-05
+  sut_key: openmoc
+roles:
+  reflected_bc:
+    kind: Baseline
+  vacuum_bc:
+    kind: Followup
+projections:
+  k_eff:
+    kind: ScalarProjection
+    path: /results/k_eff
+predicates:
+  - kind: BinaryComparison
+    predicate_id: vacuum-vs-reflective
+    left_role: vacuum_bc
+    right_role: reflected_bc
+    metric: k_eff
+    operator: Less
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 1.0e-8
+  rtol: 1.0e-5
+---
+kind: MrSpec
+mr_id: bol-alg-01
+name: MOC track refinement convergence
+description: More tracks should reduce reference error.
+tags:
+  equation_key: Boltzmann
+  program_type: Deterministic
+  source_report_id: MR-Bol-Alg-01
+  sut_key: openmoc
+roles:
+  coarse_tracks:
+    kind: Baseline
+  fine_tracks:
+    kind: Followup
+  reference:
+    kind: Reference
+projections:
+  k_eff:
+    kind: ScalarProjection
+    path: /results/k_eff
+predicates:
+  - kind: ErrorMonotonic
+    predicate_id: moc-convergence
+    ordered_roles: [coarse_tracks, fine_tracks]
+    reference_role: reference
+    metric: k_eff
+    norm_kind: Absolute
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0
+---
+kind: MrSpec
+mr_id: bol-alg-02
+name: Monte Carlo variance follows one over sqrt N
+description: Quadrupling particle count should halve the standard error.
+tags:
+  equation_key: Boltzmann
+  program_type: Statistical
+  source_report_id: MR-Bol-Alg-02
+  sut_key: openmc
+roles:
+  n_particles:
+    kind: Baseline
+  four_n_particles:
+    kind: Followup
+projections:
+  k_eff_stats:
+    kind: StatisticalProjection
+    mean_path: /results/k_eff_mean
+    std_error_path: /results/k_eff_stderr
+predicates:
+  - kind: VarianceRatio
+    predicate_id: mc-variance-ratio
+    low_sample_role: n_particles
+    high_sample_role: four_n_particles
+    statistical_metric: k_eff_stats
+    sample_ratio:
+      kind: ConstantParameter
+      value: 4.0
+    tolerance:
+      kind: StatisticalTolerance
+      sigma_multiplier: 2.0
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0
+---
+kind: MrSpec
+mr_id: bol-alg-03
+name: Energy group refinement convergence
+description: More groups should reduce reference error.
+tags:
+  equation_key: Boltzmann
+  program_type: Deterministic
+  source_report_id: MR-Bol-Alg-03
+  sut_key: openmoc
+roles:
+  coarse_groups:
+    kind: Baseline
+  fine_groups:
+    kind: Followup
+  reference:
+    kind: Reference
+projections:
+  k_eff:
+    kind: ScalarProjection
+    path: /results/k_eff
+predicates:
+  - kind: ErrorMonotonic
+    predicate_id: group-convergence
+    ordered_roles: [coarse_groups, fine_groups]
+    reference_role: reference
+    metric: k_eff
+    norm_kind: Absolute
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0

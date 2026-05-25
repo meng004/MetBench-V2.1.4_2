@@ -13,10 +13,15 @@ public sealed class FieldEqualityKernel : IVerifierKernel<FieldEqualityPredicate
 
         if (left.RowCount != right.RowCount || left.ColumnCount != right.ColumnCount)
         {
-            return VerificationResult.InvalidSpec("Field dimensions must match before runtime evaluation.");
+            if (predicate.Pairing is not TransposeFieldPairing ||
+                left.RowCount != right.ColumnCount ||
+                left.ColumnCount != right.RowCount)
+            {
+                return VerificationResult.InvalidSpec("Field dimensions must match before runtime evaluation.");
+            }
         }
 
-        var (residual, worstRow, worstColumn, worstResidual) = ComputeResidual(left, right, predicate.Tolerance.Norm);
+        var (residual, worstRow, worstColumn, worstResidual) = ComputeResidual(left, right, predicate.Pairing, predicate.Tolerance.Norm);
         var tolerance = ComputeTolerance(right, predicate.Tolerance);
         var passed = residual <= tolerance;
         var failureReason = passed
@@ -39,6 +44,7 @@ public sealed class FieldEqualityKernel : IVerifierKernel<FieldEqualityPredicate
     private static (double Residual, int WorstRow, int WorstColumn, double WorstResidual) ComputeResidual(
         Field2DValue left,
         Field2DValue right,
+        FieldPairing pairing,
         string norm)
     {
         var sumSquares = 0.0;
@@ -50,7 +56,12 @@ public sealed class FieldEqualityKernel : IVerifierKernel<FieldEqualityPredicate
         {
             for (var column = 0; column < left.ColumnCount; column++)
             {
-                var delta = Math.Abs(left.Values[row, column] - right.Values[row, column]);
+                var rightValue = pairing switch
+                {
+                    TransposeFieldPairing => right.Values[column, row],
+                    _ => right.Values[row, column]
+                };
+                var delta = Math.Abs(left.Values[row, column] - rightValue);
                 sumSquares += delta * delta;
                 if (delta > worstResidual)
                 {

@@ -1,0 +1,557 @@
+kind: MrSpec
+mr_id: dif-phy-01
+name: Boron concentration monotonicity
+description: Higher boron concentration lowers k_eff.
+tags:
+  equation_key: Diffusion
+  program_type: Deterministic
+  source_report_id: MR-Dif-Phy-01
+  sut_key: diffusion_1d
+roles:
+  low_boron:
+    kind: Baseline
+  high_boron:
+    kind: Followup
+projections:
+  k_eff:
+    kind: ScalarProjection
+    path: /results/k_eff
+predicates:
+  - kind: BinaryComparison
+    predicate_id: boron-monotonic
+    left_role: high_boron
+    right_role: low_boron
+    metric: k_eff
+    operator: Less
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 1.0e-8
+  rtol: 1.0e-5
+---
+kind: MrSpec
+mr_id: dif-phy-02
+name: Critical boron decreases with burnup
+description: Higher burnup lowers the critical boron concentration.
+tags:
+  equation_key: Diffusion
+  program_type: Deterministic
+  source_report_id: MR-Dif-Phy-02
+  sut_key: diffusion_1d
+roles:
+  low_burnup:
+    kind: Baseline
+  high_burnup:
+    kind: Followup
+projections:
+  critical_boron:
+    kind: ScalarProjection
+    path: /results/critical_boron
+predicates:
+  - kind: BinaryComparison
+    predicate_id: critical-boron-burnup
+    left_role: high_burnup
+    right_role: low_burnup
+    metric: critical_boron
+    operator: Less
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 1.0e-6
+  rtol: 1.0e-4
+---
+kind: MrSpec
+mr_id: dif-phy-03
+name: Diffusion adjoint proportionality
+description: Forward and adjoint flux fields should be proportional.
+tags:
+  equation_key: Diffusion
+  program_type: Deterministic
+  source_report_id: MR-Dif-Phy-03
+  sut_key: diffusion_1d
+roles:
+  forward:
+    kind: Baseline
+  adjoint:
+    kind: Followup
+projections:
+  flux_map:
+    kind: Field2DProjection
+    path: /results/flux_map
+    rows: 2
+    columns: 2
+predicates:
+  - kind: FieldProportionality
+    predicate_id: adjoint-proportional
+    left_role: adjoint
+    right_role: forward
+    left_metric: flux_map
+    right_metric: flux_map
+    estimator: LeastSquaresThroughOrigin
+    tolerance:
+      kind: FieldNormTolerance
+      norm: L2
+      atol: 1.0e-6
+      rtol: 5.0e-2
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 1.0e-8
+  rtol: 1.0e-5
+---
+kind: MrSpec
+mr_id: dif-phy-04
+name: Control rod insertion lowers k_eff
+description: Rod-in state should have lower k_eff than ARO.
+tags:
+  equation_key: Diffusion
+  program_type: Deterministic
+  source_report_id: MR-Dif-Phy-04
+  sut_key: diffusion_1d
+roles:
+  aro:
+    kind: Baseline
+  rod_in:
+    kind: Followup
+projections:
+  k_eff:
+    kind: ScalarProjection
+    path: /results/k_eff
+predicates:
+  - kind: BinaryComparison
+    predicate_id: rod-worth-positive
+    left_role: rod_in
+    right_role: aro
+    metric: k_eff
+    operator: Less
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 1.0e-8
+  rtol: 1.0e-5
+---
+kind: MrSpec
+mr_id: dif-phy-05
+name: Control rod shadowing is subadditive
+description: Combined rod worth should stay below the sum of separate worths.
+tags:
+  equation_key: Diffusion
+  program_type: Deterministic
+  source_report_id: MR-Dif-Phy-05
+  sut_key: diffusion_1d
+roles:
+  rod_a:
+    kind: Baseline
+projections:
+  shielding_gap:
+    kind: ScalarProjection
+    path: /results/shielding_gap
+predicates:
+  - kind: Subadditive
+    predicate_id: rod-shadowing
+    delta_a: 0.08
+    delta_b: 0.05
+    delta_ab: 0.11
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0
+---
+kind: MrSpec
+mr_id: dif-phy-06
+name: Symmetric loading yields symmetric power field
+description: Symmetric cases should match after transpose pairing.
+tags:
+  equation_key: Diffusion
+  program_type: Deterministic
+  source_report_id: MR-Dif-Phy-06
+  sut_key: diffusion_1d
+roles:
+  source:
+    kind: Baseline
+  mirror:
+    kind: Followup
+projections:
+  power_map:
+    kind: Field2DProjection
+    path: /results/power_map
+    rows: 3
+    columns: 3
+predicates:
+  - kind: FieldEquality
+    predicate_id: transpose-symmetry
+    left_role: source
+    right_role: mirror
+    left_metric: power_map
+    right_metric: power_map
+    pairing:
+      kind: Transpose
+    tolerance:
+      kind: FieldNormTolerance
+      norm: LInf
+      atol: 1.0e-6
+      rtol: 1.0e-3
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0
+---
+kind: MrSpec
+mr_id: dif-phy-07
+name: ADF equals one degenerates to no ADF
+description: ADF=1 should match the no-ADF solution.
+tags:
+  equation_key: Diffusion
+  program_type: Deterministic
+  source_report_id: MR-Dif-Phy-07
+  sut_key: diffusion_1d
+roles:
+  no_adf:
+    kind: Baseline
+  adf_one:
+    kind: Followup
+projections:
+  k_eff:
+    kind: ScalarProjection
+    path: /results/k_eff
+predicates:
+  - kind: BinaryComparison
+    predicate_id: adf-degenerate
+    left_role: adf_one
+    right_role: no_adf
+    metric: k_eff
+    operator: Equal
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 1.0e-8
+  rtol: 1.0e-5
+---
+kind: MrSpec
+mr_id: dif-phy-09
+name: Differential rod worth follows a bell shape
+description: Ordered insertion-depth runs should form a bell-shaped differential-worth sequence.
+tags:
+  equation_key: Diffusion
+  program_type: Deterministic
+  source_report_id: MR-Dif-Phy-09
+  sut_key: diffusion_1d
+roles:
+  h0:
+    kind: Baseline
+  h1:
+    kind: Followup
+  h2:
+    kind: Followup
+  h3:
+    kind: Followup
+  h4:
+    kind: Followup
+projections:
+  diff_worth:
+    kind: ScalarProjection
+    path: /results/diff_worth
+predicates:
+  - kind: OrderedSequenceShape
+    predicate_id: bell-shape
+    ordered_roles: [h0, h1, h2, h3, h4]
+    metric: diff_worth
+    shape:
+      kind: BellShape
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0
+---
+kind: MrSpec
+mr_id: dif-phy-10
+name: Negative Doppler coefficient
+description: Higher fuel temperature lowers k_eff.
+tags:
+  equation_key: Diffusion
+  program_type: Deterministic
+  source_report_id: MR-Dif-Phy-10
+  sut_key: diffusion_1d
+roles:
+  cold_fuel:
+    kind: Baseline
+  hot_fuel:
+    kind: Followup
+projections:
+  k_eff:
+    kind: ScalarProjection
+    path: /results/k_eff
+predicates:
+  - kind: BinaryComparison
+    predicate_id: negative-doppler
+    left_role: hot_fuel
+    right_role: cold_fuel
+    metric: k_eff
+    operator: Less
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 1.0e-8
+  rtol: 1.0e-5
+---
+kind: MrSpec
+mr_id: dif-phy-11
+name: Negative moderator temperature coefficient
+description: In the low-boron regime, hotter moderator lowers k_eff.
+tags:
+  equation_key: Diffusion
+  program_type: Deterministic
+  source_report_id: MR-Dif-Phy-11
+  sut_key: diffusion_1d
+roles:
+  cold_moderator:
+    kind: Baseline
+  hot_moderator:
+    kind: Followup
+projections:
+  k_eff:
+    kind: ScalarProjection
+    path: /results/k_eff
+predicates:
+  - kind: BinaryComparison
+    predicate_id: negative-mtc
+    left_role: hot_moderator
+    right_role: cold_moderator
+    metric: k_eff
+    operator: Less
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 1.0e-8
+  rtol: 1.0e-5
+---
+kind: MrSpec
+mr_id: dif-phy-12
+name: Transport diffusion consistency
+description: Transport and diffusion should agree in the weak-absorption regime.
+tags:
+  equation_key: Diffusion
+  program_type: CrossMethod
+  source_report_id: MR-Dif-Phy-12
+  sut_key: openmoc
+roles:
+  transport:
+    kind: Baseline
+    method_binding:
+      method_code: Transport
+  diffusion:
+    kind: Followup
+    method_binding:
+      method_code: Diffusion
+projections:
+  k_eff:
+    kind: ScalarProjection
+    path: /results/k_eff
+predicates:
+  - kind: CrossMethodComparison
+    predicate_id: transport-diffusion-consistency
+    left_role: transport
+    right_role: diffusion
+    metric: k_eff
+    operator: Equal
+    tolerance:
+      kind: DeterministicTolerance
+      atol: 5.0e-4
+      rtol: 5.0e-4
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0
+---
+kind: MrSpec
+mr_id: dif-phy-13
+name: Diffusion overpredicts roded k_eff
+description: Diffusion should overpredict the roded transport solution.
+tags:
+  equation_key: Diffusion
+  program_type: CrossMethod
+  source_report_id: MR-Dif-Phy-13
+  sut_key: openmoc
+roles:
+  diffusion:
+    kind: Baseline
+    method_binding:
+      method_code: Diffusion
+  transport:
+    kind: Followup
+    method_binding:
+      method_code: Transport
+projections:
+  k_eff:
+    kind: ScalarProjection
+    path: /results/k_eff
+predicates:
+  - kind: CrossMethodComparison
+    predicate_id: diffusion-overpredicts
+    left_role: diffusion
+    right_role: transport
+    metric: k_eff
+    operator: Greater
+    tolerance:
+      kind: DeterministicTolerance
+      atol: 0.0
+      rtol: 0.0
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0
+---
+kind: MrSpec
+mr_id: dif-alg-01
+name: Nodal refinement convergence
+description: Finer nodal discretization should reduce reference error.
+tags:
+  equation_key: Diffusion
+  program_type: Deterministic
+  source_report_id: MR-Dif-Alg-01
+  sut_key: diffusion_1d
+roles:
+  n16:
+    kind: Baseline
+  n32:
+    kind: Followup
+  reference:
+    kind: Reference
+projections:
+  k_eff:
+    kind: ScalarProjection
+    path: /results/k_eff
+predicates:
+  - kind: ErrorMonotonic
+    predicate_id: nodal-convergence
+    ordered_roles: [n16, n32]
+    reference_role: reference
+    metric: k_eff
+    norm_kind: Absolute
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0
+---
+kind: MrSpec
+mr_id: dif-alg-02
+name: NEM order convergence
+description: Higher-order NEM should reduce reference error.
+tags:
+  equation_key: Diffusion
+  program_type: Deterministic
+  source_report_id: MR-Dif-Alg-02
+  sut_key: diffusion_1d
+roles:
+  nem2:
+    kind: Baseline
+  nem4:
+    kind: Followup
+  reference:
+    kind: Reference
+projections:
+  k_eff:
+    kind: ScalarProjection
+    path: /results/k_eff
+predicates:
+  - kind: ErrorMonotonic
+    predicate_id: nem-order-convergence
+    ordered_roles: [nem2, nem4]
+    reference_role: reference
+    metric: k_eff
+    norm_kind: Absolute
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0
+---
+kind: MrSpec
+mr_id: dif-alg-03
+name: NEM and FDM agree in the fine-mesh limit
+description: Two discretizations should converge to the same k_eff.
+tags:
+  equation_key: Diffusion
+  program_type: CrossMethod
+  source_report_id: MR-Dif-Alg-03
+  sut_key: diffusion_1d
+roles:
+  nem:
+    kind: Baseline
+    method_binding:
+      method_code: NEM
+  fdm:
+    kind: Followup
+    method_binding:
+      method_code: FDM
+projections:
+  k_eff:
+    kind: ScalarProjection
+    path: /results/k_eff
+predicates:
+  - kind: CrossMethodComparison
+    predicate_id: nem-fdm-limit
+    left_role: nem
+    right_role: fdm
+    metric: k_eff
+    operator: Equal
+    tolerance:
+      kind: DeterministicTolerance
+      atol: 1.0e-5
+      rtol: 1.0e-4
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0
+---
+kind: MrSpec
+mr_id: dif-alg-04
+name: Coarse FDM underestimates k_eff
+description: Finer mesh should not reduce the computed k_eff.
+tags:
+  equation_key: Diffusion
+  program_type: Deterministic
+  source_report_id: MR-Dif-Alg-04
+  sut_key: diffusion_1d
+roles:
+  coarse_mesh:
+    kind: Baseline
+  fine_mesh:
+    kind: Followup
+projections:
+  k_eff:
+    kind: ScalarProjection
+    path: /results/k_eff
+predicates:
+  - kind: BinaryComparison
+    predicate_id: coarse-underestimate
+    left_role: fine_mesh
+    right_role: coarse_mesh
+    metric: k_eff
+    operator: Greater
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 1.0e-8
+  rtol: 1.0e-5
+---
+kind: MrSpec
+mr_id: dif-alg-05
+name: CMFD acceleration preserves the solution
+description: Turning CMFD on should not change k_eff.
+tags:
+  equation_key: Diffusion
+  program_type: Deterministic
+  source_report_id: MR-Dif-Alg-05
+  sut_key: diffusion_1d
+roles:
+  cmfd_off:
+    kind: Baseline
+  cmfd_on:
+    kind: Followup
+projections:
+  k_eff:
+    kind: ScalarProjection
+    path: /results/k_eff
+predicates:
+  - kind: BinaryComparison
+    predicate_id: cmfd-invariant
+    left_role: cmfd_on
+    right_role: cmfd_off
+    metric: k_eff
+    operator: Equal
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 1.0e-8
+  rtol: 1.0e-5

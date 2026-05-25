@@ -1,0 +1,27 @@
+kind: MrSpec
+mr_id: golden-fail-cpl-app-06
+name: Golden fail fixture for negative power coefficient
+description: Valid MR spec intended to evaluate to Failed when higher-power k_eff is not lower.
+tags:
+  equation_key: CoupledApplication
+  program_type: Deterministic
+roles:
+  low_power:
+    kind: Baseline
+  high_power:
+    kind: Followup
+projections:
+  k_eff:
+    kind: ScalarProjection
+    path: /results/k_eff
+predicates:
+  - kind: BinaryComparison
+    predicate_id: negative-power-coefficient
+    left_role: high_power
+    right_role: low_power
+    metric: k_eff
+    operator: Less
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 1.0e-8
+  rtol: 1.0e-5

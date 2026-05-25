@@ -1,0 +1,105 @@
+kind: PropertySpec
+property_id: dif-phy-08
+name: Edge assemblies leak more power
+description: Edge power should stay below center-average power.
+tags:
+  equation_key: Diffusion
+  program_type: Deterministic
+case:
+  kind: Base
+projections:
+  edge_to_center_ratio:
+    kind: ScalarProjection
+    path: /results/edge_to_center_ratio
+assertions:
+  - kind: BoundProperty
+    predicate_id: edge-less-than-center
+    metric: edge_to_center_ratio
+    operator: Less
+    bound:
+      kind: ConstantParameter
+      value: 1.0
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0
+---
+kind: PropertySpec
+property_id: bur-phy-04
+name: Iodine pit follows the expected temporal shape
+description: Xenon-induced reactivity should dip and recover.
+tags:
+  equation_key: Bateman
+  program_type: Deterministic
+case:
+  kind: Base
+projections:
+  iodine_pit_history:
+    kind: SequenceProjection
+    path: /results/iodine_pit_history
+assertions:
+  - kind: ShapeProperty
+    predicate_id: iodine-pit-shape
+    metric: iodine_pit_history
+    shape:
+      kind: BellShape
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0
+---
+kind: PropertySpec
+property_id: res-alg-03
+name: Dancoff factor stays inside the physical interval
+description: Dancoff factor must remain within [0, 1].
+tags:
+  equation_key: Resonance
+  program_type: Deterministic
+case:
+  kind: Base
+projections:
+  dancoff:
+    kind: ScalarProjection
+    path: /results/dancoff
+assertions:
+  - kind: BoundProperty
+    predicate_id: dancoff-upper-bound
+    metric: dancoff
+    operator: Less
+    bound:
+      kind: ConstantParameter
+      value: 1.0
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0
+---
+kind: PropertySpec
+property_id: kin-phy-02
+name: Power history follows exponential growth
+description: Positive-reactivity power history should follow the expected exponential rate.
+tags:
+  equation_key: Kinetics
+  program_type: Deterministic
+case:
+  kind: Base
+projections:
+  power_history:
+    kind: SequenceProjection
+    path: /results/power_history
+assertions:
+  - kind: ShapeProperty
+    predicate_id: exponential-growth
+    metric: power_history
+    shape:
+      kind: ExponentialGrowth
+      expected_rate:
+        kind: ConstantParameter
+        value: 0.69314718056
+      rate_tolerance: 0.05
+      residual_rel_tolerance: 0.05
+      min_r_squared: 0.99
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0

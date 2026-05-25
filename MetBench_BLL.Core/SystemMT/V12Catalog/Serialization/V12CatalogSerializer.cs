@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using MetBench_BLL.SystemMT.V12Catalog.Lint;
 using MetBench_BLL.SystemMT.V12Catalog.Schema;
 using MetBench_BLL.SystemMT.V12Catalog.Specs;
@@ -20,6 +21,7 @@ public static class V12CatalogSerializer
         PropertyNameCaseInsensitive = true,
         ReadCommentHandling = JsonCommentHandling.Skip,
         AllowTrailingCommas = true,
+        Converters = { new JsonStringEnumConverter() }
     };
 
     public static MrSpec DeserializeMrSpec(string yaml)

@@ -1,0 +1,160 @@
+kind: MrSpec
+mr_id: bur-phy-01
+name: Pure decay mass conservation
+description: Total mass number should be conserved during pure decay.
+tags:
+  equation_key: Bateman
+  program_type: Deterministic
+  source_report_id: MR-Bur-Phy-01
+  sut_key: decay_chain
+roles:
+  t1:
+    kind: Baseline
+  t2:
+    kind: Followup
+projections:
+  nuclides:
+    kind: Field2DProjection
+    path: /results/nuclides
+    rows: 1
+    columns: 4
+predicates:
+  - kind: DerivedInvariant
+    predicate_id: mass-conserved
+    left_role: t1
+    right_role: t2
+    left_metric: nuclides
+    right_metric: nuclides
+    derived_metric: mass_number_sum
+    tolerance:
+      kind: DeterministicTolerance
+      atol: 1.0e-8
+      rtol: 1.0e-6
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0
+---
+kind: MrSpec
+mr_id: bur-phy-02
+name: Step splitting invariance
+description: One full step should match two half-steps.
+tags:
+  equation_key: Bateman
+  program_type: Deterministic
+  source_report_id: MR-Bur-Phy-02
+  sut_key: decay_chain
+roles:
+  full_step:
+    kind: Baseline
+  split_step:
+    kind: Followup
+projections:
+  total_density:
+    kind: ScalarProjection
+    path: /results/total_density
+predicates:
+  - kind: BinaryComparison
+    predicate_id: step-splitting
+    left_role: split_step
+    right_role: full_step
+    metric: total_density
+    operator: Equal
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 1.0e-8
+  rtol: 1.0e-6
+---
+kind: MrSpec
+mr_id: bur-phy-03
+name: Iodine pit depth increases with power
+description: Higher power should deepen the iodine pit.
+tags:
+  equation_key: Bateman
+  program_type: Deterministic
+  source_report_id: MR-Bur-Phy-03
+  sut_key: decay_chain
+roles:
+  low_power:
+    kind: Baseline
+  high_power:
+    kind: Followup
+projections:
+  pit_depth:
+    kind: ScalarProjection
+    path: /results/pit_depth
+predicates:
+  - kind: BinaryComparison
+    predicate_id: pit-depth-monotonic
+    left_role: high_power
+    right_role: low_power
+    metric: pit_depth
+    operator: Greater
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 1.0e-8
+  rtol: 1.0e-5
+---
+kind: MrSpec
+mr_id: bur-alg-01
+name: CRAM order convergence
+description: Higher-order CRAM should reduce reference error.
+tags:
+  equation_key: Bateman
+  program_type: Deterministic
+  source_report_id: MR-Bur-Alg-01
+  sut_key: decay_chain
+roles:
+  cram16:
+    kind: Baseline
+  cram48:
+    kind: Followup
+  reference:
+    kind: Reference
+projections:
+  total_density:
+    kind: ScalarProjection
+    path: /results/total_density
+predicates:
+  - kind: ErrorMonotonic
+    predicate_id: cram-order-convergence
+    ordered_roles: [cram16, cram48]
+    reference_role: reference
+    metric: total_density
+    norm_kind: Absolute
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0
+---
+kind: MrSpec
+mr_id: bur-alg-02
+name: CRAM dominates TTA on the closed chain
+description: CRAM should stay closer to the reference than TTA.
+tags:
+  equation_key: Bateman
+  program_type: Deterministic
+  source_report_id: MR-Bur-Alg-02
+  sut_key: decay_chain
+roles:
+  tta:
+    kind: Baseline
+  cram:
+    kind: Followup
+  reference:
+    kind: Reference
+projections:
+  total_density:
+    kind: ScalarProjection
+    path: /results/total_density
+predicates:
+  - kind: ErrorMonotonic
+    predicate_id: cram-vs-tta
+    ordered_roles: [tta, cram]
+    reference_role: reference
+    metric: total_density
+    norm_kind: Absolute
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0

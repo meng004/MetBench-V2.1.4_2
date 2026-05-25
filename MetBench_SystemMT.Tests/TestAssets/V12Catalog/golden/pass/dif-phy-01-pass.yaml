@@ -1,0 +1,27 @@
+kind: MrSpec
+mr_id: golden-pass-dif-phy-01
+name: Golden pass fixture for boron monotonicity
+description: Valid MR spec intended to evaluate to Passed when observables are supplied consistently.
+tags:
+  equation_key: Diffusion
+  program_type: Deterministic
+roles:
+  low_boron:
+    kind: Baseline
+  high_boron:
+    kind: Followup
+projections:
+  k_eff:
+    kind: ScalarProjection
+    path: /results/k_eff
+predicates:
+  - kind: BinaryComparison
+    predicate_id: boron-monotonic
+    left_role: high_boron
+    right_role: low_boron
+    metric: k_eff
+    operator: Less
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 1.0e-8
+  rtol: 1.0e-5

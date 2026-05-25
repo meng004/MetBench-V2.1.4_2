@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using MetBench_BLL.SystemMT.V12Catalog.Specs;
 using MetBench_BLL.SystemMT.V12Catalog.Validation;
 
@@ -11,7 +12,9 @@ public sealed class PredicateDispatcher : IPredicateDispatcher
     private readonly ScaledEqualityKernel _scaled = new();
     private readonly CrossMethodComparisonKernel _crossMethod = new();
     private readonly ErrorMonotonicKernel _errorMonotonic = new();
+    private readonly OrderedSequenceShapeKernel _orderedSequenceShape = new();
     private readonly VarianceRatioKernel _varianceRatio = new();
+    private readonly SubadditiveKernel _subadditive = new();
     private readonly FieldEqualityKernel _fieldEquality = new();
     private readonly FieldProportionalityKernel _fieldProportionality = new();
     private readonly DerivedInvariantKernel _derivedInvariant = new();
@@ -40,7 +43,9 @@ public sealed class PredicateDispatcher : IPredicateDispatcher
             ScaledEqualityPredicate scaled => _scaled.Evaluate(scaled, context),
             CrossMethodComparisonPredicate crossMethod => _crossMethod.Evaluate(crossMethod, context),
             ErrorMonotonicPredicate monotonic => _errorMonotonic.Evaluate(monotonic, context),
+            OrderedSequenceShapePredicate orderedShape => _orderedSequenceShape.Evaluate(orderedShape, context),
             VarianceRatioPredicate varianceRatio => _varianceRatio.Evaluate(varianceRatio, context),
+            SubadditivePredicate subadditive => _subadditive.Evaluate(subadditive, context),
             FieldEqualityPredicate field => _fieldEquality.Evaluate(field, context),
             FieldProportionalityPredicate fieldProportionality => _fieldProportionality.Evaluate(fieldProportionality, context),
             DerivedInvariantPredicate derived => _derivedInvariant.Evaluate(derived, context),
@@ -63,9 +68,12 @@ public sealed class PredicateDispatcher : IPredicateDispatcher
             ErrorMonotonicPredicate monotonic =>
                 context.TryGetMetric(monotonic.ReferenceRole, monotonic.Metric, out _) &&
                 HasAllOrderedRoleMetrics(monotonic, context),
+            OrderedSequenceShapePredicate orderedShape =>
+                HasAllOrderedRoleMetrics(orderedShape.OrderedRoles, orderedShape.Metric, context),
             VarianceRatioPredicate varianceRatio =>
                 context.TryGetStatistical(varianceRatio.LowSampleRole, varianceRatio.StatisticalMetric, out _) &&
                 context.TryGetStatistical(varianceRatio.HighSampleRole, varianceRatio.StatisticalMetric, out _),
+            SubadditivePredicate => true,
             FieldEqualityPredicate field =>
                 context.TryGetField(field.LeftRole, field.LeftMetric, out _) &&
                 context.TryGetField(field.RightRole, field.RightMetric, out _),
@@ -80,9 +88,17 @@ public sealed class PredicateDispatcher : IPredicateDispatcher
 
     private static bool HasAllOrderedRoleMetrics(ErrorMonotonicPredicate monotonic, VerificationContext context)
     {
-        foreach (var role in monotonic.OrderedRoles)
+        return HasAllOrderedRoleMetrics(monotonic.OrderedRoles, monotonic.Metric, context);
+    }
+
+    private static bool HasAllOrderedRoleMetrics(
+        IReadOnlyList<string> orderedRoles,
+        string metric,
+        VerificationContext context)
+    {
+        foreach (var role in orderedRoles)
         {
-            if (!context.TryGetMetric(role, monotonic.Metric, out _))
+            if (!context.TryGetMetric(role, metric, out _))
             {
                 return false;
             }
