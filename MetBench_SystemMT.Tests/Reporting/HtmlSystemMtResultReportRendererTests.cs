@@ -221,4 +221,228 @@ public sealed class HtmlSystemMtResultReportRendererTests
         Assert.Contains("553", html);
         Assert.Contains("464", html);
     }
+
+    // ---- PR-126: ExecutionEvidence.TypedVerification projection ----
+
+    private static readonly Guid TestRecordId = Guid.Parse("507f1f77-bcf8-6cd7-9943-9011deadbeef");
+
+    private static ExecutionEvidence MakeEvidence(TypedVerificationEvidence? typed)
+        => new()
+        {
+            IdEvidence = Guid.NewGuid(),
+            ExecutionId = TestRecordId,
+            TypedVerification = typed,
+        };
+
+    [Fact]
+    public void Render_without_evidence_dictionary_matches_legacy_overload_byte_identical()
+    {
+        var renderer = new HtmlSystemMtResultReportRenderer();
+        var record = MakeRecord();
+        // Pin GeneratedAt so the two Render calls share a single timestamp;
+        // otherwise DateTimeOffset.UtcNow differs by microseconds between calls.
+        var ctx = new ReportContext(
+            Title: "MetBench System-Level MT Run Report",
+            GeneratedAt: new DateTimeOffset(2026, 6, 1, 8, 0, 0, TimeSpan.Zero));
+        var legacy = renderer.Render(new[] { record }, ctx);
+        var evidenceAware = renderer.Render(new[] { record }, evidenceByExecutionId: null, ctx);
+
+        Assert.Equal(legacy, evidenceAware);
+    }
+
+    [Fact]
+    public void Render_with_empty_evidence_dictionary_omits_typed_section()
+    {
+        var renderer = new HtmlSystemMtResultReportRenderer();
+        var record = MakeRecord();
+        var html = renderer.Render(
+            new[] { record },
+            evidenceByExecutionId: new Dictionary<Guid, ExecutionEvidence>());
+
+        Assert.DoesNotContain("Typed status", html);
+        Assert.DoesNotContain("Spec ID", html);
+    }
+
+    [Fact]
+    public void Render_record_with_matching_typed_mr_evidence_surfaces_diagnostic()
+    {
+        var renderer = new HtmlSystemMtResultReportRenderer();
+        var record = MakeRecord();
+        var evidence = MakeEvidence(new TypedVerificationEvidence
+        {
+            SpecId = "heat-equation-amplitude",
+            SpecKind = "MrSpec",
+            PredicateId = "amplitude-greater",
+            PredicateKind = "BinaryComparison",
+            Status = "Passed",
+            Passed = true,
+            Diagnostic = new TypedDiagnosticEvidence
+            {
+                Expected = 1.13,
+                Actual = 1.51,
+                Residual = 0.38,
+                Tolerance = 1e-6,
+            },
+        });
+
+        var html = renderer.Render(
+            new[] { record },
+            new Dictionary<Guid, ExecutionEvidence> { [TestRecordId] = evidence });
+
+        Assert.Contains("Spec ID", html);
+        Assert.Contains("heat-equation-amplitude", html);
+        Assert.Contains("Spec kind", html);
+        Assert.Contains("MrSpec", html);
+        Assert.Contains("Predicate", html);
+        Assert.Contains("amplitude-greater", html);
+        Assert.Contains("BinaryComparison", html);
+        Assert.Contains("Typed status", html);
+        // Status "Passed" appears in the typed section; the existing PASS badge already exists.
+        Assert.Contains(">Passed<", html);
+        Assert.Contains("Expected", html);
+        Assert.Contains("Actual", html);
+        Assert.Contains("Residual", html);
+        Assert.Contains("Tolerance", html);
+        Assert.Contains("1.13", html);
+        Assert.Contains("1.51", html);
+        Assert.Contains("0.38", html);
+        Assert.Contains("1E-06", html); // invariant-culture "G" of 1e-6
+    }
+
+    [Fact]
+    public void Render_record_with_skipped_evidence_shows_reason_and_omits_diagnostic()
+    {
+        var renderer = new HtmlSystemMtResultReportRenderer();
+        var record = MakeRecord();
+        var evidence = MakeEvidence(new TypedVerificationEvidence
+        {
+            SpecId = "heat-equation-amplitude",
+            SpecKind = "MrSpec",
+            PredicateId = "amplitude-greater",
+            PredicateKind = "BinaryComparison",
+            Status = "SkippedMissingObservable",
+            Passed = null,
+            Diagnostic = null,
+            SkipOrInvalidReason = "Required observable is missing from role outputs.",
+        });
+
+        var html = renderer.Render(
+            new[] { record },
+            new Dictionary<Guid, ExecutionEvidence> { [TestRecordId] = evidence });
+
+        Assert.Contains("Typed status", html);
+        Assert.Contains("SkippedMissingObservable", html);
+        Assert.Contains("Skip reason", html);
+        Assert.Contains("Required observable is missing", html);
+        Assert.DoesNotContain("<dt>Expected</dt>", html);
+        Assert.DoesNotContain("<dt>Actual</dt>", html);
+        Assert.DoesNotContain("<dt>Residual</dt>", html);
+        Assert.DoesNotContain("<dt>Tolerance</dt>", html);
+    }
+
+    [Fact]
+    public void Render_record_with_property_spec_evidence_lists_predicates_in_order()
+    {
+        var renderer = new HtmlSystemMtResultReportRenderer();
+        var record = MakeRecord();
+        var evidence = MakeEvidence(new TypedVerificationEvidence
+        {
+            SpecId = "neutron-flux-positivity",
+            SpecKind = "PropertySpec",
+            Status = "Held",
+            Passed = true,
+            PropertyPredicates = new List<TypedPropertyPredicateEvidence>
+            {
+                new()
+                {
+                    PredicateId = "phi-nonneg",
+                    PredicateKind = "Bound",
+                    Status = "Held",
+                    Residual = 0.0,
+                    Tolerance = 1e-12,
+                    ExpectedJson = "{\"lower\":0}",
+                    ActualJson = "0.5",
+                },
+                new()
+                {
+                    PredicateId = "phi-shape-monotone",
+                    PredicateKind = "Shape",
+                    Status = "Violated",
+                    Residual = 0.03,
+                    Tolerance = 0.01,
+                    Reason = "Decrease at index 4",
+                    ExpectedJson = "\"NonIncreasing\"",
+                    ActualJson = "[1.0,0.9,0.7,0.8]",
+                },
+            },
+        });
+
+        var html = renderer.Render(
+            new[] { record },
+            new Dictionary<Guid, ExecutionEvidence> { [TestRecordId] = evidence });
+
+        Assert.Contains("PropertySpec", html);
+        Assert.Contains("neutron-flux-positivity", html);
+        Assert.Contains("Property predicates", html);
+        Assert.Contains("phi-nonneg", html);
+        Assert.Contains("phi-shape-monotone", html);
+        // Order: nonneg must precede shape-monotone in the rendered HTML.
+        var nonnegIdx = html.IndexOf("phi-nonneg", StringComparison.Ordinal);
+        var shapeIdx = html.IndexOf("phi-shape-monotone", StringComparison.Ordinal);
+        Assert.True(nonnegIdx > 0 && shapeIdx > nonnegIdx,
+            $"Property predicates must render in source order; got nonnegIdx={nonnegIdx}, shapeIdx={shapeIdx}.");
+        Assert.Contains("Decrease at index 4", html);
+        // MR-only fields must not leak into a PropertySpec block.
+        Assert.DoesNotContain("amplitude-greater", html);
+    }
+
+    [Fact]
+    public void Render_unmatched_record_omits_typed_section_when_only_other_records_have_evidence()
+    {
+        var renderer = new HtmlSystemMtResultReportRenderer();
+        var record = MakeRecord();
+        // Evidence keyed by a DIFFERENT executionId -- record has no match.
+        var unrelatedId = Guid.NewGuid();
+        var evidence = MakeEvidence(new TypedVerificationEvidence
+        {
+            SpecId = "unrelated",
+            SpecKind = "MrSpec",
+            Status = "Passed",
+            Passed = true,
+        });
+        evidence.ExecutionId = unrelatedId;
+
+        var html = renderer.Render(
+            new[] { record },
+            new Dictionary<Guid, ExecutionEvidence> { [unrelatedId] = evidence });
+
+        Assert.DoesNotContain("Typed status", html);
+        Assert.DoesNotContain("unrelated", html);
+    }
+
+    [Fact]
+    public void Render_evidence_aware_escapes_user_supplied_strings()
+    {
+        var renderer = new HtmlSystemMtResultReportRenderer();
+        var record = MakeRecord();
+        var evidence = MakeEvidence(new TypedVerificationEvidence
+        {
+            SpecId = "<script>alert('xss')</script>",
+            SpecKind = "MrSpec",
+            PredicateId = "x & y",
+            PredicateKind = "BinaryComparison",
+            Status = "InvalidSpec",
+            Passed = null,
+            SkipOrInvalidReason = "<em>broken</em> & malformed",
+        });
+
+        var html = renderer.Render(
+            new[] { record },
+            new Dictionary<Guid, ExecutionEvidence> { [TestRecordId] = evidence });
+
+        Assert.DoesNotContain("<script>alert('xss')</script>", html);
+        Assert.Contains("&lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt;", html);
+        Assert.Contains("x &amp; y", html);
+        Assert.Contains("&lt;em&gt;broken&lt;/em&gt; &amp; malformed", html);
+    }
 }
