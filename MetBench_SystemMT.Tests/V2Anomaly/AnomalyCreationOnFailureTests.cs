@@ -209,6 +209,78 @@ public sealed class AnomalyCreationOnFailureTests
         Assert.Null(recording.Recorded[0].TypedVerificationSummary);
     }
 
+    [Theory]
+    [InlineData("SkippedMissingObservable")]
+    [InlineData("SkippedNotApplicable")]
+    [InlineData("InvalidSpec")]
+    public async Task SystemMtLauncher_skips_anomaly_when_typed_verification_is_not_a_real_failure(string status)
+    {
+        // A pipeline outcome can finish with FinalStatus="anomaly" because the legacy
+        // assertion-result Passed flag is false, even when the typed verifier was
+        // SkippedMissingObservable / SkippedNotApplicable / InvalidSpec — none of which
+        // represent a real MR violation. PR-132 fixes this by early-returning before
+        // RecordAnomalyAsync when the typed status is one of those three.
+        var recording = new RecordingAnomalyService();
+        var launcher = MakeLauncher(recording);
+
+        var resultId = Guid.NewGuid();
+        var failingOutcome = MakeOutcome(sourceValue: 1.13, followupValue: 1.10, finalStatus: PipelineStatus.Anomaly)
+            with
+            {
+                TypedVerification = status switch
+                {
+                    "SkippedMissingObservable" =>
+                        MetBench_BLL.SystemMT.Catalog.Typed.Runtime.VerificationResult.SkippedMissingObservable("missing"),
+                    "SkippedNotApplicable" =>
+                        MetBench_BLL.SystemMT.Catalog.Typed.Runtime.VerificationResult.SkippedNotApplicable("n/a"),
+                    "InvalidSpec" =>
+                        MetBench_BLL.SystemMT.Catalog.Typed.Runtime.VerificationResult.InvalidSpec("bad spec"),
+                    _ => throw new InvalidOperationException("Unknown status"),
+                },
+            };
+
+        await launcher.RecordAnomalyIfFailedAsync(
+            mrName: "MR-skipped",
+            resultId: resultId,
+            outcome: failingOutcome,
+            cancellationToken: default);
+
+        Assert.Empty(recording.Recorded);
+    }
+
+    [Fact]
+    public async Task SystemMtLauncher_records_anomaly_when_typed_verification_is_failed()
+    {
+        // Regression: a typed Status=Failed verification still produces an anomaly
+        // record (PR-132 only suppresses non-Failed paths).
+        var recording = new RecordingAnomalyService();
+        var launcher = MakeLauncher(recording);
+
+        var resultId = Guid.NewGuid();
+        var assertion = new SystemMtAssertionResultV2(
+            AssertionTypeCode: "Greater",
+            Passed: false,
+            SourceValue: 1.13, FollowupValue: 1.10,
+            ObservedDelta: -0.03, ExpectedThreshold: null,
+            Expression: "x", FailureReason: "MR violated");
+        var verification = MetBench_BLL.SystemMT.Catalog.Typed.Runtime.VerificationResult.FromAssertion(
+            assertion,
+            new MetBench_BLL.SystemMT.Catalog.Typed.Runtime.VerificationDiagnostic(1.13, 1.10, 0.03, 1e-6));
+        var failingOutcome = MakeOutcome(sourceValue: 1.13, followupValue: 1.10, finalStatus: PipelineStatus.Anomaly)
+            with
+            {
+                TypedVerification = verification,
+            };
+
+        await launcher.RecordAnomalyIfFailedAsync(
+            mrName: "MR-failed",
+            resultId: resultId,
+            outcome: failingOutcome,
+            cancellationToken: default);
+
+        Assert.Single(recording.Recorded);
+    }
+
     [Fact]
     public async Task SystemMtLauncher_skips_anomaly_when_resultId_is_null()
     {

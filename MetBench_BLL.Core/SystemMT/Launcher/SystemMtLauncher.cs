@@ -225,6 +225,20 @@ public sealed class SystemMtLauncher : ISystemMtLauncher, ISystemMtCatalogReader
     {
         if (outcome.FinalStatus == PipelineStatus.Ok) return;
         if (resultId is null) return;  // error/timeout/cancelled 无 Result(recorder 未写)
+
+        // PR-132: if the typed verifier reported Skipped*/InvalidSpec, the legacy
+        // assertion result still flagged Passed=false (pipeline fallback for any
+        // non-Passed VerifyStatus), which made the pipeline call this an Anomaly.
+        // None of those typed statuses represent a real MR violation, so the
+        // launcher must not create an anomaly row for them.
+        if (outcome.TypedVerification is { } typed
+            && typed.Status is MetBench_BLL.SystemMT.Catalog.Typed.Runtime.VerifyStatus.SkippedMissingObservable
+                            or MetBench_BLL.SystemMT.Catalog.Typed.Runtime.VerifyStatus.SkippedNotApplicable
+                            or MetBench_BLL.SystemMT.Catalog.Typed.Runtime.VerifyStatus.InvalidSpec)
+        {
+            return;
+        }
+
         var severity = AnomalyClassifier.ClassifySeverity(outcome, _severityThresholds);
         var category = AnomalyClassifier.ClassifyCategory(outcome);
         var typedSummary = BuildTypedVerificationSummary(outcome);
