@@ -33,7 +33,7 @@ public sealed class FieldEqualityPredicateValidator : IPredicateValidator<FieldE
 
         if (leftProjection is not null &&
             rightProjection is not null &&
-            (leftProjection.Rows != rightProjection.Rows || leftProjection.Columns != rightProjection.Columns))
+            !DimensionsMatch(predicate.Pairing, leftProjection, rightProjection))
         {
             errors.Add(new ValidationError(
                 $"predicates[{predicate.PredicateId}].metric_dimensions",
@@ -59,4 +59,18 @@ public sealed class FieldEqualityPredicateValidator : IPredicateValidator<FieldE
         projection is Field2DProjectionSpec fieldProjection
             ? fieldProjection
             : null;
+
+    private static bool DimensionsMatch(
+        FieldPairing pairing,
+        Field2DProjectionSpec leftProjection,
+        Field2DProjectionSpec rightProjection) =>
+        pairing switch
+        {
+            TransposeFieldPairing =>
+                leftProjection.Rows == rightProjection.Columns &&
+                leftProjection.Columns == rightProjection.Rows,
+            _ =>
+                leftProjection.Rows == rightProjection.Rows &&
+                leftProjection.Columns == rightProjection.Columns
+        };
 }

@@ -1,0 +1,29 @@
+kind: MrSpec
+mr_id: golden-missing-dif-phy-09
+name: Golden missing-observable fixture for ordered sequence shape
+description: Valid MR spec intended to surface SkippedMissingObservable when sequence inputs are incomplete.
+tags:
+  equation_key: Diffusion
+  program_type: Deterministic
+roles:
+  h0:
+    kind: Baseline
+  h1:
+    kind: Followup
+  h2:
+    kind: Followup
+projections:
+  diff_worth:
+    kind: ScalarProjection
+    path: /results/diff_worth
+predicates:
+  - kind: OrderedSequenceShape
+    predicate_id: bell-shape
+    ordered_roles: [h0, h1, h2]
+    metric: diff_worth
+    shape:
+      kind: BellShape
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0

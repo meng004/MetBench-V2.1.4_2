@@ -12,6 +12,7 @@ public sealed class ValidationRegistry
     public ScaledEqualityPredicateValidator ScaledEqualityValidator { get; }
     public CrossMethodPredicateValidator CrossMethodValidator { get; }
     public ErrorMonotonicPredicateValidator ErrorMonotonicValidator { get; }
+    public OrderedSequenceShapePredicateValidator OrderedSequenceShapeValidator { get; }
     public VarianceRatioPredicateValidator VarianceRatioValidator { get; }
     public FieldEqualityPredicateValidator FieldEqualityValidator { get; }
     public FieldProportionalityPredicateValidator FieldProportionalityValidator { get; }
@@ -25,6 +26,7 @@ public sealed class ValidationRegistry
         ScaledEqualityValidator = new ScaledEqualityPredicateValidator(ReferenceResolver, ParameterResolver);
         CrossMethodValidator = new CrossMethodPredicateValidator(ReferenceResolver);
         ErrorMonotonicValidator = new ErrorMonotonicPredicateValidator(ReferenceResolver);
+        OrderedSequenceShapeValidator = new OrderedSequenceShapePredicateValidator(ReferenceResolver, ParameterResolver);
         VarianceRatioValidator = new VarianceRatioPredicateValidator(ReferenceResolver, ParameterResolver);
         FieldEqualityValidator = new FieldEqualityPredicateValidator();
         FieldProportionalityValidator = new FieldProportionalityPredicateValidator();

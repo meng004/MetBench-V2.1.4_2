@@ -63,6 +63,26 @@ public sealed class FieldEqualityKernelTests
         Assert.Equal(VerifyStatus.Passed, result.Status);
     }
 
+    [Fact]
+    public void Kernel_supports_transpose_pairing_for_symmetric_fields()
+    {
+        var result = Kernel().Evaluate(
+            new FieldEqualityPredicate("p-field", "source", "followup", "source_flux", "followup_flux", new TransposeFieldPairing(), new FieldNormToleranceSpec("L2", 1e-6, 1e-3)),
+            ContextWithFields(
+                left: new[,]
+                {
+                    { 1.0, 2.0 },
+                    { 3.0, 4.0 }
+                },
+                right: new[,]
+                {
+                    { 1.0, 3.0 },
+                    { 2.0, 4.0 }
+                }));
+
+        Assert.Equal(VerifyStatus.Passed, result.Status);
+    }
+
     private static FieldEqualityPredicateValidator Validator() => new();
 
     private static FieldEqualityKernel Kernel() => new();

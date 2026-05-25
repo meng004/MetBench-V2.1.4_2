@@ -8,6 +8,7 @@ namespace MetBench_BLL.SystemMT.V12Catalog.Specs;
 [JsonDerivedType(typeof(ScaledEqualityPredicate), "ScaledEquality")]
 [JsonDerivedType(typeof(CrossMethodComparisonPredicate), "CrossMethodComparison")]
 [JsonDerivedType(typeof(ErrorMonotonicPredicate), "ErrorMonotonic")]
+[JsonDerivedType(typeof(OrderedSequenceShapePredicate), "OrderedSequenceShape")]
 [JsonDerivedType(typeof(VarianceRatioPredicate), "VarianceRatio")]
 [JsonDerivedType(typeof(SubadditivePredicate), "Subadditive")]
 [JsonDerivedType(typeof(FieldEqualityPredicate), "FieldEquality")]
@@ -44,6 +45,12 @@ public sealed record ErrorMonotonicPredicate(
     string ReferenceRole,
     string Metric,
     NormKind NormKind) : PredicateSpec(PredicateId);
+
+public sealed record OrderedSequenceShapePredicate(
+    string PredicateId,
+    IReadOnlyList<string> OrderedRoles,
+    string Metric,
+    ShapeSpec Shape) : PredicateSpec(PredicateId);
 
 public sealed record VarianceRatioPredicate(
     string PredicateId,
