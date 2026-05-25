@@ -65,7 +65,7 @@ The following documents are projections of the ledger and their own domain. They
 
 | Risk | Status | Required next step |
 |---|---|---|
-| Verification semantics convergence | Design locked and planned | Use `docs/superpowers/specs/2026-05-25-verification-semantics-convergence-design.md` and execute `docs/superpowers/plans/2026-05-25-verification-semantics-convergence-implementation-plan.md`; PR-C remains gated by the ExecutionEvidence v2 decision state unless it proves evidence schema is unchanged |
+| Verification semantics convergence | PR-C authorized with evidence-stability guard | PR-C may proceed only if its PR checklist proves ExecutionEvidence/reporting/persistence schema is unchanged; otherwise stop and implement the relevant ExecutionEvidence v2 slice first. Execute `docs/superpowers/plans/2026-05-25-verification-semantics-convergence-implementation-plan.md` under that guard; PR-D follows after PR-C merge. |
 | ExecutionEvidence final shape | Design locked | Use `docs/superpowers/specs/2026-05-25-executionevidence-v2-design.md` and execute `docs/superpowers/plans/2026-05-25-executionevidence-v2-implementation-plan.md`; PR-C0 of that plan implements the schema and recorder projection and unblocks PR-C of verification semantics convergence |
 | Windows verification policy | Partially controlled | Use PR gate classification now; write the dedicated Windows policy before the next Windows-touching PR |
 | Active vs historical plan drift | Controlled but must be maintained | Keep the active plan index current whenever a phase changes |
@@ -79,7 +79,7 @@ The next stage must proceed in this order:
 3. Execute verification semantics convergence PR-A and PR-B from `docs/superpowers/plans/2026-05-25-verification-semantics-convergence-implementation-plan.md`; these are docs/naming work and must preserve runtime behavior.
 4. Design Windows verification policy before the next Windows-touching PR.
 5. Execute ExecutionEvidence v2 per `docs/superpowers/plans/2026-05-25-executionevidence-v2-implementation-plan.md` (PR-A0 design lock then PR-C0 schema and recorder).
-6. Execute verification semantics convergence PR-C and PR-D only after the ledger allows assertion-runtime implementation under the current ExecutionEvidence v2 decision state.
+6. Execute verification semantics PR-C only under the evidence-stability guard; PR-D follows after PR-C merge. PR-C is authorized only if its PR checklist proves ExecutionEvidence/reporting/persistence schema is unchanged; otherwise stop and implement the relevant ExecutionEvidence v2 slice first. The ExecutionEvidence v2 implementation slices in `docs/superpowers/plans/2026-05-25-executionevidence-v2-implementation-plan.md` remain active future work and are not superseded by this authorization.
 7. Only then proceed to implementation PRs for evidence, configuration, or UI-facing work.
 
 ## 8. Update Triggers
