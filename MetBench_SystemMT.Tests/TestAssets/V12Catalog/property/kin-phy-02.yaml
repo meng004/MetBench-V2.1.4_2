@@ -1,0 +1,23 @@
+kind: PropertySpec
+property_id: kin-phy-02
+name: Power history follows exponential growth
+description: Schema-valid in PR-8; executable runtime lands in PR-9.
+tags:
+  equation_key: Kinetics
+  program_type: Deterministic
+case:
+  kind: Base
+projections:
+  power_history:
+    kind: SequenceProjection
+    path: /results/power_history
+assertions:
+  - kind: ShapeProperty
+    predicate_id: exponential-growth
+    metric: power_history
+    shape:
+      kind: ExponentialGrowth
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0

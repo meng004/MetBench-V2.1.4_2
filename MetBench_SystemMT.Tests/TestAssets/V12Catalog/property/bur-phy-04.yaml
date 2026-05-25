@@ -1,0 +1,23 @@
+kind: PropertySpec
+property_id: bur-phy-04
+name: Iodine pit down then up
+description: Single-run trajectory should form an S shape.
+tags:
+  equation_key: Burnup
+  program_type: Deterministic
+case:
+  kind: Base
+projections:
+  iodine_pit:
+    kind: SequenceProjection
+    path: /results/iodine_pit
+assertions:
+  - kind: ShapeProperty
+    predicate_id: iodine-pit-shape
+    metric: iodine_pit
+    shape:
+      kind: SShape
+default_tolerance:
+  kind: DeterministicTolerance
+  atol: 0.0
+  rtol: 0.0
