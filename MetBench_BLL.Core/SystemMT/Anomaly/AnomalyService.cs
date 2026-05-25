@@ -139,6 +139,7 @@ public sealed class AnomalyService : IAnomalyService
         string resultId,
         string severity,
         string category,
+        string? typedVerificationSummary = null,
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -157,21 +158,33 @@ public sealed class AnomalyService : IAnomalyService
             Status = "new",
             DiscoveredAt = DateTime.UtcNow,
             DiscoveredBy = "system-mt",
+            Notes = string.IsNullOrEmpty(typedVerificationSummary) ? string.Empty : typedVerificationSummary,
         };
         var ok = _anomalies.Add(anomaly);
         if (ok)
         {
+            var typedFragment = string.IsNullOrEmpty(typedVerificationSummary)
+                ? string.Empty
+                : $",\"typedVerificationSummary\":\"{EscapeJsonString(typedVerificationSummary!)}\"";
             WriteAudit(
                 actor: "system-mt",
                 action: "anomaly.created",
                 entityType: "Anomaly",
                 entityId: anomaly.IdAnomaly.ToString(),
                 detailsJson:
-                    $"{{\"mrName\":\"{mrName}\",\"resultId\":\"{resultId}\"," +
-                    $"\"severity\":\"{severity}\",\"category\":\"{category}\"}}");
+                    $"{{\"mrName\":\"{EscapeJsonString(mrName)}\",\"resultId\":\"{resultId}\"," +
+                    $"\"severity\":\"{severity}\",\"category\":\"{category}\"" +
+                    typedFragment + "}");
         }
         return Task.FromResult(anomaly);
     }
+
+    private static string EscapeJsonString(string value) =>
+        value
+            .Replace("\\", "\\\\")
+            .Replace("\"", "\\\"")
+            .Replace("\n", "\\n")
+            .Replace("\r", "\\r");
 
     // ====== Helpers ======
 

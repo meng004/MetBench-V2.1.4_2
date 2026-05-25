@@ -96,6 +96,120 @@ public sealed class AnomalyCreationOnFailureTests
     }
 
     [Fact]
+    public async Task AnomalyService_RecordAnomalyAsync_persists_typed_verification_summary_in_notes_and_audit()
+    {
+        var anomalyRepo = new FakeAnomalyRepository(Array.Empty<MetBench_Domain.Anomaly>());
+        var auditRepo = new FakeAuditLogRepository();
+        var svc = new AnomalyService(anomalyRepo, auditRepo);
+
+        var resultId = Guid.NewGuid();
+        var summary = "typed=Failed predicate=k_eff-greater (BinaryComparison) residual=0.62 tolerance=1E-06";
+
+        var anomaly = await svc.RecordAnomalyAsync(
+            mrName: "OpenMOC pin-cell — ScaleNuSigmaF",
+            resultId: resultId.ToString(),
+            severity: "minor",
+            category: "single-point",
+            typedVerificationSummary: summary);
+
+        Assert.Equal(summary, anomaly.Notes);
+
+        Assert.Single(auditRepo.Logs);
+        Assert.Contains("typedVerificationSummary", auditRepo.Logs[0].DetailsJson);
+        Assert.Contains("BinaryComparison", auditRepo.Logs[0].DetailsJson);
+    }
+
+    [Fact]
+    public async Task AnomalyService_RecordAnomalyAsync_without_typed_summary_leaves_notes_unset_and_audit_excludes_field()
+    {
+        var anomalyRepo = new FakeAnomalyRepository(Array.Empty<MetBench_Domain.Anomaly>());
+        var auditRepo = new FakeAuditLogRepository();
+        var svc = new AnomalyService(anomalyRepo, auditRepo);
+
+        var resultId = Guid.NewGuid();
+
+        var anomaly = await svc.RecordAnomalyAsync(
+            mrName: "OpenMOC pin-cell — ScaleNuSigmaF",
+            resultId: resultId.ToString(),
+            severity: "minor",
+            category: "single-point");
+
+        Assert.True(string.IsNullOrEmpty(anomaly.Notes));
+        Assert.DoesNotContain("typedVerificationSummary", auditRepo.Logs[0].DetailsJson);
+    }
+
+    [Fact]
+    public async Task SystemMtLauncher_passes_typed_verification_summary_when_outcome_carries_typed_block()
+    {
+        var recording = new RecordingAnomalyService();
+        var launcher = MakeLauncher(recording);
+
+        var resultId = Guid.NewGuid();
+        var spec = MetBench_BLL.SystemMT.Catalog.Typed.Migration.TypedSpecFactory.ForScalarBinaryComparison(
+            mrCode: "MR-test",
+            valueName: "k_eff",
+            actualRole: "followup",
+            expectedRole: "source",
+            @operator: "Greater",
+            toleranceAbs: 1e-6,
+            toleranceRel: 0.0);
+        var predicate = (MetBench_BLL.SystemMT.Catalog.Typed.Specs.BinaryComparisonPredicate)spec.Predicates[0];
+        var assertion = new SystemMtAssertionResultV2(
+            AssertionTypeCode: "Greater",
+            Passed: false,
+            SourceValue: 1.13,
+            FollowupValue: 1.10,
+            ObservedDelta: -0.03,
+            ExpectedThreshold: null,
+            Expression: "followup.k_eff Greater source.k_eff",
+            FailureReason: "actual<=expected");
+        var typedVerification = MetBench_BLL.SystemMT.Catalog.Typed.Runtime.VerificationResult.FromAssertion(
+            assertion,
+            new MetBench_BLL.SystemMT.Catalog.Typed.Runtime.VerificationDiagnostic(1.13, 1.10, 0.03, 1e-6));
+
+        var failingOutcome = MakeOutcome(sourceValue: 1.13, followupValue: 1.10, finalStatus: PipelineStatus.Anomaly)
+            with
+            {
+                TypedSpec = spec,
+                TypedPredicate = predicate,
+                TypedVerification = typedVerification,
+            };
+
+        await launcher.RecordAnomalyIfFailedAsync(
+            mrName: "OpenMOC pin-cell — ScaleNuSigmaF (k_eff increases)",
+            resultId: resultId,
+            outcome: failingOutcome,
+            cancellationToken: default);
+
+        Assert.Single(recording.Recorded);
+        var call = recording.Recorded[0];
+        Assert.NotNull(call.TypedVerificationSummary);
+        Assert.Contains("Failed", call.TypedVerificationSummary);
+        Assert.Contains("BinaryComparison", call.TypedVerificationSummary);
+        Assert.Contains("k_eff", call.TypedVerificationSummary);
+    }
+
+    [Fact]
+    public async Task SystemMtLauncher_passes_null_typed_summary_when_outcome_lacks_typed_block()
+    {
+        var recording = new RecordingAnomalyService();
+        var launcher = MakeLauncher(recording);
+
+        // Plain failing outcome with no TypedVerification set on PipelineOutcome.
+        var resultId = Guid.NewGuid();
+        var failingOutcome = MakeOutcome(sourceValue: 1.13, followupValue: 1.10, finalStatus: PipelineStatus.Anomaly);
+
+        await launcher.RecordAnomalyIfFailedAsync(
+            mrName: "MR-no-typed",
+            resultId: resultId,
+            outcome: failingOutcome,
+            cancellationToken: default);
+
+        Assert.Single(recording.Recorded);
+        Assert.Null(recording.Recorded[0].TypedVerificationSummary);
+    }
+
+    [Fact]
     public async Task SystemMtLauncher_skips_anomaly_when_resultId_is_null()
     {
         // error / timeout 状态下 recorder 不写 Result,resultId 为 null,不能链 anomaly。
@@ -159,13 +273,23 @@ public sealed class AnomalyCreationOnFailureTests
 /// <summary>Captures every RecordAnomalyAsync call for assertion in tests.</summary>
 internal sealed class RecordingAnomalyService : IAnomalyService
 {
-    public sealed record Call(string MrName, string ResultId, string Severity, string Category);
+    public sealed record Call(
+        string MrName,
+        string ResultId,
+        string Severity,
+        string Category,
+        string? TypedVerificationSummary);
     public List<Call> Recorded { get; } = new();
 
     public Task<MetBench_Domain.Anomaly> RecordAnomalyAsync(
-        string mrName, string resultId, string severity, string category, CancellationToken cancellationToken = default)
+        string mrName,
+        string resultId,
+        string severity,
+        string category,
+        string? typedVerificationSummary = null,
+        CancellationToken cancellationToken = default)
     {
-        Recorded.Add(new Call(mrName, resultId, severity, category));
+        Recorded.Add(new Call(mrName, resultId, severity, category, typedVerificationSummary));
         return Task.FromResult(new MetBench_Domain.Anomaly
         {
             IdAnomaly = Guid.NewGuid(),
@@ -173,6 +297,7 @@ internal sealed class RecordingAnomalyService : IAnomalyService
             Severity = severity,
             Category = category,
             Status = "new",
+            Notes = typedVerificationSummary ?? string.Empty,
         });
     }
 
