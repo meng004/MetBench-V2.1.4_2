@@ -28,4 +28,12 @@ public sealed class ExecutionEvidence
     public Dictionary<string, string> TransformationParameters { get; set; } = new();
 
     public DateTime RecordedAtUtc { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    /// ExecutionEvidence v2 typed-verification block. Null on rows written by
+    /// pre-v2 builds and on rows whose recorder did not receive a typed
+    /// verification or property result; populated when the System MT pipeline
+    /// dispatches through the Typed Semantic Catalog runtime.
+    /// </summary>
+    public TypedVerificationEvidence? TypedVerification { get; set; }
 }

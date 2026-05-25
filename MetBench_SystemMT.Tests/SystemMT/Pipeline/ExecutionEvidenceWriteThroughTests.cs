@@ -219,6 +219,72 @@ public sealed class ExecutionEvidenceWriteThroughTests
         }
     }
 
+    // ---- ExecutionEvidence v2 (PR-C0) additions ----
+
+    [Fact]
+    public async Task Record_writes_TypedVerification_when_typed_inputs_are_provided()
+    {
+        var execRepo = new FakeExecRepo();
+        var resRepo = new FakeResultRepo();
+        var evRepo = new InMemoryEvidenceRepo();
+        var v3Repo = new InMemoryV3Repo();
+
+        var predicate = (MetBench_BLL.SystemMT.Catalog.Typed.Specs.BinaryComparisonPredicate)
+            MetBench_BLL.SystemMT.Catalog.Typed.Migration.LegacyAssertionPredicateMapper.MapScalar(
+                "greater", "followup", "source", "max_u");
+        var spec = MetBench_BLL.SystemMT.Catalog.Typed.Migration.TypedSpecFactory.ForLegacyScalar(
+            mrCode: "heat-equation-amplitude",
+            valueName: "max_u",
+            predicate: predicate,
+            toleranceAbs: 0.0,
+            toleranceRel: 0.0);
+        var typedAssertion = OkOutcome().AssertionResult!;
+        var typedResult = MetBench_BLL.SystemMT.Catalog.Typed.Runtime.VerificationResult.FromAssertion(
+            typedAssertion,
+            new MetBench_BLL.SystemMT.Catalog.Typed.Runtime.VerificationDiagnostic(1.0, 2.0, 1.0, 0.0));
+
+        var recorder = new SystemMtExecutionRecorder(execRepo, resRepo, evRepo, v3Repo);
+        var recorded = recorder.Record(
+            CtxFor("heat-equation-amplitude"),
+            OkOutcome(),
+            mrInstanceId: 1,
+            batchId: null,
+            typedVerification: typedResult,
+            typedProperty: null,
+            typedSpec: spec,
+            typedPredicate: predicate,
+            typedPropertySpec: null);
+
+        var evidence = await evRepo.GetByExecutionAsync(recorded.ExecutionId);
+        Assert.NotNull(evidence);
+        var typed = evidence!.TypedVerification;
+        Assert.NotNull(typed);
+        Assert.Equal("MrSpec", typed!.SpecKind);
+        Assert.Equal("heat-equation-amplitude", typed.SpecId);
+        Assert.Equal("BinaryComparison", typed.PredicateKind);
+        Assert.Equal("Passed", typed.Status);
+        Assert.True(typed.Passed);
+        Assert.NotNull(typed.Diagnostic);
+        Assert.Equal(1.0, typed.Diagnostic!.Expected);
+        Assert.Equal(2.0, typed.Diagnostic.Actual);
+    }
+
+    [Fact]
+    public async Task Record_writes_evidence_with_null_TypedVerification_when_typed_inputs_are_absent()
+    {
+        var execRepo = new FakeExecRepo();
+        var resRepo = new FakeResultRepo();
+        var evRepo = new InMemoryEvidenceRepo();
+        var v3Repo = new InMemoryV3Repo();
+
+        var recorder = new SystemMtExecutionRecorder(execRepo, resRepo, evRepo, v3Repo);
+        var recorded = recorder.Record(CtxFor("heat-equation-amplitude"), OkOutcome(), mrInstanceId: 1);
+
+        var evidence = await evRepo.GetByExecutionAsync(recorded.ExecutionId);
+        Assert.NotNull(evidence);
+        Assert.Null(evidence!.TypedVerification);
+    }
+
     private sealed class InMemoryEvidenceRepo : IExecutionEvidenceRepository
     {
         private readonly List<ExecutionEvidence> _store = new();
