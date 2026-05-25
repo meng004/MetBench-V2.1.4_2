@@ -11,8 +11,7 @@
 | Plan | Status | Scope | Expiry condition |
 |---|---|---|---|
 | `docs/superpowers/plans/2026-05-25-metbench-governed-next-stage-plan.md` | Active | Governance-first next-stage planning; blocks further implementation until the named design ambiguities are resolved | Expires when semantic-convergence, Evidence v2, Windows verification policy, and transition plan are completed and replaced by a new implementation plan |
-| `docs/superpowers/plans/2026-05-25-verification-semantics-convergence-implementation-plan.md` | Active scoped plan | Implementation sequence for verification semantics convergence: PR-A design lock, PR-B naming migration, PR-C runtime convergence, PR-D guard cleanup | Expires when PR-D is merged and the status ledger marks verification semantics convergence controlled |
-| `docs/superpowers/plans/2026-05-25-executionevidence-v2-implementation-plan.md` | Active scoped plan | Implementation sequence for ExecutionEvidence v2: PR-A0 design lock and PR-C0 schema/recorder projection that unblocks verification-semantics PR-C | Expires when PR-C0 is merged and the status ledger marks ExecutionEvidence v2 implemented |
+| `docs/superpowers/plans/2026-05-25-executionevidence-v2-implementation-plan.md` | Active scoped plan | Implementation sequence for ExecutionEvidence v2: PR-A0 design lock (merged) and PR-C0 schema/recorder projection (open). PR-C0 is now the next-priority scoped plan after the verification-semantics convergence closed. | Expires when PR-C0 is merged and the status ledger marks ExecutionEvidence v2 implemented |
 
 Any new coding task must be derived from the active master plan or from a scoped successor plan registered here.
 
@@ -26,7 +25,6 @@ Any new coding task must be derived from the active master plan or from a scoped
 | `docs/superpowers/specs/2026-05-25-metbench-project-control-rules.md` | Active | Control charter: source hierarchy, gates, review, status refresh | Expires only by explicit replacement PR |
 | `docs/superpowers/specs/2026-05-25-metbench-macro-assessment-and-risk-audit.md` | Active | Macro assessment and risk audit for the Stage 8 to next-stage transition | Expires when the next macro assessment supersedes it |
 | `docs/superpowers/specs/2026-05-25-mr-verification-v1.2-codex-ready.md` | Active reference | v1.2 typed semantic model and verifier design already implemented through the current roadmap | Expires when a v1.3 verification design supersedes it |
-| `docs/superpowers/specs/2026-05-25-verification-semantics-convergence-design.md` | Active | Locks System MT verification semantics convergence, Method MT isolation, `SystemMT/Catalog/Typed` naming, and legacy assertion migration/removal policy | Expires when runtime convergence and guard cleanup PRs complete or a newer verification semantics design supersedes it |
 | `docs/superpowers/specs/2026-05-25-executionevidence-v2-design.md` | Active | Locks ExecutionEvidence v2 schema, recorder projection, compatibility contract with `SystemMtResultRecord` and `ISystemMtLauncher`, and PR-C scope boundaries | Expires only by explicit replacement PR when a future major evidence redesign supersedes it |
 | `docs/superpowers/templates/pr-gate-checklist.md` | Active | Required PR gate checklist for scope, facts, tests, Windows classification, review, and merge | Expires only by explicit replacement PR |
 
@@ -70,6 +68,18 @@ Any new coding task must be derived from the active master plan or from a scoped
 
 - 这些计划服务于一次性状态修正
 - 对应问题已被 PR 收口
+
+### 验证语义收敛链（已合并）
+
+- `docs/superpowers/plans/2026-05-25-verification-semantics-convergence-implementation-plan.md`
+- `docs/superpowers/specs/2026-05-25-verification-semantics-convergence-design.md`
+
+**原因**:
+
+- 全部四个 PR（PR-A 设计 lock #114 / PR-B 命名迁移 #115 / PR-C 运行时收敛 #118 / PR-D 守卫与清理 #119）已合并 `origin/main`。
+- 设计目标“Method MT 隔离 + System MT 全部走 Typed Semantic Catalog + W1 IMrAssertion 路径下线”已闭环。
+- `SemanticCatalogBoundaryTests` 与 `SemanticCatalogNamingBoundaryTests` 接管事后回潮守卫，参见 `docs/status/current.md` §6 Verification semantics convergence 行。
+- 设计与计划保留为历史参考；新工作不得从这两个文件衍生执行排程。
 
 ---
 
