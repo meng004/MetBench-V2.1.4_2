@@ -72,9 +72,9 @@ public sealed class LauncherEndToEndScipyBvpPoissonTests
 
         // SciPy solve_bvp adaptively refines its own mesh until residual is below tolerance;
         // the user-supplied num_points (101 → 202) only seeds the initial mesh. Both runs
-        // converge to the same continuous solution u_max = f·L²/8 = 0.125 plateau within
-        // ToleranceRel=1e-3 / ToleranceAbs=1e-6.
-        var result = await _launcher.RunAsync("scipy-bvp-poisson-mesh-richardson");
+        // converge to the same continuous solution u(x)=f·x(L−x)/2, whose peak value
+        // u_max = f·L²/8 = 0.125 occurs at x = L/2, within ToleranceRel=1e-3 / ToleranceAbs=1e-6.
+        var result = await _launcher.RunAsync("scipy-bvp-poisson-seed-mesh-insensitivity");
 
         Assert.True(result.Passed, result.FailureReason);
         Assert.Equal("u_max", result.ValueName);

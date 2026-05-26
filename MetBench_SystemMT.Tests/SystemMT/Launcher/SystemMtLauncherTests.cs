@@ -94,7 +94,7 @@ public sealed class SystemMtLauncherTests
         Assert.Equal("poisson-mesh-richardson", descriptors[18].Id);
         Assert.Equal("poisson-source-superposition", descriptors[19].Id);
         Assert.Equal("projectile-scale-v0", descriptors[20].Id);
-        Assert.Equal("scipy-bvp-poisson-mesh-richardson", descriptors[21].Id);
+        Assert.Equal("scipy-bvp-poisson-seed-mesh-insensitivity", descriptors[21].Id);
         Assert.Equal("scipy-bvp-poisson-source-superposition", descriptors[22].Id);
         Assert.Equal("scipy-ivp-lv-prey-growth-monotone", descriptors[23].Id);
         Assert.Equal("scipy-ivp-lv-step-convergence", descriptors[24].Id);
@@ -408,7 +408,7 @@ public sealed class SystemMtLauncherTests
     public async Task ListAvailableAsync_scipy_bvp_poisson_mesh_richardson_descriptor_has_expected_metadata()
     {
         var descriptors = await _launcher.ListAvailableAsync();
-        var conv = descriptors.Single(d => d.Id == "scipy-bvp-poisson-mesh-richardson");
+        var conv = descriptors.Single(d => d.Id == "scipy-bvp-poisson-seed-mesh-insensitivity");
 
         Assert.Equal("scipy-bvp-poisson-1d", conv.SutName);
         Assert.Equal("ScaleField", conv.TransformationName);
