@@ -203,6 +203,23 @@ public static class SystemMtMetadataCatalog
                 new() { Symbol = "R", Description = "水平射程（输出）", Unit = "m" },
             },
         },
+        // PR-A T1 non-JSON I/O adapter: synthetic "equation" registered solely so
+        // the synthetic _test_csv SUT has an EquationKey to bind to. NOT a real
+        // physics equation. Leading underscore in the key marks the synthetic nature.
+        new EquationMetadata
+        {
+            EquationKey = "_test_csv",
+            Name = "_TestCsv — 合成的 metbench_io 集成测试方程（非物理）",
+            CanonicalForm = "echo_value = factor",
+            SymbolSystem =
+                "factor 输入标量；echo_value 输出标量。本条目仅为 _test_csv 合成 SUT 提供 EquationKey 绑定，" +
+                "不代表任何真实物理过程。",
+            Parameters = new List<EquationParameter>
+            {
+                new() { Symbol = "factor", Description = "输入标量（CSV 单字段）", Unit = "无量纲" },
+                new() { Symbol = "echo_value", Description = "输出标量（与 factor 数值相同）", Unit = "无量纲" },
+            },
+        },
     };
 
     /// <summary>Structured metadata for every MR in the launcher catalog.</summary>
@@ -670,6 +687,23 @@ public static class SystemMtMetadataCatalog
             {
                 new() { Symbol = "factor", PhysicalMeaning = "v0 缩放倍率", ValueRange = "factor > 1" },
                 new() { Symbol = "range", PhysicalMeaning = "水平射程（输出）", ValueRange = "range > 0" },
+            },
+        },
+        // PR-A T1 non-JSON I/O adapter: synthetic test-SUT MR. NOT a real physics MR.
+        new MrMetadata
+        {
+            MrId = "csv-roundtrip-identity",
+            EquationKey = "_test_csv",
+            PhysicalMeaning =
+                "合成测试 MR：证明 metbench_io 的 csv-row wire format helper 经过未改动的 launcher / pipeline / catalog " +
+                "端到端 round-trip。ScaleField 把 /params/factor 加倍 → runner echo 出加倍后的值 → echo_value 严格大于 source。",
+            InputTransformation = "factor → factor·factor（factor > 1）",
+            OutputRelation = "echo_value(flw) > echo_value(src)（严格意义下 = factor·echo_value(src)）",
+            ComparisonType = MrComparisonType.Ordinal,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "输入 factor 的缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "echo_value", PhysicalMeaning = "输出 echo_value（= factor）", ValueRange = "echo_value > 0" },
             },
         },
     };

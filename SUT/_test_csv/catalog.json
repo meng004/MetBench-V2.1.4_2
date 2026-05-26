@@ -1,0 +1,44 @@
+{
+  "sut_name": "_test-csv",
+  "program": {
+    "program_name": "_test-csv",
+    "equation": "_TestCsv",
+    "equation_key": "_test_csv",
+    "program_type": "Num",
+    "runner_script_relative_path": "_test_csv_runner.py",
+    "input_parser_script_relative_path": "_test_csv_input_parser.py",
+    "output_parser_script_relative_path": "_test_csv_output_parser.py",
+    "input_adapter_script_relative_path": "_test_csv_input_parser.py",
+    "output_adapter_script_relative_path": "_test_csv_output_parser.py",
+    "python_executable_kind": "system"
+  },
+  "mrs": [
+    {
+      "mr_id": "csv-roundtrip-identity",
+      "sut_name": "_test-csv",
+      "display_name": "CSV roundtrip identity (synthetic test SUT)",
+      "description": "Synthetic non-physics MR that proves the metbench_io CSV helper round-trips through the MetBench launcher / pipeline / catalog without any framework knowledge of CSV. ScaleField on /params/factor doubles the input; the runner echoes the factor; output 'echo_value' must equal the doubled input (and is therefore strictly greater than the source 'echo_value').",
+      "mr_family": "TestCsv.Scaling.Identity",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "greater",
+      "assertion_name": "GreaterThan",
+      "value_name": "echo_value",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/params/factor" }
+      ],
+      "tolerance_rel": 0,
+      "tolerance_abs": 0,
+      "noise_aware": false,
+      "equation_key": "_test_csv",
+      "equation": "_TestCsv",
+      "program_type": "Num",
+      "meta_pattern": "Mono",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "sample_case_relative_path": "sample/standard.csv",
+      "work_root_name": "MetBenchTestCsv",
+      "timeout_seconds": 30
+    }
+  ]
+}
