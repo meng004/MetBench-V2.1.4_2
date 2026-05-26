@@ -284,7 +284,17 @@ services.AddSingleton(provider => new LauncherOptions(
     OpenMocPython: Environment.GetEnvironmentVariable("METBENCH_OPENMOC_PYTHON")
         ?? (OperatingSystem.IsWindows() ? "python" : "python3"),
     OpenMcPython: Environment.GetEnvironmentVariable("METBENCH_OPENMC_PYTHON")
-        ?? (OperatingSystem.IsWindows() ? "python" : "python3")));
+        ?? (OperatingSystem.IsWindows() ? "python" : "python3"),
+    // PR-1 T1: add new runtime families via the generic map — no new LauncherOptions field needed.
+    // Manifest authors declare a runtime key (e.g. "fenics") in catalog.json; WPF reads the
+    // corresponding env var here and feeds it into RuntimePythons. Unknown non-system keys
+    // fail closed at resolution time with `RuntimeEnvironmentResolutionException`.
+    RuntimePythons: new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        // Optional examples; add only the keys this WPF build needs.
+        // ["fenics"] = Environment.GetEnvironmentVariable("METBENCH_FENICS_PYTHON") ?? "",
+        // ["fipy"]   = Environment.GetEnvironmentVariable("METBENCH_FIPY_PYTHON")   ?? "",
+    }));
 
 services.AddSingleton<ISystemMtResultRepository>(provider =>
 {
@@ -319,6 +329,16 @@ Current caveats on `main`:
 - The v1.2 implementation line is complete for the current roadmap on `main`.
   Inventory truth should now be read as **44 MR + 4 Property** from the merged migration assets and gates;
   an older report summary mentioned 43 MR, but repository truth has moved to the explicit migrated inventory.
+- **PR-1 T1 manifest-driven runtime environments** (`LauncherOptions.RuntimePythons` + `ResolvePythonExecutable`):
+  new SUT runtime families (FEniCS, FiPy, torch-surrogate, ...) belong in `catalog.json`'s
+  `python_executable_kind` value, resolved through `LauncherOptions.RuntimePythons` or the
+  corresponding environment variable in WPF DI — **not** by adding a new field to
+  `LauncherOptions` for every dependency family, and **not** by extending
+  `PythonExecutableKinds.All`. Unknown non-system keys fail closed at resolution time
+  with `RuntimeEnvironmentResolutionException` naming the missing key. Built-in
+  `system` / `openmoc` / `openmc` / `scipy` behaviour is preserved via compat fields;
+  the resolver prefers `RuntimePythons[key]` (case-insensitive, non-blank) over the
+  compat field when both are set.
 
 ## 7. Async & UI-thread conventions
 

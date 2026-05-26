@@ -274,20 +274,41 @@ public sealed class CatalogDefinitionValidationTests
         Assert.Contains("WorkRootName", ex.Message);
     }
 
-    // === M16: PythonExecutableKind validated against closed set ===
+    // === M16: PythonExecutableKind open vocabulary at validate-time (PR-1 T1 manifest-driven runtime envs) ===
+    // The original M16 closed-vocabulary gate has been retired so manifest authors can declare
+    // future runtime keys (e.g. "fenics", "fipy") without source edits. Fail-closed for unknown
+    // non-system keys is now enforced at *resolution* time by
+    // LauncherOptions.ResolvePythonExecutable, not at ProgramDefinition.Validate.
 
     [Fact]
-    public void ProgramDefinition_rejects_unknown_PythonExecutableKind()
+    public void ProgramDefinition_rejects_blank_PythonExecutableKind()
     {
         var p = new ProgramDefinition
         {
             ProgramName = "openmoc",
             RunnerScriptRelativePath = "openmoc/openmoc_runner.py",
-            PythonExecutableKind = "openMC",  // case-mismatch typo
+            PythonExecutableKind = "",
         };
 
         var ex = Assert.Throws<CatalogValidationException>(() => p.Validate());
         Assert.Contains("PythonExecutableKind", ex.Message);
+    }
+
+    [Fact]
+    public void ProgramDefinition_accepts_unknown_PythonExecutableKind_for_future_runtime_keys()
+    {
+        // A future SUT family (e.g. fenics, fipy) declares its own runtime key in the manifest.
+        // Validation must allow it; the launcher fails closed only at resolution time when
+        // LauncherOptions.RuntimePythons does not configure the key.
+        var p = new ProgramDefinition
+        {
+            ProgramName = "fenics-demo",
+            RunnerScriptRelativePath = "fenics_demo/runner.py",
+            PythonExecutableKind = "fenics",
+        };
+
+        var ex = Record.Exception(() => p.Validate());
+        Assert.Null(ex);
     }
 
     [Theory]

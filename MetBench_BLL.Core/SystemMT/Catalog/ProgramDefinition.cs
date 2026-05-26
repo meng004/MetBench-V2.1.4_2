@@ -16,7 +16,14 @@ public sealed class ProgramDefinition
     public string InputAdapterScriptRelativePath { get; set; } = string.Empty;
     /// <summary>Program-level default output adapter; bindings may override via MrBindingDefinition.OutputAdapterScriptRelativePath.</summary>
     public string OutputAdapterScriptRelativePath { get; set; } = string.Empty;
-    /// <summary>One of <see cref="PythonExecutableKinds"/>: "system" / "openmoc" / "openmc".</summary>
+    /// <summary>
+    /// Manifest runtime key. Built-in keys (<c>system</c>, <c>openmoc</c>, <c>openmc</c>,
+    /// <c>scipy</c>) are listed in <see cref="PythonExecutableKinds"/>, but the vocabulary is
+    /// open — new SUT runtime families (e.g. <c>fenics</c>, <c>fipy</c>) are configured via
+    /// <see cref="MetBench_BLL.SystemMT.Launcher.LauncherOptions.RuntimePythons"/> without
+    /// editing this enum. Fail-closed behaviour for unknown non-system keys is enforced at
+    /// resolution time by <see cref="MetBench_BLL.SystemMT.Launcher.LauncherOptions.ResolvePythonExecutable"/>.
+    /// </summary>
     public string PythonExecutableKind { get; set; } = PythonExecutableKinds.System;
 
     public void Validate()
@@ -26,9 +33,12 @@ public sealed class ProgramDefinition
         if (string.IsNullOrWhiteSpace(RunnerScriptRelativePath))
             throw new CatalogValidationException(
                 $"ProgramDefinition '{ProgramName}' RunnerScriptRelativePath is required");
-        if (!PythonExecutableKinds.All.Contains(PythonExecutableKind))
+        // PythonExecutableKind is NOT validated against a closed set here. Manifest authors
+        // may declare new runtime keys (fenics, fipy, torch-surrogate, ...) without code
+        // changes; the launcher resolves them through LauncherOptions.RuntimePythons and
+        // fails closed at resolution time when unconfigured.
+        if (string.IsNullOrWhiteSpace(PythonExecutableKind))
             throw new CatalogValidationException(
-                $"ProgramDefinition '{ProgramName}' PythonExecutableKind '{PythonExecutableKind}' is not recognized; " +
-                $"expected one of: {string.Join(", ", PythonExecutableKinds.All)}");
+                $"ProgramDefinition '{ProgramName}' PythonExecutableKind is required (use \"system\" for stdlib-only SUTs)");
     }
 }

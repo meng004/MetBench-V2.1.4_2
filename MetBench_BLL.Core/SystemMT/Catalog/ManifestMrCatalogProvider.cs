@@ -115,13 +115,12 @@ public sealed class ManifestMrCatalogProvider : IMrCatalogProvider
             ? binding.OutputAdapterScriptRelativePath
             : program.OutputAdapterScriptRelativePath;
 
-        var pythonExecutable = program.PythonExecutableKind switch
-        {
-            PythonExecutableKinds.OpenMoc => _options.OpenMocPython,
-            PythonExecutableKinds.OpenMc => _options.EffectiveOpenMcPython,
-            PythonExecutableKinds.Scipy => _options.EffectiveScipyPython,
-            _ => _options.SystemPython,
-        };
+        // PR-1 T1: route runtime key through the generic resolver. Built-in keys
+        // (system / openmoc / openmc / scipy) preserve their existing fallback shape;
+        // unknown non-system keys fail closed with a clear diagnostic naming the missing key.
+        // Adding a new runtime family (fenics, fipy, ...) is now a config-only change —
+        // no switch arm here, no new LauncherOptions field.
+        var pythonExecutable = _options.ResolvePythonExecutable(program.PythonExecutableKind);
 
         var tolerance = (binding.NoiseAware || binding.ToleranceRel > 0 || binding.ToleranceAbs > 0)
             ? new AssertionTolerance(
