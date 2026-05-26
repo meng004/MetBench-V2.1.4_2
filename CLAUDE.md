@@ -410,7 +410,40 @@ session 透明、可核验。
 
 这些文档互不复制状态结论，只用指针相互引用；若有冲突，先读 `docs/status/current.md`，再读 project-control rules 与 active plan index。
 
-## 12. Roadmap pointers
+## 12. PR 提交与门禁（Two-Gate model）
+
+> 本节约束所有目标分支为 `main` 的 PR 流程；自 2026-05-26 起生效。规则细节见
+> [`docs/superpowers/specs/2026-05-26-pr-soft-review-via-claude-code-action.md`](docs/superpowers/specs/2026-05-26-pr-soft-review-via-claude-code-action.md) +
+> [`docs/superpowers/templates/pr-gate-checklist.md`](docs/superpowers/templates/pr-gate-checklist.md) +
+> [`.github/workflows/pr-soft-review.yml`](.github/workflows/pr-soft-review.yml)。
+
+### 12.1 两道门并行
+
+| Gate | 目标 | 内容 | Branch protection |
+|---|---|---|---|
+| **Hard `test`** | 保代码正确性 | `dotnet build` + xUnit + Reqnroll | ✅ Required；阻塞合并 |
+| **Soft `review`** | 保流程合规性 | Claude 自动跑 PR Gate Checklist Scope/Facts/Tests/Windows 4 节 + MetBench 专项 5 条 cross-check（Client/XAML × Windows 标注一致、Catalog 描述字节一致、docs-only PR 不冒认 baseline、PR body 与 diff 不漂移、`current.md` baseline 引用新鲜），贴单条 PR 评论 | ❌ **永不入** required；advisory only |
+
+两道门**并行起跑**，互不替代、各管一层。Hard 1 分钟内告知代码能否合并；soft 实测 ~5 分钟出评论，wall-clock ≈ max(hard, soft)。
+
+### 12.2 强约束（违反 = process bug）
+
+- 所有 PR description 必须填 [`pr-gate-checklist.md`](docs/superpowers/templates/pr-gate-checklist.md) 7 节（Scope / Facts / Tests / Windows / Review / Merge / Soft Review），缺节即被 soft-gate 抓 FAIL
+- Soft-gate 评论里每条 FAIL：**要么改 PR 解决、要么在评论下用一行人工回复说明为何不适用**，不可静默忽略
+- Soft-gate 失败 / silent-skip 本身**不挡合并**（spec §5 / §8 / pr-gate-checklist §62 三处明令），但日志事实应在 PR 上留痕
+- 修改 `.github/workflows/pr-soft-review.yml` **或** spec §7 模板的 PR 自身**无法**自审（GitHub workflow-validation 反注入门 = spec §11 R6），合并后下一个 PR 才可验证
+- `CLAUDE_CODE_OAUTH_TOKEN` secret 轮换时：粘贴前确认 token 字符串无前导 / 尾部空白 / 换行；R7 指纹是 log 里出现 `API Error: Header '14' has invalid value: '*** ***'`（两个 `***` 之间有空格）
+- Hard-gate 必须保持在 main branch protection required check 列表（当前 check 名 `test`）；soft-gate 永不入此列表
+
+### 12.3 PR 合并前应观察的事
+
+1. `test` 绿（必须）
+2. `review` 已贴 "Soft Review: PR Gate Checklist (Advisory)" 评论；若无评论且不是 R6 silent-skip / R7 secret 问题 → 调查
+3. soft-gate FAIL 已处理或被一行人工回复 N/A
+4. PR body 7 节 checklist 都打勾 / 解释
+5. 若你是 agent，merge 自己的 PR 前应 fetch origin/main 并核对 base.sha 是否需要 update branch
+
+## 13. Roadmap pointers
 
 - 📘 全息项目结构: [`docs/PROJECT-STRUCTURE.md`](docs/PROJECT-STRUCTURE.md)（含 4 SUT + 测试矩阵 + 命名约定）
 - 🧭 Staged plan: [`AGENTS.md`](AGENTS.md)（含 Stage 7 W11-W12 交付清单）
