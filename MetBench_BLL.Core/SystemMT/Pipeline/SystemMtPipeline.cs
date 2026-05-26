@@ -263,27 +263,20 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
                 spec = providedSpec;
                 predicate = providedPredicate;
             }
-            else if (string.Equals(
-                ctx.AssertionTypeCode,
-                AssertionTypeCodes.VarianceRatio,
-                StringComparison.Ordinal))
-            {
-                spec = BuildVarianceRatioSpec(ctx);
-                predicate = spec.Predicates![0];
-            }
             else
             {
-                predicate = LegacyAssertionPredicateMapper.MapScalar(
-                    ctx.AssertionTypeCode,
-                    actualRole: "followup",
-                    expectedRole: "source",
-                    metric: ctx.ValueName);
-                spec = TypedSpecFactory.ForLegacyScalar(
+                // String-code dispatch is confined to TypedSpecFactory.ForLegacyAssertion
+                // inside the Catalog/Typed/Migration/ namespace per the
+                // SemanticCatalogBoundaryTests guard — the pipeline only sees the
+                // resulting typed MrSpec + first predicate.
+                spec = TypedSpecFactory.ForLegacyAssertion(
                     mrCode: ctx.MrCode,
+                    assertionTypeCode: ctx.AssertionTypeCode,
                     valueName: ctx.ValueName,
-                    predicate: predicate,
+                    parameters: ctx.Parameters,
                     toleranceAbs: ctx.Tolerance.ToleranceAbs,
                     toleranceRel: ctx.Tolerance.ToleranceRel);
+                predicate = spec.Predicates![0];
             }
         }
         catch (ArgumentException ex)
@@ -330,49 +323,5 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
             Expression: $"{verification.Status} on '{ctx.ValueName}'",
             FailureReason: diagnosticReason);
         return (fallback, spec, predicate, verification);
-    }
-
-    /// <summary>
-    /// PR-VR: build the typed MrSpec for a <c>variance-ratio</c> AssertionTypeCode
-    /// from the pipeline context. Reads <c>factor</c> from <see cref="PipelineContext.Parameters"/>
-    /// (per-run override priority over blueprint default, already merged at the
-    /// launcher boundary) and treats <c>ctx.Tolerance.ToleranceRel</c> as the
-    /// relative slack on top of the expected stderr ratio (SigmaMultiplier =
-    /// <c>1.0 + ToleranceRel</c>). Throws <see cref="ArgumentException"/> for
-    /// blank ValueName, missing / non-numeric / ≤ 1 factor, or non-positive
-    /// ToleranceRel; the caller maps the throw into an `UnknownType` assertion.
-    /// </summary>
-    internal static MrSpec BuildVarianceRatioSpec(PipelineContext ctx)
-    {
-        if (string.IsNullOrWhiteSpace(ctx.ValueName))
-        {
-            throw new ArgumentException(
-                "variance-ratio assertion requires a non-blank ValueName (the statistical metric).",
-                nameof(ctx));
-        }
-
-        if (!ctx.Parameters.TryGetValue("factor", out var factorRaw))
-        {
-            throw new ArgumentException(
-                "variance-ratio assertion requires parameter 'factor' (per-run sample-count ratio).",
-                nameof(ctx));
-        }
-
-        if (!double.TryParse(
-                factorRaw,
-                System.Globalization.NumberStyles.Float,
-                System.Globalization.CultureInfo.InvariantCulture,
-                out var factor))
-        {
-            throw new ArgumentException(
-                $"variance-ratio assertion parameter 'factor' must parse as a double; got '{factorRaw}'.",
-                nameof(ctx));
-        }
-
-        return TypedSpecFactory.ForVarianceRatio(
-            mrCode: ctx.MrCode,
-            statisticalMetric: ctx.ValueName,
-            factor: factor,
-            toleranceRel: ctx.Tolerance.ToleranceRel);
     }
 }

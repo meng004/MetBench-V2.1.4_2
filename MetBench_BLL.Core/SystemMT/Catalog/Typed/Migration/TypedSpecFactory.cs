@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Globalization;
+using MetBench_BLL.SystemMT.Assertions;
 using MetBench_BLL.SystemMT.Catalog.Typed.Specs;
 
 namespace MetBench_BLL.SystemMT.Catalog.Typed.Migration;
@@ -45,6 +46,82 @@ public static class TypedSpecFactory
         return Build(mrCode, valueName, predicate, parameters: null,
             toleranceAbs: toleranceAbs, toleranceRel: toleranceRel,
             actualRole: actualRole, expectedRole: expectedRole);
+    }
+
+    /// <summary>
+    /// PR-VR: single migration entry point that turns a legacy pipeline-style
+    /// (assertion-type-code, value-name, parameters, tolerance) tuple into a
+    /// typed <see cref="MrSpec"/>. String dispatch on
+    /// <see cref="AssertionTypeCodes"/> is intentionally confined to this
+    /// helper (per the SemanticCatalogBoundaryTests architecture guard) so the
+    /// pipeline can stay typed-only.
+    ///
+    /// Dispatch:
+    /// <list type="bullet">
+    ///   <item><c>"variance-ratio"</c> → <see cref="ForVarianceRatio"/> using
+    ///   <c>parameters["factor"]</c> as the SampleRatio (must be finite, &gt; 1)
+    ///   and <c>toleranceRel</c> as the rel slack
+    ///   (<c>SigmaMultiplier = 1 + toleranceRel</c>).</item>
+    ///   <item>all other codes → <see cref="LegacyAssertionPredicateMapper.MapScalar"/>
+    ///   + <see cref="ForLegacyScalar"/> (the existing scalar binary-comparison
+    ///   path).</item>
+    /// </list>
+    /// Throws <see cref="System.ArgumentException"/> on bad inputs (blank
+    /// value-name, missing / non-numeric / ≤ 1 factor, non-positive tolerance,
+    /// unknown legacy code from <see cref="LegacyAssertionPredicateMapper"/>);
+    /// the pipeline catches and surfaces as <c>UnknownType</c>.
+    /// </summary>
+    public static MrSpec ForLegacyAssertion(
+        string mrCode,
+        string assertionTypeCode,
+        string valueName,
+        IReadOnlyDictionary<string, string> parameters,
+        double toleranceAbs,
+        double toleranceRel)
+    {
+        if (parameters is null) throw new System.ArgumentNullException(nameof(parameters));
+
+        if (string.Equals(assertionTypeCode, AssertionTypeCodes.VarianceRatio, System.StringComparison.Ordinal))
+        {
+            if (string.IsNullOrWhiteSpace(valueName))
+            {
+                throw new System.ArgumentException(
+                    "variance-ratio assertion requires a non-blank ValueName (the statistical metric).",
+                    nameof(valueName));
+            }
+
+            if (!parameters.TryGetValue("factor", out var factorRaw))
+            {
+                throw new System.ArgumentException(
+                    "variance-ratio assertion requires parameter 'factor' (per-run sample-count ratio).",
+                    nameof(parameters));
+            }
+
+            if (!double.TryParse(factorRaw, NumberStyles.Float, CultureInfo.InvariantCulture, out var factor))
+            {
+                throw new System.ArgumentException(
+                    $"variance-ratio assertion parameter 'factor' must parse as a double; got '{factorRaw}'.",
+                    nameof(parameters));
+            }
+
+            return ForVarianceRatio(
+                mrCode: mrCode,
+                statisticalMetric: valueName,
+                factor: factor,
+                toleranceRel: toleranceRel);
+        }
+
+        var legacyPredicate = LegacyAssertionPredicateMapper.MapScalar(
+            assertionTypeCode,
+            actualRole: "followup",
+            expectedRole: "source",
+            metric: valueName);
+        return ForLegacyScalar(
+            mrCode: mrCode,
+            valueName: valueName,
+            predicate: legacyPredicate,
+            toleranceAbs: toleranceAbs,
+            toleranceRel: toleranceRel);
     }
 
     public static MrSpec ForLegacyScaling(
