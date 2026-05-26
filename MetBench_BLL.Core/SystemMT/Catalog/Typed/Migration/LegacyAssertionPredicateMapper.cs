@@ -37,11 +37,11 @@ public static class LegacyAssertionPredicateMapper
             case "less-noise-aware":
             case "greater-noise-aware":
                 throw new ArgumentException(
-                    $"Legacy assertion code '{assertionTypeCode}' has noise-aware semantics " +
-                    $"(SourceStd / FollowupStd / NoiseMultiplier) that are not yet representable " +
-                    $"in the Typed Semantic Catalog scalar predicates. Add a noise-aware typed " +
-                    $"predicate before mapping this code, or use a typed alternative for the " +
-                    $"specific MR binding.",
+                    $"Legacy assertion code '{assertionTypeCode}' requires noise-aware inputs " +
+                    $"(SourceStdMetric / FollowupStdMetric / NoiseMultiplier) that the scalar " +
+                    $"signature does not carry. Route this MR's typed mapping through " +
+                    $"`LegacyAssertionPredicateMapper.MapNoiseAwareScalar(...)` instead, which " +
+                    $"emits a NoiseAwareBinaryComparisonPredicate with the extra σ inputs.",
                     nameof(assertionTypeCode));
         }
 
@@ -188,5 +188,64 @@ public static class LegacyAssertionPredicateMapper
             Metric: metric,
             Operator: "Equal",
             Tolerance: new DeterministicToleranceSpec(atol, rtol));
+    }
+
+    /// <summary>
+    /// Map the noise-aware scalar comparison codes (<c>less-noise-aware</c>,
+    /// <c>greater-noise-aware</c>) to a <see cref="NoiseAwareBinaryComparisonPredicate"/>.
+    /// The bare <see cref="MapScalar"/> overload still rejects these codes because the
+    /// scalar signature cannot carry the extra σ inputs; callers that need the noise-aware
+    /// path must route through this overload.
+    /// </summary>
+    /// <param name="assertionTypeCode">Must be <c>less-noise-aware</c> or <c>greater-noise-aware</c>.</param>
+    /// <param name="actualRole">Role on the right of the inequality (typically the followup observation).</param>
+    /// <param name="expectedRole">Role on the left (typically the source / baseline observation).</param>
+    /// <param name="metric">Scalar metric compared between the two roles.</param>
+    /// <param name="sourceStdMetric">Metric on <paramref name="expectedRole"/> carrying σ for the source observation.</param>
+    /// <param name="followupStdMetric">Metric on <paramref name="actualRole"/> carrying σ for the followup observation.</param>
+    /// <param name="noiseMultiplier">Strict positive multiplier (typically 1.0 – 3.0 σ).</param>
+    public static PredicateSpec MapNoiseAwareScalar(
+        string assertionTypeCode,
+        string actualRole,
+        string expectedRole,
+        string metric,
+        string sourceStdMetric,
+        string followupStdMetric,
+        double noiseMultiplier)
+    {
+        if (string.IsNullOrWhiteSpace(actualRole))
+            throw new ArgumentException("actualRole is required.", nameof(actualRole));
+        if (string.IsNullOrWhiteSpace(expectedRole))
+            throw new ArgumentException("expectedRole is required.", nameof(expectedRole));
+        if (string.IsNullOrWhiteSpace(metric))
+            throw new ArgumentException("metric is required.", nameof(metric));
+        if (string.IsNullOrWhiteSpace(sourceStdMetric))
+            throw new ArgumentException("sourceStdMetric is required.", nameof(sourceStdMetric));
+        if (string.IsNullOrWhiteSpace(followupStdMetric))
+            throw new ArgumentException("followupStdMetric is required.", nameof(followupStdMetric));
+        if (!double.IsFinite(noiseMultiplier) || noiseMultiplier <= 0)
+            throw new ArgumentException(
+                $"noiseMultiplier must be finite and > 0; got {noiseMultiplier}.",
+                nameof(noiseMultiplier));
+
+        var op = assertionTypeCode switch
+        {
+            "less-noise-aware" => "Less",
+            "greater-noise-aware" => "Greater",
+            _ => throw new ArgumentException(
+                $"MapNoiseAwareScalar only maps 'less-noise-aware' / 'greater-noise-aware'; " +
+                $"got '{assertionTypeCode}'.",
+                nameof(assertionTypeCode)),
+        };
+
+        return new NoiseAwareBinaryComparisonPredicate(
+            PredicateId: $"{metric}-{op.ToLowerInvariant()}-noise-aware",
+            LeftRole: expectedRole,
+            RightRole: actualRole,
+            Metric: metric,
+            Operator: op,
+            SourceStdMetric: sourceStdMetric,
+            FollowupStdMetric: followupStdMetric,
+            NoiseMultiplier: noiseMultiplier);
     }
 }

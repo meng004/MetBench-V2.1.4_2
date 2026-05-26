@@ -9,6 +9,7 @@ public sealed class ValidationRegistry
     public ToleranceCompatibilityChecker ToleranceChecker { get; } = new();
 
     public BinaryComparisonPredicateValidator BinaryComparisonValidator { get; }
+    public NoiseAwareBinaryComparisonPredicateValidator NoiseAwareBinaryComparisonValidator { get; }
     public ScaledEqualityPredicateValidator ScaledEqualityValidator { get; }
     public CrossMethodPredicateValidator CrossMethodValidator { get; }
     public ErrorMonotonicPredicateValidator ErrorMonotonicValidator { get; }
@@ -23,6 +24,7 @@ public sealed class ValidationRegistry
     public ValidationRegistry()
     {
         BinaryComparisonValidator = new BinaryComparisonPredicateValidator(ReferenceResolver);
+        NoiseAwareBinaryComparisonValidator = new NoiseAwareBinaryComparisonPredicateValidator(ReferenceResolver);
         ScaledEqualityValidator = new ScaledEqualityPredicateValidator(ReferenceResolver, ParameterResolver);
         CrossMethodValidator = new CrossMethodPredicateValidator(ReferenceResolver);
         ErrorMonotonicValidator = new ErrorMonotonicPredicateValidator(ReferenceResolver);

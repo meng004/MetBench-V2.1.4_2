@@ -89,7 +89,9 @@ public sealed class LegacyAssertionPredicateMapperTests
             LegacyAssertionPredicateMapper.MapScalar(code, "followup", "source", "k_eff"));
 
         Assert.Contains("noise-aware", ex.Message, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("not yet representable", ex.Message, StringComparison.OrdinalIgnoreCase);
+        // PR-N1 routed the noise-aware path through MapNoiseAwareScalar; the bare
+        // MapScalar still rejects these codes but now points at the new overload.
+        Assert.Contains("MapNoiseAwareScalar", ex.Message, StringComparison.Ordinal);
     }
 
     [Theory]
@@ -248,5 +250,91 @@ public sealed class LegacyAssertionPredicateMapperTests
                 metric: "phi",
                 factor: null!,
                 exponent: 1.0));
+    }
+
+    // ---- PR-N1: MapNoiseAwareScalar overload --------------------------------
+
+    [Theory]
+    [InlineData("less-noise-aware", "Less")]
+    [InlineData("greater-noise-aware", "Greater")]
+    public void MapNoiseAwareScalar_emits_NoiseAwareBinaryComparisonPredicate(string code, string expectedOperator)
+    {
+        var predicate = LegacyAssertionPredicateMapper.MapNoiseAwareScalar(
+            assertionTypeCode: code,
+            actualRole: "followup",
+            expectedRole: "source",
+            metric: "k_eff",
+            sourceStdMetric: "k_eff_sigma_source",
+            followupStdMetric: "k_eff_sigma_followup",
+            noiseMultiplier: 1.5);
+
+        var noiseAware = Assert.IsType<NoiseAwareBinaryComparisonPredicate>(predicate);
+        Assert.Equal(expectedOperator, noiseAware.Operator);
+        Assert.Equal("source", noiseAware.LeftRole);     // expectedRole → LeftRole
+        Assert.Equal("followup", noiseAware.RightRole);  // actualRole → RightRole
+        Assert.Equal("k_eff", noiseAware.Metric);
+        Assert.Equal("k_eff_sigma_source", noiseAware.SourceStdMetric);
+        Assert.Equal("k_eff_sigma_followup", noiseAware.FollowupStdMetric);
+        Assert.Equal(1.5, noiseAware.NoiseMultiplier);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void MapNoiseAwareScalar_rejects_blank_sourceStdMetric(string blank)
+    {
+        var ex = Assert.Throws<ArgumentException>(() =>
+            LegacyAssertionPredicateMapper.MapNoiseAwareScalar(
+                assertionTypeCode: "less-noise-aware",
+                actualRole: "followup",
+                expectedRole: "source",
+                metric: "k_eff",
+                sourceStdMetric: blank,
+                followupStdMetric: "k_eff_sigma_followup",
+                noiseMultiplier: 1.0));
+        Assert.Equal("sourceStdMetric", ex.ParamName);
+    }
+
+    [Fact]
+    public void MapNoiseAwareScalar_rejects_unsupported_code()
+    {
+        var ex = Assert.Throws<ArgumentException>(() =>
+            LegacyAssertionPredicateMapper.MapNoiseAwareScalar(
+                assertionTypeCode: "greater",
+                actualRole: "followup",
+                expectedRole: "source",
+                metric: "k_eff",
+                sourceStdMetric: "sigma_s",
+                followupStdMetric: "sigma_f",
+                noiseMultiplier: 1.0));
+        Assert.Equal("assertionTypeCode", ex.ParamName);
+    }
+
+    [Theory]
+    [InlineData(0.0)]
+    [InlineData(-0.5)]
+    [InlineData(double.NaN)]
+    public void MapNoiseAwareScalar_rejects_invalid_noise_multiplier(double bad)
+    {
+        var ex = Assert.Throws<ArgumentException>(() =>
+            LegacyAssertionPredicateMapper.MapNoiseAwareScalar(
+                assertionTypeCode: "less-noise-aware",
+                actualRole: "followup",
+                expectedRole: "source",
+                metric: "k_eff",
+                sourceStdMetric: "sigma_s",
+                followupStdMetric: "sigma_f",
+                noiseMultiplier: bad));
+        Assert.Equal("noiseMultiplier", ex.ParamName);
+    }
+
+    [Theory]
+    [InlineData("less-noise-aware")]
+    [InlineData("greater-noise-aware")]
+    public void Bare_MapScalar_still_rejects_noise_aware_codes_and_points_at_overload(string code)
+    {
+        var ex = Assert.Throws<ArgumentException>(() =>
+            LegacyAssertionPredicateMapper.MapScalar(code, "followup", "source", "k_eff"));
+        Assert.Contains("MapNoiseAwareScalar", ex.Message, StringComparison.Ordinal);
     }
 }
