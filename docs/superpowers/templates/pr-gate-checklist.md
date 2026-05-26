@@ -45,3 +45,22 @@ Choose exactly one highest required level. If multiple categories apply, choose 
 - [ ] Required checks are green.
 - [ ] Merge method is appropriate for the branch policy.
 - [ ] After merge, local `main` should be synchronized before monitoring reads the workspace.
+
+## Soft Review (advisory, automated)
+
+Every PR opened against `main` automatically triggers `pr-soft-review.yml` (per
+[`docs/superpowers/specs/2026-05-26-pr-soft-review-via-claude-code-action.md`](../specs/2026-05-26-pr-soft-review-via-claude-code-action.md))
+which runs `anthropics/claude-code-action@v1` in headless OAuth mode against
+this checklist's Scope / Facts / Tests / Windows Classification sections plus
+MetBench-specific cross-checks. The result is posted as a single PR review
+comment titled "Soft Review: PR Gate Checklist (Advisory)".
+
+- [ ] Soft Review comment present on the PR (workflow ran, did not silently skip).
+- [ ] Each FAIL in the Soft Review comment is either resolved or has a one-line
+      human reply explaining why it does not apply.
+- [ ] Soft Review is **never** added to GitHub branch protection's required
+      checks list — its job is to surface findings, not to block merge.
+
+If the workflow itself errors (Max quota exhausted, Anthropic API down,
+secret missing) the PR can still be merged; record the absence and rely on
+manual Layer 1 + Layer 2 review.
