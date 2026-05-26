@@ -155,7 +155,7 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: |
-            --max-turns 10
+            --max-turns 20
             --allowedTools "Bash(gh pr comment:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(git diff:*),Bash(git log:*)"
           prompt: |
             REPO: ${{ github.repository }}
@@ -266,6 +266,7 @@ merge ok
 - **风险 R5（self-bootstrap 第二次发现）**：claude-code-action `prompt:` 只声明意图不开通工具。即使 prompt 里说 "post a comment"，Claude 也必须通过 `claude_args: --allowedTools "..."` 显式拿到 `Bash(gh pr comment:*)` 等工具的执行权。缺这个 → action 12 秒"成功"退出但完全没贴评论，因为模型有话想说没工具可用。已在 §7 模板里：(a) `claude_args` 加 `--allowedTools "Bash(gh pr comment:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(git diff:*),Bash(git log:*)"`，(b) prompt 头加 `REPO:` / `PR NUMBER:` 上下文，(c) prompt 显式写出 `gh pr comment ${{ github.event.pull_request.number }} --body "..."` 命令样板。任何复制本模板要保留这三处；扩展工具白名单时也只列严格必需的命令前缀（不要 `Bash(*)`，最小权限）。**PR #145 第二次跑就是被这个挡住的**。
 - **风险 R6（self-bootstrap 第三次发现 / 真因）**：GitHub 对 `anthropics/claude-code-action@v1` 施加 **workflow-validation 反注入安全门**：workflow 文件必须**已经存在于 default branch 且内容与 PR 分支完全一致**，action 才会真正执行；否则立即跳过、退出码 0（job 显示 success），log 里出现 `Skipping action due to workflow validation: Workflow validation failed. The workflow file must exist and have identical content to the version on the repository's default branch. ... your workflow will begin working once you merge your PR.`。这意味着：(a) **引入 `pr-soft-review.yml` 自身的那一个 PR 永远无法被自己的 soft-gate 覆盖** —— 必须先合并、之后开的 PR 才是第一次真实跑；(b) **任何后续修改 §7 模板的 PR 也会在自身上 silent-skip**（PR 分支版本 ≠ default branch 版本 → 同一安全门），合并后下一个 PR 才会用上新模板验证；(c) 这层 silent-skip 与 OIDC / 工具白名单**无关**，是 GitHub 平台级反注入设计，不可绕过。**PR #145 第三次跑就是被这个挡住的**；R4 / R5 描述的两次"修复"叠加在 R6 之上、看上去像 fix 实际无关，保留是因为符合官方推荐用法（最小权限白名单 + OIDC 显式权限）。**实操含义**：spec §9 验收标准里"自举 PR 自身收到 Soft Review 评论"是无法满足的，应改为"合并后下一个 PR 收到评论"。
 - **风险 R7（operator 操作坑 / 不是模板缺陷）**：`CLAUDE_CODE_OAUTH_TOKEN` secret 在 GitHub Settings → Secrets and variables → Actions 输入框里**保留**任何前导 / 尾部空白或换行字符；从 `claude setup-token` 终端输出复制时极易把 `\n` 一起带进来。Anthropic SDK 把 token 拼成 `Authorization` header 时被 Node `http.validateHeaderValue` 拦截，action 25 秒内 failure 退出，log 里出现 `error: Claude Code returned an error result: API Error: Header '14' has invalid value: '*** ***'` —— **脱敏后两个 `***` 之间有空格**是这个 bug 的指纹（GitHub 把含空白的 secret 还是当一整串脱敏成 `***`，但 SDK 里这一串包含 CR/LF/space，写到 log 时被 secret-masker 切成两段并保留中间的空白）。修复路径是 operator action，不是改 workflow / spec 模板：在 GH Secret UI Update token，粘贴前先 `printf %s "$TOKEN"` 验证无尾部换行；不要直接 `echo` 后粘贴，`echo` 默认带 `\n`。**PR #147 第一次跑就是被这个挡住的**；与 R4 / R5 / R6 都不同源（R7 不是模板缺，是 operator 输入卫生），但失败诊断对未来重新 rotate token 的人有用。已在 §4 operator action 第 2 步加 warning 行。
+- **风险 R8（large-PR turn budget）**：`--max-turns 10` 对小型 docs / SUT PR 足够，但对 Windows/WPF UI PR 这类 15+ 文件 diff 不足。PR #171 首次和重跑 soft-review 均在没有产生代码级 finding 前以 `Reached maximum number of turns (10)` 失败，导致 advisory review check 阻塞而不是给出审查结论。模板将 max-turns 提高到 20；这仍然保留 runaway 上限，同时给 UI / mixed backend+WPF PR 足够空间完成 checklist、读取 diff、并发出单条 PR comment。
 - **未决 Q1**：是否要让 LLM 也读 `AGENTS.md` / `CLAUDE.md` 全文判断"该改但没改的 projection 文档"？目前 prompt 已包含 plan index 路径但未强制全读，先观察是否够用。
 - **未决 Q2**：要不要对 self-PR（agent 自己开的 PR）也跑？目前会跑 — 这是好事，能 catch 我自己漏掉的；但 LLM 给 LLM 审 LLM 的递归审美是否真有价值还要看。
 
