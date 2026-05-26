@@ -71,3 +71,17 @@
 通用开源求解器」。**这与 AGENTS.md Stage 8 §Goal 2（5 方程 × 4 程序类型 + 4 home-grown）
 的原描述已分歧**，需同步订正。SUT 接入的实施排期见
 [representative-sut-onboarding-plan](superpowers/plans/2026-05-21-representative-sut-onboarding-plan.md)。
+
+---
+
+## 6. 当前 T3 边界与 Next-SUT gate（2026-05-26）
+
+详见决策记录 [`docs/superpowers/specs/2026-05-26-t3-coverage-assessment-and-next-sut-decision.md`](superpowers/specs/2026-05-26-t3-coverage-assessment-and-next-sut-decision.md)。该决策为 T3 当前唯一的 active scoped reference，本表 §1–§5 描述的是 SUT 选型的开放宇宙，不再表示当前活动队列。
+
+要点摘要：
+
+- **Pure-stdlib PDE class coverage is complete**：椭圆 / 抛物 / 一阶线性双曲 / 二阶线性双曲 / 非线性双曲五大代表性 PDE 类各至少一例可执行 SUT（PR #134 / #136 / #138 / #140 + 既有 heat_equation / diffusion_1d），加 ODE 与反应堆 Boltzmann anchor，合计 **13 SUT / 12 equations / 25 MRs**。
+- 三大 MR 元模式（`m_mono` / `m_inv` / `m_conv`）均已在多 SUT 上覆盖。
+- **决策**：T3 SUT 扩展暂停。下一步优先级转向 T2 / T4 / T5 / T6（见 active plan index）。
+- 进一步 T3 扩展只接受四类驱动力之一：**External solver pilot**（FEniCS / OpenFOAM / Clawpack / SUNDIALS 等真实外部求解器接入）、**ML/PINN / data-driven SUT pilot**（DeepXDE / PDEBench 等代理 / surrogate）、**reactor anchor deepening**（OpenMC depletion / OpenMOC adjoint 等高保真扩展）、**missing meta-pattern**（T4 发现的 MR 族无法被现有 SUT 执行）。继续添加另一个 1D pure-stdlib PDE 不在驱动力之列。
+- Next SUT 选择标准（一次仅一个）：候选驱动力归类、候选专属实施计划（equation / MR semantics + catalog binding + tests + CI / skip policy）、不依赖未实现的 verification semantics、可在云端 CI 跑或干净 skip。任一条不满足即不得开 PR。
