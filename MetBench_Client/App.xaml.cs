@@ -121,8 +121,6 @@ namespace MetBench_Client
                     OperatingSystem.IsWindows() ? "python" : "python3"));
                 services.AddScoped(provider => new PythonInputAdapter(
                     OperatingSystem.IsWindows() ? "python" : "python3"));
-                services.AddScoped<IMrAssertion, GreaterThanAssertion>();
-                services.AddScoped<IMrAssertion, LessThanAssertion>();
                 // InputGenerator needs an adapter script path; register a factory the
                 // caller can override per-task in Stage 4. Stage 2 leaves the path
                 // resolution to whoever resolves InputGenerator at the call site.
