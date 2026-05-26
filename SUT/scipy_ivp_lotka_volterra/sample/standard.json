@@ -1,0 +1,14 @@
+{
+  "initial": {
+    "prey": 10.0,
+    "predator": 10.0
+  },
+  "params": {
+    "alpha": 1.1,
+    "beta": 0.4,
+    "delta": 0.1,
+    "gamma": 0.4,
+    "t_final": 100.0,
+    "num_eval_points": 1000
+  }
+}

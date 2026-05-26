@@ -1,0 +1,71 @@
+{
+  "sut_name": "scipy-ivp-lotka-volterra",
+  "program": {
+    "program_name": "scipy-ivp-lotka-volterra",
+    "equation": "LotkaVolterra",
+    "equation_key": "lotka-volterra",
+    "program_type": "Num",
+    "runner_script_relative_path": "scipy_ivp_lotka_volterra.py",
+    "input_parser_script_relative_path": "scipy_ivp_lotka_volterra_input_parser.py",
+    "output_parser_script_relative_path": "scipy_ivp_lotka_volterra_output_parser.py",
+    "input_adapter_script_relative_path": "scipy_ivp_lotka_volterra_input_parser.py",
+    "output_adapter_script_relative_path": "scipy_ivp_lotka_volterra_output_parser.py",
+    "python_executable_kind": "scipy"
+  },
+  "mrs": [
+    {
+      "mr_id": "scipy-ivp-lv-prey-growth-monotone",
+      "sut_name": "scipy-ivp-lotka-volterra",
+      "display_name": "SciPy IVP Lotka-Volterra — ScaleGamma (mean-prey identity)",
+      "description": "By the Lotka-Volterra time-average identity ⟨prey⟩ = gamma / delta, scaling the predator death rate gamma by factor > 1 must strictly increase the time-averaged prey population mean_prey, even when the integrator is SciPy's adaptive RK45.",
+      "mr_family": "ScipyIvp.LotkaVolterra.Scaling.Gamma",
+      "transformation_name": "ScaleGamma",
+      "assertion_type_code": "greater",
+      "assertion_name": "GreaterThan",
+      "value_name": "mean_prey",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/params/gamma" }
+      ],
+      "tolerance_rel": 0,
+      "tolerance_abs": 0,
+      "noise_aware": false,
+      "equation_key": "lotka-volterra",
+      "equation": "LotkaVolterra",
+      "program_type": "Num",
+      "meta_pattern": "Mono",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "sample_case_relative_path": "sample/standard.json",
+      "work_root_name": "MetBenchScipyIvpLotkaVolterra",
+      "timeout_seconds": 120
+    },
+    {
+      "mr_id": "scipy-ivp-lv-step-convergence",
+      "sut_name": "scipy-ivp-lotka-volterra",
+      "display_name": "SciPy IVP Lotka-Volterra — EvalGridRefinement (trapezoidal-mean convergence)",
+      "description": "SciPy adaptive RK45 decouples solution accuracy from num_eval_points (which only controls the output sampling grid). Doubling num_eval_points must leave mean_prey within tolerance because the trapezoidal time-average over a denser eval grid converges to the same continuous time-average ⟨prey⟩ = gamma/delta.",
+      "mr_family": "ScipyIvp.LotkaVolterra.Convergence.EvalGrid",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "approx",
+      "assertion_name": "ApproxEqual",
+      "value_name": "mean_prey",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/params/num_eval_points" }
+      ],
+      "tolerance_rel": 1e-3,
+      "tolerance_abs": 1e-6,
+      "noise_aware": false,
+      "equation_key": "lotka-volterra",
+      "equation": "LotkaVolterra",
+      "program_type": "Num",
+      "meta_pattern": "Conv",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "sample_case_relative_path": "sample/standard.json",
+      "work_root_name": "MetBenchScipyIvpLotkaVolterra",
+      "timeout_seconds": 120
+    }
+  ]
+}

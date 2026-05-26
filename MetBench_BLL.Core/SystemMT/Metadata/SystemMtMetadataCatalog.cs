@@ -392,6 +392,40 @@ public static class SystemMtMetadataCatalog
         },
         new MrMetadata
         {
+            MrId = "scipy-ivp-lv-prey-growth-monotone",
+            EquationKey = "lotka-volterra",
+            PhysicalMeaning =
+                "T3C-IVP（SciPy solve_ivp 求解器）：相同 Lotka-Volterra 时均恒等式 ⟨prey⟩ = γ/δ，" +
+                "γ 翻倍必使 mean_prey 严格上升 — 自适应 RK45 在 rtol=1e-9/atol=1e-12 下逼真复现连续解，" +
+                "误差远小于 strict greater 比较所要求的间距。",
+            InputTransformation = "γ → factor·γ（factor > 1）",
+            OutputRelation = "mean_prey(flw) > mean_prey(src)",
+            ComparisonType = MrComparisonType.Ordinal,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "γ（捕食者死亡率）缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "mean_prey", PhysicalMeaning = "时均猎物数（输出）", ValueRange = "mean_prey > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "scipy-ivp-lv-step-convergence",
+            EquationKey = "lotka-volterra",
+            PhysicalMeaning =
+                "T3C-IVP eval-grid 细化收敛性：SciPy solve_ivp 自适应步长使解的连续轨迹独立于 " +
+                "num_eval_points（仅控制输出采样网格）。num_eval_points 翻倍后 trapezoidal 积分" +
+                "得到的 mean_prey 应在 O(Δt²) 容差内不变，收敛到同一连续 ⟨prey⟩ = γ/δ。",
+            InputTransformation = "num_eval_points → factor·num_eval_points（factor > 1）",
+            OutputRelation = "mean_prey(flw) ≈ mean_prey(src)（O(Δt²) 容差内）",
+            ComparisonType = MrComparisonType.Absolute,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "num_eval_points 缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "mean_prey", PhysicalMeaning = "时均猎物数（输出）", ValueRange = "mean_prey > 0" },
+            },
+        },
+        new MrMetadata
+        {
             MrId = "diffusion-source-linearity",
             EquationKey = "diffusion",
             PhysicalMeaning =
@@ -435,6 +469,40 @@ public static class SystemMtMetadataCatalog
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "源缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "u_max", PhysicalMeaning = "峰值幅度（输出）", ValueRange = "u_max > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "scipy-bvp-poisson-source-superposition",
+            EquationKey = "poisson",
+            PhysicalMeaning =
+                "T3C-BVP（SciPy solve_bvp 求解器）：相同 Poisson 线性叠加 -u'' = f 在源 f 上严格线性，" +
+                "f 翻倍必使 u_max 严格放大（解析下精确按同比例 = factor·u_max(src)）。" +
+                "solve_bvp 自适应网格在 tol=1e-9 下收敛到解析解，远小于 strict greater 比较所要求的间距。",
+            InputTransformation = "f → factor·f（factor > 1）",
+            OutputRelation = "u_max(flw) > u_max(src)（严格意义下 = factor·u_max(src)）",
+            ComparisonType = MrComparisonType.Ordinal,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "源缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "u_max", PhysicalMeaning = "峰值幅度（输出）", ValueRange = "u_max > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "scipy-bvp-poisson-mesh-richardson",
+            EquationKey = "poisson",
+            PhysicalMeaning =
+                "T3C-BVP 自适应 BVP 求解器对种子网格 num_points 不敏感：solve_bvp 自适应细化内部网格 " +
+                "直至残差 < tol；用户提供的 num_points 仅为种子。num_points 翻倍后 u_max 应在 " +
+                "ToleranceRel=1e-3 / Atol=1e-6 容差内不变，二者均收敛到同一连续解 u = f·L²/8 的 plateau。",
+            InputTransformation = "num_points → factor·num_points（factor > 1）",
+            OutputRelation = "u_max(flw) ≈ u_max(src)（O(tol) 容差内）",
+            ComparisonType = MrComparisonType.Absolute,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "种子 num_points 缩放倍率", ValueRange = "factor > 1" },
                 new() { Symbol = "u_max", PhysicalMeaning = "峰值幅度（输出）", ValueRange = "u_max > 0" },
             },
         },

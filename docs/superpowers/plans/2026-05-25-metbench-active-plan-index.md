@@ -11,7 +11,8 @@
 | Plan | Status | Scope | Expiry condition |
 |---|---|---|---|
 | `docs/superpowers/plans/2026-05-25-metbench-governed-next-stage-plan.md` | Active | Governance-first next-stage planning; blocks further implementation until the named design ambiguities are resolved | Expires when semantic-convergence, Evidence v2, Windows verification policy, and transition plan are completed and replaced by a new implementation plan |
-| `docs/superpowers/specs/2026-05-26-t3-coverage-assessment-and-next-sut-decision.md` | Active scoped reference | T3 representative-PDE-class coverage assessment + next-SUT gate. Inventory anchor: **13 SUT / 12 equations / 25 MRs** after PR #134 (Poisson) / #136 (Advection) / #138 (Wave) / #140 (Burgers). **Decision (2026-05-26): T3 SUT expansion paused**; further expansion requires one of four named drivers (External solver pilot / ML/PINN or data-driven SUT pilot / reactor anchor deepening / missing meta-pattern) plus a candidate-specific implementation plan registered here before any code lands. Any new T3 SUT PR must cite this decision record. | Expires only when a newer T3 decision record supersedes it |
+| `docs/superpowers/specs/2026-05-26-t3-coverage-assessment-and-next-sut-decision.md` | Active scoped reference | T3 representative-PDE-class coverage assessment + next-SUT gate. Inventory anchor pre-§5.2: **13 SUT / 12 equations / 25 MRs** after PR #134 (Poisson) / #136 (Advection) / #138 (Wave) / #140 (Burgers). Post-§5.2 IVP: **14 SUT / 12 equations / 27 MRs**. **Pure-stdlib expansion paused**; external-solver-pilot expansion proceeds **one candidate at a time** under §4 driver #1. §5.2 (`scipy-ivp-lotka-volterra`) completed. **§5.3 (2026-05-26 post-IVP): unique selected next SUT is `scipy-bvp-poisson-1d`** (see implementation plan row below). §5.1 backlog (MeshGraphNets cylinder-flow surrogate) is **anticipation only**. Any new T3 SUT PR must cite this decision record. | Expires only when a newer T3 decision record supersedes it |
+| `docs/superpowers/plans/2026-05-26-t3c-scipy-bvp-poisson-1d-plan.md` | Active scoped implementation plan | T3C-BVP candidate-specific implementation plan for the §5.3 selection `scipy-bvp-poisson-1d`. Covers equation re-use (poisson), MR semantics for `scipy-bvp-poisson-source-superposition` (Mono / greater) and `scipy-bvp-poisson-mesh-richardson` (Conv / approx), catalog bindings, tests, CI strategy, and clean-skip policy with verbatim skip reason `"SciPy runtime not configured for scipy-bvp-poisson-1d."`. No new verification semantics; no Method MT / Typed Catalog runtime / WPF edits; T3C-IVP code is not modified. Inventory delta: +1 SUT / 0 equations / +2 MRs. | Expires once T3C-BVP merges and the inventory delta lands in `docs/status/current.md`; move to active-plan-index §3 at that point |
 | (no active scoped plan beyond the above) | — | Verification-semantics convergence (PR-A → PR-D), ExecutionEvidence v2 (PR-A0 + PR-C0 + live wiring + evidence-aware reporting via PR #123 / #126 / #128), dormant legacy code mapping (PR #124), anomaly typed annotation + correctness (PR #130 / #132), and T3 representative-PDE-class expansion (PR #134 elliptic / #136 first-order linear hyperbolic / #138 second-order linear hyperbolic / #140 nonlinear hyperbolic) are all merged. The ExecutionEvidence v2 design's full lifecycle is closed; T3 PDE-class coverage is functionally complete across four representative families and is now governed by the T3 decision record row above. Remaining follow-ups (noise-aware typed predicate when a binding adopts the codes; Windows verification policy when a Windows-touching PR is planned; T2 / T4 / T5 / T6 expansion) are tracked as `docs/status/current.md` §7 steps. | A new scoped plan must be registered here before any new cross-cutting System MT work begins. |
 
 Any new coding task must be derived from the active master plan or from a scoped successor plan registered here.
@@ -60,6 +61,16 @@ Any new coding task must be derived from the active master plan or from a scoped
 - 它们已经对应完成并入主线
 - 仍适合用作执行样板
 - 但不再代表“下一步做什么”
+
+### T3C 外部求解器试点（已合并）
+
+- `docs/superpowers/plans/2026-05-26-t3c-scipy-ivp-lotka-volterra-plan.md`（T3C-IVP，已合并）
+
+**原因**:
+
+- §5.2 decision record 选定的 SciPy `solve_ivp` Lotka-Volterra SUT 已通过 T3C-IVP 合入主线（inventory 13→14 SUT / 25→27 MR）。
+- 仍适合用作下一个外部求解器候选（如 T3C-BVP `scipy-bvp-poisson-1d`）的实施样板。
+- 但不再代表“下一步做什么”。
 
 ### 阶段性修复计划
 

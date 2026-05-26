@@ -72,7 +72,7 @@ public sealed class SystemMtLauncherTests
     {
         var descriptors = await _launcher.ListAvailableAsync();
 
-        Assert.Equal(25, descriptors.Count);
+        Assert.Equal(29, descriptors.Count);
         Assert.Equal("advection-amplitude-linearity", descriptors[0].Id);
         Assert.Equal("advection-mesh-conservation", descriptors[1].Id);
         Assert.Equal("bateman-mass-conservation", descriptors[2].Id);
@@ -94,10 +94,14 @@ public sealed class SystemMtLauncherTests
         Assert.Equal("poisson-mesh-richardson", descriptors[18].Id);
         Assert.Equal("poisson-source-superposition", descriptors[19].Id);
         Assert.Equal("projectile-scale-v0", descriptors[20].Id);
-        Assert.Equal("subchannel-flow-temperature-monotone", descriptors[21].Id);
-        Assert.Equal("subchannel-heat-flux-linearity", descriptors[22].Id);
-        Assert.Equal("wave-amplitude-linearity", descriptors[23].Id);
-        Assert.Equal("wave-mesh-energy-convergence", descriptors[24].Id);
+        Assert.Equal("scipy-bvp-poisson-mesh-richardson", descriptors[21].Id);
+        Assert.Equal("scipy-bvp-poisson-source-superposition", descriptors[22].Id);
+        Assert.Equal("scipy-ivp-lv-prey-growth-monotone", descriptors[23].Id);
+        Assert.Equal("scipy-ivp-lv-step-convergence", descriptors[24].Id);
+        Assert.Equal("subchannel-flow-temperature-monotone", descriptors[25].Id);
+        Assert.Equal("subchannel-heat-flux-linearity", descriptors[26].Id);
+        Assert.Equal("wave-amplitude-linearity", descriptors[27].Id);
+        Assert.Equal("wave-mesh-energy-convergence", descriptors[28].Id);
     }
 
     [Fact]
@@ -353,6 +357,66 @@ public sealed class SystemMtLauncherTests
         Assert.Equal("2", projectile.DefaultParameters["factor"]);
         Assert.Contains("v0", projectile.Description, StringComparison.OrdinalIgnoreCase);
         Assert.Equal("Projectile.Scaling.V0", projectile.MrFamily);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_scipy_ivp_lv_prey_growth_monotone_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var mono = descriptors.Single(d => d.Id == "scipy-ivp-lv-prey-growth-monotone");
+
+        Assert.Equal("scipy-ivp-lotka-volterra", mono.SutName);
+        Assert.Equal("ScaleGamma", mono.TransformationName);
+        Assert.Equal("GreaterThan", mono.AssertionName);
+        Assert.Equal("mean_prey", mono.ValueName);
+        Assert.Equal("2", mono.DefaultParameters["factor"]);
+        Assert.Contains("gamma", mono.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("ScipyIvp.LotkaVolterra.Scaling.Gamma", mono.MrFamily);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_scipy_ivp_lv_step_convergence_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var conv = descriptors.Single(d => d.Id == "scipy-ivp-lv-step-convergence");
+
+        Assert.Equal("scipy-ivp-lotka-volterra", conv.SutName);
+        Assert.Equal("ScaleField", conv.TransformationName);
+        Assert.Equal("ApproxEqual", conv.AssertionName);
+        Assert.Equal("mean_prey", conv.ValueName);
+        Assert.Equal("2", conv.DefaultParameters["factor"]);
+        Assert.Contains("eval", conv.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("ScipyIvp.LotkaVolterra.Convergence.EvalGrid", conv.MrFamily);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_scipy_bvp_poisson_source_superposition_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var lin = descriptors.Single(d => d.Id == "scipy-bvp-poisson-source-superposition");
+
+        Assert.Equal("scipy-bvp-poisson-1d", lin.SutName);
+        Assert.Equal("ScaleField", lin.TransformationName);
+        Assert.Equal("GreaterThan", lin.AssertionName);
+        Assert.Equal("u_max", lin.ValueName);
+        Assert.Equal("2", lin.DefaultParameters["factor"]);
+        Assert.Contains("source", lin.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("ScipyBvp.Poisson.Scaling.Source", lin.MrFamily);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_scipy_bvp_poisson_mesh_richardson_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var conv = descriptors.Single(d => d.Id == "scipy-bvp-poisson-mesh-richardson");
+
+        Assert.Equal("scipy-bvp-poisson-1d", conv.SutName);
+        Assert.Equal("ScaleField", conv.TransformationName);
+        Assert.Equal("ApproxEqual", conv.AssertionName);
+        Assert.Equal("u_max", conv.ValueName);
+        Assert.Equal("2", conv.DefaultParameters["factor"]);
+        Assert.Contains("mesh", conv.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("ScipyBvp.Poisson.Convergence.SeedMesh", conv.MrFamily);
     }
 
     [Fact]

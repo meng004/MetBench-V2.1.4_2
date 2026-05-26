@@ -17,5 +17,8 @@ public static class PythonExecutableKinds
     /// <summary>OpenMC-aware venv (resolved via LauncherOptions.EffectiveOpenMcPython).</summary>
     public const string OpenMc = "openmc";
 
-    public static readonly IReadOnlyList<string> All = new[] { System, OpenMoc, OpenMc };
+    /// <summary>SciPy-aware venv (resolved via LauncherOptions.EffectiveScipyPython); used by T3C-IVP / T3C-BVP external-solver-pilot SUTs.</summary>
+    public const string Scipy = "scipy";
+
+    public static readonly IReadOnlyList<string> All = new[] { System, OpenMoc, OpenMc, Scipy };
 }

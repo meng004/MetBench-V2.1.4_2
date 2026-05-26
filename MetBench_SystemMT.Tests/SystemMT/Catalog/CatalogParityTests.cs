@@ -9,7 +9,7 @@ namespace MetBench_SystemMT.Tests.SystemMT.Catalog;
 
 /// <summary>
 /// Pin the equivalence between the legacy hardcoded catalog and the manifest-backed catalog
-/// for every MR currently in the launcher (25 entries / 13 SUTs after T3 Poisson 1D + Advection 1D + Wave 1D + Burgers 1D).
+/// for every MR currently in the launcher (29 entries / 15 SUTs after T3C-BVP scipy-bvp-poisson-1d).
 /// Any drift in either side fails CI loudly.
 /// </summary>
 public sealed class CatalogParityTests
@@ -29,7 +29,7 @@ public sealed class CatalogParityTests
         var manifest = new ManifestMrCatalogProvider(Opts()).Load();
 
         Assert.Equal(hardcoded.Count, manifest.Count);
-        Assert.Equal(25, hardcoded.Count);
+        Assert.Equal(29, hardcoded.Count);
 
         var hSet = hardcoded.Select(e => e.Mr.Id).OrderBy(s => s).ToList();
         var mSet = manifest.Select(e => e.Mr.Id).OrderBy(s => s).ToList();
