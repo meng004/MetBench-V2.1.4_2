@@ -285,6 +285,26 @@ public static class SystemMtMetadataCatalog
         },
         new MrMetadata
         {
+            MrId = "openmc-pincell-particle-count-convergence",
+            EquationKey = "neutron-transport",
+            PhysicalMeaning =
+                "对同一 OpenMC pin-cell 算例放大 particles 计数。" +
+                "依据 Monte-Carlo 抽样的 1/√N 定律，更大的 N 应使 k_eff 的报告 std error 单调收缩。",
+            InputTransformation = "particles → factor·particles（factor > 1）",
+            OutputRelation = "k_eff_std(flw) ≤ k_eff_std(src) / √factor × (1 + ToleranceRel)",
+            // Relative comparison: kernel checks high.StdError against a (1 + ToleranceRel)
+            // band around low.StdError / √factor — equality within a tolerated relative
+            // deviation ratio (= MrComparisonType.Relative semantics).
+            ComparisonType = MrComparisonType.Relative,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor",    PhysicalMeaning = "particles 放大倍率",                 ValueRange = "factor > 1" },
+                new() { Symbol = "k_eff",     PhysicalMeaning = "OpenMC 报告的有效增殖因子（输出）",   ValueRange = "k_eff > 0" },
+                new() { Symbol = "k_eff_std", PhysicalMeaning = "k_eff 的标准误（本 MR 校验目标输出）", ValueRange = "k_eff_std > 0" },
+            },
+        },
+        new MrMetadata
+        {
             MrId = "heat-equation-amplitude",
             EquationKey = "heat-equation-1d",
             PhysicalMeaning =
