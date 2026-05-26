@@ -257,6 +257,75 @@ public sealed class LauncherCatalogV2ImporterTests
     }
 
     [Fact]
+    public void Import_keeps_legacy_application_name_empty_for_system_level_mr_boundary()
+    {
+        var importer = new LauncherCatalogV2Importer(
+            new FakeCatalogReader(new[]
+            {
+                FakeEntry("compat-mr", "compat-sut"),
+            }),
+            _apps,
+            _mrs,
+            _bindings,
+            _audit);
+
+        importer.Import();
+
+#pragma warning disable CS0618
+        Assert.True(string.IsNullOrEmpty(Assert.Single(_mrs.Data).ApplicationName));
+#pragma warning restore CS0618
+    }
+
+    [Fact]
+    public void Import_sets_unique_legacy_patterns_for_system_level_mr_repository_index_compatibility()
+    {
+        var importer = new LauncherCatalogV2Importer(
+            new FakeCatalogReader(new[]
+            {
+                FakeEntry("compat-mr-1", "compat-sut"),
+                FakeEntry("compat-mr-2", "compat-sut"),
+            }),
+            _apps,
+            _mrs,
+            _bindings,
+            _audit);
+
+        importer.Import();
+
+        Assert.Equal(2, _mrs.Data.Select(m => new
+        {
+            m.InputPattern,
+            m.OutputPattern,
+#pragma warning disable CS0618
+            m.ApplicationName,
+#pragma warning restore CS0618
+        }).Distinct().Count());
+        Assert.All(_mrs.Data, m => Assert.StartsWith("systemmt:", m.InputPattern));
+        Assert.All(_mrs.Data, m => Assert.StartsWith("systemmt:", m.OutputPattern));
+    }
+
+    [Fact]
+    public void Import_resolves_inserted_mr_id_when_repository_does_not_mutate_auto_id()
+    {
+        var nonMutatingMrs = new FakeImporterMrRepoWithoutIdMutation();
+        var importer = new LauncherCatalogV2Importer(
+            new FakeCatalogReader(new[]
+            {
+                FakeEntry("non-mutating-id-mr", "non-mutating-id-sut"),
+            }),
+            _apps,
+            nonMutatingMrs,
+            _bindings,
+            _audit);
+
+        importer.Import();
+
+        var binding = Assert.Single(_bindings.Data);
+        Assert.True(binding.MRId > 0);
+        Assert.Equal(nonMutatingMrs.Data.Single().IdMR, binding.MRId);
+    }
+
+    [Fact]
     public async Task Import_then_RunAsync_heat_equation_still_produces_execution_result()
     {
         // 「对 MT 流程的再次验证」:导入数据后,launcher 仍能跑通端到端 MR
@@ -299,6 +368,47 @@ public sealed class LauncherCatalogV2ImporterTests
         public MetamorphicRelation Get(int id) => Data.First(m => m.IdMR == id);
         public ObservableCollection<MetamorphicRelation> Get(MetamorphicRelation e) => new(Data);
         public bool Add(MetamorphicRelation e) { e.IdMR = _nextId++; Data.Add(e); return true; }
+        public bool Modify(MetamorphicRelation e) => true;
+        public bool Remove(MetamorphicRelation e) => Data.Remove(e);
+        public ObservableCollection<MetamorphicRelations_QueryResultData> GetAll_MIX() => new();
+        public ObservableCollection<MetamorphicRelations_QueryResultData> Get(MetamorphicRelation m, string d) => new();
+        public ObservableCollection<MetamorphicRelations_QueryResultData> GetAll_MIXTwoTable() => new();
+        public bool IsDuplicate(MetamorphicRelation m, bool excludeSelf = false) => false;
+    }
+
+    internal sealed class FakeImporterMrRepoWithoutIdMutation : IMetamorphicRelationRepository
+    {
+        public List<MetamorphicRelation> Data { get; } = new();
+        private int _nextId = 1;
+        public DatatoImage datatoImage { get; set; } = null!;
+        public ObservableCollection<MetamorphicRelation> GetAll() => new(Data);
+        public MetamorphicRelation Get(int id) => Data.First(m => m.IdMR == id);
+        public ObservableCollection<MetamorphicRelation> Get(MetamorphicRelation e) => new(Data);
+        public bool Add(MetamorphicRelation e)
+        {
+            Data.Add(new MetamorphicRelation
+            {
+                IdMR = _nextId++,
+                Code = e.Code,
+                Description = e.Description,
+                Kind = e.Kind,
+                TransformationName = e.TransformationName,
+                AssertionTypeCode = e.AssertionTypeCode,
+                ValueName = e.ValueName,
+                MetaPatternCode = e.MetaPatternCode,
+                DiscoveryMethod = e.DiscoveryMethod,
+                EquationKey = e.EquationKey,
+                CreatedAt = e.CreatedAt,
+                CreatedBy = e.CreatedBy,
+                InputPattern = e.InputPattern,
+                OutputPattern = e.OutputPattern,
+#pragma warning disable CS0618
+                ApplicationName = e.ApplicationName,
+#pragma warning restore CS0618
+            });
+            return true;
+        }
+
         public bool Modify(MetamorphicRelation e) => true;
         public bool Remove(MetamorphicRelation e) => Data.Remove(e);
         public ObservableCollection<MetamorphicRelations_QueryResultData> GetAll_MIX() => new();

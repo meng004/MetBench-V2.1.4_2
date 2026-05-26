@@ -259,6 +259,16 @@ namespace MetBench_DAL
                 }
                 MetamorphicRelations = db.GetCollection<MetamorphicRelation>(_dbConfig.MetamorphicRelations_Collection_Key);
                 Applications = db.GetCollection<Application>(_dbConfig.Applications_Collection_Key);
+                if (string.Equals(metamorphicRelation.Kind, "system-level", StringComparison.Ordinal))
+                {
+                    // System MT uses MRBinding rows for the real SUT association.
+                    // Keep the obsolete ApplicationName empty so legacy Method MT
+                    // query surfaces do not expose system-level catalog rows.
+                    metamorphicRelation.ApplicationName = string.Empty;
+                    var systemId = MetamorphicRelations.Insert(metamorphicRelation);
+                    return systemId > 0;
+                }
+
                 // 将 Applications 转换为字典，以便快速查找  通过索引为Name 通过Name可以找到对应的应用程序
                 var applicationDictionary = Applications.FindAll().ToDictionary(app => app.Name);
                 // 保存关联的应用程序的名称  

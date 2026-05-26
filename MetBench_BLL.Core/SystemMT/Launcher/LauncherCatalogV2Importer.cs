@@ -16,7 +16,8 @@ namespace MetBench_BLL.SystemMT.Launcher;
 /// v2 表里。
 ///
 /// 幂等:重复导入不创建重复行,通过 (Name + Kind="system-level") /
-/// (Code + Kind="system-level") / (MRId + ApplicationId) 三元组做查重。
+/// (Code + Kind="system-level") / (MRId + ApplicationId + DefaultSampleCasePath)
+/// 做查重,与 LiteDB 的 MRBinding_Composite 唯一索引保持一致。
 ///
 /// 这是 migration-plan P5「launcher 转数据驱动」的入门半步 —— 把数据先搬过来,
 /// 等 v2 entity-driven launcher 真正出现时再让 RunAsync 改读 v2 表。
@@ -114,14 +115,30 @@ public sealed class LauncherCatalogV2Importer
                         ValueName = entry.Mr.ValueName,
                         MetaPatternCode = DeriveMetaPatternCode(entry.Mr.MrFamily),
                         DiscoveryMethod = "manual",
+                        // v2 System MT 的真实绑定在 MRBinding 表里。这里仅填充旧
+                        // MR_Idx 需要的稳定占位 pattern,并保持 obsolete
+                        // ApplicationName 为空,防止 Method MT legacy 查询入口把
+                        // System MT 行当作方法级 MR 暴露出去。
+                        InputPattern = $"systemmt:{mrCode}:source",
+                        OutputPattern = $"systemmt:{mrCode}:followup",
+#pragma warning disable CS0618
+                        ApplicationName = string.Empty,
+#pragma warning restore CS0618
                         // S8-P5 review fix: 把 launcher blueprint 的 EquationKey 显式投影到 MR row
                         // （之前漏写，导致 V3 migration 全部 collapse 到 EquationKind.Other）
                         EquationKey = entry.EquationKey,
                         CreatedAt = DateTime.UtcNow,
                         CreatedBy = actor,
                     };
-                    _mrs.Add(mr);
-                    mrIdToMrInt[mrCode] = mr.IdMR;
+                    if (!_mrs.Add(mr))
+                    {
+                        throw new InvalidOperationException(
+                            $"Failed to import System MT MR '{mrCode}' for SUT '{sutName}'.");
+                    }
+
+                    var imported = ResolveImportedMr(mr, mrCode);
+                    mrIdToMrInt[mrCode] = imported.IdMR;
+                    existingMrs.Add(imported);
                     summary.MrsCreated++;
                 }
                 else
@@ -135,7 +152,12 @@ public sealed class LauncherCatalogV2Importer
             var mrIntId = mrIdToMrInt[mrCode];
             var appId = sutToAppId[sutName];
             var existingBinding = existingBindings.FirstOrDefault(b =>
-                b.MRId == mrIntId && b.ApplicationId == appId);
+                b.MRId == mrIntId
+                && b.ApplicationId == appId
+                && string.Equals(
+                    b.DefaultSampleCasePath,
+                    entry.SampleCaseRelativePath,
+                    StringComparison.Ordinal));
             if (existingBinding is null)
             {
                 var binding = new MRBinding
@@ -147,7 +169,13 @@ public sealed class LauncherCatalogV2Importer
                     BoundAt = DateTime.UtcNow,
                     BoundBy = actor,
                 };
-                _bindings.Add(binding);
+                if (!_bindings.Add(binding))
+                {
+                    throw new InvalidOperationException(
+                        $"Failed to import System MT MR binding '{mrCode}' for SUT '{sutName}'.");
+                }
+
+                existingBindings.Add(binding);
                 summary.BindingsCreated++;
             }
             else
@@ -190,6 +218,26 @@ public sealed class LauncherCatalogV2Importer
         if (mrFamily.Contains("Invariance", StringComparison.Ordinal)) return "m_inv";
         if (mrFamily.Contains("Convergence", StringComparison.Ordinal)) return "m_conv";
         return string.Empty;
+    }
+
+    private MetamorphicRelation ResolveImportedMr(MetamorphicRelation inserted, string mrCode)
+    {
+        if (inserted.IdMR > 0)
+        {
+            return inserted;
+        }
+
+        var persisted = _mrs.GetAll().FirstOrDefault(m =>
+            string.Equals(m.Code, mrCode, StringComparison.Ordinal)
+            && string.Equals(m.Kind, "system-level", StringComparison.Ordinal));
+
+        if (persisted is null || persisted.IdMR <= 0)
+        {
+            throw new InvalidOperationException(
+                $"Imported System MT MR '{mrCode}' did not receive a persistent IdMR.");
+        }
+
+        return persisted;
     }
 }
 
