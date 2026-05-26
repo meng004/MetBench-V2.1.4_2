@@ -13,7 +13,8 @@
   "solver": {
     "convergence_threshold": 0.0001,
     "max_iters": 1000,
-    "num_threads": 1
+    "num_threads": 1,
+    "particles": 5000
   },
   "materials": {
     "fuel": {

@@ -72,7 +72,7 @@ public sealed class SystemMtLauncherTests
     {
         var descriptors = await _launcher.ListAvailableAsync();
 
-        Assert.Equal(30, descriptors.Count);
+        Assert.Equal(31, descriptors.Count);
         Assert.Equal("advection-amplitude-linearity", descriptors[0].Id);
         Assert.Equal("advection-mesh-conservation", descriptors[1].Id);
         Assert.Equal("bateman-mass-conservation", descriptors[2].Id);

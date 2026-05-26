@@ -117,6 +117,43 @@ internal static class LegacyCatalogFactory
             TransformSteps: new[] { new MrTransformStep("ScaleFuelAbsorption", "/materials/fuel") },
             AssertionTypeCode: "less");
 
+        // PR-N2 / Bol-Alg-02: Monte-Carlo particle-count convergence — first
+        // catalog consumer of the variance-ratio launcher pipeline (PR-VR #168).
+        // Increasing OpenMC `particles` by `factor` must shrink the reported
+        // k_eff_std by ~ 1/√factor; the variance-ratio kernel passes iff
+        // high.StdError ≤ low.StdError / √factor × (1 + ToleranceRel).
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "openmc-pincell-particle-count-convergence",
+                DisplayName: "OpenMC pin-cell — RefineParticles (k_eff_std ~ 1/√factor)",
+                SutName: "openmc",
+                TransformationName: "ScaleField",
+                AssertionName: "VarianceRatio",
+                ValueName: "k_eff_std",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "4" },
+                Description:
+                    "Same physical input on both sides; the follow-up case multiplies OpenMC's " +
+                    "`particles` count by factor > 1. By the Monte-Carlo 1/√N sampling law the " +
+                    "reported k_eff_std must shrink to ~ 1/√factor of the source value. The " +
+                    "variance-ratio assertion permits a (1 + ToleranceRel) relative slack above " +
+                    "the expected ratio to absorb finite-sample noise.",
+                MrFamily: "NeutronTransport.Sampling.ParticleCount"),
+            SampleCaseRelativePath: Path.Combine("openmc", "sample", "pincell.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "openmc", "openmc_runner.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "openmc", "openmc_input_adapter_refine_particles.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "openmc", "openmc_output_adapter.py"),
+            PythonExecutable: options.EffectiveOpenMcPython,
+            WorkRootName: "MetBenchOpenMcRefineParticles",
+            Timeout: TimeSpan.FromMinutes(5),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "openmc", "openmc_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "openmc", "openmc_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/solver/particles") },
+            AssertionTypeCode: "variance-ratio",
+            Tolerance: new AssertionTolerance(
+                NoiseAware: true,
+                ToleranceRel: 0.30,
+                NoiseMultiplier: 1.0));
+
         yield return new MrBlueprint(
             new MrSummary(
                 Id: "heat-equation-amplitude",
