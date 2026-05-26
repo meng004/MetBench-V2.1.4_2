@@ -119,6 +119,7 @@ public sealed class ManifestMrCatalogProvider : IMrCatalogProvider
         {
             PythonExecutableKinds.OpenMoc => _options.OpenMocPython,
             PythonExecutableKinds.OpenMc => _options.EffectiveOpenMcPython,
+            PythonExecutableKinds.Scipy => _options.EffectiveScipyPython,
             _ => _options.SystemPython,
         };
 

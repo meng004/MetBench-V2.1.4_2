@@ -392,6 +392,40 @@ public static class SystemMtMetadataCatalog
         },
         new MrMetadata
         {
+            MrId = "scipy-ivp-lv-prey-growth-monotone",
+            EquationKey = "lotka-volterra",
+            PhysicalMeaning =
+                "T3C-IVP（SciPy solve_ivp 求解器）：相同 Lotka-Volterra 时均恒等式 ⟨prey⟩ = γ/δ，" +
+                "γ 翻倍必使 mean_prey 严格上升 — 自适应 RK45 在 rtol=1e-9/atol=1e-12 下逼真复现连续解，" +
+                "误差远小于 strict greater 比较所要求的间距。",
+            InputTransformation = "γ → factor·γ（factor > 1）",
+            OutputRelation = "mean_prey(flw) > mean_prey(src)",
+            ComparisonType = MrComparisonType.Ordinal,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "γ（捕食者死亡率）缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "mean_prey", PhysicalMeaning = "时均猎物数（输出）", ValueRange = "mean_prey > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "scipy-ivp-lv-step-convergence",
+            EquationKey = "lotka-volterra",
+            PhysicalMeaning =
+                "T3C-IVP eval-grid 细化收敛性：SciPy solve_ivp 自适应步长使解的连续轨迹独立于 " +
+                "num_eval_points（仅控制输出采样网格）。num_eval_points 翻倍后 trapezoidal 积分" +
+                "得到的 mean_prey 应在 O(Δt²) 容差内不变，收敛到同一连续 ⟨prey⟩ = γ/δ。",
+            InputTransformation = "num_eval_points → factor·num_eval_points（factor > 1）",
+            OutputRelation = "mean_prey(flw) ≈ mean_prey(src)（O(Δt²) 容差内）",
+            ComparisonType = MrComparisonType.Absolute,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "num_eval_points 缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "mean_prey", PhysicalMeaning = "时均猎物数（输出）", ValueRange = "mean_prey > 0" },
+            },
+        },
+        new MrMetadata
+        {
             MrId = "diffusion-source-linearity",
             EquationKey = "diffusion",
             PhysicalMeaning =

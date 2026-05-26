@@ -344,6 +344,67 @@ internal static class LegacyCatalogFactory
             TransformSteps: new[] { new MrTransformStep("ScaleField", "/params/gamma") },
             AssertionTypeCode: "greater");
 
+        // T3C-IVP: SciPy `solve_ivp`-backed Lotka-Volterra (first external-library-dependent SUT).
+        // Same equation `lotka-volterra` re-used; SUT id is `scipy-ivp-lotka-volterra`.
+        // Uses options.EffectiveScipyPython (env METBENCH_SCIPY_PYTHON; falls back to SystemPython).
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "scipy-ivp-lv-prey-growth-monotone",
+                DisplayName: "SciPy IVP Lotka-Volterra — ScaleGamma (mean-prey identity)",
+                SutName: "scipy-ivp-lotka-volterra",
+                TransformationName: "ScaleGamma",
+                AssertionName: "GreaterThan",
+                ValueName: "mean_prey",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "By the Lotka-Volterra time-average identity ⟨prey⟩ = gamma / delta, " +
+                    "scaling the predator death rate gamma by factor > 1 must strictly increase " +
+                    "the time-averaged prey population mean_prey, even when the integrator is " +
+                    "SciPy's adaptive RK45.",
+                MrFamily: "ScipyIvp.LotkaVolterra.Scaling.Gamma"),
+            SampleCaseRelativePath: Path.Combine("scipy_ivp_lotka_volterra", "sample", "standard.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "scipy_ivp_lotka_volterra", "scipy_ivp_lotka_volterra.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "scipy_ivp_lotka_volterra", "scipy_ivp_lotka_volterra_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "scipy_ivp_lotka_volterra", "scipy_ivp_lotka_volterra_output_parser.py"),
+            PythonExecutable: options.EffectiveScipyPython,
+            WorkRootName: "MetBenchScipyIvpLotkaVolterra",
+            Timeout: TimeSpan.FromSeconds(120),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "scipy_ivp_lotka_volterra", "scipy_ivp_lotka_volterra_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "scipy_ivp_lotka_volterra", "scipy_ivp_lotka_volterra_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/params/gamma") },
+            AssertionTypeCode: "greater",
+            EquationKey: "lotka-volterra");
+
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "scipy-ivp-lv-step-convergence",
+                DisplayName: "SciPy IVP Lotka-Volterra — EvalGridRefinement (trapezoidal-mean convergence)",
+                SutName: "scipy-ivp-lotka-volterra",
+                TransformationName: "ScaleField",
+                AssertionName: "ApproxEqual",
+                ValueName: "mean_prey",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "SciPy adaptive RK45 decouples solution accuracy from num_eval_points " +
+                    "(which only controls the output sampling grid). Doubling num_eval_points " +
+                    "must leave mean_prey within tolerance because the trapezoidal time-average " +
+                    "over a denser eval grid converges to the same continuous time-average " +
+                    "⟨prey⟩ = gamma/delta.",
+                MrFamily: "ScipyIvp.LotkaVolterra.Convergence.EvalGrid"),
+            SampleCaseRelativePath: Path.Combine("scipy_ivp_lotka_volterra", "sample", "standard.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "scipy_ivp_lotka_volterra", "scipy_ivp_lotka_volterra.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "scipy_ivp_lotka_volterra", "scipy_ivp_lotka_volterra_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "scipy_ivp_lotka_volterra", "scipy_ivp_lotka_volterra_output_parser.py"),
+            PythonExecutable: options.EffectiveScipyPython,
+            WorkRootName: "MetBenchScipyIvpLotkaVolterra",
+            Timeout: TimeSpan.FromSeconds(120),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "scipy_ivp_lotka_volterra", "scipy_ivp_lotka_volterra_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "scipy_ivp_lotka_volterra", "scipy_ivp_lotka_volterra_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/params/num_eval_points") },
+            AssertionTypeCode: "approx",
+            EquationKey: "lotka-volterra",
+            Tolerance: new AssertionTolerance(ToleranceRel: 1e-3, ToleranceAbs: 1e-6));
+
         yield return new MrBlueprint(
             new MrSummary(
                 Id: "projectile-scale-v0",
