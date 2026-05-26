@@ -25,9 +25,15 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          claude_args: "--max-turns 10"
+          claude_args: |
+            --max-turns 10
+            --allowedTools "Bash(gh pr comment:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(git diff:*),Bash(git log:*)"
           prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
             You are reviewing a pull request against the MetBench PR Gate Checklist.
+            The PR branch is already checked out in the current working directory.
 
             Authoritative checklist: docs/superpowers/templates/pr-gate-checklist.md
             Authoritative ledger:    docs/status/current.md
@@ -54,13 +60,17 @@ jobs:
                field references a commit that is reachable from origin/main as of the
                PR base; flag obvious stale-baseline copy-paste.
 
-            Post your findings as a single PR review comment with sections:
+            Post your findings as a single top-level PR comment using:
+              gh pr comment ${{ github.event.pull_request.number }} --body "<your review>"
+            with sections:
               ## Soft Review: PR Gate Checklist (Advisory)
               ### Mechanical checks
               ### MetBench-specific cross-checks
               ### Reviewer note for the human approver
 
             Be terse. Bullet points, not prose. Quote file:line for any FAIL.
+            Only post the GitHub comment — do NOT submit review text as messages.
 
             Do NOT push commits. Do NOT change labels. Do NOT request changes via the
-            review API — leave it as a comment so a human stays in the approve loop.
+            review API — leave it as a top-level comment so a human stays in the
+            approve loop.

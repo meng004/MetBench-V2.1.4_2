@@ -154,9 +154,15 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          claude_args: "--max-turns 10"
+          claude_args: |
+            --max-turns 10
+            --allowedTools "Bash(gh pr comment:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(git diff:*),Bash(git log:*)"
           prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
             You are reviewing a pull request against the MetBench PR Gate Checklist.
+            The PR branch is already checked out in the current working directory.
 
             Authoritative checklist: docs/superpowers/templates/pr-gate-checklist.md
             Authoritative ledger:    docs/status/current.md
@@ -183,16 +189,20 @@ jobs:
                field references a commit that is reachable from origin/main as of the
                PR base; flag obvious stale-baseline copy-paste.
 
-            Post your findings as a single PR review comment with sections:
+            Post your findings as a single top-level PR comment using:
+              gh pr comment ${{ github.event.pull_request.number }} --body "<your review>"
+            with sections:
               ## Soft Review: PR Gate Checklist (Advisory)
               ### Mechanical checks
               ### MetBench-specific cross-checks
               ### Reviewer note for the human approver
 
             Be terse. Bullet points, not prose. Quote file:line for any FAIL.
+            Only post the GitHub comment — do NOT submit review text as messages.
 
             Do NOT push commits. Do NOT change labels. Do NOT request changes via the
-            review API — leave it as a comment so a human stays in the approve loop.
+            review API — leave it as a top-level comment so a human stays in the
+            approve loop.
 ```
 
 ---
@@ -252,6 +262,7 @@ merge ok
 - **风险 R2**：Max 配额跟交互用量共享。缓解：先观察 30 天用量趋势再决定是否升级或限频。
 - **风险 R3**：prompt 漂移导致 review 质量不稳定。缓解：本 spec 的 §7 prompt 模板是 single source of truth；workflow YAML 必须从这里复制；改 prompt = 改 spec = 走 PR review。
 - **风险 R4（self-bootstrap 发现）**：`anthropics/claude-code-action@v1` 内部要做一次 GitHub OIDC handshake，即使走 `claude_code_oauth_token` 路径也需要 workflow `permissions:` 含 `id-token: write`。缺这一行 → 24 秒内挂掉、`Could not fetch an OIDC token` 报错。已在 §7 模板里加 `id-token: write`。任何复制本模板的新 workflow 必须保留这一行；任何对 v1 的 minor 升级要复查该要求是否变更。**首次落地的 PR #145 就是被这个缺权限挡住的**，记录在本 §11 以防重蹈。
+- **风险 R5（self-bootstrap 第二次发现）**：claude-code-action `prompt:` 只声明意图不开通工具。即使 prompt 里说 "post a comment"，Claude 也必须通过 `claude_args: --allowedTools "..."` 显式拿到 `Bash(gh pr comment:*)` 等工具的执行权。缺这个 → action 12 秒"成功"退出但完全没贴评论，因为模型有话想说没工具可用。已在 §7 模板里：(a) `claude_args` 加 `--allowedTools "Bash(gh pr comment:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(git diff:*),Bash(git log:*)"`，(b) prompt 头加 `REPO:` / `PR NUMBER:` 上下文，(c) prompt 显式写出 `gh pr comment ${{ github.event.pull_request.number }} --body "..."` 命令样板。任何复制本模板要保留这三处；扩展工具白名单时也只列严格必需的命令前缀（不要 `Bash(*)`，最小权限）。**PR #145 第二次跑就是被这个挡住的**。
 - **未决 Q1**：是否要让 LLM 也读 `AGENTS.md` / `CLAUDE.md` 全文判断"该改但没改的 projection 文档"？目前 prompt 已包含 plan index 路径但未强制全读，先观察是否够用。
 - **未决 Q2**：要不要对 self-PR（agent 自己开的 PR）也跑？目前会跑 — 这是好事，能 catch 我自己漏掉的；但 LLM 给 LLM 审 LLM 的递归审美是否真有价值还要看。
 
