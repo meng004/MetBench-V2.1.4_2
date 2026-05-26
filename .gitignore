@@ -72,6 +72,9 @@ MetBench_Python/**/Results/
 *.csv
 # Stage 5 experiment results are CSVs we intentionally commit:
 !docs/experiments/*.csv
+# PR-A T1 non-JSON I/O adapter: the synthetic _test_csv SUT's sample input is the
+# fixture the launcher end-to-end test feeds through metbench_io's csv-row helper.
+!SUT/_test_csv/sample/*.csv
 *.xlsx
 *.xls
 *.rar
