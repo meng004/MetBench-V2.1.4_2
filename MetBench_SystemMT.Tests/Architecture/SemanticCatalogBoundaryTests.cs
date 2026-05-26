@@ -56,7 +56,13 @@ public sealed class SemanticCatalogBoundaryTests
         var normalized = relativePath.Replace('\\', '/');
         return normalized.StartsWith("MetBench_BLL.Core/SystemMT/Assertions/", StringComparison.Ordinal)
             || normalized.StartsWith("MetBench_BLL.Core/SystemMT/Catalog/Typed/Migration/", StringComparison.Ordinal)
-            || normalized.Equals("MetBench_BLL.Core/SystemMT/Catalog/MrBindingDefinition.cs", StringComparison.Ordinal);
+            || normalized.Equals("MetBench_BLL.Core/SystemMT/Catalog/MrBindingDefinition.cs", StringComparison.Ordinal)
+            // PR-2 T4-to-T0 binder: validates discovery candidates against the manifest catalog
+            // schema, which canonically lists AssertionTypeCodes (same justification as
+            // MrBindingDefinition.cs). The binder is a *gate*, not a dispatch site — it does
+            // not route execution based on the code, it only enforces "this code is in the
+            // recognized set and is not in the noise-aware fail-closed list".
+            || normalized.StartsWith("MetBench_BLL.Core/SystemMT/Catalog/Binding/", StringComparison.Ordinal);
     }
 
     [Fact]
