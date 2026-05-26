@@ -73,6 +73,75 @@ public static class TypedSpecFactory
             actualRole: predicate.ActualRole, expectedRole: predicate.ReferenceRole);
     }
 
+    /// <summary>
+    /// Build an <see cref="MrSpec"/> wrapping a <see cref="VarianceRatioPredicate"/>
+    /// for the pipeline variance-ratio routing arm. Convention:
+    /// the expectedRole (default <c>"source"</c>) is the low-sample side (larger σ),
+    /// the actualRole (default <c>"followup"</c>) is the high-sample side (smaller σ
+    /// after the refinement scaling); the <c>SigmaMultiplier</c> of the statistical
+    /// tolerance is <c>1.0 + toleranceRel</c> so a 30 % rel blueprint tolerance
+    /// allows the observed <c>high.StdError</c> to sit up to 30 % above
+    /// <c>low.StdError / √sampleRatio</c>. Throws <see cref="System.ArgumentException"/>
+    /// for blank inputs, non-finite or ≤ 1 factor, or non-positive toleranceRel — the
+    /// pipeline translates the throw into an `UnknownType` assertion result.
+    /// </summary>
+    public static MrSpec ForVarianceRatio(
+        string mrCode,
+        string statisticalMetric,
+        double factor,
+        double toleranceRel,
+        string actualRole = "followup",
+        string expectedRole = "source")
+    {
+        if (string.IsNullOrWhiteSpace(mrCode))
+            throw new System.ArgumentException("mrCode is required.", nameof(mrCode));
+        if (string.IsNullOrWhiteSpace(statisticalMetric))
+            throw new System.ArgumentException("statisticalMetric is required.", nameof(statisticalMetric));
+        if (string.IsNullOrWhiteSpace(actualRole))
+            throw new System.ArgumentException("actualRole is required.", nameof(actualRole));
+        if (string.IsNullOrWhiteSpace(expectedRole))
+            throw new System.ArgumentException("expectedRole is required.", nameof(expectedRole));
+        if (!double.IsFinite(factor) || factor <= 1.0)
+            throw new System.ArgumentException(
+                $"variance-ratio sample factor must be finite and > 1; got {factor.ToString(CultureInfo.InvariantCulture)}.",
+                nameof(factor));
+        if (!double.IsFinite(toleranceRel) || toleranceRel <= 0.0)
+            throw new System.ArgumentException(
+                $"variance-ratio toleranceRel must be finite and > 0; got {toleranceRel.ToString(CultureInfo.InvariantCulture)}.",
+                nameof(toleranceRel));
+
+        var predicate = new VarianceRatioPredicate(
+            PredicateId: $"{statisticalMetric}-variance-ratio",
+            LowSampleRole: expectedRole,
+            HighSampleRole: actualRole,
+            StatisticalMetric: statisticalMetric,
+            SampleRatio: new ConstantParameterExpression(factor),
+            Tolerance: new StatisticalToleranceSpec(1.0 + toleranceRel));
+
+        var roles = new Dictionary<string, RunRoleSpec>
+        {
+            [expectedRole] = new("Baseline"),
+            [actualRole] = new("Followup"),
+        };
+        var projections = new Dictionary<string, ProjectionSpec>
+        {
+            [statisticalMetric] = new StatisticalProjectionSpec(
+                MeanPath: $"/values/{statisticalMetric}_mean",
+                StdErrorPath: $"/values/{statisticalMetric}"),
+        };
+        return new MrSpec(
+            Kind: "MrSpec",
+            MrId: mrCode,
+            Name: mrCode,
+            Description: null,
+            Tags: null,
+            Parameters: null,
+            Roles: roles,
+            Projections: projections,
+            Predicates: new[] { (PredicateSpec)predicate },
+            DefaultTolerance: new DeterministicToleranceSpec(0.0, toleranceRel));
+    }
+
     private static (string actualRole, string expectedRole) RolesFor(PredicateSpec predicate) =>
         predicate switch
         {
