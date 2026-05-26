@@ -1,4 +1,5 @@
 using MetBench_BLL.Discovery;
+using MetBench_SystemMT.Tests.SystemMT;
 using Xunit;
 
 namespace MetBench_SystemMT.Tests.V2Discovery;
@@ -13,7 +14,7 @@ public sealed class MetaPatternDiscovererIntegrationTests
 {
     private static readonly string RepoRoot = LocateRepoRoot();
     private static readonly string ScriptPath = Path.Combine(RepoRoot, "tools", "noether_candidates.py");
-    private static readonly string PythonExe = OperatingSystem.IsWindows() ? "python" : "python3";
+    private static readonly string PythonExe = TestAssetPaths.PythonExecutable();
 
     [Fact]
     public async Task DiscoverAsync_real_python_sidecar_returns_realizable_candidates()
@@ -63,6 +64,7 @@ public sealed class MetaPatternDiscovererIntegrationTests
 
         var outcome = await discoverer.DiscoverAsync(targetApplicationId: null);
 
+        Assert.NotEmpty(outcome.Proposals);
         foreach (var p in outcome.Proposals)
         {
             Assert.False(string.IsNullOrEmpty(p.ProposedCode), $"missing code in {p}");
