@@ -133,6 +133,12 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     branches: [main]
+    # Skip docs-only PRs: there is no compileable / pinned-count / Windows-classification
+    # surface to check, and the merge-gate hard `test` job already covers everything else.
+    # Saves ~5 min and ~140-package npm install per docs-only PR (e.g. scoped-plan PRs).
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
 
 permissions:
   contents: read
@@ -150,6 +156,17 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      # Cache the npm package store so claude-code-action's transient install does not
+      # re-download its ~140 dependencies on every PR push. Keyed on the action major
+      # version so a bump to v2 invalidates the cache. Cache miss is fine — first run
+      # populates it; subsequent runs hit and skip the network step inside the action.
+      - name: Cache npm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-claude-code-action-v1-npm
+          restore-keys: |
+            ${{ runner.os }}-claude-code-action-v1-npm
       - name: Claude soft review
         uses: anthropics/claude-code-action@v1
         with:
