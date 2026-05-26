@@ -72,36 +72,37 @@ public sealed class SystemMtLauncherTests
     {
         var descriptors = await _launcher.ListAvailableAsync();
 
-        Assert.Equal(29, descriptors.Count);
+        Assert.Equal(30, descriptors.Count);
         Assert.Equal("advection-amplitude-linearity", descriptors[0].Id);
         Assert.Equal("advection-mesh-conservation", descriptors[1].Id);
         Assert.Equal("bateman-mass-conservation", descriptors[2].Id);
         Assert.Equal("bateman-timestep-cauchy", descriptors[3].Id);
         Assert.Equal("burgers-amplitude-peak-monotone", descriptors[4].Id);
         Assert.Equal("burgers-mesh-conservation", descriptors[5].Id);
-        Assert.Equal("damped-oscillator-scale-state", descriptors[6].Id);
-        Assert.Equal("decay-chain-scale-initial", descriptors[7].Id);
-        Assert.Equal("diffusion-mesh-richardson", descriptors[8].Id);
-        Assert.Equal("diffusion-source-linearity", descriptors[9].Id);
-        Assert.Equal("fourier-alpha-monotonic", descriptors[10].Id);
-        Assert.Equal("fourier-timestep-convergence", descriptors[11].Id);
-        Assert.Equal("heat-equation-amplitude", descriptors[12].Id);
-        Assert.Equal("lotka-volterra-scale-gamma", descriptors[13].Id);
-        Assert.Equal("openmc-pincell-nu-sigma-f", descriptors[14].Id);
-        Assert.Equal("openmc-pincell-sigma-a", descriptors[15].Id);
-        Assert.Equal("openmoc-pincell-nu-sigma-f", descriptors[16].Id);
-        Assert.Equal("openmoc-pincell-sigma-a", descriptors[17].Id);
-        Assert.Equal("poisson-mesh-richardson", descriptors[18].Id);
-        Assert.Equal("poisson-source-superposition", descriptors[19].Id);
-        Assert.Equal("projectile-scale-v0", descriptors[20].Id);
-        Assert.Equal("scipy-bvp-poisson-seed-mesh-insensitivity", descriptors[21].Id);
-        Assert.Equal("scipy-bvp-poisson-source-superposition", descriptors[22].Id);
-        Assert.Equal("scipy-ivp-lv-prey-growth-monotone", descriptors[23].Id);
-        Assert.Equal("scipy-ivp-lv-step-convergence", descriptors[24].Id);
-        Assert.Equal("subchannel-flow-temperature-monotone", descriptors[25].Id);
-        Assert.Equal("subchannel-heat-flux-linearity", descriptors[26].Id);
-        Assert.Equal("wave-amplitude-linearity", descriptors[27].Id);
-        Assert.Equal("wave-mesh-energy-convergence", descriptors[28].Id);
+        Assert.Equal("csv-roundtrip-identity", descriptors[6].Id);
+        Assert.Equal("damped-oscillator-scale-state", descriptors[7].Id);
+        Assert.Equal("decay-chain-scale-initial", descriptors[8].Id);
+        Assert.Equal("diffusion-mesh-richardson", descriptors[9].Id);
+        Assert.Equal("diffusion-source-linearity", descriptors[10].Id);
+        Assert.Equal("fourier-alpha-monotonic", descriptors[11].Id);
+        Assert.Equal("fourier-timestep-convergence", descriptors[12].Id);
+        Assert.Equal("heat-equation-amplitude", descriptors[13].Id);
+        Assert.Equal("lotka-volterra-scale-gamma", descriptors[14].Id);
+        Assert.Equal("openmc-pincell-nu-sigma-f", descriptors[15].Id);
+        Assert.Equal("openmc-pincell-sigma-a", descriptors[16].Id);
+        Assert.Equal("openmoc-pincell-nu-sigma-f", descriptors[17].Id);
+        Assert.Equal("openmoc-pincell-sigma-a", descriptors[18].Id);
+        Assert.Equal("poisson-mesh-richardson", descriptors[19].Id);
+        Assert.Equal("poisson-source-superposition", descriptors[20].Id);
+        Assert.Equal("projectile-scale-v0", descriptors[21].Id);
+        Assert.Equal("scipy-bvp-poisson-seed-mesh-insensitivity", descriptors[22].Id);
+        Assert.Equal("scipy-bvp-poisson-source-superposition", descriptors[23].Id);
+        Assert.Equal("scipy-ivp-lv-prey-growth-monotone", descriptors[24].Id);
+        Assert.Equal("scipy-ivp-lv-step-convergence", descriptors[25].Id);
+        Assert.Equal("subchannel-flow-temperature-monotone", descriptors[26].Id);
+        Assert.Equal("subchannel-heat-flux-linearity", descriptors[27].Id);
+        Assert.Equal("wave-amplitude-linearity", descriptors[28].Id);
+        Assert.Equal("wave-mesh-energy-convergence", descriptors[29].Id);
     }
 
     [Fact]

@@ -853,5 +853,41 @@ internal static class LegacyCatalogFactory
             // LxF 守恒流差分严格保 ∫u dx；num_points 翻倍后实测 mass_integral 变化 ~6e-10
             // （初始 Gaussian 采样误差 O(dx²)）；ToleranceRel=1e-3 + Atol=1e-6 充裕。
             Tolerance: new AssertionTolerance(ToleranceRel: 1e-3, ToleranceAbs: 1e-6));
+
+        // PR-A T1 non-JSON I/O adapter: synthetic test SUT proving the metbench_io
+        // helper round-trips through the unchanged launcher / pipeline / catalog. Not
+        // a real physics SUT — see SUT/_test_csv/catalog.json for the canonical
+        // description. Leading underscore in the SUT directory + leading underscore
+        // in the SUT name make the synthetic nature obvious in directory listings
+        // and audit logs.
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "csv-roundtrip-identity",
+                DisplayName: "CSV roundtrip identity (synthetic test SUT)",
+                SutName: "_test-csv",
+                TransformationName: "ScaleField",
+                AssertionName: "GreaterThan",
+                ValueName: "echo_value",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Synthetic non-physics MR that proves the metbench_io CSV helper " +
+                    "round-trips through the MetBench launcher / pipeline / catalog " +
+                    "without any framework knowledge of CSV. ScaleField on /params/factor " +
+                    "doubles the input; the runner echoes the factor; output 'echo_value' " +
+                    "must equal the doubled input (and is therefore strictly greater than " +
+                    "the source 'echo_value').",
+                MrFamily: "TestCsv.Scaling.Identity"),
+            SampleCaseRelativePath: Path.Combine("_test_csv", "sample", "standard.csv"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "_test_csv", "_test_csv_runner.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "_test_csv", "_test_csv_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "_test_csv", "_test_csv_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchTestCsv",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "_test_csv", "_test_csv_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "_test_csv", "_test_csv_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/params/factor") },
+            AssertionTypeCode: "greater",
+            EquationKey: "_test_csv");
     }
 }

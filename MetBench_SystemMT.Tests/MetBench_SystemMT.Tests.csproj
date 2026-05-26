@@ -132,5 +132,17 @@
       <Link>TestAssets\scipy_bvp_poisson_1d\sample\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\SUT\_shared\metbench_io\*.py">
+      <Link>TestAssets\_shared\metbench_io\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\SUT\_test_csv\*.py">
+      <Link>TestAssets\_test_csv\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\SUT\_test_csv\sample\*.csv">
+      <Link>TestAssets\_test_csv\sample\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
