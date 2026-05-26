@@ -26,7 +26,8 @@ Any new coding task must be derived from the active master plan or from a scoped
 | `docs/superpowers/specs/2026-05-25-metbench-macro-assessment-and-risk-audit.md` | Active | Macro assessment and risk audit for the Stage 8 to next-stage transition | Expires when the next macro assessment supersedes it |
 | `docs/superpowers/specs/2026-05-25-mr-verification-v1.2-codex-ready.md` | Active reference | v1.2 typed semantic model and verifier design already implemented through the current roadmap | Expires when a v1.3 verification design supersedes it |
 | `docs/superpowers/specs/2026-05-25-systemmt-architecture-review-post-evidence-v2.md` | Active | Post-PR-D / post-PR-C0 System MT dependency-boundary audit; baseline reference for future architecture-impact reviews. PR #123 / #124 / #126 did not invalidate it. | Refresh required (not necessarily expiring) when the next System MT cross-cutting change lands. |
-| `docs/superpowers/templates/pr-gate-checklist.md` | Active | Required PR gate checklist for scope, facts, tests, Windows classification, review, and merge | Expires only by explicit replacement PR |
+| `docs/superpowers/templates/pr-gate-checklist.md` | Active | Required PR gate checklist for scope, facts, tests, Windows classification, review, merge, and soft review | Expires only by explicit replacement PR |
+| `docs/superpowers/specs/2026-05-26-pr-soft-review-via-claude-code-action.md` | Active design (implementation YAML pending operator action) | Advisory LLM-based PR review layer running in GH Actions on `pull_request` events; uses `anthropics/claude-code-action@v1` in OAuth mode against the repo owner's Max subscription | Expires when Anthropic deprecates the action or its OAuth mode, when Max coverage of headless action calls changes, or when the project replaces this review pipeline |
 
 ### 条件性活跃
 
