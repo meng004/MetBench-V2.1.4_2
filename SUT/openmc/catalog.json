@@ -67,6 +67,35 @@
       "sample_case_relative_path": "sample/pincell.json",
       "work_root_name": "MetBenchOpenMcSigmaA",
       "timeout_seconds": 300
+    },
+    {
+      "mr_id": "openmc-pincell-particle-count-convergence",
+      "sut_name": "openmc",
+      "display_name": "OpenMC pin-cell — RefineParticles (k_eff_std ~ 1/√factor)",
+      "description": "Same physical input on both sides; the follow-up case multiplies OpenMC's `particles` count by factor > 1. By the Monte-Carlo 1/√N sampling law the reported k_eff_std must shrink to ~ 1/√factor of the source value. The variance-ratio assertion permits a (1 + ToleranceRel) relative slack above the expected ratio to absorb finite-sample noise.",
+      "mr_family": "NeutronTransport.Sampling.ParticleCount",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "variance-ratio",
+      "assertion_name": "VarianceRatio",
+      "value_name": "k_eff_std",
+      "default_parameters": { "factor": "4" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/solver/particles" }
+      ],
+      "tolerance_rel": 0.30,
+      "tolerance_abs": 0,
+      "noise_aware": true,
+      "noise_multiplier": 1.0,
+      "equation_key": "",
+      "equation": "Boltzmann",
+      "program_type": "MC",
+      "meta_pattern": "Conv",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "input_adapter_script_relative_path": "openmc_input_adapter_refine_particles.py",
+      "sample_case_relative_path": "sample/pincell.json",
+      "work_root_name": "MetBenchOpenMcRefineParticles",
+      "timeout_seconds": 300
     }
   ]
 }

@@ -29,27 +29,51 @@ public sealed class OpenMcCatalogParityTests
     }
 
     [Fact]
-    public void Catalog_lists_exactly_the_two_single_program_boltzmann_mrs()
+    public void Catalog_lists_the_three_pinned_pincell_mrs()
     {
         var doc = LoadCatalog();
 
         Assert.Equal("openmc", doc.SutName);
         var actualIds = doc.Mrs.Select(m => m.MrId).OrderBy(id => id, StringComparer.Ordinal).ToArray();
-        var expectedIds = new[] { "openmc-pincell-nu-sigma-f", "openmc-pincell-sigma-a" };
+        // Two cross-program Mono MRs (counterparts of the OpenMOC pair) plus one
+        // OpenMC-specific Conv MR (Bol-Alg-02, particle-count convergence — no
+        // deterministic OpenMOC counterpart, since OpenMOC has no statistical
+        // sampling to refine).
+        var expectedIds = new[]
+        {
+            "openmc-pincell-nu-sigma-f",
+            "openmc-pincell-particle-count-convergence",
+            "openmc-pincell-sigma-a",
+        };
         Assert.Equal(expectedIds, actualIds);
     }
 
     [Fact]
-    public void Each_mr_carries_boltzmann_mono_mc_semantic_tags()
+    public void Each_mr_carries_boltzmann_mc_semantic_tags_with_pattern_per_role()
     {
         var doc = LoadCatalog();
+
+        var monoIds = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "openmc-pincell-nu-sigma-f",
+            "openmc-pincell-sigma-a",
+        };
+        var convIds = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "openmc-pincell-particle-count-convergence",
+        };
 
         foreach (var mr in doc.Mrs)
         {
             Assert.Equal("Boltzmann", mr.Equation);
-            Assert.Equal("Mono", mr.MetaPattern);
             Assert.Equal("MC", mr.ProgramType);
             Assert.Equal("openmc", mr.SutName);
+
+            var expectedPattern = monoIds.Contains(mr.MrId) ? "Mono"
+                : convIds.Contains(mr.MrId) ? "Conv"
+                : throw new Xunit.Sdk.XunitException(
+                    $"Unexpected MR id '{mr.MrId}' — extend the Mono / Conv classification above when adding new OpenMC MRs.");
+            Assert.Equal(expectedPattern, mr.MetaPattern);
         }
     }
 }
