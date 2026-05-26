@@ -60,8 +60,9 @@ SUT 接入到框架的 hook：
 
 | SUT | 单元 / contract test ([Fact] 数) | 系统级 BDD .feature | BDD scenario instances | Launcher 注册 MR id |
 |---|---|---|---|---|
-| **OpenMOC** | `OpenMocInputAdapterTests` (4) + `OpenMocOutputAdapterTests` (2) + `OpenMocSigmaAInputAdapterTests` (5) + `OpenMocRunnerSmokeTests` (1) + `OpenMocSampleCaseTests` (1) = **13** | `OpenMocPinCellNuSigmaF.feature` · `OpenMocPinCellSigmaA.feature` · `CrossProgramNeutronTransportMrs.feature` (2 outline) | 4（独占 2 + 跨程序 2） | `openmoc-pincell-nu-sigma-f` · `openmoc-pincell-sigma-a` |
-| **OpenMC** | `OpenMcInputAdapterTests` (5) + `OpenMcOutputAdapterTests` (5) + `OpenMcRunnerSmokeTests` (1) = **11** | (共用 `CrossProgramNeutronTransportMrs.feature`) | 2（跨程序 examples） | `openmc-pincell-nu-sigma-f` · `openmc-pincell-sigma-a` |
+| **OpenMOC** | `OpenMocInputAdapterTests` (4) + `OpenMocOutputAdapterTests` (2) + `OpenMocSigmaAInputAdapterTests` (5) + `OpenMocRunnerSmokeTests` (1) + `OpenMocSampleCaseTests` (1) + `OpenMocCatalogParityTests` (2) = **15** | `OpenMocPinCellNuSigmaF.feature` · `OpenMocPinCellSigmaA.feature` · `CrossProgramNeutronTransportMrs.feature` (1 outline，跨程序复用) | 2（单程序） | `openmoc-pincell-nu-sigma-f` · `openmoc-pincell-sigma-a` |
+| **OpenMC** | `OpenMcInputAdapterTests` (5) + `OpenMcOutputAdapterTests` (5) + `OpenMcRunnerSmokeTests` (1) + `OpenMcCatalogParityTests` (2) = **13** | (共用 `CrossProgramNeutronTransportMrs.feature`) | 2（单程序） | `openmc-pincell-nu-sigma-f` · `openmc-pincell-sigma-a` |
+| **OpenMOC × OpenMC 跨程序** | `CrossProgramScenarioIdReuseTests` (2) = **2**（守护 cross-program 与 single-program 复用同名 transformation） | `CrossProgramNeutronTransportMrs.feature` (2 outline，含 2 examples × 2 solvers = 4 instance) | 2（agreement，不算独立 MR） | (共享上面 4 个 single-program MR id) |
 | **Heat Equation** | `HeatEquationInputAdapterTests` (2) + `HeatEquationOutputAdapterTests` (4) = **6** | `HeatEquationAmplitude.feature` | 1 | `heat-equation-amplitude` |
 | **Projectile** | (依靠 `CliProgramRunnerTests` 通用覆盖) | `ProjectileRange.feature` | 1 | — (仅 BDD，未 Launcher 注册) |
 | **Poisson 1D** | `LauncherEndToEndPoissonTests`（端到端覆盖两条 MR；pure-stdlib，无 venv 依赖） | — | — | `poisson-source-superposition` · `poisson-mesh-richardson` |
@@ -78,6 +79,25 @@ SUT 接入到框架的 hook：
 - launcher / manifest catalog：**29** MR-on-SUT 绑定
 - 覆盖方程：**12**
 - 当前结构风险：runtime 已切到 provider-backed catalog，生产 fallback 与 importer 具体类耦合已删除；sample-level evidence 已落第一条可复盘链，但覆盖粒度仍可继续扩展。T3 代表性 PDE-class 覆盖（椭圆 / 一阶线性双曲 / 二阶线性双曲 / 非线性双曲）已通过 PR #134 / #136 / #138 / #140 闭环；T3C-IVP 通过 `scipy-ivp-lotka-volterra` 把 External-solver-pilot 接入路径打通（`LauncherOptions.ScipyPython` + `PythonExecutableKinds.Scipy` + `ManifestMrCatalogProvider` scipy 分支 + `ScipyTestPaths.cs` clean-skip helper，env var `METBENCH_SCIPY_PYTHON`）；T3C-BVP 通过 `scipy-bvp-poisson-1d` 把 BVP/elliptic external-solver 路径打通（复用 T3C-IVP 基础设施，无新框架变更）；进一步 T3 扩展由 next-SUT decision record 决定（见 `docs/status/current.md` §4 与 active plan index）
+
+---
+
+## §3.1 Boltzmann MR 覆盖明细（PR-Bol-1 同步）
+
+`SUT/openmoc/` 与 `SUT/openmc/` 各承载 **2** 条 single-program Boltzmann MR；跨程序一致性由 `CrossProgramNeutronTransportMrs.feature` 复用同一对 transformation 名实现，不算作独立 MR id。PWR MR analysis 报告（`docs/superpowers/specs/2026-05-25-mr-verification-v1.2-codex-ready.md` 1052–1056 行 + `2026-05-25-v12-pwr-migration-map.md`）定义了完整的 `Bol-Phy-01..05` / `Bol-Alg-01..03` 命名族；下表给出当前可执行 MR 与 PWR Bol-* id 的对应：
+
+| MR id | SUT | program_type | meta_pattern | PWR Bol-* 对应 | 验证状态 |
+|---|---|---|---|---|---|
+| `openmoc-pincell-nu-sigma-f` | openmoc | Num | Mono | **Bol-Phy-03**（fission production monotonicity，nuΣf↑ → k_eff↑） | Catalog + launcher 验证；runner 端到端 skip-safe（缺 OpenMOC venv 时干净跳过） |
+| `openmoc-pincell-sigma-a` | openmoc | Num | Mono | **Bol-Phy-02**（absorption monotonicity，Σa↑ → k_eff↓） | 同上 |
+| `openmc-pincell-nu-sigma-f` | openmc | MC | Mono | **Bol-Phy-03** Monte Carlo 对应 | 同上（缺 OpenMC venv 时干净跳过） |
+| `openmc-pincell-sigma-a` | openmc | MC | Mono | **Bol-Phy-02** Monte Carlo 对应 | 同上 |
+
+补充说明：
+
+1. 跨程序一致性 (`OpenMOC ↔ OpenMC`) 由 `MetBench_SystemMT.Tests/Features/CrossProgramNeutronTransportMrs.feature` 通过两个 scenario outline 验证（`ScaleNuSigmaF` / `ScaleFuelSigmaA`，每 outline × 2 solver = 4 instance）。Cross-program agreement 是**验证维度**，复用上表 4 个 single-program MR id，不增加新的 MR id；catalog/launcher 计数仍按 single-program 维度统计。
+2. `Bol-Alg-01`（MOC ray/track convergence）和 `Bol-Alg-02`（MC particle count convergence）**未在 PR-Bol-1 实施**；登记为下一批工作 PR-Bol-2 / PR-Bol-3，见 `docs/superpowers/plans/2026-05-25-metbench-active-plan-index.md` §1。`Bol-Phy-01 / Bol-Phy-04 / Bol-Phy-05 / Bol-Alg-03` 仍只在 v1.2 typed-catalog 设计示例里出现，尚无可执行 MR 绑定。
+3. PWR Bol-* 对应关系仅作文档级 traceability 注记，**未**写入 catalog JSON 字段（`pwrMrId` 等暂不引入，避免触发 runtime semantics 变更）。
 
 ---
 
