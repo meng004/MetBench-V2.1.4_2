@@ -69,7 +69,7 @@ SUT 接入到框架的 hook：
 | **Wave 1D** | `LauncherEndToEndWaveTests`（端到端覆盖两条 MR；pure-stdlib） | — | — | `wave-amplitude-linearity` · `wave-mesh-energy-convergence` |
 | **Burgers 1D** | `LauncherEndToEndBurgersTests`（端到端覆盖两条 MR；pure-stdlib） | — | — | `burgers-amplitude-peak-monotone` · `burgers-mesh-conservation` |
 | **SciPy IVP Lotka-Volterra** | `LauncherEndToEndScipyIvpLotkaVolterraTests`（`[SkippableFact]`，SciPy 缺失时 clean-skip 干净跳过）· `ScipyIvpLotkaVolterraParserTests` (3) | — | — | `scipy-ivp-lv-prey-growth-monotone` · `scipy-ivp-lv-step-convergence` |
-| **SciPy BVP Poisson 1D** | `LauncherEndToEndScipyBvpPoissonTests`（`[SkippableFact]`，SciPy 缺失时 clean-skip 干净跳过）· `ScipyBvpPoissonParserTests` (3) | — | — | `scipy-bvp-poisson-source-superposition` · `scipy-bvp-poisson-mesh-richardson` |
+| **SciPy BVP Poisson 1D** | `LauncherEndToEndScipyBvpPoissonTests`（`[SkippableFact]`，SciPy 缺失时 clean-skip 干净跳过）· `ScipyBvpPoissonParserTests` (3) | — | — | `scipy-bvp-poisson-source-superposition` · `scipy-bvp-poisson-seed-mesh-insensitivity` |
 | **跨 SUT 通用** | `MrTransformationTests` · `InputGeneratorTests`（PR #119 `GreaterThanAssertionTests` / `LessThanAssertionTests` 已随 W1 类删除；同语义现由 `Catalog/Typed/BinaryComparisonKernelTests` 覆盖） | `SystemLevelCliMt.feature` · `SystemLevelGeneratedFollowup.feature` | 2 | — |
 
 **Launcher end-to-end 测试（按 SUT）**：`LauncherEndToEndOdeTests`（decay_chain / damped_oscillator / lotka_volterra）· `LauncherEndToEndPoissonTests`（PR #134）· `LauncherEndToEndAdvectionTests`（PR #136）· `LauncherEndToEndWaveTests`（PR #138）· `LauncherEndToEndBurgersTests`（PR #140）· `LauncherEndToEndScipyIvpLotkaVolterraTests`（T3C-IVP，`[SkippableFact]`）· `LauncherEndToEndScipyBvpPoissonTests`（T3C-BVP，`[SkippableFact]`）。

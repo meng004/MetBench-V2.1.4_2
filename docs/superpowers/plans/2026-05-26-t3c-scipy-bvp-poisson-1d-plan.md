@@ -42,13 +42,13 @@ Two new MRs, both reusing existing typed predicates via `LegacyAssertionPredicat
 - Expectation: Poisson `-u'' = f` is linear in `f`. Doubling `f` doubles `u_max` exactly. Strictly `u_max(flw) > u_max(src)`.
 - Mirrors `poisson-source-superposition` (pure-stdlib) semantics under a different solver.
 
-### 3.2 `scipy-bvp-poisson-mesh-richardson` (meta-pattern `Conv`)
+### 3.2 `scipy-bvp-poisson-seed-mesh-insensitivity` (meta-pattern `Conv`)
 
 - Transformation: `ScaleField` on `/geometry/num_points` with `factor=2`.
 - Metric: `u_max`.
 - Assertion code: `approx` → typed `ScaledEqualityKernel`.
 - Tolerance: `ToleranceRel=1e-3`, `ToleranceAbs=1e-6` (parity with `poisson-mesh-richardson` / `diffusion-mesh-richardson`).
-- Expectation: SciPy `solve_bvp` is adaptive on its own mesh and refines until residual is below tolerance. The initial mesh passed in (built from `num_points`) is the user's seed; the solver's adaptive mesh refinement converges to the same continuous solution regardless of seed mesh resolution. Doubling `num_points` leaves `u_max` within tolerance because the BVP solver converges to the same `f·L²/8` plateau.
+- Expectation: SciPy `solve_bvp` is adaptive on its own mesh and refines until residual is below tolerance. The initial mesh passed in (built from `num_points`) is the user's seed; the solver's adaptive mesh refinement converges to the same continuous solution regardless of seed mesh resolution. Doubling `num_points` leaves `u_max` within tolerance because the BVP solver converges to the same continuous solution `u(x)=f·x(L−x)/2`, whose peak value `u_max = f·L²/8` occurs at `x = L/2`.
 
 ## 4. Catalog binding shape
 
@@ -70,7 +70,7 @@ SUT/scipy_bvp_poisson_1d/
 ## 6. Tests
 
 - `LauncherEndToEndScipyBvpPoissonTests.cs` — `[SkippableFact]` per MR, gated by `ScipyTestPaths.ScipyImportable()`, skip reason verbatim `"SciPy runtime not configured for scipy-bvp-poisson-1d."`.
-- `SystemMtLauncherTests.cs` — pinned descriptor count `27 → 29`; add ordered ids `scipy-bvp-poisson-mesh-richardson`, `scipy-bvp-poisson-source-superposition`; add two descriptor-metadata facts.
+- `SystemMtLauncherTests.cs` — pinned descriptor count `27 → 29`; add ordered ids `scipy-bvp-poisson-seed-mesh-insensitivity`, `scipy-bvp-poisson-source-superposition`; add two descriptor-metadata facts.
 - `CatalogParityTests.cs` — pinned count `27 → 29`.
 - `HardcodedMrCatalogProviderTests.cs` — pinned count `27 → 29`, SUT count `14 → 15`.
 - `SystemMtBootstrapTests.cs` + `LauncherCatalogV2ImporterTests.cs` + `SystemMtLauncherProviderInjectionTests.cs` — pinned-count bumps.
@@ -96,7 +96,7 @@ SUT/scipy_bvp_poisson_1d/
 
 - SUT: 14 → 15 (`scipy-bvp-poisson-1d` added; same equation `poisson` re-used).
 - Equations: 12 → 12 (no new equation).
-- MRs: 27 → 29 (`scipy-bvp-poisson-source-superposition`, `scipy-bvp-poisson-mesh-richardson`).
+- MRs: 27 → 29 (`scipy-bvp-poisson-source-superposition`, `scipy-bvp-poisson-seed-mesh-insensitivity`).
 
 ## 10. TDD order
 

@@ -438,7 +438,7 @@ internal static class LegacyCatalogFactory
 
         yield return new MrBlueprint(
             new MrSummary(
-                Id: "scipy-bvp-poisson-mesh-richardson",
+                Id: "scipy-bvp-poisson-seed-mesh-insensitivity",
                 DisplayName: "SciPy BVP 1D Poisson — InitialMeshRefinement (adaptive-BVP convergence)",
                 SutName: "scipy-bvp-poisson-1d",
                 TransformationName: "ScaleField",
@@ -449,7 +449,8 @@ internal static class LegacyCatalogFactory
                     "SciPy solve_bvp adaptively refines its own mesh until residual is below " +
                     "tolerance; the user-supplied num_points only seeds the initial mesh. " +
                     "Doubling the seed num_points must leave u_max within tolerance because " +
-                    "both runs converge to the same continuous solution u = f·L²/8 plateau.",
+                    "both runs converge to the same continuous solution u(x)=f·x(L−x)/2, " +
+                    "whose peak value u_max = f·L²/8 occurs at x = L/2.",
                 MrFamily: "ScipyBvp.Poisson.Convergence.SeedMesh"),
             SampleCaseRelativePath: Path.Combine("scipy_bvp_poisson_1d", "sample", "standard.json"),
             RunnerScriptPath: Path.Combine(options.SutRoot, "scipy_bvp_poisson_1d", "scipy_bvp_poisson_1d.py"),

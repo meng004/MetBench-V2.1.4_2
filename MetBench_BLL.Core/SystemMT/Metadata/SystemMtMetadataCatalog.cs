@@ -491,12 +491,12 @@ public static class SystemMtMetadataCatalog
         },
         new MrMetadata
         {
-            MrId = "scipy-bvp-poisson-mesh-richardson",
+            MrId = "scipy-bvp-poisson-seed-mesh-insensitivity",
             EquationKey = "poisson",
             PhysicalMeaning =
                 "T3C-BVP 自适应 BVP 求解器对种子网格 num_points 不敏感：solve_bvp 自适应细化内部网格 " +
                 "直至残差 < tol；用户提供的 num_points 仅为种子。num_points 翻倍后 u_max 应在 " +
-                "ToleranceRel=1e-3 / Atol=1e-6 容差内不变，二者均收敛到同一连续解 u = f·L²/8 的 plateau。",
+                "ToleranceRel=1e-3 / Atol=1e-6 容差内不变，二者均收敛到同一连续解 u(x)=f·x(L−x)/2，其峰值 u_max = f·L²/8 在 x = L/2。",
             InputTransformation = "num_points → factor·num_points（factor > 1）",
             OutputRelation = "u_max(flw) ≈ u_max(src)（O(tol) 容差内）",
             ComparisonType = MrComparisonType.Absolute,
