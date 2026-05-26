@@ -12,25 +12,25 @@ public sealed class HardcodedMrCatalogProviderTests
         new(SutRoot: "/tmp/sut", SystemPython: "python3", OpenMocPython: "python3");
 
     [Fact]
-    public void Load_pins_27_entries()
+    public void Load_pins_29_entries()
     {
         var p = new HardcodedMrCatalogProvider(Opts());
 
         var entries = p.Load();
 
-        // Branch state after T3 Burgers 1D + T3C-IVP scipy-ivp-lotka-volterra (+2 MR each): 27 MR × 14 SUT.
-        Assert.Equal(27, entries.Count);
+        // Branch state after T3C-IVP scipy-ivp-lotka-volterra + T3C-BVP scipy-bvp-poisson-1d (+2 MR each): 29 MR × 15 SUT.
+        Assert.Equal(29, entries.Count);
     }
 
     [Fact]
-    public void Load_spans_14_distinct_SUTs()
+    public void Load_spans_15_distinct_SUTs()
     {
         var p = new HardcodedMrCatalogProvider(Opts());
 
         var entries = p.Load();
 
         var distinctSuts = entries.Select(e => e.Mr.SutName).Distinct().ToList();
-        Assert.Equal(14, distinctSuts.Count);
+        Assert.Equal(15, distinctSuts.Count);
         Assert.Contains("openmoc", distinctSuts);
         Assert.Contains("openmc", distinctSuts);
         Assert.Contains("heat-equation", distinctSuts);
@@ -45,6 +45,7 @@ public sealed class HardcodedMrCatalogProviderTests
         Assert.Contains("wave-1d", distinctSuts);
         Assert.Contains("burgers-1d", distinctSuts);
         Assert.Contains("scipy-ivp-lotka-volterra", distinctSuts);
+        Assert.Contains("scipy-bvp-poisson-1d", distinctSuts);
     }
 
     [Fact]

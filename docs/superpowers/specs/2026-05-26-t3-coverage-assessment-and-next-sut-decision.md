@@ -94,9 +94,9 @@ Selection criterion if this decision is later revisited (one SUT at a time; neve
 
 Until those four conditions are jointly satisfied for a uniquely named candidate, no T3 SUT PR may be opened.
 
-## 5.2 Selected next SUT — External solver pilot (2026-05-26): `scipy-ivp-lotka-volterra`
+## 5.2 Selected SUT — External solver pilot (2026-05-26): `scipy-ivp-lotka-volterra` — COMPLETED
 
-**Status: Active.** Under §4 driver #1 (External solver pilot), the unique next SUT selected for T3 expansion is **`scipy-ivp-lotka-volterra`** — a SciPy `solve_ivp`-backed Lotka-Volterra ODE solver that exercises the External-solver-pilot T1 surface against the existing pure-stdlib `SUT/lotka_volterra/` for the same equation.
+**Status: Completed (T3C-IVP merged).** Under §4 driver #1 (External solver pilot), the SUT `scipy-ivp-lotka-volterra` — a SciPy `solve_ivp`-backed Lotka-Volterra ODE solver — exercises the External-solver-pilot T1 surface against the existing pure-stdlib `SUT/lotka_volterra/` for the same equation. Implementation merged via T3C-IVP; the candidate-specific plan is archived in the active plan index.
 
 The §5 selection criteria (i)–(iv) are addressed as follows:
 
@@ -105,17 +105,24 @@ The §5 selection criteria (i)–(iv) are addressed as follows:
 - (iii) No new verification semantics are required. Both MRs reuse existing typed predicates via `LegacyAssertionPredicateMapper`: `scipy-ivp-lv-prey-growth-monotone` uses `AssertionTypeCode="greater"` (→ `BinaryComparisonKernel`); `scipy-ivp-lv-step-convergence` uses `AssertionTypeCode="approx"` (→ `ScaledEqualityKernel`).
 - (iv) Tested venv / install path: env var `METBENCH_SCIPY_PYTHON` (default falls back to `LauncherOptions.SystemPython`); when SciPy is missing, the launcher end-to-end tests skip cleanly via `[SkippableFact]` + `ScipyTestPaths.ScipyImportable()` with the verbatim skip reason above. The `dotnet-test.yml` cloud CI does not currently install SciPy; tests will skip cleanly there. The Method MT, Typed Semantic Catalog runtime, and WPF surfaces are not modified by this candidate.
 
-**Out of scope for §5.2**: BVP / elliptic external-solver expansion (e.g. `scipy-bvp-poisson-1d`) is registered as a **future** candidate only — see §5.3 — and is not enabled by §5.2. The pure-stdlib §5 pause is unchanged.
+**Out of scope for §5.2**: BVP / elliptic external-solver expansion was registered as a future candidate at §5.2 closure; it is now active and selected via §5.3 below. The pure-stdlib §5 pause is unchanged.
 
-## 5.3 Future external-solver candidates (not selected)
+## 5.3 Selected next SUT — External solver pilot continuation (2026-05-26, post-IVP): `scipy-bvp-poisson-1d`
 
-The following are anticipated **future** candidates under §4 driver #1 (External solver pilot). They are **not selected**, do not unlock any code PR, and each will require its own §5.x sub-decision and candidate-specific implementation plan:
+**Status: Active.** Under §4 driver #1 (External solver pilot), the unique next SUT selected for T3 expansion after §5.2 IVP completion is **`scipy-bvp-poisson-1d`** — a SciPy `solve_bvp`-backed 1D Poisson elliptic SUT that exercises the BVP / elliptic external-solver-pilot T1 surface against the existing pure-stdlib `SUT/poisson_1d/` for the same equation.
 
-- **`scipy-bvp-poisson-1d`** — SciPy `solve_bvp`-backed 1D Poisson elliptic SUT, intended to form a same-equation cross-method pair with the existing pure-stdlib `SUT/poisson_1d/`. Anticipated successor to §5.2.
+The §5 selection criteria (i)–(iv) are addressed as follows:
+
+- (i) Falls under §4 driver #1 (External solver pilot) — second SciPy-backed SUT, validating that the External-solver-pilot path opened in §5.2 extends to BVP / elliptic problems and to a sparse / dense linear-system internal call shape that the IVP RK45 surface did not exercise.
+- (ii) Candidate-specific implementation plan registered at [`docs/superpowers/plans/2026-05-26-t3c-scipy-bvp-poisson-1d-plan.md`](../plans/2026-05-26-t3c-scipy-bvp-poisson-1d-plan.md), covering equation reference (re-uses the existing `poisson` `EquationMetadata`), MR semantics for the two new MRs, catalog binding shape, test classes, CI strategy, and clean-skip policy with the verbatim skip reason `"SciPy runtime not configured for scipy-bvp-poisson-1d."`.
+- (iii) No new verification semantics are required. Both MRs reuse existing typed predicates via `LegacyAssertionPredicateMapper`: `scipy-bvp-poisson-source-superposition` uses `AssertionTypeCode="greater"` (→ `BinaryComparisonKernel`); `scipy-bvp-poisson-mesh-richardson` uses `AssertionTypeCode="approx"` (→ `ScaledEqualityKernel`).
+- (iv) Tested venv / install path: env var `METBENCH_SCIPY_PYTHON` (already introduced by §5.2; default falls back to `LauncherOptions.SystemPython`); when SciPy is missing, the launcher end-to-end tests skip cleanly via `[SkippableFact]` + `ScipyTestPaths.ScipyImportable()` with the verbatim skip reason above. The `dotnet-test.yml` cloud CI does not currently install SciPy; tests will skip cleanly there. The Method MT, Typed Semantic Catalog runtime, and WPF surfaces are not modified by this candidate.
+
+**Out of scope for §5.3**: no other external-solver candidates are introduced. Any further external-solver SUT (e.g. FEniCS, OpenFOAM, Clawpack) requires its own §5.x sub-decision plus a candidate-specific implementation plan.
 
 ## 5.1 Candidate Backlog / 候选池
 
-This backlog enumerates candidates whose **future** evaluation is anticipated. Listing here is **not** selection. **Pure-stdlib T3 SUT expansion remains paused; the only active external-solver-pilot selection is §5.2.** Nothing in this section unlocks any other code PR. A backlog entry becomes a real candidate only after a follow-up decision-record revision (or successor record) explicitly picks it as the unique next SUT under one of the §4 drivers, and only after the entry's start conditions are jointly satisfied. Start timing is decided by the user, not inferred from this list.
+This backlog enumerates candidates whose **future** evaluation is anticipated. Listing here is **not** selection. **Pure-stdlib T3 SUT expansion remains paused; §5.2 IVP is completed and §5.3 BVP is the active external-solver-pilot selection.** Nothing in this section unlocks any other code PR. A backlog entry becomes a real candidate only after a follow-up decision-record revision (or successor record) explicitly picks it as the unique next SUT under one of the §4 drivers, and only after the entry's start conditions are jointly satisfied. Start timing is decided by the user, not inferred from this list.
 
 ### 5.1.1 MeshGraphNets — cylinder flow surrogate (ML/data-driven SUT pilot candidate)
 

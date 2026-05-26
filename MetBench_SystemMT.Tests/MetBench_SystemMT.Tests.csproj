@@ -124,5 +124,13 @@
       <Link>TestAssets\scipy_ivp_lotka_volterra\sample\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\SUT\scipy_bvp_poisson_1d\*.py">
+      <Link>TestAssets\scipy_bvp_poisson_1d\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\SUT\scipy_bvp_poisson_1d\sample\*.json">
+      <Link>TestAssets\scipy_bvp_poisson_1d\sample\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
