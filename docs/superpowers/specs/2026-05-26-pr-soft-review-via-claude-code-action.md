@@ -138,6 +138,7 @@ permissions:
   contents: read
   pull-requests: write
   issues: write
+  id-token: write  # required by claude-code-action@v1 internal OIDC handshake (see §11 R4)
 
 jobs:
   review:
@@ -250,6 +251,7 @@ merge ok
 - **风险 R1**：LLM 误报噪音。缓解：advisory only；review comment 可被人忽略；通过迭代调 prompt 收敛。
 - **风险 R2**：Max 配额跟交互用量共享。缓解：先观察 30 天用量趋势再决定是否升级或限频。
 - **风险 R3**：prompt 漂移导致 review 质量不稳定。缓解：本 spec 的 §7 prompt 模板是 single source of truth；workflow YAML 必须从这里复制；改 prompt = 改 spec = 走 PR review。
+- **风险 R4（self-bootstrap 发现）**：`anthropics/claude-code-action@v1` 内部要做一次 GitHub OIDC handshake，即使走 `claude_code_oauth_token` 路径也需要 workflow `permissions:` 含 `id-token: write`。缺这一行 → 24 秒内挂掉、`Could not fetch an OIDC token` 报错。已在 §7 模板里加 `id-token: write`。任何复制本模板的新 workflow 必须保留这一行；任何对 v1 的 minor 升级要复查该要求是否变更。**首次落地的 PR #145 就是被这个缺权限挡住的**，记录在本 §11 以防重蹈。
 - **未决 Q1**：是否要让 LLM 也读 `AGENTS.md` / `CLAUDE.md` 全文判断"该改但没改的 projection 文档"？目前 prompt 已包含 plan index 路径但未强制全读，先观察是否够用。
 - **未决 Q2**：要不要对 self-PR（agent 自己开的 PR）也跑？目前会跑 — 这是好事，能 catch 我自己漏掉的；但 LLM 给 LLM 审 LLM 的递归审美是否真有价值还要看。
 
