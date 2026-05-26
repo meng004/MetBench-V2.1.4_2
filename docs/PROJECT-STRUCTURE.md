@@ -1,6 +1,6 @@
 # MetBench 项目结构
 
-> **结构快照基线**: 2026-05-25（代码测试基线 `e839214`）
+> **结构快照基线**: 2026-05-26（代码测试基线由 `docs/status/current.md` §2 实时维护；T3 PDE-class 覆盖更新至 PR #140）
 > **目标读者**: 新加入仓库的开发者 / 验收员 / reviewer。文档全息呈现仓库当前结构 + SUT 测试覆盖 + MetBench 框架测试覆盖。
 > **更详细的设计**: [`AGENTS.md`](../AGENTS.md)（roadmap）· [`CLAUDE.md`](../CLAUDE.md)（agent 注意事项）· [`docs/design/`](design/)（架构）
 > **当前状态账本**: [`docs/status/current.md`](status/current.md)。本文件只投影结构与测试矩阵，不重新定义当前主线状态。
@@ -27,19 +27,23 @@
 
 ---
 
-## §2 SUT 清单（当前 launcher catalog：9 个）
+## §2 SUT 清单（当前 launcher catalog：13 个）
 
 | SUT | 目录 | 域 | 算法 / 程序类型 | Runner | Sample / catalog | 接入 PR |
 |---|---|---|---|---|---|---|
 | **OpenMOC** | `SUT/openmoc/` | Neutron transport | Method of Characteristics | `openmoc_runner.py` | `catalog.json` + sample | Stage 3 / Stage 8 |
 | **OpenMC** | `SUT/openmc/` | Neutron transport | Monte Carlo | `openmc_runner.py` | `catalog.json` + sample | #57 / Stage 8 |
-| **Heat Equation** | `SUT/heat_equation/` | PDE | 1D finite difference | `heat_equation.py` | `catalog.json` + sample | Stage 4 / Stage 8 |
+| **Heat Equation** | `SUT/heat_equation/` | PDE (parabolic) | 1D finite difference | `heat_equation.py` | `catalog.json` + sample | Stage 4 / Stage 8 |
 | **Projectile** | `SUT/projectile/` | Ballistics | Closed-form physics | `projectile.py` | `catalog.json` + sample | G-09 |
 | **Decay Chain** | `SUT/decay_chain/` | ODE | Bateman chain | `decay_chain_runner.py` | `catalog.json` + sample | Stage 8 P1 |
 | **Damped Oscillator** | `SUT/damped_oscillator/` | ODE | Linear ODE | `damped_oscillator_runner.py` | `catalog.json` + sample | Stage 8 P1 |
 | **Lotka-Volterra** | `SUT/lotka_volterra/` | ODE | Predator-prey ODE | `lotka_volterra_runner.py` | `catalog.json` + sample | Stage 8 P1 |
 | **Subchannel 1D** | `SUT/subchannel_1d/` | PDE / NS surrogate | 1D subchannel | `subchannel_1d_runner.py` | `catalog.json` + sample | Stage 8 P3 |
-| **Diffusion 1D** | `SUT/diffusion_1d/` | PDE | 1D diffusion FD | `diffusion_1d_runner.py` | `catalog.json` + sample | Stage 8 P4 |
+| **Diffusion 1D** | `SUT/diffusion_1d/` | PDE (parabolic) | 1D diffusion FD | `diffusion_1d_runner.py` | `catalog.json` + sample | Stage 8 P4 |
+| **Poisson 1D** | `SUT/poisson_1d/` | PDE (elliptic) | Pure-stdlib Thomas tridiagonal | `poisson_1d_runner.py` | `catalog.json` + sample | PR #134 |
+| **Advection 1D** | `SUT/advection_1d/` | PDE (first-order linear hyperbolic) | Pure-stdlib first-order upwind FD + periodic BC | `advection_1d_runner.py` | `catalog.json` + sample | PR #136 |
+| **Wave 1D** | `SUT/wave_1d/` | PDE (second-order linear hyperbolic) | Pure-stdlib second-order leapfrog FD + Dirichlet BC | `wave_1d_runner.py` | `catalog.json` + sample | PR #138 |
+| **Burgers 1D** | `SUT/burgers_1d/` | PDE (nonlinear hyperbolic) | Pure-stdlib conservative Lax-Friedrichs flux differencing + periodic BC | `burgers_1d_runner.py` | `catalog.json` + sample | PR #140 |
 
 SUT 接入到框架的 hook：
 - Python runner（`<sut>_runner.py`）—— stdin/CLI args 入参，stdout JSON 出参
@@ -58,12 +62,18 @@ SUT 接入到框架的 hook：
 | **OpenMC** | `OpenMcInputAdapterTests` (5) + `OpenMcOutputAdapterTests` (5) + `OpenMcRunnerSmokeTests` (1) = **11** | (共用 `CrossProgramNeutronTransportMrs.feature`) | 2（跨程序 examples） | `openmc-pincell-nu-sigma-f` · `openmc-pincell-sigma-a` |
 | **Heat Equation** | `HeatEquationInputAdapterTests` (2) + `HeatEquationOutputAdapterTests` (4) = **6** | `HeatEquationAmplitude.feature` | 1 | `heat-equation-amplitude` |
 | **Projectile** | (依靠 `CliProgramRunnerTests` 通用覆盖) | `ProjectileRange.feature` | 1 | — (仅 BDD，未 Launcher 注册) |
+| **Poisson 1D** | `LauncherEndToEndPoissonTests`（端到端覆盖两条 MR；pure-stdlib，无 venv 依赖） | — | — | `poisson-source-superposition` · `poisson-mesh-richardson` |
+| **Advection 1D** | `LauncherEndToEndAdvectionTests`（端到端覆盖两条 MR；pure-stdlib） | — | — | `advection-amplitude-linearity` · `advection-mesh-conservation` |
+| **Wave 1D** | `LauncherEndToEndWaveTests`（端到端覆盖两条 MR；pure-stdlib） | — | — | `wave-amplitude-linearity` · `wave-mesh-energy-convergence` |
+| **Burgers 1D** | `LauncherEndToEndBurgersTests`（端到端覆盖两条 MR；pure-stdlib） | — | — | `burgers-amplitude-peak-monotone` · `burgers-mesh-conservation` |
 | **跨 SUT 通用** | `MrTransformationTests` · `InputGeneratorTests`（PR #119 `GreaterThanAssertionTests` / `LessThanAssertionTests` 已随 W1 类删除；同语义现由 `Catalog/Typed/BinaryComparisonKernelTests` 覆盖） | `SystemLevelCliMt.feature` · `SystemLevelGeneratedFollowup.feature` | 2 | — |
 
-**SUT 系统级 MR 总数（2026-05-24）**：
-- launcher / manifest catalog：**17** MR-on-SUT 绑定
-- 覆盖方程：**8**
-- 当前结构风险：runtime 已切到 provider-backed catalog，生产 fallback 与 importer 具体类耦合已删除；sample-level evidence 已落第一条可复盘链，但覆盖粒度仍可继续扩展
+**Launcher end-to-end 测试（按 SUT）**：`LauncherEndToEndOdeTests`（decay_chain / damped_oscillator / lotka_volterra）· `LauncherEndToEndPoissonTests`（PR #134）· `LauncherEndToEndAdvectionTests`（PR #136）· `LauncherEndToEndWaveTests`（PR #138）· `LauncherEndToEndBurgersTests`（PR #140）。
+
+**SUT 系统级 MR 总数（2026-05-26，post-PR #140）**：
+- launcher / manifest catalog：**25** MR-on-SUT 绑定
+- 覆盖方程：**12**
+- 当前结构风险：runtime 已切到 provider-backed catalog，生产 fallback 与 importer 具体类耦合已删除；sample-level evidence 已落第一条可复盘链，但覆盖粒度仍可继续扩展。T3 代表性 PDE-class 覆盖（椭圆 / 一阶线性双曲 / 二阶线性双曲 / 非线性双曲）已通过 PR #134 / #136 / #138 / #140 闭环；进一步 T3 扩展由 next-SUT decision record 决定（见 `docs/status/current.md` §4 与 active plan index）
 
 ---
 
