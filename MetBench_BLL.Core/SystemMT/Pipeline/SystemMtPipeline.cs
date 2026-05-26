@@ -265,17 +265,18 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
             }
             else
             {
-                predicate = LegacyAssertionPredicateMapper.MapScalar(
-                    ctx.AssertionTypeCode,
-                    actualRole: "followup",
-                    expectedRole: "source",
-                    metric: ctx.ValueName);
-                spec = TypedSpecFactory.ForLegacyScalar(
+                // String-code dispatch is confined to TypedSpecFactory.ForLegacyAssertion
+                // inside the Catalog/Typed/Migration/ namespace per the
+                // SemanticCatalogBoundaryTests guard — the pipeline only sees the
+                // resulting typed MrSpec + first predicate.
+                spec = TypedSpecFactory.ForLegacyAssertion(
                     mrCode: ctx.MrCode,
+                    assertionTypeCode: ctx.AssertionTypeCode,
                     valueName: ctx.ValueName,
-                    predicate: predicate,
+                    parameters: ctx.Parameters,
                     toleranceAbs: ctx.Tolerance.ToleranceAbs,
                     toleranceRel: ctx.Tolerance.ToleranceRel);
+                predicate = spec.Predicates![0];
             }
         }
         catch (ArgumentException ex)

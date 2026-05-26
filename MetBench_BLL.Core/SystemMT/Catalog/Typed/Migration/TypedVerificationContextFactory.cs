@@ -39,10 +39,21 @@ public static class TypedVerificationContextFactory
 
         var (actualRole, expectedRole) = RolesFromSpec(spec);
 
+        var (expectedStatistics, actualStatistics) = BuildStatisticsForSpec(
+            spec, sourceScalars, followupScalars);
+
         var roles = new Dictionary<string, RoleOutput>(StringComparer.Ordinal)
         {
-            [expectedRole] = new RoleOutput(expectedRole, new Dictionary<string, double>(sourceScalars)),
-            [actualRole] = new RoleOutput(actualRole, new Dictionary<string, double>(followupScalars)),
+            [expectedRole] = new RoleOutput(
+                expectedRole,
+                new Dictionary<string, double>(sourceScalars),
+                Fields: null,
+                Statistics: expectedStatistics),
+            [actualRole] = new RoleOutput(
+                actualRole,
+                new Dictionary<string, double>(followupScalars),
+                Fields: null,
+                Statistics: actualStatistics),
         };
 
         var inputs = new Dictionary<string, double>(StringComparer.Ordinal);
@@ -67,9 +78,60 @@ public static class TypedVerificationContextFactory
                     return (binary.LeftRole, binary.RightRole);
                 case ScaledEqualityPredicate scaled:
                     return (scaled.ActualRole, scaled.ReferenceRole);
+                case VarianceRatioPredicate varianceRatio:
+                    // sourceScalars → expected → LowSampleRole (larger σ before refinement),
+                    // followupScalars → actual → HighSampleRole (smaller σ after refinement).
+                    return (varianceRatio.HighSampleRole, varianceRatio.LowSampleRole);
             }
         }
 
         return ("followup", "source");
+    }
+
+    /// <summary>
+    /// When the spec carries a <see cref="VarianceRatioPredicate"/>, promote the
+    /// statistical metric value from each side's scalar map into a per-role
+    /// <see cref="StatisticalValue"/> so <see cref="VarianceRatioKernel"/> can read
+    /// it via <c>context.GetStatistical(role, metric)</c>. The convention is that
+    /// <c>scalars[metric]</c> carries the stderr (e.g. <c>k_eff_std</c>); the Mean
+    /// component is set to <c>0.0</c> because the kernel does not consume it.
+    /// Returns <c>(null, null)</c> for non-variance-ratio specs — additive.
+    /// </summary>
+    private static (
+        IReadOnlyDictionary<string, StatisticalValue>? expectedStatistics,
+        IReadOnlyDictionary<string, StatisticalValue>? actualStatistics)
+        BuildStatisticsForSpec(
+            MrSpec spec,
+            IReadOnlyDictionary<string, double> sourceScalars,
+            IReadOnlyDictionary<string, double> followupScalars)
+    {
+        if (spec.Predicates is not { Count: > 0 } predicates)
+        {
+            return (null, null);
+        }
+
+        if (predicates[0] is not VarianceRatioPredicate variance)
+        {
+            return (null, null);
+        }
+
+        var expected = TryBuildStatistics(sourceScalars, variance.StatisticalMetric);
+        var actual = TryBuildStatistics(followupScalars, variance.StatisticalMetric);
+        return (expected, actual);
+    }
+
+    private static IReadOnlyDictionary<string, StatisticalValue>? TryBuildStatistics(
+        IReadOnlyDictionary<string, double> scalars,
+        string metric)
+    {
+        if (!scalars.TryGetValue(metric, out var stderr))
+        {
+            return null;
+        }
+
+        return new Dictionary<string, StatisticalValue>(StringComparer.Ordinal)
+        {
+            [metric] = new StatisticalValue(Mean: 0.0, StdError: stderr),
+        };
     }
 }
