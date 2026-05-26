@@ -667,5 +667,69 @@ internal static class LegacyCatalogFactory
             // 二阶 leapfrog 在平滑 Gaussian 上 L² 不变量到机器精度；num_points 翻倍（dt 内部
             // 同步减半保持 Courant=0.5）后 energy_proxy 实测变化 ~1e-12；ToleranceRel=1e-3 + Atol=1e-6 充裕。
             Tolerance: new AssertionTolerance(ToleranceRel: 1e-3, ToleranceAbs: 1e-6));
+
+        // T3 expansion: 1D inviscid Burgers SUT + Burgers 方程接入（first nonlinear-PDE
+        // SUT after the linear hyperbolic family Advection / Wave; pure-stdlib Lax-Friedrichs
+        // conservative flux differencing with periodic boundaries）.
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "burgers-amplitude-peak-monotone",
+                DisplayName: "1D Burgers — ScaleInitial (amplitude → peak monotone)",
+                SutName: "burgers-1d",
+                TransformationName: "ScaleField",
+                AssertionName: "GreaterThan",
+                ValueName: "peak_amplitude",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Amplitude-monotonicity MP_mono: the inviscid Burgers equation " +
+                    "u_t + (u²/2)_x = 0 is nonlinear, but strictly-positive scaling of the " +
+                    "initial Gaussian pulse must strictly increase the final peak amplitude. " +
+                    "Lax-Friedrichs is dissipative (peak ratio < 2 due to shock smearing), so " +
+                    "the assertion is GreaterThan rather than equal scaling.",
+                MrFamily: "Burgers.Scaling.Amplitude"),
+            SampleCaseRelativePath: Path.Combine("burgers_1d", "sample", "standard.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "burgers_1d", "burgers_1d.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "burgers_1d", "burgers_1d_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "burgers_1d", "burgers_1d_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchBurgers1d",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "burgers_1d", "burgers_1d_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "burgers_1d", "burgers_1d_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/initial/amplitude") },
+            AssertionTypeCode: "greater",
+            EquationKey: "burgers");
+
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "burgers-mesh-conservation",
+                DisplayName: "1D Burgers — MeshRefinement (mass conservation)",
+                SutName: "burgers-1d",
+                TransformationName: "ScaleField",
+                AssertionName: "ApproxEqual",
+                ValueName: "mass_integral",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Mass conservation MP_inv: the conservative Lax-Friedrichs flux " +
+                    "differencing with periodic boundaries preserves ∫u dx exactly per step " +
+                    "regardless of the shock structure. Doubling num_points changes the " +
+                    "initial Gaussian sampling by O(dx²) but per-step mass conservation is " +
+                    "exact; the final mass_integral must agree within tight FD tolerance.",
+                MrFamily: "Burgers.Invariance.Mass"),
+            SampleCaseRelativePath: Path.Combine("burgers_1d", "sample", "standard.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "burgers_1d", "burgers_1d.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "burgers_1d", "burgers_1d_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "burgers_1d", "burgers_1d_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchBurgers1d",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "burgers_1d", "burgers_1d_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "burgers_1d", "burgers_1d_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/geometry/num_points") },
+            AssertionTypeCode: "approx",
+            EquationKey: "burgers",
+            // LxF 守恒流差分严格保 ∫u dx；num_points 翻倍后实测 mass_integral 变化 ~6e-10
+            // （初始 Gaussian 采样误差 O(dx²)）；ToleranceRel=1e-3 + Atol=1e-6 充裕。
+            Tolerance: new AssertionTolerance(ToleranceRel: 1e-3, ToleranceAbs: 1e-6));
     }
 }

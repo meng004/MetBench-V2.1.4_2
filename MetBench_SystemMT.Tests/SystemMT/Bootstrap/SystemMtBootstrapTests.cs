@@ -47,19 +47,20 @@ public sealed class SystemMtBootstrapTests
 
         var result = await SystemMtBootstrap.SeedCatalogsAsync(_meta, importer);
 
-        // metadata seed: 11 equations + 23 MRs（S8-P4 后 + diffusion 方程 + 2 MR = 8eq/17MR；
+        // metadata seed: 12 equations + 25 MRs（S8-P4 后 + diffusion 方程 + 2 MR = 8eq/17MR；
         // T3 Poisson 1D 再加 +1 equation +2 MR = 9eq/19MR；T3 Advection 1D 再加 +1 equation
-        // +2 MR = 10eq/21MR；T3 Wave 1D 再加 +1 equation +2 MR = 11eq/23MR）
-        Assert.Equal(11, result.EquationsSeeded);
-        Assert.Equal(23, result.MrsSeeded);
-        Assert.Equal(11, (await _meta.ListEquationsAsync()).Count);
-        Assert.Equal(23, (await _meta.ListMrsAsync()).Count);
+        // +2 MR = 10eq/21MR；T3 Wave 1D 再加 +1 equation +2 MR = 11eq/23MR；T3 Burgers 1D
+        // 再加 +1 equation +2 MR = 12eq/25MR）
+        Assert.Equal(12, result.EquationsSeeded);
+        Assert.Equal(25, result.MrsSeeded);
+        Assert.Equal(12, (await _meta.ListEquationsAsync()).Count);
+        Assert.Equal(25, (await _meta.ListMrsAsync()).Count);
 
-        // entity import: 12 SUT + 23 MR + 23 binding
+        // entity import: 13 SUT + 25 MR + 25 binding
         Assert.NotNull(result.ImportSummary);
-        Assert.Equal(12, result.ImportSummary!.ApplicationsCreated);
-        Assert.Equal(23, result.ImportSummary.MrsCreated);
-        Assert.Equal(23, result.ImportSummary.BindingsCreated);
+        Assert.Equal(13, result.ImportSummary!.ApplicationsCreated);
+        Assert.Equal(25, result.ImportSummary.MrsCreated);
+        Assert.Equal(25, result.ImportSummary.BindingsCreated);
     }
 
     [Fact]
@@ -70,15 +71,15 @@ public sealed class SystemMtBootstrapTests
         await SystemMtBootstrap.SeedCatalogsAsync(_meta, importer);
         var second = await SystemMtBootstrap.SeedCatalogsAsync(_meta, importer);
 
-        // metadata 仍是 11/23（upsert 而非追加）
-        Assert.Equal(11, (await _meta.ListEquationsAsync()).Count);
-        Assert.Equal(23, (await _meta.ListMrsAsync()).Count);
+        // metadata 仍是 12/25（upsert 而非追加）
+        Assert.Equal(12, (await _meta.ListEquationsAsync()).Count);
+        Assert.Equal(25, (await _meta.ListMrsAsync()).Count);
         // entity 第二次 created=0, existing 显示原有计数
         Assert.NotNull(second.ImportSummary);
         Assert.Equal(0, second.ImportSummary!.ApplicationsCreated);
-        Assert.Equal(12, second.ImportSummary.ApplicationsExisting);
+        Assert.Equal(13, second.ImportSummary.ApplicationsExisting);
         Assert.Equal(0, second.ImportSummary.MrsCreated);
-        Assert.Equal(23, second.ImportSummary.MrsExisting);
+        Assert.Equal(25, second.ImportSummary.MrsExisting);
     }
 
     [Fact]
@@ -91,7 +92,7 @@ public sealed class SystemMtBootstrapTests
         Assert.Equal(0, result.EquationsSeeded);
         Assert.Equal(0, result.MrsSeeded);
         Assert.NotNull(result.ImportSummary);
-        Assert.Equal(12, result.ImportSummary!.ApplicationsCreated);
+        Assert.Equal(13, result.ImportSummary!.ApplicationsCreated);
     }
 
     [Fact]
@@ -99,8 +100,8 @@ public sealed class SystemMtBootstrapTests
     {
         var result = await SystemMtBootstrap.SeedCatalogsAsync(_meta, launcherImporter: null);
 
-        Assert.Equal(11, result.EquationsSeeded);
-        Assert.Equal(23, result.MrsSeeded);
+        Assert.Equal(12, result.EquationsSeeded);
+        Assert.Equal(25, result.MrsSeeded);
         Assert.Null(result.ImportSummary);
         Assert.Null(result.V3MigrationSummary);
         // entity 表未被改
@@ -119,9 +120,9 @@ public sealed class SystemMtBootstrapTests
         var result = await SystemMtBootstrap.SeedCatalogsAsync(_meta, importer, v3Ctx);
 
         Assert.NotNull(result.V3MigrationSummary);
-        // 全部 23 system-level MR 应投影到 V3
-        Assert.Equal(23, result.V3MigrationSummary!.Created);
-        Assert.Equal(23, v3.Data.Count);
+        // 全部 25 system-level MR 应投影到 V3
+        Assert.Equal(25, result.V3MigrationSummary!.Created);
+        Assert.Equal(25, v3.Data.Count);
         // 关键修复验证：EquationKey 现在能正确传到 V3
         Assert.Equal(EquationKind.Bateman,
             v3.Data.Single(m => m.MrCode == "bateman-mass-conservation").Equation);

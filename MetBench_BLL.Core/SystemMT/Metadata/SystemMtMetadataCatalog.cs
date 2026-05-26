@@ -173,6 +173,24 @@ public static class SystemMtMetadataCatalog
         },
         new EquationMetadata
         {
+            EquationKey = "burgers",
+            Name = "1D 无粘 Burgers 方程（守恒形式、周期边界）",
+            CanonicalForm = "∂u/∂t + ∂/∂x(u²/2) = 0,  x ∈ [0, L],  周期 BC",
+            SymbolSystem =
+                "u(x,t) 守恒变量（标量速度）；F(u)=u²/2 通量；L 区域长度；初始正向 Gaussian u₀(x)。" +
+                "代表性的标量非线性双曲守恒律：光滑初值在迎风侧自陡化、有限时间内形成激波；" +
+                "激波形成后熵解失去光滑性、L² 范数因激波耗散严格递减，但通量差分（Lax-Friedrichs）" +
+                "格式 + 周期边界对总质量 ∫u dx 仍是严格守恒的（与 dx / dt 无关）。",
+            Parameters = new List<EquationParameter>
+            {
+                new() { Symbol = "F(u)", Description = "守恒通量 u²/2", Unit = "无量纲" },
+                new() { Symbol = "u₀(x)", Description = "初始正向 Gaussian 脉冲（amplitude / center / sigma 参数化）", Unit = "无量纲" },
+                new() { Symbol = "peak_amplitude", Description = "末时刻峰值幅度（输出，受 LxF 数值耗散影响）", Unit = "无量纲" },
+                new() { Symbol = "mass_integral", Description = "∫u dx 数值守恒量（输出）", Unit = "无量纲" },
+            },
+        },
+        new EquationMetadata
+        {
             EquationKey = "projectile-motion",
             Name = "射程方程（真空、平面、点抛体）",
             CanonicalForm = "R = v0²·sin(2θ)/g",
@@ -503,6 +521,41 @@ public static class SystemMtMetadataCatalog
             {
                 new() { Symbol = "factor", PhysicalMeaning = "num_points 缩放倍率", ValueRange = "factor > 1" },
                 new() { Symbol = "energy_proxy", PhysicalMeaning = "0.5·∫u² dx 能量代理（输出）", ValueRange = "energy_proxy > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "burgers-amplitude-peak-monotone",
+            EquationKey = "burgers",
+            PhysicalMeaning =
+                "非线性单调性：无粘 Burgers 方程 u_t + (u²/2)_x = 0 是非线性的，" +
+                "但严格正向地放大初始 Gaussian 振幅必使末时刻峰值严格变大。" +
+                "Lax-Friedrichs 数值耗散使 peak_ratio < 2（激波被抹平），" +
+                "因此断言为 GreaterThan 而非按比例相等。",
+            InputTransformation = "amplitude → factor·amplitude（factor > 1）",
+            OutputRelation = "peak_amplitude(flw) > peak_amplitude(src)",
+            ComparisonType = MrComparisonType.Ordinal,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "初始幅度缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "peak_amplitude", PhysicalMeaning = "末时刻峰值幅度（输出）", ValueRange = "peak_amplitude > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "burgers-mesh-conservation",
+            EquationKey = "burgers",
+            PhysicalMeaning =
+                "质量守恒：Lax-Friedrichs 通量差分 + 周期边界严格守恒 ∫u dx（独立于激波结构）。" +
+                "num_points 翻倍仅令初始 Gaussian 采样误差为 O(dx²)，逐步质量守恒精确。" +
+                "末时刻 mass_integral 应在 FD 截断容差内不变。",
+            InputTransformation = "num_points → factor·num_points（factor > 1）",
+            OutputRelation = "mass_integral(flw) ≈ mass_integral(src)（O(dx²) 截断容差内）",
+            ComparisonType = MrComparisonType.Absolute,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "num_points 缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "mass_integral", PhysicalMeaning = "∫u dx 守恒量（输出）", ValueRange = "mass_integral > 0" },
             },
         },
         new MrMetadata

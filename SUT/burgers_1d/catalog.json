@@ -1,0 +1,71 @@
+{
+  "sut_name": "burgers-1d",
+  "program": {
+    "program_name": "burgers-1d",
+    "equation": "Burgers",
+    "equation_key": "burgers",
+    "program_type": "Num",
+    "runner_script_relative_path": "burgers_1d.py",
+    "input_parser_script_relative_path": "burgers_1d_input_parser.py",
+    "output_parser_script_relative_path": "burgers_1d_output_parser.py",
+    "input_adapter_script_relative_path": "burgers_1d_input_parser.py",
+    "output_adapter_script_relative_path": "burgers_1d_output_parser.py",
+    "python_executable_kind": "system"
+  },
+  "mrs": [
+    {
+      "mr_id": "burgers-amplitude-peak-monotone",
+      "sut_name": "burgers-1d",
+      "display_name": "1D Burgers — ScaleInitial (amplitude → peak monotone)",
+      "description": "Amplitude-monotonicity MP_mono: the inviscid Burgers equation u_t + (u²/2)_x = 0 is nonlinear, but strictly-positive scaling of the initial Gaussian pulse must strictly increase the final peak amplitude. Lax-Friedrichs is dissipative (peak ratio < 2 due to shock smearing), so the assertion is GreaterThan rather than equal scaling.",
+      "mr_family": "Burgers.Scaling.Amplitude",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "greater",
+      "assertion_name": "GreaterThan",
+      "value_name": "peak_amplitude",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/initial/amplitude" }
+      ],
+      "tolerance_rel": 0,
+      "tolerance_abs": 0,
+      "noise_aware": false,
+      "equation_key": "burgers",
+      "equation": "Burgers",
+      "program_type": "Num",
+      "meta_pattern": "Mono",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "sample_case_relative_path": "sample/standard.json",
+      "work_root_name": "MetBenchBurgers1d",
+      "timeout_seconds": 30
+    },
+    {
+      "mr_id": "burgers-mesh-conservation",
+      "sut_name": "burgers-1d",
+      "display_name": "1D Burgers — MeshRefinement (mass conservation)",
+      "description": "Mass conservation MP_inv: the conservative Lax-Friedrichs flux differencing with periodic boundaries preserves ∫u dx exactly per step regardless of the shock structure. Doubling num_points changes the initial Gaussian sampling by O(dx²) but per-step mass conservation is exact; the final mass_integral must agree within tight FD tolerance.",
+      "mr_family": "Burgers.Invariance.Mass",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "approx",
+      "assertion_name": "ApproxEqual",
+      "value_name": "mass_integral",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/geometry/num_points" }
+      ],
+      "tolerance_rel": 1e-3,
+      "tolerance_abs": 1e-6,
+      "noise_aware": false,
+      "equation_key": "burgers",
+      "equation": "Burgers",
+      "program_type": "Num",
+      "meta_pattern": "Inv",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "sample_case_relative_path": "sample/standard.json",
+      "work_root_name": "MetBenchBurgers1d",
+      "timeout_seconds": 30
+    }
+  ]
+}
