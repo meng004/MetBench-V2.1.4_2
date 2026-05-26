@@ -72,30 +72,32 @@ public sealed class SystemMtLauncherTests
     {
         var descriptors = await _launcher.ListAvailableAsync();
 
-        Assert.Equal(23, descriptors.Count);
+        Assert.Equal(25, descriptors.Count);
         Assert.Equal("advection-amplitude-linearity", descriptors[0].Id);
         Assert.Equal("advection-mesh-conservation", descriptors[1].Id);
         Assert.Equal("bateman-mass-conservation", descriptors[2].Id);
         Assert.Equal("bateman-timestep-cauchy", descriptors[3].Id);
-        Assert.Equal("damped-oscillator-scale-state", descriptors[4].Id);
-        Assert.Equal("decay-chain-scale-initial", descriptors[5].Id);
-        Assert.Equal("diffusion-mesh-richardson", descriptors[6].Id);
-        Assert.Equal("diffusion-source-linearity", descriptors[7].Id);
-        Assert.Equal("fourier-alpha-monotonic", descriptors[8].Id);
-        Assert.Equal("fourier-timestep-convergence", descriptors[9].Id);
-        Assert.Equal("heat-equation-amplitude", descriptors[10].Id);
-        Assert.Equal("lotka-volterra-scale-gamma", descriptors[11].Id);
-        Assert.Equal("openmc-pincell-nu-sigma-f", descriptors[12].Id);
-        Assert.Equal("openmc-pincell-sigma-a", descriptors[13].Id);
-        Assert.Equal("openmoc-pincell-nu-sigma-f", descriptors[14].Id);
-        Assert.Equal("openmoc-pincell-sigma-a", descriptors[15].Id);
-        Assert.Equal("poisson-mesh-richardson", descriptors[16].Id);
-        Assert.Equal("poisson-source-superposition", descriptors[17].Id);
-        Assert.Equal("projectile-scale-v0", descriptors[18].Id);
-        Assert.Equal("subchannel-flow-temperature-monotone", descriptors[19].Id);
-        Assert.Equal("subchannel-heat-flux-linearity", descriptors[20].Id);
-        Assert.Equal("wave-amplitude-linearity", descriptors[21].Id);
-        Assert.Equal("wave-mesh-energy-convergence", descriptors[22].Id);
+        Assert.Equal("burgers-amplitude-peak-monotone", descriptors[4].Id);
+        Assert.Equal("burgers-mesh-conservation", descriptors[5].Id);
+        Assert.Equal("damped-oscillator-scale-state", descriptors[6].Id);
+        Assert.Equal("decay-chain-scale-initial", descriptors[7].Id);
+        Assert.Equal("diffusion-mesh-richardson", descriptors[8].Id);
+        Assert.Equal("diffusion-source-linearity", descriptors[9].Id);
+        Assert.Equal("fourier-alpha-monotonic", descriptors[10].Id);
+        Assert.Equal("fourier-timestep-convergence", descriptors[11].Id);
+        Assert.Equal("heat-equation-amplitude", descriptors[12].Id);
+        Assert.Equal("lotka-volterra-scale-gamma", descriptors[13].Id);
+        Assert.Equal("openmc-pincell-nu-sigma-f", descriptors[14].Id);
+        Assert.Equal("openmc-pincell-sigma-a", descriptors[15].Id);
+        Assert.Equal("openmoc-pincell-nu-sigma-f", descriptors[16].Id);
+        Assert.Equal("openmoc-pincell-sigma-a", descriptors[17].Id);
+        Assert.Equal("poisson-mesh-richardson", descriptors[18].Id);
+        Assert.Equal("poisson-source-superposition", descriptors[19].Id);
+        Assert.Equal("projectile-scale-v0", descriptors[20].Id);
+        Assert.Equal("subchannel-flow-temperature-monotone", descriptors[21].Id);
+        Assert.Equal("subchannel-heat-flux-linearity", descriptors[22].Id);
+        Assert.Equal("wave-amplitude-linearity", descriptors[23].Id);
+        Assert.Equal("wave-mesh-energy-convergence", descriptors[24].Id);
     }
 
     [Fact]
@@ -156,6 +158,36 @@ public sealed class SystemMtLauncherTests
         Assert.Equal("2", conv.DefaultParameters["factor"]);
         Assert.Contains("convergence", conv.Description, StringComparison.OrdinalIgnoreCase);
         Assert.Equal("Wave.Convergence.Energy", conv.MrFamily);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_burgers_amplitude_peak_monotone_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var mono = descriptors.Single(d => d.Id == "burgers-amplitude-peak-monotone");
+
+        Assert.Equal("burgers-1d", mono.SutName);
+        Assert.Equal("ScaleField", mono.TransformationName);
+        Assert.Equal("GreaterThan", mono.AssertionName);
+        Assert.Equal("peak_amplitude", mono.ValueName);
+        Assert.Equal("2", mono.DefaultParameters["factor"]);
+        Assert.Contains("amplitude", mono.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Burgers.Scaling.Amplitude", mono.MrFamily);
+    }
+
+    [Fact]
+    public async Task ListAvailableAsync_burgers_mesh_conservation_descriptor_has_expected_metadata()
+    {
+        var descriptors = await _launcher.ListAvailableAsync();
+        var cons = descriptors.Single(d => d.Id == "burgers-mesh-conservation");
+
+        Assert.Equal("burgers-1d", cons.SutName);
+        Assert.Equal("ScaleField", cons.TransformationName);
+        Assert.Equal("ApproxEqual", cons.AssertionName);
+        Assert.Equal("mass_integral", cons.ValueName);
+        Assert.Equal("2", cons.DefaultParameters["factor"]);
+        Assert.Contains("conservation", cons.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Burgers.Invariance.Mass", cons.MrFamily);
     }
 
     [Fact]

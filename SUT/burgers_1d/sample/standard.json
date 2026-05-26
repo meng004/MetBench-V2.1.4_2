@@ -1,0 +1,15 @@
+{
+  "geometry": {
+    "length":     1.0,
+    "num_points": 200
+  },
+  "initial": {
+    "amplitude": 1.0,
+    "center":    0.5,
+    "sigma":     0.1
+  },
+  "time": {
+    "t_final":   0.1,
+    "num_steps": 200
+  }
+}
