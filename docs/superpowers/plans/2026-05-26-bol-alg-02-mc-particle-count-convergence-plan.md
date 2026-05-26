@@ -1,5 +1,94 @@
 # Bol-Alg-02 — MC Particle Count Convergence on OpenMC (PR-N2)
 
+> **Status (2026-05-26): RETRACTED.** This plan was authored on the assumption that
+> `assertion_type_code: variance-ratio` was already wired through
+> `SystemMtLauncher → SystemMtPipeline → VarianceRatioKernel` because
+> `LegacyAssertionPredicateMapper.MapVarianceRatio(...)` exists since PR #124. The
+> assumption is wrong — see "Discovered blocker (2026-05-26)" section directly below.
+> PR-N2 is blocked on a new prerequisite **PR-VR (variance-ratio launcher pipeline
+> wiring)** plan that must be drafted, executed, and merged first. After PR-VR
+> ships, a successor scoped plan must be drafted that revives only the catalog +
+> blueprint + pinned-count edits documented here (the wiring tasks listed below
+> are not sufficient — they assume MapScalar-style routing).
+
+---
+
+## Discovered blocker (2026-05-26)
+
+While implementing this plan I started bumping pinned counts (30 → 31) across the
+six descriptor-list test files and writing `LauncherEndToEndOpenMcParticleCountConvergenceTests`.
+Before committing the new `MrBlueprint` row, I traced the runtime path that
+`SystemMtLauncher.RunAsync("openmc-pincell-particle-count-convergence")` would
+follow and found three real gaps that the original plan body ignored:
+
+1. **Pipeline does not route `variance-ratio` to the typed kernel.**
+   `MetBench_BLL.Core/SystemMT/Pipeline/SystemMtPipeline.cs:251-325`
+   (`EvaluateAssertion`) calls `LegacyAssertionPredicateMapper.MapScalar(...)` for
+   the conversion `AssertionTypeCode → typed predicate`. `MapScalar` only knows
+   `less` / `greater` / `approx` / `equal` (plus the new PR-N1 noise-aware fail-closed
+   message). For `variance-ratio` it throws `ArgumentException`, which the
+   pipeline catches and translates to `SystemMtAssertionResultV2.UnknownType`.
+   The "already typed" `MapVarianceRatio(...)` helper exists in the migration
+   namespace but no caller in the production code path invokes it.
+2. **Launcher does not populate `RoleOutput.Statistical(StdError)`.**
+   `VarianceRatioKernel.Evaluate` (`Catalog/Typed/Runtime/VarianceRatioKernel.cs:11-12`)
+   does `context.GetStatistical(role, metric)` and reads `low.StdError` /
+   `high.StdError`. The launcher's `RoleOutput` is built from a flat scalar
+   `Outputs[metric]` map; there is no surface that promotes
+   `output_parser.k_eff_std` (already emitted by the OpenMC output parser) into
+   a per-role `StdError`.
+3. **Launcher does not populate `ExtraAssertionValues["refinement_factor"]`.**
+   The legacy `AssertionEvaluator.cs:79-91` variance-ratio path requires
+   `ExtraValues["refinement_factor"]`. `SystemMtLauncher.cs:166` always passes
+   `ExtraAssertionValues: null` to `PipelineContext`, so even if the legacy path
+   were taken, the assertion would throw `ArgumentException` immediately.
+
+**Sanity check.** A repo-wide search confirms zero existing `MrBlueprint` rows
+use `AssertionTypeCode: "variance-ratio"`:
+
+```
+grep -rn 'AssertionTypeCode: "variance' MetBench_BLL.Core/  →  no hits
+```
+
+The wiring has never been built end-to-end. The original plan's "no new typed
+predicate is needed for the variance ratio itself" and "assertion_type_code =
+variance-ratio is already typed-mappable (PR #124)" claims are correct **only**
+at the `LegacyAssertionPredicateMapper` layer, not at the launcher / pipeline
+layer.
+
+### Required prerequisite — PR-VR
+
+A separate scoped plan (`docs/superpowers/plans/2026-05-26-variance-ratio-launcher-pipeline-wiring-plan.md`, to be drafted next) covers:
+
+- (a) Pipeline arm: add a `variance-ratio` case to `SystemMtPipeline.EvaluateAssertion`
+  that calls `LegacyAssertionPredicateMapper.MapVarianceRatio(lowSampleRole,
+  highSampleRole, statisticalMetric, sampleRatio, sigmaMultiplier)` and feeds the
+  resulting predicate into the typed dispatcher.
+- (b) Statistical-role population: extend the launcher's source / followup
+  `RoleOutput` construction so `<metric>_std` (or `_stderr` / `_sigma`) outputs from
+  the output parser get attached to the role as `StdError`, not as a scalar metric.
+- (c) `SampleRatio` resolution: pull `factor` from `DefaultParameters` /
+  `parameterOverrides` and wrap it as `ConstantParameterExpression(double.Parse(...))`.
+- (d) (Optional fallback) Populate `ExtraAssertionValues["refinement_factor"]` for
+  the legacy `AssertionEvaluator` path, so behaviour is consistent if any
+  consumer falls back.
+
+PR-VR ships **no** new MR catalog row; it adds the wiring + unit tests + an
+integration test using a fake stderr-emitting output parser. PR-N2's successor
+plan then adds the `openmc-pincell-particle-count-convergence` blueprint, the
+metadata row, and bumps the pinned counts.
+
+### Why this was not caught earlier
+
+The original plan stopped at "MapVarianceRatio exists → it's typed → just add
+the blueprint" without tracing through `SystemMtPipeline.EvaluateAssertion`.
+PR-N1 succeeded because the noise-aware mapper *is* called from `MapScalar`
+(through the throw-message path before PR-N1, and through the new overload
+after) — variance-ratio sits on a different routing surface that was never wired
+into the launcher's runtime.
+
+---
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Add the MR `openmc-pincell-particle-count-convergence` (PWR `Bol-Alg-02`): doubling OpenMC's per-batch particle count must shrink the reported `k_eff_std` by approximately `1/√2`. Asserts via the noise-aware typed scalar predicate that PR-N1 ships, plus the existing `VarianceRatioPredicate` for the σ-ratio check. Closes the long-standing **Blocked** row for PR-Bol-3 in the active plan index.
