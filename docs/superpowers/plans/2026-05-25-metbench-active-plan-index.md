@@ -11,7 +11,7 @@
 | Plan | Status | Scope | Expiry condition |
 |---|---|---|---|
 | `docs/superpowers/plans/2026-05-25-metbench-governed-next-stage-plan.md` | Active | Governance-first next-stage planning; blocks further implementation until the named design ambiguities are resolved | Expires when semantic-convergence, Evidence v2, Windows verification policy, and transition plan are completed and replaced by a new implementation plan |
-| (no active scoped plan) | — | Verification-semantics convergence (PR-A → PR-D), ExecutionEvidence v2 (PR-A0 + PR-C0 + live wiring + evidence-aware reporting via PR #123 / #126), and dormant legacy code mapping (PR #124) are all merged. The ExecutionEvidence v2 design's full lifecycle is closed. Remaining follow-ups (noise-aware typed predicate when a binding adopts the codes; Windows verification policy when a Windows-touching PR is planned; T2 / T3 / T4 / T5 / T6 expansion) are tracked as `docs/status/current.md` §7 steps; no new scoped plan has been opened yet. | A new scoped plan must be registered here before any new cross-cutting System MT work begins. |
+| (no active scoped plan) | — | Verification-semantics convergence (PR-A → PR-D), ExecutionEvidence v2 (PR-A0 + PR-C0 + live wiring + evidence-aware reporting via PR #123 / #126 / #128), dormant legacy code mapping (PR #124), anomaly typed annotation + correctness (PR #130 / #132), and T3 representative-PDE-class expansion (PR #134 elliptic / #136 first-order linear hyperbolic / #138 second-order linear hyperbolic / #140 nonlinear hyperbolic) are all merged. The ExecutionEvidence v2 design's full lifecycle is closed; T3 PDE-class coverage is functionally complete across four representative families. Remaining follow-ups (noise-aware typed predicate when a binding adopts the codes; Windows verification policy when a Windows-touching PR is planned; T2 / T4 / T5 / T6 expansion) are tracked as `docs/status/current.md` §7 steps; no new scoped plan has been opened yet. | A new scoped plan must be registered here before any new cross-cutting System MT work begins. |
 
 Any new coding task must be derived from the active master plan or from a scoped successor plan registered here.
 
@@ -95,7 +95,7 @@ Any new coding task must be derived from the active master plan or from a scoped
 
 ### 验证语义收敛续作 + evidence-aware reporting + anomaly annotation/correctness + T3 expansion（已合并）
 
-- 无独立文件（PR #123 / #124 / #126 / #128 / #130 / #132 / #134 / #136 直接在主线推进）
+- 无独立文件（PR #123 / #124 / #126 / #128 / #130 / #132 / #134 / #136 / #138 / #140 直接在主线推进）
 
 **原因**:
 
@@ -107,7 +107,9 @@ Any new coding task must be derived from the active master plan or from a scoped
 - PR #130 给 `IAnomalyService.RecordAnomalyAsync` 加 optional `string? typedVerificationSummary` 参数，`SystemMtLauncher.RecordAnomalyIfFailedAsync` 把 `PipelineOutcome.TypedVerification` 投影成 `typed=<Status> metric=<Metric> predicate=<id> (<Kind>) residual=… tolerance=…` 一行摘要，写入 `Anomaly.Notes` 与 `anomaly.created` 审计 `detailsJson`。无 typed verification 时 byte-identical to PR-129。
 - PR #132 修正了一个 bug：`Status=SkippedMissingObservable / SkippedNotApplicable / InvalidSpec` 的 typed verification 之前会因 `SystemMtAssertionResultV2.Passed=false` 的 fallback 而被 launcher 错误归类为 Anomaly。`RecordAnomalyIfFailedAsync` 现在对这三种非-Failed 状态早返，避免误报。`Status=Failed` 与遗留非-typed 失败仍生成 Anomaly。
 - PR #134 启动 T3 扩展，加首个椭圆 PDE SUT（`SUT/poisson_1d/`，pure-stdlib Thomas 三对角求解器，无需 venv，云端 CI 可跑），加 `poisson` `EquationMetadata` 和两条 MR（`poisson-source-superposition` m_mono 线性叠加 + `poisson-mesh-richardson` m_conv）。同时**通过演示验证 T1**：新 SUT 接入只改 SUT 文件 + catalog 接线 + 计数测试，未触 Pipeline / Persistence / Reporting / Launcher 类体 / DAL —— 证明 T1 的 CLI runner / Python adapter / catalog provider / launcher facade 已稳定可附加。Inventory 改为 10 SUT / 9 方程 / 19 MR；`EquationKind` enum 不变（poisson → `Other`；APPEND-ONLY 保持，5 反应堆方程仍为 canonical）。
-- PR #136 续 T3 扩展，加首个双曲 PDE SUT（`SUT/advection_1d/`，一阶迎风 FD + 周期边界 + 内部 Courant=0.5 dt 选择，pure-stdlib），加 `advection` `EquationMetadata` 和两条 MR（`advection-amplitude-linearity` m_mono + `advection-mesh-conservation` m_inv via 守恒迎风格式）。再次仅改 SUT 文件 + catalog 接线 + 计数测试，二次确认 T1 by-demonstration 验证。Inventory 改为 11 SUT / 10 方程 / 21 MR；APPEND-ONLY 保持（advection → `Other`）。
+- PR #136 续 T3 扩展，加首个一阶线性双曲 PDE SUT（`SUT/advection_1d/`，一阶迎风 FD + 周期边界 + 内部 Courant=0.5 dt 选择，pure-stdlib），加 `advection` `EquationMetadata` 和两条 MR（`advection-amplitude-linearity` m_mono + `advection-mesh-conservation` m_inv via 守恒迎风格式）。再次仅改 SUT 文件 + catalog 接线 + 计数测试，二次确认 T1 by-demonstration 验证。Inventory 改为 11 SUT / 10 方程 / 21 MR；APPEND-ONLY 保持（advection → `Other`）。
+- PR #138 续 T3 扩展，加首个二阶线性双曲 PDE SUT（`SUT/wave_1d/`，规范 `u_tt = c²·u_xx`，二阶 leapfrog FD + Dirichlet 边界 + 零初始速度 + 内部 Courant=0.5 dt 选择，pure-stdlib），加 `wave` `EquationMetadata` 和两条 MR（`wave-amplitude-linearity` m_mono via 线性 leapfrog + `wave-mesh-energy-convergence` m_conv via L² 不变量 `0.5·∫u² dx`）。三次确认 T1 by-demonstration 验证。Inventory 改为 12 SUT / 11 方程 / 23 MR；APPEND-ONLY 保持（wave → `Other`）。
+- PR #140 续 T3 扩展，加首个非线性 PDE SUT（`SUT/burgers_1d/`，无粘 Burgers `u_t + (u²/2)_x = 0`，守恒 Lax-Friedrichs 通量差分 + 周期边界 + 内部 Courant=0.5 dt 选择，pure-stdlib），加 `burgers` `EquationMetadata` 和两条 MR（`burgers-amplitude-peak-monotone` m_mono via 非线性幅值单调性（LxF 数值耗散使 peak_ratio < 2 但仍严格大）+ `burgers-mesh-conservation` m_inv via 守恒通量差分严格保 ∫u dx）。四次确认 T1 by-demonstration 验证，且跨四类 PDE（椭圆 / 一阶线性双曲 / 二阶线性双曲 / 非线性双曲）。Inventory 改为 13 SUT / 12 方程 / 25 MR；APPEND-ONLY 保持（burgers → `Other`）。T3 代表性 PDE-class 覆盖功能性完成。
 - 后续触发条件（noise-aware 旧码被新增 catalog binding 采用 → 加噪声感知 typed predicate）记录在 `docs/status/current.md` §7。
 
 ---
