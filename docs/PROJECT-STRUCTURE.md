@@ -17,7 +17,7 @@
 | **`MetBench_IDAL/`** | `net8.0` | Anywhere | DAL 接口合约 |
 | **`MetBench_DAL/`** | `net8.0` | Anywhere | LiteDB 持久化：v1 run-result + v2 24-collection schema |
 | **`MetBench_Client/`** | `net8.0-windows7.0` | **Windows only** | WPF UI 应用，入口点；引 `Wpf.Ui` + `CommunityToolkit.Mvvm` + LiveCharts WPF |
-| **`MetBench_SystemMT.Tests/`** | `net8.0` | Anywhere | xUnit + Reqnroll：跨平台事实源测试。当前共享精确代码绿基线见下文：`e839214` = **1043 pass / 0 fail / 0 skip**。 |
+| **`MetBench_SystemMT.Tests/`** | `net8.0` | Anywhere | xUnit + Reqnroll：跨平台事实源测试。当前共享精确代码绿基线见 §4 末尾：`66eb297` (PR #162 PR-A) = **1209 pass / 0 fail / 12 skip / 1221 total** (cloud CI without SciPy / OpenMOC / OpenMC venvs). |
 
 **硬规则**（cloud 与 Windows 端协作）：
 
@@ -27,7 +27,7 @@
 
 ---
 
-## §2 SUT 清单（当前 launcher catalog：15 个）
+## §2 SUT 清单（当前 launcher catalog：16 个 — 15 真实物理 SUT + 1 合成测试 SUT）
 
 | SUT | 目录 | 域 | 算法 / 程序类型 | Runner | Sample / catalog | 接入 PR |
 |---|---|---|---|---|---|---|
@@ -46,6 +46,11 @@
 | **Burgers 1D** | `SUT/burgers_1d/` | PDE (nonlinear hyperbolic) | Pure-stdlib conservative Lax-Friedrichs flux differencing + periodic BC | `burgers_1d_runner.py` | `catalog.json` + sample | PR #140 |
 | **SciPy IVP Lotka-Volterra** | `SUT/scipy_ivp_lotka_volterra/` | ODE (Lotka-Volterra, predator-prey nonlinear) | **External library**: SciPy `solve_ivp` adaptive RK45 (rtol=1e-9 / atol=1e-12) | `scipy_ivp_lotka_volterra.py` | `catalog.json` + sample | T3C-IVP |
 | **SciPy BVP Poisson 1D** | `SUT/scipy_bvp_poisson_1d/` | PDE (elliptic Poisson `-u''=f`, Dirichlet BC) | **External library**: SciPy `solve_bvp` adaptive BVP (tol=1e-9) | `scipy_bvp_poisson_1d.py` | `catalog.json` + sample | T3C-BVP |
+| **_test-csv** (合成测试 SUT) | `SUT/_test_csv/` | **非物理** — `metbench_io` helper 集成回归 | Pure-stdlib echo runner; uses `SUT/_shared/metbench_io/` csv-row helper | `_test_csv_runner.py` | `catalog.json` + sample CSV | PR-A (#162) |
+
+辅助包：
+
+- `SUT/_shared/metbench_io/` —— pure-stdlib Python 包，单点翻译非 JSON 输入/输出 wire format（当前支持 `csv-row` 与 `plain-text`），框架其余部分不感知 wire format。SUT runner 调用 `read_input(path, fmt=...)` / `write_input(...)`，剩下都是普通 dict。PR-A (#162) 引入。
 
 SUT 接入到框架的 hook：
 - Python runner（`<sut>_runner.py`）—— stdin/CLI args 入参，stdout JSON 出参
@@ -71,14 +76,16 @@ SUT 接入到框架的 hook：
 | **Burgers 1D** | `LauncherEndToEndBurgersTests`（端到端覆盖两条 MR；pure-stdlib） | — | — | `burgers-amplitude-peak-monotone` · `burgers-mesh-conservation` |
 | **SciPy IVP Lotka-Volterra** | `LauncherEndToEndScipyIvpLotkaVolterraTests`（`[SkippableFact]`，SciPy 缺失时 clean-skip 干净跳过）· `ScipyIvpLotkaVolterraParserTests` (3) | — | — | `scipy-ivp-lv-prey-growth-monotone` · `scipy-ivp-lv-step-convergence` |
 | **SciPy BVP Poisson 1D** | `LauncherEndToEndScipyBvpPoissonTests`（`[SkippableFact]`，SciPy 缺失时 clean-skip 干净跳过）· `ScipyBvpPoissonParserTests` (3) | — | — | `scipy-bvp-poisson-source-superposition` · `scipy-bvp-poisson-seed-mesh-insensitivity` |
+| **_test-csv** (合成测试 SUT) | `LauncherEndToEndTestCsvTests` (1, 端到端打通 `metbench_io` csv-row helper 经未改动 launcher) · `MetBenchIoHelperTests` (11, helper 单元覆盖 csv-row / plain-text round-trip / 未知格式 fail-closed / json passthrough) | — | — | `csv-roundtrip-identity` |
 | **跨 SUT 通用** | `MrTransformationTests` · `InputGeneratorTests`（PR #119 `GreaterThanAssertionTests` / `LessThanAssertionTests` 已随 W1 类删除；同语义现由 `Catalog/Typed/BinaryComparisonKernelTests` 覆盖） | `SystemLevelCliMt.feature` · `SystemLevelGeneratedFollowup.feature` | 2 | — |
 
-**Launcher end-to-end 测试（按 SUT）**：`LauncherEndToEndOdeTests`（decay_chain / damped_oscillator / lotka_volterra）· `LauncherEndToEndPoissonTests`（PR #134）· `LauncherEndToEndAdvectionTests`（PR #136）· `LauncherEndToEndWaveTests`（PR #138）· `LauncherEndToEndBurgersTests`（PR #140）· `LauncherEndToEndScipyIvpLotkaVolterraTests`（T3C-IVP，`[SkippableFact]`）· `LauncherEndToEndScipyBvpPoissonTests`（T3C-BVP，`[SkippableFact]`）。
+**Launcher end-to-end 测试（按 SUT）**：`LauncherEndToEndOdeTests`（decay_chain / damped_oscillator / lotka_volterra）· `LauncherEndToEndPoissonTests`（PR #134）· `LauncherEndToEndAdvectionTests`（PR #136）· `LauncherEndToEndWaveTests`（PR #138）· `LauncherEndToEndBurgersTests`（PR #140）· `LauncherEndToEndScipyIvpLotkaVolterraTests`（T3C-IVP，`[SkippableFact]`）· `LauncherEndToEndScipyBvpPoissonTests`（T3C-BVP，`[SkippableFact]`）· `LauncherEndToEndTestCsvTests`（PR-A 合成 _test_csv SUT）。
 
-**SUT 系统级 MR 总数（2026-05-26，post-T3C-BVP）**：
-- launcher / manifest catalog：**29** MR-on-SUT 绑定
-- 覆盖方程：**12**
-- 当前结构风险：runtime 已切到 provider-backed catalog，生产 fallback 与 importer 具体类耦合已删除；sample-level evidence 已落第一条可复盘链，但覆盖粒度仍可继续扩展。T3 代表性 PDE-class 覆盖（椭圆 / 一阶线性双曲 / 二阶线性双曲 / 非线性双曲）已通过 PR #134 / #136 / #138 / #140 闭环；T3C-IVP 通过 `scipy-ivp-lotka-volterra` 把 External-solver-pilot 接入路径打通（`LauncherOptions.ScipyPython` + `PythonExecutableKinds.Scipy` + `ManifestMrCatalogProvider` scipy 分支 + `ScipyTestPaths.cs` clean-skip helper，env var `METBENCH_SCIPY_PYTHON`）；T3C-BVP 通过 `scipy-bvp-poisson-1d` 把 BVP/elliptic external-solver 路径打通（复用 T3C-IVP 基础设施，无新框架变更）；进一步 T3 扩展由 next-SUT decision record 决定（见 `docs/status/current.md` §4 与 active plan index）
+**SUT 系统级 MR 总数（2026-05-26，post-PR-A）**：
+- launcher / manifest catalog：**30** MR-on-SUT 绑定 = 29 真实物理 + 1 合成 (`csv-roundtrip-identity`)
+- 覆盖方程：**13** = 12 真实物理 + 1 合成 (`_test_csv`)
+- 真实物理 inventory（排除合成 SUT）：**15 SUT / 12 equations / 29 MRs**，与 T3C-BVP 后一致
+- 当前结构风险：runtime 已切到 provider-backed catalog，生产 fallback 与 importer 具体类耦合已删除；sample-level evidence 已落第一条可复盘链，但覆盖粒度仍可继续扩展。T3 代表性 PDE-class 覆盖（椭圆 / 一阶线性双曲 / 二阶线性双曲 / 非线性双曲）已通过 PR #134 / #136 / #138 / #140 闭环；T3C-IVP 通过 `scipy-ivp-lotka-volterra` 把 External-solver-pilot 接入路径打通（`LauncherOptions.ScipyPython` + `PythonExecutableKinds.Scipy` + `ManifestMrCatalogProvider` scipy 分支 + `ScipyTestPaths.cs` clean-skip helper，env var `METBENCH_SCIPY_PYTHON`）；T3C-BVP 通过 `scipy-bvp-poisson-1d` 把 BVP/elliptic external-solver 路径打通（复用 T3C-IVP 基础设施，无新框架变更）；PR-1（#157）把 `LauncherOptions.RuntimePythons` 通用化为 manifest-driven 解析（新增运行时家族纯配置即可，不再改 `LauncherOptions` 字段）；PR-A（#162）把 SUT I/O wire format 从 JSON 单独扩展到 csv-row / plain-text（`metbench_io` helper）；PR-B（#161）与 PR-2（#159）分别落地 same-equation cross-method differential runner 与 T4-to-T0 discovery binder；进一步 T3 扩展由 next-SUT decision record 决定（见 `docs/status/current.md` §4 与 active plan index）
 
 ---
 
@@ -120,12 +127,16 @@ SUT 接入到框架的 hook：
 | **Schema / Entity** (round-trip + soft-delete + migration) | `MetBench_Domain.V2` | `V2Schema/` | 5 | 9 |
 | **Transformations** (v2 IMRTransformation) | `MetBench_BLL.Discovery.Transformations` | `V2Transformations/` | 3 | 20 |
 | **Typed Semantic Catalog** (typed semantic model + validator + verifier runtime + migration helpers，v1.2 PR-0..PR-10 + review-fix + PR-B/C/D 收敛) | `MetBench_BLL.SystemMT.Catalog.Typed.*` | `SystemMT/Catalog/Typed/` | 41 | 102 |
+| **Differential Runner** (T1 §2.1 element 3 same-equation cross-method differential，PR-B #161) | `MetBench_BLL.SystemMT.Differential.*` | `SystemMT/Differential/` | 1 | 28 |
+| **Discovery → Catalog Binder** (T4-to-T0 fail-closed bridge，PR-2 #159) | `MetBench_BLL.SystemMT.Catalog.Binding.*` | `SystemMT/Catalog/Binding/` | 1 | 24 |
+| **Runtime Environment Resolver** (manifest-driven `python_executable_kind`，PR-1 #157) | `MetBench_BLL.SystemMT.Launcher` (`LauncherOptions.RuntimePythons` + `RuntimeEnvironmentResolutionException`) | `SystemMT/Launcher/RuntimeEnvironmentResolverTests.cs` | 1 | 10 |
+| **metbench_io Python helper** (T1 §2.1 element 2 non-JSON wire format，PR-A #162) | `SUT/_shared/metbench_io/` (Python) | `SystemMT/Shared/MetBenchIoHelperTests.cs` | 1 | 11 |
 | **ColdStart** | — | `ColdStart/` | 1 | 1 |
 
 **测试总数对照**：
-- 当前共享精确 Linux / cloud 绿基线：提交 `5d4dcc7`（PR #119）= **1048 pass / 0 fail / 8 skip / 1056 total**（8 skip 为 OpenMOC / OpenMC 集成测试，未安装 Python venv 时干净跳过，与回归无关）
+- 当前共享精确 Linux / cloud 绿基线：提交 `66eb297`（PR #162 PR-A）= **1209 pass / 0 fail / 12 skip / 1221 total**（12 skip = 8 OpenMOC/OpenMC 未装 venv + 4 SciPy 未装 venv，均通过 `[SkippableFact]` 干净跳过，与回归无关；本地装 SciPy 时为 **1213 pass / 0 fail / 8 skip**）
 - v1.2 迁移 / gate 当前真相层：**44 MR + 4 Property** 已进入 typed catalog 工件、golden fixtures 与 coverage gate
-- 历史参考基线：`e839214`（PR #110）= **1043 pass / 0 fail / 0 skip**（PR-B/C/D 前）；`373bb59` = **961 / 0 / 8 / 969**；`763e067`（PR #93）= **965 / 0 / 0**
+- 历史参考基线：`453e369`（PR #160 docs gate）= 1196 pass；`2f997dd`（PR #161 PR-B differential runner）= 1196 pass；`66eb297`（PR #162 PR-A I/O adapter）= 1209 pass。更早：`5d4dcc7`（PR #119）= **1048 pass / 0 fail / 8 skip / 1056 total**；`e839214`（PR #110）= **1043 pass / 0 fail / 0 skip**（PR-B/C/D 前）；`373bb59` = **961 / 0 / 8 / 969**；`763e067`（PR #93）= **965 / 0 / 0**
 - 当前 Windows WPF 已知旧基线：2026-05-24 在 Parallels Win11 上 `dotnet build MetBench_Client/MetBench_Client.csproj` **0 编译错误**，约 `17.47s`；本轮最新代码回执待补
 - UAT BDD filter（`FullyQualifiedName~UAT`）：**48 Pass / 0 Skip**
 - BDD smoke（Features filter）：**30 Pass / 1 Skip**

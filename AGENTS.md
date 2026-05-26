@@ -278,11 +278,20 @@ launcher catalog，2026-05-22）；MR/程序元信息持久化计划 **P-A + P-C
   `PWR_MR_Analysis_Report.md` 汇总段曾写 43 MR，而明细迁移核对后主线事实是 44 MR。
   后续监控、coverage 分母和 dashboard 都必须以仓库内迁移工件与 gate 为准，不再沿用“43 + 4”的旧表述。
 
+**Stage 8 后续主线交付（v1.2 闭环之后）**：
+
+- ExecutionEvidence v2 全生命周期：PR #121（PR-C0 数据 + 持久化 + recorder） + PR #123（live wiring through pipeline） + PR #126（HTML 报告 evidence-aware） + PR #128（markdown 报告 evidence-aware）+ PR #130（anomaly typed-verification annotation）+ PR #132（anomaly correctness）。
+- T3 representative-PDE-class 扩展闭环：PR #134（Poisson 1D 椭圆）→ PR #136（Advection 1D 一阶线性双曲）→ PR #138（Wave 1D 二阶线性双曲）→ PR #140（Burgers 1D 非线性双曲）。决定 PR #146 / 索引 PR #148。
+- T3C external-solver pilot：PR #149（T3C-IVP scipy-ivp-lotka-volterra）→ PR #150（T3C-BVP scipy-bvp-poisson-1d）→ PR #151（命名 + plateau 措辞 post-merge 修正）。
+- T1 / T4 cloud-side scoped 闭环（PR-0 #154 docs gate）：PR #157（PR-1 T1 manifest-driven runtime envs，`LauncherOptions.RuntimePythons`） + PR #159（PR-2 T4-to-T0 discovery binder，`DiscoveredMrCatalogBinder` gate） + PR #160（docs gate for next pair） + PR #161（PR-B T1 same-equation cross-method differential runner，`IDifferentialTestRunner`） + PR #162（PR-A T1 non-JSON I/O helper + 合成 `_test_csv` test SUT）。当前共享代码绿基线：`66eb297` = **1209 pass / 0 fail / 12 skip** on cloud CI（不装 SciPy）；本地装 SciPy 时 **1213 pass / 0 fail / 8 skip**。
+
 **当前仍未闭环的项**：
 
 - `ExecutionEvidence.SampleTraces` 已开始写入目标字段的 source / transformed / output triples；当前待补的是更细粒度的多变量 / 多路径 trace。
 - `flw≈k·src` 缩放等式 assertion 仍未实现，P1 的 3 条齐次 MR 仍未从 MP_mono 升到 MP_inv。
+- Windows 侧 UI MR CRUD（`docs/superpowers/plans/2026-05-26-t1-ui-mr-crud-windows-vm-plan.md`）仍 Open，待 Windows/VM 启动。
 - Windows 侧对 `e839214` 之后后续新增主线代码的回执，需要按双环境 runbook 持续补记。
+- 噪声感知 typed predicate（`less-noise-aware` / `greater-noise-aware`）尚未实现，因此 PR-Bol-3 (Bol-Alg-02 MC particle count convergence) 与 `csv-roundtrip-identity` 之外的噪声感知 MR 仍被 `LegacyAssertionPredicateMapper` 显式 fail-closed。
 
 **暂缓**（Stage 9+ 候）：BNCT 硼中子放疗、故障注入 V3、论文 writeup。
 
