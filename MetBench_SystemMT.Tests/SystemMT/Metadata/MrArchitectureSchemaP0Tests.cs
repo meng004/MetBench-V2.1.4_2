@@ -47,26 +47,29 @@ public sealed class MrArchitectureSchemaP0Tests : IDisposable
     [Fact]
     public void MetamorphicRelation_roundtrips_new_fields_via_LiteDB()
     {
-        using var db = new LiteDatabase($"Filename={_dbPath + "-mr.db"}");
-        var col = db.GetCollection<MetamorphicRelation>("Mrs");
-        col.EnsureIndex(x => x.IdMR, unique: true);
-
-        var mr = new MetamorphicRelation
+        var dbFile = _dbPath + "-mr.db";
+        using (var db = new LiteDatabase($"Filename={dbFile}"))
         {
-            Code = "MR-TEST-P0",
-            Kind = "system-level",
-            EquationKey = "bateman",
-            ValueShape = "vector",
-        };
-        col.Insert(mr);
+            var col = db.GetCollection<MetamorphicRelation>("Mrs");
+            col.EnsureIndex(x => x.IdMR, unique: true);
 
-        var back = col.FindOne(x => x.Code == "MR-TEST-P0");
-        Assert.NotNull(back);
-        Assert.Equal("bateman", back.EquationKey);
-        Assert.Equal("vector", back.ValueShape);
+            var mr = new MetamorphicRelation
+            {
+                Code = "MR-TEST-P0",
+                Kind = "system-level",
+                EquationKey = "bateman",
+                ValueShape = "vector",
+            };
+            col.Insert(mr);
 
-        File.Delete(_dbPath + "-mr.db");
-        var l = _dbPath + "-mr.db-log";
+            var back = col.FindOne(x => x.Code == "MR-TEST-P0");
+            Assert.NotNull(back);
+            Assert.Equal("bateman", back.EquationKey);
+            Assert.Equal("vector", back.ValueShape);
+        }
+
+        File.Delete(dbFile);
+        var l = dbFile + "-log";
         if (File.Exists(l)) File.Delete(l);
     }
 
