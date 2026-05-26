@@ -13,7 +13,7 @@
 | `docs/superpowers/plans/2026-05-25-metbench-governed-next-stage-plan.md` | Active | Governance-first next-stage planning; blocks further implementation until the named design ambiguities are resolved | Expires when semantic-convergence, Evidence v2, Windows verification policy, and transition plan are completed and replaced by a new implementation plan |
 | `docs/superpowers/plans/2026-05-26-t1-t4-ui-sequenced-execution-plan.md` | Active orchestration plan | Mandatory execution order for PR-0 docs-only gate → PR-1 T1 multi-env → PR-2 T4-to-T0 binder → separate Windows/VM UI MR CRUD plan. Prevents cloud-side BLL work, T4 binder work, and WPF UI work from being mixed into one PR. | Expires when PR-0, PR-1, and PR-2 have merged and a separate UI MR CRUD plan is either registered or explicitly deferred in the status ledger |
 | `docs/superpowers/specs/2026-05-26-t3-coverage-assessment-and-next-sut-decision.md` | Active scoped reference | T3 representative-PDE-class coverage assessment + next-SUT gate. Inventory anchor pre-§5.2: **13 SUT / 12 equations / 25 MRs** after PR #134 (Poisson) / #136 (Advection) / #138 (Wave) / #140 (Burgers). Post-§5.2 IVP: **14 SUT / 12 equations / 27 MRs**. Post-§5.3 BVP: **15 SUT / 12 equations / 29 MRs**. **Pure-stdlib expansion paused**; external-solver-pilot expansion proceeded one candidate at a time under §4 driver #1 through IVP and BVP. §5.1 backlog (MeshGraphNets cylinder-flow surrogate) is **anticipation only**. Any further T3 SUT PR must add a new §5.x decision plus a candidate-specific plan. | Expires only when a newer T3 decision record supersedes it |
-| `docs/superpowers/plans/2026-05-26-t1-manifest-driven-runtime-environments-plan.md` | Active scoped implementation plan | T1 cloud-side scalability fix. Replaces per-runtime hardcoded launcher slots with manifest-driven runtime-key resolution while preserving existing `system` / `openmoc` / `openmc` / `scipy` behavior and skip-safe external dependency tests. Must run before adding the next new runtime family such as FEniCS, FiPy, or surrogate-model venvs. | Expires once the manifest-driven runtime resolver merges and `docs/status/current.md` records T1 multi-env as controlled |
+| `docs/superpowers/plans/2026-05-26-t1-manifest-driven-runtime-environments-plan.md` | Completed (PR-1 merged) | T1 cloud-side scalability fix. `LauncherOptions.RuntimePythons` map + `ResolvePythonExecutable` resolver replaces the per-runtime hardcoded switch. Built-in `system` / `openmoc` / `openmc` / `scipy` behaviour preserved; unknown non-system keys fail closed at resolution time. Adding a new runtime family is now config-only. Status ledger row "T1 multi-env management" moved Open → Controlled. | Already expired (merged); referenced from §3 for historical context |
 | `docs/superpowers/plans/2026-05-26-t4-to-t0-mr-discovery-binder-plan.md` | Queued scoped implementation plan | T4 cloud-side binder. Converts validated discovery candidates into draft T0 System MT catalog assets with provenance and fail-closed validation; must not auto-mutate active `SUT/<sut>/catalog.json`. Execute after T1 multi-env is merged or explicitly waived for the binder PR. | Expires once the binder merges and the status ledger records the discovery-to-catalog boundary as controlled |
 | `docs/superpowers/plans/2026-05-26-t1-ui-mr-crud-windows-vm-plan.md` | Gated Windows/VM implementation plan | UI MR CRUD is a separate T1 usability/adoption blocker. It is not cloud-side because WPF source can be edited in cloud but must be built and visually/functionally verified through Windows SSH/RDP or FlaUI. This plan targets System MT manifest MR CRUD and must not be mixed with PR-1 T1 multi-env or PR-2 T4 binder. | Execute only after explicit approval to start Windows/VM UI work; expires when UI MR CRUD lands and `docs/status/current.md` records it as controlled |
 | PR-Bol-2 (Bol-Alg-01 MOC ray/track convergence on OpenMOC) | Anticipated, not yet started | Reference-convergence MR `Bol-Alg-01 → ErrorMonotonicPredicate` on OpenMOC pin-cell. Depends on existing `ErrorMonotonicPredicate` kernel in typed catalog runtime (delivered by PR-PR-4). Requires new SUT input knob (ray density / track spacing) and adapter; will need its own implementation plan registered here before any code lands. | Expires once a candidate-specific implementation plan is registered and PR-Bol-2 merges |
@@ -77,7 +77,19 @@ Any new coding task must be derived from the active master plan or from a scoped
 - §5.2 decision record 选定的 SciPy `solve_ivp` Lotka-Volterra SUT 已通过 T3C-IVP 合入主线（inventory 13→14 SUT / 25→27 MR）。
 - §5.3 decision record 选定的 SciPy `solve_bvp` Poisson 1D SUT 已通过 T3C-BVP 合入主线（inventory 14→15 SUT / 27→29 MR）。
 - 仍适合用作未来外部求解器候选的实施样板。
-- 但不再代表“下一步做什么”。
+- 但不再代表”下一步做什么”。
+
+### T1 manifest-driven runtime environments（已合并）
+
+- `docs/superpowers/plans/2026-05-26-t1-manifest-driven-runtime-environments-plan.md`（PR-1，已合并）
+
+**原因**:
+
+- `LauncherOptions.RuntimePythons` + `ResolvePythonExecutable` 已替换原先逐 venv 字段的硬编码槽位；`ManifestMrCatalogProvider` 改为单点 resolver 调用。
+- 内置 `system`/`openmoc`/`openmc`/`scipy` 行为保留；未知非 system 键在 resolver 处 fail-closed 并附带可定位的诊断信息。
+- 新增 runtime family（FEniCS/FiPy/torch-surrogate 等）从此为纯配置变更，无需改 `LauncherOptions` 字段或 `PythonExecutableKinds.All`。
+- 状态账本”T1 multi-env management”行已由 Open 改为 Controlled。
+- 下一个仍排队的 cloud-side 范围计划是 `2026-05-26-t4-to-t0-mr-discovery-binder-plan.md`（队列态，依赖本 PR 已合并或显式 waiver）。
 
 ### 阶段性修复计划
 

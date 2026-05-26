@@ -309,4 +309,115 @@ public sealed class ManifestMrCatalogProviderTests : System.IDisposable
         Assert.Single(entries);
         Assert.Equal("test-mr-1", entries[0].Mr.Id);
     }
+
+    // ---- PR-1 T1 manifest-driven runtime environments ------------------------------------
+    // New manifest python_executable_kind values must resolve through
+    // LauncherOptions.RuntimePythons without growing per-runtime fields. Unknown non-system
+    // keys must fail closed at manifest-load time with a diagnostic naming the missing key.
+
+    private const string FutureRuntimeManifest = """
+        {
+          "sut_name": "fenics-demo",
+          "program": {
+            "program_name": "fenics-demo",
+            "runner_script_relative_path": "runner.py",
+            "input_parser_script_relative_path": "in_parser.py",
+            "output_parser_script_relative_path": "out_parser.py",
+            "input_adapter_script_relative_path": "in_adapter.py",
+            "output_adapter_script_relative_path": "out_adapter.py",
+            "python_executable_kind": "fenics"
+          },
+          "mrs": [
+            {
+              "mr_id": "fenics-demo-mr",
+              "sut_name": "fenics-demo",
+              "display_name": "FEniCS demo MR",
+              "description": "Future-runtime probe MR.",
+              "mr_family": "Future.Runtime.Probe",
+              "transformation_name": "ScaleField",
+              "assertion_type_code": "greater",
+              "assertion_name": "GreaterThan",
+              "value_name": "y",
+              "default_parameters": { "factor": "2" },
+              "transform_steps": [
+                { "transformation_name": "ScaleField", "target_field_path": "/x" }
+              ],
+              "sample_case_relative_path": "sample/case.json",
+              "work_root_name": "MetBenchFenicsDemo",
+              "timeout_seconds": 30
+            }
+          ]
+        }
+        """;
+
+    [Fact]
+    public void Load_resolves_future_runtime_key_through_RuntimePythons_map()
+    {
+        WriteManifest("fenics_demo_dir", FutureRuntimeManifest);
+
+        var opts = new LauncherOptions(
+            SutRoot: _tmpRoot,
+            SystemPython: "python3",
+            OpenMocPython: "python3",
+            RuntimePythons: new Dictionary<string, string>
+            {
+                ["fenics"] = "/venv/fenics/bin/python",
+            });
+
+        var entries = new ManifestMrCatalogProvider(opts).Load();
+        var entry = Assert.Single(entries);
+        Assert.Equal("/venv/fenics/bin/python", entry.PythonExecutable);
+    }
+
+    [Fact]
+    public void Load_fails_closed_when_manifest_runtime_key_is_unknown_and_unmapped()
+    {
+        WriteManifest("fenics_demo_dir", FutureRuntimeManifest);
+
+        // No RuntimePythons entry for "fenics", and "fenics" is not a known compat key.
+        var opts = new LauncherOptions(
+            SutRoot: _tmpRoot,
+            SystemPython: "python3",
+            OpenMocPython: "python3");
+
+        var ex = Assert.Throws<RuntimeEnvironmentResolutionException>(() => new ManifestMrCatalogProvider(opts).Load());
+        Assert.Contains("fenics", ex.Message, System.StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Load_routes_legacy_openmoc_runtime_key_to_OpenMocPython_when_no_map_entry()
+    {
+        var json = ValidSingleMrManifest.Replace(
+            "\"python_executable_kind\": \"system\"",
+            "\"python_executable_kind\": \"openmoc\"");
+        WriteManifest("openmoc_compat_dir", json);
+
+        var opts = new LauncherOptions(
+            SutRoot: _tmpRoot,
+            SystemPython: "python3",
+            OpenMocPython: "/legacy/openmoc/bin/python");
+
+        var entries = new ManifestMrCatalogProvider(opts).Load();
+        var entry = Assert.Single(entries);
+        Assert.Equal("/legacy/openmoc/bin/python", entry.PythonExecutable);
+    }
+
+    [Fact]
+    public void Load_routes_legacy_scipy_runtime_key_to_ScipyPython_when_no_map_entry()
+    {
+        var json = ValidSingleMrManifest.Replace(
+            "\"python_executable_kind\": \"system\"",
+            "\"python_executable_kind\": \"scipy\"");
+        WriteManifest("scipy_compat_dir", json);
+
+        var opts = new LauncherOptions(
+            SutRoot: _tmpRoot,
+            SystemPython: "python3",
+            OpenMocPython: "python3",
+            ScipyPython: "/venv/scipy/bin/python");
+
+        var entries = new ManifestMrCatalogProvider(opts).Load();
+        var entry = Assert.Single(entries);
+        Assert.Equal("/venv/scipy/bin/python", entry.PythonExecutable);
+    }
 }
