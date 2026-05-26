@@ -73,7 +73,7 @@
       "sut_name": "openmc",
       "display_name": "OpenMC pin-cell — RefineParticles (k_eff_std ~ 1/√factor)",
       "description": "Same physical input on both sides; the follow-up case multiplies OpenMC's `particles` count by factor > 1. By the Monte-Carlo 1/√N sampling law the reported k_eff_std must shrink to ~ 1/√factor of the source value. The variance-ratio assertion permits a (1 + ToleranceRel) relative slack above the expected ratio to absorb finite-sample noise.",
-      "mr_family": "NeutronTransport.Sampling.ParticleCount",
+      "mr_family": "NeutronTransport.Convergence.ParticleCount",
       "transformation_name": "ScaleField",
       "assertion_type_code": "variance-ratio",
       "assertion_name": "VarianceRatio",

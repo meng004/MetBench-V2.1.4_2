@@ -179,8 +179,8 @@ public sealed class LauncherCatalogV2ImporterTests
         Assert.Equal("launcher.catalog.import", log.Action);
         Assert.Equal("launcher-import", log.Actor);
         Assert.Contains("applicationsCreated", log.DetailsJson);
-        Assert.Contains("\"mrsCreated\":30", log.DetailsJson);
-        Assert.Contains("\"bindingsCreated\":30", log.DetailsJson);
+        Assert.Contains("\"mrsCreated\":31", log.DetailsJson);
+        Assert.Contains("\"bindingsCreated\":31", log.DetailsJson);
     }
 
     [Fact]

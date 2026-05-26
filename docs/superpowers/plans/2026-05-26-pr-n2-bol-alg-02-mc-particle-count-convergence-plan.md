@@ -48,7 +48,7 @@ It **may** (and will):
 
 **Q3 — AssertionName display string.** `"VarianceRatio"` (PascalCase, parallels existing `"LessThan"` / `"Approximately"` display names on sibling rows). This is a UI label, not a dispatch key — the dispatch key is `AssertionTypeCode: "variance-ratio"`.
 
-**Q4 — MrFamily tag.** `"NeutronTransport.Sampling.ParticleCount"` — sits alongside the existing `"NeutronTransport.Scaling.SigmaA"` / `"NeutronTransport.Scaling.NuSigmaF"` family naming convention. Distinct family axis (sampling vs scaling), so report aggregation groups it correctly.
+**Q4 — MrFamily tag.** `"NeutronTransport.Convergence.ParticleCount"` — sits alongside the existing `"NeutronTransport.Scaling.SigmaA"` / `"NeutronTransport.Scaling.NuSigmaF"` family naming convention. Distinct family axis (sampling vs scaling), so report aggregation groups it correctly.
 
 **Q5 — Skip behaviour on CI.** Uses `SkippableFact` gated on `OpenMcTestPaths.OpenMcImportable()`. Ubuntu CI ships without OpenMC → the test skips, contributing `+0 pass / +0 fail / +1 skip` to the suite baseline. Local + Windows + Parallels VM runs with `METBENCH_OPENMC_PYTHON` set → the test executes and runs the launcher end-to-end.
 
@@ -116,7 +116,7 @@ yield return new MrBlueprint(
             "依 1/√N 抽样定律，期望 k_eff 的报告 std error 收缩到 1/√factor。" +
             "采用 variance-ratio 断言：" +
             "k_eff_std(flw) ≤ k_eff_std(src) / √factor × (1 + ToleranceRel)。",
-        MrFamily: "NeutronTransport.Sampling.ParticleCount"),
+        MrFamily: "NeutronTransport.Convergence.ParticleCount"),
     SampleCaseRelativePath: Path.Combine("openmc", "sample", "pincell.json"),
     RunnerScriptPath: Path.Combine(options.SutRoot, "openmc", "openmc_runner.py"),
     InputAdapterScriptPath: Path.Combine(options.SutRoot, "openmc", "openmc_input_adapter_refine_particles.py"),
@@ -283,4 +283,4 @@ Add a new §3 row "Particle-count convergence MR (Bol-Alg-02)": "Controlled — 
 ## Notes for Future Successors
 
 - If the OpenMC `k_eff_std` ever proves noisier than expected and the test flakes, **do not widen ToleranceRel silently**. Reproduce locally, examine the actual ratio, and either (a) increase `particles` baseline in `pincell.json` (improves SNR symmetrically), or (b) raise ToleranceRel with a documented rationale and commit message explaining the Monte-Carlo noise floor for this specific case.
-- If a second MC SUT (e.g. an OpenMC criticality benchmark) joins the catalog later and reuses variance-ratio, the `MrFamily` tag should be reused (`NeutronTransport.Sampling.ParticleCount`) so the Coverage report groups them.
+- If a second MC SUT (e.g. an OpenMC criticality benchmark) joins the catalog later and reuses variance-ratio, the `MrFamily` tag should be reused (`NeutronTransport.Convergence.ParticleCount`) so the Coverage report groups them.

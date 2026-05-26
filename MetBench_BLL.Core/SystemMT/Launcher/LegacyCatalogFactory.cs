@@ -137,7 +137,7 @@ internal static class LegacyCatalogFactory
                     "reported k_eff_std must shrink to ~ 1/√factor of the source value. The " +
                     "variance-ratio assertion permits a (1 + ToleranceRel) relative slack above " +
                     "the expected ratio to absorb finite-sample noise.",
-                MrFamily: "NeutronTransport.Sampling.ParticleCount"),
+                MrFamily: "NeutronTransport.Convergence.ParticleCount"),
             SampleCaseRelativePath: Path.Combine("openmc", "sample", "pincell.json"),
             RunnerScriptPath: Path.Combine(options.SutRoot, "openmc", "openmc_runner.py"),
             InputAdapterScriptPath: Path.Combine(options.SutRoot, "openmc", "openmc_input_adapter_refine_particles.py"),

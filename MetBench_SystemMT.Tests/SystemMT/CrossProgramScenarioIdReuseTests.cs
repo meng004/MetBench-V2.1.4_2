@@ -55,27 +55,44 @@ public sealed class CrossProgramScenarioIdReuseTests
     [Fact]
     public void Feature_transformations_match_single_program_catalog_transformations()
     {
-        // Both single-program catalogs are expected to declare ScaleNuSigmaF and ScaleFuelSigmaA
-        // for their respective MR ids. The cross-program feature must reuse these names verbatim;
-        // any drift would mean cross-program tests exercise a different MR than single-program tests.
+        // Cross-program parity contract: OpenMOC and OpenMC must declare *the same*
+        // TransformationName for the *cross-program MRs* (nu-sigma-f, sigma-a). Each catalog
+        // may additionally declare program-specific MRs (e.g. OpenMC's PR-N2 / Bol-Alg-02
+        // particle-count-convergence MR has no OpenMOC counterpart because OpenMOC is
+        // deterministic). Compare the cross-program subset, not the whole catalog.
         var openmoc = LoadCatalog("openmoc");
         var openmc = LoadCatalog("openmc");
 
-        var openmocTransformations = openmoc.Mrs
+        // Cross-program MRs are identified by ID stem (everything after the SUT-name prefix).
+        // Both catalogs must contain the same set of stems for the cross-program subset; the
+        // intersection is what the cross-program BDD feature exercises.
+        var openmocStems = openmoc.Mrs.Select(m => StripSutPrefix(m.MrId, "openmoc")).ToHashSet(StringComparer.Ordinal);
+        var openmcStems = openmc.Mrs.Select(m => StripSutPrefix(m.MrId, "openmc")).ToHashSet(StringComparer.Ordinal);
+        var crossProgramStems = openmocStems.Intersect(openmcStems, StringComparer.Ordinal).ToHashSet(StringComparer.Ordinal);
+
+        var openmocCrossTransformations = openmoc.Mrs
+            .Where(m => crossProgramStems.Contains(StripSutPrefix(m.MrId, "openmoc")))
             .Select(m => m.TransformationName)
             .OrderBy(n => n, StringComparer.Ordinal)
             .ToArray();
-        var openmcTransformations = openmc.Mrs
+        var openmcCrossTransformations = openmc.Mrs
+            .Where(m => crossProgramStems.Contains(StripSutPrefix(m.MrId, "openmc")))
             .Select(m => m.TransformationName)
             .OrderBy(n => n, StringComparer.Ordinal)
             .ToArray();
 
-        Assert.Equal(openmocTransformations, openmcTransformations);
-        Assert.Equal(new[] { "ScaleFuelSigmaA", "ScaleNuSigmaF" }, openmocTransformations);
+        Assert.Equal(openmocCrossTransformations, openmcCrossTransformations);
+        Assert.Equal(new[] { "ScaleFuelSigmaA", "ScaleNuSigmaF" }, openmocCrossTransformations);
 
         var feature = FeatureSource();
         Assert.Contains("\"ScaleNuSigmaF\"", feature);
         Assert.Contains("\"ScaleFuelSigmaA\"", feature);
+    }
+
+    private static string StripSutPrefix(string mrId, string sutName)
+    {
+        var prefix = sutName + "-";
+        return mrId.StartsWith(prefix, StringComparison.Ordinal) ? mrId.Substring(prefix.Length) : mrId;
     }
 
     [Fact]
