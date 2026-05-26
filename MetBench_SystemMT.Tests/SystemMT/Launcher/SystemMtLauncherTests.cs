@@ -457,6 +457,34 @@ public sealed class SystemMtLauncherTests
     }
 
     [Fact]
+    public async Task ListAvailableAsync_exposes_four_single_program_boltzmann_mrs_with_expected_program_types()
+    {
+        // Categorical (set-based) assertion that complements the positional-index test
+        // `ListAvailableAsync_returns_known_scenarios_in_id_order`. The positional test pins
+        // ordering and breaks loudly when SUTs are added/removed; this one survives ordering
+        // changes but guards that the 4 single-program Boltzmann MR ids remain discoverable.
+        var descriptors = await _launcher.ListAvailableAsync();
+
+        var boltzmannIds = new[]
+        {
+            "openmc-pincell-nu-sigma-f",
+            "openmc-pincell-sigma-a",
+            "openmoc-pincell-nu-sigma-f",
+            "openmoc-pincell-sigma-a",
+        };
+
+        var bySut = descriptors
+            .Where(d => boltzmannIds.Contains(d.Id, StringComparer.Ordinal))
+            .ToDictionary(d => d.Id, d => d.SutName);
+
+        Assert.Equal(4, bySut.Count);
+        Assert.Equal("openmc", bySut["openmc-pincell-nu-sigma-f"]);
+        Assert.Equal("openmc", bySut["openmc-pincell-sigma-a"]);
+        Assert.Equal("openmoc", bySut["openmoc-pincell-nu-sigma-f"]);
+        Assert.Equal("openmoc", bySut["openmoc-pincell-sigma-a"]);
+    }
+
+    [Fact]
     public async Task ListAvailableAsync_openmoc_sigma_a_descriptor_has_expected_metadata()
     {
         var descriptors = await _launcher.ListAvailableAsync();
