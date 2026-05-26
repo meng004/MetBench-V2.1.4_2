@@ -405,6 +405,66 @@ internal static class LegacyCatalogFactory
             EquationKey: "lotka-volterra",
             Tolerance: new AssertionTolerance(ToleranceRel: 1e-3, ToleranceAbs: 1e-6));
 
+        // T3C-BVP: SciPy `solve_bvp`-backed 1D Poisson (second external-library-dependent SUT).
+        // Same equation `poisson` re-used; SUT id is `scipy-bvp-poisson-1d`.
+        // Uses options.EffectiveScipyPython (env METBENCH_SCIPY_PYTHON; falls back to SystemPython).
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "scipy-bvp-poisson-source-superposition",
+                DisplayName: "SciPy BVP 1D Poisson — ScaleSource (linearity)",
+                SutName: "scipy-bvp-poisson-1d",
+                TransformationName: "ScaleField",
+                AssertionName: "GreaterThan",
+                ValueName: "u_max",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Superposition / linearity MP_mono: the 1D Poisson equation -u'' = f is " +
+                    "linear in the source f. Scaling f by factor > 1 must strictly increase " +
+                    "the peak amplitude u_max — analytically by exactly the same factor — " +
+                    "even when the integrator is SciPy's adaptive solve_bvp.",
+                MrFamily: "ScipyBvp.Poisson.Scaling.Source"),
+            SampleCaseRelativePath: Path.Combine("scipy_bvp_poisson_1d", "sample", "standard.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "scipy_bvp_poisson_1d", "scipy_bvp_poisson_1d.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "scipy_bvp_poisson_1d", "scipy_bvp_poisson_1d_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "scipy_bvp_poisson_1d", "scipy_bvp_poisson_1d_output_parser.py"),
+            PythonExecutable: options.EffectiveScipyPython,
+            WorkRootName: "MetBenchScipyBvpPoisson1d",
+            Timeout: TimeSpan.FromSeconds(120),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "scipy_bvp_poisson_1d", "scipy_bvp_poisson_1d_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "scipy_bvp_poisson_1d", "scipy_bvp_poisson_1d_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/source/strength") },
+            AssertionTypeCode: "greater",
+            EquationKey: "poisson");
+
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "scipy-bvp-poisson-mesh-richardson",
+                DisplayName: "SciPy BVP 1D Poisson — InitialMeshRefinement (adaptive-BVP convergence)",
+                SutName: "scipy-bvp-poisson-1d",
+                TransformationName: "ScaleField",
+                AssertionName: "ApproxEqual",
+                ValueName: "u_max",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "SciPy solve_bvp adaptively refines its own mesh until residual is below " +
+                    "tolerance; the user-supplied num_points only seeds the initial mesh. " +
+                    "Doubling the seed num_points must leave u_max within tolerance because " +
+                    "both runs converge to the same continuous solution u = f·L²/8 plateau.",
+                MrFamily: "ScipyBvp.Poisson.Convergence.SeedMesh"),
+            SampleCaseRelativePath: Path.Combine("scipy_bvp_poisson_1d", "sample", "standard.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "scipy_bvp_poisson_1d", "scipy_bvp_poisson_1d.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "scipy_bvp_poisson_1d", "scipy_bvp_poisson_1d_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "scipy_bvp_poisson_1d", "scipy_bvp_poisson_1d_output_parser.py"),
+            PythonExecutable: options.EffectiveScipyPython,
+            WorkRootName: "MetBenchScipyBvpPoisson1d",
+            Timeout: TimeSpan.FromSeconds(120),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "scipy_bvp_poisson_1d", "scipy_bvp_poisson_1d_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "scipy_bvp_poisson_1d", "scipy_bvp_poisson_1d_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/geometry/num_points") },
+            AssertionTypeCode: "approx",
+            EquationKey: "poisson",
+            Tolerance: new AssertionTolerance(ToleranceRel: 1e-3, ToleranceAbs: 1e-6));
+
         yield return new MrBlueprint(
             new MrSummary(
                 Id: "projectile-scale-v0",

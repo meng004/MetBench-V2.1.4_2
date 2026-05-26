@@ -47,18 +47,18 @@ public sealed class SystemMtBootstrapTests
 
         var result = await SystemMtBootstrap.SeedCatalogsAsync(_meta, importer);
 
-        // metadata seed: 12 equations + 27 MRs（T3 Burgers 1D 后 12eq/25MR；
-        // T3C-IVP scipy-ivp-lotka-volterra 再加 +0 equation +2 MR = 12eq/27MR）
+        // metadata seed: 12 equations + 29 MRs（T3C-IVP 后 12eq/27MR；
+        // T3C-BVP scipy-bvp-poisson-1d 再加 +0 equation +2 MR = 12eq/29MR）
         Assert.Equal(12, result.EquationsSeeded);
-        Assert.Equal(27, result.MrsSeeded);
+        Assert.Equal(29, result.MrsSeeded);
         Assert.Equal(12, (await _meta.ListEquationsAsync()).Count);
-        Assert.Equal(27, (await _meta.ListMrsAsync()).Count);
+        Assert.Equal(29, (await _meta.ListMrsAsync()).Count);
 
-        // entity import: 14 SUT + 27 MR + 27 binding
+        // entity import: 15 SUT + 29 MR + 29 binding
         Assert.NotNull(result.ImportSummary);
-        Assert.Equal(14, result.ImportSummary!.ApplicationsCreated);
-        Assert.Equal(27, result.ImportSummary.MrsCreated);
-        Assert.Equal(27, result.ImportSummary.BindingsCreated);
+        Assert.Equal(15, result.ImportSummary!.ApplicationsCreated);
+        Assert.Equal(29, result.ImportSummary.MrsCreated);
+        Assert.Equal(29, result.ImportSummary.BindingsCreated);
     }
 
     [Fact]
@@ -69,15 +69,15 @@ public sealed class SystemMtBootstrapTests
         await SystemMtBootstrap.SeedCatalogsAsync(_meta, importer);
         var second = await SystemMtBootstrap.SeedCatalogsAsync(_meta, importer);
 
-        // metadata 仍是 12/27（upsert 而非追加）
+        // metadata 仍是 12/29（upsert 而非追加）
         Assert.Equal(12, (await _meta.ListEquationsAsync()).Count);
-        Assert.Equal(27, (await _meta.ListMrsAsync()).Count);
+        Assert.Equal(29, (await _meta.ListMrsAsync()).Count);
         // entity 第二次 created=0, existing 显示原有计数
         Assert.NotNull(second.ImportSummary);
         Assert.Equal(0, second.ImportSummary!.ApplicationsCreated);
-        Assert.Equal(14, second.ImportSummary.ApplicationsExisting);
+        Assert.Equal(15, second.ImportSummary.ApplicationsExisting);
         Assert.Equal(0, second.ImportSummary.MrsCreated);
-        Assert.Equal(27, second.ImportSummary.MrsExisting);
+        Assert.Equal(29, second.ImportSummary.MrsExisting);
     }
 
     [Fact]
@@ -90,7 +90,7 @@ public sealed class SystemMtBootstrapTests
         Assert.Equal(0, result.EquationsSeeded);
         Assert.Equal(0, result.MrsSeeded);
         Assert.NotNull(result.ImportSummary);
-        Assert.Equal(14, result.ImportSummary!.ApplicationsCreated);
+        Assert.Equal(15, result.ImportSummary!.ApplicationsCreated);
     }
 
     [Fact]
@@ -99,7 +99,7 @@ public sealed class SystemMtBootstrapTests
         var result = await SystemMtBootstrap.SeedCatalogsAsync(_meta, launcherImporter: null);
 
         Assert.Equal(12, result.EquationsSeeded);
-        Assert.Equal(27, result.MrsSeeded);
+        Assert.Equal(29, result.MrsSeeded);
         Assert.Null(result.ImportSummary);
         Assert.Null(result.V3MigrationSummary);
         // entity 表未被改
@@ -118,9 +118,9 @@ public sealed class SystemMtBootstrapTests
         var result = await SystemMtBootstrap.SeedCatalogsAsync(_meta, importer, v3Ctx);
 
         Assert.NotNull(result.V3MigrationSummary);
-        // 全部 27 system-level MR 应投影到 V3
-        Assert.Equal(27, result.V3MigrationSummary!.Created);
-        Assert.Equal(27, v3.Data.Count);
+        // 全部 29 system-level MR 应投影到 V3
+        Assert.Equal(29, result.V3MigrationSummary!.Created);
+        Assert.Equal(29, v3.Data.Count);
         // 关键修复验证：EquationKey 现在能正确传到 V3
         Assert.Equal(EquationKind.Bateman,
             v3.Data.Single(m => m.MrCode == "bateman-mass-conservation").Equation);

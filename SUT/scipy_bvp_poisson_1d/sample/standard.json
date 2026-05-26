@@ -1,0 +1,9 @@
+{
+  "geometry": {
+    "length":     1.0,
+    "num_points": 101
+  },
+  "source": {
+    "strength": 1.0
+  }
+}
