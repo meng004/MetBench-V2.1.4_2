@@ -85,6 +85,12 @@ namespace MetBench_Client.ViewModels
             },
                      new NavigationViewItem()
             {
+                Content = "System MT MR Catalog",
+                Icon = new SymbolIcon { Symbol = SymbolRegular.DocumentQueueMultiple24 },
+                TargetPageType = typeof(Views.Pages.SystemMtMrCatalogPage)
+            },
+                     new NavigationViewItem()
+            {
                 Content = "Anomalies",
                 Icon = new SymbolIcon { Symbol = SymbolRegular.Warning24 },
                 TargetPageType = typeof(Views.Pages.AnomalyListPage)

@@ -1,0 +1,286 @@
+<Page
+    x:Class="MetBench_Client.Views.Pages.SystemMtMrCatalogPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:MetBench_Client.Views.Pages"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="SystemMtMrCatalogPage"
+    d:DataContext="{d:DesignInstance local:SystemMtMrCatalogPage, IsDesignTimeCreatable=False}"
+    d:DesignHeight="720"
+    d:DesignWidth="1180"
+    ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+    ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    AutomationProperties.AutomationId="SystemMtMrCatalogPage"
+    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    mc:Ignorable="d">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock FontSize="22" FontWeight="Medium" Text="System MT MR Catalog"/>
+            <TextBlock
+                Margin="0,4,0,0"
+                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                Text="Edit manifest-backed System MT MR bindings. Validation must pass before save."/>
+        </StackPanel>
+
+        <Border
+            Grid.Row="1"
+            Margin="0,0,0,12"
+            Padding="14"
+            BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="4">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock FontWeight="SemiBold" Text="Manifest"/>
+                    <ComboBox
+                        x:Name="ComboBox_SystemMtManifest"
+                        Margin="0,4,0,0"
+                        AutomationProperties.AutomationId="ComboBox_SystemMtManifest"
+                        DisplayMemberPath="SutId"
+                        ItemsSource="{Binding ViewModel.Manifests, Mode=OneWay}"
+                        SelectedItem="{Binding ViewModel.SelectedManifest, Mode=TwoWay}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Margin="12,22,0,0" Orientation="Horizontal">
+                    <ui:Button
+                        Margin="0,0,8,0"
+                        Command="{Binding ViewModel.RefreshManifestsCommand, Mode=OneWay}"
+                        Content="Reload"/>
+                    <ui:Button
+                        x:Name="Button_NewMrDraft"
+                        AutomationProperties.AutomationId="Button_NewMrDraft"
+                        Command="{Binding ViewModel.NewMrDraftCommand, Mode=OneWay}"
+                        Content="New MR draft"/>
+                </StackPanel>
+
+                <TextBlock
+                    x:Name="TextBlock_SystemMtMrCatalogStatus"
+                    Grid.Column="2"
+                    Margin="16,22,0,0"
+                    AutomationProperties.AutomationId="TextBlock_SystemMtMrCatalogStatus"
+                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                    Text="{Binding ViewModel.StatusMessage, Mode=OneWay}"
+                    TextWrapping="Wrap"/>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="420"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border
+                Grid.Column="0"
+                BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="4">
+                <ui:DataGrid
+                    x:Name="DataGrid_SystemMtMrBindings"
+                    AutomationProperties.AutomationId="DataGrid_SystemMtMrBindings"
+                    AutoGenerateColumns="False"
+                    IsReadOnly="True"
+                    ItemsSource="{Binding ViewModel.MrBindings, Mode=OneWay}"
+                    SelectedItem="{Binding ViewModel.SelectedDraft, Mode=TwoWay}">
+                    <ui:DataGrid.Columns>
+                        <DataGridTextColumn Width="160" Binding="{Binding MrId}" Header="MR ID"/>
+                        <DataGridTextColumn Width="140" Binding="{Binding AssertionTypeCode}" Header="Assertion"/>
+                        <DataGridTextColumn Width="*" Binding="{Binding ValueName}" Header="Value"/>
+                    </ui:DataGrid.Columns>
+                </ui:DataGrid>
+            </Border>
+
+            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+                <Border
+                    Padding="14"
+                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="160"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="160"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="MR ID"/>
+                        <ui:TextBox
+                            x:Name="TextBox_MrId"
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Margin="0,0,12,8"
+                            AutomationProperties.AutomationId="TextBox_MrId"
+                            Text="{Binding ViewModel.SelectedDraft.MrId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="0" Grid.Column="2" Margin="0,0,8,8" VerticalAlignment="Center" Text="Display name"/>
+                        <ui:TextBox
+                            x:Name="TextBox_DisplayName"
+                            Grid.Row="0"
+                            Grid.Column="3"
+                            Margin="0,0,0,8"
+                            AutomationProperties.AutomationId="TextBox_DisplayName"
+                            Text="{Binding ViewModel.SelectedDraft.DisplayName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Description"/>
+                        <ui:TextBox
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Grid.ColumnSpan="3"
+                            Margin="0,0,0,8"
+                            Text="{Binding ViewModel.SelectedDraft.Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Transformation"/>
+                        <ui:TextBox
+                            x:Name="TextBox_TransformationName"
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Margin="0,0,12,8"
+                            AutomationProperties.AutomationId="TextBox_TransformationName"
+                            Text="{Binding ViewModel.SelectedDraft.TransformationName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="2" Margin="0,0,8,8" VerticalAlignment="Center" Text="Assertion"/>
+                        <ComboBox
+                            x:Name="ComboBox_AssertionTypeCode"
+                            Grid.Row="2"
+                            Grid.Column="3"
+                            Margin="0,0,0,8"
+                            AutomationProperties.AutomationId="ComboBox_AssertionTypeCode"
+                            ItemsSource="{Binding ViewModel.AvailableAssertionTypeCodes, Mode=OneWay}"
+                            SelectedItem="{Binding ViewModel.SelectedDraft.AssertionTypeCode, Mode=TwoWay}"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Assertion name"/>
+                        <ui:TextBox
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            Margin="0,0,12,8"
+                            Text="{Binding ViewModel.SelectedDraft.AssertionName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="2" Margin="0,0,8,8" VerticalAlignment="Center" Text="Value name"/>
+                        <ui:TextBox
+                            x:Name="TextBox_ValueName"
+                            Grid.Row="3"
+                            Grid.Column="3"
+                            Margin="0,0,0,8"
+                            AutomationProperties.AutomationId="TextBox_ValueName"
+                            Text="{Binding ViewModel.SelectedDraft.ValueName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Equation key"/>
+                        <ui:TextBox
+                            x:Name="TextBox_EquationKey"
+                            Grid.Row="4"
+                            Grid.Column="1"
+                            Margin="0,0,12,8"
+                            AutomationProperties.AutomationId="TextBox_EquationKey"
+                            Text="{Binding ViewModel.SelectedDraft.EquationKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="4" Grid.Column="2" Margin="0,0,8,8" VerticalAlignment="Center" Text="Meta pattern"/>
+                        <ui:TextBox
+                            x:Name="TextBox_MetaPattern"
+                            Grid.Row="4"
+                            Grid.Column="3"
+                            Margin="0,0,0,8"
+                            AutomationProperties.AutomationId="TextBox_MetaPattern"
+                            Text="{Binding ViewModel.SelectedDraft.MetaPattern, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Sample case"/>
+                        <ui:TextBox
+                            x:Name="TextBox_SampleCaseRelativePath"
+                            Grid.Row="5"
+                            Grid.Column="1"
+                            Margin="0,0,12,8"
+                            AutomationProperties.AutomationId="TextBox_SampleCaseRelativePath"
+                            Text="{Binding ViewModel.SelectedDraft.SampleCaseRelativePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="5" Grid.Column="2" Margin="0,0,8,8" VerticalAlignment="Center" Text="Work root"/>
+                        <ui:TextBox
+                            x:Name="TextBox_WorkRootName"
+                            Grid.Row="5"
+                            Grid.Column="3"
+                            Margin="0,0,0,8"
+                            AutomationProperties.AutomationId="TextBox_WorkRootName"
+                            Text="{Binding ViewModel.SelectedDraft.WorkRootName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="6" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Timeout seconds"/>
+                        <ui:TextBox
+                            x:Name="NumberBox_TimeoutSeconds"
+                            Grid.Row="6"
+                            Grid.Column="1"
+                            Margin="0,0,12,8"
+                            AutomationProperties.AutomationId="NumberBox_TimeoutSeconds"
+                            Text="{Binding ViewModel.SelectedDraft.TimeoutSeconds, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="6" Grid.Column="2" Margin="0,0,8,8" VerticalAlignment="Center" Text="Factor"/>
+                        <ui:TextBox
+                            x:Name="TextBox_Factor"
+                            Grid.Row="6"
+                            Grid.Column="3"
+                            Margin="0,0,0,8"
+                            AutomationProperties.AutomationId="TextBox_Factor"
+                            Text="{Binding ViewModel.SelectedDraft.Factor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="7" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Transform step"/>
+                        <ui:TextBox
+                            Grid.Row="7"
+                            Grid.Column="1"
+                            Margin="0,0,12,8"
+                            Text="{Binding ViewModel.SelectedDraft.TransformStepName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="7" Grid.Column="2" Margin="0,0,8,8" VerticalAlignment="Center" Text="Target field path"/>
+                        <ui:TextBox
+                            Grid.Row="7"
+                            Grid.Column="3"
+                            Margin="0,0,0,8"
+                            Text="{Binding ViewModel.SelectedDraft.TransformTargetFieldPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <StackPanel Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="4" HorizontalAlignment="Right" Orientation="Horizontal">
+                            <ui:Button
+                                x:Name="Button_ValidateMrDraft"
+                                Margin="0,12,8,0"
+                                AutomationProperties.AutomationId="Button_ValidateMrDraft"
+                                Command="{Binding ViewModel.ValidateMrDraftCommand, Mode=OneWay}"
+                                Content="Validate"/>
+                            <ui:Button
+                                x:Name="Button_SaveMrDraft"
+                                Margin="0,12,0,0"
+                                Appearance="Primary"
+                                AutomationProperties.AutomationId="Button_SaveMrDraft"
+                                Command="{Binding ViewModel.SaveMrDraftCommand, Mode=OneWay}"
+                                Content="Save"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Page>

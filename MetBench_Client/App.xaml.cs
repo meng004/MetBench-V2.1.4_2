@@ -20,6 +20,7 @@ using MetBench_BLL.SystemMT.Metadata;
 using MetBench_BLL.SystemMT.Persistence;
 using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_BLL.SystemMT.Catalog;
+using MetBench_BLL.SystemMT.Catalog.Editing;
 using MetBench_BLL.SystemMT.Reporting;
 using MetBench_BLL.Discovery;
 using MetBench_BLL.Discovery.Validators;
@@ -150,6 +151,9 @@ namespace MetBench_Client
                 services.AddSingleton<IMrCatalogProvider>(provider =>
                     new ManifestMrCatalogProvider(
                         provider.GetRequiredService<LauncherOptions>()));
+                services.AddSingleton<ISystemMtManifestCatalogEditor>(provider =>
+                    new SystemMtManifestCatalogEditor(
+                        provider.GetRequiredService<LauncherOptions>().SutRoot));
                 services.AddScoped<ISystemMtLauncher, SystemMtLauncher>();
                 services.AddScoped<ISystemMtCatalogReader>(provider =>
                     (ISystemMtCatalogReader)provider.GetRequiredService<ISystemMtLauncher>());
@@ -157,6 +161,8 @@ namespace MetBench_Client
 
                 services.AddScoped<Views.Pages.SystemMtExecutionPage>();
                 services.AddScoped<ViewModels.SystemMtExecutionViewModel>();
+                services.AddScoped<Views.Pages.SystemMtMrCatalogPage>();
+                services.AddScoped<ViewModels.SystemMtMrCatalogViewModel>();
 
                 // === v2 SystemMT repositories (LiteDB) + Anomaly stack ===
                 services.AddSystemMtRepositories();
