@@ -240,6 +240,7 @@ merge ok
 | active plan index §2 注册本 spec | grep 文件名命中 index 表格 |
 | Operator action 文档化 | §4 节存在 |
 | 实现 PR（workflow YAML）作为独立 follow-up | 本 spec 不含 YAML 部署；另起 PR 时 secret 已配置 |
+| Soft-gate 真实首跑验证 | 引入 `pr-soft-review.yml` 的 PR **不算自验**（GitHub workflow-validation 安全门，详见 R6）；以**该 PR 合并后下一个开向 main 的 PR** 收到 "Soft Review: PR Gate Checklist (Advisory)" 评论为准 |
 
 ---
 
@@ -263,6 +264,7 @@ merge ok
 - **风险 R3**：prompt 漂移导致 review 质量不稳定。缓解：本 spec 的 §7 prompt 模板是 single source of truth；workflow YAML 必须从这里复制；改 prompt = 改 spec = 走 PR review。
 - **风险 R4（self-bootstrap 发现）**：`anthropics/claude-code-action@v1` 内部要做一次 GitHub OIDC handshake，即使走 `claude_code_oauth_token` 路径也需要 workflow `permissions:` 含 `id-token: write`。缺这一行 → 24 秒内挂掉、`Could not fetch an OIDC token` 报错。已在 §7 模板里加 `id-token: write`。任何复制本模板的新 workflow 必须保留这一行；任何对 v1 的 minor 升级要复查该要求是否变更。**首次落地的 PR #145 就是被这个缺权限挡住的**，记录在本 §11 以防重蹈。
 - **风险 R5（self-bootstrap 第二次发现）**：claude-code-action `prompt:` 只声明意图不开通工具。即使 prompt 里说 "post a comment"，Claude 也必须通过 `claude_args: --allowedTools "..."` 显式拿到 `Bash(gh pr comment:*)` 等工具的执行权。缺这个 → action 12 秒"成功"退出但完全没贴评论，因为模型有话想说没工具可用。已在 §7 模板里：(a) `claude_args` 加 `--allowedTools "Bash(gh pr comment:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(git diff:*),Bash(git log:*)"`，(b) prompt 头加 `REPO:` / `PR NUMBER:` 上下文，(c) prompt 显式写出 `gh pr comment ${{ github.event.pull_request.number }} --body "..."` 命令样板。任何复制本模板要保留这三处；扩展工具白名单时也只列严格必需的命令前缀（不要 `Bash(*)`，最小权限）。**PR #145 第二次跑就是被这个挡住的**。
+- **风险 R6（self-bootstrap 第三次发现 / 真因）**：GitHub 对 `anthropics/claude-code-action@v1` 施加 **workflow-validation 反注入安全门**：workflow 文件必须**已经存在于 default branch 且内容与 PR 分支完全一致**，action 才会真正执行；否则立即跳过、退出码 0（job 显示 success），log 里出现 `Skipping action due to workflow validation: Workflow validation failed. The workflow file must exist and have identical content to the version on the repository's default branch. ... your workflow will begin working once you merge your PR.`。这意味着：(a) **引入 `pr-soft-review.yml` 自身的那一个 PR 永远无法被自己的 soft-gate 覆盖** —— 必须先合并、之后开的 PR 才是第一次真实跑；(b) **任何后续修改 §7 模板的 PR 也会在自身上 silent-skip**（PR 分支版本 ≠ default branch 版本 → 同一安全门），合并后下一个 PR 才会用上新模板验证；(c) 这层 silent-skip 与 OIDC / 工具白名单**无关**，是 GitHub 平台级反注入设计，不可绕过。**PR #145 第三次跑就是被这个挡住的**；R4 / R5 描述的两次"修复"叠加在 R6 之上、看上去像 fix 实际无关，保留是因为符合官方推荐用法（最小权限白名单 + OIDC 显式权限）。**实操含义**：spec §9 验收标准里"自举 PR 自身收到 Soft Review 评论"是无法满足的，应改为"合并后下一个 PR 收到评论"。
 - **未决 Q1**：是否要让 LLM 也读 `AGENTS.md` / `CLAUDE.md` 全文判断"该改但没改的 projection 文档"？目前 prompt 已包含 plan index 路径但未强制全读，先观察是否够用。
 - **未决 Q2**：要不要对 self-PR（agent 自己开的 PR）也跑？目前会跑 — 这是好事，能 catch 我自己漏掉的；但 LLM 给 LLM 审 LLM 的递归审美是否真有价值还要看。
 
@@ -270,7 +272,8 @@ merge ok
 
 ## 12. Implementation order
 
-1. **本 PR**：merge spec + 更新 checklist + 注册 plan index
-2. **Operator action**：仓库 owner 跑 `claude setup-token`，加 `CLAUDE_CODE_OAUTH_TOKEN` secret
-3. **Follow-up PR**：把 §7 模板原样落到 `.github/workflows/pr-soft-review.yml`；本 PR 自身是 soft-gate 落地后的第一个被审 PR — 自举验证
-4. **观察 1-2 周**：根据 review noise 调 §7 prompt；改动须回写本 spec
+1. **Spec PR #143**：merge spec + 更新 checklist + 注册 plan index ✅
+2. **Operator action**：仓库 owner 跑 `claude setup-token`，加 `CLAUDE_CODE_OAUTH_TOKEN` secret，安装 GH App ✅
+3. **Workflow PR #145**：把 §7 模板原样落到 `.github/workflows/pr-soft-review.yml`；自身**无法**自验（见 R6） ✅
+4. **本 R6 PR**：回写 R4 / R5 / R6 三次 self-bootstrap 发现并修正 §9 验收口径。本 PR **不动** `.github/workflows/pr-soft-review.yml`（workflow YAML 在 #145 已落地、PR 分支与 default branch 字节一致），因此**应当能通过 R6 workflow-validation 安全门，作为第一个真实跑 soft-gate 的 PR** —— 它本身就是 §9 末行验收的首个数据点
+5. **观察 1-2 周**：根据 review noise 调 §7 prompt；改动须回写本 spec。注意任何改 §7 模板 / 改 workflow YAML 的 PR 都会重新触发 R6（自身 silent-skip，下一个 PR 才会用上新版本验证）
