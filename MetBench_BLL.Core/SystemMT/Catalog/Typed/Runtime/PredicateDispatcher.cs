@@ -9,6 +9,7 @@ public sealed class PredicateDispatcher : IPredicateDispatcher
 {
     private readonly ApplicabilityEvaluator _applicability = new();
     private readonly BinaryComparisonKernel _binary = new();
+    private readonly NoiseAwareBinaryComparisonKernel _noiseAwareBinary = new();
     private readonly ScaledEqualityKernel _scaled = new();
     private readonly CrossMethodComparisonKernel _crossMethod = new();
     private readonly ErrorMonotonicKernel _errorMonotonic = new();
@@ -40,6 +41,7 @@ public sealed class PredicateDispatcher : IPredicateDispatcher
         return predicate switch
         {
             BinaryComparisonPredicate binary => _binary.Evaluate(binary, context),
+            NoiseAwareBinaryComparisonPredicate noiseAwareBinary => _noiseAwareBinary.Evaluate(noiseAwareBinary, context),
             ScaledEqualityPredicate scaled => _scaled.Evaluate(scaled, context),
             CrossMethodComparisonPredicate crossMethod => _crossMethod.Evaluate(crossMethod, context),
             ErrorMonotonicPredicate monotonic => _errorMonotonic.Evaluate(monotonic, context),
@@ -59,6 +61,11 @@ public sealed class PredicateDispatcher : IPredicateDispatcher
             BinaryComparisonPredicate binary =>
                 context.TryGetMetric(binary.LeftRole, binary.Metric, out _) &&
                 context.TryGetMetric(binary.RightRole, binary.Metric, out _),
+            NoiseAwareBinaryComparisonPredicate noiseAwareBinary =>
+                context.TryGetMetric(noiseAwareBinary.LeftRole, noiseAwareBinary.Metric, out _) &&
+                context.TryGetMetric(noiseAwareBinary.RightRole, noiseAwareBinary.Metric, out _) &&
+                context.TryGetMetric(noiseAwareBinary.LeftRole, noiseAwareBinary.SourceStdMetric, out _) &&
+                context.TryGetMetric(noiseAwareBinary.RightRole, noiseAwareBinary.FollowupStdMetric, out _),
             ScaledEqualityPredicate scaled =>
                 context.TryGetMetric(scaled.ActualRole, scaled.Metric, out _) &&
                 context.TryGetMetric(scaled.ReferenceRole, scaled.Metric, out _),

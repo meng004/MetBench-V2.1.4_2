@@ -42,6 +42,7 @@ public sealed class MrSpecValidator : ISpecValidator<MrSpec>
             var result = predicate switch
             {
                 BinaryComparisonPredicate binary => _registry.BinaryComparisonValidator.Validate(binary, spec),
+                NoiseAwareBinaryComparisonPredicate noiseAwareBinary => _registry.NoiseAwareBinaryComparisonValidator.Validate(noiseAwareBinary, spec),
                 ScaledEqualityPredicate scaled => _registry.ScaledEqualityValidator.Validate(scaled, spec),
                 CrossMethodComparisonPredicate crossMethod => _registry.CrossMethodValidator.Validate(crossMethod, spec),
                 ErrorMonotonicPredicate monotonic => _registry.ErrorMonotonicValidator.Validate(monotonic, spec),
