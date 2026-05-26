@@ -20,7 +20,7 @@ the peak amplitude is `u_max = f * L^2 / 8` at `x = L/2`. SciPy adaptively
 refines its own mesh until residual is below tolerance; the user-supplied
 `num_points` only seeds the initial mesh — the converged result is
 independent of seed mesh resolution to within tolerance. See MR
-`scipy-bvp-poisson-mesh-richardson`.
+`scipy-bvp-poisson-seed-mesh-insensitivity`.
 
 Invocation:
 

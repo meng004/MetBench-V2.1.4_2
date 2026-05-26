@@ -41,10 +41,10 @@
       "timeout_seconds": 120
     },
     {
-      "mr_id": "scipy-bvp-poisson-mesh-richardson",
+      "mr_id": "scipy-bvp-poisson-seed-mesh-insensitivity",
       "sut_name": "scipy-bvp-poisson-1d",
       "display_name": "SciPy BVP 1D Poisson — InitialMeshRefinement (adaptive-BVP convergence)",
-      "description": "SciPy solve_bvp adaptively refines its own mesh until residual is below tolerance; the user-supplied num_points only seeds the initial mesh. Doubling the seed num_points must leave u_max within tolerance because both runs converge to the same continuous solution u = f·L²/8 plateau.",
+      "description": "SciPy solve_bvp adaptively refines its own mesh until residual is below tolerance; the user-supplied num_points only seeds the initial mesh. Doubling the seed num_points must leave u_max within tolerance because both runs converge to the same continuous solution u(x)=f·x(L−x)/2, whose peak value u_max = f·L²/8 occurs at x = L/2.",
       "mr_family": "ScipyBvp.Poisson.Convergence.SeedMesh",
       "transformation_name": "ScaleField",
       "assertion_type_code": "approx",
