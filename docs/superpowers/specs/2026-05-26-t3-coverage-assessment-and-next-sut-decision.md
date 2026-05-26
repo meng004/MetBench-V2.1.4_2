@@ -93,6 +93,45 @@ Selection criterion if this decision is later revisited (one SUT at a time; neve
 
 Until those four conditions are jointly satisfied for a uniquely named candidate, no T3 SUT PR may be opened.
 
+## 5.1 Candidate Backlog / 候选池
+
+This backlog enumerates candidates whose **future** evaluation is anticipated. Listing here is **not** selection. **T3 SUT expansion remains paused.** Nothing in this section unlocks PR-T3C. A backlog entry becomes a real candidate only after a follow-up decision-record revision (or successor record) explicitly picks it as the unique next SUT under one of the §4 drivers, and only after the entry's start conditions are jointly satisfied. Start timing is decided by the user, not inferred from this list.
+
+### 5.1.1 MeshGraphNets — cylinder flow surrogate (ML/data-driven SUT pilot candidate)
+
+| Field | Value |
+|---|---|
+| Backlog category | §4 driver #2 — ML/PINN / data-driven SUT pilot |
+| Equation surface | Incompressible Navier-Stokes (cylinder wake, vortex shedding) via the DeepMind MeshGraphNets surrogate trained on the published `cylinder_flow` dataset |
+| Status | Backlog only — **not selected**, does not unlock PR-T3C |
+| Why this is anticipated | First non-pure-stdlib, non-classical-solver SUT; exercises (a) data-driven runtime path, (b) checkpoint-driven inference, (c) mesh-output handling, (d) the currently fail-closed noise-aware predicate path (`less-noise-aware` / `greater-noise-aware`, see `docs/status/current.md` §6) |
+
+**Start conditions (ALL must be satisfied before a candidate-specific plan is opened, and the plan itself is then prerequisite to any code PR):**
+
+1. **Runtime venv available** — a tested Python venv (e.g. `METBENCH_MESHGRAPHNETS_PYTHON`) with the model framework (TensorFlow / JAX / PyTorch as upstream requires) installable on at least one supported platform; cloud CI must either install it or skip cleanly per `CLAUDE.md` §8. The venv strategy is owned by the candidate-specific implementation plan; it MAY reuse the §5.1.2 multi-venv capability if that capability already exists, otherwise the plan must specify a self-contained venv setup.
+2. **Checkpoint prepared** — a reproducible trained checkpoint identified by source, license, hash, and provenance. Either bundled (size-permitting) or fetched by a documented script with caching.
+3. **Tiny fixture prepared** — a small mesh / initial-condition fixture that runs in seconds, suitable for end-to-end tests; not the full benchmark dataset.
+4. **Asset manifest provided** — an asset-provenance manifest is provided in a form agreed by the candidate-specific implementation plan, listing every required asset (venv ref, checkpoint hash, fixture path, parser scripts) with verification commands so onboarding is reproducible; the §5.1.2 heavy-dependency SUT onboarding specification, if it has shipped by then, MAY standardise the manifest format, but is not a prerequisite.
+5. **First MR set selected** — the initial MR family is named in writing (e.g. inlet-velocity scaling monotonicity, mesh-refinement noise-aware comparability, cross-method agreement against another NS-surrogate anchor solving the same cylinder-wake instance, if such an anchor is later added). Each MR's meta-pattern is identified.
+6. **Clean-skip policy explicit** — when the venv, checkpoint, or fixture is missing, the launcher end-to-end test class must skip cleanly (xUnit `[SkippableFact]` or equivalent), with the skip reason logged. No false failures on cloud CI without the assets.
+7. **Verification-semantics prerequisite** — if the first MR set includes any MR that requires noise-aware typed predicates (highly likely given §5.1.1 motivation (d)), an independent verification-semantics PR adding a noise-aware typed predicate under `MetBench_BLL.Core/SystemMT/Catalog/Typed/` ships **first**, per §5(iii).
+8. **Candidate-specific implementation plan registered** — `docs/superpowers/plans/<meshgraphnets-cylinder-flow-plan>.md` is written and registered in [`docs/superpowers/plans/2026-05-25-metbench-active-plan-index.md`](../plans/2026-05-25-metbench-active-plan-index.md) §1, covering all of: equation semantics, MR semantics, catalog bindings (manifest + `LegacyCatalogFactory` blueprint), tests (parser/adapter smoke + launcher end-to-end), CI strategy, and skip policy. This is the §5 (ii) gate condition.
+
+Until **all eight** are satisfied and a follow-up decision-record revision explicitly picks this candidate as the unique next SUT, no T3 SUT PR for MeshGraphNets may be opened. Start timing is at the user's discretion.
+
+### 5.1.2 Non-T3 product capabilities listed for traceability
+
+The following are **new T-level product capabilities** that interact with T3 onboarding but are **not themselves T3 candidates**. They neither unlock nor block PR-T3C; they are listed here only so that future T3 candidates (especially MeshGraphNets) can reference them without confusion. Start timing is decided by the user.
+
+| Capability | Why it interacts with T3 (but is not T3C) | Trace |
+|---|---|---|
+| **Multi-venv configuration & management** | T1 (process/venv handling) needs to address heavy, conflicting dependencies (TF / JAX / PyTorch / OpenMC / OpenMOC venvs coexisting); MeshGraphNets cannot land cleanly without this | T1 extension; see `docs/requirements.md` gap entry |
+| **UI-only MR / SUT onboarding** | A WPF-side data-entry surface so users can register MRs and (with constraints) SUTs without editing source; orthogonal to T3 — T3C is about adding a runnable SUT, this is about how *any* SUT/MR enters the catalog | T1 / T2 extension; see `docs/requirements.md` gap entry |
+| **Heavy-dependency / data-driven SUT onboarding specification** | A normative onboarding spec covering checkpoint provenance, asset manifests, clean-skip policy, fixture sizing, license tracking — the prerequisite framework that lets MeshGraphNets and future similar SUTs land safely | T1 / T3 boundary; see `docs/requirements.md` gap entry |
+| **SUT onboarding + MR usage documentation as a productised surface** | Treats per-SUT onboarding documentation + per-MR usage documentation as a maintained product artifact (template + index + lint), not ad-hoc per-PR text | T2 / docs productisation; see `docs/requirements.md` gap entry |
+
+None of these four capabilities changes the §5 paused decision. None unlocks PR-T3C. None blocks PR-T3C either. They are listed so that a future MeshGraphNets implementation plan (or any other future T3 candidate plan) can reference whichever of these capabilities its start conditions depend on, instead of inventing the requirements ad-hoc.
+
 ## 6. Cross-references
 
 - [`docs/status/current.md`](../../status/current.md) §2 (canonical inventory), §4 (active control documents), §7 (current execution order).
