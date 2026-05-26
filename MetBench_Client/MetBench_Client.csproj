@@ -91,28 +91,8 @@
     adapters, and sample cases at runtime.
   -->
 	<ItemGroup>
-		<None Include="..\SUT\openmoc\*.py">
-			<Link>SUT\openmoc\%(Filename)%(Extension)</Link>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Include="..\SUT\openmoc\sample\*.json">
-			<Link>SUT\openmoc\sample\%(Filename)%(Extension)</Link>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Include="..\SUT\heat_equation\*.py">
-			<Link>SUT\heat_equation\%(Filename)%(Extension)</Link>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Include="..\SUT\heat_equation\sample\*.json">
-			<Link>SUT\heat_equation\sample\%(Filename)%(Extension)</Link>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Include="..\SUT\openmc\*.py">
-			<Link>SUT\openmc\%(Filename)%(Extension)</Link>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Include="..\SUT\openmc\sample\*.json">
-			<Link>SUT\openmc\sample\%(Filename)%(Extension)</Link>
+		<None Include="..\SUT\**\*.*">
+			<Link>SUT\%(RecursiveDir)%(Filename)%(Extension)</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
