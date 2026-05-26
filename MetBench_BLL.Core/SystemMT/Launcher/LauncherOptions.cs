@@ -27,11 +27,19 @@ namespace MetBench_BLL.SystemMT.Launcher;
 /// (MRs that need OpenMC will fail at runtime; that is expected
 /// in CI / VM where OpenMC is not installed).
 /// </param>
+/// <param name="ScipyPython">
+/// Python executable that has SciPy importable. Used by external-solver-pilot
+/// SUTs that depend on <c>scipy.integrate</c> (T3C-IVP / T3C-BVP).
+/// May equal <see cref="SystemPython"/> when SciPy is installed system-wide;
+/// when SciPy is missing the corresponding launcher end-to-end tests skip
+/// cleanly via <c>ScipyTestPaths.ScipyImportable()</c>.
+/// </param>
 public sealed record LauncherOptions(
     string SutRoot,
     string SystemPython,
     string OpenMocPython,
-    string? OpenMcPython = null)
+    string? OpenMcPython = null,
+    string? ScipyPython = null)
 {
     /// <summary>
     /// Resolves to <see cref="OpenMcPython"/> if set, otherwise
@@ -41,4 +49,13 @@ public sealed record LauncherOptions(
     /// machines that do not have OpenMC installed).
     /// </summary>
     public string EffectiveOpenMcPython => string.IsNullOrWhiteSpace(OpenMcPython) ? SystemPython : OpenMcPython!;
+
+    /// <summary>
+    /// Resolves to <see cref="ScipyPython"/> if set, otherwise
+    /// <see cref="SystemPython"/>. SciPy-backed SUTs attempted without
+    /// a SciPy-equipped Python will simply fail at run time; tests gate
+    /// on <c>ScipyTestPaths.ScipyImportable()</c> and skip cleanly when
+    /// SciPy is unavailable.
+    /// </summary>
+    public string EffectiveScipyPython => string.IsNullOrWhiteSpace(ScipyPython) ? SystemPython : ScipyPython!;
 }

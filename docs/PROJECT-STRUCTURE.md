@@ -27,7 +27,7 @@
 
 ---
 
-## §2 SUT 清单（当前 launcher catalog：13 个）
+## §2 SUT 清单（当前 launcher catalog：14 个）
 
 | SUT | 目录 | 域 | 算法 / 程序类型 | Runner | Sample / catalog | 接入 PR |
 |---|---|---|---|---|---|---|
@@ -44,6 +44,7 @@
 | **Advection 1D** | `SUT/advection_1d/` | PDE (first-order linear hyperbolic) | Pure-stdlib first-order upwind FD + periodic BC | `advection_1d_runner.py` | `catalog.json` + sample | PR #136 |
 | **Wave 1D** | `SUT/wave_1d/` | PDE (second-order linear hyperbolic) | Pure-stdlib second-order leapfrog FD + Dirichlet BC | `wave_1d_runner.py` | `catalog.json` + sample | PR #138 |
 | **Burgers 1D** | `SUT/burgers_1d/` | PDE (nonlinear hyperbolic) | Pure-stdlib conservative Lax-Friedrichs flux differencing + periodic BC | `burgers_1d_runner.py` | `catalog.json` + sample | PR #140 |
+| **SciPy IVP Lotka-Volterra** | `SUT/scipy_ivp_lotka_volterra/` | ODE (Lotka-Volterra, predator-prey nonlinear) | **External library**: SciPy `solve_ivp` adaptive RK45 (rtol=1e-9 / atol=1e-12) | `scipy_ivp_lotka_volterra.py` | `catalog.json` + sample | T3C-IVP |
 
 SUT 接入到框架的 hook：
 - Python runner（`<sut>_runner.py`）—— stdin/CLI args 入参，stdout JSON 出参
@@ -66,14 +67,15 @@ SUT 接入到框架的 hook：
 | **Advection 1D** | `LauncherEndToEndAdvectionTests`（端到端覆盖两条 MR；pure-stdlib） | — | — | `advection-amplitude-linearity` · `advection-mesh-conservation` |
 | **Wave 1D** | `LauncherEndToEndWaveTests`（端到端覆盖两条 MR；pure-stdlib） | — | — | `wave-amplitude-linearity` · `wave-mesh-energy-convergence` |
 | **Burgers 1D** | `LauncherEndToEndBurgersTests`（端到端覆盖两条 MR；pure-stdlib） | — | — | `burgers-amplitude-peak-monotone` · `burgers-mesh-conservation` |
+| **SciPy IVP Lotka-Volterra** | `LauncherEndToEndScipyIvpLotkaVolterraTests`（`[SkippableFact]`，SciPy 缺失时 clean-skip 干净跳过）· `ScipyIvpLotkaVolterraParserTests` (3) | — | — | `scipy-ivp-lv-prey-growth-monotone` · `scipy-ivp-lv-step-convergence` |
 | **跨 SUT 通用** | `MrTransformationTests` · `InputGeneratorTests`（PR #119 `GreaterThanAssertionTests` / `LessThanAssertionTests` 已随 W1 类删除；同语义现由 `Catalog/Typed/BinaryComparisonKernelTests` 覆盖） | `SystemLevelCliMt.feature` · `SystemLevelGeneratedFollowup.feature` | 2 | — |
 
-**Launcher end-to-end 测试（按 SUT）**：`LauncherEndToEndOdeTests`（decay_chain / damped_oscillator / lotka_volterra）· `LauncherEndToEndPoissonTests`（PR #134）· `LauncherEndToEndAdvectionTests`（PR #136）· `LauncherEndToEndWaveTests`（PR #138）· `LauncherEndToEndBurgersTests`（PR #140）。
+**Launcher end-to-end 测试（按 SUT）**：`LauncherEndToEndOdeTests`（decay_chain / damped_oscillator / lotka_volterra）· `LauncherEndToEndPoissonTests`（PR #134）· `LauncherEndToEndAdvectionTests`（PR #136）· `LauncherEndToEndWaveTests`（PR #138）· `LauncherEndToEndBurgersTests`（PR #140）· `LauncherEndToEndScipyIvpLotkaVolterraTests`（T3C-IVP，`[SkippableFact]`）。
 
-**SUT 系统级 MR 总数（2026-05-26，post-PR #140）**：
-- launcher / manifest catalog：**25** MR-on-SUT 绑定
+**SUT 系统级 MR 总数（2026-05-26，post-T3C-IVP）**：
+- launcher / manifest catalog：**27** MR-on-SUT 绑定
 - 覆盖方程：**12**
-- 当前结构风险：runtime 已切到 provider-backed catalog，生产 fallback 与 importer 具体类耦合已删除；sample-level evidence 已落第一条可复盘链，但覆盖粒度仍可继续扩展。T3 代表性 PDE-class 覆盖（椭圆 / 一阶线性双曲 / 二阶线性双曲 / 非线性双曲）已通过 PR #134 / #136 / #138 / #140 闭环；进一步 T3 扩展由 next-SUT decision record 决定（见 `docs/status/current.md` §4 与 active plan index）
+- 当前结构风险：runtime 已切到 provider-backed catalog，生产 fallback 与 importer 具体类耦合已删除；sample-level evidence 已落第一条可复盘链，但覆盖粒度仍可继续扩展。T3 代表性 PDE-class 覆盖（椭圆 / 一阶线性双曲 / 二阶线性双曲 / 非线性双曲）已通过 PR #134 / #136 / #138 / #140 闭环；T3C-IVP 通过 `scipy-ivp-lotka-volterra` 把 External-solver-pilot 接入路径打通（`LauncherOptions.ScipyPython` + `PythonExecutableKinds.Scipy` + `ManifestMrCatalogProvider` scipy 分支 + `ScipyTestPaths.cs` clean-skip helper，env var `METBENCH_SCIPY_PYTHON`）；进一步 T3 扩展由 next-SUT decision record 决定（见 `docs/status/current.md` §4 与 active plan index）
 
 ---
 
