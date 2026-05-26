@@ -198,7 +198,7 @@ WPF 的 `MetBench_Client/` 因 SDK targets 限制 **不在 Linux CI 编译**；�
 当要继续加新 SUT（如 SU2 / FEniCS / 新的 neutron solver），按 [F13 RFC](superpowers/plans/2026-05-17-f13-third-sut-rfc.md) §6 走，并以当前 manifest/provider 路径为准：
 
 - [ ] `.claude/web-setup.sh` 加该 SUT 的 venv / binary 安装段
-- [ ] `LauncherOptions.<sut>Python` 字段 + DI 默认值
+- [ ] 在 manifest/runtime-env registry 中声明 runtime key；不要再为每个新依赖族新增 `LauncherOptions.<sut>Python` 字段（执行 `docs/superpowers/plans/2026-05-26-t1-manifest-driven-runtime-environments-plan.md` 前，新增 runtime family 必须先停下来补该能力）
 - [ ] `SUT/<sut>/catalog.json` 补齐 runnable catalog entry；如需新字段，同步 `MrCatalogEntry` / `ManifestMrCatalogProvider`
 - [ ] `SUT/<sut>/` 目录含 runner + adapters + sample + 可选 scg.json
 - [ ] `<sut>RunnerSmokeTests.cs` 写 ≥ 1 个 [SkippableFact]
