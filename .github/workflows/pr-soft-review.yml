@@ -1,0 +1,65 @@
+name: pr-soft-review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  review:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Claude soft review
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: "--max-turns 10"
+          prompt: |
+            You are reviewing a pull request against the MetBench PR Gate Checklist.
+
+            Authoritative checklist: docs/superpowers/templates/pr-gate-checklist.md
+            Authoritative ledger:    docs/status/current.md
+            Authoritative plan index: docs/superpowers/plans/2026-05-25-metbench-active-plan-index.md
+
+            Run, in order, the mechanical sections of the PR Gate Checklist (Scope,
+            Facts, Tests, Windows Classification) against THIS PR's actual diff and
+            body. For each section, report PASS / WARN / FAIL with one-line evidence
+            (file path, line, or PR body excerpt). Skip the Review section — that is
+            your job. Skip the Merge section — that is the human's job.
+
+            Then run these MetBench-specific cross-checks:
+            1. If the diff touches MetBench_Client/** or any *.xaml*, the PR body
+               Windows Classification must NOT be "No Windows evidence required".
+            2. If the diff touches MetBench_BLL.Core/SystemMT/Catalog/** or
+               LegacyCatalogFactory.cs, the description text in SUT/<sut>/catalog.json
+               for any added MR must match the corresponding MrSummary.Description
+               byte-for-byte.
+            3. If the PR claims a new code-test baseline in its body but the diff
+               contains zero changes outside docs/ or SUT/<sut>/sample/, flag it.
+            4. If the PR base..head diff scope-creeps beyond what the PR body claims
+               (e.g. body says "Burgers SUT" but diff also touches openmoc), flag it.
+            5. If docs/status/current.md is in the diff, verify the baseline commit
+               field references a commit that is reachable from origin/main as of the
+               PR base; flag obvious stale-baseline copy-paste.
+
+            Post your findings as a single PR review comment with sections:
+              ## Soft Review: PR Gate Checklist (Advisory)
+              ### Mechanical checks
+              ### MetBench-specific cross-checks
+              ### Reviewer note for the human approver
+
+            Be terse. Bullet points, not prose. Quote file:line for any FAIL.
+
+            Do NOT push commits. Do NOT change labels. Do NOT request changes via the
+            review API — leave it as a comment so a human stays in the approve loop.
