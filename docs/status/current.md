@@ -1,6 +1,6 @@
 # MetBench Current Status Ledger
 
-> **Status date**: 2026-05-25
+> **Status date**: 2026-05-26 (refreshed for `origin/main` head `66eb297` after PR-1 / PR-2 / PR-B / PR-A merged)
 > **Ledger role**: the single current-status source for monitoring, planning, and handoff.
 > **Rule**: other documents may project this status for their own purpose, but they do not redefine it.
 
