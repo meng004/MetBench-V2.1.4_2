@@ -391,7 +391,7 @@ Hard `test` gate 绿 ≠ WPF 改动正确，仅代表 cross-platform 未被破�
 |---|---|---|
 | plotter 搬到 `MetBench_BLL` 跑 CI 单测 | **不做** | 与 legacy `MetBench_Client/Services/Plotting/` 同位约定冲突，违 §0.5 |
 | 抽 helper（label formatter 等）到 BLL.Core | **不做** | YAGNI；都是 `string.Format(InvariantCulture, ...)` 级别 |
-| ViewModel mockable 单测 | **不做** | `[ObservableProperty]` 在 `net8.0-windows7.0` SDK 展开；建影子测试项目 < 收益 |
+| ViewModel mockable 单测 | **不做** | ViewModel 依赖 `Wpf.Ui.Controls.INavigationAware`（Windows-only），需建影子接口 + 影子测试项目镜像 ViewModel —— 工程量 > 收益 |
 | UIAutomation smoke | **不做（v1）** | 与 T1 Windows VM 计划 §8 Optional 一致 |
 
 显式决定写入 PR body §Tests 节，避免下次有人误以为忘了。
@@ -434,7 +434,7 @@ HTML renderer（`ISystemMtResultReportRenderer`）已在 PR #126/128 落地，�
 - `MetBench_Client/Views/Pages/SystemMtResultPage.xaml` [改] —— 加 export 按钮行 + WebView2 区
 - `MetBench_Client/ViewModels/SystemMtResultViewModel.cs` [改] —— 加 4 RelayCommand + IsBusy / StatusMessage / PreviewUri + Uri 构造 + Process.Start fallback
 - `MetBench_Client/App.xaml.cs` [改] —— DI 注册 4 个 renderer（若 Linux Phase 3a/3b/3c PR 未含 WPF 注册指引）
-- 可选：`MetBench_Client/Services/FileExport/SystemMtExportService.cs` [新] —— 仅当 4 命令共享逻辑达到 §0.5 抽取阈值
+- 可选：`MetBench_Client/Services/FileExport/SystemMtExportService.cs` [新] —— 抽取判据：4 个 `ExportXxxAsync` 命令中若共享代码（SaveFileDialog 调用、`File.WriteAllBytesAsync` + 异常 catch、IsBusy / StatusMessage 状态机）累计 ≥ 30 行（实现一遍后用 git diff 量）即抽出；否则 inline 在 ViewModel
 
 估算 3 改（可能 + 1 新）≈ 400-600 行。验收：§7.3 PR-W2 checklist 全部 ✅。
 
