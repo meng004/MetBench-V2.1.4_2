@@ -6,6 +6,144 @@
 No previous sessions found.
 </claude-mem-context>
 
+# Codex Agent Operating Rules
+
+This section is the project contract for Codex-style agents. It complements
+[`CLAUDE.md`](CLAUDE.md) instead of replacing it. If these rules conflict with a
+task request, stop and report the conflict before editing code or documents.
+
+## 0. Read Order and Truth Sources
+
+Before making any project-status, roadmap, or completion claim, read sources in
+this order:
+
+1. `docs/status/current.md` for the current status ledger.
+2. Live git state for `origin/main`; never copy a static main commit from a
+   document as current truth.
+3. `docs/superpowers/plans/2026-05-25-metbench-active-plan-index.md` for active
+   plans.
+4. `CLAUDE.md` for engineering conventions, build/test boundaries, WPF patterns,
+   and PR gates.
+5. The specific plan/spec/requirement files named by the task.
+
+Local worktrees, stashes, unpushed branches, VM logs, and one-off reports are
+evidence, not repository truth. They may support a conclusion only after being
+clearly labeled with their source and commit/branch context.
+
+## 1. Execution Baselines
+
+- Do not start implementation from a dirty or stale worktree unless the task is
+  explicitly about that worktree. Prefer a fresh branch or worktree from current
+  `origin/main`.
+- If the root worktree is not `main` or has uncommitted files, do not treat it
+  as the GitHub repository state. Say so and isolate the work.
+- Pull or fetch before creating PR branches, before merging, and before any
+  monitoring/status output.
+- Never revert, overwrite, or clean user changes unless the user explicitly asks
+  for that exact destructive action.
+
+## 2. Development Gate
+
+No coding before the following are true:
+
+- The requirement or active plan is identified.
+- The design boundary is clear enough that two agents would implement the same
+  thing.
+- Acceptance criteria and verification commands are known.
+- Shared boundaries are named, especially System MT launcher, typed semantic
+  catalog, evidence, persistence, and WPF surfaces.
+
+Use TDD for code changes: write or identify the failing test first, make the
+minimal implementation, run focused tests, then run the relevant wider suite.
+Do not use runtime repair as a substitute for load-time validation.
+
+## 3. System MT and Method MT Boundary
+
+- Current development focus is System MT unless a task explicitly says Method
+  MT.
+- System MT runtime must flow through the launcher facade and Typed Semantic
+  Catalog predicates/kernels. Do not reintroduce legacy `IMrAssertion`,
+  dictionary predicates, or method-level assertion classes into System MT
+  runtime.
+- Method MT legacy entities may remain where they are required for historical
+  persistence or UI compatibility, but they must not become the execution path
+  for new System MT work.
+- New MR semantics belong in typed catalog specs, validators, kernels, fixtures,
+  and catalog assets, with fail-closed behavior when unsupported.
+
+## 4. Cloud and Windows VM Boundary
+
+- Cloud/Linux-safe work: `MetBench_BLL.Core/`, `MetBench_DAL/`,
+  `MetBench_BLL/` cross-platform code, `MetBench_SystemMT.Tests/`, docs, CI, and
+  catalog assets that do not require WPF visual validation.
+- Windows-only work: `MetBench_Client/`, XAML, WPF navigation/view models,
+  `App.xaml.cs` wiring, Windows startup/config binding, WPF build/run, RDP/FlaUI
+  visual checks, and any task requiring `dotnet build MetBench.sln`.
+- For any task that must run in the Windows VM, Codex must provide a complete
+  prompt for Claude Code running inside the VM instead of attempting direct VM
+  control. The prompt must include preconditions, exact commands, expected
+  outputs, logs to collect, and pass/fail criteria.
+- Windows evidence and cloud evidence are separate. Do not merge them into one
+  vague "validated" claim.
+
+## 5. Testing and Evidence Rules
+
+- Every "done", "fixed", "green", or "merged" claim must cite concrete evidence:
+  command, check-run, PR number, commit, test count, or explicit VM回执.
+- If a local wrapper returns only an exit code or binlog-only output, say that
+  counts are unavailable.
+- Skips are acceptable only when the test has an explicit environment gate and a
+  meaningful skip reason.
+- Documentation-only PRs do not refresh code-test baselines.
+- Existing unrelated failures must be named and split into separate PRs; do not
+  hide them inside feature work.
+
+## 6. PR Gate
+
+Each PR must be small, single-purpose, and use
+[`docs/superpowers/templates/pr-gate-checklist.md`](docs/superpowers/templates/pr-gate-checklist.md).
+
+Before merge:
+
+- Confirm current base/head against `origin/main`.
+- Required `test` check must be green.
+- Soft `review` must be inspected. Advisory failures must either be fixed or
+  answered with a concise N/A reason on the PR.
+- Windows classification must be explicit: no Windows evidence, build,
+  run-and-log, or UI-visible validation.
+- If GitHub reports a branch as behind/blocked/unstable, update or wait for
+  checks rather than bypassing branch protection.
+
+After merge:
+
+- Fetch `origin/main`.
+- Report the merge commit.
+- State whether status ledger, requirements, project structure, or active plan
+  index need follow-up updates.
+
+## 7. Documentation Synchronization
+
+Document roles are fixed:
+
+- `docs/status/current.md`: current status ledger and monitoring interpretation.
+- `AGENTS.md`: roadmap projection plus agent operating rules.
+- `CLAUDE.md`: collaboration, engineering, WPF, and PR process conventions.
+- `docs/requirements.md`: requirement-implementation-test traceability.
+- `docs/PROJECT-STRUCTURE.md`: structure, inventory, and test matrix projection.
+
+When implementation changes status, inventory, requirements, structure, or
+roadmap meaning, update the corresponding projection in the same PR or open a
+docs-sync PR immediately after. If documents disagree, the status ledger wins
+until projections are corrected.
+
+## 8. Communication Floor
+
+- Be explicit about uncertainty; label "待核实" when evidence is missing.
+- Do not claim memory, preference, file, commit, PR, or VM state changed unless
+  a tool action or user-provided evidence proves it.
+- Prefer concise Chinese status updates with concrete next actions.
+- When blocked, state the exact blocker and the smallest unblock action.
+
 # MetBench System-level MT Roadmap
 
 This project is being extended from method/unit-level metamorphic testing (MT) to
