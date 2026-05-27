@@ -126,3 +126,27 @@ Refresh this document (matrix table + top-1 candidate) when any of the following
 - A new MR is added to the catalog (filled cell count moves)
 - An MR's `equation_key` or `meta_pattern` is migrated (Unclassified bucket shrinks; gap list shifts)
 - Phase 5 picks and ships a Tier-A candidate (the corresponding cell moves from gap → filled; recommend the next gap)
+
+
+---
+
+## §7 Known data debt: 8 MRs with empty `equation_key` (deferred)
+
+The §2 matrix shows 8/32 MRs falling under the empty-string `equation_key` bucket. This is **catalog metadata debt**, not a code defect — the auditor faithfully reports what the manifests carry. Once those 8 MRs gain proper `equation_key` values, the matrix collapses by one row and the gap list shrinks correspondingly (currently 12 gaps; estimated 6–8 after migration).
+
+Proposed mapping (to be confirmed by a future data-only PR):
+
+| MR id | Proposed `equation_key` | Source manifest |
+|---|---|---|
+| `damped-oscillator-scale-state` | `damped-oscillator` | `SUT/damped_oscillator/catalog.json` |
+| `heat-equation-amplitude` | `heat-equation-1d` | `SUT/heat_equation/catalog.json` |
+| `lotka-volterra-scale-gamma` | `lotka-volterra` | `SUT/lotka_volterra/catalog.json` (the pure-stdlib variant) |
+| `openmc-pincell-nu-sigma-f` | `neutron-transport` | `SUT/openmc/catalog.json` |
+| `openmc-pincell-sigma-a` | `neutron-transport` | `SUT/openmc/catalog.json` |
+| `openmoc-pincell-nu-sigma-f` | `neutron-transport` | `SUT/openmoc/catalog.json` |
+| `openmoc-pincell-sigma-a` | `neutron-transport` | `SUT/openmoc/catalog.json` |
+| `projectile-scale-v0` | `projectile` (new EquationMetadata) | `SUT/projectile/catalog.json` |
+
+Deferred because: each maps to a different SUT, so the migration is a per-manifest edit, not a single sweep. The Phase 5 gap-fill (`subchannel-friction-invariance`, #192) does not depend on this migration. A docs+data PR can land independently after Phase 5 / 6.
+
+When the migration ships, refresh §2 + §3 + §4 here and re-run `MetaPatternMatrixAuditorTests` to lock the new numbers.
