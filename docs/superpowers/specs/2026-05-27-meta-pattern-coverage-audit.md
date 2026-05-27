@@ -130,3 +130,41 @@ Refresh this document (matrix table + top-1 candidate) when any of the following
 - A new MR is added to the catalog (filled cell count moves)
 - An MR's `equation_key` or `meta_pattern` is migrated (Unclassified bucket shrinks; gap list shifts)
 - Phase 5 picks and ships a Tier-A candidate (the corresponding cell moves from gap → filled; recommend the next gap)
+
+
+---
+
+## §7 Known data debt: 8 MRs with empty `equation_key`
+
+The §2 matrix shows 8/33 MRs falling under the empty-string `equation_key` bucket. This is **catalog metadata debt**, not a code defect — the auditor faithfully reports what the manifests carry. Once those 8 MRs gain proper `equation_key` values, the matrix collapses by one row (the empty-key bucket disappears) and the gap list shifts correspondingly: filled cells rebalance across the existing physical equation rows, and 1–2 new physical gaps surface (e.g. `(damped-oscillator, Conv)` and `(projectile, Conv)`) that the current snapshot cannot see.
+
+Proposed mapping (to be confirmed by a future data-only PR):
+
+| MR id | Proposed `equation_key` | Source manifest |
+|---|---|---|
+| `damped-oscillator-scale-state` | `damped-oscillator` | `SUT/damped_oscillator/catalog.json` |
+| `heat-equation-amplitude` | `heat-equation-1d` | `SUT/heat_equation/catalog.json` |
+| `lotka-volterra-scale-gamma` | `lotka-volterra` | `SUT/lotka_volterra/catalog.json` (pure-stdlib variant; SciPy variant already carries the key) |
+| `openmc-pincell-nu-sigma-f` | `neutron-transport` | `SUT/openmc/catalog.json` |
+| `openmc-pincell-sigma-a` | `neutron-transport` | `SUT/openmc/catalog.json` |
+| `openmoc-pincell-nu-sigma-f` | `neutron-transport` | `SUT/openmoc/catalog.json` |
+| `openmoc-pincell-sigma-a` | `neutron-transport` | `SUT/openmoc/catalog.json` |
+| `projectile-scale-v0` | `projectile` (new `EquationMetadata` row to add to `SystemMtMetadataCatalog`) | `SUT/projectile/catalog.json` |
+
+### Deferred because
+
+- Each map entry hits a different SUT manifest — the migration is 8 separate per-manifest edits rather than a single sweep.
+- 7 of the 8 reuse existing `EquationKey` values already present in `SystemMtMetadataCatalog.Equations`; only `projectile-scale-v0` needs a new `EquationMetadata` row.
+- The downstream `MetaPatternMatrixAuditorTests` snapshot will need its expected matrix updated in the same PR (the cell count and gap list shift in a single hop).
+- No urgency: nothing in the runtime depends on this metadata. The audit spec §2 just reads as more honest once the empty-key bucket is gone.
+
+### What this debt note enables
+
+A future contributor (human or agent) doing the migration can:
+1. Copy the table above as the working migration scope.
+2. Edit the 8 listed `SUT/<sut>/catalog.json` manifests + add 1 new `EquationMetadata` row.
+3. Re-run `MetaPatternMatrixAuditor.Audit(provider)` → refresh §2 matrix snapshot here.
+4. Update `MetaPatternMatrixAuditorTests` expected matrix.
+5. Confirm `dotnet test` 0 failed on Linux.
+
+That is the entire PR shape: data + one matrix-snapshot doc refresh + one test pin refresh.
