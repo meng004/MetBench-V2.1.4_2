@@ -22,6 +22,14 @@
 - [ ] Focused tests were run, or the PR explains why none apply.
 - [ ] Full cloud test baseline was run when code behavior changed, or the PR explains why not.
 - [ ] Documentation-only PRs do not claim a new code-test baseline.
+- [ ] **Public-contract ↔ fact pair (CLAUDE.md §12.4 R4)**: every public method XML doc claim ("honors X" / "implements Y" / "supports Z") has a corresponding fact asserting the claim is observable in output. Unclaimed contracts do not exist.
+
+## Cross-PR Consistency (CLAUDE.md §12.4)
+
+- [ ] **R1 · Parity test for multi-projection types**: if this PR adds / changes a field on a `public sealed record` (or any type) that has ≥ 2 projection paths (e.g. `FromBlueprint` + `MapToEntry`, HTML / Markdown / PDF / Word / Excel renderers, to-DTO / from-DTO), the corresponding `<TypeName>ParityTests.cs` (or equivalent) asserts the new field's parity. Adding a field on only one side fails this check.
+- [ ] **R2 · Multi-PR chain awareness**: if this PR is part of a ≥ 3-PR phased delivery (plan enumerates `Phase N` or `PR-X-N`), the PR body cites the chain and states whether this is an intermediate phase or the chain-end. **Chain-end** PRs (the final phase) must explicitly enqueue a fresh-session post-merge holistic review before marking the chain "Controlled" in `docs/status/current.md`.
+- [ ] **R3 · Spec-doc retrospective on Phase divergence**: if this PR's implementation differs from a Phase-K (K < N) spec doc's recommendation, **this PR or a same-day follow-up doc PR** re-touches that spec doc to mark the original recommendation as "REJECTED / REPLACED, reason …". Stale "top-1 candidate" claims are not allowed on `main`.
+- [ ] **R4 · cross-file change pinned by a fact**: if this PR touches behaviorally-paired files (e.g. `LegacyCatalogFactory` and `SystemMtMetadataCatalog`, or a runner script and its input adapter), at least one fact verifies the pairing — not just one fact per file.
 
 ## Windows Classification
 
