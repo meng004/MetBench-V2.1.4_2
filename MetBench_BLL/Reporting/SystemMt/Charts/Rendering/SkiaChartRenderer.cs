@@ -29,7 +29,10 @@ public sealed class SkiaChartRenderer : ISystemMtChartRenderer
         if (options.Height <= 0) throw new ArgumentOutOfRangeException(nameof(options), $"Height must be > 0 (got {options.Height})");
         if (options.Dpi <= 0) throw new ArgumentOutOfRangeException(nameof(options), $"Dpi must be > 0 (got {options.Dpi})");
 
-        var info = new SKImageInfo(options.Width, options.Height, SKColorType.Rgba8888, SKAlphaType.Premul);
+        // Opaque surface (alpha channel disabled): PNG encoder writes RGB,
+        // and downstream embedders (iTextSharp) don't generate a separate
+        // SMask XObject per chart image.
+        var info = new SKImageInfo(options.Width, options.Height, SKColorType.Rgba8888, SKAlphaType.Opaque);
         using var surface = SKSurface.Create(info);
         if (surface is null)
         {
