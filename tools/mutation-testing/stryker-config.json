@@ -1,0 +1,28 @@
+{
+  "stryker-config": {
+    "project-info": {
+      "name": "MetBench System MT Catalog Typed - mutation testing pilot",
+      "module": "MetBench_BLL.Core/SystemMT/Catalog/Typed",
+      "phase": "Phase 5 of docs/superpowers/plans/2026-05-27-ci-governance-cat-b-hardening-plan.md"
+    },
+    "project": "MetBench_BLL.Core.csproj",
+    "solution": "MetBench.sln",
+    "test-projects": ["MetBench_SystemMT.Tests/MetBench_SystemMT.Tests.csproj"],
+    "mutate": [
+      "MetBench_BLL.Core/SystemMT/Catalog/Typed/**/*.cs"
+    ],
+    "reporters": ["html", "json", "cleartext", "progress"],
+    "thresholds": {
+      "high": 85,
+      "low": 70,
+      "break": 0
+    },
+    "concurrency": 4,
+    "since": {
+      "enabled": false
+    },
+    "language-version": "Latest",
+    "verbosity": "info",
+    "additional-timeout": 120
+  }
+}
