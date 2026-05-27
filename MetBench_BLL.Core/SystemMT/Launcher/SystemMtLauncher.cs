@@ -486,6 +486,15 @@ public sealed record MrCatalogEntry(
     // PR-Bol-2A: 多相 error-monotonic MR 用 (null/empty = 走传统 2-side path)
     IReadOnlyList<MetBench_BLL.SystemMT.Pipeline.RefinementPhase>? RefinementPhases = null)
 {
+    /// <summary>
+    /// Meta-pattern slug declared by the manifest binding (<c>Mono</c> / <c>Inv</c> /
+    /// <c>Conv</c>, per <c>CLAUDE.md §2.2 T4</c>). Empty string when the catalog source
+    /// does not project meta-pattern (e.g. test fakes that pre-date PR-T3-7); the meta-
+    /// pattern auditor treats empty as "Unclassified" so unmigrated rows are visible
+    /// rather than silently buried.
+    /// </summary>
+    public string MetaPattern { get; init; } = string.Empty;
+
     /// <summary>UI convenience: first step's transformation name (engine name, not display).</summary>
     public string PrimaryTransformationName =>
         TransformSteps.Count > 0 ? TransformSteps[0].TransformationName : string.Empty;
