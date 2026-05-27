@@ -7,7 +7,7 @@ namespace MetBench_BLL.SystemMT.Catalog;
 
 /// <summary>
 /// Transitional <see cref="IMrCatalogProvider"/> that wraps the legacy hardcoded
-/// blueprints from <see cref="LegacyCatalogFactory"/>. 31 MR × 16 SUT entries
+/// blueprints from <see cref="LegacyCatalogFactory"/>. 32 MR × 16 SUT entries
 /// (17 + 2 from T3 Poisson 1D + 2 from T3 Advection 1D + 2 from T3 Wave 1D + 2 from T3 Burgers 1D + 2 from T3C-IVP scipy-ivp-lotka-volterra + 2 from T3C-BVP scipy-bvp-poisson-1d + 1 synthetic test SUT _test-csv from PR-A non-JSON I/O adapter); provided so Task 3 can switch the launcher to
 /// provider-backed loading without changing behavior. Slated for removal in Task 7
 /// once the manifest-backed catalog has shipped and is the WPF default.
