@@ -1,15 +1,9 @@
-name: pr-soft-review
+name: pr-ai-review
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, ready_for_review, edited]
     branches: [main]
-    # Skip docs-only PRs: there is no compileable / pinned-count / Windows-classification
-    # surface to check, and the merge-gate hard `test` job already covers everything else.
-    # Saves ~5 min and ~140-package npm install per docs-only PR (e.g. scoped-plan PRs).
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
 
 permissions:
   contents: read
@@ -18,19 +12,114 @@ permissions:
   id-token: write  # required by claude-code-action@v1 internal OIDC handshake (see spec §11 R4)
 
 jobs:
-  review:
+  codex-governance-review:
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      # Cache the npm package store so claude-code-action's transient install does not
-      # re-download its ~140 dependencies on every PR push. Keyed on the action major
-      # version so a bump to v2 invalidates the cache. Cache miss is fine — first run
-      # populates it; subsequent runs hit and skip the network step inside the action.
+
+      - name: Pre-fetch PR refs for governance diff
+        env:
+          PR_BASE_REF: ${{ github.event.pull_request.base.ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          git fetch --no-tags origin \
+            "$PR_BASE_REF" \
+            "+refs/pull/$PR_NUMBER/head"
+
+      - name: Codex governance review
+        id: codex
+        continue-on-error: true
+        uses: openai/codex-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          sandbox: read-only
+          safety-strategy: read-only
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+            BASE SHA: ${{ github.event.pull_request.base.sha }}
+            HEAD SHA: ${{ github.event.pull_request.head.sha }}
+
+            You are the MetBench governance gatekeeper.
+
+            Review ONLY this pull request's diff and PR body. Do not modify files.
+            Focus on project control, not deep implementation logic.
+
+            Authoritative files:
+            - AGENTS.md
+            - CLAUDE.md
+            - docs/status/current.md
+            - docs/requirements.md
+            - docs/PROJECT-STRUCTURE.md
+            - docs/superpowers/templates/pr-gate-checklist.md
+            - docs/superpowers/plans/2026-05-25-metbench-active-plan-index.md
+
+            Check:
+            1. Scope: one primary purpose; no unrelated cleanup.
+            2. Requirements / plan traceability: affected T/F/G item or active plan is named.
+            3. Status truth: if current status, inventory, baseline, or execution order changes,
+               docs/status/current.md and projection docs are updated consistently.
+            4. Windows classification: WPF, MetBench_Client, App.xaml.cs, Windows path,
+               startup, DB path, or UI-visible changes have the required VM evidence level.
+            5. Review evidence: PR body records Layer 1 / Layer 2 review intent or evidence.
+            6. MetBench boundaries: Method MT and System MT are not mixed; System MT verification
+               extensions stay on Catalog/Typed runtime boundaries.
+            7. Docs-only PRs do not claim a new code-test baseline.
+
+            Return a concise Markdown comment with this exact title:
+            ## Codex Governance Review (Advisory)
+
+            Use sections:
+            ### Verdict
+            ### Findings
+            ### Required follow-up before merge
+
+            Use P0/P1/P2 severity. Quote file paths and line numbers where possible.
+            If there are no findings, say "No governance blockers found."
+
+      - name: Post Codex governance review
+        if: steps.codex.outputs.final-message != ''
+        uses: actions/github-script@v7
+        env:
+          CODEX_FINAL_MESSAGE: ${{ steps.codex.outputs.final-message }}
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: process.env.CODEX_FINAL_MESSAGE,
+            });
+
+      - name: Report Codex review unavailable
+        if: steps.codex.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: "## Codex Governance Review (Advisory)\n\nCodex review did not complete. This advisory failure does not replace the required `test` gate. Run manual governance review against `docs/superpowers/templates/pr-gate-checklist.md` before merge.",
+            });
+
+  claude-semantic-review:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
       - name: Cache npm store
         uses: actions/cache@v4
         with:
@@ -38,7 +127,10 @@ jobs:
           key: ${{ runner.os }}-claude-code-action-v1-npm
           restore-keys: |
             ${{ runner.os }}-claude-code-action-v1-npm
-      - name: Claude soft review
+
+      - name: Claude semantic review
+        id: claude
+        continue-on-error: true
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -49,45 +141,45 @@ jobs:
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
 
-            You are reviewing a pull request against the MetBench PR Gate Checklist.
+            You are the MetBench semantic code reviewer.
             The PR branch is already checked out in the current working directory.
 
-            Authoritative checklist: docs/superpowers/templates/pr-gate-checklist.md
-            Authoritative ledger:    docs/status/current.md
-            Authoritative plan index: docs/superpowers/plans/2026-05-25-metbench-active-plan-index.md
+            Codex covers governance. Do NOT repeat checklist mechanics unless they
+            expose a code-level defect. Focus on semantic correctness and maintainability.
 
-            Run, in order, the mechanical sections of the PR Gate Checklist (Scope,
-            Facts, Tests, Windows Classification) against THIS PR's actual diff and
-            body. For each section, report PASS / WARN / FAIL with one-line evidence
-            (file path, line, or PR body excerpt). Skip the Review section — that is
-            your job. Skip the Merge section — that is the human's job.
-
-            Then run these MetBench-specific cross-checks:
-            1. If the diff touches MetBench_Client/** or any *.xaml*, the PR body
-               Windows Classification must NOT be "No Windows evidence required".
-            2. If the diff touches MetBench_BLL.Core/SystemMT/Catalog/** or
-               LegacyCatalogFactory.cs, the description text in SUT/<sut>/catalog.json
-               for any added MR must match the corresponding MrSummary.Description
-               byte-for-byte.
-            3. If the PR claims a new code-test baseline in its body but the diff
-               contains zero changes outside docs/ or SUT/<sut>/sample/, flag it.
-            4. If the PR base..head diff scope-creeps beyond what the PR body claims
-               (e.g. body says "Burgers SUT" but diff also touches openmoc), flag it.
-            5. If docs/status/current.md is in the diff, verify the baseline commit
-               field references a commit that is reachable from origin/main as of the
-               PR base; flag obvious stale-baseline copy-paste.
+            Review the PR diff for:
+            1. C# logic bugs, bad exception paths, non-determinism, and edge cases.
+            2. System MT runtime boundaries: launcher facade, pipeline, Catalog/Typed
+               predicates, migration factories, and evidence/reporting contracts.
+            3. Method MT isolation: no accidental Method MT dependency in System MT paths.
+            4. Test adequacy: tests must prove behavior, not only shape or counts.
+            5. Windows/WPF code semantics when touched; if UI is touched, check that the
+               PR does not rely on cloud CI to prove WPF behavior.
+            6. Data/catalog safety: fail-closed validation, path safety, deterministic
+               runtime key resolution, and no silent fallback.
 
             Post your findings as a single top-level PR comment using:
               gh pr comment ${{ github.event.pull_request.number }} --body "<your review>"
             with sections:
-              ## Soft Review: PR Gate Checklist (Advisory)
-              ### Mechanical checks
-              ### MetBench-specific cross-checks
-              ### Reviewer note for the human approver
+              ## Claude Semantic Review (Advisory)
+              ### Verdict
+              ### Findings
+              ### Test and risk notes
 
-            Be terse. Bullet points, not prose. Quote file:line for any FAIL.
+            Use P0/P1/P2 severity. Quote file:line for any finding.
+            If there are no findings, say "No semantic blockers found."
+            Be terse. Bullet points, not prose.
             Only post the GitHub comment — do NOT submit review text as messages.
 
             Do NOT push commits. Do NOT change labels. Do NOT request changes via the
             review API — leave it as a top-level comment so a human stays in the
             approve loop.
+
+      - name: Report Claude review unavailable
+        if: steps.claude.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} --body "## Claude Semantic Review (Advisory)
+
+          Claude semantic review did not complete. This advisory failure does not replace the required \`test\` gate. Run manual semantic review for C# runtime boundaries, exception paths, and test adequacy before merge."

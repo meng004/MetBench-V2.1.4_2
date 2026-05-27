@@ -46,21 +46,25 @@ Choose exactly one highest required level. If multiple categories apply, choose 
 - [ ] Merge method is appropriate for the branch policy.
 - [ ] After merge, local `main` should be synchronized before monitoring reads the workspace.
 
-## Soft Review (advisory, automated)
+## AI Review (advisory, automated)
 
 Every PR opened against `main` automatically triggers `pr-soft-review.yml` (per
 [`docs/superpowers/specs/2026-05-26-pr-soft-review-via-claude-code-action.md`](../specs/2026-05-26-pr-soft-review-via-claude-code-action.md))
-which runs `anthropics/claude-code-action@v1` in headless OAuth mode against
-this checklist's Scope / Facts / Tests / Windows Classification sections plus
-MetBench-specific cross-checks. The result is posted as a single PR review
-comment titled "Soft Review: PR Gate Checklist (Advisory)".
+which now runs two advisory reviewers:
 
-- [ ] Soft Review comment present on the PR (workflow ran, did not silently skip).
-- [ ] Each FAIL in the Soft Review comment is either resolved or has a one-line
+- `openai/codex-action@v1` as **Codex Governance Review** for scope, status,
+  requirements/plan traceability, Windows classification, and Method MT /
+  System MT boundary drift.
+- `anthropics/claude-code-action@v1` as **Claude Semantic Review** for C# logic,
+  exception paths, runtime boundaries, test adequacy, and WPF semantic risk.
+
+- [ ] Codex Governance Review comment present on the PR (workflow ran, did not silently skip).
+- [ ] Claude Semantic Review comment present on the PR (workflow ran, did not silently skip).
+- [ ] Each FAIL / P0 / P1 in either AI review comment is either resolved or has a one-line
       human reply explaining why it does not apply.
-- [ ] Soft Review is **never** added to GitHub branch protection's required
-      checks list — its job is to surface findings, not to block merge.
+- [ ] AI review jobs are **never** added to GitHub branch protection's required
+      checks list — their job is to surface findings, not to block merge.
 
-If the workflow itself errors (Max quota exhausted, Anthropic API down,
-secret missing) the PR can still be merged; record the absence and rely on
-manual Layer 1 + Layer 2 review.
+If the workflow itself errors (OpenAI / Anthropic API unavailable, quota
+exhausted, secret missing) the PR can still be merged; record the absence and
+rely on manual Layer 1 + Layer 2 review.
