@@ -163,6 +163,11 @@ public sealed class ManifestMrCatalogProvider : IMrCatalogProvider
                 ? defs.Select(d => new MetBench_BLL.SystemMT.Pipeline.RefinementPhase(
                     d.Role,
                     new Dictionary<string, string>(d.Parameters, StringComparer.Ordinal))).ToList()
-                : null);
+                : null)
+        {
+            // PR-T3-7: surface manifest meta_pattern so the coverage auditor can
+            // build the (equation × meta-pattern) matrix without re-parsing JSON.
+            MetaPattern = binding.MetaPattern,
+        };
     }
 }
