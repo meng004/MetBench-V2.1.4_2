@@ -206,7 +206,7 @@ INavigationService → SystemMtResultPage(scope) → DataContext = page
    ↓
 ViewModel.OnNavigatedTo() → RefreshAsync()
    ↓
-ISystemMtResultRepository.LoadAllAsync(ct)
+ISystemMtResultRepository.ListRecentAsync(limit: 100, ct)
    ↓
 Records.Clear() / Add(record × N)                 → DataGrid 重绑
    ↓
@@ -242,7 +242,7 @@ TwoWay binding → OnViewModeChanged
    ↓
 IsBusy = true; StatusMessage = "正在生成 PDF..."
    ↓
-Task.Run(() => _pdfRenderer.Render(records, evidenceByGuid, reportContext))
+Task.Run(() => _pdfRenderer.Render(records, evidenceByExecutionId, context))
    ↓
 SaveFileDialog(filter="*.pdf")  → 用户挑路径 (或 Cancel)
    ↓
@@ -286,7 +286,7 @@ IsBusy = false
 | `ChartFigure.SeriesList` 空 | plotter 返回 `Series = []`，XAML 显示 "(无数据点)" overlay；不抛异常 |
 | `ChartPoint` 含 NaN / ±∞ | LiveCharts 跳过；`StatusMessage = "提示：N 个数据点为 NaN/Inf 已跳过"`（显式提示，CLAUDE.md §6） |
 | `metric` 不在 `PhaseMetrics.Keys` | `AvailableMetrics` 下拉仅含合法值；万一非法 → `KeyNotFoundException` 转 InfoBar |
-| `evidenceByGuid == null` | Renderer 已支持（Linux Phase 3a/3b/3c 验收守住），report 跳过 TypedVerification 块 |
+| `evidenceByExecutionId == null` | Renderer 2-arg 重载 / 3-arg 重载传 null 均跳过 TypedVerification 块 |
 
 ### 6.2 投影 / 渲染异常
 
