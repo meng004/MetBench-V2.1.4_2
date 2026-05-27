@@ -19,7 +19,7 @@ public sealed class HardcodedMrCatalogProviderTests
         var entries = p.Load();
 
         // Branch state after PR-A non-JSON I/O adapter synthetic _test-csv SUT (+1 MR / +1 SUT): 30 MR × 16 SUT.
-        Assert.Equal(31, entries.Count);
+        Assert.Equal(32, entries.Count);
     }
 
     [Fact]
