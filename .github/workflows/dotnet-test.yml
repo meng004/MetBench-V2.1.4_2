@@ -64,3 +64,89 @@ jobs:
               --trx TestResults/test-results.trx \
               --total-budget-seconds 120 \
               --per-test-warn-ms 2000
+
+  # Mechanical governance grep replaces the prior anthropics/claude-code-action +
+  # openai/codex-action AI review workflow (`.github/workflows/pr-soft-review.yml`).
+  # Rationale: CLAUDE.md §12.4 R1/R3/R4 and §12.5 mechanized most of what AI review
+  # claimed to catch (parity facts, contract-honor facts, architecture guards) into
+  # hard `test`. The remaining governance items below are pure pattern matches —
+  # cheaper, faster, deterministic, no token spend, no anti-injection failures.
+  # Failures here are advisory: they post a GH Actions ::warning:: but do NOT fail
+  # the workflow (would otherwise need a separate required-check name; we keep
+  # `test` as the single hard gate per CLAUDE.md §12.1).
+  governance:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: PR body + diff inline governance checks
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          fail=0
+          warn() { echo "::warning::$1"; fail=$((fail + 1)); }
+
+          body=$(gh pr view "$PR_NUMBER" --json body --jq .body)
+          diff_files=$(git diff --name-only "$PR_BASE_SHA"..HEAD)
+
+          # Check 1 — Plan traceability (CLAUDE.md §11 / §12.4 R2):
+          # any non-docs-only PR should cite either an active plan path,
+          # a T#-anchor (T0..T6), or a CLAUDE.md / spec doc anchor in the body.
+          if ! echo "$diff_files" | grep -qvE '^docs/|\.md$'; then
+            : # docs-only PR — plan citation optional
+          elif ! echo "$body" | grep -qE 'docs/superpowers/(plans|specs)/|\bT[0-6]\b|CLAUDE\.md|PR-[A-Za-z0-9]'; then
+            warn "Plan traceability: PR body cites no active plan / T-anchor / spec / PR-id (CLAUDE.md §12.4 R2)"
+          fi
+
+          # Check 2 — Status truth (CLAUDE.md §11.3):
+          # changes to catalog (SUT/<sut>/catalog.json or LegacyCatalogFactory.cs) that
+          # bump the MR inventory must also touch docs/status/current.md.
+          if echo "$diff_files" | grep -qE 'SUT/[^/]+/catalog\.json|LegacyCatalogFactory\.cs'; then
+            inv_delta=$(git diff "$PR_BASE_SHA"..HEAD -- 'SUT/*/catalog.json' 'MetBench_BLL.Core/SystemMT/Launcher/LegacyCatalogFactory.cs' \
+              | grep -c '^[+-][^+-].*"mr_id"' || true)
+            if [ "$inv_delta" -gt 0 ] && ! echo "$diff_files" | grep -q 'docs/status/current\.md'; then
+              warn "Status truth: catalog touched with MR-id delta but docs/status/current.md not in diff (CLAUDE.md §11.3)"
+            fi
+          fi
+
+          # Check 3 — Windows classification (CLAUDE.md §9 / §12.4):
+          # if MetBench_Client/ or *.xaml* is touched, PR body must mention Windows
+          # verification (RDP / VM / FlaUI / Windows VM) or it must be an explicit
+          # Windows-only PR (e.g. title prefix or label).
+          if echo "$diff_files" | grep -qE '^MetBench_Client/|\.xaml'; then
+            if ! echo "$body" | grep -qiE 'Windows VM|RDP|FlaUI|Parallels|Windows-only|VM evidence'; then
+              warn "Windows classification: WPF/MetBench_Client touched but PR body does not document Windows verification (CLAUDE.md §3 / §9)"
+            fi
+          fi
+
+          # Check 4 — Docs-only baseline misclaim (CLAUDE.md §12.4):
+          # if diff is docs-only (all paths under docs/ or *.md), PR body should
+          # not claim a new code-test baseline (no "passed: NNNN" / "X / 0 / Y" pattern
+          # except as a quote of an existing baseline).
+          if ! echo "$diff_files" | grep -qvE '^docs/|\.md$'; then
+            if echo "$body" | grep -qE 'NEW baseline|new baseline.*passed|baseline:.*passed'; then
+              warn "Docs-only baseline misclaim: PR is docs-only but body claims a new code-test baseline (CLAUDE.md §12.4)"
+            fi
+          fi
+
+          # Check 5 — PR Gate Checklist 7 sections (CLAUDE.md §12.2):
+          # PR body should carry the 7 mandatory section headers.
+          for section in '1\. Scope' '2\. Facts' '3\. Tests' '4\. Windows' '5\. Review' '6\. Merge' '7\. Soft Review'; do
+            if ! echo "$body" | grep -qE "(##|###) +$section"; then
+              warn "PR Gate Checklist: missing section header matching '$section' (CLAUDE.md §12.2 / docs/superpowers/templates/pr-gate-checklist.md)"
+            fi
+          done
+
+          echo "Governance grep result: $fail warning(s). Hard 'test' gate is the only blocker."
+          # Exit 0 unconditionally — advisory only, matches the prior AI-review semantics.
+          exit 0

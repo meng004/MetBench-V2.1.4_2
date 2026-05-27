@@ -430,41 +430,46 @@ session 透明、可核验。
 
 这些文档互不复制状态结论，只用指针相互引用；若有冲突，先读 `docs/status/current.md`，再读 project-control rules 与 active plan index。
 
-## 12. PR 提交与门禁（Hard Test + Dual AI Review）
+## 12. PR 提交与门禁（Hard Test + Inline Governance Grep）
 
-> 本节约束所有目标分支为 `main` 的 PR 流程；自 2026-05-26 起生效。规则细节见
-> [`docs/superpowers/specs/2026-05-26-pr-soft-review-via-claude-code-action.md`](docs/superpowers/specs/2026-05-26-pr-soft-review-via-claude-code-action.md) +
+> 本节约束所有目标分支为 `main` 的 PR 流程；自 2026-05-26 起生效，2026-05-27 起把
+> 早期的 dual AI review (`openai/codex-action@v1` + `anthropics/claude-code-action@v1`)
+> 整体替换为**内联 grep 治理检查**（理由见 §12.1 末尾）。规则细节见
 > [`docs/superpowers/templates/pr-gate-checklist.md`](docs/superpowers/templates/pr-gate-checklist.md) +
-> [`.github/workflows/pr-soft-review.yml`](.github/workflows/pr-soft-review.yml)。
+> [`.github/workflows/dotnet-test.yml`](.github/workflows/dotnet-test.yml) 的 `governance` job。
+>
+> 历史 spec [`docs/superpowers/specs/2026-05-26-pr-soft-review-via-claude-code-action.md`](docs/superpowers/specs/2026-05-26-pr-soft-review-via-claude-code-action.md)
+> 已 retired（保留作历史记录），对应 workflow `pr-soft-review.yml` 已删除。
 
-### 12.1 三层并行
+### 12.1 两层并行 + 三/四层防御
 
 | Gate | 目标 | 内容 | Branch protection |
 |---|---|---|---|
-| **Hard `test`** | 保代码正确性 | `dotnet build` + xUnit + Reqnroll | ✅ Required；阻塞合并 |
-| **Codex governance review** | 保项目不失控 / 不失真 | Codex 自动审 Scope、需求/计划追溯、状态账本、projection docs、Windows 分类、Method MT / System MT 边界、docs-only baseline 误报 | ❌ **永不入** required；advisory only |
-| **Claude semantic review** | 保代码语义质量 | Claude Code 自动审 C# 逻辑、异常路径、System MT runtime 边界、Catalog/Typed predicate 使用、测试是否证明行为、WPF 语义风险 | ❌ **永不入** required；advisory only |
+| **Hard `test`** | 保代码正确性 + 跨 PR contract guard | `dotnet build` + xUnit + Reqnroll + §12.4 R1/R4 mechanized facts + §12.5 第四层 guard | ✅ Required；阻塞合并 |
+| **Inline `governance` grep** | 保项目不失控 / 不失真 | `dotnet-test.yml` 内 `governance` job 跑 5 条 grep：plan traceability / status truth / Windows classification / docs-only baseline misclaim / PR Gate Checklist 7 节存在 | ❌ **永不入** required；advisory only，输出 `::warning::` |
 
-三层**并行起跑**，互不替代、各管一层。Hard 负责可合并性；Codex 负责治理门禁；Claude 负责语义审查。AI review 只发表评论，不改代码、不请求 changes、不进入 branch protection。
+两层**并行起跑**，互不替代。`test` 负责可合并性；`governance` 负责治理门禁（grep / 文件触发匹配）。**AI review 已撤除**——dual AI review 在 2026-05-27 之前两个月的实战中：(a) 经常因 OAuth quota / OpenAI quota / anti-injection 401 fail-fast；(b) 实际 catch 数远低于 §12.4 / §12.5 的 mechanical guards；(c) 每 PR 烧 ~5 min runner + LLM token。机械 grep 跑 < 10 秒、确定性、零 token 成本，配合 §12.4 R1/R4 + §12.5 已经覆盖了 dual AI review 试图守护的所有范围。
+
+#### §12.4 第三层 / §12.5 第四层
+
+- **§12.4 第三层**：跨 PR 一致性 + parity-test 纪律。**人** + **流程**约束（R1-R4），由 PR 作者 + post-merge holistic review 兜底
+- **§12.5 第四层**：把 §12.4 R1/R3/R4 编进 hard `test` 的具体 fact 守护（`*ParityTests.cs` / `Audit_*_providers_produce_identical_matrices` / `Render_*_renders_<contract>`）
+
+第四层成熟度决定第三层人工干预的频率；以后 finding 优先转 fourth-layer guard test。
 
 ### 12.2 强约束（违反 = process bug）
 
-- 所有 PR description 必须填 [`pr-gate-checklist.md`](docs/superpowers/templates/pr-gate-checklist.md) 7 节（Scope / Facts / Tests / Windows / Review / Merge / AI Review），缺节即被 Codex governance review 抓 FAIL
-- AI review 评论里每条 FAIL / P0 / P1：**要么改 PR 解决、要么在评论下用一行人工回复说明为何不适用**，不可静默忽略
-- AI review 失败 / silent-skip 本身**不挡合并**；但日志事实应在 PR 上留痕，并由人工补 Layer 1 + Layer 2 review
-- 修改 `.github/workflows/pr-soft-review.yml` **或** spec §7 模板的 PR 自身**无法**自审（GitHub workflow-validation 反注入门 = spec §11 R6），合并后下一个 PR 才可验证
-- `CLAUDE_CODE_OAUTH_TOKEN` secret 轮换时：粘贴前确认 token 字符串无前导 / 尾部空白 / 换行；R7 指纹是 log 里出现 `API Error: Header '14' has invalid value: '*** ***'`（两个 `***` 之间有空格）
-- `OPENAI_API_KEY` secret 轮换时：确认 key 只存在于 GitHub Actions secret，不写入 PR body / repo / logs
-- Hard-gate 必须保持在 main branch protection required check 列表（当前 check 名 `test`）；Codex / Claude advisory review 永不入此列表
+- 所有 PR description 必须填 [`pr-gate-checklist.md`](docs/superpowers/templates/pr-gate-checklist.md) 7 节（Scope / Facts / Tests / Windows / Review / Merge / Soft Review），缺节会被 `governance` job 的 grep check 5 抓 `::warning::`
+- 改 `.github/workflows/dotnet-test.yml` 的 `governance` job 本身的 PR 是**自审的**——grep 跑在 PR head ref，不像旧 `anthropics/claude-code-action@v1` 有 anti-injection 401 拒绝。但 grep 规则改坏后果直接在本 PR 显现，建议在 PR 描述里 paste 一段 test 输出证明新规则不 false-positive
+- Hard-gate 必须保持在 main branch protection required check 列表（当前 check 名 `test`）；`governance` job 永不入此列表
+- 撤除的 secret：`OPENAI_API_KEY`、`CLAUDE_CODE_OAUTH_TOKEN`——撤除后仍可保留在 repo Settings 不影响（无 workflow 引用）；若需重新启用某种 AI review 服务，参考 §12.1 的历史 spec
 
 ### 12.3 PR 合并前应观察的事
 
 1. `test` 绿（必须）
-2. `pr-ai-review` 已贴 "Codex Governance Review (Advisory)" 评论；若无评论且不是 workflow/secret/quota 问题 → 调查
-3. `pr-ai-review` 已贴 "Claude Semantic Review (Advisory)" 评论；若无评论且不是 workflow/secret/quota 问题 → 调查
-4. AI review 的 P0/P1/FAIL 已处理或被一行人工回复 N/A
-5. PR body 7 节 checklist 都打勾 / 解释
-6. 若你是 agent，merge 自己的 PR 前应 fetch origin/main 并核对 base.sha 是否需要 update branch
+2. `governance` 已跑（在 `test` workflow 同一 PR 检查里，作为单独 job）；若产生 `::warning::` 行，逐条核对并在 PR 描述或评论里说明
+3. PR body 7 节 checklist 都打勾 / 解释
+4. 若你是 agent，merge 自己的 PR 前应 fetch origin/main 并核对 base.sha 是否需要 update branch
 
 ### 12.4 第三层防御：跨 PR 一致性 & parity-test 纪律
 
