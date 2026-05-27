@@ -137,10 +137,12 @@ public sealed class MrBindingDefinition
             AssertionTypeCode, AssertionTypeCodes.ErrorMonotonic, StringComparison.Ordinal);
         if (isErrorMonotonic)
         {
-            if (RefinementPhases is null || RefinementPhases.Count < 2)
+            // ErrorMonotonicPredicateValidator requires OrderedRoles.Count ≥ 2; with the
+            // "last phase = ReferenceRole" convention that means total refinement_phases ≥ 3.
+            if (RefinementPhases is null || RefinementPhases.Count < 3)
                 throw new CatalogValidationException(
-                    $"MrBindingDefinition '{MrId}' uses 'error-monotonic' and requires refinement_phases with at least 2 entries " +
-                    $"(got {(RefinementPhases?.Count ?? 0)}).");
+                    $"MrBindingDefinition '{MrId}' uses 'error-monotonic' and requires refinement_phases with at least 3 entries " +
+                    $"(≥ 2 ordered roles + 1 reference role; got {(RefinementPhases?.Count ?? 0)}).");
             var seen = new HashSet<string>(StringComparer.Ordinal);
             for (var i = 0; i < RefinementPhases.Count; i++)
             {

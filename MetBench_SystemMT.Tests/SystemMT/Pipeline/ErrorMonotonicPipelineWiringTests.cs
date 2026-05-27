@@ -47,7 +47,10 @@ public sealed class ErrorMonotonicPipelineWiringTests : IDisposable
         ValueName: "k_eff",
         TargetFieldPath: "/tracking/num_azim",
         PathSyntax: "json-pointer",
-        Parameters: new Dictionary<string, string>(),
+        // PR-Bol-2A: phase.Parameters override ctx.Parameters; this default lets phases
+        // omit "factor" and inherit the no-op multiplier when they only care about
+        // accumulating outputs (each phase's per-role identity is what matters here).
+        Parameters: new Dictionary<string, string> { ["factor"] = "1" },
         Tolerance: new AssertionTolerance(),
         ExtraAssertionValues: null,
         SutName: "fake-sut",

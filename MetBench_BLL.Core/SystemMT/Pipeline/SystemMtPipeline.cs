@@ -407,8 +407,17 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
                 if (i == 0) { firstInputPath = phaseInputPath; firstOutputPath = phaseOutputPath; }
                 if (i == mp.Phases.Count - 1) { lastInputPath = phaseInputPath; lastOutputPath = phaseOutputPath; }
 
-                // Apply transformation with per-phase parameters
-                var phaseDict = transformation.Apply(sourceDict, ctx.TargetFieldPath, phase.Parameters);
+                // Merge blueprint defaults (ctx.Parameters) with per-phase overrides; phase wins on conflict.
+                // This lets common parameters (e.g. mesh size baseline) live once on the blueprint and only
+                // the per-phase delta (e.g. factor) appear in refinement_phases.
+                var mergedParameters = new Dictionary<string, string>(ctx.Parameters, StringComparer.Ordinal);
+                foreach (var (k, v) in phase.Parameters)
+                {
+                    mergedParameters[k] = v;
+                }
+
+                // Apply transformation with merged parameters
+                var phaseDict = transformation.Apply(sourceDict, ctx.TargetFieldPath, mergedParameters);
 
                 // Write phase input via Python input parser
                 var dictTempPath = Path.Combine(artifactsDir, $"phase.dict.{phase.Role}.json");

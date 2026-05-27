@@ -47,7 +47,10 @@ public sealed class MultiPhasePipelineTests : IDisposable
         ValueName: "k_eff",
         TargetFieldPath: "/tracking/num_azim",
         PathSyntax: "json-pointer",
-        Parameters: new Dictionary<string, string>(),
+        // PR-Bol-2A: phase.Parameters override ctx.Parameters; the default `factor=1`
+        // makes the ScaleField transform a no-op so each phase's role-keyed output is
+        // determined by the FakeProcessExecutor mapping rather than the transform.
+        Parameters: new Dictionary<string, string> { ["factor"] = "1" },
         Tolerance: new AssertionTolerance(),
         ExtraAssertionValues: null,
         SutName: "fake-sut",
@@ -315,27 +318,30 @@ public sealed class MultiPhasePipelineTests : IDisposable
     }
 
     [Fact]
-    public async Task Multi_phase_two_phase_minimum_runs_two_SUT_invocations()
+    public async Task Multi_phase_three_phase_minimum_runs_three_SUT_invocations()
     {
-        // Boundary: 2 phases works (OrderedRoles=[coarse] + ReferenceRole=reference).
+        // Boundary: ErrorMonotonicPredicate validator requires OrderedRoles.Count ≥ 2
+        // (ErrorMonotonicPredicateValidator.cs:21–24). With the "last phase = ReferenceRole"
+        // convention this means total phases ≥ 3. Sanity-check that the boundary actually
+        // works end-to-end.
         var spec = TypedSpecFactory.ForErrorMonotonic(
             "mr-em", "k_eff",
-            new[] { "coarse" }, "reference");
+            new[] { "coarse", "medium" }, "reference");
         var predicate = (ErrorMonotonicPredicate)spec.Predicates![0];
-        // Coarse-error = |1.43 - 1.44| = 0.01; single-step monotonic by definition.
-        var exec = MakeExecutor(new() { ["coarse"] = 1.43, ["reference"] = 1.44 });
+        var exec = MakeExecutor(new() { ["coarse"] = 1.40, ["medium"] = 1.43, ["reference"] = 1.44 });
         var pipeline = new SystemMtPipeline(exec);
         var ctx = MakeBaseContext() with { TypedSpec = spec, TypedPredicate = predicate };
         var mp = new MultiPhaseExecutionContext(ctx, new[]
         {
             new RefinementPhase("coarse", new Dictionary<string, string>()),
+            new RefinementPhase("medium", new Dictionary<string, string>()),
             new RefinementPhase("reference", new Dictionary<string, string>()),
         });
 
         var outcome = await pipeline.ExecuteMultiPhaseAsync(mp);
 
         Assert.Equal(PipelineStatus.Ok, outcome.FinalStatus);
-        Assert.Equal(2, _runnerCommands.Count);
-        Assert.Equal(2, outcome.PhaseMetrics!.Count);
+        Assert.Equal(3, _runnerCommands.Count);
+        Assert.Equal(3, outcome.PhaseMetrics!.Count);
     }
 }
