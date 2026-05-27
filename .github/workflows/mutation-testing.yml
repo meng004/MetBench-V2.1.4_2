@@ -1,0 +1,106 @@
+name: mutation-testing
+
+# Phase 5 of the CI Cat B hardening plan
+# (docs/superpowers/plans/2026-05-27-ci-governance-cat-b-hardening-plan.md).
+# Runs Stryker.NET against MetBench_BLL.Core/SystemMT/Catalog/Typed/ to surface
+# negative-space test gaps (survived mutations = missing assertions).
+#
+# Triggers:
+#   - Weekly cron Monday 08:00 UTC (establishes baseline drift over time)
+#   - Manual workflow_dispatch (on-demand audit)
+#   - PR label 'mutation-testing' (opt-in per-PR for risky catalog changes)
+#
+# Output: StrykerOutput/ uploaded as 'stryker-report' artifact. No hard gate
+# at the MVP — `break: 0` in stryker-config.json. Future PR may promote.
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'    # Monday 08:00 UTC
+  workflow_dispatch:
+  pull_request:
+    types: [labeled]
+
+permissions:
+  contents: read
+  pull-requests: write   # to comment summary back onto a labeled PR
+
+jobs:
+  mutation:
+    if: github.event_name != 'pull_request' || github.event.label.name == 'mutation-testing'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show pre-installed toolchain
+        run: |
+          dotnet --list-sdks
+          dotnet --version
+
+      - name: Install dotnet-stryker
+        run: dotnet tool install --global dotnet-stryker
+
+      - name: Restore + build solution
+        # Stryker needs a clean baseline build before mutating.
+        run: |
+          dotnet restore MetBench.sln
+          dotnet build MetBench_BLL.Core/MetBench_BLL.Core.csproj --no-restore --nologo
+          dotnet build MetBench_SystemMT.Tests/MetBench_SystemMT.Tests.csproj --no-restore --nologo
+
+      - name: Run Stryker.NET (typed catalog scope)
+        # Adds dotnet tools to PATH (dotnet tool install --global drops binaries
+        # under $HOME/.dotnet/tools which is not automatically on PATH inside
+        # GH Actions Ubuntu image).
+        env:
+          PATH: ${{ env.HOME }}/.dotnet/tools:${{ env.PATH }}
+        run: |
+          export PATH="$HOME/.dotnet/tools:$PATH"
+          dotnet stryker --config-file tools/mutation-testing/stryker-config.json
+
+      - name: Upload mutation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stryker-report
+          path: StrykerOutput/
+          retention-days: 30
+
+      - name: Summarize for PR comment (label-triggered only)
+        if: github.event_name == 'pull_request' && github.event.label.name == 'mutation-testing'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          json_report=$(find StrykerOutput -name 'mutation-report.json' | head -1 || true)
+          if [ -z "$json_report" ] || [ ! -f "$json_report" ]; then
+            echo "Stryker report JSON not found; skipping PR summary"
+            exit 0
+          fi
+          # Extract a minimal summary from the JSON
+          total=$(jq '[.files[].mutants[]] | length' "$json_report")
+          killed=$(jq '[.files[].mutants[] | select(.status == "Killed")] | length' "$json_report")
+          survived=$(jq '[.files[].mutants[] | select(.status == "Survived")] | length' "$json_report")
+          no_coverage=$(jq '[.files[].mutants[] | select(.status == "NoCoverage")] | length' "$json_report")
+          if [ "$total" -gt 0 ]; then
+            score=$(awk -v k="$killed" -v t="$total" 'BEGIN { printf "%.1f", (k / t) * 100 }')
+          else
+            score="n/a"
+          fi
+          {
+            echo "## Mutation testing summary (Phase 5 pilot)"
+            echo ""
+            echo "Scope: \`MetBench_BLL.Core/SystemMT/Catalog/Typed/\`"
+            echo ""
+            echo "| Status | Count |"
+            echo "|---|---|"
+            echo "| Total mutants | ${total} |"
+            echo "| Killed | ${killed} |"
+            echo "| Survived | ${survived} |"
+            echo "| No coverage | ${no_coverage} |"
+            echo "| Mutation score | ${score}% |"
+            echo ""
+            echo "Survived + No coverage are actionable test-gap findings. Download the full HTML report from the workflow artifact \`stryker-report\` for line-level details."
+          } > /tmp/mutation-summary.md
+          gh pr comment "$PR_NUMBER" --body-file /tmp/mutation-summary.md
