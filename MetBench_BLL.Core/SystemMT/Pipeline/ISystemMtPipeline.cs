@@ -21,4 +21,19 @@ public interface ISystemMtPipeline
         PipelineContext context,
         IProgress<string>? progress = null,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// PR-Bol-2A: 多相 reference-convergence 流水线。串行执行 <c>mp.Phases</c> 中的每个相位
+    /// (per-phase parameter overrides), 累积每相位的 metric 字典, 最后用 typed dispatcher
+    /// 对 <c>mp.Base.TypedSpec</c> + <c>mp.Base.TypedPredicate</c> (launcher 预构建)
+    /// 跑一次 <see cref="MetBench_BLL.SystemMT.Catalog.Typed.Runtime.PredicateDispatcher.Dispatch"/>.
+    /// 不做字符串-代码分派 — typed spec 必须由 launcher 注入 <c>mp.Base</c>。
+    /// </summary>
+    /// <param name="mp">多相执行上下文。</param>
+    /// <param name="progress">阶段切换回调；每相位前 emit <c>"running-phase:{role}"</c>。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    Task<PipelineOutcome> ExecuteMultiPhaseAsync(
+        MultiPhaseExecutionContext mp,
+        IProgress<string>? progress = null,
+        CancellationToken cancellationToken = default);
 }

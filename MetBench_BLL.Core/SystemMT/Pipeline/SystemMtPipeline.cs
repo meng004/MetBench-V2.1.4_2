@@ -324,4 +324,208 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
             FailureReason: diagnosticReason);
         return (fallback, spec, predicate, verification);
     }
+
+    /// <summary>
+    /// PR-Bol-2A: 多相 reference-convergence 管线。串行执行 <c>mp.Phases</c>:
+    /// 每相位用 phase.Parameters 跑一次 <c>transform → write → run → parse</c>，
+    /// 累积 <c>phaseMetrics[role] = metrics</c>。最后用 launcher 预构建的 typed spec
+    /// + predicate 跑一次 <see cref="IPredicateDispatcher.Dispatch"/>。
+    ///
+    /// <para>设计契约（PR-Bol-2A）：</para>
+    /// <list type="bullet">
+    ///   <item><c>mp.Base.TypedSpec</c> 必须非空（launcher 必须预构建）；否则 fail-closed。</item>
+    ///   <item>每相位有独立的输入 / 输出文件 (<c>phase.in.{role}.json</c> / <c>phase.out.{role}.json</c>)。</item>
+    ///   <item>进度回调 emit <c>"running-phase:{role}"</c>；不进 <see cref="PipelineStatus.All"/>。</item>
+    ///   <item>显示兼容：第一相位 → <c>SourceMetrics</c>，最后相位 → <c>FollowupMetrics</c>。</item>
+    /// </list>
+    /// </summary>
+    public async Task<PipelineOutcome> ExecuteMultiPhaseAsync(
+        MultiPhaseExecutionContext mp,
+        IProgress<string>? progress = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (mp is null) throw new ArgumentNullException(nameof(mp));
+        if (mp.Phases is null || mp.Phases.Count == 0)
+            throw new ArgumentException("MultiPhaseExecutionContext requires at least one phase.", nameof(mp));
+
+        var ctx = mp.Base;
+        var startedAt = DateTime.UtcNow;
+        var artifactsDir = ctx.WorkingDirectory;
+        Directory.CreateDirectory(artifactsDir);
+
+        // Display-compat fields filled at the end from first / last phase.
+        TimeSpan firstElapsed = TimeSpan.Zero;
+        TimeSpan lastElapsed = TimeSpan.Zero;
+        int firstExitCode = 0;
+        int lastExitCode = 0;
+        string firstInputPath = "";
+        string lastInputPath = "";
+        string firstOutputPath = "";
+        string lastOutputPath = "";
+
+        try
+        {
+            if (ctx.TypedSpec is not { } typedSpec || ctx.TypedPredicate is not { } typedPredicate)
+            {
+                return Fail(PipelineStatus.Error,
+                    "ExecuteMultiPhaseAsync requires PipelineContext.TypedSpec + TypedPredicate "
+                    + "to be pre-built by the launcher (no string-code dispatch in the multi-phase path).");
+            }
+
+            // 1. ParsingSource — 一次性解析 source case
+            progress?.Report(PipelineStatus.ParsingSource);
+            var parseSourceCmd =
+                $"{ctx.InputParserCommand} parse --input \"{ctx.SourceCasePath}\"";
+            var psResult = await _processExecutor.RunAsync(
+                parseSourceCmd, artifactsDir, ctx.TimeoutSeconds, cancellationToken)
+                .ConfigureAwait(false);
+            if (psResult.ExitCode != 0)
+                return Fail(PipelineStatus.Error, "ParsingSource failed: " + psResult.Stderr);
+
+            var sourceDict = (Dictionary<string, object?>)ConvertJsonValue(
+                JsonDocument.Parse(psResult.Stdout).RootElement)!
+                ?? throw new InvalidOperationException("Empty parse result");
+
+            // 解析变换一次（每相位共享，仅 phase.Parameters 不同）
+            var transformation = ctx.EquationFunctionRegistry is { } eqReg
+                ? new TransformationResolver(eqReg).Resolve(ctx.TransformationName, ctx.EquationKey)
+                : TransformationRegistry.Get(ctx.TransformationName);
+
+            var phaseMetrics = new Dictionary<string, IReadOnlyDictionary<string, double>>(
+                StringComparer.Ordinal);
+            var phaseMetricsForContext = new Dictionary<string, IReadOnlyDictionary<string, double>>(
+                StringComparer.Ordinal);
+
+            // 2-N. 每相位独立 transform → write → run → parse
+            for (var i = 0; i < mp.Phases.Count; i++)
+            {
+                var phase = mp.Phases[i];
+                progress?.Report($"{PipelineStatus.RunningPhase}:{phase.Role}");
+
+                var phaseInputPath = Path.Combine(artifactsDir, $"phase.in.{phase.Role}.json");
+                var phaseOutputPath = Path.Combine(artifactsDir, $"phase.out.{phase.Role}.json");
+                if (i == 0) { firstInputPath = phaseInputPath; firstOutputPath = phaseOutputPath; }
+                if (i == mp.Phases.Count - 1) { lastInputPath = phaseInputPath; lastOutputPath = phaseOutputPath; }
+
+                // Apply transformation with per-phase parameters
+                var phaseDict = transformation.Apply(sourceDict, ctx.TargetFieldPath, phase.Parameters);
+
+                // Write phase input via Python input parser
+                var dictTempPath = Path.Combine(artifactsDir, $"phase.dict.{phase.Role}.json");
+                File.WriteAllText(dictTempPath, JsonSerializer.Serialize(phaseDict));
+                var writeCmd =
+                    $"{ctx.InputParserCommand} write --dict-file \"{dictTempPath}\" --output \"{phaseInputPath}\"";
+                var wResult = await _processExecutor.RunAsync(
+                    writeCmd, artifactsDir, ctx.TimeoutSeconds, cancellationToken)
+                    .ConfigureAwait(false);
+                if (wResult.ExitCode != 0)
+                    return Fail(PipelineStatus.Error,
+                        $"WritingPhase '{phase.Role}' failed: {wResult.Stderr}");
+
+                // Run SUT
+                var runCmd = $"{ctx.RunnerCommand} --input \"{phaseInputPath}\" --output \"{phaseOutputPath}\"";
+                var rResult = await _processExecutor.RunAsync(
+                    runCmd, artifactsDir, ctx.TimeoutSeconds, cancellationToken)
+                    .ConfigureAwait(false);
+                if (i == 0) { firstElapsed = rResult.Elapsed; firstExitCode = rResult.ExitCode; }
+                if (i == mp.Phases.Count - 1) { lastElapsed = rResult.Elapsed; lastExitCode = rResult.ExitCode; }
+                if (rResult.TimedOut)
+                    return Fail(PipelineStatus.Timeout, $"Phase '{phase.Role}' SUT timed out");
+                if (rResult.ExitCode != 0)
+                    return Fail(PipelineStatus.Error,
+                        $"Phase '{phase.Role}' SUT failed: {rResult.Stderr}");
+
+                // Parse phase output → metrics
+                var phaseOutDict = await ParseOutputDict(ctx, phaseOutputPath, artifactsDir, cancellationToken)
+                    .ConfigureAwait(false);
+                var metrics = ExtractMetrics(phaseOutDict);
+                phaseMetrics[phase.Role] = metrics;
+                phaseMetricsForContext[phase.Role] = metrics;
+            }
+
+            // Asserting — typed dispatch via FromPhaseOutputs
+            progress?.Report(PipelineStatus.Asserting);
+            SystemMtAssertionResultV2 assertionResult;
+            VerificationResult? verification = null;
+            try
+            {
+                var verificationContext = TypedVerificationContextFactory.FromPhaseOutputs(
+                    typedSpec, phaseMetricsForContext, ctx.Parameters);
+                verification = _predicateDispatcher.Dispatch(typedPredicate, verificationContext);
+                assertionResult = verification.Assertion ?? new SystemMtAssertionResultV2(
+                    AssertionTypeCode: ctx.AssertionTypeCode,
+                    Passed: false,
+                    SourceValue: null,
+                    FollowupValue: null,
+                    ObservedDelta: null,
+                    ExpectedThreshold: null,
+                    Expression: $"{verification.Status} on '{ctx.ValueName}'",
+                    FailureReason: verification.Context?.Reason ?? verification.Status.ToString());
+            }
+            catch (InvalidOperationException ex)
+            {
+                assertionResult = SystemMtAssertionResultV2.UnknownType(ctx.AssertionTypeCode) with
+                {
+                    FailureReason = ex.Message,
+                };
+            }
+
+            var finalStatus = assertionResult.Passed ? PipelineStatus.Ok : PipelineStatus.Anomaly;
+            progress?.Report(finalStatus);
+
+            // Display-compat: first phase metrics → SourceMetrics, last phase metrics → FollowupMetrics
+            var sourceMetricsDisplay = phaseMetrics[mp.Phases[0].Role];
+            var followupMetricsDisplay = phaseMetrics[mp.Phases[mp.Phases.Count - 1].Role];
+
+            return new PipelineOutcome(
+                FinalStatus: finalStatus,
+                ErrorMessage: null,
+                StartedAt: startedAt,
+                FinishedAt: DateTime.UtcNow,
+                ArtifactsDirectory: artifactsDir,
+                SourceInputPath: firstInputPath,
+                FollowupInputPath: lastInputPath,
+                SourceOutputPath: firstOutputPath,
+                FollowupOutputPath: lastOutputPath,
+                SourceMetrics: sourceMetricsDisplay,
+                FollowupMetrics: followupMetricsDisplay,
+                AssertionResult: assertionResult,
+                SourceElapsed: firstElapsed,
+                FollowupElapsed: lastElapsed,
+                SourceExitCode: firstExitCode,
+                FollowupExitCode: lastExitCode)
+            {
+                TypedSpec = typedSpec,
+                TypedPredicate = typedPredicate,
+                TypedVerification = verification,
+                PhaseMetrics = phaseMetrics,
+            };
+        }
+        catch (OperationCanceledException)
+        {
+            return Fail(PipelineStatus.Cancelled, "Multi-phase pipeline cancelled by user");
+        }
+        catch (Exception ex)
+        {
+            return Fail(PipelineStatus.Error, $"{ex.GetType().Name}: {ex.Message}");
+        }
+
+        PipelineOutcome Fail(string status, string err) => new(
+            FinalStatus: status,
+            ErrorMessage: err,
+            StartedAt: startedAt,
+            FinishedAt: DateTime.UtcNow,
+            ArtifactsDirectory: artifactsDir,
+            SourceInputPath: firstInputPath,
+            FollowupInputPath: lastInputPath,
+            SourceOutputPath: firstOutputPath,
+            FollowupOutputPath: lastOutputPath,
+            SourceMetrics: null,
+            FollowupMetrics: null,
+            AssertionResult: null,
+            SourceElapsed: firstElapsed,
+            FollowupElapsed: lastElapsed,
+            SourceExitCode: firstExitCode,
+            FollowupExitCode: lastExitCode);
+    }
 }

@@ -157,6 +157,12 @@ public sealed class ManifestMrCatalogProvider : IMrCatalogProvider
                 .ToList(),
             AssertionTypeCode: binding.AssertionTypeCode,
             EquationKey: binding.EquationKey,
-            Tolerance: tolerance);
+            Tolerance: tolerance,
+            // PR-Bol-2A: project manifest refinement_phases → runtime RefinementPhase list
+            RefinementPhases: binding.RefinementPhases is { Count: > 0 } defs
+                ? defs.Select(d => new MetBench_BLL.SystemMT.Pipeline.RefinementPhase(
+                    d.Role,
+                    new Dictionary<string, string>(d.Parameters, StringComparer.Ordinal))).ToList()
+                : null);
     }
 }
