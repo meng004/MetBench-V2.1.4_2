@@ -235,4 +235,32 @@ public sealed class WordSystemMtResultReportRendererTests
 
         Assert.Contains("Custom Boltzmann Word Report", ExtractBodyText(docx));
     }
+
+    [Fact]
+    public void Render_inline_drawing_emu_dimensions_track_chart_render_options()
+    {
+        // M2 (PR-B): the renderer previously hard-pinned 5x3.33 inch (3:2 ratio) regardless
+        // of ChartRenderOptions. Now cx/cy derive from Width/Height at 9525 EMU per pixel,
+        // so a square ChartRenderOptions yields a square inline chart instead of distorted.
+        const long EmuPerPx = 9525L;
+        const int width = 1000;
+        const int height = 800;
+        var renderer = new WordSystemMtResultReportRenderer(
+            new MetBench_BLL.Reporting.SystemMt.Charts.Rendering.SkiaChartRenderer(),
+            new ChartRenderOptions(Width: width, Height: height));
+
+        var docx = renderer.Render(new[] { SampleRecord("mr-x", passed: true) }, FixedContext());
+
+        // Walk the body's Drawing element and inspect its <wp:extent cx=... cy=... />.
+        using var stream = new MemoryStream(docx);
+        using var doc = WordprocessingDocument.Open(stream, isEditable: false);
+        var extents = doc.MainDocumentPart!.Document.Body!
+            .Descendants<DocumentFormat.OpenXml.Drawing.Wordprocessing.Extent>()
+            .ToList();
+        Assert.NotEmpty(extents);
+        // Last embedded image's extent — should match ChartRenderOptions.
+        var last = extents.Last();
+        Assert.Equal(width * EmuPerPx, last.Cx?.Value);
+        Assert.Equal(height * EmuPerPx, last.Cy?.Value);
+    }
 }

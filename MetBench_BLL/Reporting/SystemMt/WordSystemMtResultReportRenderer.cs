@@ -23,10 +23,11 @@ public sealed class WordSystemMtResultReportRenderer : IWordSystemMtResultReport
 {
     private static readonly CultureInfo Inv = CultureInfo.InvariantCulture;
 
-    // 5 inch chart inline; 1 inch = 914400 EMU. Aspect 3:2 derived from the default
-    // 720x480 Phase-2 PNG so the rendered chart fills the column without distortion.
-    private const long ImageWidthEmu = 4_572_000;   // 5 inch
-    private const long ImageHeightEmu = 3_048_000;  // 5 inch × 480/720
+    // 1 pixel @ 96 dpi == 9525 EMU. Computing EMU from ChartRenderOptions.Width/Height
+    // keeps the docx physical size proportional to the PNG aspect ratio: a caller that
+    // passes ChartRenderOptions(1000, 1000) gets a square inline chart instead of the
+    // hard-coded 3:2 that would distort a square render.
+    private const long EmuPerPixelAt96Dpi = 9_525L;
 
     private readonly ISystemMtChartRenderer _chartRenderer;
     private readonly ChartRenderOptions _chartOptions;
@@ -158,7 +159,9 @@ public sealed class WordSystemMtResultReportRenderer : IWordSystemMtResultReport
             imagePart.FeedData(imgStream);
         var relId = mainPart.GetIdOfPart(imagePart);
 
-        var drawing = BuildInlineDrawing(relId, imageId, $"chart-{imageId}", ImageWidthEmu, ImageHeightEmu);
+        var cx = _chartOptions.Width * EmuPerPixelAt96Dpi;
+        var cy = _chartOptions.Height * EmuPerPixelAt96Dpi;
+        var drawing = BuildInlineDrawing(relId, imageId, $"chart-{imageId}", cx, cy);
         var run = new Run(drawing);
         var paragraph = new Paragraph(run);
         body.AppendChild(paragraph);
