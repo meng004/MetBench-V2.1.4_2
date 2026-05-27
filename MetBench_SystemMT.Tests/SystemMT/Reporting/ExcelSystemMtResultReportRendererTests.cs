@@ -62,9 +62,12 @@ public sealed class ExcelSystemMtResultReportRendererTests
         using var wb = Open(xlsx);
         var summary = wb.Worksheet(ExcelSystemMtResultReportRenderer.SummarySheetName);
         Assert.NotNull(summary);
-        // Header row is the only non-blank row.
-        Assert.Equal("MrName", summary.Cell(1, 1).GetString());
-        Assert.True(summary.Cell(2, 1).IsEmpty(), "Summary sheet must contain only the header row for empty input");
+        // M1 (PR-B): Summary sheet now carries a title block (row 1) + generated-at (row 2)
+        // + counts (row 3) before the header row (row 5). Row 6+ is data.
+        Assert.Equal("MrName", summary.Cell(ExcelSystemMtResultReportRenderer.SummaryHeaderRow, 1).GetString());
+        Assert.True(
+            summary.Cell(ExcelSystemMtResultReportRenderer.SummaryFirstDataRow, 1).IsEmpty(),
+            "Summary first data row must be empty for empty input");
     }
 
     [Fact]
@@ -85,7 +88,8 @@ public sealed class ExcelSystemMtResultReportRendererTests
 
         using var wb = Open(xlsx);
         var summary = wb.Worksheet(ExcelSystemMtResultReportRenderer.SummarySheetName);
-        Assert.Equal("openmoc-pincell-nu-sigma-f", summary.Cell(2, 1).GetString());
+        Assert.Equal("openmoc-pincell-nu-sigma-f",
+            summary.Cell(ExcelSystemMtResultReportRenderer.SummaryFirstDataRow, 1).GetString());
     }
 
     [Fact]
@@ -96,7 +100,7 @@ public sealed class ExcelSystemMtResultReportRendererTests
 
         using var wb = Open(xlsx);
         var summary = wb.Worksheet(ExcelSystemMtResultReportRenderer.SummarySheetName);
-        var sourceCell = summary.Cell(2, 4);
+        var sourceCell = summary.Cell(ExcelSystemMtResultReportRenderer.SummaryFirstDataRow, 4);
         Assert.Equal(XLDataType.Number, sourceCell.DataType);
         Assert.Equal(rec.SourceValue, sourceCell.GetDouble());
     }
@@ -109,7 +113,7 @@ public sealed class ExcelSystemMtResultReportRendererTests
 
         using var wb = Open(xlsx);
         var summary = wb.Worksheet(ExcelSystemMtResultReportRenderer.SummarySheetName);
-        var followCell = summary.Cell(2, 5);
+        var followCell = summary.Cell(ExcelSystemMtResultReportRenderer.SummaryFirstDataRow, 5);
         Assert.Equal(XLDataType.Number, followCell.DataType);
         Assert.Equal(rec.FollowUpValue, followCell.GetDouble());
     }
@@ -149,8 +153,16 @@ public sealed class ExcelSystemMtResultReportRendererTests
 
         using var wb = Open(xlsx);
         var summary = wb.Worksheet(ExcelSystemMtResultReportRenderer.SummarySheetName);
-        var dataRows = summary.RangeUsed()!.RowsUsed().Count() - 1; // minus header
-        Assert.Equal(3, dataRows);
+        // M1: rows 1-3 are title + generated-at + counts; row 4 is the blank separator;
+        // row 5 is the header; rows 6+ are data. We count concrete data rows below the
+        // header row to avoid the title block inflating the count.
+        var dataRowCount = 0;
+        for (var r = ExcelSystemMtResultReportRenderer.SummaryFirstDataRow; r <= 100; r++)
+        {
+            if (summary.Cell(r, 1).IsEmpty()) break;
+            dataRowCount++;
+        }
+        Assert.Equal(3, dataRowCount);
     }
 
     [Fact]
@@ -161,7 +173,7 @@ public sealed class ExcelSystemMtResultReportRendererTests
 
         using var wb = Open(xlsx);
         var summary = wb.Worksheet(ExcelSystemMtResultReportRenderer.SummarySheetName);
-        var passedCell = summary.Cell(2, 6);
+        var passedCell = summary.Cell(ExcelSystemMtResultReportRenderer.SummaryFirstDataRow, 6);
         Assert.Equal(XLDataType.Boolean, passedCell.DataType);
         Assert.False(passedCell.GetBoolean());
     }
@@ -222,10 +234,89 @@ public sealed class ExcelSystemMtResultReportRendererTests
         using var wb2 = Open(second);
         Assert.Equal(wb1.Worksheets.Count, wb2.Worksheets.Count);
         Assert.Equal(
-            wb1.Worksheet(ExcelSystemMtResultReportRenderer.SummarySheetName).Cell(2, 1).GetString(),
-            wb2.Worksheet(ExcelSystemMtResultReportRenderer.SummarySheetName).Cell(2, 1).GetString());
+            wb1.Worksheet(ExcelSystemMtResultReportRenderer.SummarySheetName).Cell(ExcelSystemMtResultReportRenderer.SummaryFirstDataRow, 1).GetString(),
+            wb2.Worksheet(ExcelSystemMtResultReportRenderer.SummarySheetName).Cell(ExcelSystemMtResultReportRenderer.SummaryFirstDataRow, 1).GetString());
         Assert.Equal(
             wb1.Worksheet(ExcelSystemMtResultReportRenderer.ChartsSheetName).Pictures.Count,
             wb2.Worksheet(ExcelSystemMtResultReportRenderer.ChartsSheetName).Pictures.Count);
+    }
+
+    // ---- PR-B regression facts -----------------------------------------------
+
+    [Fact]
+    public void Render_summary_title_cell_carries_report_context_title()
+    {
+        // M1 (PR-B): Excel renderer previously discarded ReportContext entirely.
+        var ctx = new ReportContext(Title: "MetBench Demo Report", GeneratedAt: FixedGenAt);
+        var xlsx = NewRenderer().Render(new[] { SampleRecord("mr-x", passed: true) }, ctx);
+
+        using var wb = Open(xlsx);
+        var summary = wb.Worksheet(ExcelSystemMtResultReportRenderer.SummarySheetName);
+        Assert.Equal("MetBench Demo Report", summary.Cell(1, 1).GetString());
+        Assert.True(summary.Cell(1, 1).Style.Font.Bold);
+    }
+
+    [Fact]
+    public void Render_summary_meta_row_carries_generated_at()
+    {
+        // M1 (PR-B): the previous renderer discarded GeneratedAt; pin it.
+        var xlsx = NewRenderer().Render(new[] { SampleRecord("mr-x", passed: true) }, FixedContext());
+
+        using var wb = Open(xlsx);
+        var summary = wb.Worksheet(ExcelSystemMtResultReportRenderer.SummarySheetName);
+        var metaText = summary.Cell(2, 1).GetString();
+        Assert.Contains("2026-05-27 12:30:00Z", metaText);
+    }
+
+    [Fact]
+    public void Render_summary_counts_row_reflects_pass_fail_totals()
+    {
+        // M1 (PR-B): summary block now includes counts; matches PDF/Word title block.
+        var records = new[]
+        {
+            SampleRecord("mr-a", passed: true),
+            SampleRecord("mr-b", passed: true),
+            SampleRecord("mr-c", passed: false),
+        };
+        var xlsx = NewRenderer().Render(records, FixedContext());
+
+        using var wb = Open(xlsx);
+        var summary = wb.Worksheet(ExcelSystemMtResultReportRenderer.SummarySheetName);
+        var countsText = summary.Cell(3, 1).GetString();
+        Assert.Contains("Records: 3", countsText);
+        Assert.Contains("Passed: 2", countsText);
+        Assert.Contains("Failed: 1", countsText);
+    }
+
+    [Fact]
+    public void Render_charts_sheet_anchor_spacing_grows_with_chart_height()
+    {
+        // M3 (PR-B): hard-coded rowsPerChart=25 → derived from ChartRenderOptions.Height
+        // so taller charts no longer overlap their neighbours.
+        var records = new[] { SampleRecord("mr-a", passed: true), SampleRecord("mr-b", passed: true) };
+        var smallChart = new ChartRenderOptions(Width: 720, Height: 480);
+        var tallChart = new ChartRenderOptions(Width: 720, Height: 2000);
+
+        var xlsxSmall = new ExcelSystemMtResultReportRenderer(
+            new MetBench_BLL.Reporting.SystemMt.Charts.Rendering.SkiaChartRenderer(), smallChart)
+            .Render(records, FixedContext());
+        var xlsxTall = new ExcelSystemMtResultReportRenderer(
+            new MetBench_BLL.Reporting.SystemMt.Charts.Rendering.SkiaChartRenderer(), tallChart)
+            .Render(records, FixedContext());
+
+        using var wbSmall = Open(xlsxSmall);
+        using var wbTall = Open(xlsxTall);
+        // Charts sheet picture count matches record count regardless of height.
+        Assert.Equal(2, wbSmall.Worksheet(ExcelSystemMtResultReportRenderer.ChartsSheetName).Pictures.Count);
+        Assert.Equal(2, wbTall.Worksheet(ExcelSystemMtResultReportRenderer.ChartsSheetName).Pictures.Count);
+        // Tall-chart second anchor row must be larger than small-chart second anchor row.
+        var smallAnchors = wbSmall.Worksheet(ExcelSystemMtResultReportRenderer.ChartsSheetName)
+            .CellsUsed(c => c.Style.Font.Bold && c.GetString().StartsWith("mr-")).Select(c => c.Address.RowNumber).OrderBy(r => r).ToList();
+        var tallAnchors = wbTall.Worksheet(ExcelSystemMtResultReportRenderer.ChartsSheetName)
+            .CellsUsed(c => c.Style.Font.Bold && c.GetString().StartsWith("mr-")).Select(c => c.Address.RowNumber).OrderBy(r => r).ToList();
+        Assert.Equal(2, smallAnchors.Count);
+        Assert.Equal(2, tallAnchors.Count);
+        Assert.True(tallAnchors[1] > smallAnchors[1],
+            $"Tall chart second anchor (row {tallAnchors[1]}) must exceed small chart second anchor (row {smallAnchors[1]})");
     }
 }

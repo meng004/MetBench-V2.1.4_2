@@ -40,11 +40,12 @@ public sealed class ExcelSystemMtResultReportRenderer : IExcelSystemMtResultRepo
         ReportContext? context = null)
     {
         if (records is null) throw new ArgumentNullException(nameof(records));
-        _ = context ?? new ReportContext();
+        var ctx = context ?? new ReportContext();
+        var generatedAt = ctx.GeneratedAt ?? DateTimeOffset.UtcNow;
         var list = records.ToList();
 
         using var workbook = new XLWorkbook();
-        WriteSummarySheet(workbook, list);
+        WriteSummarySheet(workbook, list, ctx, generatedAt);
         WriteTypedVerificationSheetIfPresent(workbook, list, evidenceByExecutionId);
         WriteChartsSheet(workbook, list);
 
@@ -53,24 +54,47 @@ public sealed class ExcelSystemMtResultReportRenderer : IExcelSystemMtResultRepo
         return stream.ToArray();
     }
 
-    private static void WriteSummarySheet(XLWorkbook workbook, IReadOnlyList<SystemMtResultRecord> records)
+    // Summary sheet layout:
+    //   Row 1: ReportContext.Title (bold, parity with PDF/Word title page)
+    //   Row 2: "Generated at <iso 8601 utc>"
+    //   Row 3: "Records: <n>   Passed: <p>   Failed: <f>"
+    //   Row 4: (intentionally blank — visual separator)
+    //   Row 5: header row (MrName / AssertionName / ...)
+    //   Row 6+: one record per row
+    public const int SummaryHeaderRow = 5;
+    public const int SummaryFirstDataRow = SummaryHeaderRow + 1;
+
+    private static void WriteSummarySheet(
+        XLWorkbook workbook,
+        IReadOnlyList<SystemMtResultRecord> records,
+        ReportContext ctx,
+        DateTimeOffset generatedAt)
     {
         var sheet = workbook.Worksheets.Add(SummarySheetName);
 
-        sheet.Cell(1, 1).Value = "MrName";
-        sheet.Cell(1, 2).Value = "AssertionName";
-        sheet.Cell(1, 3).Value = "ValueName";
-        sheet.Cell(1, 4).Value = "SourceValue";
-        sheet.Cell(1, 5).Value = "FollowUpValue";
-        sheet.Cell(1, 6).Value = "Passed";
-        sheet.Cell(1, 7).Value = "FailureReason";
-        sheet.Cell(1, 8).Value = "RunAt";
-        sheet.Row(1).Style.Font.Bold = true;
+        sheet.Cell(1, 1).Value = ctx.Title;
+        sheet.Cell(1, 1).Style.Font.Bold = true;
+        sheet.Cell(1, 1).Style.Font.FontSize = 14;
+        sheet.Cell(2, 1).Value = $"Generated at {generatedAt.ToString("u", Inv)}";
+        var passed = records.Count(r => r.Passed);
+        var failed = records.Count - passed;
+        sheet.Cell(3, 1).Value =
+            $"Records: {records.Count.ToString(Inv)}   Passed: {passed.ToString(Inv)}   Failed: {failed.ToString(Inv)}";
+
+        sheet.Cell(SummaryHeaderRow, 1).Value = "MrName";
+        sheet.Cell(SummaryHeaderRow, 2).Value = "AssertionName";
+        sheet.Cell(SummaryHeaderRow, 3).Value = "ValueName";
+        sheet.Cell(SummaryHeaderRow, 4).Value = "SourceValue";
+        sheet.Cell(SummaryHeaderRow, 5).Value = "FollowUpValue";
+        sheet.Cell(SummaryHeaderRow, 6).Value = "Passed";
+        sheet.Cell(SummaryHeaderRow, 7).Value = "FailureReason";
+        sheet.Cell(SummaryHeaderRow, 8).Value = "RunAt";
+        sheet.Row(SummaryHeaderRow).Style.Font.Bold = true;
 
         for (int i = 0; i < records.Count; i++)
         {
             var r = records[i];
-            int row = i + 2;
+            int row = SummaryFirstDataRow + i;
             sheet.Cell(row, 1).Value = r.MrName;
             sheet.Cell(row, 2).Value = r.AssertionName;
             sheet.Cell(row, 3).Value = r.ValueName;
@@ -139,8 +163,12 @@ public sealed class ExcelSystemMtResultReportRenderer : IExcelSystemMtResultRepo
         var sheet = workbook.Worksheets.Add(ChartsSheetName);
         if (records.Count == 0) return;
 
-        // Anchor each chart 25 rows below the previous; label in column A.
-        const int rowsPerChart = 25;
+        // Anchor each chart N rows below the previous. N derived from the chart
+        // pixel height: ClosedXML's default row height is 15pt ≈ 20px, the inline
+        // chart is rendered at 50% of ChartRenderOptions.Height, plus 2 rows for
+        // the label + breathing room. Bumps to >= 20 as a floor so single-record
+        // and tiny-chart cases still leave visual spacing.
+        int rowsPerChart = Math.Max(20, (_chartOptions.Height / 2) / 20 + 2);
         for (int i = 0; i < records.Count; i++)
         {
             var rec = records[i];

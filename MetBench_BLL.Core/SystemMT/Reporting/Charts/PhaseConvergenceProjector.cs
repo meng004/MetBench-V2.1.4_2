@@ -23,12 +23,17 @@ public static class PhaseConvergenceProjector
         if (string.IsNullOrWhiteSpace(mrId)) throw new ArgumentException("mrId is required", nameof(mrId));
         if (string.IsNullOrWhiteSpace(metric)) throw new ArgumentException("metric is required", nameof(metric));
 
-        // ErrorMonotonicPredicateValidator demands OrderedRoles ≥ 2 (= total phases ≥ 3 with last
-        // being the ReferenceRole). Anything less is meaningless for convergence rendering.
-        if (phaseMetrics.Count < 2)
+        // ErrorMonotonicPredicateValidator (PR-Bol-2A) requires OrderedRoles ≥ 2 with the last
+        // phase becoming the ReferenceRole, i.e. total phases ≥ 3. Rendering a "convergence"
+        // chart with 2 phases would be visually meaningful (one segment) but semantically
+        // inconsistent with the predicate it feeds — the kernel would refuse the same input.
+        // Tightening the projector threshold here keeps the data layer in lockstep with the
+        // verification layer.
+        if (phaseMetrics.Count < 3)
         {
             throw new ArgumentException(
-                $"PhaseConvergenceProjector requires at least 2 phases; got {phaseMetrics.Count}",
+                $"PhaseConvergenceProjector requires at least 3 phases " +
+                $"(OrderedRoles ≥ 2 + ReferenceRole, per ErrorMonotonicPredicate semantics); got {phaseMetrics.Count}",
                 nameof(phaseMetrics));
         }
 

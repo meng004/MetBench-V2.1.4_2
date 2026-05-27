@@ -46,7 +46,7 @@ public sealed class PhaseConvergenceProjectorTests
     [Fact]
     public void Project_uses_metric_name_for_y_axis_label_and_title()
     {
-        var phases = MakePhases(("a", 1.0), ("b", 2.0));
+        var phases = MakePhases(("a", 1.0), ("b", 2.0), ("c", 3.0));
 
         var fig = PhaseConvergenceProjector.Project(phases, "mr-x", "k_eff");
 
@@ -56,13 +56,20 @@ public sealed class PhaseConvergenceProjectorTests
     }
 
     [Fact]
-    public void Project_throws_when_single_phase_because_convergence_is_meaningless()
+    public void Project_throws_when_fewer_than_three_phases_to_match_error_monotonic_semantics()
     {
-        var phases = MakePhases(("only", 1.0));
+        // ErrorMonotonicPredicateValidator (PR-Bol-2A) requires OrderedRoles >= 2 with the last
+        // phase becoming the ReferenceRole, i.e. total phases >= 3. The projector matches.
+        var single = MakePhases(("only", 1.0));
+        var two = MakePhases(("coarse", 1.0), ("reference", 1.5));
 
-        var ex = Assert.Throws<ArgumentException>(
-            () => PhaseConvergenceProjector.Project(phases, "mr-x", "k_eff"));
-        Assert.Contains("at least 2 phases", ex.Message);
+        foreach (var phases in new[] { single, two })
+        {
+            var ex = Assert.Throws<ArgumentException>(
+                () => PhaseConvergenceProjector.Project(phases, "mr-x", "k_eff"));
+            Assert.Contains("at least 3 phases", ex.Message);
+            Assert.Contains("ErrorMonotonicPredicate", ex.Message);
+        }
     }
 
     [Fact]
@@ -72,6 +79,7 @@ public sealed class PhaseConvergenceProjectorTests
         {
             ["coarse"] = new Dictionary<string, double> { ["k_eff"] = 1.0 },
             ["medium"] = new Dictionary<string, double> { ["other_metric"] = 2.0 },
+            ["reference"] = new Dictionary<string, double> { ["k_eff"] = 1.5 },
         };
 
         var ex = Assert.Throws<ArgumentException>(
