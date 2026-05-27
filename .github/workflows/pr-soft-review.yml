@@ -80,6 +80,20 @@ jobs:
             6. MetBench boundaries: Method MT and System MT are not mixed; System MT verification
                extensions stay on Catalog/Typed runtime boundaries.
             7. Docs-only PRs do not claim a new code-test baseline.
+            8. **CLAUDE.md §12.4 R2 — multi-PR chain awareness**: if the PR body cites
+               a plan with `Phase N` or `PR-X-N` naming, confirm PR body states whether
+               this is an intermediate phase or the chain-end. Chain-end PRs must
+               explicitly enqueue a fresh-session post-merge holistic review
+               (per `docs/superpowers/templates/chain-end-review-checklist.md`)
+               BEFORE the chain is marked "Controlled" in docs/status/current.md.
+               Flag chain-end PRs that mark Controlled without enqueuing the review.
+            9. **CLAUDE.md §12.4 R3 — spec retrospective on Phase divergence**: if
+               this PR's implementation diverges from a Phase-K (K < N) spec doc's
+               recommendation (different MR, different candidate, different SUT,
+               different design), verify either this PR or a same-day follow-up doc
+               PR re-touches the spec doc to mark the original recommendation as
+               REJECTED/REPLACED with reason. Stale "top-1 candidate = X" claims
+               on main are a process bug; flag them.
 
             Post your findings as a single top-level PR comment using:
               gh pr comment ${{ github.event.pull_request.number }} --body "<your review>"
@@ -155,6 +169,20 @@ jobs:
                PR does not rely on cloud CI to prove WPF behavior.
             6. Data/catalog safety: fail-closed validation, path safety, deterministic
                runtime key resolution, and no silent fallback.
+            7. **CLAUDE.md §12.4 R4 — public-contract ↔ fact pair**: for every public
+               method whose XML doc claims "honors X" / "implements Y" / "supports Z"
+               / "renders Z" / "per ReportContext.X", confirm a test in this PR (or a
+               pre-existing test still asserting the contract) observably proves the
+               claim. Flag any `_ = ctx ?? new Default()` or `_ = arg ?? …` patterns
+               where the coalesced value is silently discarded — these are textbook
+               "claim without implementation" bugs (B1 / Excel ReportContext class).
+            8. **CLAUDE.md §12.4 R1 — cross-projection parity**: if this PR adds /
+               changes a field on a public type with ≥ 2 projection paths (e.g.
+               `FromBlueprint` + `MapToEntry`, HTML/Markdown/PDF/Word/Excel renderers,
+               to-DTO/from-DTO mappers), verify both sides are updated AND the
+               corresponding `<TypeName>ParityTests.cs` asserts the new field.
+               Flag one-sided field additions even if the diff compiles (L1 /
+               MrCatalogEntry.MetaPattern class — silent until post-merge review).
 
             Post your findings as a single top-level PR comment using:
               gh pr comment ${{ github.event.pull_request.number }} --body "<your review>"

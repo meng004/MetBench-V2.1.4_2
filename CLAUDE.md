@@ -466,6 +466,58 @@ session 透明、可核验。
 5. PR body 7 节 checklist 都打勾 / 解释
 6. 若你是 agent，merge 自己的 PR 前应 fetch origin/main 并核对 base.sha 是否需要 update branch
 
+### 12.4 第三层防御：跨 PR 一致性 & parity-test 纪律
+
+> **背景**：2026-05-27 T2/T3 6-phase chain 的 post-merge review 发现 11 项 finding；其中 5 项属"单 PR diff 可见"（AI review 大概率能抓），但**另外 6 项是跨 PR / 跨文件 / retrospective 性质**，soft / Codex / Claude review 在 PR-time 都看不见。本节把"跨 PR 一致性"作为**第三层防御**约束起来，不能仅靠 AI review 兜底。
+
+#### R1 · Cross-projection parity test 强制
+
+> 凡是一个 public type 有**两条以上投影路径**（典型例：`MrCatalogEntry.FromBlueprint` vs `ManifestMrCatalogProvider.MapToEntry`、entity 的 to-DTO/from-DTO 双向、HTML/Markdown/PDF/Word/Excel 多渲染器投影同一 record），**每加一个字段必须同步加 parity test**。
+>
+> - 守护文件命名约定：`<TypeName>ParityTests.cs`（如 `CatalogParityTests.cs`）
+> - 投影路径的任意一侧改了 record/字段，PR 必须同时改对方 + 守护测试。AI review prompt 应被指示检查这一点
+> - **历史教训**：PR-T3-7 / Phase 4 加 `MrCatalogEntry.MetaPattern`，只改了 `ManifestMrCatalogProvider`；`FromBlueprint` 没改 → 通过 hard + soft + Claude semantic review 全部 gate；post-merge review 才捕获（PR #199 修，加 parity assertion + `Audit_hardcoded_and_manifest_providers_produce_identical_matrices` 守护）。**约束**：以后任何加字段 PR，CI 失败提示要明确指向 missing parity assertion，不是 silent diff
+
+#### R2 · 多 PR 链路必须 chain-end holistic review
+
+> 任何**连续 ≥ 3 个 PR** 的 phased delivery（典型例：T2/T3 6-phase chain；W12 4-PR sequence；S8 P1-P5 chain），**最后一个 PR 合并后必须立刻开一个独立 review session** 跑 post-merge holistic review，发现 finding 写成一个 cleanup PR 才算 chain closure。
+>
+> - Trigger 条件：plan 文档里枚举 ≥ 3 个 sequential PRs，或 plan 用了 "Phase N" / "PR-X-N" 命名
+> - Review session 必须是**独立 fresh agent**（新 context），不能由 chain 实施 session 自己审
+> - 找到的 finding 进入 cleanup PR（一个 PR 多个 fix bundle 可接受，分两个 PR 更清晰），cleanup PR merge 后才能在 `docs/status/current.md` Stage-8 表里标 chain "Controlled"
+> - **历史教训**：T2/T3 chain 在 Phase 6 (PR-LEDGER) 合并后立即声明 Controlled；之后 review 找 11 项 finding，被迫开 PR #195 + #199 两个 cleanup PR。规则化后：chain-end review 应是 plan 的 phase N+1，提前进 plan，不是事后补
+
+#### R3 · Spec 文档对实施偏离的 retrospective 责任
+
+> Phase-K (K < N) 的 spec 文档若推荐了候选 X，而 Phase-N 实施时换成候选 Y（empirical validation 失败 / SUT precondition 不满足 / 等），**Phase-N 的同一 PR 或紧随的 doc PR 必须 re-touch 该 spec**，把推荐措辞改为"原推荐已被 Y 替代，原因 …"。
+>
+> - 不允许留 stale "top-1 候选 = X" 在 main 上让下一个读者误解
+> - 不允许仅在 commit body / status ledger 提一句"已替代"——spec doc 本身要改
+> - Phase-N PR body 必须明示「本 PR 修改了 Phase-K spec 的 §N」，AI review 可据此核对
+> - **历史教训**：Phase 5 (PR #192) ship `subchannel-friction-invariance` 而非 spec doc top-1 `burgers-timestep-convergence`；commit body 解释了但 spec doc §4 仍标 burgers 为 top-1；PR #199 才把 spec §4 改成"REJECTED with retrospective"。规则化后：偏离实施的同 PR 即修 spec
+
+#### R4 · Public-contract ↔ fact 配对
+
+> 凡是 public method 的 XML doc 声称「honors X」/「implements Y」/「supports Z」/「per ReportContext.Title」，必须在同 PR 加 fact 断言 X / Y / Z 在输出里**可观测**。**未断言的契约不算实现**。
+>
+> - PR Gate Checklist 「Tests」节明确把这一条作为 sub-check
+> - AI review prompt 应被指示：扫描 public method XML doc 提取契约关键词，grep 对应测试文件确认 fact 存在
+> - **历史教训**：`IExcelSystemMtResultReportRenderer` XML doc 提到 `ReportContext`，但 `ExcelSystemMtResultReportRenderer.Render` 内部 `_ = context ?? new ReportContext()` 立刻丢掉；测试没断言 Title 出现 → 全部 gate 通过；post-merge review 才发现（PR #195 修）。规则化后：每个声明契约的 public method 必带一个反映契约的 fact
+
+### 12.5 第四层防御：固化跨 PR / contract guard 进 hard gate
+
+> 第三层是流程约束；第四层是把流程约束**编译进** hard `test` gate，从根本上让违反它的 PR 直接红。这一层是 R1-R4 的**自动化具象化**：
+
+| 名称 | 守的 finding 类型 | 对应规则 | 现状 |
+|---|---|---|---|
+| `*ParityTests.cs` | cross-projection 字段不对称（L1 类） | R1 | `CatalogParityTests` 已加 `MetaPattern` 断言；后续 record 加字段必加同款 |
+| `Audit_*_providers_produce_identical_matrices` | 多 provider 实现产出不同结果（L1/M5 类） | R1 | `MetaPatternMatrixAuditorTests` 已加；后续多 provider 服务都加 |
+| `Render_*_renders_<contract>` 测试 | public method XML doc 契约未实现（B1 类） | R4 | `Render_summary_sheet_renders_title` 等已加；后续每个 evidence-aware overload 都加 |
+| 架构守护 `SemanticCatalogBoundaryTests` 系列 | 边界跨违反（pre-existing） | R1 | 已生效；不放松 |
+| chain-end review checklist | 多 PR 链路漂移（D1/D2/T1/T2 类） | R2/R3 | 待引入：`docs/superpowers/templates/chain-end-review-checklist.md` |
+
+**约束**：post-merge holistic review 每发现一个 finding，**第一优先级动作**是问"能否把这类 finding 转成第四层 guard test"。能就加守护；不能（或代价过高）则进 chain-end review checklist。**不允许只修该实例，不加守护**。
+
 ## 13. Roadmap pointers
 
 - 📘 全息项目结构: [`docs/PROJECT-STRUCTURE.md`](docs/PROJECT-STRUCTURE.md)（含 4 SUT + 测试矩阵 + 命名约定）
