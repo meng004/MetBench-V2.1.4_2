@@ -13,7 +13,13 @@ permissions:
 
 jobs:
   codex-governance-review:
-    if: github.event.pull_request.draft == false
+    # Repo-variable gate. Default OFF: when the OpenAI plan tied to
+    # secrets.OPENAI_API_KEY exhausts its quota, the codex-action exits with
+    # "Quota exceeded" in ~30s and the workflow posts a noisy "review did not
+    # complete" comment on every PR push. To re-enable when billing is restored,
+    # set repo variable METBENCH_CODEX_REVIEW_ENABLED=true (Settings → Variables
+    # → Actions → New repository variable).
+    if: vars.METBENCH_CODEX_REVIEW_ENABLED == 'true' && github.event.pull_request.draft == false
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
