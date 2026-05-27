@@ -12,14 +12,15 @@ permissions:
   id-token: write  # required by claude-code-action@v1 internal OIDC handshake (see spec §11 R4)
 
 jobs:
-  codex-governance-review:
-    # Repo-variable gate. Default OFF: when the OpenAI plan tied to
-    # secrets.OPENAI_API_KEY exhausts its quota, the codex-action exits with
-    # "Quota exceeded" in ~30s and the workflow posts a noisy "review did not
-    # complete" comment on every PR push. To re-enable when billing is restored,
-    # set repo variable METBENCH_CODEX_REVIEW_ENABLED=true (Settings → Variables
-    # → Actions → New repository variable).
-    if: vars.METBENCH_CODEX_REVIEW_ENABLED == 'true' && github.event.pull_request.draft == false
+  # Governance review — previously openai/codex-action@v1, swapped to Claude after
+  # the OpenAI key tied to secrets.OPENAI_API_KEY hit "Quota exceeded" in ~30s on
+  # every PR push and the noisy "Codex review did not complete" advisory comment
+  # was spamming threads. PR #202 had gated the codex job behind a repo variable;
+  # this PR drops codex entirely and routes governance through the existing Claude
+  # OAuth token. claude-semantic-review (below) is unchanged — the two jobs use
+  # the same CLAUDE_CODE_OAUTH_TOKEN but distinct prompts.
+  claude-governance-review:
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -28,23 +29,23 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Pre-fetch PR refs for governance diff
-        env:
-          PR_BASE_REF: ${{ github.event.pull_request.base.ref }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          git fetch --no-tags origin \
-            "$PR_BASE_REF" \
-            "+refs/pull/$PR_NUMBER/head"
-
-      - name: Codex governance review
-        id: codex
-        continue-on-error: true
-        uses: openai/codex-action@v1
+      - name: Cache npm store
+        uses: actions/cache@v4
         with:
-          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
-          sandbox: read-only
-          safety-strategy: read-only
+          path: ~/.npm
+          key: ${{ runner.os }}-claude-code-action-v1-npm
+          restore-keys: |
+            ${{ runner.os }}-claude-code-action-v1-npm
+
+      - name: Claude governance review
+        id: claude
+        continue-on-error: true
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: |
+            --max-turns 20
+            --allowedTools "Bash(gh pr comment:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(git diff:*),Bash(git log:*)"
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
@@ -52,9 +53,12 @@ jobs:
             HEAD SHA: ${{ github.event.pull_request.head.sha }}
 
             You are the MetBench governance gatekeeper.
+            The PR branch is already checked out in the current working directory.
 
             Review ONLY this pull request's diff and PR body. Do not modify files.
-            Focus on project control, not deep implementation logic.
+            Focus on project control, not deep implementation logic — semantic code
+            review is handled separately by the claude-semantic-review job; do NOT
+            repeat its concerns here.
 
             Authoritative files:
             - AGENTS.md
@@ -77,44 +81,31 @@ jobs:
                extensions stay on Catalog/Typed runtime boundaries.
             7. Docs-only PRs do not claim a new code-test baseline.
 
-            Return a concise Markdown comment with this exact title:
-            ## Codex Governance Review (Advisory)
+            Post your findings as a single top-level PR comment using:
+              gh pr comment ${{ github.event.pull_request.number }} --body "<your review>"
+            with sections:
+              ## Claude Governance Review (Advisory)
+              ### Verdict
+              ### Findings
+              ### Required follow-up before merge
 
-            Use sections:
-            ### Verdict
-            ### Findings
-            ### Required follow-up before merge
+            Use P0/P1/P2 severity. Quote file:line for any finding.
+            If there are no governance blockers, say "No governance blockers found."
+            Be terse. Bullet points, not prose.
+            Only post the GitHub comment — do NOT submit review text as messages.
 
-            Use P0/P1/P2 severity. Quote file paths and line numbers where possible.
-            If there are no findings, say "No governance blockers found."
+            Do NOT push commits. Do NOT change labels. Do NOT request changes via the
+            review API — leave it as a top-level comment so a human stays in the
+            approve loop.
 
-      - name: Post Codex governance review
-        if: steps.codex.outputs.final-message != ''
-        uses: actions/github-script@v7
+      - name: Report Claude governance review unavailable
+        if: steps.claude.outcome == 'failure'
         env:
-          CODEX_FINAL_MESSAGE: ${{ steps.codex.outputs.final-message }}
-        with:
-          github-token: ${{ github.token }}
-          script: |
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number,
-              body: process.env.CODEX_FINAL_MESSAGE,
-            });
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} --body "## Claude Governance Review (Advisory)
 
-      - name: Report Codex review unavailable
-        if: steps.codex.outcome == 'failure'
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ github.token }}
-          script: |
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number,
-              body: "## Codex Governance Review (Advisory)\n\nCodex review did not complete. This advisory failure does not replace the required `test` gate. Run manual governance review against `docs/superpowers/templates/pr-gate-checklist.md` before merge.",
-            });
+          Claude governance review did not complete. This advisory failure does not replace the required \`test\` gate. Run manual governance review against \`docs/superpowers/templates/pr-gate-checklist.md\` before merge."
 
   claude-semantic-review:
     if: github.event.pull_request.draft == false
@@ -150,8 +141,9 @@ jobs:
             You are the MetBench semantic code reviewer.
             The PR branch is already checked out in the current working directory.
 
-            Codex covers governance. Do NOT repeat checklist mechanics unless they
-            expose a code-level defect. Focus on semantic correctness and maintainability.
+            The claude-governance-review job covers governance. Do NOT repeat checklist
+            mechanics unless they expose a code-level defect. Focus on semantic
+            correctness and maintainability.
 
             Review the PR diff for:
             1. C# logic bugs, bad exception paths, non-determinism, and edge cases.
