@@ -66,6 +66,33 @@
       "sample_case_relative_path": "sample/pwr_channel.json",
       "work_root_name": "MetBenchSubchannel",
       "timeout_seconds": 30
+    },
+    {
+      "mr_id": "subchannel-friction-invariance",
+      "sut_name": "subchannel-1d",
+      "display_name": "1D subchannel — ScaleFriction (ΔT invariant under f)",
+      "description": "Decoupling invariance MP_inv: in this lumped 0D-axial energy balance the friction factor f only enters the momentum equation (Δp = f·L·G²/(2·ρ·D_h)). It does NOT appear in the energy balance ΔT = q''·P_h·L/(G·A_xs·c_p). Doubling f must therefore leave delta_T bit-identical (analytical closed-form invariance — no FD truncation involved).",
+      "mr_family": "Subchannel.Invariance.Friction",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "approx",
+      "assertion_name": "ApproxEqual",
+      "value_name": "delta_T",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/fluid/friction_factor" }
+      ],
+      "tolerance_rel": 1e-12,
+      "tolerance_abs": 1e-12,
+      "noise_aware": false,
+      "equation_key": "navier-stokes",
+      "equation": "NavierStokes",
+      "program_type": "Num",
+      "meta_pattern": "Inv",
+      "source_level": "Manual",
+      "failure_correlation": "None",
+      "sample_case_relative_path": "sample/pwr_channel.json",
+      "work_root_name": "MetBenchSubchannel",
+      "timeout_seconds": 30
     }
   ]
 }

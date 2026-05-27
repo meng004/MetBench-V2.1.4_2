@@ -107,7 +107,7 @@ public sealed class SystemMtLauncherProviderInjectionTests
 
         var items = await launcher.ListAvailableAsync();
 
-        Assert.Equal(32, items.Count);
+        Assert.Equal(33, items.Count);
         Assert.Contains(items, m => m.Id == "openmoc-pincell-nu-sigma-f");
     }
 

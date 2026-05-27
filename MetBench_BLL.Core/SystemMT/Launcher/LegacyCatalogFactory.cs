@@ -622,6 +622,43 @@ internal static class LegacyCatalogFactory
             AssertionTypeCode: "greater",
             EquationKey: "navier-stokes");
 
+        // PR-T3-8 (Phase 5): friction-invariance MR closing the (navier-stokes, Inv) gap
+        // surfaced by docs/superpowers/specs/2026-05-27-meta-pattern-coverage-audit.md.
+        // The lumped 0D-axial subchannel energy balance ΔT = q''·P_h·L/(G·A_xs·c_p)
+        // does NOT depend on the friction factor f (which only enters the momentum
+        // equation Δp = f·L·G²/(2·ρ·D_h)). Doubling f leaves delta_T bit-identical;
+        // tolerance is set to 1e-12 to pin the analytical (no-FD-truncation) invariance.
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "subchannel-friction-invariance",
+                DisplayName: "1D subchannel — ScaleFriction (ΔT invariant under f)",
+                SutName: "subchannel-1d",
+                TransformationName: "ScaleField",
+                AssertionName: "ApproxEqual",
+                ValueName: "delta_T",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Decoupling invariance MP_inv: in this lumped 0D-axial energy balance " +
+                    "the friction factor f only enters the momentum equation " +
+                    "(Δp = f·L·G²/(2·ρ·D_h)). It does NOT appear in the energy balance " +
+                    "ΔT = q''·P_h·L/(G·A_xs·c_p). Doubling f must therefore leave delta_T " +
+                    "bit-identical (analytical closed-form invariance — no FD truncation " +
+                    "involved).",
+                MrFamily: "Subchannel.Invariance.Friction"),
+            SampleCaseRelativePath: Path.Combine("subchannel_1d", "sample", "pwr_channel.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "subchannel_1d", "subchannel_1d.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "subchannel_1d", "subchannel_1d_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "subchannel_1d", "subchannel_1d_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchSubchannel",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "subchannel_1d", "subchannel_1d_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "subchannel_1d", "subchannel_1d_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/fluid/friction_factor") },
+            AssertionTypeCode: "approx",
+            EquationKey: "navier-stokes",
+            Tolerance: new AssertionTolerance(ToleranceRel: 1e-12, ToleranceAbs: 1e-12));
+
         // S8-P4: 1D diffusion SUT + diffusion 方程接入
         yield return new MrBlueprint(
             new MrSummary(

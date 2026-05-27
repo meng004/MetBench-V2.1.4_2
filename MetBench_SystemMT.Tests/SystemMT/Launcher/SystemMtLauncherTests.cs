@@ -72,7 +72,7 @@ public sealed class SystemMtLauncherTests
     {
         var descriptors = await _launcher.ListAvailableAsync();
 
-        Assert.Equal(32, descriptors.Count);
+        Assert.Equal(33, descriptors.Count);
         Assert.Equal("advection-amplitude-linearity", descriptors[0].Id);
         Assert.Equal("advection-mesh-conservation", descriptors[1].Id);
         Assert.Equal("bateman-mass-conservation", descriptors[2].Id);
@@ -102,9 +102,10 @@ public sealed class SystemMtLauncherTests
         Assert.Equal("scipy-ivp-lv-prey-growth-monotone", descriptors[26].Id);
         Assert.Equal("scipy-ivp-lv-step-convergence", descriptors[27].Id);
         Assert.Equal("subchannel-flow-temperature-monotone", descriptors[28].Id);
-        Assert.Equal("subchannel-heat-flux-linearity", descriptors[29].Id);
-        Assert.Equal("wave-amplitude-linearity", descriptors[30].Id);
-        Assert.Equal("wave-mesh-energy-convergence", descriptors[31].Id);
+        Assert.Equal("subchannel-friction-invariance", descriptors[29].Id);
+        Assert.Equal("subchannel-heat-flux-linearity", descriptors[30].Id);
+        Assert.Equal("wave-amplitude-linearity", descriptors[31].Id);
+        Assert.Equal("wave-mesh-energy-convergence", descriptors[32].Id);
     }
 
     [Fact]

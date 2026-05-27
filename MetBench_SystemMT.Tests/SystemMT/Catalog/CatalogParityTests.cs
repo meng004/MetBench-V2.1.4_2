@@ -29,7 +29,7 @@ public sealed class CatalogParityTests
         var manifest = new ManifestMrCatalogProvider(Opts()).Load();
 
         Assert.Equal(hardcoded.Count, manifest.Count);
-        Assert.Equal(32, hardcoded.Count);
+        Assert.Equal(33, hardcoded.Count);
 
         var hSet = hardcoded.Select(e => e.Mr.Id).OrderBy(s => s).ToList();
         var mSet = manifest.Select(e => e.Mr.Id).OrderBy(s => s).ToList();

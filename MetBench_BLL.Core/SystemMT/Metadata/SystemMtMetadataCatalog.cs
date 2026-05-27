@@ -712,6 +712,23 @@ public static class SystemMtMetadataCatalog
         },
         new MrMetadata
         {
+            MrId = "subchannel-friction-invariance",
+            EquationKey = "navier-stokes",
+            PhysicalMeaning =
+                "解耦不变性 MP_inv：在这个 0D-轴向能量平衡里，friction factor f 只进入动量方程 " +
+                "(Δp = f·L·G²/(2·ρ·D_h))；它不出现在能量方程 ΔT = q''·P_h·L/(G·A_xs·c_p) 里。" +
+                "因此 f 翻倍必使 delta_T 位级不变（解析闭式不变量，无 FD 截断）。",
+            InputTransformation = "f → factor·f（factor > 1）",
+            OutputRelation = "delta_T(flw) ≈ delta_T(src)（解析意义下严格相等，1e-12 容差守 FP 误差）",
+            ComparisonType = MrComparisonType.Absolute,
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "f 缩放倍率", ValueRange = "factor > 1" },
+                new() { Symbol = "delta_T", PhysicalMeaning = "出口温升（输出，f 不变）", ValueRange = "delta_T > 0" },
+            },
+        },
+        new MrMetadata
+        {
             MrId = "projectile-scale-v0",
             EquationKey = "projectile-motion",
             PhysicalMeaning =
