@@ -89,6 +89,7 @@ namespace MetBench_Client.ViewModels
                 LocalizedNav("Nav_SystemMtEquationCatalog",    SymbolRegular.MathFormula24,           typeof(Views.Pages.SystemMtEquationCatalogPage),    _localizedNavigation),
                 LocalizedNav("Nav_SystemMtSampleCaseCatalog",  SymbolRegular.DocumentText24,          typeof(Views.Pages.SystemMtSampleCaseCatalogPage),  _localizedNavigation),
                 LocalizedNav("Nav_SystemMtExecutionHistory",   SymbolRegular.History24,               typeof(Views.Pages.SystemMtExecutionHistoryPage),   _localizedNavigation),
+                LocalizedNav("Nav_SystemMtResult",             SymbolRegular.DataBarVertical24,       typeof(Views.Pages.SystemMtResultPage),             _localizedNavigation),
                 LocalizedNav("Nav_Anomalies",                  SymbolRegular.Warning24,               typeof(Views.Pages.AnomalyListPage),                _localizedNavigation),
                 LocalizedNav("Nav_Discovery",                  SymbolRegular.Lightbulb24,             typeof(Views.Pages.DiscoveryPage),                  _localizedNavigation),
                 LocalizedNav("Nav_CandidateReview",            SymbolRegular.ClipboardCheckmark24,    typeof(Views.Pages.CandidateReviewPage),            _localizedNavigation),

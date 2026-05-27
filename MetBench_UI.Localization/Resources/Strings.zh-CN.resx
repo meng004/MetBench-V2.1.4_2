@@ -118,6 +118,9 @@
   <data name="Nav_SystemMtExecutionHistory" xml:space="preserve">
     <value>系统级执行历史</value>
   </data>
+  <data name="Nav_SystemMtResult" xml:space="preserve">
+    <value>SystemMT 结果</value>
+  </data>
   <data name="Nav_Anomalies" xml:space="preserve">
     <value>异常</value>
   </data>
