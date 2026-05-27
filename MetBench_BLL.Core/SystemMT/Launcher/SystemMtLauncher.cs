@@ -182,8 +182,37 @@ public sealed class SystemMtLauncher : ISystemMtLauncher, ISystemMtCatalogReader
                 ? null : _equationFunctions,
         };
 
-        var outcome = await _pipeline.ExecuteAsync(context, progress: null, cancellationToken)
-            .ConfigureAwait(false);
+        // PR-Bol-2A: 多相 error-monotonic 分支 — launcher 预构建 TypedSpec + TypedPredicate
+        // via TypedSpecFactory.ForErrorMonotonic (string-code 分派仍封闭在 Migration/ 内),
+        // 然后调 ExecuteMultiPhaseAsync. 30+ 现存 2-side MR 走 else 分支保持字节一致.
+        PipelineOutcome outcome;
+        if (blueprint.RefinementPhases is { Count: > 0 } phases)
+        {
+            var orderedRoles = phases.Take(phases.Count - 1).Select(p => p.Role).ToArray();
+            var referenceRole = phases[phases.Count - 1].Role;
+            var typedSpec = MetBench_BLL.SystemMT.Catalog.Typed.Migration.TypedSpecFactory.ForErrorMonotonic(
+                mrCode: blueprint.Mr.Id,
+                metric: blueprint.Mr.ValueName,
+                orderedRoles: orderedRoles,
+                referenceRole: referenceRole,
+                normKind: MetBench_BLL.SystemMT.Catalog.Typed.Specs.NormKind.Relative,
+                toleranceRel: context.Tolerance.ToleranceRel);
+            var typedPredicate = (MetBench_BLL.SystemMT.Catalog.Typed.Specs.ErrorMonotonicPredicate)typedSpec.Predicates![0];
+            var contextWithSpec = context with
+            {
+                TypedSpec = typedSpec,
+                TypedPredicate = typedPredicate,
+            };
+            outcome = await _pipeline.ExecuteMultiPhaseAsync(
+                new MultiPhaseExecutionContext(contextWithSpec, phases),
+                progress: null,
+                cancellationToken).ConfigureAwait(false);
+        }
+        else
+        {
+            outcome = await _pipeline.ExecuteAsync(context, progress: null, cancellationToken)
+                .ConfigureAwait(false);
+        }
 
         var recorded = _recorder.Record(context, outcome, mrInstanceId: -1);
 
@@ -420,7 +449,9 @@ internal sealed record MrBlueprint(
     string EquationKey = "",
     // S8-P5 review fix: approx/scaled-equality MR 必须显式设容差；默认 0/0 会让
     // BeApproximately(src, 0) 退化为 bit-exact equality，永远 fail 在数值噪声上
-    AssertionTolerance? Tolerance = null);
+    AssertionTolerance? Tolerance = null,
+    // PR-Bol-2A: 多相 error-monotonic MR 用 (null/empty = 走传统 2-side ExecuteAsync)
+    IReadOnlyList<MetBench_BLL.SystemMT.Pipeline.RefinementPhase>? RefinementPhases = null);
 
 /// <summary>v2 pipeline 的单步变换规格。多步在 launcher.RunAsync 内包 <c>CompositeTransform</c>。</summary>
 internal sealed record MrTransformStep(
@@ -451,7 +482,9 @@ public sealed record MrCatalogEntry(
     IReadOnlyList<MrCatalogTransformStep> TransformSteps,
     string AssertionTypeCode,
     string EquationKey,
-    AssertionTolerance? Tolerance)
+    AssertionTolerance? Tolerance,
+    // PR-Bol-2A: 多相 error-monotonic MR 用 (null/empty = 走传统 2-side path)
+    IReadOnlyList<MetBench_BLL.SystemMT.Pipeline.RefinementPhase>? RefinementPhases = null)
 {
     /// <summary>UI convenience: first step's transformation name (engine name, not display).</summary>
     public string PrimaryTransformationName =>
@@ -474,7 +507,8 @@ public sealed record MrCatalogEntry(
             bp.TransformSteps.Select(s => new MrCatalogTransformStep(s.TransformationName, s.TargetFieldPath)).ToList(),
             bp.AssertionTypeCode,
             bp.EquationKey,
-            bp.Tolerance);
+            bp.Tolerance,
+            bp.RefinementPhases);
 
     /// <summary>
     /// Inverse of <see cref="FromBlueprint"/>; reconstructs the runtime blueprint for launcher consumption.
@@ -493,7 +527,8 @@ public sealed record MrCatalogEntry(
             TransformSteps.Select(s => new MrTransformStep(s.TransformationName, s.TargetFieldPath)).ToList(),
             AssertionTypeCode,
             EquationKey,
-            Tolerance);
+            Tolerance,
+            RefinementPhases);
 }
 
 /// <summary>Public mirror of internal MrTransformStep for IMrCatalogProvider boundary.</summary>

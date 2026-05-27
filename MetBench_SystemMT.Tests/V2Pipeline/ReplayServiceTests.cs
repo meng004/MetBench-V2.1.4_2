@@ -151,4 +151,13 @@ internal sealed class FakePipeline : ISystemMtPipeline
             SourceElapsed: TimeSpan.Zero, FollowupElapsed: TimeSpan.Zero,
             SourceExitCode: 0, FollowupExitCode: 0));
     }
+
+    // PR-Bol-2A: ISystemMtPipeline interface added ExecuteMultiPhaseAsync; replay tests do not
+    // exercise the multi-phase path, so throw NotImplementedException — any test that hits this
+    // surface accidentally fails loudly.
+    public Task<PipelineOutcome> ExecuteMultiPhaseAsync(
+        MultiPhaseExecutionContext mp,
+        IProgress<string>? progress = null,
+        CancellationToken cancellationToken = default)
+        => throw new NotImplementedException("FakePipeline does not implement ExecuteMultiPhaseAsync (replay tests are 2-side only).");
 }

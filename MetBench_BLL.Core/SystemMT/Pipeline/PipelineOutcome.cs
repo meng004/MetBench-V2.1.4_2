@@ -40,4 +40,14 @@ public sealed record PipelineOutcome(
 
     /// <summary>Typed verifier result for <see cref="TypedPredicate"/>; null when the typed path was not taken.</summary>
     public VerificationResult? TypedVerification { get; init; }
+
+    /// <summary>
+    /// PR-Bol-2A: per-phase metrics dict (role → metric snapshot) when
+    /// <see cref="SystemMtPipeline.ExecuteMultiPhaseAsync"/> was used; null for the
+    /// single-source/followup path. The display-compat fields <see cref="SourceMetrics"/>
+    /// + <see cref="FollowupMetrics"/> are populated from the first / last phase
+    /// respectively so the existing report renderer + recorder still see something
+    /// meaningful for multi-phase runs.
+    /// </summary>
+    public IReadOnlyDictionary<string, IReadOnlyDictionary<string, double>>? PhaseMetrics { get; init; }
 }

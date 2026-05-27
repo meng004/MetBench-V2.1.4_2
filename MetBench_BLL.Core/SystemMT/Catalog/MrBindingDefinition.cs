@@ -44,6 +44,15 @@ public sealed class MrBindingDefinition
     /// <summary>Process timeout in seconds; no default — authors must choose per SUT runtime (openmoc≈120, openmc≈300, ODE≈30-60).</summary>
     public int TimeoutSeconds { get; set; }
 
+    /// <summary>
+    /// PR-Bol-2A: optional ordered refinement-phase list consumed by the multi-phase
+    /// pipeline. Required when <see cref="AssertionTypeCode"/> is <c>"error-monotonic"</c>;
+    /// rejected with any other code. Must contain ≥ 2 phases. Phase order is
+    /// significant — the last phase becomes the typed predicate's <c>ReferenceRole</c>;
+    /// earlier phases become <c>OrderedRoles</c> in declared order.
+    /// </summary>
+    public List<RefinementPhaseDefinition>? RefinementPhases { get; set; }
+
     /// <summary>Assertion codes whose semantics REQUIRE a positive tolerance (Approx-class family).</summary>
     private static readonly HashSet<string> ToleranceRequiredCodes = new(StringComparer.Ordinal)
     {
@@ -120,6 +129,38 @@ public sealed class MrBindingDefinition
                 throw new CatalogValidationException(
                     $"MrBindingDefinition '{MrId}' uses '{AssertionTypeCode}' (approx-class) but provides no tolerance: " +
                     "set ToleranceRel/ToleranceAbs > 0, or NoiseAware=true with NoiseMultiplier > 0.");
+        }
+
+        // 3) PR-Bol-2A: RefinementPhases is required for "error-monotonic" and rejected for any
+        //    other code. Each phase must validate independently.
+        var isErrorMonotonic = string.Equals(
+            AssertionTypeCode, AssertionTypeCodes.ErrorMonotonic, StringComparison.Ordinal);
+        if (isErrorMonotonic)
+        {
+            // ErrorMonotonicPredicateValidator requires OrderedRoles.Count ≥ 2; with the
+            // "last phase = ReferenceRole" convention that means total refinement_phases ≥ 3.
+            if (RefinementPhases is null || RefinementPhases.Count < 3)
+                throw new CatalogValidationException(
+                    $"MrBindingDefinition '{MrId}' uses 'error-monotonic' and requires refinement_phases with at least 3 entries " +
+                    $"(≥ 2 ordered roles + 1 reference role; got {(RefinementPhases?.Count ?? 0)}).");
+            var seen = new HashSet<string>(StringComparer.Ordinal);
+            for (var i = 0; i < RefinementPhases.Count; i++)
+            {
+                if (RefinementPhases[i] is null)
+                    throw new CatalogValidationException(
+                        $"MrBindingDefinition '{MrId}' refinement_phases[{i}] must not be null");
+                RefinementPhases[i].Validate(MrId, i);
+                if (!seen.Add(RefinementPhases[i].Role))
+                    throw new CatalogValidationException(
+                        $"MrBindingDefinition '{MrId}' refinement_phases roles must be unique; " +
+                        $"'{RefinementPhases[i].Role}' appears more than once.");
+            }
+        }
+        else if (RefinementPhases is { Count: > 0 })
+        {
+            throw new CatalogValidationException(
+                $"MrBindingDefinition '{MrId}' carries refinement_phases but AssertionTypeCode is '{AssertionTypeCode}'; " +
+                "refinement_phases is only valid with 'error-monotonic'.");
         }
     }
 

@@ -309,6 +309,14 @@ internal sealed class ProgrammablePipeline : ISystemMtPipeline
             AssertionResult: null,
             SourceElapsed: TimeSpan.Zero, FollowupElapsed: TimeSpan.Zero,
             SourceExitCode: 0, FollowupExitCode: 0);
+
+    // PR-Bol-2A: ISystemMtPipeline interface added ExecuteMultiPhaseAsync; R-case reproduction
+    // tests don't exercise multi-phase, so throw to fail loudly if accidentally called.
+    public Task<PipelineOutcome> ExecuteMultiPhaseAsync(
+        MultiPhaseExecutionContext mp,
+        IProgress<string>? progress = null,
+        CancellationToken cancellationToken = default)
+        => throw new NotImplementedException("ProgrammablePipeline does not implement ExecuteMultiPhaseAsync (R-case tests are 2-side only).");
 }
 
 internal sealed class FakeRCaseBugRepo : IKnownBugRepository

@@ -219,6 +219,84 @@ public static class TypedSpecFactory
             DefaultTolerance: new DeterministicToleranceSpec(0.0, toleranceRel));
     }
 
+    /// <summary>
+    /// PR-Bol-2A: build an <see cref="MrSpec"/> wrapping an <see cref="ErrorMonotonicPredicate"/>
+    /// for the multi-phase reference-convergence path. <paramref name="orderedRoles"/> are the
+    /// progressively-refined phase role names (e.g. <c>["coarse", "medium"]</c>) and
+    /// <paramref name="referenceRole"/> is the most-refined / benchmark phase role (e.g.
+    /// <c>"reference"</c>). The kernel checks that <c>|metric[orderedRoles[i]] − metric[referenceRole]|</c>
+    /// is monotonically non-increasing along <paramref name="orderedRoles"/>, under the chosen
+    /// <paramref name="normKind"/> (default <see cref="NormKind.Relative"/> for scalar k_eff).
+    /// Fails closed on blank inputs, &lt; 2 ordered roles, duplicates inside ordered roles, or
+    /// overlap between ordered roles and the reference role.
+    /// </summary>
+    public static MrSpec ForErrorMonotonic(
+        string mrCode,
+        string metric,
+        IReadOnlyList<string> orderedRoles,
+        string referenceRole,
+        NormKind normKind = NormKind.Relative,
+        double toleranceRel = 0.0)
+    {
+        if (string.IsNullOrWhiteSpace(mrCode))
+            throw new System.ArgumentException("mrCode is required.", nameof(mrCode));
+        if (string.IsNullOrWhiteSpace(metric))
+            throw new System.ArgumentException("metric is required.", nameof(metric));
+        if (string.IsNullOrWhiteSpace(referenceRole))
+            throw new System.ArgumentException("referenceRole is required.", nameof(referenceRole));
+        if (orderedRoles is null)
+            throw new System.ArgumentNullException(nameof(orderedRoles));
+        if (orderedRoles.Count < 2)
+            throw new System.ArgumentException(
+                $"error-monotonic requires at least 2 ordered roles; got {orderedRoles.Count}.",
+                nameof(orderedRoles));
+
+        var seen = new HashSet<string>(System.StringComparer.Ordinal);
+        foreach (var role in orderedRoles)
+        {
+            if (string.IsNullOrWhiteSpace(role))
+                throw new System.ArgumentException(
+                    "error-monotonic ordered role names must all be non-blank.", nameof(orderedRoles));
+            if (!seen.Add(role))
+                throw new System.ArgumentException(
+                    $"error-monotonic ordered roles must be unique; '{role}' appears more than once.",
+                    nameof(orderedRoles));
+            if (string.Equals(role, referenceRole, System.StringComparison.Ordinal))
+                throw new System.ArgumentException(
+                    $"error-monotonic ordered role '{role}' must not equal referenceRole.",
+                    nameof(orderedRoles));
+        }
+
+        var predicate = new ErrorMonotonicPredicate(
+            PredicateId: $"{metric}-error-monotonic",
+            OrderedRoles: orderedRoles,
+            ReferenceRole: referenceRole,
+            Metric: metric,
+            NormKind: normKind);
+
+        var roles = new Dictionary<string, RunRoleSpec>(System.StringComparer.Ordinal);
+        foreach (var role in orderedRoles)
+            roles[role] = new RunRoleSpec("Baseline");
+        roles[referenceRole] = new RunRoleSpec("Reference");
+
+        var projections = new Dictionary<string, ProjectionSpec>(System.StringComparer.Ordinal)
+        {
+            [metric] = new ScalarProjectionSpec($"/values/{metric}"),
+        };
+
+        return new MrSpec(
+            Kind: "MrSpec",
+            MrId: mrCode,
+            Name: mrCode,
+            Description: null,
+            Tags: null,
+            Parameters: null,
+            Roles: roles,
+            Projections: projections,
+            Predicates: new[] { (PredicateSpec)predicate },
+            DefaultTolerance: new DeterministicToleranceSpec(0.0, toleranceRel));
+    }
+
     private static (string actualRole, string expectedRole) RolesFor(PredicateSpec predicate) =>
         predicate switch
         {

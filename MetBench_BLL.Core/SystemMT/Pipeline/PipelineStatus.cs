@@ -28,7 +28,15 @@ public static class PipelineStatus
     public const string Timeout          = "timeout";
     public const string Cancelled        = "cancelled";
 
-    /// <summary>所有合法状态（校验用）。</summary>
+    /// <summary>
+    /// PR-Bol-2A: 多相管线 <c>ExecuteMultiPhaseAsync</c> 在每个相位前 emit
+    /// <c>"running-phase:{role}"</c>（如 <c>"running-phase:coarse"</c>）；此处常量是不带
+    /// role 后缀的"裸"前缀，用于 dashboard / 日志按 <c>StartsWith</c> 分类。<see cref="All"/>
+    /// 集合不包含 role-suffixed 字符串以保持有限性；多相进度字符串只用于显示，不参与状态机校验。
+    /// </summary>
+    public const string RunningPhase     = "running-phase";
+
+    /// <summary>所有合法状态（校验用）。多相 <c>running-phase:&lt;role&gt;</c> 是显示级字符串、不入此集合。</summary>
     public static readonly IReadOnlySet<string> All = new HashSet<string>
     {
         Queued, ParsingSource, Transforming, WritingFollowup,

@@ -33,11 +33,20 @@ public static class AssertionTypeCodes
     /// <summary>跨程序一致性（m_cmp，如 OpenMOC vs OpenMC）。</summary>
     public const string CrossProgramAgree = "cross-program-agree";
 
+    /// <summary>
+    /// 误差单调收敛（m_conv 多相 reference convergence，如 OpenMOC ray/track refinement
+    /// 在固定参考解下 |k_eff(coarse) − k_eff(ref)| 单调递减到 |k_eff(fine) − k_eff(ref)|）。
+    /// 首个消费者：Bol-Alg-01 `openmoc-pincell-ray-track-convergence`（PR-Bol-2B）；
+    /// 走 launcher 多相管线（PR-Bol-2A 加入）+ 类型化 <c>ErrorMonotonicPredicate</c>。
+    /// </summary>
+    public const string ErrorMonotonic = "error-monotonic";
+
     /// <summary>支持的全部断言代码（UI 下拉框 / 校验用）。</summary>
     public static readonly IReadOnlyList<string> All = new[]
     {
         Less, Greater, Approx,
         LessNoiseAware, GreaterNoiseAware, ApproxInvariant,
         VarianceRatio, FluxPointwiseApprox, CrossProgramAgree,
+        ErrorMonotonic,
     };
 }

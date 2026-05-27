@@ -134,4 +134,55 @@ public static class TypedVerificationContextFactory
             [metric] = new StatisticalValue(Mean: 0.0, StdError: stderr),
         };
     }
+
+    /// <summary>
+    /// PR-Bol-2A: build a <see cref="VerificationContext"/> from a per-phase scalar map.
+    /// One <see cref="RoleOutput"/> per <paramref name="phaseScalars"/> entry, keyed by the
+    /// phase role name. No statistics promotion (the <c>ErrorMonotonicKernel</c> reads via
+    /// <c>GetMetric</c>, not <c>GetStatistical</c>). Validates the spec up-front and throws
+    /// <see cref="InvalidOperationException"/> on validation failure — same fail-closed
+    /// contract as <see cref="FromScalarOutputs"/>. Independent of <see cref="FromScalarOutputs"/>
+    /// to keep PR-VR's 2-side statistics-promotion path byte-identical.
+    /// </summary>
+    public static VerificationContext FromPhaseOutputs(
+        MrSpec spec,
+        IReadOnlyDictionary<string, IReadOnlyDictionary<string, double>> phaseScalars,
+        IReadOnlyDictionary<string, string> parameterValues)
+    {
+        if (spec is null) throw new ArgumentNullException(nameof(spec));
+        if (phaseScalars is null) throw new ArgumentNullException(nameof(phaseScalars));
+        if (parameterValues is null) throw new ArgumentNullException(nameof(parameterValues));
+
+        var validation = spec.Validate();
+        if (!validation.IsValid)
+        {
+            throw new InvalidOperationException(
+                "Typed semantic spec must validate before runtime execution: " +
+                string.Join("; ", validation.Errors.Select(e => $"{e.Path}: {e.Message}")));
+        }
+
+        var roles = new Dictionary<string, RoleOutput>(StringComparer.Ordinal);
+        foreach (var (role, scalars) in phaseScalars)
+        {
+            if (scalars is null)
+                throw new ArgumentException(
+                    $"phaseScalars[{role}] must not be null.", nameof(phaseScalars));
+            roles[role] = new RoleOutput(
+                role,
+                new Dictionary<string, double>(scalars),
+                Fields: null,
+                Statistics: null);
+        }
+
+        var inputs = new Dictionary<string, double>(StringComparer.Ordinal);
+        foreach (var (key, value) in parameterValues)
+        {
+            if (double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed))
+            {
+                inputs[key] = parsed;
+            }
+        }
+
+        return new VerificationContext(spec, roles, inputs);
+    }
 }
