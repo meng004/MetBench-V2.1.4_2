@@ -221,4 +221,35 @@ public sealed class MetaPatternMatrixAuditorTests
             .ToList();
         Assert.Empty(unclassified);
     }
+
+    [Fact]
+    public void Audit_hardcoded_and_manifest_providers_produce_identical_matrices()
+    {
+        // PR-T2-T3 review-fix: the auditor's contract is to produce the same
+        // matrix regardless of which IMrCatalogProvider implementation it reads
+        // from. Before the fix, HardcodedMrCatalogProvider routed entries
+        // through MrCatalogEntry.FromBlueprint which did not preserve MetaPattern,
+        // so every row landed in the Unclassified bucket and the gap set was
+        // wrong. After the fix, FromBlueprint derives MetaPattern from the
+        // MrFamily convention; this fact pins parity end-to-end.
+        var options = new LauncherOptions(
+            SutRoot: TestAssetPaths.AssetRoot(),
+            SystemPython: TestAssetPaths.PythonExecutable(),
+            OpenMocPython: TestAssetPaths.PythonExecutable());
+#pragma warning disable CS0618 // HardcodedMrCatalogProvider is [Obsolete] — intentional parity test target until removal.
+        var hardcodedMatrix = MetaPatternMatrixAuditor.Audit(new HardcodedMrCatalogProvider(options));
+#pragma warning restore CS0618
+        var manifestMatrix = MetaPatternMatrixAuditor.Audit(new ManifestMrCatalogProvider(options));
+
+        Assert.Equal(manifestMatrix.Cells.Count, hardcodedMatrix.Cells.Count);
+        Assert.Equal(manifestMatrix.Gaps.Count, hardcodedMatrix.Gaps.Count);
+        for (int i = 0; i < manifestMatrix.Cells.Count; i++)
+        {
+            var h = hardcodedMatrix.Cells[i];
+            var m = manifestMatrix.Cells[i];
+            Assert.Equal(m.EquationKey, h.EquationKey);
+            Assert.Equal(m.MetaPattern, h.MetaPattern);
+            Assert.Equal(m.MrIds, h.MrIds);
+        }
+    }
 }

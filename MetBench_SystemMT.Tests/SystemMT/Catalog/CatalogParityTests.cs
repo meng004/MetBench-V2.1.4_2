@@ -70,6 +70,11 @@ public sealed class CatalogParityTests
             Assert.Equal(h.AssertionTypeCode, m.AssertionTypeCode);
             Assert.Equal(h.PrimaryTransformationName, m.PrimaryTransformationName);
             Assert.Equal(h.EquationKey, m.EquationKey);
+            // PR-T2-T3 review-fix: pin MetaPattern parity so the auditor produces
+            // the same matrix regardless of provider source. Hardcoded path derives
+            // MetaPattern from MrFamily via MrMetaPatternConventions.FromMrFamily;
+            // manifest path reads it from the JSON binding directly.
+            Assert.Equal(h.MetaPattern, m.MetaPattern);
         }
     }
 }

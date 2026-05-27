@@ -55,16 +55,17 @@ public sealed class ExcelSystemMtResultReportRendererTests
     }
 
     [Fact]
-    public void Render_empty_input_returns_workbook_with_summary_header_only()
+    public void Render_empty_input_returns_workbook_with_title_and_header_no_data_rows()
     {
         var xlsx = NewRenderer().Render(Array.Empty<SystemMtResultRecord>(), FixedContext());
 
         using var wb = Open(xlsx);
         var summary = wb.Worksheet(ExcelSystemMtResultReportRenderer.SummarySheetName);
         Assert.NotNull(summary);
-        // Header row is the only non-blank row.
-        Assert.Equal("MrName", summary.Cell(1, 1).GetString());
-        Assert.True(summary.Cell(2, 1).IsEmpty(), "Summary sheet must contain only the header row for empty input");
+        Assert.Equal("MrName", summary.Cell(ExcelSystemMtResultReportRenderer.SummaryHeaderRow, 1).GetString());
+        Assert.True(
+            summary.Cell(ExcelSystemMtResultReportRenderer.SummaryFirstDataRow, 1).IsEmpty(),
+            "Summary sheet must contain no data rows for empty input");
     }
 
     [Fact]
@@ -79,13 +80,14 @@ public sealed class ExcelSystemMtResultReportRendererTests
     }
 
     [Fact]
-    public void Render_single_record_summary_a2_contains_mr_name()
+    public void Render_single_record_first_data_row_contains_mr_name()
     {
         var xlsx = NewRenderer().Render(new[] { SampleRecord("openmoc-pincell-nu-sigma-f", passed: true) }, FixedContext());
 
         using var wb = Open(xlsx);
         var summary = wb.Worksheet(ExcelSystemMtResultReportRenderer.SummarySheetName);
-        Assert.Equal("openmoc-pincell-nu-sigma-f", summary.Cell(2, 1).GetString());
+        Assert.Equal("openmoc-pincell-nu-sigma-f",
+            summary.Cell(ExcelSystemMtResultReportRenderer.SummaryFirstDataRow, 1).GetString());
     }
 
     [Fact]
@@ -96,7 +98,7 @@ public sealed class ExcelSystemMtResultReportRendererTests
 
         using var wb = Open(xlsx);
         var summary = wb.Worksheet(ExcelSystemMtResultReportRenderer.SummarySheetName);
-        var sourceCell = summary.Cell(2, 4);
+        var sourceCell = summary.Cell(ExcelSystemMtResultReportRenderer.SummaryFirstDataRow, 4);
         Assert.Equal(XLDataType.Number, sourceCell.DataType);
         Assert.Equal(rec.SourceValue, sourceCell.GetDouble());
     }
@@ -109,7 +111,7 @@ public sealed class ExcelSystemMtResultReportRendererTests
 
         using var wb = Open(xlsx);
         var summary = wb.Worksheet(ExcelSystemMtResultReportRenderer.SummarySheetName);
-        var followCell = summary.Cell(2, 5);
+        var followCell = summary.Cell(ExcelSystemMtResultReportRenderer.SummaryFirstDataRow, 5);
         Assert.Equal(XLDataType.Number, followCell.DataType);
         Assert.Equal(rec.FollowUpValue, followCell.GetDouble());
     }
@@ -136,7 +138,7 @@ public sealed class ExcelSystemMtResultReportRendererTests
     }
 
     [Fact]
-    public void Render_multi_record_summary_has_one_data_row_per_record_plus_header()
+    public void Render_multi_record_summary_has_one_data_row_per_record()
     {
         var records = new[]
         {
@@ -149,8 +151,16 @@ public sealed class ExcelSystemMtResultReportRendererTests
 
         using var wb = Open(xlsx);
         var summary = wb.Worksheet(ExcelSystemMtResultReportRenderer.SummarySheetName);
-        var dataRows = summary.RangeUsed()!.RowsUsed().Count() - 1; // minus header
-        Assert.Equal(3, dataRows);
+        // Verify by reading each expected data row position; the title / generated-at /
+        // totals / header rows above are out of scope for this fact.
+        for (int i = 0; i < records.Length; i++)
+        {
+            var row = ExcelSystemMtResultReportRenderer.SummaryFirstDataRow + i;
+            Assert.Equal(records[i].MrName, summary.Cell(row, 1).GetString());
+        }
+        // No 4th data row.
+        Assert.True(summary.Cell(
+            ExcelSystemMtResultReportRenderer.SummaryFirstDataRow + records.Length, 1).IsEmpty());
     }
 
     [Fact]
@@ -161,9 +171,30 @@ public sealed class ExcelSystemMtResultReportRendererTests
 
         using var wb = Open(xlsx);
         var summary = wb.Worksheet(ExcelSystemMtResultReportRenderer.SummarySheetName);
-        var passedCell = summary.Cell(2, 6);
+        var passedCell = summary.Cell(ExcelSystemMtResultReportRenderer.SummaryFirstDataRow, 6);
         Assert.Equal(XLDataType.Boolean, passedCell.DataType);
         Assert.False(passedCell.GetBoolean());
+    }
+
+    [Fact]
+    public void Render_summary_sheet_contains_report_context_title_at_top()
+    {
+        // PR-T2-T3 review-fix B1: ReportContext.Title / GeneratedAt / totals now
+        // appear in the Summary sheet header rows (previously discarded). Parity
+        // with PDF and Word title sections.
+        var ctx = new ReportContext(Title: "Custom Boltzmann Excel Report", GeneratedAt: FixedGenAt);
+        var xlsx = NewRenderer().Render(new[] { SampleRecord("mr-x", passed: true) }, ctx);
+
+        using var wb = Open(xlsx);
+        var summary = wb.Worksheet(ExcelSystemMtResultReportRenderer.SummarySheetName);
+        Assert.Equal("Custom Boltzmann Excel Report",
+            summary.Cell(ExcelSystemMtResultReportRenderer.SummaryTitleRow, 1).GetString());
+        Assert.Contains("Generated at",
+            summary.Cell(ExcelSystemMtResultReportRenderer.SummaryGeneratedAtRow, 1).GetString());
+        Assert.Contains("Total: 1",
+            summary.Cell(ExcelSystemMtResultReportRenderer.SummaryTotalsRow, 1).GetString());
+        Assert.Contains("Passed: 1",
+            summary.Cell(ExcelSystemMtResultReportRenderer.SummaryTotalsRow, 1).GetString());
     }
 
     [Fact]
@@ -222,8 +253,10 @@ public sealed class ExcelSystemMtResultReportRendererTests
         using var wb2 = Open(second);
         Assert.Equal(wb1.Worksheets.Count, wb2.Worksheets.Count);
         Assert.Equal(
-            wb1.Worksheet(ExcelSystemMtResultReportRenderer.SummarySheetName).Cell(2, 1).GetString(),
-            wb2.Worksheet(ExcelSystemMtResultReportRenderer.SummarySheetName).Cell(2, 1).GetString());
+            wb1.Worksheet(ExcelSystemMtResultReportRenderer.SummarySheetName)
+               .Cell(ExcelSystemMtResultReportRenderer.SummaryFirstDataRow, 1).GetString(),
+            wb2.Worksheet(ExcelSystemMtResultReportRenderer.SummarySheetName)
+               .Cell(ExcelSystemMtResultReportRenderer.SummaryFirstDataRow, 1).GetString());
         Assert.Equal(
             wb1.Worksheet(ExcelSystemMtResultReportRenderer.ChartsSheetName).Pictures.Count,
             wb2.Worksheet(ExcelSystemMtResultReportRenderer.ChartsSheetName).Pictures.Count);
