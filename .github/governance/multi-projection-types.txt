@@ -1,0 +1,26 @@
+# Registry of public types in MetBench_BLL.Core that have >= 2 projection paths.
+# Per CLAUDE.md §12.4 R1, adding a field to any of these types REQUIRES touching
+# the corresponding ParityTests file in the same PR. The G10 governance grep
+# check in dotnet-test.yml enforces this.
+#
+# Format: <TypeName>=<ParityTestsFile1>[,<ParityTestsFile2>,...]
+# - Use comma-separated paths when multiple parity test files cover the type.
+# - Use the literal token NONE when no parity test exists yet (G10 emits a
+#   stronger warning pointing at the registered gap).
+# - Lines starting with # and blank lines are ignored.
+#
+# Phase 4 Roslyn analyzer (METBENCH001) is planned to supersede this list
+# with AST-based detection. While that ships, this list is the source of
+# truth and must be updated whenever a new multi-projection type appears.
+
+# Catalog ↔ Manifest projection (HardcodedMrCatalogProvider + ManifestMrCatalogProvider)
+MrCatalogEntry=MetBench_SystemMT.Tests/SystemMT/Catalog/CatalogParityTests.cs
+
+# Launcher summary list (consumed by ListAvailableAsync + LauncherCatalogV2Importer)
+MrSummary=NONE
+
+# Result record (rendered by 5 renderers: HTML / Markdown / PDF / Word / Excel)
+SystemMtResultRecord=NONE
+
+# Execution evidence (recorder write + HTML/Markdown/PDF/Word/Excel rendering)
+ExecutionEvidence=NONE

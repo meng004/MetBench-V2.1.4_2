@@ -189,6 +189,57 @@ jobs:
             fi
           fi
 
+          # Check 10 (G10) — multi-projection record discipline (Cat B, L1 / FromBlueprint MetaPattern class):
+          # Reads .github/governance/multi-projection-types.txt and, for each registered
+          # type whose declaration file appears in the diff with a field addition,
+          # requires the registered ParityTests file to be touched in the same PR.
+          # Types registered as NONE emit a stronger reminder warning.
+          # Phase 4 Roslyn analyzer will supersede this list-based check.
+          registry='.github/governance/multi-projection-types.txt'
+          if [ -f "$registry" ]; then
+            while IFS='=' read -r type_name parity_paths; do
+              # Skip comments and blanks
+              case "$type_name" in ''|'#'*) continue ;; esac
+              # Find the declaration file(s) of the type by grepping for a record /
+              # class declaration. Types may be declared inline in larger files
+              # (e.g. MrCatalogEntry lives inside SystemMtLauncher.cs), so we cannot
+              # rely on the <TypeName>.cs convention.
+              decl_files=$(grep -rlE "(public|internal) (sealed )?(record|class) ${type_name}\\b" \
+                             MetBench_BLL.Core MetBench_BLL 2>/dev/null || true)
+              if [ -z "$decl_files" ]; then
+                continue
+              fi
+              # Did this PR add a public field on that type? (Heuristic: any line starting with `+ public`
+              # inside the declaration file diff.) This is conservative: an in-file addition that lands
+              # outside the type's record body would also trigger; reviewers downgrade as needed.
+              added_in_type=0
+              for decl in $decl_files; do
+                if git diff "$PR_BASE_SHA"..HEAD -- "$decl" 2>/dev/null \
+                     | grep -qE '^\+\s+public (string|int|long|double|bool|TimeSpan|IReadOnlyList|IReadOnlyDictionary|Guid)[^=(]* \{ (get|init)'; then
+                  added_in_type=1
+                  break
+                fi
+              done
+              if [ "$added_in_type" -eq 1 ]; then
+                if [ "$parity_paths" = "NONE" ]; then
+                  warn "G10 multi-projection: ${type_name} gained a public field but the type has NO ParityTests registered. Either add one and update .github/governance/multi-projection-types.txt, or document why projection-parity is not applicable (CLAUDE.md §12.4 R1)."
+                else
+                  parity_ok=0
+                  IFS=',' read -ra paths <<< "$parity_paths"
+                  for path in "${paths[@]}"; do
+                    if echo "$diff_files" | grep -qE "^${path}$"; then
+                      parity_ok=1
+                      break
+                    fi
+                  done
+                  if [ "$parity_ok" -eq 0 ]; then
+                    warn "G10 multi-projection: ${type_name} gained a public field but none of its registered ParityTests (${parity_paths}) was touched. Add a parity assertion (CLAUDE.md §12.4 R1)."
+                  fi
+                fi
+              fi
+            done < "$registry"
+          fi
+
           echo "Governance grep result: $fail warning(s). Hard 'test' gate is the only blocker."
           # Exit 0 unconditionally — advisory only, matches the prior AI-review semantics.
           exit 0
