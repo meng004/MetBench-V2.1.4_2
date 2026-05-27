@@ -147,6 +147,48 @@ jobs:
             fi
           done
 
+          # Check 6 (G6) — silent-discard pattern (Cat A, B1 / Excel ReportContext class):
+          # `_ = expr ?? default;` evaluates expr then discards the coalesced value.
+          # Each occurrence is a candidate "claim without implementation" bug.
+          # See docs/superpowers/specs/2026-05-27-t2-t3-chain-post-merge-review.md §2 B1.
+          if git diff "$PR_BASE_SHA"..HEAD -- '**/*.cs' 2>/dev/null | grep -qE '^\+\s*_ = .* \?\? '; then
+            warn "G6 silent-discard: '_ = … ?? …' pattern detected in diff. Verify the coalesced value is intentionally unused (CLAUDE.md §12.4 R4)."
+          fi
+
+          # Check 7 (G7) — pinned-count discipline (Cat A, PR-N2 / PR-Bol-2B / PR-T3-8 precedent):
+          # adding a new MrBlueprint without bumping any pinned 'Assert.Equal(N, …)' in tests
+          # historically caused hard-test red. Make the discipline explicit.
+          if git diff "$PR_BASE_SHA"..HEAD -- 'MetBench_BLL.Core/SystemMT/Launcher/LegacyCatalogFactory.cs' 2>/dev/null \
+               | grep -qE '^\+ *yield return new MrBlueprint\('; then
+            bumped=$(git diff "$PR_BASE_SHA"..HEAD -- 'MetBench_SystemMT.Tests/**/*.cs' 2>/dev/null \
+                       | grep -cE '^[+-]\s+Assert\.Equal\([0-9]+,' || echo 0)
+            if [ "${bumped:-0}" -lt 1 ]; then
+              warn "G7 pinned-count: new MrBlueprint added in LegacyCatalogFactory.cs but no pinned 'Assert.Equal(N, …)' bumped in test files (CLAUDE.md §12.5 / PR-N2 precedent)."
+            fi
+          fi
+
+          # Check 8 (G8) — § 12.4 R1 parity-test hint (Cat A/B border, L1 / FromBlueprint MetaPattern class):
+          # public field added to a type in MetBench_BLL.Core/ probably has multi-projection
+          # paths. Warn if no ParityTests file was touched in the same diff.
+          added_fields=$(git diff "$PR_BASE_SHA"..HEAD -- 'MetBench_BLL.Core/**/*.cs' 2>/dev/null \
+                          | grep -cE '^\+\s+public (string|int|long|double|bool|TimeSpan|IReadOnlyList|IReadOnlyDictionary|Guid)[^=(]* \{ (get|init)' \
+                          || echo 0)
+          if [ "${added_fields:-0}" -gt 0 ] && ! echo "$diff_files" | grep -qE 'ParityTests\.cs$'; then
+            warn "G8 R1 parity hint: ${added_fields} public field(s) added in MetBench_BLL.Core but no *ParityTests.cs touched. Verify the type has no multi-projection paths, or add a parity assertion (CLAUDE.md §12.4 R1)."
+          fi
+
+          # Check 9 (G9) — Stage-8 ledger 'Controlled' row without post-merge-review.md (Cat B, D1/D2 class):
+          # CLAUDE.md §12.4 R2 mandates ≥ 3-PR chains produce a post-merge-review.md AND the
+          # Stage-8 row cross-links it. T2/T3 chain originally violated this; G9 catches recurrence.
+          new_stage8=$(git diff "$PR_BASE_SHA"..HEAD -- 'docs/status/current.md' 2>/dev/null \
+                        | grep -cE '^\+\|.*Controlled.*— [0-9]+-phase' || echo 0)
+          if [ "${new_stage8:-0}" -gt 0 ]; then
+            if ! git diff "$PR_BASE_SHA"..HEAD -- 'docs/status/current.md' 2>/dev/null \
+                  | grep -qE '^\+.*docs/superpowers/specs/.*post-merge-review'; then
+              warn "G9 Stage-8 chain-end review: new 'Controlled — N-phase' Stage-8 row added but no post-merge-review.md cross-link in the row (CLAUDE.md §12.4 R2)."
+            fi
+          fi
+
           echo "Governance grep result: $fail warning(s). Hard 'test' gate is the only blocker."
           # Exit 0 unconditionally — advisory only, matches the prior AI-review semantics.
           exit 0
