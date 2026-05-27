@@ -1,10 +1,10 @@
-# PR Soft-Review Gate via claude-code-action (Max OAuth)
+# PR AI Review Gate via Codex + Claude Code
 
-> **Date**: 2026-05-26
-> **Status**: Active design (implementation YAML pending operator action)
-> **Scope**: Define the advisory LLM-based PR review layer that runs in GitHub Actions on every PR open / synchronize.
+> **Date**: 2026-05-26; updated 2026-05-27
+> **Status**: Active design; implementation lives in `.github/workflows/pr-soft-review.yml`
+> **Scope**: Define the advisory LLM-based PR review layer that runs in GitHub Actions on PR open / synchronize / reopen / ready-for-review / body edit.
 > **Hard-gate counterpart**: `.github/workflows/dotnet-test.yml` (existing, blocking).
-> **Checklist counterpart**: `docs/superpowers/templates/pr-gate-checklist.md` (this spec is referenced from its new "Soft Review" section).
+> **Checklist counterpart**: `docs/superpowers/templates/pr-gate-checklist.md` (this spec is referenced from its "AI Review" section).
 
 ---
 
@@ -12,7 +12,12 @@
 
 2026-05-26 的 retrospective review 暴露了一个 process gap：四个 PR (#138 / #140 / #141 / #142) 全部以"本地测试通过 + CI test job 绿 → squash 合并"的轻量流程合入主线，**没有任何代码 review 步骤**。CI 通过 ≠ review 通过。手工 PR Gate Checklist 已记录在 `pr-gate-checklist.md`，但纯靠 agent / 人记得贴 checklist 是不可靠的：上面四个 PR 全部漏贴。
 
-本 spec 引入一个**自动化的、LLM-based 的 advisory review 层**，把"读 diff → 对照 checklist → 在 PR 留 comment"这个本应有人做的步骤变成 PR 生命周期的硬约束（虽然结论本身仍是 advisory）。
+本 spec 引入一个**自动化的、LLM-based 的 advisory review 层**，把"读 diff → 对照 checklist → 在 PR 留 comment"这个本应有人做的步骤变成 PR 生命周期的固定动作（结论仍是 advisory）。
+
+2026-05-27 升级后，这一层拆成两名 reviewer：
+
+- **Codex Governance Review**：主审项目控制面，检查 scope、需求 / 计划追溯、状态账本、projection docs、Windows classification、Method MT / System MT 边界、docs-only baseline 误报。
+- **Claude Semantic Review**：副审代码语义面，检查 C# 逻辑、异常路径、System MT runtime 边界、Catalog/Typed predicate 使用、测试是否证明行为、WPF 语义风险。
 
 ---
 
@@ -20,9 +25,9 @@
 
 ### 在范围
 
-- 在 `pull_request` 事件触发时自动起 `anthropics/claude-code-action@v1`（headless 模式）
-- 跑一段固定的 review prompt，对照 `pr-gate-checklist.md` 的 Scope / Facts / Tests / Windows Classification 四节做机械审查
-- 把审查发现以 PR review comment 形式贴回 PR
+- 在 `pull_request` 事件触发时自动起 `openai/codex-action@v1` 和 `anthropics/claude-code-action@v1`
+- Codex 跑治理 prompt；Claude 跑语义 prompt
+- 把两类审查发现以两个独立 PR top-level comment 贴回 PR
 - 失败模式：action 本身 fail 不挡 merge（advisory 性质）
 
 ### 不在范围
@@ -30,7 +35,7 @@
 - **不替代** `dotnet test` 硬门
 - **不替代**人类对数学 / 物理 / 主观措辞的判断
 - **不**直接 push 代码改动到 PR 分支（只贴 comment）
-- **不**强制 merge 前 LLM 必须报 "approved"（noise 误报会把 PR 永久卡住）
+- **不**强制 merge 前 AI 必须报 "approved"（noise 误报会把 PR 永久卡住）
 - **不**改 PR labels / milestones / assignees（最小权限）
 
 ---
@@ -38,30 +43,28 @@
 ## 3. 触发条件
 
 - Event: `pull_request`
-- Types: `opened`, `synchronize`, `reopened`
+- Types: `opened`, `synchronize`, `reopened`, `ready_for_review`, `edited`
 - Not on `draft: true` PRs（先标准 ready-for-review 再消耗 review 额度）
-- Not on PR 仅改 `.github/`、`*.md` 之外的纯 docs 路径时也跑（cheap 且能捕获 doc drift）
+- Docs-only PRs also run：Codex governance review is specifically useful for status-ledger / plan-index drift
 - Branch filter: `base: main` 才跑（feature-to-feature PR 不消耗配额）
 
 ---
 
 ## 4. 认证
 
-| 项 | 值 |
-|---|---|
-| Secret 名 | `CLAUDE_CODE_OAUTH_TOKEN` |
-| 来源 | 仓库 owner 在本地跑 `claude setup-token` 用 Max 账户登录生成 |
-| Repo scope | `meng004/metbench-v2.1.4_2` |
-| 计费 | 消耗 Max 订阅配额，**不**另外消耗 Anthropic API token billing |
-| 失效条件 | OAuth token 被撤销 / 过期 / Anthropic 弃用 OAuth 模式 |
+| Reviewer | Secret 名 | 来源 | 失效条件 |
+|---|---|---|---|
+| Codex | `OPENAI_API_KEY` | OpenAI Platform project API key, stored as GitHub Actions secret | key revoked / quota exhausted / OpenAI API unavailable |
+| Claude Code | `CLAUDE_CODE_OAUTH_TOKEN` | Repo owner 本地跑 `claude setup-token` 用 Max 账户登录生成 | OAuth token revoked / expired / Anthropic deprecates OAuth mode |
 
 **前置 operator action（不可被 agent 完成）**：
 
-1. Repo owner 本地执行 `claude setup-token`（一次性）
-2. 把生成的 token 加到 GH repo Settings → Secrets and variables → Actions，命名 `CLAUDE_CODE_OAUTH_TOKEN`。**粘贴时 token 字符串不可包含前导 / 尾部空白或换行**（GitHub Secrets UI 会原样保留），否则 Anthropic SDK 会拒绝 HTTP header 抛 `API Error: Header '14' has invalid value: '*** ***'`（脱敏后两个 `***` 之间有空格是这个 bug 的指纹）—— 详见 §11 R7
-3. 确认 Claude GH App 已安装并对本仓库开启了 Contents / Issues / Pull requests 读写权限
+1. 在 OpenAI Platform 创建 project API key，加入 GH repo Settings → Secrets and variables → Actions，命名 `OPENAI_API_KEY`。
+2. Repo owner 本地执行 `claude setup-token`（一次性）。
+3. 把生成的 token 加到 GH repo Settings → Secrets and variables → Actions，命名 `CLAUDE_CODE_OAUTH_TOKEN`。**粘贴时 token 字符串不可包含前导 / 尾部空白或换行**（GitHub Secrets UI 会原样保留），否则 Anthropic SDK 会拒绝 HTTP header 抛 `API Error: Header '14' has invalid value: '*** ***'`（脱敏后两个 `***` 之间有空格是这个 bug 的指纹）—— 详见 §11 R7。
+4. 确认 Claude GH App 已安装并对本仓库开启 Contents / Issues / Pull requests 读写权限。
 
-实现 PR 在 secret 配置完成之前 merge 也可以，workflow 会因缺 secret 直接跳过（不挡 merge）。
+实现 PR 在 secret 配置完成之前 merge 也可以，workflow 会报告 advisory unavailable（不挡 merge）。
 
 ---
 
@@ -69,16 +72,15 @@
 
 ### 输入
 
-`anthropics/claude-code-action@v1` 自动注入：
 - PR diff（base..head）
 - PR 标题 + body
-- 仓库代码（通过 `actions/checkout@v4` 拉到 runner）
-
-加上 workflow 中显式传入的 `prompt`（见 §7）和 `claude_args`（限 max-turns 防 runaway）。
+- 仓库代码（通过 `actions/checkout@v5` 拉到 runner）
+- workflow 中显式传入的 Codex / Claude prompts
+- Claude `claude_args`（限 max-turns + allowedTools 防 runaway）
 
 ### 输出
 
-- **唯一允许的 side effect**：通过 GH App API 在 PR 上发 review comments
+- **唯一允许的 side effect**：在 PR 上发 top-level advisory comments
 - **不允许**：push commits、修 labels、open issues、merge、close PR
 - review 结论格式固定（见 §7 prompt 模板）
 
@@ -86,9 +88,10 @@
 
 | 失败原因 | 表现 | 影响 merge？ |
 |---|---|---|
-| `CLAUDE_CODE_OAUTH_TOKEN` 未配置 | workflow 跳过 step | 否 |
-| Max 配额耗尽 | action step fails | 否（job 不在 required checks 列表里） |
-| Anthropic API 5xx | action step fails | 否 |
+| `OPENAI_API_KEY` 未配置 | Codex step fails; fallback comment says unavailable | 否 |
+| `CLAUDE_CODE_OAUTH_TOKEN` 未配置 | Claude step fails; fallback comment says unavailable | 否 |
+| OpenAI / Anthropic quota exhausted | action step fails; fallback comment says unavailable | 否（job 不在 required checks 列表里） |
+| OpenAI / Anthropic API 5xx | action step fails; fallback comment says unavailable | 否 |
 | Runner timeout（默认 6h） | job killed | 否 |
 | LLM 误报 | review comment 仍发出 | 人工 override |
 
@@ -100,30 +103,41 @@
 
 把 `pr-gate-checklist.md` 各项按机械可行性分类，并指明每项由谁来管：
 
-| Checklist 项 | 由 claude-code-action 检 | 由 hard-gate (dotnet test) 检 | 由人 / 我 (agent) 判断 |
-|---|---|---|---|
-| Scope: 单一主目的 | ✅ regex PR title + 路径 vs claim | — | — |
-| Scope: 不混 feature / governance / cleanup | ✅ 跨目录路径混合检测 | — | ⚠ 边界情形人工 |
-| Scope: 状态账本变动声明 | ✅ 检 PR body 是否声明 + 改动是否一致 | — | — |
-| Facts: origin/main head 检查 | ⚠ 仅检 PR body 含此声明 | — | — |
-| Facts: 状态账本更新 | ✅ 若改动含 source 文件，验 `docs/status/current.md` 是否在 PR 内或紧随其后的 PR | — | — |
-| Facts: projection 文档同步 | ✅ 检 `AGENTS.md` / `CLAUDE.md` 等是否需要同步 | — | — |
-| Tests: focused tests 跑过 | — | ✅ `dotnet test` | — |
-| Tests: full baseline | — | ✅ `dotnet test` 跑全套 | — |
-| Tests: docs-only 不claim 新 baseline | ✅ 检 PR body 是否违反 | — | — |
-| Windows Classification | ✅ 改动文件路径 → 推断分类 → 对比 PR body 声明 | — | — |
-| Review: Layer 1 | ✅ 这层就是 Layer 1 | — | — |
-| Review: Layer 2（独立人审） | ⚠ LLM 给出建议但不替代 | — | ✅ 人 |
-| Review: 显式检 status drift / stale baseline | ✅ 解析 ledger baseline commit vs git head | — | — |
-| Merge: required checks green | — | ✅ GH | — |
-| Merge: merge method | — | ⚠ branch policy | ✅ 人 |
-| Merge: 同步 main | — | — | ✅ agent |
+| Checklist 项 | 由 Codex governance 检 | 由 Claude semantic 检 | 由 hard-gate (dotnet test) 检 | 由人 / 我 (agent) 判断 |
+|---|---|---|---|---|
+| Scope: 单一主目的 | ✅ PR body vs path diff | ⚠ only if code coupling suggests scope creep | — | — |
+| Scope: 不混 feature / governance / cleanup | ✅ | ⚠ | — | ⚠ 边界情形人工 |
+| Scope: 状态账本变动声明 | ✅ | — | — | — |
+| Facts: origin/main head 检查 | ✅ PR body / diff evidence | — | — | — |
+| Facts: 状态账本更新 | ✅ | — | — | — |
+| Facts: projection 文档同步 | ✅ | — | — | — |
+| Tests: focused tests 跑过 | ✅ PR body evidence | ✅ adequacy of tests | ✅ `dotnet test` | — |
+| Tests: full baseline | ✅ PR body evidence | ✅ missing behavioral coverage | ✅ `dotnet test` 跑全套 | — |
+| Tests: docs-only 不claim 新 baseline | ✅ | — | — | — |
+| Windows Classification | ✅ path → required evidence | ✅ WPF semantic risk if touched | — | — |
+| Review: Layer 1 | ✅ evidence present | ✅ code-level review comment | — | — |
+| Review: Layer 2（独立人审） | ⚠ advisory, not replacement | ⚠ advisory, not replacement | — | ✅ 人 |
+| Review: status drift / stale baseline | ✅ | — | — | — |
+| Merge: required checks green | — | — | ✅ GH | — |
+| Merge: merge method | — | — | ⚠ branch policy | ✅ 人 |
+| Merge: 同步 main | — | — | — | ✅ agent |
 
-**主要价值**：上表中 ✅ 在 `claude-code-action` 列的 11 项，是过去四个 PR **完全漏掉**的检查。把它们自动化后，再漏掉就是 action 没跑或 LLM 出 bug，而不是流程缺失。
+**主要价值**：Codex 防止项目控制失真，Claude 防止代码语义失真。两者都不替代 hard `test` 和 human approval。
 
 ---
 
-## 7. Workflow 模板
+## 7. Workflow 实现口径
+
+实现文件仍为 `.github/workflows/pr-soft-review.yml`，但 workflow name 升级为 `pr-ai-review`。保留原文件名是为了不打断既有文档链接和历史 PR 引用。
+
+当前实现包含两个 advisory job：
+
+- `codex-governance-review`：使用 `openai/codex-action@v1`，`OPENAI_API_KEY`，`sandbox: read-only`，`safety-strategy: read-only`。Codex 只读仓库和 PR diff，输出 `## Codex Governance Review (Advisory)` comment。
+- `claude-semantic-review`：使用 `anthropics/claude-code-action@v1`，`CLAUDE_CODE_OAUTH_TOKEN`，`--max-turns 20`，并只允许 `gh pr comment/view/diff` 与只读 `git diff/log` Bash 工具。Claude 输出 `## Claude Semantic Review (Advisory)` comment。
+
+两个 job 都 `continue-on-error: true`，失败时贴 advisory unavailable comment；它们不进入 branch protection required checks。
+
+下方 YAML 块是 2026-05-26 的 bootstrap 历史模板，保留用于解释 R4/R5/R6/R7 风险来源；当前真实实现以 `.github/workflows/pr-soft-review.yml` 为准。
 
 ```yaml
 # .github/workflows/pr-soft-review.yml
@@ -229,21 +243,21 @@ jobs:
 ```
 PR opened / synchronize
         ↓
-   ┌────┴────┐
-   ↓         ↓
-hard-gate  soft-gate
-(dotnet)   (claude)
-   ↓         ↓
-required    advisory
-   ↓         ↓
-green?    findings → PR comment
+   ┌────┬─────────────┐
+   ↓    ↓             ↓
+hard   Codex         Claude
+test   governance    semantic
+   ↓    ↓             ↓
+required advisory     advisory
+   ↓    ↓             ↓
+green? findings → PR comments
    ↓
 merge ok
 ```
 
-两者**完全独立**：
-- soft-gate 出错不影响 hard-gate 是否绿
-- hard-gate 红时 soft-gate 仍然会跑（也可能有用 — 帮诊断为什么红）
+三者**完全独立**：
+- AI review 出错不影响 hard-gate 是否绿
+- hard-gate 红时 AI review 仍然会跑（也可能有用 — 帮诊断为什么红）
 - merge 阻断只由 hard-gate + branch protection 控制
 
 ---
@@ -253,11 +267,11 @@ merge ok
 | 项 | 验证方式 |
 |---|---|
 | Spec 合入 main | 本 PR merge |
-| `pr-gate-checklist.md` 引用本 spec | grep 本 spec 文件名命中 checklist |
+| `pr-gate-checklist.md` 引用本 spec | grep 本 spec 文件名命中 checklist AI Review section |
 | active plan index §2 注册本 spec | grep 文件名命中 index 表格 |
 | Operator action 文档化 | §4 节存在 |
 | 实现 PR（workflow YAML）作为独立 follow-up | 本 spec 不含 YAML 部署；另起 PR 时 secret 已配置 |
-| Soft-gate 真实首跑验证 | 引入 `pr-soft-review.yml` 的 PR **不算自验**（GitHub workflow-validation 安全门，详见 R6）；以**该 PR 合并后下一个开向 main 的 PR** 收到 "Soft Review: PR Gate Checklist (Advisory)" 评论为准 |
+| AI review 真实首跑验证 | 修改 `pr-soft-review.yml` 的 PR **不算自验**（GitHub workflow-validation 安全门，详见 R6）；以**该 PR 合并后下一个开向 main 的 PR** 收到 "Codex Governance Review (Advisory)" 与 "Claude Semantic Review (Advisory)" 两条评论为准 |
 
 ---
 
@@ -265,9 +279,9 @@ merge ok
 
 本 spec 失效的可能触发：
 
-1. Anthropic 弃用 `anthropics/claude-code-action@v1` 或其 OAuth 模式
-2. Max 订阅条款变更不再覆盖 headless action 调用
-3. 项目转向 self-hosted LLM 或别的 review pipeline
+1. OpenAI 弃用 `openai/codex-action@v1` 或 Anthropic 弃用 `anthropics/claude-code-action@v1` / OAuth 模式
+2. OpenAI API key 或 Max 订阅条款变更不再覆盖 headless action 调用
+3. OpenAI / Anthropic action 任一侧被项目替换为 self-hosted LLM 或别的 review pipeline
 4. 团队规模扩大到需要专人 Layer-2 review，本层 advisory 价值缩水
 
 任一触发 → 起替代 spec → 在本文件加 "Superseded by: …" 头注 → 在 active plan index §2 把本 spec 移到"条件性活跃"或历史区。
