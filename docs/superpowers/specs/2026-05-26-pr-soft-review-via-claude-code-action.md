@@ -1,10 +1,34 @@
 # PR AI Review Gate via Codex + Claude Code
 
-> **Date**: 2026-05-26; updated 2026-05-27
-> **Status**: Active design; implementation lives in `.github/workflows/pr-soft-review.yml`
-> **Scope**: Define the advisory LLM-based PR review layer that runs in GitHub Actions on PR open / synchronize / reopen / ready-for-review / body edit.
-> **Hard-gate counterpart**: `.github/workflows/dotnet-test.yml` (existing, blocking).
-> **Checklist counterpart**: `docs/superpowers/templates/pr-gate-checklist.md` (this spec is referenced from its "AI Review" section).
+> ⚠️ **RETIRED on 2026-05-27** — this design has been replaced by the inline
+> `governance` grep job inside `.github/workflows/dotnet-test.yml`. The
+> corresponding workflow file `.github/workflows/pr-soft-review.yml` has been
+> deleted. See `CLAUDE.md §12.1` for the post-retirement architecture and the
+> rationale. The text below is kept as historical record so future
+> contributors can understand what the AI-review attempt looked like and why
+> it was retired.
+>
+> **Reasons for retirement** (summary):
+> 1. OpenAI Codex action consistently failed with "Quota exceeded" in ~30 s
+>    against the `OPENAI_API_KEY`-bound org, posting noisy advisory comments
+>    on every PR push.
+> 2. `anthropics/claude-code-action@v1`'s anti-injection guard (correctly)
+>    refuses to issue an app token when the workflow file in the PR head
+>    differs from `main` — so any workflow-touching PR self-fails both AI
+>    review jobs with 401 (CLAUDE.md §12.2 R6).
+> 3. The 2026-05-27 T2/T3 chain post-merge review found 11 findings; **0**
+>    of them had been surfaced by the AI review layer. The §12.4 R1 + R4
+>    parity / contract-honor facts (#199 + #195 cleanup PRs) mechanized
+>    catching equivalents, making the AI layer redundant.
+> 4. Per-PR cost: ~5 min runner-time × 2 jobs × ~140-package npm install ×
+>    Claude OAuth + OpenAI API token spend. Mechanical grep (current
+>    `governance` job) accomplishes the same checks in < 10 s.
+>
+> **Original date**: 2026-05-26; updated 2026-05-27 (twice — second update is this retirement notice)
+> **Original status**: Active design; implementation lived in `.github/workflows/pr-soft-review.yml` (deleted 2026-05-27)
+> **Original scope**: Define the advisory LLM-based PR review layer that ran in GitHub Actions on PR open / synchronize / reopen / ready-for-review / body edit.
+> **Hard-gate counterpart**: `.github/workflows/dotnet-test.yml` (existing, blocking; now also hosts the `governance` grep job that replaces the design below).
+> **Checklist counterpart**: `docs/superpowers/templates/pr-gate-checklist.md` (this spec was referenced from its "AI Review" section; checklist still keeps the section but it is no longer enforced by AI).
 
 ---
 
