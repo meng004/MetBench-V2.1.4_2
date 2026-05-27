@@ -1,6 +1,6 @@
 # (Equation × Meta-Pattern) Coverage Audit
 
-> **Date**: 2026-05-27
+> **Date**: 2026-05-27 (Phase 5 closed — `(navier-stokes, Inv)` cell now filled by `subchannel-friction-invariance` via PR #192 `c14ffd9`; gap count 12 → 11)
 > **Status**: Active reference (PR-T3-7 / Phase 4 of the T2-T3 visualization + gap-fill plan)
 > **Source plan**: [`docs/superpowers/plans/2026-05-27-t2-systemmt-visualization-and-t3-gap-fill-plan.md`](../plans/2026-05-27-t2-systemmt-visualization-and-t3-gap-fill-plan.md)
 > **Producer**: `MetBench_BLL.SystemMT.Coverage.MetaPatternMatrixAuditor.Audit(IMrCatalogProvider)` ([`MetBench_BLL.Core/SystemMT/Coverage/MetaPatternMatrixAuditor.cs`](../../../MetBench_BLL.Core/SystemMT/Coverage/MetaPatternMatrixAuditor.cs))
@@ -29,11 +29,11 @@ Generated from the manifest catalog under `SUT/<sut>/catalog.json`. The empty-st
 | `diffusion` | 1 — `diffusion-source-linearity` | ❌ | 1 — `diffusion-mesh-richardson` |
 | `heat-equation-1d` | 1 — `fourier-alpha-monotonic` | ❌ | 1 — `fourier-timestep-convergence` |
 | `lotka-volterra` | 1 — `scipy-ivp-lv-prey-growth-monotone` | ❌ | 1 — `scipy-ivp-lv-step-convergence` |
-| `navier-stokes` | 2 — `subchannel-flow-temperature-monotone`, `subchannel-heat-flux-linearity` | ❌ | ❌ |
+| `navier-stokes` | 2 — `subchannel-flow-temperature-monotone`, `subchannel-heat-flux-linearity` | 1 — `subchannel-friction-invariance` (PR-T3-8 / #192) | ❌ |
 | `poisson` | 2 — `poisson-source-superposition`, `scipy-bvp-poisson-source-superposition` | ❌ | 2 — `poisson-mesh-richardson`, `scipy-bvp-poisson-seed-mesh-insensitivity` |
 | `wave` | 1 — `wave-amplitude-linearity` | ❌ | 1 — `wave-mesh-energy-convergence` |
 
-**Totals**: 32 MRs binned across 21 filled cells; 12 empty cells (gaps) in the 11 × 3 = 33 Cartesian product.
+**Totals (Phase 5 close)**: **33 MRs** binned across **22 filled cells**; **11 empty cells** (gaps) in the 11 × 3 = 33 Cartesian product. Phase 5 closed the `(navier-stokes, Inv)` cell. Phase-4 totals were 32 MRs / 21 filled / 12 gaps.
 
 ---
 
@@ -50,8 +50,8 @@ These all build on SUTs already shipping pure-stdlib runners on Linux CI; a new 
 | A1 | `(burgers, Conv)` | `burgers-timestep-convergence` | Doubling internal `num_steps` shrinks the residual between two solutions monotonically (`ErrorMonotonicPredicate` on `peak_amplitude` or `mass_integral`). Conservative Lax-Friedrichs scheme is first-order accurate in time → expected halving residual. | `SUT/burgers_1d/` |
 | A2 | `(advection, Conv)` | `advection-timestep-convergence` | Same convergence shape as A1 but on the linear upwind scheme. Linear scheme makes the convergence rate analytically clean. | `SUT/advection_1d/` |
 | A3 | `(diffusion, Inv)` | `diffusion-source-symmetry-invariance` | Spatially mirrored source → spatially mirrored solution (parity invariance). `FieldEqualityPredicate(MirrorPairing)` on `phi` array. | `SUT/diffusion_1d/` |
-| A4 | `(navier-stokes, Inv)` | `subchannel-power-rebalance-invariance` | Total enthalpy in − out equals total power deposited regardless of axial power profile (steady-state energy balance). `DerivedInvariantPredicate(EnthalpyBalance)`. | `SUT/subchannel_1d/` |
-| A5 | `(navier-stokes, Conv)` | `subchannel-mesh-convergence` | Doubling the axial node count → residual on `T_exit` shrinks (Richardson). | `SUT/subchannel_1d/` |
+| ~~A4~~ | ~~`(navier-stokes, Inv)`~~ | ~~`subchannel-power-rebalance-invariance`~~ | **CLOSED**: PR-T3-8 / #192 shipped `subchannel-friction-invariance` (decoupling invariance — friction-factor does not enter energy equation in this 0D subchannel model). The A4 enthalpy-balance candidate remains a possible additional Inv MR but is no longer the gap-closing candidate. | — |
+| A5 | `(navier-stokes, Conv)` | `subchannel-mesh-convergence` | Doubling the axial node count → residual on `T_exit` shrinks (Richardson). NOTE: current `subchannel_1d.py` is a 0D analytical lumped model with no axial discretisation; closing this cell would require either extending the SUT to a finite-difference axial scheme, or picking a different Conv candidate. | `SUT/subchannel_1d/` (needs FD extension) |
 | A6 | `(poisson, Inv)` | `poisson-source-superposition-invariance` | Adding sources `f1 + f2` → solution `u1 + u2` (linearity invariance, distinct from the existing source-scaling Mono MR). `BinaryComparisonPredicate(Equal)` on `u_max`. | `SUT/poisson_1d/` |
 | A7 | `(wave, Inv)` | `wave-amplitude-symmetry-invariance` | Mirror IC `u0(x) → u0(L−x)` → mirrored solution at every t (parity invariance). `FieldEqualityPredicate(MirrorPairing)`. | `SUT/wave_1d/` |
 | A8 | `(heat-equation-1d, Inv)` | `fourier-energy-decay-invariance` | Total `∫u dx` strictly monotonically decreases (or is bounded above) under pure diffusion — an invariant inequality. `BinaryComparisonPredicate(LessEqual)`. | `SUT/heat_equation/` |
@@ -76,7 +76,11 @@ These need SciPy / OpenMOC / OpenMC; viable but CI must skip cleanly when the ve
 
 ## §4 Recommended top-1 candidate for Phase 5
 
-**`A1` — `burgers-timestep-convergence`** on `SUT/burgers_1d/`.
+> **Status update (2026-05-27, post-Phase-5)**: PR-T3-8 / #192 (`c14ffd9`) shipped **`subchannel-friction-invariance`** instead of the original top-1 below. The original top-1 (`burgers-timestep-convergence`) was rejected after empirical validation: Lax-Friedrichs dissipation grows under timestep refinement at fixed dx, breaking the Conv claim. The same failure mode applies to upwind FD on advection (A2 fallback). The remaining `(burgers, Conv)` and `(advection, Conv)` gaps require a refined MR design (simultaneous mesh + timestep refinement that preserves Courant ratio) — not a simple ScaleField on a single refinement knob. The original top-1 analysis is preserved below for the historical record.
+
+---
+
+**Original (pre-Phase-5) top-1 — REJECTED on validation**: ~~`A1` — `burgers-timestep-convergence`~~ on `SUT/burgers_1d/`.
 
 ### Why this one over the rest of Tier A
 
