@@ -23,4 +23,17 @@
     <InternalsVisibleTo Include="MetBench_SystemMT.Tests" />
   </ItemGroup>
 
+  <!--
+    Phase 4 of the CI Cat B hardening plan:
+    MetBench_Analyzers ships METBENCH001 (multi-projection record without
+    ParityTests). Severity is Info at MVP so build stays green; future PR
+    can promote to Warning / Error.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\MetBench_Analyzers\MetBench_Analyzers.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false"
+                      PrivateAssets="all" />
+  </ItemGroup>
+
 </Project>
