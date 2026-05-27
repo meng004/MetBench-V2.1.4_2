@@ -14,10 +14,22 @@ namespace MetBench_BLL.Reporting.SystemMt;
 /// <summary>
 /// Word (<c>.docx</c>) projection of a System-level MT run-report.
 /// DocumentFormat.OpenXml 3.3.0 backend; embeds a Phase-2 PNG chart per record
-/// via <see cref="ISystemMtChartRenderer"/>. Output is deterministic when
-/// <see cref="ReportContext.GeneratedAt"/> is supplied (no
-/// <see cref="CoreFilePropertiesPart"/> is added, so OpenXml does not inject
-/// a wall-clock created/modified timestamp into the package).
+/// via <see cref="ISystemMtChartRenderer"/>.
+///
+/// <para>Determinism caveats (M9, PR #183-#191 review):</para>
+/// <list type="bullet">
+///   <item>The renderer does NOT add a <see cref="CoreFilePropertiesPart"/>, so
+///   the OPC package carries no wall-clock created/modified timestamp.</item>
+///   <item>Raw <c>.docx</c> byte equality is NOT guaranteed across renders:
+///   OpenXml SDK injects fresh RSID (revision save id) attributes on every
+///   render, and the OPC zip container records <c>ZipEntry.LastWriteTime</c>
+///   per entry.</item>
+///   <item>What IS stable across identical input + pinned
+///   <see cref="ReportContext.GeneratedAt"/>: extracted body text, paragraph
+///   count, image part count, and <c>word/document.xml</c> byte length
+///   (RSIDs are fixed-width pseudo-random strings). Pinned by
+///   <c>Render_document_xml_payload_length_and_text_content_stable_for_same_input</c>.</item>
+/// </list>
 /// </summary>
 public sealed class WordSystemMtResultReportRenderer : IWordSystemMtResultReportRenderer
 {

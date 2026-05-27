@@ -29,7 +29,13 @@ public sealed class SkiaChartRenderer : ISystemMtChartRenderer
         if (options.Height <= 0) throw new ArgumentOutOfRangeException(nameof(options), $"Height must be > 0 (got {options.Height})");
         if (options.Dpi <= 0) throw new ArgumentOutOfRangeException(nameof(options), $"Dpi must be > 0 (got {options.Dpi})");
 
-        var info = new SKImageInfo(options.Width, options.Height, SKColorType.Rgba8888, SKAlphaType.Premul);
+        // SKAlphaType.Opaque tells the PNG encoder the image carries no alpha channel,
+        // so downstream embedders (notably iTextSharp's Image.GetInstance) emit a single
+        // /Subtype /Image XObject per chart instead of a (primary, /SMask soft-mask) pair.
+        // The PDF test's smask-aware counter still works (becomes a no-op) but the
+        // simpler 1:1 model is the principled state — see review item M4 from the
+        // PR #183-#191 audit.
+        var info = new SKImageInfo(options.Width, options.Height, SKColorType.Rgba8888, SKAlphaType.Opaque);
         using var surface = SKSurface.Create(info);
         if (surface is null)
         {
