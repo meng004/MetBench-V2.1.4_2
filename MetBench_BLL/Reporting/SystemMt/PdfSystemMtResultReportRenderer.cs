@@ -199,11 +199,20 @@ public sealed class PdfSystemMtResultReportRenderer : IPdfSystemMtResultReportRe
         var png = _chartRenderer.RenderPng(figure, _chartOptions);
         var image = Image.GetInstance(png);
 
-        // Scale the chart down to fit the page width (A4 minus margins ≈ 523pt).
-        const float maxWidthPt = 480f;
-        if (image.Width > maxWidthPt)
+        // PR-T2-T3 review-fix C1: iTextSharp's Image.Width is the raw pixel
+        // width from the PNG IHDR (e.g. 720 for the default 720×480
+        // ChartRenderOptions), NOT a typographic point measurement. We want the
+        // *displayed* width bounded by maxDisplayWidthPt (A4 page width 595pt
+        // minus 2× 36pt margin ≈ 523pt, conservatively rounded down to 480pt).
+        // Convert pixels to points at the chart's render DPI before comparing
+        // so callers can change ChartRenderOptions.Width / Dpi without breaking
+        // the bound.
+        const float maxDisplayWidthPt = 480f;
+        var pixelsPerPoint = _chartOptions.Dpi / 72f;
+        var imageWidthPt = image.Width / pixelsPerPoint;
+        if (imageWidthPt > maxDisplayWidthPt)
         {
-            var scale = maxWidthPt / image.Width;
+            var scale = maxDisplayWidthPt / imageWidthPt;
             image.ScalePercent(scale * 100f);
         }
         image.SpacingBefore = 8f;

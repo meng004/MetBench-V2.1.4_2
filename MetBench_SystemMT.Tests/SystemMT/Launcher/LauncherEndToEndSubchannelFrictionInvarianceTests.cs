@@ -49,7 +49,15 @@ public sealed class LauncherEndToEndSubchannelFrictionInvarianceTests
 
         Assert.True(result.Passed, result.FailureReason);
         Assert.Equal("delta_T", result.ValueName);
-        // Analytical invariance — source and follow-up should be byte-equal.
+        // PR-T2-T3 review-fix T3: friction factor does NOT enter the energy
+        // equation ΔT = q''·P_h·L/(G·A_xs·c_p), so doubling it must produce
+        // delta_T BIT-IDENTICAL to the source. This is an INTENTIONAL strict
+        // regression guard — do NOT loosen to ApproxEqual: any FP perturbation
+        // here would indicate the runner's float ordering changed and silently
+        // broke the analytical decoupling. If subchannel_1d.py is rewritten
+        // and this fact starts failing on a microscopic FP wobble (e.g. 1e-15
+        // residual), the right fix is to re-derive WHY a structural change
+        // moved bits, not to relax this assertion.
         Assert.Equal(result.SourceValue, result.FollowUpValue);
 
         var exec = Assert.Single(_execs.Data);

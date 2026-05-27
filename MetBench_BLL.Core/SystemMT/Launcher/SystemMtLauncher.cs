@@ -517,7 +517,13 @@ public sealed record MrCatalogEntry(
             bp.AssertionTypeCode,
             bp.EquationKey,
             bp.Tolerance,
-            bp.RefinementPhases);
+            bp.RefinementPhases)
+        {
+            // Derive the meta-pattern from the MrFamily convention so the entry
+            // projected from the legacy hardcoded path carries the same metadata
+            // as the manifest-backed projection. See MrMetaPatternConventions.
+            MetaPattern = MrMetaPatternConventions.FromMrFamily(bp.Mr.MrFamily),
+        };
 
     /// <summary>
     /// Inverse of <see cref="FromBlueprint"/>; reconstructs the runtime blueprint for launcher consumption.
