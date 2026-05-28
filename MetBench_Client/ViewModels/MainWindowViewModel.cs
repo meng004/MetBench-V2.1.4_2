@@ -97,6 +97,12 @@ namespace MetBench_Client.ViewModels
             },
                      new NavigationViewItem()
             {
+                Content = "System MT Equation Catalog",
+                Icon = new SymbolIcon { Symbol = SymbolRegular.MathFormula24 },
+                TargetPageType = typeof(Views.Pages.SystemMtEquationCatalogPage)
+            },
+                     new NavigationViewItem()
+            {
                 Content = "System MT Execution History",
                 Icon = new SymbolIcon { Symbol = SymbolRegular.History24 },
                 TargetPageType = typeof(Views.Pages.SystemMtExecutionHistoryPage)

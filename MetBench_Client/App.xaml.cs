@@ -17,6 +17,7 @@ using MetBench_BLL.SystemMT.Anomaly;
 using MetBench_BLL.SystemMT.Bootstrap;
 using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Metadata;
+using MetBench_BLL.SystemMT.Metadata.Editing;
 using MetBench_BLL.SystemMT.Persistence;
 using MetBench_BLL.SystemMT.Persistence.Editing;
 using MetBench_BLL.SystemMT.Pipeline;
@@ -185,6 +186,9 @@ namespace MetBench_Client
                 services.AddScoped<ViewModels.SystemMtMrCatalogViewModel>();
                 services.AddScoped<Views.Pages.SystemMtSutCatalogPage>();
                 services.AddScoped<ViewModels.SystemMtSutCatalogViewModel>();
+                services.AddScoped<ISystemMtEquationEditor, SystemMtEquationEditor>();
+                services.AddScoped<Views.Pages.SystemMtEquationCatalogPage>();
+                services.AddScoped<ViewModels.SystemMtEquationCatalogViewModel>();
                 services.AddScoped<IExecutionHistoryEditor, ExecutionHistoryEditor>();
                 services.AddScoped<Views.Pages.SystemMtExecutionHistoryPage>();
                 services.AddScoped<ViewModels.SystemMtExecutionHistoryViewModel>();
