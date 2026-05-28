@@ -47,6 +47,7 @@ Choose exactly one highest required level. If multiple categories apply, choose 
 - [ ] Layer 1 local review completed.
 - [ ] Layer 2 PR review note completed.
 - [ ] Review explicitly checked for status drift and stale baseline claims.
+- [ ] **Author-side `/code-review` advisory (CLAUDE.md §12.2 module F)**: if this PR touches `MetBench_BLL.Core/SystemMT/Reporting/`, `Catalog/Editing/`, `Catalog/Typed/Runtime/`, or `MetBench_Analyzers/`, `/code-review high` was run locally and its output was either acted on or explicitly dismissed. Non-blocking; skip with a one-line reason if not applicable.
 
 ## Merge
 

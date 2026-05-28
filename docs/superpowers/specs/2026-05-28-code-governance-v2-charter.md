@@ -156,7 +156,7 @@ R1-R4 文本内容保留，本章程不重述；每条规则在 CLAUDE.md §12.4
 | Layer 4 `*ParityTests.cs` | → 模块 B | 保留 |
 | Layer 4 `Audit_*_providers_*` | → 模块 B | 保留 |
 | Layer 4 `Render_*_renders_*` | → 模块 B + 模块 C | 保留 + R4 半自动叠加 |
-| Layer 4 METBENCH001 | → 模块 B；**升 METBENCH002 通用** | 001 仍跑特化，002 跑通用扫描 |
+| Layer 4 METBENCH001 | → 模块 B；保留 | 001 当前已是通用 syntax-only 扫描（threshold ≥ 2 跨文件 use site），并非 4-type 注册表特化；P3 实施时该 charter 描述被 retrospective 修订（见 P3 plan §1）。METBENCH002 作差异化补强：threshold ≥ 5 + 扩 `RecursivePatternSyntax` use-site。 |
 | Layer 4 Stryker pilot | → 模块 C；**升 PR-delta gate** | break=0 → -3pp（baseline 后） |
 | Layer 4 spec-freshness cron | → 模块 D；**加 orphan-spec** | 同 Python 脚本扩 |
 | Layer 4 chain-end-review-checklist.md | → 模块 E | 保留 |
@@ -192,7 +192,7 @@ R1-R4 文本内容保留，本章程不重述；每条规则在 CLAUDE.md §12.4
 |---|---|---|---|---|
 | **P1** | 模块 B：catalog-derived 计数 + ID 白名单（替 G7 grep） | 半天 | 极低 | 消除一整类 Cat B drift |
 | **P2** | 模块 D：扩 `spec_freshness_audit.py` 加 orphan-spec 检查 | 半天 | 极低 | 新增 D1/D2 漂移侦测 |
-| **P3** | 模块 B：METBENCH002 通用 field-flow tracer Roslyn 分析器 | 2-3 天 | 中（AST 复杂度） | L1 Cat B 覆盖大幅扩 |
+| **P3** | 模块 B：METBENCH002 通用 field-flow tracer Roslyn 分析器 | 2-3 天 | 中（AST 复杂度） | 扩 use-site 谱 + 高阈值精选 |
 | **P4** | 模块 C：Stryker baseline 观察 3 周 → 升级 PR-delta gate（break=-3pp） | 时间（cron 自跑）+ 半天 workflow 改 | 中（baseline 漂移可能） | 激活第四层 §12.5 负空间守卫 |
 | **P5** | 模块 E：`/code-review ultra` 喂入累积 diff 自动化脚本 + checklist 步骤 | 1 天 | 低（每 chain 一次 cost 可控） | Cat B 全谱再覆一层 |
 | **P6** | 模块 F：CLAUDE.md §12 加作者侧 advisory + `pr-gate-checklist.md` Review 节加 advisory bullet | 半天 | 极低 | 作者侧 Cat A 前置 |
