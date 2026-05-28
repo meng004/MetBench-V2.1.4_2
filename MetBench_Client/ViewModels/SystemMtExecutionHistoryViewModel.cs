@@ -117,9 +117,9 @@ namespace MetBench_Client.ViewModels
                 ? $"Delete execution {targets[0].Id} ({targets[0].MrName})? Evidence will be removed first, then the result row. This cannot be undone."
                 : $"Delete {targets.Count} execution rows (and their evidence)? This cannot be undone.";
 
-            var confirm = MessageBox.Show(
-                prompt, "Confirm delete", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-            if (confirm != MessageBoxResult.OK) return;
+            var confirm = System.Windows.MessageBox.Show(
+                prompt, "Confirm delete", System.Windows.MessageBoxButton.OKCancel, System.Windows.MessageBoxImage.Warning);
+            if (confirm != System.Windows.MessageBoxResult.OK) return;
 
             var outcome = await _editor.DeleteBatchAsync(targets.Select(r => r.Id)).ConfigureAwait(false);
             StatusMessage = FormatDeleteOutcome(outcome);
