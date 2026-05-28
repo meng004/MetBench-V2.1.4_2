@@ -155,18 +155,6 @@ jobs:
             warn "G6 silent-discard: '_ = … ?? …' pattern detected in diff. Verify the coalesced value is intentionally unused (CLAUDE.md §12.4 R4)."
           fi
 
-          # Check 7 (G7) — pinned-count discipline (Cat A, PR-N2 / PR-Bol-2B / PR-T3-8 precedent):
-          # adding a new MrBlueprint without bumping any pinned 'Assert.Equal(N, …)' in tests
-          # historically caused hard-test red. Make the discipline explicit.
-          if git diff "$PR_BASE_SHA"..HEAD -- 'MetBench_BLL.Core/SystemMT/Launcher/LegacyCatalogFactory.cs' 2>/dev/null \
-               | grep -qE '^\+ *yield return new MrBlueprint\('; then
-            bumped=$(git diff "$PR_BASE_SHA"..HEAD -- 'MetBench_SystemMT.Tests/**/*.cs' 2>/dev/null \
-                       | grep -cE '^[+-]\s+Assert\.Equal\([0-9]+,' || echo 0)
-            if [ "${bumped:-0}" -lt 1 ]; then
-              warn "G7 pinned-count: new MrBlueprint added in LegacyCatalogFactory.cs but no pinned 'Assert.Equal(N, …)' bumped in test files (CLAUDE.md §12.5 / PR-N2 precedent)."
-            fi
-          fi
-
           # Check 8 (G8) — § 12.4 R1 parity-test hint (Cat A/B border, L1 / FromBlueprint MetaPattern class):
           # public field added to a type in MetBench_BLL.Core/ probably has multi-projection
           # paths. Warn if no ParityTests file was touched in the same diff.

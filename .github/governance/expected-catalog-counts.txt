@@ -1,0 +1,87 @@
+# MetBench catalog source-of-truth whitelist.
+# Per CLAUDE.md §12.4 R1 + v2 charter §3 module B: the catalog has two
+# projection paths (MetBench_BLL.Core/SystemMT/Launcher/LegacyCatalogFactory.cs
+# + SUT/<sut>/catalog.json), and this file is the meta-fact source for both
+# the cardinality and the ID set of MRs / SUTs / equations. Any PR that adds
+# (or removes) an MR / SUT / equation MUST update this file in lockstep —
+# otherwise the catalog-count fact suite (>= 6 test classes; see
+# docs/superpowers/plans/2026-05-28-p1-catalog-derived-counts-plan.md §6.1)
+# will fail loudly. This file replaces the advisory G7 grep retired by the
+# same plan.
+#
+# Categories (one per line):
+#   mr:<mr-id>          — distinct MrCatalogEntry.Mr.Id values
+#   sut:<sut-name>      — distinct MrCatalogEntry.Mr.SutName values
+#   eq:<equation-key>   — distinct EquationMetadata.EquationKey values
+#                          (sourced from SystemMtMetadataCatalog.Equations)
+#
+# Lines starting with # and blank lines are ignored. Entries are sorted
+# alphabetically (Ordinal) within each section for stable diffs.
+
+# --- MR IDs (count must equal MrCatalogEntry count from both providers) ---
+mr:advection-amplitude-linearity
+mr:advection-mesh-conservation
+mr:bateman-mass-conservation
+mr:bateman-timestep-cauchy
+mr:burgers-amplitude-peak-monotone
+mr:burgers-mesh-conservation
+mr:csv-roundtrip-identity
+mr:damped-oscillator-scale-state
+mr:decay-chain-scale-initial
+mr:diffusion-mesh-richardson
+mr:diffusion-source-linearity
+mr:fourier-alpha-monotonic
+mr:fourier-timestep-convergence
+mr:heat-equation-amplitude
+mr:lotka-volterra-scale-gamma
+mr:openmc-pincell-nu-sigma-f
+mr:openmc-pincell-particle-count-convergence
+mr:openmc-pincell-sigma-a
+mr:openmoc-pincell-nu-sigma-f
+mr:openmoc-pincell-ray-track-convergence
+mr:openmoc-pincell-sigma-a
+mr:poisson-mesh-richardson
+mr:poisson-source-superposition
+mr:projectile-scale-v0
+mr:scipy-bvp-poisson-seed-mesh-insensitivity
+mr:scipy-bvp-poisson-source-superposition
+mr:scipy-ivp-lv-prey-growth-monotone
+mr:scipy-ivp-lv-step-convergence
+mr:subchannel-flow-temperature-monotone
+mr:subchannel-friction-invariance
+mr:subchannel-heat-flux-linearity
+mr:wave-amplitude-linearity
+mr:wave-mesh-energy-convergence
+
+# --- SUT names (count must equal distinct MrCatalogEntry.Mr.SutName) ---
+sut:_test-csv
+sut:advection-1d
+sut:burgers-1d
+sut:damped-oscillator
+sut:decay-chain
+sut:diffusion-1d
+sut:heat-equation
+sut:lotka-volterra
+sut:openmc
+sut:openmoc
+sut:poisson-1d
+sut:projectile
+sut:scipy-bvp-poisson-1d
+sut:scipy-ivp-lotka-volterra
+sut:subchannel-1d
+sut:wave-1d
+
+# --- Equation keys (count must equal MetadataRepository.ListEquationsAsync()) ---
+eq:_test_csv
+eq:advection
+eq:bateman
+eq:burgers
+eq:damped-oscillator
+eq:diffusion
+eq:heat-equation-1d
+eq:lotka-volterra
+eq:navier-stokes
+eq:neutron-transport
+eq:poisson
+eq:projectile-motion
+eq:wave

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MetBench_BLL.SystemMT.Catalog;
 using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Pipeline;
+using MetBench_SystemMT.Tests.SystemMT.Catalog.Governance;
 using MetBench_SystemMT.Tests.V2Anomaly;
 using MetBench_SystemMT.Tests.V2Pipeline;
 using Xunit;
@@ -107,7 +108,7 @@ public sealed class SystemMtLauncherProviderInjectionTests
 
         var items = await launcher.ListAvailableAsync();
 
-        Assert.Equal(33, items.Count);
+        Assert.Equal(ExpectedCatalogCountsWhitelist.MrCount, items.Count);
         Assert.Contains(items, m => m.Id == "openmoc-pincell-nu-sigma-f");
     }
 
