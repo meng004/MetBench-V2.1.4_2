@@ -4,6 +4,7 @@ using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_Domain;
 using MetBench_IDAL;
+using MetBench_SystemMT.Tests.SystemMT.Catalog.Governance;
 using MetBench_SystemMT.Tests.V2Anomaly;
 using MetBench_SystemMT.Tests.V2Pipeline;
 using Xunit;
@@ -79,8 +80,8 @@ public sealed class LauncherCatalogV2ImporterTests
     {
         var summary = _importer.Import();
 
-        Assert.Equal(16, summary.ApplicationsCreated);
-        Assert.Equal(16, _apps.Data.Count);
+        Assert.Equal(ExpectedCatalogCountsWhitelist.SutCount, summary.ApplicationsCreated);
+        Assert.Equal(ExpectedCatalogCountsWhitelist.SutCount, _apps.Data.Count);
         var sutNames = _apps.Data.Select(a => a.Name).OrderBy(n => n, System.StringComparer.Ordinal).ToArray();
         Assert.Equal(
             new[] { "_test-csv", "advection-1d", "burgers-1d", "damped-oscillator", "decay-chain", "diffusion-1d", "heat-equation", "lotka-volterra", "openmc", "openmoc", "poisson-1d", "projectile", "scipy-bvp-poisson-1d", "scipy-ivp-lotka-volterra", "subchannel-1d", "wave-1d" },
@@ -94,8 +95,8 @@ public sealed class LauncherCatalogV2ImporterTests
     {
         var summary = _importer.Import();
 
-        Assert.Equal(33, summary.MrsCreated);
-        Assert.Equal(33, _mrs.Data.Count);
+        Assert.Equal(ExpectedCatalogCountsWhitelist.MrCount, summary.MrsCreated);
+        Assert.Equal(ExpectedCatalogCountsWhitelist.MrCount, _mrs.Data.Count);
         Assert.All(_mrs.Data, m => Assert.Equal("system-level", m.Kind));
         Assert.All(_mrs.Data, m => Assert.Equal("manual", m.DiscoveryMethod));
         // S8-P1 后元模式扩展：Scaling → m_mono / Invariance → m_inv / Convergence → m_conv
@@ -111,7 +112,7 @@ public sealed class LauncherCatalogV2ImporterTests
     {
         _importer.Import();
 
-        Assert.Equal(33, _bindings.Data.Count);
+        Assert.Equal(ExpectedCatalogCountsWhitelist.MrCount, _bindings.Data.Count);
         foreach (var b in _bindings.Data)
         {
             Assert.NotNull(_mrs.Data.FirstOrDefault(m => m.IdMR == b.MRId));
@@ -190,22 +191,22 @@ public sealed class LauncherCatalogV2ImporterTests
         var second = _importer.Import();
 
         // 第 1 次:全部新建
-        Assert.Equal(16, first.ApplicationsCreated);
-        Assert.Equal(33, first.MrsCreated);
-        Assert.Equal(33, first.BindingsCreated);
+        Assert.Equal(ExpectedCatalogCountsWhitelist.SutCount, first.ApplicationsCreated);
+        Assert.Equal(ExpectedCatalogCountsWhitelist.MrCount, first.MrsCreated);
+        Assert.Equal(ExpectedCatalogCountsWhitelist.MrCount, first.BindingsCreated);
 
         // 第 2 次:全部已存在
         Assert.Equal(0, second.ApplicationsCreated);
-        Assert.Equal(16, second.ApplicationsExisting);
+        Assert.Equal(ExpectedCatalogCountsWhitelist.SutCount, second.ApplicationsExisting);
         Assert.Equal(0, second.MrsCreated);
-        Assert.Equal(33, second.MrsExisting);
+        Assert.Equal(ExpectedCatalogCountsWhitelist.MrCount, second.MrsExisting);
         Assert.Equal(0, second.BindingsCreated);
-        Assert.Equal(33, second.BindingsExisting);
+        Assert.Equal(ExpectedCatalogCountsWhitelist.MrCount, second.BindingsExisting);
 
         // 行数总和未变
-        Assert.Equal(16, _apps.Data.Count);
-        Assert.Equal(33, _mrs.Data.Count);
-        Assert.Equal(33, _bindings.Data.Count);
+        Assert.Equal(ExpectedCatalogCountsWhitelist.SutCount, _apps.Data.Count);
+        Assert.Equal(ExpectedCatalogCountsWhitelist.MrCount, _mrs.Data.Count);
+        Assert.Equal(ExpectedCatalogCountsWhitelist.MrCount, _bindings.Data.Count);
         // 两次都写一条审计
         Assert.Equal(2, _audit.Data.Count);
     }

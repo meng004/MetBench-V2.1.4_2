@@ -2,6 +2,7 @@
 using System.Linq;
 using MetBench_BLL.SystemMT.Catalog;
 using MetBench_BLL.SystemMT.Launcher;
+using MetBench_SystemMT.Tests.SystemMT.Catalog.Governance;
 using Xunit;
 
 namespace MetBench_SystemMT.Tests.SystemMT.Catalog;
@@ -19,7 +20,7 @@ public sealed class HardcodedMrCatalogProviderTests
         var entries = p.Load();
 
         // Branch state after PR-A non-JSON I/O adapter synthetic _test-csv SUT (+1 MR / +1 SUT): 30 MR × 16 SUT.
-        Assert.Equal(33, entries.Count);
+        Assert.Equal(ExpectedCatalogCountsWhitelist.MrCount, entries.Count);
     }
 
     [Fact]
@@ -30,7 +31,7 @@ public sealed class HardcodedMrCatalogProviderTests
         var entries = p.Load();
 
         var distinctSuts = entries.Select(e => e.Mr.SutName).Distinct().ToList();
-        Assert.Equal(16, distinctSuts.Count);
+        Assert.Equal(ExpectedCatalogCountsWhitelist.SutCount, distinctSuts.Count);
         Assert.Contains("openmoc", distinctSuts);
         Assert.Contains("openmc", distinctSuts);
         Assert.Contains("heat-equation", distinctSuts);
