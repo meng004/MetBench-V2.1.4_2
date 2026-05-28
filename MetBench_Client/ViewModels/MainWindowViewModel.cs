@@ -91,6 +91,12 @@ namespace MetBench_Client.ViewModels
             },
                      new NavigationViewItem()
             {
+                Content = "System MT SUT Catalog",
+                Icon = new SymbolIcon { Symbol = SymbolRegular.Apps24 },
+                TargetPageType = typeof(Views.Pages.SystemMtSutCatalogPage)
+            },
+                     new NavigationViewItem()
+            {
                 Content = "System MT Execution History",
                 Icon = new SymbolIcon { Symbol = SymbolRegular.History24 },
                 TargetPageType = typeof(Views.Pages.SystemMtExecutionHistoryPage)
