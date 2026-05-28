@@ -63,7 +63,18 @@ public sealed class DefaultProcessExecutor : IProcessExecutor
     private static (string FileName, string Arguments) PlatformShell(string command)
     {
         if (OperatingSystem.IsWindows())
-            return ("cmd.exe", $"/c {command}");
+        {
+            // cmd.exe /c with a command containing multiple quoted tokens
+            // (e.g. `"python" "C:\path\script.py" parse --input "C:\path\in.json"`)
+            // triggers cmd's documented rule-2 quote-stripping (`cmd /?`):
+            // > if more than 2 quotes are present, strip the leading and trailing
+            // > quote chars from the command, leaving the middle intact.
+            // That mangles the command into `python" "C:\path\script.py" ...` and
+            // cmd prints `系统找不到指定的路径` on stderr. Pass `/s /c "<command>"`
+            // so cmd treats the entire command as one quoted block and only strips
+            // the outer pair we explicitly add.
+            return ("cmd.exe", $"/s /c \"{command}\"");
+        }
         return ("/bin/sh", $"-c \"{command.Replace("\"", "\\\"")}\"");
     }
 }
