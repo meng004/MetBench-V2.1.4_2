@@ -2,6 +2,12 @@
 
 > **When to use**: at the end of any ≥ 3-PR phased delivery (T2/T3 chain, W12 sequence, S8 P1-P5 chain, etc.) per `CLAUDE.md §12.4 R2`. Spawn a **fresh agent session** (not the chain-implementation session). Run the items below over the full set of merged PRs treated as a single diff.
 
+### Step 0 — Generate ultra invocation (P5 automation)
+
+- [ ] Ran `python3 tools/chain_end_ultra_invocation.py --base <chain-base-ref> --head <chain-head-sha> --chain-name <chain-slug>` and captured the output into the working notes of this review session.
+- [ ] The generated `/code-review ultra ...` line was invoked (or its stdin-piped variant if the skill's arg form requires that), with output saved alongside this checklist's findings.
+- [ ] The suggested review-doc path (`docs/superpowers/specs/YYYY-MM-DD-<chain-name>-post-merge-review.md`) was reconciled against `§2.2` of the P5 plan and §2 chain-naming examples; if the slug differs, document why in the review doc header.
+
 ## Scope
 
 - [ ] All chain PRs identified (cite SHA + PR number for each phase).
@@ -48,6 +54,7 @@
 - [ ] **Cleanup PR(s) opened and merged BEFORE the chain is declared "Controlled" in the status ledger** (CLAUDE.md §12.4 R2).
 - [ ] For every B-category finding, the cleanup PR adds a guard test (parity / contract / paired-fact) per CLAUDE.md §12.4 R1+R4, NOT only a per-instance fix.
 - [ ] Chain-end review session creates a `docs/superpowers/specs/<date>-<chain-name>-post-merge-review.md` summarizing categories, findings, follow-up PRs, and rules-of-thumb learned.
+- [ ] Step 0 ultra-invocation output is cross-linked from the review doc as an "Auxiliary artifacts" section (immediately after §1 chain phases table), with the exact `/code-review ultra ...` command, full base + head SHAs, and finding-vs-ultra-finding reconciliation notes (which ultra findings the human ritual confirmed / dismissed / extended).
 
 ---
 
