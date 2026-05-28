@@ -6,3 +6,4 @@
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
 METBENCH001 | MetBench.Governance | Info | MultiProjectionRecordAnalyzer — multi-projection record without ParityTests guard (CLAUDE.md §12.4 R1)
+METBENCH002 | MetBench.Governance | Info | FieldFlowTracerAnalyzer — generic field-flow tracer for public sealed records with >= 5 cross-file construction sites (v2 charter §6 P3)
