@@ -62,6 +62,15 @@ public sealed class LiteDbExecutionEvidenceRepository : IExecutionEvidenceReposi
         return Task.FromResult<ExecutionEvidence?>(match);
     }
 
+    public Task<bool> DeleteByExecutionIdAsync(Guid executionId, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        // The ExecutionId index is unique (line 45), so at most one row matches.
+        // DeleteMany returns the count of removed rows; > 0 means we actually deleted.
+        var removed = _collection.DeleteMany(e => e.ExecutionId == executionId);
+        return Task.FromResult(removed > 0);
+    }
+
     public void Dispose()
     {
         if (_disposed) return;

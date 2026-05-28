@@ -18,6 +18,7 @@ using MetBench_BLL.SystemMT.Bootstrap;
 using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Metadata;
 using MetBench_BLL.SystemMT.Persistence;
+using MetBench_BLL.SystemMT.Persistence.Editing;
 using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_BLL.SystemMT.Catalog;
 using MetBench_BLL.SystemMT.Catalog.Editing;
@@ -144,6 +145,13 @@ namespace MetBench_Client
                     return new LiteDbSystemMtResultRepository($"Filename={dbPath}");
                 });
 
+                services.AddSingleton<IExecutionEvidenceRepository>(provider =>
+                {
+                    var dataDir = Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!;
+                    var dbPath = Path.Combine(dataDir, "SystemMT.Litedb");
+                    return new LiteDbExecutionEvidenceRepository($"Filename={dbPath}");
+                });
+
                 // P3.3 — launcher 经 SystemMtPipeline + SystemMtExecutionRecorder 落
                 // Execution+Result+Anomaly。lifetime 改 Scoped 与 IExecutionRepository /
                 // IResultRepository / ISystemMtPipeline 一致。
@@ -163,6 +171,9 @@ namespace MetBench_Client
                 services.AddScoped<ViewModels.SystemMtExecutionViewModel>();
                 services.AddScoped<Views.Pages.SystemMtMrCatalogPage>();
                 services.AddScoped<ViewModels.SystemMtMrCatalogViewModel>();
+                services.AddScoped<IExecutionHistoryEditor, ExecutionHistoryEditor>();
+                services.AddScoped<Views.Pages.SystemMtExecutionHistoryPage>();
+                services.AddScoped<ViewModels.SystemMtExecutionHistoryViewModel>();
 
                 // === v2 SystemMT repositories (LiteDB) + Anomaly stack ===
                 services.AddSystemMtRepositories();

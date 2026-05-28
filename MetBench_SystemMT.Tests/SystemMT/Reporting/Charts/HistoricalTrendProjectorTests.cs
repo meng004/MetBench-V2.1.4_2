@@ -40,6 +40,10 @@ public sealed class HistoricalTrendProjectorTests
             => Task.FromResult(new PagedResult<SystemMtResultRecord>(Array.Empty<SystemMtResultRecord>(), 0, request.PageIndex, request.PageSize));
         public Task<PagedResult<SystemMtResultRecord>> ListPagedByMrNameAsync(string mrName, PageRequest request, CancellationToken cancellationToken = default)
             => Task.FromResult(new PagedResult<SystemMtResultRecord>(Array.Empty<SystemMtResultRecord>(), 0, request.PageIndex, request.PageSize));
+        public Task<bool> DeleteAsync(string id, CancellationToken cancellationToken = default)
+            => Task.FromResult(false);
+        public Task<int> DeleteBatchAsync(IEnumerable<string> ids, CancellationToken cancellationToken = default)
+            => Task.FromResult(0);
     }
 
     private static SystemMtResultRecord MakeRecord(double followUp, DateTimeOffset runAt, string valueName = "k_eff")

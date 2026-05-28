@@ -91,6 +91,12 @@ namespace MetBench_Client.ViewModels
             },
                      new NavigationViewItem()
             {
+                Content = "System MT Execution History",
+                Icon = new SymbolIcon { Symbol = SymbolRegular.History24 },
+                TargetPageType = typeof(Views.Pages.SystemMtExecutionHistoryPage)
+            },
+                     new NavigationViewItem()
+            {
                 Content = "Anomalies",
                 Icon = new SymbolIcon { Symbol = SymbolRegular.Warning24 },
                 TargetPageType = typeof(Views.Pages.AnomalyListPage)

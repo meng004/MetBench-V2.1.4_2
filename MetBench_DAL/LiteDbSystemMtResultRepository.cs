@@ -259,6 +259,28 @@ public sealed class LiteDbSystemMtResultRepository : ISystemMtResultRepository, 
             items, totalCount, request.PageIndex, request.PageSize));
     }
 
+    public Task<bool> DeleteAsync(string id, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!Guid.TryParse(id, out var guid))
+            return Task.FromResult(false);
+        return Task.FromResult(_collection.Delete(guid));
+    }
+
+    public Task<int> DeleteBatchAsync(IEnumerable<string> ids, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(ids);
+        cancellationToken.ThrowIfCancellationRequested();
+        int removed = 0;
+        foreach (var id in ids)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (Guid.TryParse(id, out var guid) && _collection.Delete(guid))
+                removed++;
+        }
+        return Task.FromResult(removed);
+    }
+
     public void Dispose()
     {
         if (_disposed)
