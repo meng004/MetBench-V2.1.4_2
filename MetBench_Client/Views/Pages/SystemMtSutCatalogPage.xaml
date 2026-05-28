@@ -1,0 +1,226 @@
+<Page
+    x:Class="MetBench_Client.Views.Pages.SystemMtSutCatalogPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:MetBench_Client.Views.Pages"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="SystemMtSutCatalogPage"
+    d:DataContext="{d:DesignInstance local:SystemMtSutCatalogPage, IsDesignTimeCreatable=False}"
+    d:DesignHeight="720"
+    d:DesignWidth="1180"
+    ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+    ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    AutomationProperties.AutomationId="SystemMtSutCatalogPage"
+    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    mc:Ignorable="d">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock FontSize="22" FontWeight="Medium" Text="System MT SUT Catalog"/>
+            <TextBlock
+                Margin="0,4,0,0"
+                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                Text="Edit the program section of SUT/&lt;sut&gt;/catalog.json. MR bindings are edited on the MR Catalog page."/>
+        </StackPanel>
+
+        <Border
+            Grid.Row="1"
+            Margin="0,0,0,12"
+            Padding="14"
+            BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="4">
+            <StackPanel Orientation="Horizontal">
+                <ui:Button
+                    Margin="0,0,8,0"
+                    Command="{Binding ViewModel.RefreshSutsCommand, Mode=OneWay}"
+                    Content="Reload"/>
+                <ui:Button
+                    x:Name="Button_NewSutDraft"
+                    Margin="0,0,16,0"
+                    AutomationProperties.AutomationId="Button_NewSutDraft"
+                    Command="{Binding ViewModel.NewSutDraftCommand, Mode=OneWay}"
+                    Content="New SUT draft"/>
+                <TextBlock
+                    x:Name="TextBlock_SystemMtSutCatalogStatus"
+                    Margin="0,4,0,0"
+                    AutomationProperties.AutomationId="TextBlock_SystemMtSutCatalogStatus"
+                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                    Text="{Binding ViewModel.StatusMessage, Mode=OneWay}"
+                    TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="380"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border
+                Grid.Column="0"
+                BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="4">
+                <ui:DataGrid
+                    x:Name="DataGrid_SystemMtSuts"
+                    AutomationProperties.AutomationId="DataGrid_SystemMtSuts"
+                    AutoGenerateColumns="False"
+                    IsReadOnly="True"
+                    ItemsSource="{Binding ViewModel.Suts, Mode=OneWay}"
+                    SelectedItem="{Binding ViewModel.SelectedSut, Mode=TwoWay}">
+                    <ui:DataGrid.Columns>
+                        <DataGridTextColumn Width="140" Binding="{Binding SutId}" Header="SUT id"/>
+                        <DataGridTextColumn Width="120" Binding="{Binding Equation}" Header="Equation"/>
+                        <DataGridTextColumn Width="*" Binding="{Binding ProgramName}" Header="Program"/>
+                    </ui:DataGrid.Columns>
+                </ui:DataGrid>
+            </Border>
+
+            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+                <Border
+                    Padding="14"
+                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="SUT name"/>
+                        <ui:TextBox
+                            x:Name="TextBox_SutName"
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Margin="0,0,0,8"
+                            AutomationProperties.AutomationId="TextBox_SutName"
+                            Text="{Binding ViewModel.Draft.SutName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Program name"/>
+                        <ui:TextBox
+                            x:Name="TextBox_ProgramName"
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Margin="0,0,0,8"
+                            AutomationProperties.AutomationId="TextBox_ProgramName"
+                            Text="{Binding ViewModel.Draft.ProgramName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Equation"/>
+                        <ui:TextBox
+                            x:Name="TextBox_Equation"
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Margin="0,0,0,8"
+                            AutomationProperties.AutomationId="TextBox_Equation"
+                            Text="{Binding ViewModel.Draft.Equation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Equation key"/>
+                        <ui:TextBox
+                            x:Name="TextBox_EquationKey"
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            Margin="0,0,0,8"
+                            AutomationProperties.AutomationId="TextBox_EquationKey"
+                            Text="{Binding ViewModel.Draft.EquationKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Program type"/>
+                        <ui:TextBox
+                            x:Name="TextBox_ProgramType"
+                            Grid.Row="4"
+                            Grid.Column="1"
+                            Margin="0,0,0,8"
+                            AutomationProperties.AutomationId="TextBox_ProgramType"
+                            Text="{Binding ViewModel.Draft.ProgramType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Python runtime kind"/>
+                        <ui:TextBox
+                            x:Name="TextBox_PythonExecutableKind"
+                            Grid.Row="5"
+                            Grid.Column="1"
+                            Margin="0,0,0,8"
+                            AutomationProperties.AutomationId="TextBox_PythonExecutableKind"
+                            Text="{Binding ViewModel.Draft.PythonExecutableKind, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="6" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Runner script"/>
+                        <ui:TextBox
+                            x:Name="TextBox_RunnerScriptRelativePath"
+                            Grid.Row="6"
+                            Grid.Column="1"
+                            Margin="0,0,0,8"
+                            AutomationProperties.AutomationId="TextBox_RunnerScriptRelativePath"
+                            Text="{Binding ViewModel.Draft.RunnerScriptRelativePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="7" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Input parser script"/>
+                        <ui:TextBox
+                            Grid.Row="7"
+                            Grid.Column="1"
+                            Margin="0,0,0,8"
+                            Text="{Binding ViewModel.Draft.InputParserScriptRelativePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="8" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Output parser script"/>
+                        <ui:TextBox
+                            Grid.Row="8"
+                            Grid.Column="1"
+                            Margin="0,0,0,8"
+                            Text="{Binding ViewModel.Draft.OutputParserScriptRelativePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="9" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Input adapter script"/>
+                        <ui:TextBox
+                            Grid.Row="9"
+                            Grid.Column="1"
+                            Margin="0,0,0,8"
+                            Text="{Binding ViewModel.Draft.InputAdapterScriptRelativePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="10" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Output adapter script"/>
+                        <ui:TextBox
+                            Grid.Row="10"
+                            Grid.Column="1"
+                            Margin="0,0,0,8"
+                            Text="{Binding ViewModel.Draft.OutputAdapterScriptRelativePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <StackPanel Grid.Row="11" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right" Orientation="Horizontal">
+                            <ui:Button
+                                x:Name="Button_ValidateSutDraft"
+                                Margin="0,12,8,0"
+                                AutomationProperties.AutomationId="Button_ValidateSutDraft"
+                                Command="{Binding ViewModel.ValidateSutDraftCommand, Mode=OneWay}"
+                                Content="Validate"/>
+                            <ui:Button
+                                x:Name="Button_SaveSutDraft"
+                                Margin="0,12,0,0"
+                                Appearance="Primary"
+                                AutomationProperties.AutomationId="Button_SaveSutDraft"
+                                Command="{Binding ViewModel.SaveSutDraftCommand, Mode=OneWay}"
+                                Content="Save"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Page>
