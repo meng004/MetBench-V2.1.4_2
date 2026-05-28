@@ -154,6 +154,9 @@ namespace MetBench_Client
                 services.AddSingleton<ISystemMtManifestCatalogEditor>(provider =>
                     new SystemMtManifestCatalogEditor(
                         provider.GetRequiredService<LauncherOptions>().SutRoot));
+                services.AddSingleton<ISystemMtSutEditor>(provider =>
+                    new SystemMtSutEditor(
+                        provider.GetRequiredService<LauncherOptions>().SutRoot));
                 services.AddScoped<ISystemMtLauncher, SystemMtLauncher>();
                 services.AddScoped<ISystemMtCatalogReader>(provider =>
                     (ISystemMtCatalogReader)provider.GetRequiredService<ISystemMtLauncher>());
@@ -163,6 +166,8 @@ namespace MetBench_Client
                 services.AddScoped<ViewModels.SystemMtExecutionViewModel>();
                 services.AddScoped<Views.Pages.SystemMtMrCatalogPage>();
                 services.AddScoped<ViewModels.SystemMtMrCatalogViewModel>();
+                services.AddScoped<Views.Pages.SystemMtSutCatalogPage>();
+                services.AddScoped<ViewModels.SystemMtSutCatalogViewModel>();
 
                 // === v2 SystemMT repositories (LiteDB) + Anomaly stack ===
                 services.AddSystemMtRepositories();
