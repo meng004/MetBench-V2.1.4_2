@@ -6,8 +6,11 @@ intentionally minimal:
 
     {"text": "<file body>"}
 
-Trailing newline of the source file is preserved verbatim — round-trip is
-byte-identical.
+Round-trip is byte-identical on every platform. The read/write paths open
+files with ``newline=""`` to disable Python's text-mode universal newline
+translation; without this, ``write_text`` on Windows would silently rewrite
+``"\\n"`` to ``"\\r\\n"`` and break the byte-identical contract pinned by
+``PlainText_round_trip_byte_identical``.
 """
 
 from __future__ import annotations
@@ -17,7 +20,8 @@ from typing import Any
 
 
 def read_plain_text(path: Path) -> dict[str, Any]:
-    return {"text": path.read_text(encoding="utf-8")}
+    with path.open("r", encoding="utf-8", newline="") as handle:
+        return {"text": handle.read()}
 
 
 def write_plain_text(data: dict[str, Any], path: Path) -> None:
@@ -27,4 +31,5 @@ def write_plain_text(data: dict[str, Any], path: Path) -> None:
             f"metbench_io.plain-text: expected str 'text'; got {type(text).__name__}"
         )
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(text, encoding="utf-8")
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        handle.write(text)
