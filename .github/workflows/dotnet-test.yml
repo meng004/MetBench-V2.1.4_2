@@ -228,6 +228,21 @@ jobs:
             done < "$registry"
           fi
 
+          # Check 11 (G11) — decision-record-or-die for new-module paths (Cat B prevention):
+          # A PR that creates a NEW file under any registered "new-module" path family
+          # must declare a decision record in the PR body via the `decision-record:`
+          # substring (per docs/superpowers/templates/decision-record-template.md).
+          # Mirrors the §5.x decision-record discipline established by
+          # docs/superpowers/specs/2026-05-26-t3-coverage-assessment-and-next-sut-decision.md.
+          new_module_files=$(git diff --name-only --diff-filter=A "$PR_BASE_SHA"..HEAD \
+                              | grep -E '^(MetBench_BLL\.Core/SystemMT/Reporting/.*Renderer\.cs|MetBench_BLL\.Core/SystemMT/Catalog/Typed/Runtime/.*Kernel\.cs|MetBench_BLL\.Core/Discovery/.*Discoverer\.cs|MetBench_BLL\.Core/SystemMT/Anomaly/.*\.cs)$' \
+                              || true)
+          if [ -n "$new_module_files" ]; then
+            if ! echo "$body" | grep -qE 'decision-record:'; then
+              warn "G11 decision-record-or-die: new module file(s) added without a 'decision-record:' citation in PR body. Files: $(echo "$new_module_files" | tr '\n' ' '). Add 'decision-record: docs/superpowers/specs/YYYY-MM-DD-<topic>-decision.md' (or 'decision-record: N/A (internal-helper / refactor / file-split)') per docs/superpowers/templates/decision-record-template.md (v2 charter §6 P7)."
+            fi
+          fi
+
           echo "Governance grep result: $fail warning(s). Hard 'test' gate is the only blocker."
           # Exit 0 unconditionally — advisory only, matches the prior AI-review semantics.
           exit 0

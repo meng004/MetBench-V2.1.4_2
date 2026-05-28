@@ -470,7 +470,7 @@ Author-side（PR push 前，可选，按需 LLM）
 | 模块 | 触发 | 工具 / 现状 | 门类型 | 主守 Cat |
 |---|---|---|---|---|
 | **A. 功能正确性** | 每 PR push、main 推进 | `.github/workflows/dotnet-test.yml` 的 `test` job（dotnet build + xUnit + Reqnroll） | ✅ Required | Cat A |
-| **B. 机械模式守卫** | 每 PR push | grep G6/G8/G9/G10/G11(P7 新)；Roslyn METBENCH001 + METBENCH002(P3 新)；`*ParityTests.cs` + `Audit_*_providers_produce_identical_matrices` + `Render_*_renders_<contract>`；catalog-derived 计数白名单(P1 新，替 G7) | grep advisory；Roslyn + parity tests 经 `test` job → 实质 Required | Cat A + Cat B L1 子类 |
+| **B. 机械模式守卫** | 每 PR push | grep G6/G8/G9/G10/G11([`decision-record-template.md`](docs/superpowers/templates/decision-record-template.md), P7 新)；Roslyn METBENCH001 + METBENCH002(P3 新)；`*ParityTests.cs` + `Audit_*_providers_produce_identical_matrices` + `Render_*_renders_<contract>`；catalog-derived 计数白名单(P1 新，替 G7) | grep advisory；Roslyn + parity tests 经 `test` job → 实质 Required | Cat A + Cat B L1 子类 |
 | **C. 负空间守卫** | Stryker：cron + label / R4：作者侧推荐 | `tools/mutation-testing/`（P4 升级 break=-3pp PR-delta gate）+ PR Gate Checklist 「Tests」节 R4 sub-check | Stryker：升级后 Required；R4 semantic：Advisory | Cat B M5 / B1 / R4 子类 |
 | **D. 漂移侦测** | 周一 cron + spec/plan 改动 | `tools/spec_freshness_audit.py`（P2 加 orphan-spec）+ `.github/workflows/spec-freshness-monitor.yml` | Async / Issue-based，永不阻塞 PR | Cat B D1 / D2 / A4 / T3 子类 |
 | **E. 链尾整体审查** | ≥ 3-PR chain 最后一个 PR 合入后 | 人工 fresh-session `Explore` ritual + `/code-review ultra`（P5 自动喂入累积 diff）+ [`chain-end-review-checklist.md`](docs/superpowers/templates/chain-end-review-checklist.md) | 阻塞性 ritual：ledger 标 Controlled 必须在 review doc 落地后 | Cat B 全谱兜底 |
