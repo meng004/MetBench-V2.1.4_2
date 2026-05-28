@@ -2,6 +2,7 @@ using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_BLL.SystemMT.Catalog;
 using MetBench_Domain;
+using MetBench_SystemMT.Tests.SystemMT.Catalog.Governance;
 using MetBench_SystemMT.Tests.V2Anomaly;
 using MetBench_SystemMT.Tests.V2Pipeline;
 using Xunit;
@@ -72,7 +73,7 @@ public sealed class SystemMtLauncherTests
     {
         var descriptors = await _launcher.ListAvailableAsync();
 
-        Assert.Equal(33, descriptors.Count);
+        Assert.Equal(ExpectedCatalogCountsWhitelist.MrCount, descriptors.Count);
         Assert.Equal("advection-amplitude-linearity", descriptors[0].Id);
         Assert.Equal("advection-mesh-conservation", descriptors[1].Id);
         Assert.Equal("bateman-mass-conservation", descriptors[2].Id);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MetBench_BLL.SystemMT.Catalog;
 using MetBench_BLL.SystemMT.Launcher;
+using MetBench_SystemMT.Tests.SystemMT.Catalog.Governance;
 using Xunit;
 
 namespace MetBench_SystemMT.Tests.SystemMT.Catalog;
@@ -29,7 +30,7 @@ public sealed class CatalogParityTests
         var manifest = new ManifestMrCatalogProvider(Opts()).Load();
 
         Assert.Equal(hardcoded.Count, manifest.Count);
-        Assert.Equal(33, hardcoded.Count);
+        Assert.Equal(ExpectedCatalogCountsWhitelist.MrCount, hardcoded.Count);
 
         var hSet = hardcoded.Select(e => e.Mr.Id).OrderBy(s => s).ToList();
         var mSet = manifest.Select(e => e.Mr.Id).OrderBy(s => s).ToList();
@@ -77,5 +78,22 @@ public sealed class CatalogParityTests
             // the JSON binding directly.
             Assert.Equal(h.MetaPattern, m.MetaPattern);
         }
+    }
+
+    [Fact]
+    public void Catalog_MR_id_set_equals_governance_whitelist()
+    {
+        // v2 charter P1 / CLAUDE.md §12.4 R1: catalog MR-id set is the meta-fact
+        // that drives 6 test classes' pinned counts; this fact red-fires when the
+        // hardcoded provider drifts from .github/governance/expected-catalog-counts.txt.
+        var actual = new HardcodedMrCatalogProvider(Opts())
+            .Load()
+            .Select(e => e.Mr.Id)
+            .OrderBy(s => s, System.StringComparer.Ordinal)
+            .ToList();
+        var expected = ExpectedCatalogCountsWhitelist.ReadMrIds()
+            .OrderBy(s => s, System.StringComparer.Ordinal)
+            .ToList();
+        Assert.Equal(expected, actual);
     }
 }
