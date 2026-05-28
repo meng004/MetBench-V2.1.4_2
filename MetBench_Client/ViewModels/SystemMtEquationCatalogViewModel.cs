@@ -35,6 +35,8 @@ namespace MetBench_Client.ViewModels
         private bool _hasValidDraft;
 
         [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(ValidateEquationDraftCommand))]
+        [NotifyCanExecuteChangedFor(nameof(SaveEquationDraftCommand))]
         private bool _isDraftReadOnly = true;
 
         public SystemMtEquationCatalogViewModel(ISystemMtEquationEditor editor)
