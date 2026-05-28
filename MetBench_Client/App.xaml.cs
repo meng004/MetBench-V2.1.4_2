@@ -168,6 +168,11 @@ namespace MetBench_Client
                 services.AddScoped<ViewModels.SystemMtMrCatalogViewModel>();
                 services.AddScoped<Views.Pages.SystemMtSutCatalogPage>();
                 services.AddScoped<ViewModels.SystemMtSutCatalogViewModel>();
+                services.AddSingleton<ISystemMtSampleCaseEditor>(provider =>
+                    new SystemMtSampleCaseEditor(
+                        provider.GetRequiredService<LauncherOptions>().SutRoot));
+                services.AddScoped<Views.Pages.SystemMtSampleCaseCatalogPage>();
+                services.AddScoped<ViewModels.SystemMtSampleCaseCatalogViewModel>();
 
                 // === v2 SystemMT repositories (LiteDB) + Anomaly stack ===
                 services.AddSystemMtRepositories();
