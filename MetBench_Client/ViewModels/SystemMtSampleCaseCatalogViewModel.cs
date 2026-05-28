@@ -162,12 +162,12 @@ namespace MetBench_Client.ViewModels
         {
             if (SelectedSut is null || SelectedSample is null) return;
 
-            var confirm = MessageBox.Show(
+            var confirm = System.Windows.MessageBox.Show(
                 $"Delete sample '{SelectedSample.FileName}' from SUT '{SelectedSut.SutId}'? Files referenced by an MR will be blocked.",
                 "Confirm delete",
-                MessageBoxButton.OKCancel,
-                MessageBoxImage.Warning);
-            if (confirm != MessageBoxResult.OK) return;
+                System.Windows.MessageBoxButton.OKCancel,
+                System.Windows.MessageBoxImage.Warning);
+            if (confirm != System.Windows.MessageBoxResult.OK) return;
 
             var result = _sampleEditor.Delete(SelectedSut.SutId, SelectedSample.FileName);
             StatusMessage = result.Success
