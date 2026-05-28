@@ -1,0 +1,16 @@
+# Orphan-spec auditor allowlist.
+# Per CLAUDE.md §12.4 R3 + v2 charter §3 module D / §6 P2.
+# Any spec listed here is explicitly allowed to NOT appear in
+# docs/superpowers/plans/2026-05-25-metbench-active-plan-index.md.
+#
+# Format: one entry per line; entry is either a basename
+# (e.g. 2026-05-07-something.md) or a path relative to repo root
+# (e.g. docs/superpowers/specs/2026-05-07-something.md). Lines
+# starting with # and blank lines are ignored.
+#
+# Every entry MUST be followed by an inline "# why ..." comment on the
+# same logical block (above the entry as preceding comment lines) to
+# preserve audit value.
+
+# (initial state — empty; baseline orphans were handled by registering
+# them in active-plan-index.md instead of allowlisting.)

@@ -30,6 +30,7 @@
 | `docs/superpowers/plans/2026-05-27-t2-systemmt-visualization-and-t3-gap-fill-plan.md` | Completed (6-phase chain + 2 cleanup PRs + 1 governance PR merged) | **T2 SystemMT visualization 4-end + T3 gap-fill sequenced plan** — closed across PR #184 (Phase 1 ChartData DTO `7526407`), PR #185 (Phase 2 SkiaSharp PNG renderer `0184f63`), PR #186 (Phase 3a iTextSharp PDF renderer `9e898f1`), PR #188 (Phase 3b OpenXml Word renderer `b76f4d7`), PR #190 (Phase 3c ClosedXML Excel renderer `0fd1b93`), PR #191 (Phase 4 MetaPatternMatrixAuditor + spec doc `4c07c1f`), PR #192 (Phase 5 `subchannel-friction-invariance` gap-fill MR `c14ffd9`), PR #193 (Phase 6 ledger refresh `d2e1c5d`). Post-merge holistic review surfaced 11 findings (5 Cat-A single-PR visible + 6 Cat-B cross-PR/retrospective) closed by PR #195 `f10cfc2` (M1/M2/M3/M5) + PR #199 `227959f` (L1/C1/T3/D1/D2). Governance rules codified via PR #203 `8e4bf19` (`CLAUDE.md §12.4` R1-R4 + §12.5 + chain-end review checklist). Worked-example post-merge review doc: [`docs/superpowers/specs/2026-05-27-t2-t3-chain-post-merge-review.md`](../specs/2026-05-27-t2-t3-chain-post-merge-review.md). Cross-link to Phase 4 coverage-audit spec: `docs/superpowers/specs/2026-05-27-meta-pattern-coverage-audit.md` (matrix snapshot + 12 → 11 gap delta after Phase 5; A4 retrospective wording + SUT-precondition habit added by PR #199). Phase 5 substituted the spec's top-1 (`burgers-timestep-convergence`) for `subchannel-friction-invariance` after empirical validation surfaced Lax-Friedrichs dissipation growth under timestep refinement. Cumulative delta: +89 facts across 6 phases (26/12/12/13/14/10/2); +6 cleanup facts; +1 MR (32 → 33); no new SUT; no Method MT / WPF / SemanticCatalogBoundaryTests regression. Final cloud baseline 1463 / 0 / 16. Status ledger row "T2 SystemMT visualization 4-end stack + T3 gap-fill chain" moved Pending → Controlled. | Already expired (chain complete); referenced from §3 for historical context |
 | `docs/superpowers/plans/2026-05-27-ci-governance-cat-b-hardening-plan.md` | Completed (5-phase chain + writing-plan + Phase 6 chain-end review all merged) | **CI Cat B hardening plan** — closed across PR #207 (writing-plan `272c51d`), PR #208 (Phase 1 G6-G9 grep `748f972`), PR #209 (Phase 2 G10 multi-projection registry `72b2823`), PR #210 (Phase 3 spec-freshness cron `dcf64f7`), PR #211 (Phase 4 `MetBench_Analyzers/` METBENCH001 `89596be`), PR #212 (Phase 5 Stryker pilot `4398a47`), PR-LEDGER Phase 6 (this PR). Fresh-session chain-end review per CLAUDE.md §12.4 R2: [`docs/superpowers/specs/2026-05-27-ci-cat-b-hardening-chain-post-merge-review.md`](../specs/2026-05-27-ci-cat-b-hardening-chain-post-merge-review.md) — 0 Cat A findings, 1 Cat B (Phase 6 itself, closed by this PR). Coverage delta achieved: Cat A grep ~75% → ~90%; Cat B ~5% → ~50%. Status ledger row "CI Cat B hardening chain — Controlled" moved Pending → Controlled. | Already expired (chain complete); referenced from §3 for historical context |
 | `docs/superpowers/plans/2026-05-28-p1-catalog-derived-counts-plan.md` | Active scoped — 单 PR 改造 | v2 charter P1：消除 catalog pinned-count 漂移 Cat B；引入 `expected-catalog-counts.txt` whitelist + `ExpectedCatalogCountsWhitelist` 辅助类 + `Catalog_MR_id_set_equals_governance_whitelist` 强化 fact；退役 G7 advisory grep。 | Expires on PR merge |
+| `docs/superpowers/plans/2026-05-28-p2-spec-freshness-orphan-spec-plan.md` | Active scoped — 单 PR 改造 | v2 charter P2：orphan-spec 守卫扩展，落点模块 D + R3 | Expires on PR merge |
 | (no active scoped plan beyond the above) | — | Verification-semantics convergence (PR-A → PR-D), ExecutionEvidence v2 (PR-A0 + PR-C0 + live wiring + evidence-aware reporting via PR #123 / #126 / #128), dormant legacy code mapping (PR #124), anomaly typed annotation + correctness (PR #130 / #132), T3 representative-PDE-class expansion (PR #134 / #136 / #138 / #140), T3C-IVP, T3C-BVP, PR-Bol-1, and the T2/T3 visualization-and-gap-fill 6-phase plan (PR #184–#192) are merged. Remaining follow-ups must enter through explicit scoped plans registered here. | A new scoped plan must be registered here before any new cross-cutting System MT work begins. |
 
 Any new coding task must be derived from the active master plan or from a scoped successor plan registered here.
@@ -47,6 +48,7 @@ Any new coding task must be derived from the active master plan or from a scoped
 | `docs/superpowers/specs/2026-05-25-systemmt-architecture-review-post-evidence-v2.md` | Active | Post-PR-D / post-PR-C0 System MT dependency-boundary audit; baseline reference for future architecture-impact reviews. PR #123 / #124 / #126 did not invalidate it. | Refresh required (not necessarily expiring) when the next System MT cross-cutting change lands. |
 | `docs/superpowers/templates/pr-gate-checklist.md` | Active | Required PR gate checklist for scope, facts, tests, Windows classification, review, merge, and dual AI advisory review | Expires only by explicit replacement PR |
 | `docs/superpowers/specs/2026-05-26-pr-soft-review-via-claude-code-action.md` | Active design (implemented as dual AI advisory review) | Advisory LLM-based PR review layer running in GH Actions on `pull_request` events. `openai/codex-action@v1` performs Codex Governance Review (scope / status / traceability / Windows classification / boundary drift); `anthropics/claude-code-action@v1` performs Claude Semantic Review (C# logic / runtime boundaries / exception paths / test adequacy). | Expires when either action is deprecated, when GitHub-hosted AI review is replaced, or when the project adopts a different review pipeline |
+| `docs/superpowers/specs/2026-05-28-code-governance-v2-charter.md` | Active | v2 治理章程（六模块 + 元规则集），P1-P7 真相层 | Replaced by future v3 charter |
 
 ### 条件性活跃
 
@@ -157,6 +159,7 @@ Any new coding task must be derived from the active master plan or from a scoped
 
 - `docs/superpowers/plans/2026-05-25-v12-doc-alignment-plan.md`
 - `docs/superpowers/plans/2026-05-24-metbench-doc-runtime-alignment-plan.md`
+  - 对应 design spec：`docs/superpowers/specs/2026-05-24-metbench-doc-runtime-alignment-design.md`
 
 **原因**:
 
@@ -221,6 +224,22 @@ Any new coding task must be derived from the active master plan or from a scoped
 
 - 它们形成于旧基线、旧阶段或旧分母之上
 - 仍有参考价值，但不能直接驱动当前执行
+
+### 历史 spec（pre-index 时期的 retrospective / review 类设计文档）
+
+以下 spec 文档为 active-plan-index 创立（2026-05-25）前后的 retrospective / review 类设计稿，
+已固化为只读历史参考；不再对应任何 active plan，但保留索引可追溯：
+
+- `docs/superpowers/specs/2026-05-07-system-level-mt-bdd-design.md`
+- `docs/superpowers/specs/2026-05-25-mr-verification-retrospective-review.md`
+- `docs/superpowers/specs/2026-05-25-mr-verification-two-layer-review-policy.md`
+- `docs/superpowers/specs/2026-05-25-v12-pwr-migration-map.md`
+
+**原因**:
+
+- pre-index 时期形成的 retrospective / review / migration-map 类 spec，对应工作已收口或纯粹作为历史快照
+- 不会再有新的 active plan 衍生自这几份 spec
+- 仍可作为相关主题查询的只读参考
 
 ---
 
