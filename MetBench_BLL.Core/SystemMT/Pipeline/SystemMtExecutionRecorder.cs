@@ -4,6 +4,7 @@ using MetBench_BLL.SystemMT.Catalog.Typed.Specs;
 using MetBench_BLL.SystemMT.Persistence;
 using MetBench_Domain;
 using MetBench_IDAL;
+using System.IO;
 using System.Text.Json;
 using TypedPropertyResult = MetBench_BLL.SystemMT.Catalog.Typed.Property.PropertyResult;
 
@@ -30,17 +31,20 @@ public sealed class SystemMtExecutionRecorder
     private readonly IResultRepository _results;
     private readonly IExecutionEvidenceRepository? _evidence;
     private readonly IMetamorphicRelationV3Repository? _v3;
+    private readonly ISystemMtResultRepository? _legacyResults;
 
     public SystemMtExecutionRecorder(
         IExecutionRepository executions,
         IResultRepository results,
         IExecutionEvidenceRepository? evidence = null,
-        IMetamorphicRelationV3Repository? v3 = null)
+        IMetamorphicRelationV3Repository? v3 = null,
+        ISystemMtResultRepository? legacyResults = null)
     {
         _executions = executions ?? throw new ArgumentNullException(nameof(executions));
         _results = results ?? throw new ArgumentNullException(nameof(results));
         _evidence = evidence;
         _v3 = v3;
+        _legacyResults = legacyResults;
     }
 
     /// <summary>
@@ -122,6 +126,38 @@ public sealed class SystemMtExecutionRecorder
                 typedSpec,
                 typedPredicate,
                 typedPropertySpec);
+        }
+
+        // Legacy SystemMtResults mirror — populates the collection
+        // IExecutionHistoryEditor.ListPagedAsync reads so the WPF Execution
+        // History page sees live runs. Id is set to executionId (v2
+        // Execution.IdExecution) so DeleteAsync(executionId) joins cleanly
+        // across Result + Evidence + legacy collections.
+        if (_legacyResults is not null)
+        {
+            var legacyRecord = new SystemMtResultRecord
+            {
+                Id = executionId,
+                MrName = context.MrCode,
+                RunAt = outcome.FinishedAt,
+                AssertionName = assertion.AssertionTypeCode,
+                ValueName = context.ValueName,
+                SourceValue = assertion.SourceValue ?? 0,
+                FollowUpValue = assertion.FollowupValue ?? 0,
+                Passed = assertion.Passed,
+                FailureReason = assertion.FailureReason ?? string.Empty,
+                SourceCaseName = Path.GetFileName(context.SourceCasePath ?? string.Empty),
+                FollowUpCaseName = Path.GetFileName(outcome.FollowupInputPath ?? string.Empty),
+                SourceElapsed = outcome.SourceElapsed,
+                FollowUpElapsed = outcome.FollowupElapsed,
+                SourceExitCode = outcome.SourceExitCode,
+                FollowUpExitCode = outcome.FollowupExitCode,
+                SourceMetrics = ToMutable(outcome.SourceMetrics),
+                FollowUpMetrics = ToMutable(outcome.FollowupMetrics),
+                TransformationName = context.TransformationName,
+                TransformationParameters = new Dictionary<string, string>(context.Parameters),
+            };
+            _legacyResults.SaveAsync(legacyRecord).GetAwaiter().GetResult();
         }
 
         return new RecordedExecution(executionId, resultId);

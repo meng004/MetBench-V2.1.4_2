@@ -247,6 +247,8 @@ public sealed class ExecutionHistoryEditorTests
         // Unused interface members
         public Task<string> SaveAsync(string mrName, SystemMtResult result, CancellationToken cancellationToken = default) =>
             throw new NotSupportedException();
+        public Task<string> SaveAsync(SystemMtResultRecord record, CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
         public Task<SystemMtResultRecord?> GetAsync(string id, CancellationToken cancellationToken = default) =>
             throw new NotSupportedException();
         public Task<IReadOnlyList<SystemMtResultRecord>> ListRecentAsync(int limit = 100, CancellationToken cancellationToken = default) =>

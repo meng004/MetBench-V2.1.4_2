@@ -32,6 +32,8 @@ public sealed class HistoricalTrendProjectorTests
         // Unused contract methods — return defaults to satisfy the interface.
         public Task<string> SaveAsync(string mrName, SystemMtResult result, CancellationToken cancellationToken = default)
             => Task.FromResult(string.Empty);
+        public Task<string> SaveAsync(SystemMtResultRecord record, CancellationToken cancellationToken = default)
+            => Task.FromResult(record.Id.ToString());
         public Task<SystemMtResultRecord?> GetAsync(string id, CancellationToken cancellationToken = default)
             => Task.FromResult<SystemMtResultRecord?>(null);
         public Task<IReadOnlyList<SystemMtResultRecord>> ListRecentAsync(int limit = 100, CancellationToken cancellationToken = default)

@@ -163,6 +163,18 @@ public sealed class LiteDbSystemMtResultRepository : ISystemMtResultRepository, 
         return Task.FromResult(record.Id.ToString());
     }
 
+    public Task<string> SaveAsync(SystemMtResultRecord record, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ArgumentNullException.ThrowIfNull(record);
+        if (record.RunAt == default) record.RunAt = DateTimeOffset.UtcNow;
+        // Upsert preserves a caller-supplied Id (e.g. Execution.IdExecution from
+        // the recorder mirror) and mints a fresh Guid via autoId only when Id is
+        // Guid.Empty.
+        _collection.Upsert(record);
+        return Task.FromResult(record.Id.ToString());
+    }
+
     public Task<SystemMtResultRecord?> GetAsync(string id, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();

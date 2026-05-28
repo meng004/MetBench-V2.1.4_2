@@ -17,6 +17,20 @@ public interface ISystemMtResultRepository
     Task<string> SaveAsync(string mrName, SystemMtResult result, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Persist a pre-built <see cref="SystemMtResultRecord"/>. Used by
+    /// <c>SystemMtExecutionRecorder</c> to mirror v2-schema executions
+    /// (<c>Execution</c> + <c>Result</c> + <c>ExecutionEvidence</c>) into the
+    /// legacy <c>SystemMtResults</c> collection that
+    /// <c>IExecutionHistoryEditor.ListPagedAsync</c> reads. When
+    /// <see cref="SystemMtResultRecord.Id"/> is <see cref="Guid.Empty"/> the
+    /// implementation mints a fresh Guid; otherwise the supplied Id is
+    /// preserved verbatim so <c>ExecutionHistoryEditor.DeleteAsync</c> can
+    /// join through <c>executionId</c> across the legacy and evidence
+    /// collections.
+    /// </summary>
+    Task<string> SaveAsync(SystemMtResultRecord record, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Fetch a single record by id, or <c>null</c> if not found.
     /// </summary>
     Task<SystemMtResultRecord?> GetAsync(string id, CancellationToken cancellationToken = default);
