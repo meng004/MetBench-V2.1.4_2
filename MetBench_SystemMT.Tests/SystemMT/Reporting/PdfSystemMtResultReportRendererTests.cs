@@ -154,7 +154,12 @@ public sealed class PdfSystemMtResultReportRendererTests
     {
         var pdf = NewRenderer().Render(new[] { SampleRecord("openmoc-pincell-nu-sigma-f", passed: true) }, FixedContext());
 
-        Assert.True(pdf.Length > 10_000, $"PDF unexpectedly small: {pdf.Length} bytes");
+        // Lower bound calibrated against Linux baseline (Cloud CI ~12kB). Windows
+        // ARM64 with default SkiaSharp text rendering produces a smaller chart PNG
+        // (font hinting / anti-aliasing differences), driving the single-record PDF
+        // down to ~8kB. 7_500 retains the "PDF is not empty" guarantee while
+        // accommodating cross-platform rasterizer variance.
+        Assert.True(pdf.Length > 7_500, $"PDF unexpectedly small: {pdf.Length} bytes");
         Assert.True(pdf.Length < 5_000_000, $"PDF unexpectedly large: {pdf.Length} bytes");
     }
 
