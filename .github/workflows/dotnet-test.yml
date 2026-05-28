@@ -243,6 +243,43 @@ jobs:
             fi
           fi
 
+          # Check 12 (G12) — WPF MessageBox namespace ambiguity guard (Cat B prevention):
+          # Files under MetBench_Client/ that import BOTH System.Windows AND
+          # Wpf.Ui.Controls and use the static-call pattern `MessageBox.Show(`
+          # (or .ShowDialog / .ShowAsync / .ShowDialogAsync) or enum-value
+          # access `MessageBox{Button,Result,Image}.<member>` WITHOUT a
+          # `System.Windows.` or `Wpf.Ui.Controls.` namespace prefix will fail
+          # compile on Windows with CS0104 because Wpf.Ui.Controls.MessageBox
+          # shadows System.Windows.MessageBox.
+          #
+          # The instance-construction pattern `new Wpf.Ui.Controls.MessageBox{}`
+          # (used in pre-existing Method MT pages) is intentional and not
+          # ambiguous — only the static-call / static-enum pattern is risky.
+          #
+          # Linux CI cannot compile MetBench_Client.csproj (MSB4019), so this
+          # grep is the only pre-merge guard. T1 non-MR CRUD chain hit this 3x
+          # (PR #223 / #225 / #224); rule codified as G12 by PR-FUP-1.
+          dual_using_files=$(grep -rlE '^using System\.Windows;' MetBench_Client/ 2>/dev/null \
+                              | xargs -I{} grep -lE '^using Wpf\.Ui\.Controls;' {} 2>/dev/null \
+                              || true)
+          unqualified_violations=""
+          if [ -n "$dual_using_files" ]; then
+            for f in $dual_using_files; do
+              # Look for risky usages: either `MessageBox.Show*(` static call or
+              # `MessageBox{Button,Result,Image}.<member>` enum-value access.
+              risky=$(grep -nE '\b(MessageBox\.(Show|ShowDialog|ShowAsync|ShowDialogAsync)\(|MessageBox(Button|Result|Image)\.[A-Za-z])' "$f" || true)
+              # Filter out lines that already qualify with System.Windows. or
+              # Wpf.Ui.Controls.
+              bare=$(echo "$risky" | grep -vE '(System\.Windows|Wpf\.Ui\.Controls)\.(MessageBox|MessageBoxButton|MessageBoxResult|MessageBoxImage)' || true)
+              if [ -n "$bare" ]; then
+                unqualified_violations="$unqualified_violations $f"
+              fi
+            done
+          fi
+          if [ -n "$unqualified_violations" ]; then
+            warn "G12 WPF MessageBox namespace ambiguity: file(s) import both System.Windows and Wpf.Ui.Controls and reference MessageBox.Show( / MessageBox{Button,Result,Image} without fully qualifying as System.Windows.* — will hit CS0104 on Windows build. Fix by qualifying as System.Windows.MessageBox.Show(...) etc. Files:$unqualified_violations"
+          fi
+
           echo "Governance grep result: $fail warning(s). Hard 'test' gate is the only blocker."
           # Exit 0 unconditionally — advisory only, matches the prior AI-review semantics.
           exit 0
