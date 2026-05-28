@@ -476,6 +476,11 @@ Author-side（PR push 前，可选，按需 LLM）
 | **E. 链尾整体审查** | ≥ 3-PR chain 最后一个 PR 合入后 | 人工 fresh-session `Explore` ritual + `/code-review ultra`（P5 自动喂入累积 diff）+ [`chain-end-review-checklist.md`](docs/superpowers/templates/chain-end-review-checklist.md) | 阻塞性 ritual：ledger 标 Controlled 必须在 review doc 落地后 | Cat B 全谱兜底 |
 | **F. 作者侧顾问** | 作者本地，可选 | `/code-review low/medium/high` superpowers skill | 非门禁 | Cat A 语义级 |
 
+> **模块 F 触发建议（非强制）**：PR push 前若 diff 触碰下列路径族之一，作者侧建议先跑 `/code-review high` 自查 Cat A 语义 bug：
+> `MetBench_BLL.Core/SystemMT/Reporting/`（公开契约 ↔ fact 配对，详见 §12.4 R4）、`Catalog/Editing/`、`Catalog/Typed/Runtime/`（predicate / discoverer 逻辑分支）、`MetBench_Analyzers/`（Roslyn diagnostic 误报风险）。
+> 跨链 PR（≥ 3-PR chain 的最后一个）改用 `/code-review ultra`，由模块 E ritual 触发（详见 §12.4 R2）。
+> 该建议是模块 F 的操作化指引，不改 §12.4 R4 中关于 `Reporting/` + `Catalog/Editing/` 的既有半自动核对要求。
+
 ### 12.3 强约束（违反 = process bug）
 
 - 所有 PR description 必须填 [`pr-gate-checklist.md`](docs/superpowers/templates/pr-gate-checklist.md) 7 节（Scope / Facts / Tests / Windows / Review / Merge / Soft Review），缺节会被模块 B 的 grep check 5 抓 `::warning::`。
