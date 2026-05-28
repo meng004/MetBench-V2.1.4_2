@@ -22,14 +22,6 @@
     <ProjectReference Include="..\MetBench_BLL.Core\MetBench_BLL.Core.csproj" />
     <ProjectReference Include="..\MetBench_BLL\MetBench_BLL.csproj" />
     <ProjectReference Include="..\MetBench_DAL\MetBench_DAL.csproj" />
-    <!-- v2 charter §6 P3: reference analyzer assembly for reflection-only registration facts -->
-    <!-- (Governance/Analyzers/AnalyzerRegistrationFacts.cs). ReferenceOutputAssembly=true so -->
-    <!-- the tests can construct the analyzer types directly; SkipGetTargetFrameworkProperties -->
-    <!-- bypasses TFM compat check between net8.0 tests and netstandard2.0 analyzer DLL. -->
-    <ProjectReference Include="..\MetBench_Analyzers\MetBench_Analyzers.csproj">
-      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
-      <SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
-    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
