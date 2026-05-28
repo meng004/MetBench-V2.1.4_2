@@ -14,7 +14,7 @@
 | # | 实体 | Truth source（已存在） | UI 缺口 |
 |---|---|---|---|
 | **a** | **SUT (System-level Application)** | `SUT/<name>/catalog.json` 的 `program` 段 + `ManifestMrCatalogProvider` 解析；on-disk Python runner / parser / adapter 脚本 | 无 System-MT 专用 SUT CRUD 页；现有 `ApplicationManagementPage` 是 v1 Method-MT 视角，997-line VM 已混进 v2 字段但 UI 不分 Kind |
-| **b** | **Equation** | `SystemMtMetadataCatalog.Equations` 12 个 seed `EquationMetadata` + `ISystemMtMetadataRepository.UpsertEquationAsync` 已就位 | 无 Equation 列表 / 编辑页；equation 现在 hard-code 在源码 + 静态 seed |
+| **b** | **Equation** | `SystemMtMetadataCatalog.Equations` 13 个 seed `EquationMetadata`（12 physics + `_test_csv` 合成；plan 初稿写 12，repo 实际 13）+ `ISystemMtMetadataRepository.UpsertEquationAsync` 已就位 | 无 Equation 列表 / 编辑页；equation 现在 hard-code 在源码 + 静态 seed |
 | **c** | **Sample case** | `SUT/<sut>/sample/*.json` 文件（被 `MrBindingDefinition.SampleCaseRelativePath` 引用） | 无 sample case 浏览 / 编辑页；现在手编 JSON |
 | **d** | **Test execution record** | `SystemMtResultRecord` in `SystemMT.Litedb` + `ExecutionEvidence`；`ISystemMtResultRepository.ListPagedAsync` / `ListPagedByMrNameAsync` 已就位 | 无历史执行查询 / 删除页；`SystemMtExecutionPage` 只显示**本次** run |
 
@@ -75,7 +75,7 @@ PR-1 / PR-2 / PR-3 / PR-4 可在 PR-1 合入后并行起 PR；PR-3 等 PR-1 是�
 
 ### PR-2 · Equation CRUD
 
-**Truth source**：`SystemMtMetadataCatalog.Equations` 12 个 seed `EquationMetadata`（reactor 5 锚定 + T3 7 扩展）作为只读 baseline；用户新增的 equation 落 LiteDB（已就位 `ISystemMtMetadataRepository`）。
+**Truth source**：`SystemMtMetadataCatalog.Equations` 13 个 seed `EquationMetadata`（reactor 5 锚定 + T3 7 扩展 + `_test_csv` 合成；plan 初稿写 12，repo 实际 13——retrospective per chain-end review F1-CatA）作为只读 baseline；用户新增的 equation 落 LiteDB（已就位 `ISystemMtMetadataRepository`）。
 
 **允许操作**：
 - **R**：merged view — seed list (来源标 `Built-in`) ∪ LiteDB user-defined (来源标 `User`)，按 `EquationKey` 排序。
@@ -171,7 +171,7 @@ PR-1 / PR-2 / PR-3 / PR-4 可在 PR-1 合入后并行起 PR；PR-3 等 PR-1 是�
 | ID | 风险 | 缓解 |
 |---|---|---|
 | **R1** | Windows VM 上 PR-4 `Microsoft.Web.WebView2` / LiteDB transactional delete 在 antivirus 下偶发 file-lock | 删除走 `LiteDatabase.Transaction()` 包裹；UI 层加重试 3 次 + 用户可见报错 |
-| **R2** | PR-2 `EquationKey` 冲突检测漏判 case sensitivity | `OrdinalIgnoreCase` 比较；测试覆盖 `boltzmann` / `Boltzmann` / `BOLTZMANN` 三种输入 |
+| **R2** | PR-2 `EquationKey` 冲突检测漏判 case sensitivity | `OrdinalIgnoreCase` 比较；测试覆盖 `fourier` / `Fourier` / `FOURIER` / `BoLtZmAnN` 四种输入（plan 初稿写 boltzmann 三选，实际实现选 fourier 四选 + mixed-case `BoLtZmAnN`；plan 初稿用的 `boltzmann` 字面在 repo 中是 equation key `neutron-transport` 的 display name 而非 key，故实施时改为 `fourier`——retrospective per chain-end review F1-CatA）|
 | **R3** | PR-3 reference-guard 需 grep 全部 `SUT/*/catalog.json` 的 `sample_case_relative_path`，IO 成本随 SUT 数量线性增长 | 16 SUT 当下尚未触及性能阈；缓存 5 秒 |
 | **R4** | PR-1 SUT 创建时 Python 脚本不存在 → fail-closed 但用户体验差 | 表单加 "Browse" 按钮指向 `SUT/<sut>/` 目录，列已存在的 `*.py` |
 | **R5** | 4 个 feature PR 并行起会触发 nav menu / `App.xaml.cs` 合并冲突 | PR-1 / PR-2 / PR-3 / PR-4 各自只追加自身 nav 行 + 自身 DI 行，且不动其他人的；冲突时按 PR 合入顺序逐个 rebase |

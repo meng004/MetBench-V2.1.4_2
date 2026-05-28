@@ -536,6 +536,7 @@ Author-side（PR push 前，可选，按需 LLM）
 | 名称 | 模块 | 守的 finding 类型 | 对应规则 | 现状 |
 |---|---|---|---|---|
 | `*ParityTests.cs` | B | cross-projection 字段不对称（L1 类） | R1 | `CatalogParityTests` 已加 `MetaPattern` 断言；后续 record 加字段必加同款 |
+| `LegacyResultRecordParityTests.cs` (planned) | B | multi-write-path `SystemMtResultRecord` 字段不对称（L1 类） | R1 | T1 非 MR CRUD chain-end review F2-CatB ([`docs/superpowers/specs/2026-05-28-t1-non-mr-crud-chain-post-merge-review.md`](docs/superpowers/specs/2026-05-28-t1-non-mr-crud-chain-post-merge-review.md) §2.2 / §3)；PR-4 (#224) 引入两条 write 路径（legacy `SaveAsync(string,SystemMtResult)` + 新 `SaveAsync(record)` 镜像）；待 cleanup PR 实施 |
 | `Audit_*_providers_produce_identical_matrices` | B | 多 provider 实现产出不同结果（L1/M5 类） | R1 | `MetaPatternMatrixAuditorTests` 已加；后续多 provider 服务都加 |
 | `Render_*_renders_<contract>` 测试 | B + C | public method XML doc 契约未实现（B1 类） | R4 | `Render_summary_sheet_renders_title` 等已加；后续每个 evidence-aware overload 都加 |
 | 架构守护 `SemanticCatalogBoundaryTests` 系列 | B | 边界跨违反（pre-existing） | R1 | 已生效；不放松 |

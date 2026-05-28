@@ -24,6 +24,13 @@ namespace MetBench_BLL.SystemMT.Pipeline;
 ///   • <see cref="Result"/> 仅当 pipeline 跑到断言阶段（<c>AssertionResult</c> 非 null）
 ///     才写；error / timeout / cancelled 只有 Execution、无 Result。
 ///   • Anomaly 不在此创建 —— 异常调查工作流由 AnomalyService 负责（见计划 P4）。
+///   • Legacy <c>SystemMtResults</c> 镜像：当构造时注入 <see cref="ISystemMtResultRepository"/>
+///     时，会在 V2 <c>Result</c> 写入后镜像一份 <see cref="SystemMtResultRecord"/> 到 legacy
+///     集合，<c>Id == executionId</c>（即 V2 <see cref="Execution.IdExecution"/>），
+///     保证 <c>IExecutionHistoryEditor.DeleteAsync</c> 跨集合删除 join 工作。镜像走
+///     同样的 <c>AssertionResult-非 null</c> 门，与 V2 <c>Result</c> 写入策略一致。
+///     PR-4 (#224) 加的此路径由 <c>LegacyResultMirrorTests</c> (4 facts) 守护：
+///     Id == ExecutionId / 无注入跳镜像 / 无 assertion 跳镜像 / 失败 reason 透传。
 /// </remarks>
 public sealed class SystemMtExecutionRecorder
 {
