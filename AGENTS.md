@@ -422,6 +422,42 @@ launcher catalog，2026-05-22）；MR/程序元信息持久化计划 **P-A + P-C
 - T3 representative-PDE-class 扩展闭环：PR #134（Poisson 1D 椭圆）→ PR #136（Advection 1D 一阶线性双曲）→ PR #138（Wave 1D 二阶线性双曲）→ PR #140（Burgers 1D 非线性双曲）。决定 PR #146 / 索引 PR #148。
 - T3C external-solver pilot：PR #149（T3C-IVP scipy-ivp-lotka-volterra）→ PR #150（T3C-BVP scipy-bvp-poisson-1d）→ PR #151（命名 + plateau 措辞 post-merge 修正）。
 - T1 / T4 cloud-side scoped 闭环（PR-0 #154 docs gate）：PR #157（PR-1 T1 manifest-driven runtime envs，`LauncherOptions.RuntimePythons`） + PR #159（PR-2 T4-to-T0 discovery binder，`DiscoveredMrCatalogBinder` gate） + PR #160（docs gate for next pair） + PR #161（PR-B T1 same-equation cross-method differential runner，`IDifferentialTestRunner`） + PR #162（PR-A T1 non-JSON I/O helper + 合成 `_test_csv` test SUT）。当前共享代码绿基线：`66eb297` = **1209 pass / 0 fail / 12 skip** on cloud CI（不装 SciPy）；本地装 SciPy 时 **1213 pass / 0 fail / 8 skip**。
+- **v2 治理章程 rollout chain（2026-05-28，PR #215–#227）** — 详见下方 "v2 治理章程 rollout chain" 子段。
+
+### v2 治理章程 rollout chain（2026-05-28）
+
+**目标**：前两次 chain-end review（T2/T3 chain 与 CI Cat B chain）暴露 Cat A 覆盖 ~90%、Cat B 覆盖仅 ~50%，跨 PR / retrospective 类缺陷无机械守卫。本轮把治理从 v1 "4 层防御" 重组为 **v2 "6 模块 + 元规则集 §12.4 R1-R4"**，落 5 项 ROI 评估通过的新机制，把 Cat B 覆盖从 ~50% 提升到 ~75%。
+
+**方案**：8 PR 顺序 ship；每个 P 都跑完整 superpowers 三段闭环（Plan subagent → Execute subagent → Verify subagent fresh-context Explore）；chain-end 跑独立 §12.4 R2 holistic review ritual，dogfood P5 刚 ship 的 `tools/chain_end_ultra_invocation.py` 生成 Step 0 invocation。
+
+| PR | Commit | 内容 | 模块 |
+|---|---|---|---|
+| #215 P1 | `a40f1f1` | catalog-derived counts + ID whitelist；退 G7 grep；新加 `Catalog_MR_id_set_equals_governance_whitelist` 强化 fact；35 处 pinned `Assert.Equal` literal 改 `ExpectedCatalogCountsWhitelist.*Count` | B |
+| #216 charter | `fdba8e7` | v2 治理章程 spec + CLAUDE.md §12 重写（"4 层" → "6 模块"），R1-R4 文本字节不动 | spec |
+| #217 P2 | `1cbcd86` | spec-freshness cron 扩 orphan-spec auditor + allowlist + 6 单测；同 PR 整理 6 个 baseline orphan spec 登记 | D |
+| #218 P7 | `f6e60bf` | G11 decision-record-or-die grep + 79 行 decision-record-template.md（4 path family：renderer/kernel/discoverer/anomaly 新模块需 PR body 含 `decision-record:` 引用） | B |
+| #220 P6 | `f2a9eaf` | 模块 F 作者侧 `/code-review` advisory：CLAUDE.md §12.2 段 + pr-gate-checklist Review sub-check，docs-only | F |
+| #222 P5 | `c08d7df` | chain-end ultra invocation 自动化（242 行 python + 4 单测）+ chain-end-checklist.md 加 Step 0/N | E |
+| #226 P3 | `8873110` | METBENCH002 通用 field-flow tracer Roslyn analyzer（threshold ≥ 5 + `RecursivePatternSyntax`）+ R3 retrospective 修 charter §4 METBENCH001 描述（plan inventory 发现原描述与实现不符）；fix commit `4688643` 删 3 reflection facts 因 `IncludeBuildOutput=false` 不兼容 | B |
+| #227 ledger | `936350a` | chain-end review doc + Stage-8 Controlled 行 + active-plan-index P 行全部 Completed + F1 follow-up 注册 | — |
+
+**效果**：
+- **Cat A 覆盖**：~90% → **~95%**（G11 + 模块 F 作者侧 `/code-review` advisory）
+- **Cat B 覆盖**：~50% → **~75%**（catalog-derived 计数 + orphan-spec auditor + METBENCH002 + chain-end 自动化 + decision-record-or-die）
+- **失败模式从机制上消除**：未来加 MR 时漏 bump 6 处计数文件 → 自动 6 个 fact 红；未注册 spec → cron 自动 issue；新模块未带 decision record → CI advisory；多投影 record ≥ 5 use site → analyzer 自动 emit Info。
+- **章程合规**：R1-R4 元规则文本字节冻结，所有改动通过模块代码 / 工具落实；每条规则附"由模块 X 实现"指针。
+- **过程纪律**：P3 plan inventory 发现 charter §4 自述与实现不符 → 立即同 PR re-touch charter（§12.4 R3 retrospective ritual 一次完整 dogfood）；chain-end review session 是独立 fresh-context Explore subagent（非实施 session），合规 §12.4 R2。
+
+**deferred / follow-up**：
+- **P4 Stryker delta gate** — 需 3 周 weekly Stryker cron baseline 观察（首跑 2026-06-01）后定 break=-3pp PR-delta 阈值；预计 2026-06-18 起手 follow-up PR。
+- **F1 P3 reflection facts** — 重新引入 3 个 METBENCH002 registration lock facts 用 `Assembly.LoadFrom` 绕过 analyzer csproj `IncludeBuildOutput=false`，P2 priority，1 周内补 follow-up PR。
+
+**详见**：
+- v2 章程 spec：[`docs/superpowers/specs/2026-05-28-code-governance-v2-charter.md`](docs/superpowers/specs/2026-05-28-code-governance-v2-charter.md)
+- chain-end review doc：[`docs/superpowers/specs/2026-05-28-v2-charter-rollout-chain-post-merge-review.md`](docs/superpowers/specs/2026-05-28-v2-charter-rollout-chain-post-merge-review.md)
+- CLAUDE.md §12 v2 重写后版本
+- 6 个 P plan：`docs/superpowers/plans/2026-05-28-p{1,2,3,5,6,7}-*.md`
+- 状态账本 Stage-8 行 "v2 governance charter rollout chain"：[`docs/status/current.md`](docs/status/current.md)
 
 **当前仍未闭环的项**：
 
