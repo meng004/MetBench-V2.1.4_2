@@ -189,6 +189,11 @@ namespace MetBench_Client
                 services.AddScoped<ISystemMtEquationEditor, SystemMtEquationEditor>();
                 services.AddScoped<Views.Pages.SystemMtEquationCatalogPage>();
                 services.AddScoped<ViewModels.SystemMtEquationCatalogViewModel>();
+                services.AddSingleton<ISystemMtSampleCaseEditor>(provider =>
+                    new SystemMtSampleCaseEditor(
+                        provider.GetRequiredService<LauncherOptions>().SutRoot));
+                services.AddScoped<Views.Pages.SystemMtSampleCaseCatalogPage>();
+                services.AddScoped<ViewModels.SystemMtSampleCaseCatalogViewModel>();
                 services.AddScoped<IExecutionHistoryEditor, ExecutionHistoryEditor>();
                 services.AddScoped<Views.Pages.SystemMtExecutionHistoryPage>();
                 services.AddScoped<ViewModels.SystemMtExecutionHistoryViewModel>();
