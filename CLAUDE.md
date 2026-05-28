@@ -430,98 +430,124 @@ session 透明、可核验。
 
 这些文档互不复制状态结论，只用指针相互引用；若有冲突，先读 `docs/status/current.md`，再读 project-control rules 与 active plan index。
 
-## 12. PR 提交与门禁（Hard Test + Inline Governance Grep）
+## 12. PR 提交与门禁（v2: 六模块 + 元规则集）
 
-> 本节约束所有目标分支为 `main` 的 PR 流程；自 2026-05-26 起生效，2026-05-27 起把
-> 早期的 dual AI review (`openai/codex-action@v1` + `anthropics/claude-code-action@v1`)
-> 整体替换为**内联 grep 治理检查**（理由见 §12.1 末尾）。规则细节见
-> [`docs/superpowers/templates/pr-gate-checklist.md`](docs/superpowers/templates/pr-gate-checklist.md) +
-> [`.github/workflows/dotnet-test.yml`](.github/workflows/dotnet-test.yml) 的 `governance` job。
+> 本节约束所有目标分支为 `main` 的 PR 流程。**v2 章程** 2026-05-28 替代 v1 "4 层防御"
+> 表述，把治理重组为 6 个职责单一、边界清晰的模块 + 元规则集 §12.4 R1-R4。详细推导、
+> Cat A/B 覆盖矩阵、实施顺序见
+> [`docs/superpowers/specs/2026-05-28-code-governance-v2-charter.md`](docs/superpowers/specs/2026-05-28-code-governance-v2-charter.md)。
 >
-> 历史 spec [`docs/superpowers/specs/2026-05-26-pr-soft-review-via-claude-code-action.md`](docs/superpowers/specs/2026-05-26-pr-soft-review-via-claude-code-action.md)
-> 已 retired（保留作历史记录），对应 workflow `pr-soft-review.yml` 已删除。
+> 历史 spec（保留作记录）：
+> - [`docs/superpowers/specs/2026-05-26-pr-soft-review-via-claude-code-action.md`](docs/superpowers/specs/2026-05-26-pr-soft-review-via-claude-code-action.md) — 已 retired（dual AI review 已撤除）
+> - 旧 v1 4-layer 表述（"Layer 1 Hard test / Layer 2 grep / Layer 3 §12.4 / Layer 4 §12.5"）见 git 历史。
 
-### 12.1 两层并行 + 三/四层防御
+### 12.1 整体架构
 
-| Gate | 目标 | 内容 | Branch protection |
-|---|---|---|---|
-| **Hard `test`** | 保代码正确性 + 跨 PR contract guard | `dotnet build` + xUnit + Reqnroll + §12.4 R1/R4 mechanized facts + §12.5 第四层 guard | ✅ Required；阻塞合并 |
-| **Inline `governance` grep** | 保项目不失控 / 不失真 | `dotnet-test.yml` 内 `governance` job 跑 5 条 grep：plan traceability / status truth / Windows classification / docs-only baseline misclaim / PR Gate Checklist 7 节存在 | ❌ **永不入** required；advisory only，输出 `::warning::` |
+六模块按触发时机三段：
 
-两层**并行起跑**，互不替代。`test` 负责可合并性；`governance` 负责治理门禁（grep / 文件触发匹配）。**AI review 已撤除**——dual AI review 在 2026-05-27 之前两个月的实战中：(a) 经常因 OAuth quota / OpenAI quota / anti-injection 401 fail-fast；(b) 实际 catch 数远低于 §12.4 / §12.5 的 mechanical guards；(c) 每 PR 烧 ~5 min runner + LLM token。机械 grep 跑 < 10 秒、确定性、零 token 成本，配合 §12.4 R1/R4 + §12.5 已经覆盖了 dual AI review 试图守护的所有范围。
+```
+PR-time（每 PR 必跑，0 token / 秒级）
+  A. 功能正确性     B. 机械模式守卫      C. 负空间守卫
+  Hard `test`      grep+Roslyn         Stryker delta +
+  (build+xUnit)    parity tests        R4 半自动 semantic
 
-#### §12.4 第三层 / §12.5 第四层
+Schedule / 链尾（异步、周期性、按需 LLM）
+  D. 漂移侦测                E. 链尾整体审查
+  weekly cron                /code-review ultra +
+  spec-freshness+orphan      §12.4 R2 ritual
 
-- **§12.4 第三层**：跨 PR 一致性 + parity-test 纪律。**人** + **流程**约束（R1-R4），由 PR 作者 + post-merge holistic review 兜底
-- **§12.5 第四层**：把 §12.4 R1/R3/R4 编进 hard `test` 的具体 fact 守护（`*ParityTests.cs` / `Audit_*_providers_produce_identical_matrices` / `Render_*_renders_<contract>`）
+Author-side（PR push 前，可选，按需 LLM）
+  F. 作者侧顾问
+  /code-review low/medium/high
+                            ▲
+                            │
+               G. 元规则集 §12.4 R1-R4
+               （A-F 都向它收敛）
+```
 
-第四层成熟度决定第三层人工干预的频率；以后 finding 优先转 fourth-layer guard test。
+### 12.2 模块详表（精简操作版；完整论证见 v2 spec §3）
 
-### 12.2 强约束（违反 = process bug）
+| 模块 | 触发 | 工具 / 现状 | 门类型 | 主守 Cat |
+|---|---|---|---|---|
+| **A. 功能正确性** | 每 PR push、main 推进 | `.github/workflows/dotnet-test.yml` 的 `test` job（dotnet build + xUnit + Reqnroll） | ✅ Required | Cat A |
+| **B. 机械模式守卫** | 每 PR push | grep G6/G8/G9/G10/G11(P7 新)；Roslyn METBENCH001 + METBENCH002(P3 新)；`*ParityTests.cs` + `Audit_*_providers_produce_identical_matrices` + `Render_*_renders_<contract>`；catalog-derived 计数白名单(P1 新，替 G7) | grep advisory；Roslyn + parity tests 经 `test` job → 实质 Required | Cat A + Cat B L1 子类 |
+| **C. 负空间守卫** | Stryker：cron + label / R4：作者侧推荐 | `tools/mutation-testing/`（P4 升级 break=-3pp PR-delta gate）+ PR Gate Checklist 「Tests」节 R4 sub-check | Stryker：升级后 Required；R4 semantic：Advisory | Cat B M5 / B1 / R4 子类 |
+| **D. 漂移侦测** | 周一 cron + spec/plan 改动 | `tools/spec_freshness_audit.py`（P2 加 orphan-spec）+ `.github/workflows/spec-freshness-monitor.yml` | Async / Issue-based，永不阻塞 PR | Cat B D1 / D2 / A4 / T3 子类 |
+| **E. 链尾整体审查** | ≥ 3-PR chain 最后一个 PR 合入后 | 人工 fresh-session `Explore` ritual + `/code-review ultra`（P5 自动喂入累积 diff）+ [`chain-end-review-checklist.md`](docs/superpowers/templates/chain-end-review-checklist.md) | 阻塞性 ritual：ledger 标 Controlled 必须在 review doc 落地后 | Cat B 全谱兜底 |
+| **F. 作者侧顾问** | 作者本地，可选 | `/code-review low/medium/high` superpowers skill | 非门禁 | Cat A 语义级 |
 
-- 所有 PR description 必须填 [`pr-gate-checklist.md`](docs/superpowers/templates/pr-gate-checklist.md) 7 节（Scope / Facts / Tests / Windows / Review / Merge / Soft Review），缺节会被 `governance` job 的 grep check 5 抓 `::warning::`
-- 改 `.github/workflows/dotnet-test.yml` 的 `governance` job 本身的 PR 是**自审的**——grep 跑在 PR head ref，不像旧 `anthropics/claude-code-action@v1` 有 anti-injection 401 拒绝。但 grep 规则改坏后果直接在本 PR 显现，建议在 PR 描述里 paste 一段 test 输出证明新规则不 false-positive
-- Hard-gate 必须保持在 main branch protection required check 列表（当前 check 名 `test`）；`governance` job 永不入此列表
-- 撤除的 secret：`OPENAI_API_KEY`、`CLAUDE_CODE_OAUTH_TOKEN`——撤除后仍可保留在 repo Settings 不影响（无 workflow 引用）；若需重新启用某种 AI review 服务，参考 §12.1 的历史 spec
+### 12.3 强约束（违反 = process bug）
 
-### 12.3 PR 合并前应观察的事
+- 所有 PR description 必须填 [`pr-gate-checklist.md`](docs/superpowers/templates/pr-gate-checklist.md) 7 节（Scope / Facts / Tests / Windows / Review / Merge / Soft Review），缺节会被模块 B 的 grep check 5 抓 `::warning::`。
+- 改模块 B `governance` job 本身的 PR 是**自审的**——grep 跑在 PR head ref。规则改坏后果直接在本 PR 显现，建议 PR 描述里 paste 一段 test 输出证明新规则不 false-positive。
+- 模块 A `test` 必须保持在 main branch protection required check 列表（check 名 `test`）；模块 B `governance` job 永不入此列表。
+- 模块 E ritual 不可绕过：若 plan 文档枚举 ≥ 3 sequential PRs 或用 "Phase N" / "PR-X-N" 命名，最后一个 PR merge 后必须开 fresh-session review，cleanup PR 落地后 `docs/status/current.md` 才能标 chain "Controlled"。
+- AI review 撤除背景：dual AI review 在 2026-05-27 之前两个月的实战中 (a) 经常因 OAuth quota / OpenAI quota / anti-injection 401 fail-fast；(b) 实际 catch 数远低于模块 B/C/E 的 mechanical guards；(c) 每 PR 烧 ~5 min runner + LLM token。机械化路径（grep + Roslyn + Stryker + parity tests）+ 模块 F 作者侧按需 LLM 已覆盖原 dual AI review 的全部范围且零自动 token 成本。
 
-1. `test` 绿（必须）
-2. `governance` 已跑（在 `test` workflow 同一 PR 检查里，作为单独 job）；若产生 `::warning::` 行，逐条核对并在 PR 描述或评论里说明
-3. PR body 7 节 checklist 都打勾 / 解释
-4. 若你是 agent，merge 自己的 PR 前应 fetch origin/main 并核对 base.sha 是否需要 update branch
+### 12.4 元规则集 R1-R4（保留，每条标注由哪个模块实现）
 
-### 12.4 第三层防御：跨 PR 一致性 & parity-test 纪律
+> **背景**：2026-05-27 T2/T3 6-phase chain 的 post-merge review 发现 11 项 finding；其中 5 项属"单 PR diff 可见"（AI review 大概率能抓），但**另外 6 项是跨 PR / 跨文件 / retrospective 性质**，soft / Codex / Claude review 在 PR-time 都看不见。本节把跨 PR 一致性作为**元约束**沉淀，由模块 B/C/D/E 落实。
 
-> **背景**：2026-05-27 T2/T3 6-phase chain 的 post-merge review 发现 11 项 finding；其中 5 项属"单 PR diff 可见"（AI review 大概率能抓），但**另外 6 项是跨 PR / 跨文件 / retrospective 性质**，soft / Codex / Claude review 在 PR-time 都看不见。本节把"跨 PR 一致性"作为**第三层防御**约束起来，不能仅靠 AI review 兜底。
-
-#### R1 · Cross-projection parity test 强制
+#### R1 · Cross-projection parity test 强制 — *由模块 B 实现（METBENCH001/002 + `*ParityTests.cs`）*
 
 > 凡是一个 public type 有**两条以上投影路径**（典型例：`MrCatalogEntry.FromBlueprint` vs `ManifestMrCatalogProvider.MapToEntry`、entity 的 to-DTO/from-DTO 双向、HTML/Markdown/PDF/Word/Excel 多渲染器投影同一 record），**每加一个字段必须同步加 parity test**。
 >
 > - 守护文件命名约定：`<TypeName>ParityTests.cs`（如 `CatalogParityTests.cs`）
-> - 投影路径的任意一侧改了 record/字段，PR 必须同时改对方 + 守护测试。AI review prompt 应被指示检查这一点
+> - 投影路径的任意一侧改了 record/字段，PR 必须同时改对方 + 守护测试
 > - **历史教训**：PR-T3-7 / Phase 4 加 `MrCatalogEntry.MetaPattern`，只改了 `ManifestMrCatalogProvider`；`FromBlueprint` 没改 → 通过 hard + soft + Claude semantic review 全部 gate；post-merge review 才捕获（PR #199 修，加 parity assertion + `Audit_hardcoded_and_manifest_providers_produce_identical_matrices` 守护）。**约束**：以后任何加字段 PR，CI 失败提示要明确指向 missing parity assertion，不是 silent diff
 
-#### R2 · 多 PR 链路必须 chain-end holistic review
+#### R2 · 多 PR 链路必须 chain-end holistic review — *由模块 E 实现（ritual + `/code-review ultra`）*
 
 > 任何**连续 ≥ 3 个 PR** 的 phased delivery（典型例：T2/T3 6-phase chain；W12 4-PR sequence；S8 P1-P5 chain），**最后一个 PR 合并后必须立刻开一个独立 review session** 跑 post-merge holistic review，发现 finding 写成一个 cleanup PR 才算 chain closure。
 >
 > - Trigger 条件：plan 文档里枚举 ≥ 3 个 sequential PRs，或 plan 用了 "Phase N" / "PR-X-N" 命名
 > - Review session 必须是**独立 fresh agent**（新 context），不能由 chain 实施 session 自己审
+> - **自动化辅助**：调 `/code-review ultra --base origin/main~N --head HEAD` 喂入累积 diff，输出作为 fresh-session ritual 的辅助产物（不替代 ritual 本身，但显著降低人工 review 成本）
 > - 找到的 finding 进入 cleanup PR（一个 PR 多个 fix bundle 可接受，分两个 PR 更清晰），cleanup PR merge 后才能在 `docs/status/current.md` Stage-8 表里标 chain "Controlled"
 > - **历史教训**：T2/T3 chain 在 Phase 6 (PR-LEDGER) 合并后立即声明 Controlled；之后 review 找 11 项 finding，被迫开 PR #195 + #199 两个 cleanup PR。规则化后：chain-end review 应是 plan 的 phase N+1，提前进 plan，不是事后补
 
-#### R3 · Spec 文档对实施偏离的 retrospective 责任
+#### R3 · Spec 文档对实施偏离的 retrospective 责任 — *由模块 D 实现（spec-freshness + orphan auditor）+ PR Gate Checklist*
 
 > Phase-K (K < N) 的 spec 文档若推荐了候选 X，而 Phase-N 实施时换成候选 Y（empirical validation 失败 / SUT precondition 不满足 / 等），**Phase-N 的同一 PR 或紧随的 doc PR 必须 re-touch 该 spec**，把推荐措辞改为"原推荐已被 Y 替代，原因 …"。
 >
 > - 不允许留 stale "top-1 候选 = X" 在 main 上让下一个读者误解
 > - 不允许仅在 commit body / status ledger 提一句"已替代"——spec doc 本身要改
-> - Phase-N PR body 必须明示「本 PR 修改了 Phase-K spec 的 §N」，AI review 可据此核对
+> - Phase-N PR body 必须明示「本 PR 修改了 Phase-K spec 的 §N」
 > - **历史教训**：Phase 5 (PR #192) ship `subchannel-friction-invariance` 而非 spec doc top-1 `burgers-timestep-convergence`；commit body 解释了但 spec doc §4 仍标 burgers 为 top-1；PR #199 才把 spec §4 改成"REJECTED with retrospective"。规则化后：偏离实施的同 PR 即修 spec
 
-#### R4 · Public-contract ↔ fact 配对
+#### R4 · Public-contract ↔ fact 配对 — *由模块 C 实现（Stryker delta + `/code-review high` 半自动）*
 
 > 凡是 public method 的 XML doc 声称「honors X」/「implements Y」/「supports Z」/「per ReportContext.Title」，必须在同 PR 加 fact 断言 X / Y / Z 在输出里**可观测**。**未断言的契约不算实现**。
 >
 > - PR Gate Checklist 「Tests」节明确把这一条作为 sub-check
-> - AI review prompt 应被指示：扫描 public method XML doc 提取契约关键词，grep 对应测试文件确认 fact 存在
+> - PR 触碰 `MetBench_BLL.Core/SystemMT/Reporting/` 或 `Catalog/Editing/` 时，作者侧建议先跑 `/code-review high` 半自动核对
 > - **历史教训**：`IExcelSystemMtResultReportRenderer` XML doc 提到 `ReportContext`，但 `ExcelSystemMtResultReportRenderer.Render` 内部 `_ = context ?? new ReportContext()` 立刻丢掉；测试没断言 Title 出现 → 全部 gate 通过；post-merge review 才发现（PR #195 修）。规则化后：每个声明契约的 public method 必带一个反映契约的 fact
 
-### 12.5 第四层防御：固化跨 PR / contract guard 进 hard gate
+### 12.5 模块 B / C 当前 fact 守卫清单
 
-> 第三层是流程约束；第四层是把流程约束**编译进** hard `test` gate，从根本上让违反它的 PR 直接红。这一层是 R1-R4 的**自动化具象化**：
+> 本节是模块 B（机械模式守卫）+ 模块 C（负空间守卫）当前在仓库内已激活的 fact 守卫快照。
+> 每条对应 R1-R4 中的一条规则；finding 进来 → 第一优先级把它转成本表里的新一行。
 
-| 名称 | 守的 finding 类型 | 对应规则 | 现状 |
-|---|---|---|---|
-| `*ParityTests.cs` | cross-projection 字段不对称（L1 类） | R1 | `CatalogParityTests` 已加 `MetaPattern` 断言；后续 record 加字段必加同款 |
-| `Audit_*_providers_produce_identical_matrices` | 多 provider 实现产出不同结果（L1/M5 类） | R1 | `MetaPatternMatrixAuditorTests` 已加；后续多 provider 服务都加 |
-| `Render_*_renders_<contract>` 测试 | public method XML doc 契约未实现（B1 类） | R4 | `Render_summary_sheet_renders_title` 等已加；后续每个 evidence-aware overload 都加 |
-| 架构守护 `SemanticCatalogBoundaryTests` 系列 | 边界跨违反（pre-existing） | R1 | 已生效；不放松 |
-| chain-end review checklist | 多 PR 链路漂移（D1/D2/T1/T2 类） | R2/R3 | 待引入：`docs/superpowers/templates/chain-end-review-checklist.md` |
+| 名称 | 模块 | 守的 finding 类型 | 对应规则 | 现状 |
+|---|---|---|---|---|
+| `*ParityTests.cs` | B | cross-projection 字段不对称（L1 类） | R1 | `CatalogParityTests` 已加 `MetaPattern` 断言；后续 record 加字段必加同款 |
+| `Audit_*_providers_produce_identical_matrices` | B | 多 provider 实现产出不同结果（L1/M5 类） | R1 | `MetaPatternMatrixAuditorTests` 已加；后续多 provider 服务都加 |
+| `Render_*_renders_<contract>` 测试 | B + C | public method XML doc 契约未实现（B1 类） | R4 | `Render_summary_sheet_renders_title` 等已加；后续每个 evidence-aware overload 都加 |
+| 架构守护 `SemanticCatalogBoundaryTests` 系列 | B | 边界跨违反（pre-existing） | R1 | 已生效；不放松 |
+| METBENCH001 Roslyn analyzer | B | multi-projection record 加字段未守 parity test（注册表 4 type） | R1 | 已生效；待 P3 升 METBENCH002 通用扫描 |
+| Stryker.NET 变异测试 | C | 测试存在但没真断契约（M5 类） | R4 | 当前 break=0 informational；P4 升 break=-3pp PR-delta gate |
+| chain-end review checklist | E | 多 PR 链路漂移（D1/D2/T1/T2 类） | R2/R3 | `docs/superpowers/templates/chain-end-review-checklist.md` |
 
-**约束**：post-merge holistic review 每发现一个 finding，**第一优先级动作**是问"能否把这类 finding 转成第四层 guard test"。能就加守护；不能（或代价过高）则进 chain-end review checklist。**不允许只修该实例，不加守护**。
+**约束**：post-merge holistic review 每发现一个 finding，**第一优先级动作**是问"能否把这类 finding 转成本表的新一行（模块 B 或 C 的 guard test）"。能就加守护；不能（或代价过高）则进 chain-end review checklist。**不允许只修该实例，不加守护**。
+
+### 12.6 PR 合并前必须观察
+
+1. 模块 A `test` 绿（必须）
+2. 模块 B `governance` 已跑（同 `test` workflow 内单独 job）；若产生 `::warning::` 行，逐条核对并在 PR 描述或评论里说明
+3. 模块 B Roslyn METBENCH00x 诊断为 0 错误（按当前严重级）
+4. PR body 7 节 checklist 都打勾 / 解释
+5. 若 PR 是 ≥ 3-PR chain 的最后一个，模块 E ritual 已规划进 phase N+1
+6. 若你是 agent，merge 自己的 PR 前应 fetch origin/main 并核对 base.sha 是否需要 update branch
 
 ## 13. Roadmap pointers
 
