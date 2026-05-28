@@ -32,6 +32,8 @@ public sealed class HistoricalTrendProjectorTests
         // Unused contract methods — return defaults to satisfy the interface.
         public Task<string> SaveAsync(string mrName, SystemMtResult result, CancellationToken cancellationToken = default)
             => Task.FromResult(string.Empty);
+        public Task<string> SaveAsync(SystemMtResultRecord record, CancellationToken cancellationToken = default)
+            => Task.FromResult(record.Id.ToString());
         public Task<SystemMtResultRecord?> GetAsync(string id, CancellationToken cancellationToken = default)
             => Task.FromResult<SystemMtResultRecord?>(null);
         public Task<IReadOnlyList<SystemMtResultRecord>> ListRecentAsync(int limit = 100, CancellationToken cancellationToken = default)
@@ -40,6 +42,10 @@ public sealed class HistoricalTrendProjectorTests
             => Task.FromResult(new PagedResult<SystemMtResultRecord>(Array.Empty<SystemMtResultRecord>(), 0, request.PageIndex, request.PageSize));
         public Task<PagedResult<SystemMtResultRecord>> ListPagedByMrNameAsync(string mrName, PageRequest request, CancellationToken cancellationToken = default)
             => Task.FromResult(new PagedResult<SystemMtResultRecord>(Array.Empty<SystemMtResultRecord>(), 0, request.PageIndex, request.PageSize));
+        public Task<bool> DeleteAsync(string id, CancellationToken cancellationToken = default)
+            => Task.FromResult(false);
+        public Task<int> DeleteBatchAsync(IEnumerable<string> ids, CancellationToken cancellationToken = default)
+            => Task.FromResult(0);
     }
 
     private static SystemMtResultRecord MakeRecord(double followUp, DateTimeOffset runAt, string valueName = "k_eff")

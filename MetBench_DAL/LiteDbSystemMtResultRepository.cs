@@ -163,6 +163,18 @@ public sealed class LiteDbSystemMtResultRepository : ISystemMtResultRepository, 
         return Task.FromResult(record.Id.ToString());
     }
 
+    public Task<string> SaveAsync(SystemMtResultRecord record, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ArgumentNullException.ThrowIfNull(record);
+        if (record.RunAt == default) record.RunAt = DateTimeOffset.UtcNow;
+        // Upsert preserves a caller-supplied Id (e.g. Execution.IdExecution from
+        // the recorder mirror) and mints a fresh Guid via autoId only when Id is
+        // Guid.Empty.
+        _collection.Upsert(record);
+        return Task.FromResult(record.Id.ToString());
+    }
+
     public Task<SystemMtResultRecord?> GetAsync(string id, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -257,6 +269,28 @@ public sealed class LiteDbSystemMtResultRepository : ISystemMtResultRepository, 
 
         return Task.FromResult(new PagedResult<SystemMtResultRecord>(
             items, totalCount, request.PageIndex, request.PageSize));
+    }
+
+    public Task<bool> DeleteAsync(string id, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!Guid.TryParse(id, out var guid))
+            return Task.FromResult(false);
+        return Task.FromResult(_collection.Delete(guid));
+    }
+
+    public Task<int> DeleteBatchAsync(IEnumerable<string> ids, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(ids);
+        cancellationToken.ThrowIfCancellationRequested();
+        int removed = 0;
+        foreach (var id in ids)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (Guid.TryParse(id, out var guid) && _collection.Delete(guid))
+                removed++;
+        }
+        return Task.FromResult(removed);
     }
 
     public void Dispose()

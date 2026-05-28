@@ -17,6 +17,20 @@ public interface ISystemMtResultRepository
     Task<string> SaveAsync(string mrName, SystemMtResult result, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Persist a pre-built <see cref="SystemMtResultRecord"/>. Used by
+    /// <c>SystemMtExecutionRecorder</c> to mirror v2-schema executions
+    /// (<c>Execution</c> + <c>Result</c> + <c>ExecutionEvidence</c>) into the
+    /// legacy <c>SystemMtResults</c> collection that
+    /// <c>IExecutionHistoryEditor.ListPagedAsync</c> reads. When
+    /// <see cref="SystemMtResultRecord.Id"/> is <see cref="Guid.Empty"/> the
+    /// implementation mints a fresh Guid; otherwise the supplied Id is
+    /// preserved verbatim so <c>ExecutionHistoryEditor.DeleteAsync</c> can
+    /// join through <c>executionId</c> across the legacy and evidence
+    /// collections.
+    /// </summary>
+    Task<string> SaveAsync(SystemMtResultRecord record, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Fetch a single record by id, or <c>null</c> if not found.
     /// </summary>
     Task<SystemMtResultRecord?> GetAsync(string id, CancellationToken cancellationToken = default);
@@ -42,5 +56,21 @@ public interface ISystemMtResultRepository
     /// One page of results filtered to a single scenario, most-recent first.
     /// </summary>
     Task<PagedResult<SystemMtResultRecord>> ListPagedByMrNameAsync(string mrName, PageRequest request, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Delete a single result by its <see cref="SystemMtResultRecord.Id"/>
+    /// string form. Returns <c>true</c> when an existing row was removed,
+    /// <c>false</c> when the id was not found (or not parseable as a Guid).
+    /// Does not touch the linked <see cref="ExecutionEvidence"/> row — orchestrate
+    /// the joint delete through <c>IExecutionHistoryEditor</c> instead.
+    /// </summary>
+    Task<bool> DeleteAsync(string id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Delete multiple result rows in one call. Returns the number actually
+    /// removed (ids absent from the collection or unparseable are silently
+    /// skipped). Does not touch <see cref="ExecutionEvidence"/>.
+    /// </summary>
+    Task<int> DeleteBatchAsync(IEnumerable<string> ids, CancellationToken cancellationToken = default);
 }
 

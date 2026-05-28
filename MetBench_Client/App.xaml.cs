@@ -19,6 +19,7 @@ using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Metadata;
 using MetBench_BLL.SystemMT.Metadata.Editing;
 using MetBench_BLL.SystemMT.Persistence;
+using MetBench_BLL.SystemMT.Persistence.Editing;
 using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_BLL.SystemMT.Catalog;
 using MetBench_BLL.SystemMT.Catalog.Editing;
@@ -32,6 +33,7 @@ using Wpf.Ui;
 using Stylet;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
+using LiteDB;
 
 namespace MetBench_Client
 {
@@ -138,12 +140,27 @@ namespace MetBench_Client
                     OpenMocPython: Environment.GetEnvironmentVariable("METBENCH_OPENMOC_PYTHON")
                         ?? (OperatingSystem.IsWindows() ? "python" : "python3")));
 
-                services.AddSingleton<ISystemMtResultRepository>(provider =>
+                // Share one LiteDatabase handle between the result and evidence repos
+                // because both target the same SystemMT.Litedb file. Default Direct mode
+                // locks the file exclusively, so two independent LiteDatabase instances
+                // on the same path would race and crash the second-resolved singleton.
+                ILiteDatabase? systemMtLiteDb = null;
+                ILiteDatabase GetSharedSystemMtDb()
                 {
-                    var dataDir = Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!;
-                    var dbPath = Path.Combine(dataDir, "SystemMT.Litedb");
-                    return new LiteDbSystemMtResultRepository($"Filename={dbPath}");
-                });
+                    if (systemMtLiteDb is null)
+                    {
+                        var dataDir = Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!;
+                        var dbPath = Path.Combine(dataDir, "SystemMT.Litedb");
+                        systemMtLiteDb = new LiteDatabase($"Filename={dbPath}", new BsonMapper());
+                    }
+                    return systemMtLiteDb;
+                }
+
+                services.AddSingleton<ISystemMtResultRepository>(provider =>
+                    new LiteDbSystemMtResultRepository(GetSharedSystemMtDb()));
+
+                services.AddSingleton<IExecutionEvidenceRepository>(provider =>
+                    new LiteDbExecutionEvidenceRepository(GetSharedSystemMtDb()));
 
                 // P3.3 — launcher 经 SystemMtPipeline + SystemMtExecutionRecorder 落
                 // Execution+Result+Anomaly。lifetime 改 Scoped 与 IExecutionRepository /
@@ -177,6 +194,9 @@ namespace MetBench_Client
                         provider.GetRequiredService<LauncherOptions>().SutRoot));
                 services.AddScoped<Views.Pages.SystemMtSampleCaseCatalogPage>();
                 services.AddScoped<ViewModels.SystemMtSampleCaseCatalogViewModel>();
+                services.AddScoped<IExecutionHistoryEditor, ExecutionHistoryEditor>();
+                services.AddScoped<Views.Pages.SystemMtExecutionHistoryPage>();
+                services.AddScoped<ViewModels.SystemMtExecutionHistoryViewModel>();
 
                 // === v2 SystemMT repositories (LiteDB) + Anomaly stack ===
                 services.AddSystemMtRepositories();

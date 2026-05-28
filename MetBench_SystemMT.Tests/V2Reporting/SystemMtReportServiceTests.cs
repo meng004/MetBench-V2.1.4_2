@@ -320,6 +320,12 @@ internal sealed class FakeEvidenceRepo : IExecutionEvidenceRepository
         Data.TryGetValue(executionId, out var ev);
         return Task.FromResult<ExecutionEvidence?>(ev);
     }
+
+    public Task<bool> DeleteByExecutionIdAsync(Guid executionId, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(Data.Remove(executionId));
+    }
 }
 
 internal sealed class FakeBundle

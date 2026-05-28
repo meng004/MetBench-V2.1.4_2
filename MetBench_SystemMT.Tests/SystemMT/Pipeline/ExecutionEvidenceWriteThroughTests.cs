@@ -451,6 +451,12 @@ public sealed class ExecutionEvidenceWriteThroughTests
             cancellationToken.ThrowIfCancellationRequested();
             return Task.FromResult<ExecutionEvidence?>(_store.FirstOrDefault(e => e.ExecutionId == executionId));
         }
+
+        public Task<bool> DeleteByExecutionIdAsync(Guid executionId, System.Threading.CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.FromResult(_store.RemoveAll(e => e.ExecutionId == executionId) > 0);
+        }
     }
 
     private sealed class InMemoryV3Repo : IMetamorphicRelationV3Repository
