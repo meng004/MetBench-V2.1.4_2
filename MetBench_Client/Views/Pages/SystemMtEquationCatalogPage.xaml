@@ -1,0 +1,180 @@
+<Page
+    x:Class="MetBench_Client.Views.Pages.SystemMtEquationCatalogPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:MetBench_Client.Views.Pages"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="SystemMtEquationCatalogPage"
+    d:DataContext="{d:DesignInstance local:SystemMtEquationCatalogPage, IsDesignTimeCreatable=False}"
+    d:DesignHeight="720"
+    d:DesignWidth="1180"
+    ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+    ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    AutomationProperties.AutomationId="SystemMtEquationCatalogPage"
+    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    mc:Ignorable="d">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock FontSize="22" FontWeight="Medium" Text="System MT Equation Catalog"/>
+            <TextBlock
+                Margin="0,4,0,0"
+                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                Text="Built-in seed equations are read-only. User-defined equations can be created, edited, and deleted (unless referenced by an MR)."/>
+        </StackPanel>
+
+        <Border
+            Grid.Row="1"
+            Margin="0,0,0,12"
+            Padding="14"
+            BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="4">
+            <StackPanel Orientation="Horizontal">
+                <ui:Button
+                    Margin="0,0,8,0"
+                    Command="{Binding ViewModel.RefreshEquationsCommand, Mode=OneWay}"
+                    Content="Reload"/>
+                <ui:Button
+                    x:Name="Button_NewEquationDraft"
+                    Margin="0,0,16,0"
+                    AutomationProperties.AutomationId="Button_NewEquationDraft"
+                    Command="{Binding ViewModel.NewEquationDraftCommand, Mode=OneWay}"
+                    Content="New equation"/>
+                <TextBlock
+                    x:Name="TextBlock_SystemMtEquationCatalogStatus"
+                    Margin="0,4,0,0"
+                    AutomationProperties.AutomationId="TextBlock_SystemMtEquationCatalogStatus"
+                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                    Text="{Binding ViewModel.StatusMessage, Mode=OneWay}"
+                    TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="480"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border
+                Grid.Column="0"
+                BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="4">
+                <ui:DataGrid
+                    x:Name="DataGrid_SystemMtEquations"
+                    AutomationProperties.AutomationId="DataGrid_SystemMtEquations"
+                    AutoGenerateColumns="False"
+                    IsReadOnly="True"
+                    ItemsSource="{Binding ViewModel.Equations, Mode=OneWay}"
+                    SelectedItem="{Binding ViewModel.SelectedEquation, Mode=TwoWay}">
+                    <ui:DataGrid.Columns>
+                        <DataGridTextColumn Width="140" Binding="{Binding EquationKey}" Header="Key"/>
+                        <DataGridTextColumn Width="200" Binding="{Binding Name}" Header="Name"/>
+                        <DataGridTextColumn Width="*" Binding="{Binding CanonicalForm}" Header="Canonical form"/>
+                        <DataGridTextColumn Width="80" Binding="{Binding Source}" Header="Source"/>
+                    </ui:DataGrid.Columns>
+                </ui:DataGrid>
+            </Border>
+
+            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+                <Border
+                    Padding="14"
+                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="160"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Equation key"/>
+                        <ui:TextBox
+                            x:Name="TextBox_EquationKey"
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Margin="0,0,0,8"
+                            AutomationProperties.AutomationId="TextBox_EquationKey"
+                            IsReadOnly="{Binding ViewModel.IsDraftReadOnly, Mode=OneWay}"
+                            Text="{Binding ViewModel.Draft.EquationKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Name"/>
+                        <ui:TextBox
+                            x:Name="TextBox_EquationName"
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Margin="0,0,0,8"
+                            AutomationProperties.AutomationId="TextBox_EquationName"
+                            IsReadOnly="{Binding ViewModel.IsDraftReadOnly, Mode=OneWay}"
+                            Text="{Binding ViewModel.Draft.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Top" Text="Canonical form"/>
+                        <ui:TextBox
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Margin="0,0,0,8"
+                            AcceptsReturn="True"
+                            FontFamily="Consolas"
+                            IsReadOnly="{Binding ViewModel.IsDraftReadOnly, Mode=OneWay}"
+                            MinHeight="60"
+                            Text="{Binding ViewModel.Draft.CanonicalForm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            TextWrapping="Wrap"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Top" Text="Symbol system"/>
+                        <ui:TextBox
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            Margin="0,0,0,8"
+                            AcceptsReturn="True"
+                            IsReadOnly="{Binding ViewModel.IsDraftReadOnly, Mode=OneWay}"
+                            MinHeight="60"
+                            Text="{Binding ViewModel.Draft.SymbolSystem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            TextWrapping="Wrap"/>
+
+                        <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right" Orientation="Horizontal">
+                            <ui:Button
+                                x:Name="Button_ValidateEquationDraft"
+                                Margin="0,12,8,0"
+                                AutomationProperties.AutomationId="Button_ValidateEquationDraft"
+                                Command="{Binding ViewModel.ValidateEquationDraftCommand, Mode=OneWay}"
+                                Content="Validate"/>
+                            <ui:Button
+                                x:Name="Button_SaveEquationDraft"
+                                Margin="0,12,8,0"
+                                Appearance="Primary"
+                                AutomationProperties.AutomationId="Button_SaveEquationDraft"
+                                Command="{Binding ViewModel.SaveEquationDraftCommand, Mode=OneWay}"
+                                Content="Save"/>
+                            <ui:Button
+                                x:Name="Button_DeleteEquation"
+                                Margin="0,12,0,0"
+                                Appearance="Danger"
+                                AutomationProperties.AutomationId="Button_DeleteEquation"
+                                Command="{Binding ViewModel.DeleteEquationCommand, Mode=OneWay}"
+                                Content="Delete"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Page>
