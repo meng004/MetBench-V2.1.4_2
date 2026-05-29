@@ -85,7 +85,15 @@ foreach (var element in anomalyArray.EnumerateArray())
     var anomaly = new Anomaly
     {
         IdAnomaly = Guid.NewGuid(),
-        ResultId = Guid.Empty, // No live Result row; report-only finding
+        // Synthetic distinct ResultId: cross-program findings have no live
+        // Result row, but the Anomalies collection has a UNIQUE index on
+        // ResultId (DbConfig.cs EnsureIndex unique:true), so a shared
+        // Guid.Empty placeholder collides after the first row. A fresh Guid
+        // per row avoids the collision; it intentionally does NOT resolve to
+        // any SystemMtResultRecord. The orphan sweeper (AnomalyOrphanSweeper)
+        // exempts Category="cross-program-disagreement" from sweeping precisely
+        // so these unresolvable-by-design rows are never deleted.
+        ResultId = Guid.NewGuid(),
         Severity = severity,
         Status = "investigating",
         Category = category,
