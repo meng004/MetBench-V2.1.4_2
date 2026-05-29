@@ -24,9 +24,13 @@
 - [ ] **Step 1 — build:** `dotnet build MetBench_Client/MetBench_Client.csproj` → 0 errors. **Screenshot this terminal output** as `01-build-success.png`.
 - [ ] **Step 2 — seed 2 cross-program anomalies** (gives 2 rows with `Status=investigating`, `Category=cross-program-disagreement`):
   ```
-  dotnet run --project tools/SeedCrossProgramAnomalies
+  dotnet run --project tools/SeedCrossProgramAnomalies -- \
+    --input docs/experiments/cross-program-anomalies-2026-05-28.json \
+    --db <path-to-the-LiteDB-the-WPF-app-reads>
   ```
-  (Reads `docs/experiments/cross-program-anomalies-2026-05-28.json`; registers the AnomalyStatus BSON serializer itself per `AnomalyStatuses.RegisterBsonMapping`.)
+  (Both `--input` and `--db` are **REQUIRED** — a bare `dotnet run --project tools/SeedCrossProgramAnomalies`
+  prints usage and exits 64. The seeder registers the AnomalyStatus BSON serializer itself per
+  `AnomalyStatuses.RegisterBsonMapping`. For an isolated run set `METBENCH_DB_PATH` and point `--db` at it.)
 - [ ] **Step 3 — launch:** `dotnet run --project MetBench_Client`; navigate to the **Anomaly** list page.
 
 **验收条件:** build 0 errors (captured); app boots to AnomalyList showing ≥2 rows.
