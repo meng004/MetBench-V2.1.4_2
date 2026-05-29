@@ -483,7 +483,7 @@ Author-side（PR push 前，可选，按需 LLM）
 
 ### 12.3 强约束（违反 = process bug）
 
-- 所有 PR description 必须填 [`pr-gate-checklist.md`](docs/superpowers/templates/pr-gate-checklist.md) 7 节（Scope / Facts / Tests / Windows / Review / Merge / Soft Review），缺节会被模块 B 的 grep check 5 抓 `::warning::`。
+- 所有 PR description 必须填 [`pr-gate-checklist.md`](docs/superpowers/templates/pr-gate-checklist.md) 7 节（Scope / Facts / Tests / Windows Classification / Review / Merge / AI Review），缺节会被模块 B 的 grep check 5 抓 `::warning::`。
 - 改模块 B `governance` job 本身的 PR 是**自审的**——grep 跑在 PR head ref。规则改坏后果直接在本 PR 显现，建议 PR 描述里 paste 一段 test 输出证明新规则不 false-positive。
 - 模块 A `test` 必须保持在 main branch protection required check 列表（check 名 `test`）；模块 B `governance` job 永不入此列表。
 - 模块 E ritual 不可绕过：若 plan 文档枚举 ≥ 3 sequential PRs 或用 "Phase N" / "PR-X-N" 命名，最后一个 PR merge 后必须开 fresh-session review，cleanup PR 落地后 `docs/status/current.md` 才能标 chain "Controlled"。
