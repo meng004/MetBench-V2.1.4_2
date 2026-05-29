@@ -157,7 +157,7 @@ AI 可用于分类、摘要、草拟、解释等语言任务。路由、重试�
 测试输入生成 → 衍生输入转换 → 执行 SUT → 验证源/衍生输出是否满足 MR。实现为
 System-MT 引擎 + Launcher facade（`ISystemMtLauncher` 单一入口）+ LiteDB 持久化。
 **验收标准：流程端到端走通**，不以覆盖全部方程为准（覆盖见 T3）。
-截至代码测试基线 `e839214`（2026-05-25），System-MT 已切到 `ISystemMtLauncher` / `SystemMtLauncher`
+截至当前代码测试基线（实时见 [`docs/status/current.md`](docs/status/current.md)），System-MT 已切到 `ISystemMtLauncher` / `SystemMtLauncher`
 + provider-backed catalog 路径；WPF 默认注册 `ManifestMrCatalogProvider`，但 launcher
 launcher 已移除生产路径的 `HardcodedMrCatalogProvider` 过渡 fallback，现要求显式注入 `IMrCatalogProvider`。
 
