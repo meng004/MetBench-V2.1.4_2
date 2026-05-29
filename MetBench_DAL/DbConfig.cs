@@ -196,12 +196,21 @@ namespace MetBench_DAL
                 var mapper = BsonMapper.Global;
                 //建立引用
 
+                // debt #5: Anomaly.Status 持久化为 int（而非默认 enum-name 字符串）。
+                // type-level 注册，必须先于任何 collection 读写，且与 CollectionExists 无关。
+                AnomalyStatuses.RegisterBsonMapping(mapper);
+
                 RegisterV1Collections(db, mapper);
                 RegisterV2InfrastructureCollections(db, mapper);
                 RegisterV2ExecutionCollections(db, mapper);
                 RegisterV2DiscoveryCollections(db, mapper);
                 RegisterV2MutationCollections(db, mapper);
                 RegisterV2MiscCollections(db, mapper);
+
+                // debt #5: 一次性把既有 Anomaly.Status 的 string 值迁移成 int。
+                // 无条件运行（既有 DB 的 Anomalies collection 已存在，不会进入上面的注册分支），
+                // 幂等（只改 Status 仍是 string 的文档）。
+                MigrateAnomalyStatusStringToInt(db);
             }
         }
 
@@ -468,6 +477,34 @@ namespace MetBench_DAL
                 collection.EnsureIndex(x => x.Scope);
                 collection.EnsureIndex(x => x.GeneratedAt);
                 mapper.Entity<Report>().Id(x => x.IdReport);
+            }
+        }
+
+        // ============================================================
+        // debt #5: Anomaly.Status string → int 一次性迁移
+        // ============================================================
+        private void MigrateAnomalyStatusStringToInt(LiteDatabase db)
+        {
+            if (!db.CollectionExists(Anomalies_Key))
+            {
+                return;
+            }
+
+            // 走 BsonDocument 原始层（绕过 typed 反序列化），只重写仍是 string 的 Status。
+            var col = db.GetCollection(Anomalies_Key);
+            var toUpdate = new List<BsonDocument>();
+            foreach (var doc in col.FindAll())
+            {
+                if (doc.TryGetValue("Status", out var status) && status.IsString)
+                {
+                    doc["Status"] = (int)AnomalyStatuses.ParseLenient(status.AsString);
+                    toUpdate.Add(doc);
+                }
+            }
+
+            foreach (var doc in toUpdate)
+            {
+                col.Update(doc);
             }
         }
 

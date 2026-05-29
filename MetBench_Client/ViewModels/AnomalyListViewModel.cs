@@ -113,7 +113,7 @@ namespace MetBench_Client.ViewModels
                 // Path B: 有过滤 — 走 BLL service，内存切片
                 var filter = new AnomalyFilter(
                     Severity: string.IsNullOrEmpty(SeverityFilter) ? null : SeverityFilter,
-                    Status: string.IsNullOrEmpty(StatusFilter) ? null : StatusFilter);
+                    Status: AnomalyStatuses.TryParseKebab(StatusFilter, out var statusFilter) ? statusFilter : (AnomalyStatus?)null);
                 var all = _service.List(filter);
                 var slice = all.Skip(req.Skip).Take(req.PageSize).ToList();
                 return Task.FromResult(new PagedResult<Anomaly>(
@@ -154,9 +154,15 @@ namespace MetBench_Client.ViewModels
 
             try
             {
+                if (!AnomalyStatuses.TryParseKebab(TransitionTarget, out var target))
+                {
+                    ErrorMessage = $"Unknown status '{TransitionTarget}'.";
+                    return;
+                }
+
                 var ok = _service.TransitionStatus(
                     SelectedAnomaly.IdAnomaly,
-                    TransitionTarget!,
+                    target,
                     notes: null,
                     actor: "wpf-user");
 

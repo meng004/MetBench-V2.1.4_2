@@ -26,8 +26,8 @@ public sealed class AnomalyService : IAnomalyService
 
         if (!string.IsNullOrEmpty(filter.Severity))
             query = query.Where(a => a.Severity == filter.Severity);
-        if (!string.IsNullOrEmpty(filter.Status))
-            query = query.Where(a => a.Status == filter.Status);
+        if (filter.Status is { } status)
+            query = query.Where(a => a.Status == status);
         if (!string.IsNullOrEmpty(filter.Category))
             query = query.Where(a => a.Category == filter.Category);
         if (filter.LinkedKnownBugId.HasValue)
@@ -54,7 +54,7 @@ public sealed class AnomalyService : IAnomalyService
             .GroupBy(a => a.Category ?? "unknown")
             .ToDictionary(g => g.Key, g => g.Count());
         var byStatus = anomalies
-            .GroupBy(a => a.Status ?? "unknown")
+            .GroupBy(a => a.Status.ToKebab())
             .ToDictionary(g => g.Key, g => g.Count());
 
         var dominantSeverity = bySeverity
@@ -88,12 +88,16 @@ public sealed class AnomalyService : IAnomalyService
 
     // ====== State transitions ======
 
-    public bool TransitionStatus(Guid anomalyId, string newStatus, string? notes, string actor)
+    public bool TransitionStatus(Guid anomalyId, AnomalyStatus newStatus, string? notes, string actor)
     {
         var anomaly = _anomalies.Get(anomalyId);
         if (anomaly is null) return false;
 
         var oldStatus = anomaly.Status;
+        // 状态机校验 — 非法转移是契约违反，显式抛出（§6），不静默写入。
+        if (!oldStatus.CanTransition(newStatus))
+            throw new InvalidAnomalyStatusTransitionException(oldStatus, newStatus);
+
         anomaly.Status = newStatus;
         if (!string.IsNullOrEmpty(notes))
             anomaly.Notes = notes;
@@ -101,7 +105,7 @@ public sealed class AnomalyService : IAnomalyService
         var ok = _anomalies.Modify(anomaly);
         if (ok) WriteAudit(actor, "anomaly.status-change",
             "Anomaly", anomaly.IdAnomaly.ToString(),
-            $"{{\"from\":\"{oldStatus}\",\"to\":\"{newStatus}\"}}");
+            $"{{\"from\":\"{oldStatus.ToKebab()}\",\"to\":\"{newStatus.ToKebab()}\"}}");
         return ok;
     }
 
@@ -155,7 +159,7 @@ public sealed class AnomalyService : IAnomalyService
             ResultId = resultGuid,
             Severity = severity,
             Category = category,
-            Status = "new",
+            Status = AnomalyStatus.New,
             DiscoveredAt = DateTime.UtcNow,
             DiscoveredBy = "system-mt",
             Notes = string.IsNullOrEmpty(typedVerificationSummary) ? string.Empty : typedVerificationSummary,

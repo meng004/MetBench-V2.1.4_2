@@ -35,6 +35,7 @@
 | Catalog convergence / metadata / evidence | Complete for current mainline, with evidence granularity still eligible for expansion | PR #91-#95 |
 | MR verification v1.2 | Complete for current roadmap | PR #97-#110 |
 | v1.2 inventory denominator | `44 MR + 4 Property` | PR #109 / PR #110 migration and coverage gates |
+| inventory 两层关系（防混用） | `44 MR + 4 Property` = v1.2 typed-catalog migration denominator（PR #109/#110 迁移 + 覆盖 gate）；`33 MR / 16 SUT / 13 eq` = 当前运行时 catalog provider 实际产出，权威 `.github/governance/expected-catalog-counts.txt`（`ExpectedCatalogCountsWhitelist` 强制）。二者分属不同层，引用时必须注明是哪一层。 |
 | Documentation truth-source alignment | Complete through PR #111 | PR #111 |
 | Governance baseline | Complete through PR #112 | PR #112 |
 | Verification semantics convergence | Controlled — convergence closed | PR #115 (PR-B typed catalog rename), PR #118 (PR-C typed predicate runtime), PR #119 (PR-D architecture guards + W1 cleanup). System MT pipeline assertion stage now runs only on Typed Semantic Catalog predicates; the W1 `IMrAssertion` interface and its `Approx/Greater/Less` implementations plus `SystemMtRunner` and `EqualityThresholds` are removed from production. `SemanticCatalogBoundaryTests` prevents re-introduction. |

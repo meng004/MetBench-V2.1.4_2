@@ -33,13 +33,13 @@ public sealed class AnomalyServiceTests
     {
         var data = new[]
         {
-            MakeAnomaly(status: "new"),
-            MakeAnomaly(status: "confirmed-bug"),
-            MakeAnomaly(status: "confirmed-bug"),
+            MakeAnomaly(status: AnomalyStatus.New),
+            MakeAnomaly(status: AnomalyStatus.ConfirmedBug),
+            MakeAnomaly(status: AnomalyStatus.ConfirmedBug),
         };
         var svc = MakeService(data);
 
-        var confirmed = svc.List(new AnomalyFilter(Status: "confirmed-bug"));
+        var confirmed = svc.List(new AnomalyFilter(Status: AnomalyStatus.ConfirmedBug));
         Assert.Equal(2, confirmed.Count);
     }
 
@@ -147,16 +147,19 @@ public sealed class AnomalyServiceTests
     public void TransitionStatus_updates_and_writes_audit()
     {
         var anomalyId = Guid.NewGuid();
-        var data = new[] { MakeAnomalyWithId(anomalyId, status: "new") };
+        var data = new[] { MakeAnomalyWithId(anomalyId, status: AnomalyStatus.New) };
         var auditRepo = new FakeAuditLogRepository();
         var svc = MakeService(data, auditRepo);
 
-        var ok = svc.TransitionStatus(anomalyId, "investigating", "Looking into Case 6", "alice");
+        var ok = svc.TransitionStatus(anomalyId, AnomalyStatus.Investigating, "Looking into Case 6", "alice");
         Assert.True(ok);
-        Assert.Equal("investigating", data[0].Status);
+        Assert.Equal(AnomalyStatus.Investigating, data[0].Status);
         Assert.Equal("Looking into Case 6", data[0].Notes);
         Assert.Single(auditRepo.Logs);
         Assert.Equal("anomaly.status-change", auditRepo.Logs[0].Action);
+        // 审计 detailsJson 维持 kebab 形态（不波及既有日志消费方）。
+        Assert.Contains("\"from\":\"new\"", auditRepo.Logs[0].DetailsJson);
+        Assert.Contains("\"to\":\"investigating\"", auditRepo.Logs[0].DetailsJson);
     }
 
     [Fact]
@@ -192,15 +195,45 @@ public sealed class AnomalyServiceTests
     public void TransitionStatus_missing_anomaly_returns_false()
     {
         var svc = MakeService(Array.Empty<MetBench_Domain.Anomaly>());
-        var ok = svc.TransitionStatus(Guid.NewGuid(), "investigating", null, "alice");
+        var ok = svc.TransitionStatus(Guid.NewGuid(), AnomalyStatus.Investigating, null, "alice");
         Assert.False(ok);
+    }
+
+    [Fact]
+    public void TransitionStatus_illegal_transition_throws_and_does_not_mutate()
+    {
+        var anomalyId = Guid.NewGuid();
+        var data = new[] { MakeAnomalyWithId(anomalyId, status: AnomalyStatus.New) };
+        var auditRepo = new FakeAuditLogRepository();
+        var svc = MakeService(data, auditRepo);
+
+        // new → confirmed-bug 不在状态机里（必须先 investigating）。
+        var ex = Assert.Throws<InvalidAnomalyStatusTransitionException>(() =>
+            svc.TransitionStatus(anomalyId, AnomalyStatus.ConfirmedBug, null, "alice"));
+        Assert.Equal(AnomalyStatus.New, ex.From);
+        Assert.Equal(AnomalyStatus.ConfirmedBug, ex.To);
+        // 非法转移不得改状态、不得写审计。
+        Assert.Equal(AnomalyStatus.New, data[0].Status);
+        Assert.Empty(auditRepo.Logs);
+    }
+
+    [Fact]
+    public void TransitionStatus_investigating_to_confirmed_bug_succeeds()
+    {
+        var anomalyId = Guid.NewGuid();
+        var data = new[] { MakeAnomalyWithId(anomalyId, status: AnomalyStatus.Investigating) };
+        var svc = MakeService(data);
+
+        var ok = svc.TransitionStatus(anomalyId, AnomalyStatus.ConfirmedBug, null, "alice");
+        Assert.True(ok);
+        Assert.Equal(AnomalyStatus.ConfirmedBug, data[0].Status);
     }
 
     // =================== fixtures ===================
 
     private static MetBench_Domain.Anomaly MakeAnomaly(
         string severity = "minor",
-        string status = "new",
+        AnomalyStatus status = AnomalyStatus.New,
         string category = "uncategorized",
         int? linkedBugId = null,
         DateTime? discoveredAt = null)
@@ -209,7 +242,7 @@ public sealed class AnomalyServiceTests
     private static MetBench_Domain.Anomaly MakeAnomalyWithId(
         Guid id,
         string severity = "minor",
-        string status = "new",
+        AnomalyStatus status = AnomalyStatus.New,
         string category = "uncategorized",
         int? linkedBugId = null,
         DateTime? discoveredAt = null)
@@ -268,7 +301,7 @@ internal sealed class FakeAnomalyRepository : IAnomalyRepository
     public MetBench_Domain.Anomaly? GetByResult(Guid resultId)
         => _data.FirstOrDefault(a => a.ResultId == resultId);
 
-    public ObservableCollection<MetBench_Domain.Anomaly> GetByStatus(string status)
+    public ObservableCollection<MetBench_Domain.Anomaly> GetByStatus(AnomalyStatus status)
         => new(_data.Where(a => a.Status == status).ToList());
 
     public ObservableCollection<MetBench_Domain.Anomaly> GetByLinkedBug(int knownBugId)

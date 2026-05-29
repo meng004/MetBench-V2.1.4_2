@@ -9,8 +9,8 @@ public interface IAnomalyRepository : IGuidRepository<Anomaly>
     /// <summary>按 Result 查（0:1）。找不到返回 null。</summary>
     Anomaly? GetByResult(Guid resultId);
 
-    /// <summary>按 Status 过滤 (new / investigating / known / confirmed-bug / false-positive)。</summary>
-    ObservableCollection<Anomaly> GetByStatus(string status);
+    /// <summary>按 Status 过滤 (new / investigating / known / confirmed-bug / false-positive / fixed-upstream)。</summary>
+    ObservableCollection<Anomaly> GetByStatus(AnomalyStatus status);
 
     /// <summary>列出关联到指定 KnownBug 的 Anomaly（看 R-Case 复现历史）。</summary>
     ObservableCollection<Anomaly> GetByLinkedBug(int knownBugId);

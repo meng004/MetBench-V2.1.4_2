@@ -43,8 +43,8 @@ public class Anomaly
     /// <summary>该 Anomaly 被 Replay 的次数。</summary>
     public int ReplayCount { get; set; }
 
-    /// <summary>调查状态。</summary>
-    public string Status { get; set; } = "new";
+    /// <summary>调查状态（LiteDB 存 int；kebab 映射见 <see cref="AnomalyStatuses"/>）。</summary>
+    public AnomalyStatus Status { get; set; } = AnomalyStatus.New;
 
     /// <summary>研究者分析笔记（Markdown）。</summary>
     public string? Notes { get; set; }

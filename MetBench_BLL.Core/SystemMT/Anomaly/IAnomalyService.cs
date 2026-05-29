@@ -13,8 +13,12 @@ public interface IAnomalyService
     /// <summary>共性分析 — 输入一组 Anomaly → CommonalityReport。</summary>
     CommonalityReport AnalyzeCommonalities(IReadOnlyList<MetBench_Domain.Anomaly> anomalies);
 
-    /// <summary>转移状态（new → investigating → known/confirmed-bug/false-positive）+ 写 AuditLog。</summary>
-    bool TransitionStatus(Guid anomalyId, string newStatus, string? notes, string actor);
+    /// <summary>
+    /// 转移状态（<c>new → investigating → {known | confirmed-bug | false-positive | fixed-upstream}</c>）+ 写 AuditLog。
+    /// anomaly 不存在返回 <c>false</c>；请求的转移不在状态机里抛
+    /// <see cref="InvalidAnomalyStatusTransitionException"/>（合法转移表见 <see cref="MetBench_Domain.AnomalyStatuses.CanTransition"/>）。
+    /// </summary>
+    bool TransitionStatus(Guid anomalyId, AnomalyStatus newStatus, string? notes, string actor);
 
     /// <summary>把 Anomaly 链到已知 KnownBug。</summary>
     bool LinkToKnownBug(Guid anomalyId, int knownBugId, string actor);

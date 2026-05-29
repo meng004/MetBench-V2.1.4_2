@@ -206,7 +206,7 @@ public sealed class ReplayContextBuilderTests
         fakes.AnomalyRepo.Data.Add(new MetBench_Domain.Anomaly
         {
             IdAnomaly = anomalyId, ResultId = resultId,
-            Severity = "major", Status = "new", Category = "basin",
+            Severity = "major", Status = MetBench_Domain.AnomalyStatus.New, Category = "basin",
         });
 
         return fakes;
@@ -237,7 +237,7 @@ internal sealed class FakeRcbAnomalyRepo : IAnomalyRepository
     public ObservableCollection<MetBench_Domain.Anomaly> GetPage(int p, int s) => new(Data.Skip(p * s).Take(s).ToList());
     public int Count() => Data.Count;
     public MetBench_Domain.Anomaly? GetByResult(Guid id) => Data.FirstOrDefault(a => a.ResultId == id);
-    public ObservableCollection<MetBench_Domain.Anomaly> GetByStatus(string s) => new();
+    public ObservableCollection<MetBench_Domain.Anomaly> GetByStatus(MetBench_Domain.AnomalyStatus s) => new();
     public ObservableCollection<MetBench_Domain.Anomaly> GetByLinkedBug(int id) => new();
 }
 

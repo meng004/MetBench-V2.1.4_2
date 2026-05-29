@@ -141,7 +141,7 @@ jobs:
 
           # Check 5 — PR Gate Checklist 7 sections (CLAUDE.md §12.2):
           # PR body should carry the 7 mandatory section headers.
-          for section in '1\. Scope' '2\. Facts' '3\. Tests' '4\. Windows' '5\. Review' '6\. Merge' '7\. Soft Review'; do
+          for section in 'Scope' 'Facts' 'Tests' 'Windows Classification' 'Review' 'Merge' 'AI Review'; do
             if ! echo "$body" | grep -qE "(##|###) +$section"; then
               warn "PR Gate Checklist: missing section header matching '$section' (CLAUDE.md §12.2 / docs/superpowers/templates/pr-gate-checklist.md)"
             fi

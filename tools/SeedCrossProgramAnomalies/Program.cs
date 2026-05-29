@@ -49,6 +49,11 @@ if (!doc.RootElement.TryGetProperty("anomalies", out var anomalyArray))
     return 3;
 }
 
+// This process does not go through DbConfig, so register the AnomalyStatus int
+// serializer explicitly — otherwise the enum would serialize as its default
+// (enum-name string) and violate the int-on-disk contract (debt #5).
+AnomalyStatuses.RegisterBsonMapping(BsonMapper.Global);
+
 using var db = new LiteDatabase($"Filename={dbPath}");
 db.Pragma("UTC_DATE", true);
 var collection = db.GetCollection<Anomaly>("Anomalies");
@@ -95,7 +100,7 @@ foreach (var element in anomalyArray.EnumerateArray())
         // so these unresolvable-by-design rows are never deleted.
         ResultId = Guid.NewGuid(),
         Severity = severity,
-        Status = "investigating",
+        Status = AnomalyStatus.Investigating,
         Category = category,
         DiscoveredAt = DateTime.UtcNow,
         Notes = notes,

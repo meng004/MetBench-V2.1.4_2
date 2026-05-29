@@ -92,3 +92,9 @@ appsettings.local.json
 *.bin
 *.safetensors
 checkpoint-*/
+
+# CodeGraph local index (per-machine tool data, not version-controlled)
+.codegraph/
+
+# Local-only dev-server launch config (not version-controlled)
+.claude/launch.json

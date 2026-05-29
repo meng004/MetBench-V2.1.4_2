@@ -157,7 +157,7 @@ AI 可用于分类、摘要、草拟、解释等语言任务。路由、重试�
 测试输入生成 → 衍生输入转换 → 执行 SUT → 验证源/衍生输出是否满足 MR。实现为
 System-MT 引擎 + Launcher facade（`ISystemMtLauncher` 单一入口）+ LiteDB 持久化。
 **验收标准：流程端到端走通**，不以覆盖全部方程为准（覆盖见 T3）。
-截至代码测试基线 `e839214`（2026-05-25），System-MT 已切到 `ISystemMtLauncher` / `SystemMtLauncher`
+截至当前代码测试基线（实时见 [`docs/status/current.md`](docs/status/current.md)），System-MT 已切到 `ISystemMtLauncher` / `SystemMtLauncher`
 + provider-backed catalog 路径；WPF 默认注册 `ManifestMrCatalogProvider`，但 launcher
 launcher 已移除生产路径的 `HardcodedMrCatalogProvider` 过渡 fallback，现要求显式注入 `IMrCatalogProvider`。
 
@@ -327,8 +327,10 @@ Current caveats on `main`:
   exponential-growth runtime, typed migration gates, and review-fix hardening for
   invalid golden fixtures / coverage semantics.
 - The v1.2 implementation line is complete for the current roadmap on `main`.
-  Inventory truth should now be read as **44 MR + 4 Property** from the merged migration assets and gates;
-  an older report summary mentioned 43 MR, but repository truth has moved to the explicit migrated inventory.
+  Inventory has **two distinct layers — do not conflate**: the v1.2 typed-catalog *migration denominator* is
+  **44 MR + 4 Property** (merged migration assets + coverage gates; an older report summary said 43, superseded);
+  the *runtime catalog provider inventory* is **33 MR / 16 SUT / 13 equations**
+  (authoritative source `.github/governance/expected-catalog-counts.txt`, enforced by `ExpectedCatalogCountsWhitelist`).
 - **PR-1 T1 manifest-driven runtime environments** (`LauncherOptions.RuntimePythons` + `ResolvePythonExecutable`):
   new SUT runtime families (FEniCS, FiPy, torch-surrogate, ...) belong in `catalog.json`'s
   `python_executable_kind` value, resolved through `LauncherOptions.RuntimePythons` or the
@@ -483,7 +485,7 @@ Author-side（PR push 前，可选，按需 LLM）
 
 ### 12.3 强约束（违反 = process bug）
 
-- 所有 PR description 必须填 [`pr-gate-checklist.md`](docs/superpowers/templates/pr-gate-checklist.md) 7 节（Scope / Facts / Tests / Windows / Review / Merge / Soft Review），缺节会被模块 B 的 grep check 5 抓 `::warning::`。
+- 所有 PR description 必须填 [`pr-gate-checklist.md`](docs/superpowers/templates/pr-gate-checklist.md) 7 节（Scope / Facts / Tests / Windows Classification / Review / Merge / AI Review），缺节会被模块 B 的 grep check 5 抓 `::warning::`。
 - 改模块 B `governance` job 本身的 PR 是**自审的**——grep 跑在 PR head ref。规则改坏后果直接在本 PR 显现，建议 PR 描述里 paste 一段 test 输出证明新规则不 false-positive。
 - 模块 A `test` 必须保持在 main branch protection required check 列表（check 名 `test`）；模块 B `governance` job 永不入此列表。
 - 模块 E ritual 不可绕过：若 plan 文档枚举 ≥ 3 sequential PRs 或用 "Phase N" / "PR-X-N" 命名，最后一个 PR merge 后必须开 fresh-session review，cleanup PR 落地后 `docs/status/current.md` 才能标 chain "Controlled"。

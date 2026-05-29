@@ -164,7 +164,8 @@ public sealed class RCaseReproductionService
                 ResultId = resultId,
                 DiscoveredAt = DateTime.UtcNow,
                 Severity = "major",
-                Status = "confirmed-bug",
+                // 直接创建一条已确认的复现记录（状态机只约束 TransitionStatus，不约束构造）。
+                Status = AnomalyStatus.ConfirmedBug,
                 Category = $"r-case-{spec.KnownBugCode}",
                 LinkedKnownBugId = bug.IdBug,
                 Notes = $"Auto-reproduced via RCaseReproductionService. gap={gap?.ToString("P2") ?? "n/a"}",

@@ -387,7 +387,7 @@ public sealed class V2EntityRoundtripTests : IDisposable
             Severity = "major",
             Category = "basin",
             ReplayCount = 3,
-            Status = "confirmed-bug",
+            Status = AnomalyStatus.ConfirmedBug,
             Notes = "OpenMOC CPUSolver 第二收敛盆，factor=1.25",
             LinkedKnownBugId = 6,
             DiscoveredAt = new DateTime(2026, 5, 12, 9, 30, 0, DateTimeKind.Utc),
