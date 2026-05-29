@@ -1,0 +1,36 @@
+{
+  "source": "docs/experiments/cross-program-report.md",
+  "extracted_at": "static-report",
+  "anomalies": [
+    {
+      "transform": "ScaleFuelSigmaT",
+      "k_openmoc": 0.11127,
+      "k_openmc": 0.11292,
+      "sigma_openmc": 0.00022,
+      "delta_k": 0.00165,
+      "budget": 0.00113,
+      "verdict": "DISAGREE",
+      "openmoc_scenario": "openmoc-pincell-fuel-sigma-t",
+      "openmc_scenario": "openmc-pincell-fuel-sigma-t",
+      "percent_of_openmc": 1.5,
+      "severity": "major",
+      "category": "cross-program-disagreement",
+      "status_after_seed": "investigating"
+    },
+    {
+      "transform": "ScaleModeratorSigmaA",
+      "k_openmoc": 0.47635,
+      "k_openmc": 0.96831,
+      "sigma_openmc": 0.00166,
+      "delta_k": 0.49196,
+      "budget": 0.00968,
+      "verdict": "DISAGREE",
+      "openmoc_scenario": "openmoc-pincell-moderator-sigma-a",
+      "openmc_scenario": "openmc-pincell-moderator-sigma-a",
+      "percent_of_openmc": 50.8,
+      "severity": "critical",
+      "category": "cross-program-disagreement",
+      "status_after_seed": "investigating"
+    }
+  ]
+}

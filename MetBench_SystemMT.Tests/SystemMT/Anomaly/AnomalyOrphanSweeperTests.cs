@@ -116,6 +116,45 @@ public sealed class AnomalyOrphanSweeperTests
     }
 
     [Fact]
+    public async Task SweepAsync_exempts_report_only_cross_program_anomalies_despite_unresolvable_resultid()
+    {
+        // PR-2 cross-program anomalies carry synthetic ResultIds (to satisfy the
+        // unique index) that never resolve. They must be RETAINED, not swept,
+        // because they are report-only findings with no backing Result by design.
+        var anomalies = new FakeAnomalyRepo();
+        var results = new FakeResultRepo(); // empty → every GetAsync returns null
+        anomalies.Data.Add(new MetBench_Domain.Anomaly
+        {
+            IdAnomaly = Guid.NewGuid(),
+            ResultId = Guid.NewGuid(), // synthetic, unresolvable
+            Category = "cross-program-disagreement",
+        });
+        anomalies.Data.Add(new MetBench_Domain.Anomaly
+        {
+            IdAnomaly = Guid.NewGuid(),
+            ResultId = Guid.NewGuid(), // synthetic, unresolvable
+            Category = "CROSS-PROGRAM-DISAGREEMENT", // case-insensitive match
+        });
+        // A genuine orphan with a live-MT category must still be swept.
+        anomalies.Data.Add(new MetBench_Domain.Anomaly
+        {
+            IdAnomaly = Guid.NewGuid(),
+            ResultId = Guid.NewGuid(),
+            Category = "single-point",
+        });
+
+        var sweeper = new AnomalyOrphanSweeper(anomalies, results);
+        var result = await sweeper.SweepAsync();
+
+        Assert.Equal(1, result.SweptCount); // only the single-point orphan
+        Assert.Equal(2, result.RetainedCount); // both cross-program rows kept
+        Assert.Equal(0, result.FailedCount);
+        Assert.Equal(2, anomalies.Data.Count);
+        Assert.All(anomalies.Data, a =>
+            Assert.Equal("cross-program-disagreement", a.Category, ignoreCase: true));
+    }
+
+    [Fact]
     public void Constructor_rejects_null_repos()
     {
         var results = new FakeResultRepo();

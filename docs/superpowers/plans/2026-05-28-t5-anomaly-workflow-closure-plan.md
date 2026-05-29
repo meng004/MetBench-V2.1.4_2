@@ -123,6 +123,14 @@ PR-1 与 PR-2 PR-0 合后并行；PR-3 等 PR-1 + PR-2 合后。
 - 其他超预算 case（如有）按相同规则入库
 - Anomaly.Notes = 引用 `docs/experiments/discussion-phase2.md` 的根因分析
 
+### DB 目标修正（VM verification finding，2026-05-29）
+
+> **修正**：`Anomaly` collection 实际落在 **legacy `MR.Litedb`**（`DbConfig._conn` 解析），**不是** `SystemMT.Litedb`。seed 工具 `--db` 必须指向 production `LiteDbAnomalyRepository` 读的同一个 `MR.Litedb` 文件（WPF dev 模式为 `MetBench_Client/bin/Debug/<tfm>/MetBench_DataBase/MR.Litedb` 或 `DbConfig` 解析的路径）。orphan sweeper (PR-1) 做的是 **跨库 join**：Anomaly(MR.Litedb) ← ResultId → SystemMtResults(SystemMT.Litedb)。
+
+### ResultId 冲突修正（VM verification finding，2026-05-29）
+
+> **修正**：`Anomalies` collection 有 **unique 索引** on `ResultId`（`DbConfig.cs` `EnsureIndex(x => x.ResultId, unique: true)`）。多条 cross-program 行不能共用 `Guid.Empty`——会触发 unique 冲突，2 条只进 1 条。seed 工具改为**每行合成不同 `Guid.NewGuid()`**。这些合成 Guid 故意不解析到任何 `SystemMtResultRecord`；orphan sweeper 通过 **类别豁免** `Category=="cross-program-disagreement"`（`AnomalyOrphanSweeper.ReportOnlyCategories`）确保这些 report-only 行永不被 sweep 删除。
+
 ### VM prompt
 
 由 VM agent 读取 `docs/superpowers/vm-prompts/2026-05-28-t5-pr-2-vm-prompt.md` 后执行，含：
