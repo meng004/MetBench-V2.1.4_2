@@ -1,7 +1,9 @@
 # PR Description Draft — Follow-up debts batch (#2 #3 #4 #5)
 
-> Branch `followup/debts-2026-05-29` → `main`. Fill into GitHub PR body. Sections follow
-> `docs/superpowers/templates/pr-gate-checklist.md`. **Do not open until WPF (Task 4E) VM-verified.**
+> Branch `followup/debts-2026-05-29` → `main`. Opened as **draft**: WPF (Task 4E) compiles + boots on a
+> Windows host (`dotnet build` 0 errors, `dotnet run` no XAML-parse crash); the 7 interactive GUI screenshots
+> are pending a display-equipped operator. Convert to ready + merge once they land. Sections follow
+> `docs/superpowers/templates/pr-gate-checklist.md`.
 
 ---
 
