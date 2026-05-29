@@ -48,7 +48,12 @@ public sealed class MrArchitectureSchemaP0Tests : IDisposable
     public void MetamorphicRelation_roundtrips_new_fields_via_LiteDB()
     {
         var dbFile = _dbPath + "-mr.db";
-        using (var db = new LiteDatabase($"Filename={dbFile}"))
+        // Isolated BsonMapper — must NOT use the shared BsonMapper.Global. DbConfig
+        // mutates Global via Entity<MetamorphicRelation>(), and LiteDB 5's global
+        // mapper EntityMapper cache is not thread-safe, so a concurrent test touching
+        // DbConfig.Instance can race this serialization and intermittently drop a
+        // field (observed: EquationKey -> "" in CI). Per-test mapper removes the race.
+        using (var db = new LiteDatabase($"Filename={dbFile}", new BsonMapper()))
         {
             var col = db.GetCollection<MetamorphicRelation>("Mrs");
             col.EnsureIndex(x => x.IdMR, unique: true);
@@ -78,7 +83,7 @@ public sealed class MrArchitectureSchemaP0Tests : IDisposable
     {
         var path = _dbPath + "-old.db";
         // 写一个不含新字段的"老"文档,模拟既有 v2 数据
-        using (var db = new LiteDatabase($"Filename={path}"))
+        using (var db = new LiteDatabase($"Filename={path}", new BsonMapper()))
         {
             var raw = db.GetCollection("Mrs");
             raw.Insert(new BsonDocument
@@ -91,7 +96,7 @@ public sealed class MrArchitectureSchemaP0Tests : IDisposable
             });
         }
         // 用强类型读
-        using (var db = new LiteDatabase($"Filename={path}"))
+        using (var db = new LiteDatabase($"Filename={path}", new BsonMapper()))
         {
             var col = db.GetCollection<MetamorphicRelation>("Mrs");
             var mr = col.FindById(7);
