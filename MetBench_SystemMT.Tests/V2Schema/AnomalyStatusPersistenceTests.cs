@@ -47,7 +47,10 @@ public sealed class AnomalyStatusPersistenceTests : IDisposable
         }));
 
         // 原始 BsonDocument 层验证 on-disk 是 int（而非 enum-name 字符串）。
-        using var db = new LiteDatabase($"Filename={_dbPath}");
+        // Isolated BsonMapper — must NOT read the shared BsonMapper.Global. DbConfig
+        // mutates Global, and LiteDB 5's global-mapper cache is not thread-safe, so a
+        // bare `new LiteDatabase` can race with concurrent DbConfig tests (see PR #239).
+        using var db = new LiteDatabase($"Filename={_dbPath}", new BsonMapper());
         var raw = db.GetCollection("Anomalies").FindById(id);
         Assert.NotNull(raw);
         Assert.True(raw["Status"].IsInt32, $"Status should be int, was {raw["Status"].Type}");
@@ -89,7 +92,8 @@ public sealed class AnomalyStatusPersistenceTests : IDisposable
         var idAlreadyInt = Guid.NewGuid();
 
         // 1) 写入旧数据：一条 Status 为 kebab string，一条已是 int（迁移须幂等跳过）。
-        using (var db = new LiteDatabase($"Filename={_dbPath}"))
+        // Isolated BsonMapper — must NOT read the shared BsonMapper.Global (race w/ DbConfig, PR #239).
+        using (var db = new LiteDatabase($"Filename={_dbPath}", new BsonMapper()))
         {
             var col = db.GetCollection("Anomalies");
             col.Insert(new BsonDocument
@@ -114,7 +118,8 @@ public sealed class AnomalyStatusPersistenceTests : IDisposable
         var repo = new LiteDbAnomalyRepository();
 
         // 3) on-disk：两条都是 int，值正确。
-        using (var db = new LiteDatabase($"Filename={_dbPath}"))
+        // Isolated BsonMapper — must NOT read the shared BsonMapper.Global (race w/ DbConfig, PR #239).
+        using (var db = new LiteDatabase($"Filename={_dbPath}", new BsonMapper()))
         {
             var col = db.GetCollection("Anomalies");
             var migrated = col.FindById(idKebab);
