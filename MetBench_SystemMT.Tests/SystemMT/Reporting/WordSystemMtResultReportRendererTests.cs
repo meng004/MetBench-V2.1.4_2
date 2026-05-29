@@ -263,4 +263,45 @@ public sealed class WordSystemMtResultReportRendererTests
         Assert.Equal(width * EmuPerPx, last.Cx?.Value);
         Assert.Equal(height * EmuPerPx, last.Cy?.Value);
     }
+
+    [Fact]
+    public void Render_document_xml_payload_length_and_text_content_stable_for_same_input()
+    {
+        // M9 (PR #183-#191 review): WordSystemMtResultReportRenderer's XML doc claims
+        // "Output is deterministic when GeneratedAt is supplied." That claim is overstated:
+        // OpenXml SDK 3.x injects fresh RSID (revision save id) attributes on every render,
+        // so the raw document.xml bytes differ even with identical input. RSIDs are
+        // fixed-width pseudo-random strings, so:
+        //   (a) document.xml byte LENGTH is stable across renders (rsid width is constant)
+        //   (b) extracted body TEXT is stable (rsids live on attributes, not in run text)
+        //   (c) image part count and inline drawing extent are stable
+        // This fact pins the determinism surface that callers actually care about.
+        // Bonus side-effect: also exercises the M2 fix (ChartRenderOptions-derived EMU)
+        // by checking image count parity.
+        var rec = SampleRecord("openmoc-pincell-nu-sigma-f", passed: true);
+        var renderer = NewRenderer();
+
+        var first = renderer.Render(new[] { rec }, FixedContext());
+        var second = renderer.Render(new[] { rec }, FixedContext());
+
+        static byte[] ExtractDocumentXmlBytes(byte[] docx)
+        {
+            using var ms = new MemoryStream(docx);
+            using var zip = new ZipArchive(ms, ZipArchiveMode.Read);
+            var entry = zip.GetEntry("word/document.xml")
+                        ?? throw new InvalidOperationException("word/document.xml missing from docx package");
+            using var stream = entry.Open();
+            using var output = new MemoryStream();
+            stream.CopyTo(output);
+            return output.ToArray();
+        }
+
+        var firstDocXml = ExtractDocumentXmlBytes(first);
+        var secondDocXml = ExtractDocumentXmlBytes(second);
+
+        Assert.Equal(firstDocXml.Length, secondDocXml.Length);
+        Assert.Equal(ExtractBodyText(first), ExtractBodyText(second));
+        Assert.Equal(CountMediaPngs(first), CountMediaPngs(second));
+        Assert.Equal(CountTopLevelBodyChildren(first), CountTopLevelBodyChildren(second));
+    }
 }

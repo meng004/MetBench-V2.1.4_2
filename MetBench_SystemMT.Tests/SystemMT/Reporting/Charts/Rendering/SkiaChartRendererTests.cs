@@ -220,4 +220,22 @@ public sealed class SkiaChartRendererTests
         Assert.Throws<ArgumentOutOfRangeException>(() => renderer.RenderPng(fig, new ChartRenderOptions(Height: -1)));
         Assert.Throws<ArgumentOutOfRangeException>(() => renderer.RenderPng(fig, new ChartRenderOptions(Dpi: 0)));
     }
+
+    [Fact]
+    public void RenderPng_output_is_opaque_no_alpha_channel_in_ihdr()
+    {
+        // M4 (PR #183-#191 review): the renderer now uses SKAlphaType.Opaque so the PNG
+        // carries no alpha channel. Downstream embedders (iTextSharp) consequently emit
+        // a single /Subtype /Image XObject per chart instead of (primary, /SMask) pair.
+        // PNG IHDR byte 25 is the color type: 2 = truecolor RGB (opaque), 6 = RGBA.
+        // We require 2 here so future regressions to Premul fail loudly.
+        var renderer = new SkiaChartRenderer();
+        var fig = MakePhaseFigure(("a", 1.0), ("b", 2.0), ("c", 3.0));
+
+        var bytes = renderer.RenderPng(fig, new ChartRenderOptions());
+
+        // IHDR layout: 8-byte PNG magic + 4-byte length + 4-byte "IHDR" + 4+4 dimensions
+        // + 1-byte bit depth + 1-byte color type (index 25).
+        Assert.Equal(2, bytes[25]);
+    }
 }
