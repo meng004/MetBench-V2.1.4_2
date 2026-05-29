@@ -1,6 +1,6 @@
 ---
 topic: debt #5 — Anomaly 状态机 string → AnomalyStatus enum
-status: cloud-complete（跨平台已实现+测试绿；WPF 待 VM 编译验证）
+status: completed（跨平台已实现+测试绿；WPF 已 VM 编译+boot+UIA 验证；随 debt batch 经 PR #236 合入 main `827394b`）
 branch: followup/debts-2026-05-29
 base: origin/main (84ae500)
 date: 2026-05-29
