@@ -192,7 +192,7 @@ public sealed class AnomalyOrphanSweeperTests
         public ObservableCollection<MetBench_Domain.Anomaly> GetPage(int p, int s) => new(Data.Skip(p * s).Take(s).ToList());
         public int Count() => Data.Count;
         public MetBench_Domain.Anomaly? GetByResult(Guid id) => Data.FirstOrDefault(a => a.ResultId == id);
-        public ObservableCollection<MetBench_Domain.Anomaly> GetByStatus(string s) => new(Data.Where(a => a.Status == s).ToList());
+        public ObservableCollection<MetBench_Domain.Anomaly> GetByStatus(MetBench_Domain.AnomalyStatus s) => new(Data.Where(a => a.Status == s).ToList());
         public ObservableCollection<MetBench_Domain.Anomaly> GetByLinkedBug(int id) => new(Data.Where(a => a.LinkedKnownBugId == id).ToList());
     }
 

@@ -1,3 +1,5 @@
+using MetBench_Domain;
+
 namespace MetBench_BLL.SystemMT.Anomaly;
 
 /// <summary>
@@ -6,7 +8,7 @@ namespace MetBench_BLL.SystemMT.Anomaly;
 /// </summary>
 public sealed record AnomalyFilter(
     string? Severity = null,
-    string? Status = null,
+    AnomalyStatus? Status = null,
     string? Category = null,
     int? RelatedApplicationId = null,
     int? LinkedKnownBugId = null,

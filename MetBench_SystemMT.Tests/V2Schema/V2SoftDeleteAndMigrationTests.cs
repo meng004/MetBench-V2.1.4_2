@@ -116,7 +116,7 @@ public sealed class V2SoftDeleteAndMigrationTests : IDisposable
             IdAnomaly = Guid.NewGuid(),
             ResultId = Guid.NewGuid(),  // 任意 GUID，没有对应 Result
             Severity = "major",
-            Status = "new",
+            Status = AnomalyStatus.New,
         });
         Assert.Equal(1, col.Count());
     }

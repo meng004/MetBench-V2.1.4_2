@@ -49,7 +49,7 @@ public sealed class SystemMtReportServiceTests : IDisposable
         fakes.Anomalies.Add(new MetBench_Domain.Anomaly
         {
             IdAnomaly = anomalyId, Severity = "major", Category = "basin",
-            Status = "investigating", DiscoveredAt = DateTime.UtcNow, Notes = "note",
+            Status = MetBench_Domain.AnomalyStatus.Investigating, DiscoveredAt = DateTime.UtcNow, Notes = "note",
         });
         var path = Path.Combine(_tmpDir, "anomaly.md");
 
@@ -382,7 +382,7 @@ internal sealed class FakeAnomalyRepo : IAnomalyRepository
     public ObservableCollection<MetBench_Domain.Anomaly> GetPage(int p, int s) => new(Data.Skip(p * s).Take(s).ToList());
     public int Count() => Data.Count;
     public MetBench_Domain.Anomaly? GetByResult(Guid id) => null;
-    public ObservableCollection<MetBench_Domain.Anomaly> GetByStatus(string s) => new();
+    public ObservableCollection<MetBench_Domain.Anomaly> GetByStatus(MetBench_Domain.AnomalyStatus s) => new();
     public ObservableCollection<MetBench_Domain.Anomaly> GetByLinkedBug(int id) => new();
 }
 

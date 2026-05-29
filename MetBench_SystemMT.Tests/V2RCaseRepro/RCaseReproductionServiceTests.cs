@@ -50,7 +50,7 @@ public sealed class RCaseReproductionServiceTests
         var anomaly = fakes.Anomalies.Data[0];
         Assert.Equal(fakes.RCase4!.IdBug, anomaly.LinkedKnownBugId);
         Assert.Equal("major", anomaly.Severity);
-        Assert.Equal("confirmed-bug", anomaly.Status);
+        Assert.Equal(MetBench_Domain.AnomalyStatus.ConfirmedBug, anomaly.Status);
 
         // AuditLog
         Assert.Contains(fakes.Audit.Logs, l => l.Action == "r-case.reproduced");
@@ -375,7 +375,7 @@ internal sealed class FakeRCaseAnomalyRepo : IAnomalyRepository
     public ObservableCollection<MetBench_Domain.Anomaly> GetPage(int p, int s) => new(Data.Skip(p * s).Take(s).ToList());
     public int Count() => Data.Count;
     public MetBench_Domain.Anomaly? GetByResult(Guid id) => Data.FirstOrDefault(a => a.ResultId == id);
-    public ObservableCollection<MetBench_Domain.Anomaly> GetByStatus(string s) => new();
+    public ObservableCollection<MetBench_Domain.Anomaly> GetByStatus(MetBench_Domain.AnomalyStatus s) => new();
     public ObservableCollection<MetBench_Domain.Anomaly> GetByLinkedBug(int id) => new();
 }
 

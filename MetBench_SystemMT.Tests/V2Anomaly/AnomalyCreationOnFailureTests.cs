@@ -39,7 +39,7 @@ public sealed class AnomalyCreationOnFailureTests
         Assert.Equal(resultId, anomaly.ResultId);
         Assert.Equal("minor", anomaly.Severity);
         Assert.Equal("single-point", anomaly.Category);
-        Assert.Equal("new", anomaly.Status);
+        Assert.Equal(AnomalyStatus.New, anomaly.Status);
         Assert.InRange(anomaly.DiscoveredAt, before.AddSeconds(-1), after.AddSeconds(1));
 
         var stored = anomalyRepo.GetAll();
@@ -368,7 +368,7 @@ internal sealed class RecordingAnomalyService : IAnomalyService
             ResultId = Guid.TryParse(resultId, out var g) ? g : Guid.NewGuid(),
             Severity = severity,
             Category = category,
-            Status = "new",
+            Status = AnomalyStatus.New,
             Notes = typedVerificationSummary ?? string.Empty,
         });
     }
@@ -376,7 +376,7 @@ internal sealed class RecordingAnomalyService : IAnomalyService
     // Unused by these tests; throw to surface accidental invocations.
     public IReadOnlyList<MetBench_Domain.Anomaly> List(AnomalyFilter filter) => throw new NotImplementedException();
     public CommonalityReport AnalyzeCommonalities(IReadOnlyList<MetBench_Domain.Anomaly> anomalies) => throw new NotImplementedException();
-    public bool TransitionStatus(Guid anomalyId, string newStatus, string? notes, string actor) => throw new NotImplementedException();
+    public bool TransitionStatus(Guid anomalyId, AnomalyStatus newStatus, string? notes, string actor) => throw new NotImplementedException();
     public bool LinkToKnownBug(Guid anomalyId, int knownBugId, string actor) => throw new NotImplementedException();
     public bool UnlinkKnownBug(Guid anomalyId, string actor) => throw new NotImplementedException();
 }
