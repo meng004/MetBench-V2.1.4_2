@@ -24,6 +24,7 @@ namespace MetBench_Client.ViewModels
     {
         private readonly IAnomalyService _service;
         private readonly IAnomalyRepository _repo;
+        private readonly IAnomalyOrphanSweeper _orphanSweeper;
         private readonly ReplayInbox _replayInbox;
         private readonly INavigationService _navigationService;
 
@@ -45,17 +46,39 @@ namespace MetBench_Client.ViewModels
         [ObservableProperty]
         private string? _errorMessage;
 
+        [ObservableProperty]
+        private string? _sweepStatus;
+
         public AnomalyListViewModel(
             IAnomalyService service,
             IAnomalyRepository repo,
+            IAnomalyOrphanSweeper orphanSweeper,
             ReplayInbox replayInbox,
             INavigationService navigationService)
         {
             _service = service;
             _repo = repo;
+            _orphanSweeper = orphanSweeper;
             _replayInbox = replayInbox;
             _navigationService = navigationService;
             PageSize = 25;
+        }
+
+        [RelayCommand]
+        private async Task SweepOrphansAsync()
+        {
+            try
+            {
+                var result = await _orphanSweeper.SweepAsync().ConfigureAwait(true);
+                SweepStatus = $"Swept {result.SweptCount}, retained {result.RetainedCount}, failed {result.FailedCount}.";
+                ErrorMessage = null;
+                await LoadAsync().ConfigureAwait(true);
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = ex.Message;
+                SweepStatus = $"Sweep failed: {ex.Message}";
+            }
         }
 
         public async void OnNavigatedTo()
