@@ -327,8 +327,10 @@ Current caveats on `main`:
   exponential-growth runtime, typed migration gates, and review-fix hardening for
   invalid golden fixtures / coverage semantics.
 - The v1.2 implementation line is complete for the current roadmap on `main`.
-  Inventory truth should now be read as **44 MR + 4 Property** from the merged migration assets and gates;
-  an older report summary mentioned 43 MR, but repository truth has moved to the explicit migrated inventory.
+  Inventory has **two distinct layers — do not conflate**: the v1.2 typed-catalog *migration denominator* is
+  **44 MR + 4 Property** (merged migration assets + coverage gates; an older report summary said 43, superseded);
+  the *runtime catalog provider inventory* is **33 MR / 16 SUT / 13 equations**
+  (authoritative source `.github/governance/expected-catalog-counts.txt`, enforced by `ExpectedCatalogCountsWhitelist`).
 - **PR-1 T1 manifest-driven runtime environments** (`LauncherOptions.RuntimePythons` + `ResolvePythonExecutable`):
   new SUT runtime families (FEniCS, FiPy, torch-surrogate, ...) belong in `catalog.json`'s
   `python_executable_kind` value, resolved through `LauncherOptions.RuntimePythons` or the
