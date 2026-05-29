@@ -201,6 +201,7 @@ namespace MetBench_Client
                 // === v2 SystemMT repositories (LiteDB) + Anomaly stack ===
                 services.AddSystemMtRepositories();
                 services.AddScoped<IAnomalyService, AnomalyService>();
+                services.AddScoped<IAnomalyOrphanSweeper, AnomalyOrphanSweeper>();
 
                 // === G-08b: metadata catalog DB + bootstrap ===
                 services.AddSingleton<ISystemMtMetadataRepository>(provider =>

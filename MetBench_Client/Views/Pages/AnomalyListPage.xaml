@@ -50,6 +50,18 @@
                        Margin="12,0,0,0"
                        Icon="{ui:SymbolIcon ChartMultiple24}"
                        Command="{Binding ViewModel.AnalyzeCommonalityCommand}" />
+
+            <ui:Button Appearance="Secondary"
+                       Content="Sweep orphans"
+                       Margin="12,0,0,0"
+                       Icon="{ui:SymbolIcon Delete24}"
+                       ToolTip="Remove Anomaly rows whose linked Execution / Result no longer exists (PR-FUP F4 / T5 Route B)."
+                       Command="{Binding ViewModel.SweepOrphansCommand}" />
+
+            <TextBlock Margin="12,0,0,0"
+                       VerticalAlignment="Center"
+                       FontStyle="Italic"
+                       Text="{Binding ViewModel.SweepStatus}" />
         </StackPanel>
 
         <!-- Row 1: data grid -->
