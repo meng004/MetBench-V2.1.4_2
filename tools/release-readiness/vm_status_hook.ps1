@@ -22,9 +22,9 @@ param(
 $ErrorActionPreference = "Stop"
 
 function Get-GitValue {
-    param([string[]]$Args)
+    param([string[]]$GitArgs)
     try {
-        $value = & git @Args 2>$null
+        $value = & git @GitArgs 2>$null
         if ($LASTEXITCODE -eq 0) {
             return ($value -join "`n").Trim()
         }
@@ -35,7 +35,7 @@ function Get-GitValue {
     return ""
 }
 
-$root = Get-GitValue @("rev-parse", "--show-toplevel")
+$root = Get-GitValue -GitArgs @("rev-parse", "--show-toplevel")
 if ([string]::IsNullOrWhiteSpace($root)) {
     throw "vm_status_hook.ps1 must run inside a git worktree."
 }
@@ -44,8 +44,8 @@ $evidencePath = Join-Path $root $EvidenceDir
 New-Item -ItemType Directory -Force -Path $evidencePath | Out-Null
 
 $statusPath = Join-Path $evidencePath "vm-status.jsonl"
-$branch = Get-GitValue @("branch", "--show-current")
-$head = Get-GitValue @("rev-parse", "HEAD")
+$branch = Get-GitValue -GitArgs @("branch", "--show-current")
+$head = Get-GitValue -GitArgs @("rev-parse", "HEAD")
 
 $screenshots = @()
 if (Test-Path $evidencePath) {
