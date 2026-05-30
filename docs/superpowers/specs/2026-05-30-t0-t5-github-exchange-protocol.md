@@ -14,6 +14,12 @@ target repository head.
 | Coordinator package | `codex/t0-t5-release-readiness` |
 | VM evidence return | `claude/vm-t0-t5-release-readiness` |
 
+Remote repository:
+
+```text
+https://github.com/meng004/MetBench-V2.1.4_2.git
+```
+
 The VM worker must base its branch on the coordinator package branch after the
 package is pushed. The VM branch must not contain production code changes.
 

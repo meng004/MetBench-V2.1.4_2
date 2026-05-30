@@ -8,7 +8,9 @@
 | Coordinator worktree | /private/tmp/metbench-t0-t5-release-readiness |
 | Production repository root | /Users/limeng/Codes/MetBench-V2.1.4_2 |
 | Branch | codex/t0-t5-release-readiness |
-| HEAD at assessment start | b9e917c15683c37466f23e2c4927aecc6cdff8b2 |
+| Target production base | b9e917c15683c37466f23e2c4927aecc6cdff8b2 |
+| Coordinator package HEAD | Resolve live from `rtk git rev-parse HEAD` on `codex/t0-t5-release-readiness` |
+| Production-code delta from target base | NO |
 | origin/main at assessment start | b9e917c15683c37466f23e2c4927aecc6cdff8b2 |
 | Runtime catalog denominator | 16 SUT / 13 equations / 33 MRs |
 | Selected SUT/MR set | heat-equation/heat-equation-amplitude; advection-1d/advection-mesh-conservation; wave-1d/wave-mesh-energy-convergence |
@@ -39,6 +41,8 @@
 | T4-purity | `rtk git status --short SUT` | PASS | No modified files under `SUT/`. |
 | Catalog denominator | `rtk dotnet test MetBench_SystemMT.Tests --filter "FullyQualifiedName~Catalog_MR_id_set_equals_governance_whitelist" --logger "console;verbosity=minimal"` | PASS | 1 test passed; runtime catalog count guard green. |
 | Full cloud gate | `rtk dotnet test MetBench_SystemMT.Tests --logger "console;verbosity=minimal"` | PASS | 1554 tests passed; 0 failures reported by the local test wrapper. |
+| GitHub coordinator branch | `rtk git ls-remote --heads origin codex/t0-t5-release-readiness claude/vm-t0-t5-release-readiness` | PASS | `codex/t0-t5-release-readiness` exists at `d9f3bbf7119d884d4f67c57a801ffd9a76c8200a`; VM evidence branch is absent. |
+| VM evidence polling | `rtk git fetch origin claude/vm-t0-t5-release-readiness` | NOT RUN | Remote returned `fatal: couldn't find remote ref claude/vm-t0-t5-release-readiness`; VM evidence has not been pushed. |
 | T1-5 Windows UI | VM branch receipt and screenshot matrix | NOT RUN | VM evidence branch has not been collected in this coordinator run. |
 
 ## Selected Release-Smoke SUT/MR Set

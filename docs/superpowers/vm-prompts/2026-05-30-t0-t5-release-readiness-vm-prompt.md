@@ -8,7 +8,8 @@ for the target head below and return evidence through GitHub.
 
 | Field | Value |
 |---|---|
-| Repository | `limeng40/MetBench-V2.1.4` |
+| Repository | `meng004/MetBench-V2.1.4_2` |
+| Remote URL | `https://github.com/meng004/MetBench-V2.1.4_2.git` |
 | Coordinator branch | `codex/t0-t5-release-readiness` |
 | VM branch | `claude/vm-t0-t5-release-readiness` |
 | Target production base | `b9e917c15683c37466f23e2c4927aecc6cdff8b2` |
@@ -25,11 +26,30 @@ for the target head below and return evidence through GitHub.
 
 ## Setup
 
+Start from an existing checkout of this repository. If Claude Code is not
+already in a git worktree, create one first:
+
+```powershell
+cd C:\Users\limeng\Codes
+git clone https://github.com/meng004/MetBench-V2.1.4_2.git MetBench-V2.1.4_2-t0-t5
+cd MetBench-V2.1.4_2-t0-t5
+```
+
+If the repository already exists, `cd` to that repository root instead. Confirm
+you are in the right repository:
+
+```powershell
+git remote -v
+git rev-parse --show-toplevel
+```
+
+Then check out the VM evidence branch from the coordinator package:
+
 ```powershell
 git fetch origin
 git checkout -B claude/vm-t0-t5-release-readiness origin/codex/t0-t5-release-readiness
 git rev-parse HEAD
-git diff --name-only b9e917c15683c37466f23e2c4927aecc6cdff8b2..HEAD -- . ":(exclude)docs/superpowers/plans/2026-05-30-t0-t5-minimal-release-readiness-confirmation-plan.md" ":(exclude)docs/superpowers/specs/2026-05-30-t0-t5-github-exchange-protocol.md" ":(exclude)docs/superpowers/specs/2026-05-30-t0-t5-vm-release-smoke/**" ":(exclude)docs/superpowers/vm-prompts/2026-05-30-t0-t5-release-readiness-vm-prompt.md" ":(exclude)docs/superpowers/vm-prompts/2026-05-30-t0-t5-vm-monitor-hook.md" ":(exclude)tools/release-readiness/vm_status_hook.ps1"
+git diff --name-only b9e917c15683c37466f23e2c4927aecc6cdff8b2..HEAD -- . ":(exclude)docs/superpowers/plans/2026-05-30-t0-t5-minimal-release-readiness-confirmation-plan.md" ":(exclude)docs/superpowers/specs/2026-05-30-t0-t5-github-exchange-protocol.md" ":(exclude)docs/superpowers/specs/2026-05-30-t0-t5-minimal-release-readiness-report.md" ":(exclude)docs/superpowers/specs/2026-05-30-t0-t5-vm-release-smoke/**" ":(exclude)docs/superpowers/vm-prompts/2026-05-30-t0-t5-release-readiness-vm-prompt.md" ":(exclude)docs/superpowers/vm-prompts/2026-05-30-t0-t5-vm-monitor-hook.md" ":(exclude)tools/release-readiness/vm_status_hook.ps1"
 ```
 
 If the `git diff --name-only ...` command prints any path, record those paths in
@@ -117,10 +137,28 @@ Record every command result in `vm-summary.md`.
 
 ## Screenshot Evidence
 
-Use UIA, Playwright-for-WPF tooling, manual screenshot, or the existing VM
-smokeshot harness if available. The screenshot matrix in the README must have
-one row for every T0-T5 core check and must be updated from `PENDING` to
-`PASS`, `FAIL`, or `BLOCKED`.
+Use the checked-in UIA smokeshot harness first, then manual screenshots only for
+pages or states that the harness does not cover.
+
+Build the Windows client and smokeshot harness:
+
+```powershell
+dotnet build MetBench.sln
+dotnet build tools\smokeshot\smokeshot.csproj
+```
+
+Run the reusable UIA smoke where possible:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\smokeshot\run_full_smoke.ps1 `
+  -OutDir "docs\superpowers\specs\2026-05-30-t0-t5-vm-release-smoke" `
+  -KeepRunning
+```
+
+If `run_full_smoke.ps1` cannot cover the System-MT-specific pages, launch
+`MetBench_Client` and use UIA/manual capture to produce the required filenames.
+The screenshot matrix in the README must have one row for every T0-T5 core
+check and must be updated from `PENDING` to `PASS`, `FAIL`, or `BLOCKED`.
 
 Minimum screenshot contents:
 
@@ -136,6 +174,10 @@ Minimum screenshot contents:
 | `08-reporting-or-export.png` | report/export/chart surface |
 | `09-anomaly-list.png` | anomaly list from deliberate failure |
 | `10-anomaly-status-action.png` | anomaly status action or persisted status |
+
+Every row in the 21-check screenshot matrix must reference at least one `.png`.
+`vm-summary.md` is supplemental command evidence, not a replacement for
+screenshot evidence.
 
 ## Final Summary
 
