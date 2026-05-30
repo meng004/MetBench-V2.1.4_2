@@ -55,6 +55,7 @@
   <ItemGroup>
     <ProjectReference Include="..\MetBench_BLL\MetBench_BLL.csproj" />
     <ProjectReference Include="..\MetBench_IDAL\MetBench_IDAL.csproj" />
+    <ProjectReference Include="..\MetBench_UI.Localization\MetBench_UI.Localization.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -28,6 +28,7 @@ using MetBench_BLL.Discovery;
 using MetBench_BLL.Discovery.Validators;
 using MetBench_BLL.Mutation;
 using MetBench_BLL.Coverage;
+using MetBench_UI.Localization;
 using Wpf.Ui.Controls;
 using Wpf.Ui;
 using Stylet;
@@ -60,6 +61,10 @@ namespace MetBench_Client
                 //添加各种服务和页面
                 // App Host
                 services.AddHostedService<ApplicationHostService>();
+
+                // UI-neutral localization (MetBench_UI.Localization)
+                services.AddSingleton<IAppLocalizationService, AppLocalizationService>();
+                services.AddSingleton<LocalizedTextProvider>();
 
                 // Page resolver service 注入服务提供程序
                 services.AddSingleton<IPageService, PageService>();
