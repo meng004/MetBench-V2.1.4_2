@@ -445,4 +445,370 @@
   <data name="Catalog_FileName" xml:space="preserve">
     <value>文件名</value>
   </data>
+  <data name="Anomaly_SeverityFilterLabel" xml:space="preserve">
+    <value>严重程度：</value>
+  </data>
+  <data name="Anomaly_StatusFilterLabel" xml:space="preserve">
+    <value>状态：</value>
+  </data>
+  <data name="Anomaly_AnalyzeCommonality" xml:space="preserve">
+    <value>共性分析</value>
+  </data>
+  <data name="Anomaly_SweepOrphans" xml:space="preserve">
+    <value>清理孤立项</value>
+  </data>
+  <data name="Anomaly_SweepOrphansTooltip" xml:space="preserve">
+    <value>删除关联的执行/结果已不存在的异常行（PR-FUP F4 / T5 路线 B）。</value>
+  </data>
+  <data name="Anomaly_ColumnId" xml:space="preserve">
+    <value>编号</value>
+  </data>
+  <data name="Anomaly_ColumnSeverity" xml:space="preserve">
+    <value>严重程度</value>
+  </data>
+  <data name="Anomaly_ColumnStatus" xml:space="preserve">
+    <value>状态</value>
+  </data>
+  <data name="Anomaly_ColumnCategory" xml:space="preserve">
+    <value>类别</value>
+  </data>
+  <data name="Anomaly_ColumnDiscovered" xml:space="preserve">
+    <value>发现时间</value>
+  </data>
+  <data name="Anomaly_ColumnLinkedBug" xml:space="preserve">
+    <value>关联缺陷</value>
+  </data>
+  <data name="Anomaly_ColumnReplayCount" xml:space="preserve">
+    <value>回放次数</value>
+  </data>
+  <data name="Anomaly_ColumnNotes" xml:space="preserve">
+    <value>备注</value>
+  </data>
+  <data name="Anomaly_TransitionSelectedTo" xml:space="preserve">
+    <value>将所选项转换为：</value>
+  </data>
+  <data name="Anomaly_ReplayThisAnomaly" xml:space="preserve">
+    <value>回放此异常</value>
+  </data>
+  <data name="Anomaly_CommonalityReport" xml:space="preserve">
+    <value>共性分析报告</value>
+  </data>
+  <data name="Anomaly_CommonalityTotal" xml:space="preserve">
+    <value>总计：</value>
+  </data>
+  <data name="Anomaly_CommonalityDominantSeverity" xml:space="preserve">
+    <value>主要严重程度：</value>
+  </data>
+  <data name="Anomaly_CommonalityDominantCategory" xml:space="preserve">
+    <value>主要类别：</value>
+  </data>
+  <data name="Anomaly_CommonalityLinkedToKnownBug" xml:space="preserve">
+    <value>关联到已知缺陷：</value>
+  </data>
+  <data name="AppMgmt_ApplicationName" xml:space="preserve">
+    <value>应用名称</value>
+  </data>
+  <data name="AppMgmt_Number" xml:space="preserve">
+    <value>序号</value>
+  </data>
+  <data name="AppMgmt_ProgrammingLanguage" xml:space="preserve">
+    <value>编程语言</value>
+  </data>
+  <data name="AppMgmt_LineOfCode" xml:space="preserve">
+    <value>代码行数</value>
+  </data>
+  <data name="AppMgmt_SoftwareUnderTest" xml:space="preserve">
+    <value>被测软件</value>
+  </data>
+  <data name="AppMgmt_SourceTestCase" xml:space="preserve">
+    <value>源测试用例</value>
+  </data>
+  <data name="AppMgmt_DOI" xml:space="preserve">
+    <value>DOI</value>
+  </data>
+  <data name="AppMgmt_Url" xml:space="preserve">
+    <value>网址</value>
+  </data>
+  <data name="AppMgmt_IdApplication" xml:space="preserve">
+    <value>应用 ID</value>
+  </data>
+  <data name="AppMgmt_DomainName" xml:space="preserve">
+    <value>领域名称</value>
+  </data>
+  <data name="AppMgmt_ClearSelection" xml:space="preserve">
+    <value>清除</value>
+  </data>
+  <data name="AppMgmt_Upload" xml:space="preserve">
+    <value>上传</value>
+  </data>
+  <data name="AppMgmt_Unzip" xml:space="preserve">
+    <value>解压</value>
+  </data>
+  <data name="AppMgmt_InputParams" xml:space="preserve">
+    <value>输入参数</value>
+  </data>
+  <data name="AppMgmt_OutputParams" xml:space="preserve">
+    <value>输出参数</value>
+  </data>
+  <data name="DomainMgmt_DomainName" xml:space="preserve">
+    <value>领域名称</value>
+  </data>
+  <data name="DomainMgmt_ColumnNumber" xml:space="preserve">
+    <value>序号</value>
+  </data>
+  <data name="DomainMgmt_IdDomain" xml:space="preserve">
+    <value>领域 ID</value>
+  </data>
+  <data name="MrDisplay_ColumnNumber" xml:space="preserve">
+    <value>序号</value>
+  </data>
+  <data name="MrDisplay_ColumnContext" xml:space="preserve">
+    <value>上下文</value>
+  </data>
+  <data name="MrDisplay_ColumnArityOfMR" xml:space="preserve">
+    <value>MR元数</value>
+  </data>
+  <data name="MrDisplay_ColumnInputPattern" xml:space="preserve">
+    <value>输入模式</value>
+  </data>
+  <data name="MrDisplay_ColumnOutputPattern" xml:space="preserve">
+    <value>输出模式</value>
+  </data>
+  <data name="MrDisplay_ColumnApplicationName" xml:space="preserve">
+    <value>应用名称</value>
+  </data>
+  <data name="MrDisplay_ColumnCodeName" xml:space="preserve">
+    <value>程序名称</value>
+  </data>
+  <data name="MrDisplay_ColumnDomainName" xml:space="preserve">
+    <value>领域名称</value>
+  </data>
+  <data name="MrDisplay_ColumnOperation" xml:space="preserve">
+    <value>操作</value>
+  </data>
+  <data name="MrDisplay_FilterArityOfMR" xml:space="preserve">
+    <value>MR元数</value>
+  </data>
+  <data name="MrDisplay_FilterDimensionOfInputPattern" xml:space="preserve">
+    <value>输入模式维度</value>
+  </data>
+  <data name="MrDisplay_FilterDimensionOfOutputPattern" xml:space="preserve">
+    <value>输出模式维度</value>
+  </data>
+  <data name="MrDisplay_FilterApplicationName" xml:space="preserve">
+    <value>应用名称</value>
+  </data>
+  <data name="MrDisplay_FilterDomainName" xml:space="preserve">
+    <value>领域名称</value>
+  </data>
+  <data name="MrMgmt_ApplicationName" xml:space="preserve">
+    <value>应用名称</value>
+  </data>
+  <data name="MrMgmt_StatusFilterLabel" xml:space="preserve">
+    <value>状态：</value>
+  </data>
+  <data name="MrMgmt_StatusFilterTooltip" xml:space="preserve">
+    <value>按聚合的 MRBinding.Status 过滤 MR（默认隐藏已弃用/已归档）</value>
+  </data>
+  <data name="MrMgmt_ColNumber" xml:space="preserve">
+    <value>序号</value>
+  </data>
+  <data name="MrMgmt_Context" xml:space="preserve">
+    <value>上下文</value>
+  </data>
+  <data name="MrMgmt_ArityOfMR" xml:space="preserve">
+    <value>MR 元数</value>
+  </data>
+  <data name="MrMgmt_InputPattern" xml:space="preserve">
+    <value>输入模式</value>
+  </data>
+  <data name="MrMgmt_OutputPattern" xml:space="preserve">
+    <value>输出模式</value>
+  </data>
+  <data name="MrMgmt_DomainName" xml:space="preserve">
+    <value>领域名称</value>
+  </data>
+  <data name="MrMgmt_Status" xml:space="preserve">
+    <value>状态</value>
+  </data>
+  <data name="MrMgmt_Operation" xml:space="preserve">
+    <value>操作</value>
+  </data>
+  <data name="MrMgmt_ExecuteMT" xml:space="preserve">
+    <value>执行 MT</value>
+  </data>
+  <data name="MrMgmt_IdMR" xml:space="preserve">
+    <value>MR 编号</value>
+  </data>
+  <data name="MrMgmt_Granularity" xml:space="preserve">
+    <value>粒度</value>
+  </data>
+  <data name="MrMgmt_Hierarchy" xml:space="preserve">
+    <value>层级</value>
+  </data>
+  <data name="MrMgmt_DimensionOfInputPattern" xml:space="preserve">
+    <value>输入模式维度</value>
+  </data>
+  <data name="MrMgmt_DimensionOfOutputPattern" xml:space="preserve">
+    <value>输出模式维度</value>
+  </data>
+  <data name="MrMgmt_Operator" xml:space="preserve">
+    <value>算子</value>
+  </data>
+  <data name="MrMgmt_Expression" xml:space="preserve">
+    <value>表达式</value>
+  </data>
+  <data name="Report_ReportType" xml:space="preserve">
+    <value>报告类型</value>
+  </data>
+  <data name="MetaPattern_Title" xml:space="preserve">
+    <value>NOETHER 元模式</value>
+  </data>
+  <data name="MetaPattern_ToggleStatus" xml:space="preserve">
+    <value>切换状态</value>
+  </data>
+  <data name="MetaPattern_SoftDelete" xml:space="preserve">
+    <value>软删除</value>
+  </data>
+  <data name="MetaPattern_ColumnCode" xml:space="preserve">
+    <value>代码</value>
+  </data>
+  <data name="MetaPattern_ColumnBlock" xml:space="preserve">
+    <value>块</value>
+  </data>
+  <data name="MetaPattern_ColumnDefaultAssertion" xml:space="preserve">
+    <value>默认断言</value>
+  </data>
+  <data name="MetaPattern_ColumnTolRel" xml:space="preserve">
+    <value>相对容差</value>
+  </data>
+  <data name="MetaPattern_ColumnNoise" xml:space="preserve">
+    <value>噪声</value>
+  </data>
+  <data name="MetaPattern_ColumnStatus" xml:space="preserve">
+    <value>状态</value>
+  </data>
+  <data name="MetaPattern_ColumnOutOfScopeReason" xml:space="preserve">
+    <value>超范围原因</value>
+  </data>
+  <data name="MetaPattern_FieldCode" xml:space="preserve">
+    <value>代码（唯一，添加后不可变）：</value>
+  </data>
+  <data name="MetaPattern_FieldName" xml:space="preserve">
+    <value>名称：</value>
+  </data>
+  <data name="MetaPattern_FieldBlock" xml:space="preserve">
+    <value>块：</value>
+  </data>
+  <data name="MetaPattern_FieldDefaultAssertionType" xml:space="preserve">
+    <value>默认断言类型：</value>
+  </data>
+  <data name="MetaPattern_FieldDefaultTolerance" xml:space="preserve">
+    <value>默认容差（相对）：</value>
+  </data>
+  <data name="MetaPattern_FieldNoiseAware" xml:space="preserve">
+    <value>噪声感知</value>
+  </data>
+  <data name="MetaPattern_FieldStatus" xml:space="preserve">
+    <value>状态：</value>
+  </data>
+  <data name="MetaPattern_FieldOutOfScopeReason" xml:space="preserve">
+    <value>超范围原因（仅当状态 = out-of-scope 时）：</value>
+  </data>
+  <data name="MetaPattern_FieldHypothesisTemplate" xml:space="preserve">
+    <value>假设模板：</value>
+  </data>
+  <data name="Replay_FieldId" xml:space="preserve">
+    <value>Id：</value>
+  </data>
+  <data name="Replay_FieldSeverity" xml:space="preserve">
+    <value>严重性：</value>
+  </data>
+  <data name="Replay_FieldStatus" xml:space="preserve">
+    <value>状态：</value>
+  </data>
+  <data name="Replay_FieldDiscovered" xml:space="preserve">
+    <value>发现时间：</value>
+  </data>
+  <data name="Replay_Classification" xml:space="preserve">
+    <value>分类：</value>
+  </data>
+  <data name="Replay_ColumnField" xml:space="preserve">
+    <value>字段</value>
+  </data>
+  <data name="Replay_ColumnOriginal" xml:space="preserve">
+    <value>原始</value>
+  </data>
+  <data name="Replay_ColumnReplay" xml:space="preserve">
+    <value>回放</value>
+  </data>
+  <data name="Replay_RowMr" xml:space="preserve">
+    <value>蜕变关系</value>
+  </data>
+  <data name="Replay_RowSut" xml:space="preserve">
+    <value>被测系统</value>
+  </data>
+  <data name="Replay_RowTriggerParameters" xml:space="preserve">
+    <value>触发参数</value>
+  </data>
+  <data name="Replay_RowSourceValue" xml:space="preserve">
+    <value>源输出值</value>
+  </data>
+  <data name="Replay_RowFollowupValue" xml:space="preserve">
+    <value>衍生输出值</value>
+  </data>
+  <data name="Replay_RowAssertion" xml:space="preserve">
+    <value>断言</value>
+  </data>
+  <data name="Replay_RowFinalStatus" xml:space="preserve">
+    <value>最终状态</value>
+  </data>
+  <data name="Replay_RunRealReplay" xml:space="preserve">
+    <value>运行真实回放</value>
+  </data>
+  <data name="Replay_SimulateClassification" xml:space="preserve">
+    <value>模拟分类：</value>
+  </data>
+  <data name="Replay_SimulateReplay" xml:space="preserve">
+    <value>模拟回放</value>
+  </data>
+  <data name="History_PageSubtitle" xml:space="preserve">
+    <value>浏览历史 System-MT 运行。按 MR 名称过滤。可删除选中行（先删证据，再删结果；重试时显示孤立项）。</value>
+  </data>
+  <data name="History_FilterByMrName" xml:space="preserve">
+    <value>按 MR 名称过滤</value>
+  </data>
+  <data name="History_Refresh" xml:space="preserve">
+    <value>刷新</value>
+  </data>
+  <data name="History_DeleteSelected" xml:space="preserve">
+    <value>删除选中</value>
+  </data>
+  <data name="History_Column_RunAt" xml:space="preserve">
+    <value>运行时间 (UTC)</value>
+  </data>
+  <data name="History_Column_Mr" xml:space="preserve">
+    <value>MR</value>
+  </data>
+  <data name="History_Column_Assertion" xml:space="preserve">
+    <value>断言</value>
+  </data>
+  <data name="History_Column_Value" xml:space="preserve">
+    <value>值</value>
+  </data>
+  <data name="History_Column_Passed" xml:space="preserve">
+    <value>通过</value>
+  </data>
+  <data name="History_Column_FailureReason" xml:space="preserve">
+    <value>失败原因</value>
+  </data>
+  <data name="History_PreviousPage" xml:space="preserve">
+    <value>上一页</value>
+  </data>
+  <data name="History_NextPage" xml:space="preserve">
+    <value>下一页</value>
+  </data>
+  <data name="History_EvidenceForSelectedRow" xml:space="preserve">
+    <value>选中行的证据</value>
+  </data>
 </root>

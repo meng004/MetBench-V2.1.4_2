@@ -445,4 +445,370 @@
   <data name="Catalog_FileName" xml:space="preserve">
     <value>File name</value>
   </data>
+  <data name="Anomaly_SeverityFilterLabel" xml:space="preserve">
+    <value>Severity:</value>
+  </data>
+  <data name="Anomaly_StatusFilterLabel" xml:space="preserve">
+    <value>Status:</value>
+  </data>
+  <data name="Anomaly_AnalyzeCommonality" xml:space="preserve">
+    <value>Analyze commonality</value>
+  </data>
+  <data name="Anomaly_SweepOrphans" xml:space="preserve">
+    <value>Sweep orphans</value>
+  </data>
+  <data name="Anomaly_SweepOrphansTooltip" xml:space="preserve">
+    <value>Remove Anomaly rows whose linked Execution / Result no longer exists (PR-FUP F4 / T5 Route B).</value>
+  </data>
+  <data name="Anomaly_ColumnId" xml:space="preserve">
+    <value>Id</value>
+  </data>
+  <data name="Anomaly_ColumnSeverity" xml:space="preserve">
+    <value>Severity</value>
+  </data>
+  <data name="Anomaly_ColumnStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Anomaly_ColumnCategory" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="Anomaly_ColumnDiscovered" xml:space="preserve">
+    <value>Discovered</value>
+  </data>
+  <data name="Anomaly_ColumnLinkedBug" xml:space="preserve">
+    <value>Linked Bug</value>
+  </data>
+  <data name="Anomaly_ColumnReplayCount" xml:space="preserve">
+    <value>Replay #</value>
+  </data>
+  <data name="Anomaly_ColumnNotes" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="Anomaly_TransitionSelectedTo" xml:space="preserve">
+    <value>Transition selected to:</value>
+  </data>
+  <data name="Anomaly_ReplayThisAnomaly" xml:space="preserve">
+    <value>Replay this anomaly</value>
+  </data>
+  <data name="Anomaly_CommonalityReport" xml:space="preserve">
+    <value>Commonality Report</value>
+  </data>
+  <data name="Anomaly_CommonalityTotal" xml:space="preserve">
+    <value>Total: </value>
+  </data>
+  <data name="Anomaly_CommonalityDominantSeverity" xml:space="preserve">
+    <value>Dominant severity: </value>
+  </data>
+  <data name="Anomaly_CommonalityDominantCategory" xml:space="preserve">
+    <value>Dominant category: </value>
+  </data>
+  <data name="Anomaly_CommonalityLinkedToKnownBug" xml:space="preserve">
+    <value>Linked to known bug: </value>
+  </data>
+  <data name="AppMgmt_ApplicationName" xml:space="preserve">
+    <value>ApplicationName</value>
+  </data>
+  <data name="AppMgmt_Number" xml:space="preserve">
+    <value>Number</value>
+  </data>
+  <data name="AppMgmt_ProgrammingLanguage" xml:space="preserve">
+    <value>ProgrammingLanguage</value>
+  </data>
+  <data name="AppMgmt_LineOfCode" xml:space="preserve">
+    <value>LineOfCode</value>
+  </data>
+  <data name="AppMgmt_SoftwareUnderTest" xml:space="preserve">
+    <value>SoftwareUnderTest</value>
+  </data>
+  <data name="AppMgmt_SourceTestCase" xml:space="preserve">
+    <value>SourceTestCase</value>
+  </data>
+  <data name="AppMgmt_DOI" xml:space="preserve">
+    <value>DOI</value>
+  </data>
+  <data name="AppMgmt_Url" xml:space="preserve">
+    <value>Url</value>
+  </data>
+  <data name="AppMgmt_IdApplication" xml:space="preserve">
+    <value>IdApplication</value>
+  </data>
+  <data name="AppMgmt_DomainName" xml:space="preserve">
+    <value>DomainName</value>
+  </data>
+  <data name="AppMgmt_ClearSelection" xml:space="preserve">
+    <value>X</value>
+  </data>
+  <data name="AppMgmt_Upload" xml:space="preserve">
+    <value>Upl</value>
+  </data>
+  <data name="AppMgmt_Unzip" xml:space="preserve">
+    <value>Unzip</value>
+  </data>
+  <data name="AppMgmt_InputParams" xml:space="preserve">
+    <value>InputParams</value>
+  </data>
+  <data name="AppMgmt_OutputParams" xml:space="preserve">
+    <value>OutputParams</value>
+  </data>
+  <data name="DomainMgmt_DomainName" xml:space="preserve">
+    <value>DomainName</value>
+  </data>
+  <data name="DomainMgmt_ColumnNumber" xml:space="preserve">
+    <value>Number</value>
+  </data>
+  <data name="DomainMgmt_IdDomain" xml:space="preserve">
+    <value>IdDomain</value>
+  </data>
+  <data name="MrDisplay_ColumnNumber" xml:space="preserve">
+    <value>Number</value>
+  </data>
+  <data name="MrDisplay_ColumnContext" xml:space="preserve">
+    <value>Context</value>
+  </data>
+  <data name="MrDisplay_ColumnArityOfMR" xml:space="preserve">
+    <value>ArityOfMR</value>
+  </data>
+  <data name="MrDisplay_ColumnInputPattern" xml:space="preserve">
+    <value>InputPattern</value>
+  </data>
+  <data name="MrDisplay_ColumnOutputPattern" xml:space="preserve">
+    <value>OutputPattern</value>
+  </data>
+  <data name="MrDisplay_ColumnApplicationName" xml:space="preserve">
+    <value>ApplicationName</value>
+  </data>
+  <data name="MrDisplay_ColumnCodeName" xml:space="preserve">
+    <value>CodeName</value>
+  </data>
+  <data name="MrDisplay_ColumnDomainName" xml:space="preserve">
+    <value>DomainName</value>
+  </data>
+  <data name="MrDisplay_ColumnOperation" xml:space="preserve">
+    <value>Operation</value>
+  </data>
+  <data name="MrDisplay_FilterArityOfMR" xml:space="preserve">
+    <value>ArityOfMR</value>
+  </data>
+  <data name="MrDisplay_FilterDimensionOfInputPattern" xml:space="preserve">
+    <value>DimensionOfInputPattern</value>
+  </data>
+  <data name="MrDisplay_FilterDimensionOfOutputPattern" xml:space="preserve">
+    <value>DimensionOfOutputPattern</value>
+  </data>
+  <data name="MrDisplay_FilterApplicationName" xml:space="preserve">
+    <value>ApplicationName</value>
+  </data>
+  <data name="MrDisplay_FilterDomainName" xml:space="preserve">
+    <value>DomainName</value>
+  </data>
+  <data name="MrMgmt_ApplicationName" xml:space="preserve">
+    <value>ApplicationName</value>
+  </data>
+  <data name="MrMgmt_StatusFilterLabel" xml:space="preserve">
+    <value>Status:</value>
+  </data>
+  <data name="MrMgmt_StatusFilterTooltip" xml:space="preserve">
+    <value>Filter MRs by aggregated MRBinding.Status (default hides deprecated/archived)</value>
+  </data>
+  <data name="MrMgmt_ColNumber" xml:space="preserve">
+    <value>Number</value>
+  </data>
+  <data name="MrMgmt_Context" xml:space="preserve">
+    <value>Context</value>
+  </data>
+  <data name="MrMgmt_ArityOfMR" xml:space="preserve">
+    <value>ArityOfMR</value>
+  </data>
+  <data name="MrMgmt_InputPattern" xml:space="preserve">
+    <value>InputPattern</value>
+  </data>
+  <data name="MrMgmt_OutputPattern" xml:space="preserve">
+    <value>OutputPattern</value>
+  </data>
+  <data name="MrMgmt_DomainName" xml:space="preserve">
+    <value>DomainName</value>
+  </data>
+  <data name="MrMgmt_Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="MrMgmt_Operation" xml:space="preserve">
+    <value>Operation</value>
+  </data>
+  <data name="MrMgmt_ExecuteMT" xml:space="preserve">
+    <value>Execute MT</value>
+  </data>
+  <data name="MrMgmt_IdMR" xml:space="preserve">
+    <value>IdMR</value>
+  </data>
+  <data name="MrMgmt_Granularity" xml:space="preserve">
+    <value>Granularity</value>
+  </data>
+  <data name="MrMgmt_Hierarchy" xml:space="preserve">
+    <value>Hierarchy</value>
+  </data>
+  <data name="MrMgmt_DimensionOfInputPattern" xml:space="preserve">
+    <value>DimensionOfInputPattern</value>
+  </data>
+  <data name="MrMgmt_DimensionOfOutputPattern" xml:space="preserve">
+    <value>DimensionOfOutputPattern</value>
+  </data>
+  <data name="MrMgmt_Operator" xml:space="preserve">
+    <value>Operator</value>
+  </data>
+  <data name="MrMgmt_Expression" xml:space="preserve">
+    <value>Expression</value>
+  </data>
+  <data name="Report_ReportType" xml:space="preserve">
+    <value>Report Type</value>
+  </data>
+  <data name="MetaPattern_Title" xml:space="preserve">
+    <value>NOETHER MetaPatterns</value>
+  </data>
+  <data name="MetaPattern_ToggleStatus" xml:space="preserve">
+    <value>Toggle status</value>
+  </data>
+  <data name="MetaPattern_SoftDelete" xml:space="preserve">
+    <value>Soft-delete</value>
+  </data>
+  <data name="MetaPattern_ColumnCode" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="MetaPattern_ColumnBlock" xml:space="preserve">
+    <value>Block</value>
+  </data>
+  <data name="MetaPattern_ColumnDefaultAssertion" xml:space="preserve">
+    <value>Default assertion</value>
+  </data>
+  <data name="MetaPattern_ColumnTolRel" xml:space="preserve">
+    <value>Tol-rel</value>
+  </data>
+  <data name="MetaPattern_ColumnNoise" xml:space="preserve">
+    <value>Noise</value>
+  </data>
+  <data name="MetaPattern_ColumnStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="MetaPattern_ColumnOutOfScopeReason" xml:space="preserve">
+    <value>Out-of-scope reason</value>
+  </data>
+  <data name="MetaPattern_FieldCode" xml:space="preserve">
+    <value>Code (unique, immutable after add):</value>
+  </data>
+  <data name="MetaPattern_FieldName" xml:space="preserve">
+    <value>Name:</value>
+  </data>
+  <data name="MetaPattern_FieldBlock" xml:space="preserve">
+    <value>Block:</value>
+  </data>
+  <data name="MetaPattern_FieldDefaultAssertionType" xml:space="preserve">
+    <value>Default assertion type:</value>
+  </data>
+  <data name="MetaPattern_FieldDefaultTolerance" xml:space="preserve">
+    <value>Default tolerance (relative):</value>
+  </data>
+  <data name="MetaPattern_FieldNoiseAware" xml:space="preserve">
+    <value>Noise-aware</value>
+  </data>
+  <data name="MetaPattern_FieldStatus" xml:space="preserve">
+    <value>Status:</value>
+  </data>
+  <data name="MetaPattern_FieldOutOfScopeReason" xml:space="preserve">
+    <value>Out-of-scope reason (only when Status = out-of-scope):</value>
+  </data>
+  <data name="MetaPattern_FieldHypothesisTemplate" xml:space="preserve">
+    <value>Hypothesis template:</value>
+  </data>
+  <data name="Replay_FieldId" xml:space="preserve">
+    <value>Id: </value>
+  </data>
+  <data name="Replay_FieldSeverity" xml:space="preserve">
+    <value>Severity: </value>
+  </data>
+  <data name="Replay_FieldStatus" xml:space="preserve">
+    <value>Status: </value>
+  </data>
+  <data name="Replay_FieldDiscovered" xml:space="preserve">
+    <value>Discovered: </value>
+  </data>
+  <data name="Replay_Classification" xml:space="preserve">
+    <value>Classification:</value>
+  </data>
+  <data name="Replay_ColumnField" xml:space="preserve">
+    <value>Field</value>
+  </data>
+  <data name="Replay_ColumnOriginal" xml:space="preserve">
+    <value>Original</value>
+  </data>
+  <data name="Replay_ColumnReplay" xml:space="preserve">
+    <value>Replay</value>
+  </data>
+  <data name="Replay_RowMr" xml:space="preserve">
+    <value>MR</value>
+  </data>
+  <data name="Replay_RowSut" xml:space="preserve">
+    <value>SUT</value>
+  </data>
+  <data name="Replay_RowTriggerParameters" xml:space="preserve">
+    <value>Trigger parameters</value>
+  </data>
+  <data name="Replay_RowSourceValue" xml:space="preserve">
+    <value>Source value</value>
+  </data>
+  <data name="Replay_RowFollowupValue" xml:space="preserve">
+    <value>Followup value</value>
+  </data>
+  <data name="Replay_RowAssertion" xml:space="preserve">
+    <value>Assertion</value>
+  </data>
+  <data name="Replay_RowFinalStatus" xml:space="preserve">
+    <value>Final status</value>
+  </data>
+  <data name="Replay_RunRealReplay" xml:space="preserve">
+    <value>Run real replay</value>
+  </data>
+  <data name="Replay_SimulateClassification" xml:space="preserve">
+    <value>Simulate classification:</value>
+  </data>
+  <data name="Replay_SimulateReplay" xml:space="preserve">
+    <value>Simulate replay</value>
+  </data>
+  <data name="History_PageSubtitle" xml:space="preserve">
+    <value>Browse past System-MT runs. Filter by MR name. Selected rows can be deleted (Evidence first, then Result; orphans are surfaced on retry).</value>
+  </data>
+  <data name="History_FilterByMrName" xml:space="preserve">
+    <value>Filter by MR name</value>
+  </data>
+  <data name="History_Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="History_DeleteSelected" xml:space="preserve">
+    <value>Delete selected</value>
+  </data>
+  <data name="History_Column_RunAt" xml:space="preserve">
+    <value>Run at (UTC)</value>
+  </data>
+  <data name="History_Column_Mr" xml:space="preserve">
+    <value>MR</value>
+  </data>
+  <data name="History_Column_Assertion" xml:space="preserve">
+    <value>Assertion</value>
+  </data>
+  <data name="History_Column_Value" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="History_Column_Passed" xml:space="preserve">
+    <value>Passed</value>
+  </data>
+  <data name="History_Column_FailureReason" xml:space="preserve">
+    <value>Failure reason</value>
+  </data>
+  <data name="History_PreviousPage" xml:space="preserve">
+    <value>Previous</value>
+  </data>
+  <data name="History_NextPage" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="History_EvidenceForSelectedRow" xml:space="preserve">
+    <value>Evidence for selected row</value>
+  </data>
 </root>
