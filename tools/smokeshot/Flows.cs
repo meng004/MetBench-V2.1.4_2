@@ -546,6 +546,91 @@ public static class Flows
         return failed == 0 ? 0 : 1;
     }
 
+    // =====================================================================
+    // i18n-pages: switch to a target language (zh / en) via Settings, then
+    // navigate the 5 System-MT pages (Execution + 4 catalogs) capturing one
+    // screenshot per page. Filenames are caller-supplied (Task 7 evidence set:
+    // 10-exec..19-samplecatalog). Best-effort: each page failure is counted
+    // but does not abort the remaining captures.
+    // lang: "zh" or "en". Returns 0 if all 5 captured, else count of failures
+    // is reflected as exit 1.
+    // =====================================================================
+    public static int I18nPages(IntPtr hwnd, AutomationElement app, string outDir, string lang)
+    {
+        bool zh = lang.Equals("zh", StringComparison.OrdinalIgnoreCase);
+        Console.WriteLine($"=== i18n-pages flow (lang={(zh ? "zh" : "en")}) ===");
+        int failed = 0;
+
+        // ---- step A: navigate to Settings and switch language ----
+        // Settings nav label is localized too; try both labels regardless of
+        // current culture (we don't know the starting state).
+        Console.WriteLine("\nA) Navigate to Settings + switch language...");
+        bool settingsOk = false;
+        foreach (var label in new[] { "Settings", "设置" })
+        {
+            try { UiaHelpers.NavigateTo(app, label, settleMs: 1800); settingsOk = true; break; }
+            catch { }
+        }
+        if (!settingsOk)
+        {
+            Console.WriteLine("  FAIL: could not reach Settings — aborting i18n-pages.");
+            return 1;
+        }
+
+        string comboItem = zh ? "中文" : "English";
+        bool selected = UiaHelpers.SelectComboBoxItem(app, comboItem, settleMs: 800);
+        if (!selected) { Console.WriteLine($"  WARN: ComboBox select '{comboItem}' failed."); failed++; }
+        bool applied = InvokeSettingsLanguageButton(app);
+        if (!applied) { Console.WriteLine("  WARN: apply button not invoked; culture may not have switched."); failed++; }
+        Thread.Sleep(2000);
+        UiaHelpers.MaximizeWindow(hwnd);
+        Thread.Sleep(800);
+
+        // ---- per-page capture ----
+        // (navLabelZh, navLabelEn, screenshot filename)
+        var pages = new (string Zh, string En, string File)[]
+        {
+            ("系统级蜕变测试",  "System MT",                     zh ? "10-exec-zh.png"           : "11-exec-en.png"),
+            ("系统级 MR 目录",   "System MT MR Catalog",          zh ? "12-mrcatalog-zh.png"      : "13-mrcatalog-en.png"),
+            ("系统级 SUT 目录",  "System MT SUT Catalog",         zh ? "14-sutcatalog-zh.png"     : "15-sutcatalog-en.png"),
+            ("系统级方程目录",   "System MT Equation Catalog",    zh ? "16-equationcatalog-zh.png": "17-equationcatalog-en.png"),
+            ("系统级样例目录",   "System MT Sample Case Catalog", zh ? "18-samplecatalog-zh.png"  : "19-samplecatalog-en.png"),
+        };
+
+        foreach (var page in pages)
+        {
+            // Prefer the label matching the active culture, fall back to the other.
+            string[] order = zh ? new[] { page.Zh, page.En } : new[] { page.En, page.Zh };
+            bool navOk = false;
+            foreach (var label in order)
+            {
+                try { UiaHelpers.NavigateTo(app, label, settleMs: 1800); navOk = true; Console.WriteLine($"  Navigated via '{label}'"); break; }
+                catch { }
+            }
+            if (!navOk)
+            {
+                Console.WriteLine($"  WARN: could not navigate to page for '{page.File}'.");
+                failed++;
+                continue;
+            }
+            try
+            {
+                UiaHelpers.FocusAndAttach(hwnd);
+                Thread.Sleep(500);
+                UiaHelpers.SaveScreenshot(hwnd, System.IO.Path.Combine(outDir, page.File));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"  FAIL screenshot {page.File}: {ex.Message}");
+                failed++;
+            }
+        }
+
+        if (failed == 0) Console.WriteLine("\ni18n-pages PASS");
+        else Console.WriteLine($"\ni18n-pages PARTIAL: {failed} step(s) failed");
+        return failed == 0 ? 0 : 1;
+    }
+
     // ---- private helpers for i18n-smoke ----
 
     /// <summary>

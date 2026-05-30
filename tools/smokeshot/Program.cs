@@ -64,6 +64,7 @@ internal static class Program
                 "mt-exec"      => Flows.MtExec(hwnd, app, outDir),
                 "metapatterns" => Flows.MetaPatterns(hwnd, app, outDir),
                 "i18n-smoke"   => Flows.I18nSmoke(hwnd, app, outDir),
+                "i18n-pages"   => Flows.I18nPages(hwnd, app, outDir, RequirePositional(args, 1, "lang")),
                 "debug"        => Flows.Debug(app),
                 _              => UnknownCommand(cmd),
             };
@@ -113,6 +114,7 @@ internal static class Program
         Console.Error.WriteLine("  smokeshot mt-exec [--out DIR]            Step 3: MT execution (skips if no OpenMOC)");
         Console.Error.WriteLine("  smokeshot metapatterns [--out DIR]       MetaPatterns CRUD screenshots");
         Console.Error.WriteLine("  smokeshot i18n-smoke   [--out DIR]       Client i18n language switch + fallback evidence");
+        Console.Error.WriteLine("  smokeshot i18n-pages <zh|en> [--out DIR] Capture 5 System-MT pages in the given language");
         Console.Error.WriteLine("  smokeshot debug                          Dump named UIA tree");
         Console.Error.WriteLine("Exit codes: 0=ok 1=fail 2=skipped 3=app-not-running");
     }
