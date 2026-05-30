@@ -41,7 +41,7 @@
 | T4-purity | `rtk git status --short SUT` | PASS | No modified files under `SUT/`. |
 | Catalog denominator | `rtk dotnet test MetBench_SystemMT.Tests --filter "FullyQualifiedName~Catalog_MR_id_set_equals_governance_whitelist" --logger "console;verbosity=minimal"` | PASS | 1 test passed; runtime catalog count guard green. |
 | Full cloud gate | `rtk dotnet test MetBench_SystemMT.Tests --logger "console;verbosity=minimal"` | PASS | 1554 tests passed; 0 failures reported by the local test wrapper. |
-| GitHub coordinator branch | `rtk git ls-remote --heads origin codex/t0-t5-release-readiness claude/vm-t0-t5-release-readiness` | PASS | `codex/t0-t5-release-readiness` exists at `0450938529f157605088bbcb4a91ecd7ddc5fac2`; VM evidence branch is absent. |
+| GitHub coordinator branch | `rtk git ls-remote --heads origin codex/t0-t5-release-readiness claude/vm-t0-t5-release-readiness` | PASS | `codex/t0-t5-release-readiness` exists; resolve the current branch head live from GitHub. VM evidence branch is absent. |
 | VM evidence polling | `rtk git fetch origin claude/vm-t0-t5-release-readiness` | NOT RUN | Remote returned `fatal: couldn't find remote ref claude/vm-t0-t5-release-readiness`; VM evidence has not been pushed. |
 | T1-5 Windows UI | VM branch receipt and screenshot matrix | NOT RUN | VM evidence branch has not been collected in this coordinator run. |
 
