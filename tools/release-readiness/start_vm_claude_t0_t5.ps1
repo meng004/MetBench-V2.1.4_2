@@ -33,6 +33,8 @@ Set-Location $Worktree
 Invoke-Step "Checkout coordinator package" {
     git fetch origin
     git checkout -B $VmBranch "origin/$CoordinatorBranch"
+    git config user.name "Codex VM"
+    git config user.email "codex-vm@example.invalid"
 }
 
 $evidenceDir = Join-Path $Worktree "docs\superpowers\specs\2026-05-30-t0-t5-vm-release-smoke"
