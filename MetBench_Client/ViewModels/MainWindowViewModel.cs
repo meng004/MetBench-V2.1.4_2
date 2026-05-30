@@ -60,7 +60,7 @@ namespace MetBench_Client.ViewModels
                     item.Header = _localization.GetString("Tray_Home");
         }
 
-        private NavigationViewItem LocalizedNav(string key, SymbolRegular symbol, System.Type targetPageType)
+        private NavigationViewItem LocalizedNav(string key, SymbolRegular symbol, System.Type targetPageType, List<(NavigationViewItem Item, string Key)> registry)
         {
             var item = new NavigationViewItem
             {
@@ -68,19 +68,7 @@ namespace MetBench_Client.ViewModels
                 Icon = new SymbolIcon { Symbol = symbol },
                 TargetPageType = targetPageType
             };
-            _localizedNavigation.Add((item, key));
-            return item;
-        }
-
-        private NavigationViewItem LocalizedFooterNav(string key, SymbolRegular symbol, System.Type targetPageType)
-        {
-            var item = new NavigationViewItem
-            {
-                Content = _localization.GetString(key),
-                Icon = new SymbolIcon { Symbol = symbol },
-                TargetPageType = targetPageType
-            };
-            _localizedFooter.Add((item, key));
+            registry.Add((item, key));
             return item;
         }
 
@@ -90,32 +78,32 @@ namespace MetBench_Client.ViewModels
 
             NavigationItems = new ObservableCollection<object>
             {
-                LocalizedNav("Nav_MrDisplay",                  SymbolRegular.CalendarDataBar24,       typeof(Views.Pages.MRDisplayPage)),
-                LocalizedNav("Nav_MrManagement",               SymbolRegular.DataHistogram24,         typeof(Views.Pages.MRManagementPage)),
-                LocalizedNav("Nav_ApplicationManagement",      SymbolRegular.DataHistogram24,         typeof(Views.Pages.ApplicationManagementPage)),
-                LocalizedNav("Nav_DomainManagement",           SymbolRegular.DataHistogram24,         typeof(Views.Pages.DomainManagementPage)),
-                LocalizedNav("Nav_MtExecution",                SymbolRegular.PersonRunning20,         typeof(Views.Pages.MTExecutionPage)),
-                LocalizedNav("Nav_SystemMtExecution",          SymbolRegular.PlayCircle24,            typeof(Views.Pages.SystemMtExecutionPage)),
-                LocalizedNav("Nav_SystemMtMrCatalog",          SymbolRegular.DocumentQueueMultiple24, typeof(Views.Pages.SystemMtMrCatalogPage)),
-                LocalizedNav("Nav_SystemMtSutCatalog",         SymbolRegular.Apps24,                  typeof(Views.Pages.SystemMtSutCatalogPage)),
-                LocalizedNav("Nav_SystemMtEquationCatalog",    SymbolRegular.MathFormula24,           typeof(Views.Pages.SystemMtEquationCatalogPage)),
-                LocalizedNav("Nav_SystemMtSampleCaseCatalog",  SymbolRegular.DocumentText24,          typeof(Views.Pages.SystemMtSampleCaseCatalogPage)),
-                LocalizedNav("Nav_SystemMtExecutionHistory",   SymbolRegular.History24,               typeof(Views.Pages.SystemMtExecutionHistoryPage)),
-                LocalizedNav("Nav_Anomalies",                  SymbolRegular.Warning24,               typeof(Views.Pages.AnomalyListPage)),
-                LocalizedNav("Nav_Discovery",                  SymbolRegular.Lightbulb24,             typeof(Views.Pages.DiscoveryPage)),
-                LocalizedNav("Nav_CandidateReview",            SymbolRegular.ClipboardCheckmark24,    typeof(Views.Pages.CandidateReviewPage)),
-                LocalizedNav("Nav_Mutation",                   SymbolRegular.Bug24,                   typeof(Views.Pages.MutationCampaignPage)),
-                LocalizedNav("Nav_Replay",                     SymbolRegular.ArrowCounterclockwise24, typeof(Views.Pages.ReplayResultPage)),
-                LocalizedNav("Nav_Coverage",                   SymbolRegular.DataPie20,               typeof(Views.Pages.CoverageDashboardPage)),
-                LocalizedNav("Nav_MetaPatterns",               SymbolRegular.Shapes24,                typeof(Views.Pages.MetaPatternsPage)),
-                LocalizedNav("Nav_MrDetection",                SymbolRegular.CalendarSearch20,        typeof(Views.Pages.AutoDetectMRPage)),
-                LocalizedNav("Nav_MrRecommendation",           SymbolRegular.CalendarArrowRight24,    typeof(Views.Pages.MRRecommendationPage)),
-                LocalizedNav("Nav_MrReportGenerator",          SymbolRegular.DocumentQueueMultiple24, typeof(Views.Pages.MTReportGeneratorPage)),
+                LocalizedNav("Nav_MrDisplay",                  SymbolRegular.CalendarDataBar24,       typeof(Views.Pages.MRDisplayPage),                  _localizedNavigation),
+                LocalizedNav("Nav_MrManagement",               SymbolRegular.DataHistogram24,         typeof(Views.Pages.MRManagementPage),               _localizedNavigation),
+                LocalizedNav("Nav_ApplicationManagement",      SymbolRegular.DataHistogram24,         typeof(Views.Pages.ApplicationManagementPage),      _localizedNavigation),
+                LocalizedNav("Nav_DomainManagement",           SymbolRegular.DataHistogram24,         typeof(Views.Pages.DomainManagementPage),           _localizedNavigation),
+                LocalizedNav("Nav_MtExecution",                SymbolRegular.PersonRunning20,         typeof(Views.Pages.MTExecutionPage),                _localizedNavigation),
+                LocalizedNav("Nav_SystemMtExecution",          SymbolRegular.PlayCircle24,            typeof(Views.Pages.SystemMtExecutionPage),          _localizedNavigation),
+                LocalizedNav("Nav_SystemMtMrCatalog",          SymbolRegular.DocumentQueueMultiple24, typeof(Views.Pages.SystemMtMrCatalogPage),          _localizedNavigation),
+                LocalizedNav("Nav_SystemMtSutCatalog",         SymbolRegular.Apps24,                  typeof(Views.Pages.SystemMtSutCatalogPage),         _localizedNavigation),
+                LocalizedNav("Nav_SystemMtEquationCatalog",    SymbolRegular.MathFormula24,           typeof(Views.Pages.SystemMtEquationCatalogPage),    _localizedNavigation),
+                LocalizedNav("Nav_SystemMtSampleCaseCatalog",  SymbolRegular.DocumentText24,          typeof(Views.Pages.SystemMtSampleCaseCatalogPage),  _localizedNavigation),
+                LocalizedNav("Nav_SystemMtExecutionHistory",   SymbolRegular.History24,               typeof(Views.Pages.SystemMtExecutionHistoryPage),   _localizedNavigation),
+                LocalizedNav("Nav_Anomalies",                  SymbolRegular.Warning24,               typeof(Views.Pages.AnomalyListPage),                _localizedNavigation),
+                LocalizedNav("Nav_Discovery",                  SymbolRegular.Lightbulb24,             typeof(Views.Pages.DiscoveryPage),                  _localizedNavigation),
+                LocalizedNav("Nav_CandidateReview",            SymbolRegular.ClipboardCheckmark24,    typeof(Views.Pages.CandidateReviewPage),            _localizedNavigation),
+                LocalizedNav("Nav_Mutation",                   SymbolRegular.Bug24,                   typeof(Views.Pages.MutationCampaignPage),           _localizedNavigation),
+                LocalizedNav("Nav_Replay",                     SymbolRegular.ArrowCounterclockwise24, typeof(Views.Pages.ReplayResultPage),               _localizedNavigation),
+                LocalizedNav("Nav_Coverage",                   SymbolRegular.DataPie20,               typeof(Views.Pages.CoverageDashboardPage),          _localizedNavigation),
+                LocalizedNav("Nav_MetaPatterns",               SymbolRegular.Shapes24,                typeof(Views.Pages.MetaPatternsPage),               _localizedNavigation),
+                LocalizedNav("Nav_MrDetection",                SymbolRegular.CalendarSearch20,        typeof(Views.Pages.AutoDetectMRPage),               _localizedNavigation),
+                LocalizedNav("Nav_MrRecommendation",           SymbolRegular.CalendarArrowRight24,    typeof(Views.Pages.MRRecommendationPage),           _localizedNavigation),
+                LocalizedNav("Nav_MrReportGenerator",          SymbolRegular.DocumentQueueMultiple24, typeof(Views.Pages.MTReportGeneratorPage),          _localizedNavigation),
             };
 
             NavigationFooter = new ObservableCollection<object>
             {
-                LocalizedFooterNav("Nav_Settings", SymbolRegular.Settings24, typeof(Views.Pages.SettingsPage))
+                LocalizedNav("Nav_Settings", SymbolRegular.Settings24, typeof(Views.Pages.SettingsPage), _localizedFooter)
             };
 
             TrayMenuItems = new ObservableCollection<MenuItem>()
