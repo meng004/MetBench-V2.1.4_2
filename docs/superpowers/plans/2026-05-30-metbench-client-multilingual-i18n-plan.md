@@ -24,8 +24,8 @@ VM Claude Code startup command:
 
 ```powershell
 cd C:\MetBench-V2.1.4_2
-git fetch origin
-git checkout -B codex/client-i18n origin/main
+git fetch origin codex/client-i18n-plan
+git checkout -B codex/client-i18n origin/codex/client-i18n-plan
 cmd /c claude
 ```
 
