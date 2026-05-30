@@ -41,9 +41,11 @@
 | T4-purity | `rtk git status --short SUT` | PASS | No modified files under `SUT/`. |
 | Catalog denominator | `rtk dotnet test MetBench_SystemMT.Tests --filter "FullyQualifiedName~Catalog_MR_id_set_equals_governance_whitelist" --logger "console;verbosity=minimal"` | PASS | 1 test passed; runtime catalog count guard green. |
 | Full cloud gate | `rtk dotnet test MetBench_SystemMT.Tests --logger "console;verbosity=minimal"` | PASS | 1554 tests passed; 0 failures reported by the local test wrapper. |
-| GitHub coordinator branch | `rtk git ls-remote --heads origin codex/t0-t5-release-readiness claude/vm-t0-t5-release-readiness` | PASS | `codex/t0-t5-release-readiness` exists; resolve the current branch head live from GitHub. VM evidence branch is absent. |
-| VM evidence polling | `rtk git fetch origin claude/vm-t0-t5-release-readiness` | NOT RUN | Remote returned `fatal: couldn't find remote ref claude/vm-t0-t5-release-readiness`; VM evidence has not been pushed. |
-| T1-5 Windows UI | VM branch receipt and screenshot matrix | NOT RUN | VM evidence branch has not been collected in this coordinator run. |
+| GitHub coordinator branch | `rtk git ls-remote --heads origin codex/t0-t5-release-readiness claude/vm-t0-t5-release-readiness` | PASS | `codex/t0-t5-release-readiness` exists; resolve the current branch head live from GitHub. VM evidence branch now exists. |
+| VM CLI availability | `rtk prlctl exec "Windows 11" --current-user cmd /c claude --version` | PASS | Windows VM current user `ccf8\codex` has Claude Code CLI `2.1.158`; git is available. |
+| VM bootstrap | `rtk prlctl exec "Windows 11" --current-user powershell ... start_vm_claude_t0_t5.ps1 -Background` | RUNNING | VM checkout created at `C:\Users\codex\metbench-t0-t5-release-readiness`; Claude Code CLI started in background. |
+| VM evidence polling | `rtk git fetch origin claude/vm-t0-t5-release-readiness`; `rtk git show origin/claude/vm-t0-t5-release-readiness:.../vm-status.jsonl` | RUNNING | VM evidence branch exists and contains `vm-claude-bootstrap` status `running` at `2026-05-30T06:01:10.8854412Z`; screenshot matrix not complete yet. |
+| T1-5 Windows UI | VM branch receipt and screenshot matrix | NOT RUN | VM execution has started, but screenshot evidence has not been pushed yet. |
 
 ## Selected Release-Smoke SUT/MR Set
 
@@ -104,10 +106,10 @@ readiness, not full scientific adequacy coverage.
 
 Decision: CONDITIONAL RELEASE
 
-Reason: Full cloud suite and selected smoke have 0 failures, but Windows VM UI
-evidence was not refreshed for `b9e917c15683c37466f23e2c4927aecc6cdff8b2`, the
-screenshot matrix is incomplete, and core-function confirmation coverage is
-20/21.
+Reason: Full cloud suite and selected smoke have 0 failures, and VM Claude Code
+execution has been started, but Windows VM UI evidence has not completed for
+`b9e917c15683c37466f23e2c4927aecc6cdff8b2`, the screenshot matrix is incomplete,
+and core-function confirmation coverage is 20/21.
 
 Limitation: user delivery is acceptable only as a cloud-validated conditional
 release until the VM worker fills the screenshot matrix and pushes the VM
