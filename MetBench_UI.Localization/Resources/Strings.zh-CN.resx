@@ -329,7 +329,7 @@
     <value>断言类型</value>
   </data>
   <data name="Catalog_Value" xml:space="preserve">
-    <value>值名称</value>
+    <value>值</value>
   </data>
   <data name="Catalog_DisplayName" xml:space="preserve">
     <value>显示名称</value>
