@@ -49,7 +49,7 @@ Then check out the VM evidence branch from the coordinator package:
 git fetch origin
 git checkout -B claude/vm-t0-t5-release-readiness origin/codex/t0-t5-release-readiness
 git rev-parse HEAD
-git diff --name-only b9e917c15683c37466f23e2c4927aecc6cdff8b2..HEAD -- . ":(exclude)docs/superpowers/plans/2026-05-30-t0-t5-minimal-release-readiness-confirmation-plan.md" ":(exclude)docs/superpowers/specs/2026-05-30-t0-t5-github-exchange-protocol.md" ":(exclude)docs/superpowers/specs/2026-05-30-t0-t5-minimal-release-readiness-report.md" ":(exclude)docs/superpowers/specs/2026-05-30-t0-t5-vm-release-smoke/**" ":(exclude)docs/superpowers/vm-prompts/2026-05-30-t0-t5-release-readiness-vm-prompt.md" ":(exclude)docs/superpowers/vm-prompts/2026-05-30-t0-t5-vm-monitor-hook.md" ":(exclude)tools/release-readiness/vm_status_hook.ps1"
+git diff --name-only b9e917c15683c37466f23e2c4927aecc6cdff8b2..HEAD -- . ":(exclude)docs/superpowers/plans/2026-05-30-t0-t5-minimal-release-readiness-confirmation-plan.md" ":(exclude)docs/superpowers/specs/2026-05-30-t0-t5-github-exchange-protocol.md" ":(exclude)docs/superpowers/specs/2026-05-30-t0-t5-minimal-release-readiness-report.md" ":(exclude)docs/superpowers/specs/2026-05-30-t0-t5-vm-release-smoke/**" ":(exclude)docs/superpowers/vm-prompts/2026-05-30-t0-t5-release-readiness-vm-prompt.md" ":(exclude)docs/superpowers/vm-prompts/2026-05-30-t0-t5-vm-monitor-hook.md" ":(exclude)tools/release-readiness/vm_status_hook.ps1" ":(exclude)tools/release-readiness/start_vm_claude_t0_t5.ps1"
 ```
 
 If the `git diff --name-only ...` command prints any path, record those paths in

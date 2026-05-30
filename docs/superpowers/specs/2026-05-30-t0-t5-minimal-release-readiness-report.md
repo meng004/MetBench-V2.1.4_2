@@ -45,6 +45,7 @@
 | VM CLI availability | `rtk prlctl exec "Windows 11" --current-user cmd /c claude --version` | PASS | Windows VM current user `ccf8\codex` has Claude Code CLI `2.1.158`; git is available. |
 | VM bootstrap | `rtk prlctl exec "Windows 11" --current-user powershell ... start_vm_claude_t0_t5.ps1 -Background` | RUNNING | VM checkout created at `C:\Users\codex\metbench-t0-t5-release-readiness`; Claude Code CLI started in background. |
 | VM evidence polling | `rtk git fetch origin claude/vm-t0-t5-release-readiness`; `rtk git show origin/claude/vm-t0-t5-release-readiness:.../vm-status.jsonl` | RUNNING | VM evidence branch exists and contains `vm-claude-bootstrap` status `running` at `2026-05-30T06:01:10.8854412Z`; screenshot matrix not complete yet. |
+| VM setup gate | VM Claude Code CLI run from `claude-vm-run.log` | BLOCKED | VM correctly stopped before tests because the setup delta gate omitted `tools/release-readiness/start_vm_claude_t0_t5.ps1`; coordinator patched the prompt exclude list and will relaunch. |
 | T1-5 Windows UI | VM branch receipt and screenshot matrix | NOT RUN | VM execution has started, but screenshot evidence has not been pushed yet. |
 
 ## Selected Release-Smoke SUT/MR Set
