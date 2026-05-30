@@ -1,11 +1,26 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MetBench_UI.Localization;
 using Wpf.Ui.Controls;
 
 namespace MetBench_Client.ViewModels
 {
     public partial class SettingsViewModel : ObservableObject, INavigationAware
     {
+        private readonly IAppLocalizationService _localization;
+
+        public LocalizedTextProvider Localization { get; }
+
+        [ObservableProperty]
+        private IReadOnlyList<AppCultureOption> _availableCultures = Array.Empty<AppCultureOption>();
+
+        [ObservableProperty]
+        private AppCultureOption? _selectedCulture;
+
         private bool _isInitialized = false;
 
         [ObservableProperty]
@@ -16,6 +31,12 @@ namespace MetBench_Client.ViewModels
             .Appearance
             .ApplicationTheme
             .Unknown;
+
+        public SettingsViewModel(IAppLocalizationService localization, LocalizedTextProvider localizedText)
+        {
+            _localization = localization;
+            Localization = localizedText;
+        }
 
         //public String AppVersion { get; set; } = "1.0.0.0";
         public void OnNavigatedTo()
@@ -34,8 +55,17 @@ namespace MetBench_Client.ViewModels
             //AppVersion = $"Numerical Expression Metamorphic Relations Repository - {GetAssemblyVersion()}";
             AppVersion = $"MetBench: A Numerical Expression Metamorphic Relations Benchmark Dataset - {GetAssemblyVersion()}";
 
+            AvailableCultures = _localization.AvailableCultures;
+            SelectedCulture = AvailableCultures.FirstOrDefault(c => c.Culture.Name == _localization.CurrentCulture.Name);
 
             _isInitialized = true;
+        }
+
+        [RelayCommand]
+        private void OnChangeCulture(string cultureName)
+        {
+            _localization.SetCulture(new CultureInfo(cultureName));
+            SelectedCulture = AvailableCultures.FirstOrDefault(c => c.Culture.Name == _localization.CurrentCulture.Name);
         }
 
         private static string GetAssemblyVersion()

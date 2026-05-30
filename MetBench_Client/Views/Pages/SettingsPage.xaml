@@ -21,36 +21,50 @@
     </Page.Resources>
 
     <StackPanel Margin="42" >
-        <TextBlock 
+        <TextBlock
         FontSize="20"
         FontWeight="Medium"
-        Text="Personalization" />
-        <TextBlock Margin="0,12,0,0" Text="Theme" />
+        Text="{Binding ViewModel.Localization[Settings_Personalization]}" />
+        <TextBlock Margin="0,12,0,0" Text="{Binding ViewModel.Localization[Settings_Theme]}" />
         <RadioButton
         Margin="0,12,0,0"
         Command="{Binding ViewModel.ChangeThemeCommand, Mode=OneWay}"
         CommandParameter="theme_light"
-        Content="Light"
+        Content="{Binding ViewModel.Localization[Settings_Theme_Light]}"
         GroupName="themeSelect"
         IsChecked="{Binding ViewModel.CurrentApplicationTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light, Mode=OneWay}" />
         <RadioButton
         Margin="0,8,0,0"
         Command="{Binding ViewModel.ChangeThemeCommand, Mode=OneWay}"
         CommandParameter="theme_dark"
-        Content="Dark"
+        Content="{Binding ViewModel.Localization[Settings_Theme_Dark]}"
         GroupName="themeSelect"
         IsChecked="{Binding ViewModel.CurrentApplicationTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}" />
+
+        <TextBlock Margin="0,24,0,0" Text="{Binding ViewModel.Localization[Settings_Language]}" />
+        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+            <ComboBox
+                ItemsSource="{Binding ViewModel.AvailableCultures}"
+                SelectedItem="{Binding ViewModel.SelectedCulture, Mode=TwoWay}"
+                DisplayMemberPath="DisplayName"
+                MinWidth="160" />
+            <Button
+                Margin="8,0,0,0"
+                Command="{Binding ViewModel.ChangeCultureCommand}"
+                CommandParameter="{Binding ViewModel.SelectedCulture.Culture.Name}"
+                Content="{Binding ViewModel.Localization[Settings_Language]}" />
+        </StackPanel>
 
         <TextBlock
         Margin="0,24,0,0"
         FontSize="20"
         FontWeight="Medium"
-        Text="About MetBench" />
+        Text="{Binding ViewModel.Localization[Settings_About]}" />
         <TextBlock  Margin="0,12,0,0" Text="{Binding ViewModel.AppVersion, Mode=OneWay}" />
         <ui:TextBlock
       Margin="0,24,0,8"
       FontTypography="BodyStrong"
-      Text="More" />
+      Text="{Binding ViewModel.Localization[Settings_More]}" />
         <!--<ui:CardExpander ContentPadding="0" Icon="{ui:ImageIcon 'pack://application:,,,/Assets/applicationIcon-256.png ', Width=38, Height=35}">
             <ui:CardExpander.Header>
                 <Grid>
@@ -116,12 +130,12 @@
             </StackPanel>
         </ui:CardExpander>-->
         <StackPanel Orientation="Horizontal">
-            <TextBlock Text="MetBench project introduction" Margin="0 5 10 0"/>
-            <ui:Anchor Content="MetBench SourceCode" Icon="{ui:SymbolIcon Link24}" Appearance="Primary" NavigateUri="https://github.com/Zhaoyin0910/MetBench"/>
+            <TextBlock Text="{Binding ViewModel.Localization[Settings_ProjectIntroduction]}" Margin="0 5 10 0"/>
+            <ui:Anchor Content="{Binding ViewModel.Localization[Settings_SourceCode]}" Icon="{ui:SymbolIcon Link24}" Appearance="Primary" NavigateUri="https://github.com/Zhaoyin0910/MetBench"/>
         </StackPanel>
-        
+
         <StackPanel Orientation="Horizontal" Margin="0 10 0 0">
-            <TextBlock VerticalAlignment="Center" Text="To clone this repository" Margin="0 5 10 0"/>
+            <TextBlock VerticalAlignment="Center" Text="{Binding ViewModel.Localization[Settings_CloneRepository]}" Margin="0 5 10 0"/>
             <!--<ui:Anchor Content="Git Link" Icon="{ui:SymbolIcon Link24}" Margin="46 0 0 0" Width="200" Appearance="Primary" NavigateUri="https://github.com/Zhaoyin0910/MetBench.git"/>-->
             <TextBlock VerticalAlignment="Center" Margin="5 5 0 0" Foreground="{ui:ThemeResource TextFillColorSecondaryBrush}" Text="https://github.com/Zhaoyin0910/MetBench.git" />
         </StackPanel>

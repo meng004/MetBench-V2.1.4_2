@@ -148,4 +148,31 @@
   <data name="Tray_Home" xml:space="preserve">
     <value>主页</value>
   </data>
+  <data name="Settings_Theme" xml:space="preserve">
+    <value>主题</value>
+  </data>
+  <data name="Settings_Theme_Light" xml:space="preserve">
+    <value>浅色</value>
+  </data>
+  <data name="Settings_Theme_Dark" xml:space="preserve">
+    <value>深色</value>
+  </data>
+  <data name="Settings_About" xml:space="preserve">
+    <value>关于 MetBench</value>
+  </data>
+  <data name="Settings_More" xml:space="preserve">
+    <value>更多</value>
+  </data>
+  <data name="Settings_ProjectIntroduction" xml:space="preserve">
+    <value>MetBench 项目介绍</value>
+  </data>
+  <data name="Settings_SourceCode" xml:space="preserve">
+    <value>MetBench 源代码</value>
+  </data>
+  <data name="Settings_CloneRepository" xml:space="preserve">
+    <value>克隆此仓库</value>
+  </data>
+  <data name="Settings_InvalidCultureFallback" xml:space="preserve">
+    <value>不支持的语言将回退到英文。</value>
+  </data>
 </root>
