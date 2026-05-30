@@ -29,7 +29,13 @@ public sealed class AppLocalizationService : IAppLocalizationService
 
     public void SetCulture(CultureInfo culture)
     {
-        var selected = ResolveCulture(culture);
+        var selected = culture.TwoLetterISOLanguageName switch
+        {
+            "zh" => Chinese,
+            "en" => English,
+            _ => Cultures.FirstOrDefault(c => c.Culture.Name == culture.Name)?.Culture ?? English,
+        };
+
         if (selected.Name == CurrentCulture.Name)
         {
             return;
@@ -42,19 +48,17 @@ public sealed class AppLocalizationService : IAppLocalizationService
 
     public string GetString(string key)
     {
-        var value = Strings.ResourceManager.GetString(key, CurrentCulture);
-        return string.IsNullOrWhiteSpace(value) ? $"??{key}??" : value;
-    }
-
-    private static CultureInfo ResolveCulture(CultureInfo culture)
-    {
-        var exact = Cultures.FirstOrDefault(c => c.Culture.Name == culture.Name)?.Culture;
-        if (exact is not null)
+        if (key is null)
         {
-            return exact;
+            return "??null??";
         }
 
-        var neutral = Cultures.FirstOrDefault(c => c.Culture.TwoLetterISOLanguageName == culture.TwoLetterISOLanguageName)?.Culture;
-        return neutral ?? English;
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            return "??empty??";
+        }
+
+        var value = Strings.ResourceManager.GetString(key, CurrentCulture);
+        return string.IsNullOrWhiteSpace(value) ? $"??{key}??" : value;
     }
 }
