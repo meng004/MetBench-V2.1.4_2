@@ -10,6 +10,7 @@
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:viewmodels="clr-namespace:MetBench_Client.ViewModels"
       xmlns:controls="clr-namespace:MetBench_Client.Controls"
+      xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
       mc:Ignorable="d"
       d:DesignHeight="800"
       d:DesignWidth="1000"
@@ -17,9 +18,9 @@
       d:Background="{DynamicResource ApplicationBackgroundBrush}"
       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
       Title="AutoDetectMRPage">
-    <!--<Page.Resources>
-        <util:IndexConverter x:Key="IndexConverter"/>
-    </Page.Resources>-->
+    <Page.Resources>
+        <helpers:BindingProxy x:Key="LocalizationProxy" Data="{Binding}"/>
+    </Page.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="5*"/>
@@ -57,12 +58,12 @@
   
                     <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}"  Binding="{Binding ApplicationName}" Width="200" IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="ApplicationName" AutomationProperties.AutomationId="DataGridTextColumn_ApplicationName"></TextBlock>
+                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[Detect_ApplicationName], Source={StaticResource LocalizationProxy}}" AutomationProperties.AutomationId="DataGridTextColumn_ApplicationName"></TextBlock>
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
                     <DataGridTemplateColumn>
                         <DataGridTemplateColumn.Header>
-                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="InputPattern"></TextBlock>
+                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[Detect_InputPattern], Source={StaticResource LocalizationProxy}}"></TextBlock>
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate >
                             <DataTemplate>
@@ -74,7 +75,7 @@
                     </DataGridTemplateColumn>
                     <DataGridTemplateColumn >
                         <DataGridTemplateColumn.Header>
-                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="OutputPattern"></TextBlock>
+                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Data.ViewModel.Localization[Detect_OutputPattern], Source={StaticResource LocalizationProxy}}"></TextBlock>
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -86,12 +87,12 @@
                     </DataGridTemplateColumn>
                     <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}"  Binding="{Binding DimensionOfInputPattern}" Width="200" IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="DimensionOfInputPattern"></TextBlock>
+                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[Detect_DimensionOfInputPattern], Source={StaticResource LocalizationProxy}}"></TextBlock>
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
                     <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}"  Binding="{Binding TrueRatio}" Width="100" IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="TrueRatio"></TextBlock>
+                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[Detect_TrueRatio], Source={StaticResource LocalizationProxy}}"></TextBlock>
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
                 </DataGrid.Columns>
@@ -122,7 +123,7 @@
                     <RowDefinition Height="2*"/>
                 </Grid.RowDefinitions>
                 <StackPanel  Grid.Row="0" x:Name="stackpanel1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="Program"  Margin="65 0 0 0" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding ViewModel.Localization[Detect_Program]}"  Margin="65 0 0 0" VerticalAlignment="Center" />
                     <ui:TextBox x:Name="txbCodeName" Margin="25 0 0 0" VerticalContentAlignment="Center" Width="150"
                                 IsReadOnly="True"
                                 InputMethod.IsInputMethodEnabled="False"
@@ -131,33 +132,33 @@
                                 TextWrapping="Wrap"
                                 Text="{Binding ViewModel.CodeName,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                                 />
-                    <ui:Button Appearance="Info" Content="X"
+                    <ui:Button Appearance="Info" Content="{Binding ViewModel.Localization[Detect_WithdrawUpload]}"
                                Margin="5 0 0 0"
                                s:View.ActionTarget="{Binding ViewModel}"
                                Command="{s:Action btnBack_Click}" 
                                />
-                    <ui:Button Appearance="Primary" Content="Upl" Margin="5 0 0 0"
+                    <ui:Button Appearance="Primary" Content="{Binding ViewModel.Localization[Detect_Upload]}" Margin="5 0 0 0"
                                s:View.ActionTarget="{Binding ViewModel}"
                                Command="{s:Action btnAddCode_Click}"
                                Icon="{ui:SymbolIcon ArrowUpload24}"
                                />
                 </StackPanel>
                 <StackPanel  Grid.Row="1" x:Name="stackpanel2" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="InputParamCount"  Margin="20 0 0 0" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding ViewModel.Localization[Detect_InputParamCount]}"  Margin="20 0 0 0" VerticalAlignment="Center" />
                     <ui:TextBox x:Name="txbInputParamCount"  Margin="8 0 0 0" VerticalContentAlignment="Center" Width="170"
                              InputMethod.IsInputMethodEnabled="False"
                              Language="en-US"
                              TextWrapping="Wrap"
                              Text="{Binding ViewModel.InputParamCount,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                              />
-                    <ui:Button Appearance="Primary"  Content="Reset" Margin="3 0 0 0"
+                    <ui:Button Appearance="Primary"  Content="{Binding ViewModel.Localization[Detect_Reset]}" Margin="3 0 0 0"
                                 Icon="{ui:SymbolIcon TextBulletListSquareSettings20}"
                                 s:View.ActionTarget="{Binding ViewModel}"
                                 Command="{s:Action btn_Cancle}"
                                />
                 </StackPanel>
                 <StackPanel  Grid.Row="2" x:Name="stackpanel3" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="InputParamRanges"  Margin="15 0 0 0" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding ViewModel.Localization[Detect_InputParamRanges]}"  Margin="15 0 0 0" VerticalAlignment="Center" />
                     <ui:TextBox x:Name="txbMaxNumber"  Margin="5 0 0 0" VerticalContentAlignment="Center" Width="170"
                              InputMethod.IsInputMethodEnabled="False"
                              Language="en-US"
@@ -166,7 +167,7 @@
                              />
                 </StackPanel>
                 <StackPanel  Grid.Row="3" x:Name="stackpanel4" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="InputDatatypes"  Margin="40 0 0 0" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding ViewModel.Localization[Detect_InputDatatypes]}"  Margin="40 0 0 0" VerticalAlignment="Center" />
                     <ui:TextBox x:Name="txbExecuteNumb" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="170"
                              InputMethod.IsInputMethodEnabled="False"
                              Language="en-US"
@@ -199,7 +200,7 @@
                     </Grid.ColumnDefinitions>
                 </Grid>
                 <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left">
-                    <ui:Button Appearance="Primary"  Content="DetectMR"
+                    <ui:Button Appearance="Primary"  Content="{Binding ViewModel.Localization[Detect_DetectMR]}"
                                Margin="0 0 0 20"
                                 Icon="{ui:SymbolIcon CalendarEdit24}"
                                 s:View.ActionTarget="{Binding ViewModel}"
@@ -207,14 +208,14 @@
                                />
                 </StackPanel>
                 <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left">
-                    <ui:Button Appearance="Primary"  Content="StoreMR"
+                    <ui:Button Appearance="Primary"  Content="{Binding ViewModel.Localization[Detect_StoreMR]}"
                  Icon="{ui:SymbolIcon DocumentArrowDown20}"
                  s:View.ActionTarget="{Binding ViewModel}"
                  Command="{s:Action btn_StoreMR}"
                 />
                 </StackPanel>
                 <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left">
-                    <ui:Button Appearance="Primary"  Content="ExportCsv"
+                    <ui:Button Appearance="Primary"  Content="{Binding ViewModel.Localization[Detect_ExportCsv]}"
                                Margin="0 20 0 0"
                                Icon="{ui:SymbolIcon DocumentArrowDown20}"
                                s:View.ActionTarget="{Binding ViewModel}"

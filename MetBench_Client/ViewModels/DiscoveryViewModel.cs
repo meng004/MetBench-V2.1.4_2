@@ -9,6 +9,7 @@ using MetBench_BLL;
 using MetBench_BLL.Discovery;
 using MetBench_Domain;
 using MetBench_IDAL;
+using MetBench_UI.Localization;
 using Wpf.Ui.Controls;
 
 namespace MetBench_Client.ViewModels;
@@ -53,13 +54,17 @@ public sealed partial class DiscoveryViewModel : ObservableObject, INavigationAw
         DiscoveryService discoveryService,
         IEnumerable<IMRDiscoverer> discoverers,
         ICandidateMRRepository candidateRepo,
-        ApplicationService appService)
+        ApplicationService appService,
+        LocalizedTextProvider localization)
     {
         _discoveryService = discoveryService;
         _discoverers = discoverers;
         _candidateRepo = candidateRepo;
         _appService = appService;
+        Localization = localization;
     }
+
+    public LocalizedTextProvider Localization { get; }
 
     public void OnNavigatedTo()
     {

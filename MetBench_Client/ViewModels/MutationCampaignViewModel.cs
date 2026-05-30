@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.Input;
 using MetBench_BLL.Mutation;
 using MetBench_Domain;
 using MetBench_IDAL;
+using MetBench_UI.Localization;
 using Wpf.Ui.Controls;
 
 namespace MetBench_Client.ViewModels;
@@ -52,16 +53,20 @@ public sealed partial class MutationCampaignViewModel : ObservableObject, INavig
     [ObservableProperty]
     private string? _errorMessage;
 
+    public LocalizedTextProvider Localization { get; }
+
     public MutationCampaignViewModel(
         MutationCampaignService campaignService,
         IMutantRepository mutantRepo,
         IMRBindingRepository mrBindingRepo,
-        IMutationResultRepository resultRepo)
+        IMutationResultRepository resultRepo,
+        LocalizedTextProvider localization)
     {
         _campaignService = campaignService;
         _mutantRepo = mutantRepo;
         _mrBindingRepo = mrBindingRepo;
         _resultRepo = resultRepo;
+        Localization = localization;
     }
 
     public void OnNavigatedTo()

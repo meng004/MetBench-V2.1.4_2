@@ -4,11 +4,16 @@
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
       Title="DiscoveryPage"
       d:DesignHeight="700" d:DesignWidth="1100"
       ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
       mc:Ignorable="d">
+
+    <Page.Resources>
+        <helpers:BindingProxy x:Key="LocalizationProxy" Data="{Binding}" />
+    </Page.Resources>
 
     <Grid Margin="14">
         <Grid.RowDefinitions>
@@ -25,14 +30,14 @@
                 Padding="12"
                 Margin="0,0,0,12">
             <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Discoverer:" VerticalAlignment="Center" Margin="0,0,6,0"
+                <TextBlock Text="{Binding ViewModel.Localization[Discovery_DiscovererLabel]}" VerticalAlignment="Center" Margin="0,0,6,0"
                            FontWeight="SemiBold" />
                 <ComboBox ItemsSource="{Binding ViewModel.DiscovererList}"
                           SelectedItem="{Binding ViewModel.SelectedDiscoverer, Mode=TwoWay}"
                           DisplayMemberPath="Name"
                           Width="200" Margin="0,0,16,0" />
 
-                <TextBlock Text="Target SUT:" VerticalAlignment="Center" Margin="0,0,6,0"
+                <TextBlock Text="{Binding ViewModel.Localization[Discovery_TargetSutLabel]}" VerticalAlignment="Center" Margin="0,0,6,0"
                            FontWeight="SemiBold" />
                 <ComboBox ItemsSource="{Binding ViewModel.Applications}"
                           SelectedItem="{Binding ViewModel.SelectedApplication, Mode=TwoWay}"
@@ -40,7 +45,7 @@
                           Width="200" Margin="0,0,16,0" />
 
                 <ui:Button Appearance="Primary"
-                           Content="Run discovery"
+                           Content="{Binding ViewModel.Localization[Discovery_RunButton]}"
                            Icon="{ui:SymbolIcon Search24}"
                            Command="{Binding ViewModel.RunDiscoveryCommand}" />
 
@@ -82,13 +87,13 @@
                      BorderThickness="1"
                      BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}">
             <ui:DataGrid.Columns>
-                <DataGridTextColumn Header="Code"       Binding="{Binding ProposedCode}"                 Width="160" />
-                <DataGridTextColumn Header="Name"       Binding="{Binding ProposedName}"                 Width="*" />
-                <DataGridTextColumn Header="Assertion"  Binding="{Binding SuggestedAssertionTypeCode}"   Width="100" />
-                <DataGridTextColumn Header="Value"      Binding="{Binding ProposedValueName}"            Width="80" />
-                <DataGridTextColumn Header="Confidence" Binding="{Binding Confidence, StringFormat=F2}"  Width="90" />
-                <DataGridTextColumn Header="Status"     Binding="{Binding Status}"                       Width="80" />
-                <DataGridTextColumn Header="Created"    Binding="{Binding CreatedAt, StringFormat=yyyy-MM-dd HH:mm}" Width="130" />
+                <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Discovery_ColCode], Source={StaticResource LocalizationProxy}}"       Binding="{Binding ProposedCode}"                 Width="160" />
+                <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Legacy_Name], Source={StaticResource LocalizationProxy}}"       Binding="{Binding ProposedName}"                 Width="*" />
+                <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Discovery_ColAssertion], Source={StaticResource LocalizationProxy}}"  Binding="{Binding SuggestedAssertionTypeCode}"   Width="100" />
+                <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Discovery_ColValue], Source={StaticResource LocalizationProxy}}"      Binding="{Binding ProposedValueName}"            Width="80" />
+                <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Discovery_ColConfidence], Source={StaticResource LocalizationProxy}}" Binding="{Binding Confidence, StringFormat=F2}"  Width="90" />
+                <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Discovery_ColStatus], Source={StaticResource LocalizationProxy}}"     Binding="{Binding Status}"                       Width="80" />
+                <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Discovery_ColCreated], Source={StaticResource LocalizationProxy}}"    Binding="{Binding CreatedAt, StringFormat=yyyy-MM-dd HH:mm}" Width="130" />
             </ui:DataGrid.Columns>
         </ui:DataGrid>
     </Grid>

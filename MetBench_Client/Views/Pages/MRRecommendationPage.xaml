@@ -10,6 +10,7 @@
       xmlns:models1="clr-namespace:MetBench_Client.Models"
       xmlns:viewmodels="clr-namespace:MetBench_Client.ViewModels"
       xmlns:controls="clr-namespace:MetBench_Client.Controls"
+      xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
       mc:Ignorable="d"
       d:DataContext="{d:DesignInstance viewmodels:MRRecommendationViewModel}"
       d:DesignHeight="800"
@@ -18,6 +19,10 @@
       d:Background="{DynamicResource ApplicationBackgroundBrush}"
       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
       Title="MRRecommendationPage">
+
+    <Page.Resources>
+        <helpers:BindingProxy x:Key="LocalizationProxy" Data="{Binding}" />
+    </Page.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -55,13 +60,13 @@
 
                         <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}"  Binding="{Binding TargetProgram.FunctionName}" Width="200" IsReadOnly="True">
                             <DataGridTextColumn.Header>
-                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="Program"></TextBlock>
+                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[Recommend_Application], Source={StaticResource LocalizationProxy}}"></TextBlock>
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
 
                         <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}"  Binding="{Binding Similarity}" Width="150" IsReadOnly="True">
                             <DataGridTextColumn.Header>
-                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="Similarity"></TextBlock>
+                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[Recommend_Similarity], Source={StaticResource LocalizationProxy}}"></TextBlock>
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
 
@@ -69,7 +74,7 @@
 
                         <DataGridTemplateColumn IsReadOnly="True">
                             <DataGridTemplateColumn.Header>
-                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="InputPattern"></TextBlock>
+                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[Recommend_InputPattern], Source={StaticResource LocalizationProxy}}"></TextBlock>
                             </DataGridTemplateColumn.Header>
 
                             <DataGridTemplateColumn.CellTemplate >
@@ -83,7 +88,7 @@
 
                         <DataGridTemplateColumn IsReadOnly="True">
                             <DataGridTemplateColumn.Header>
-                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="OutputPattern"></TextBlock>
+                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[Recommend_OutputPattern], Source={StaticResource LocalizationProxy}}"></TextBlock>
                             </DataGridTemplateColumn.Header>
 
                             <DataGridTemplateColumn.CellTemplate>
@@ -97,11 +102,11 @@
 
                         <DataGridTemplateColumn  Width="150" IsReadOnly="True">
                             <DataGridTemplateColumn.Header>
-                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="MR Infomation"></TextBlock>
+                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[Recommend_MrInformation], Source={StaticResource LocalizationProxy}}"></TextBlock>
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <ui:Button  Width="100" Height="50" FontSize="14" Content="查看" HorizontalAlignment="Center" AutomationProperties.AutomationId="Button_MT"
+                                    <ui:Button  Width="100" Height="50" FontSize="14" Content="{Binding Data.ViewModel.Localization[Recommend_View], Source={StaticResource LocalizationProxy}}" HorizontalAlignment="Center" AutomationProperties.AutomationId="Button_MT"
                                      Appearance="Primary"
                                      Icon="{ui:SymbolIcon CalculatorArrowClockwise24}"
                                      Command="{s:Action btn_EditSelectedMR}"
@@ -112,11 +117,11 @@
                         </DataGridTemplateColumn>
                         <DataGridTemplateColumn  Width="150" IsReadOnly="True">
                             <DataGridTemplateColumn.Header>
-                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="Application Infomation"></TextBlock>
+                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[Recommend_ApplicationInformation], Source={StaticResource LocalizationProxy}}"></TextBlock>
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <ui:Button  Width="100" Height="50" FontSize="14" Content="查看" HorizontalAlignment="Center" AutomationProperties.AutomationId="Button_MT"
+                                    <ui:Button  Width="100" Height="50" FontSize="14" Content="{Binding Data.ViewModel.Localization[Recommend_View], Source={StaticResource LocalizationProxy}}" HorizontalAlignment="Center" AutomationProperties.AutomationId="Button_MT"
                                                 Appearance="Primary"
                                                 Icon="{ui:SymbolIcon CalculatorArrowClockwise24}"
                                                 Command="{s:Action btn_EditSelectedApplication}"
@@ -127,7 +132,7 @@
                         </DataGridTemplateColumn>
                         <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}"  Binding="{Binding Value}" Width="200" IsReadOnly="True">
                             <DataGridTextColumn.Header>
-                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="SupportRate"></TextBlock>
+                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[Recommend_SupportRate], Source={StaticResource LocalizationProxy}}"></TextBlock>
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
                     </DataGrid.Columns>
@@ -152,27 +157,27 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <StackPanel Grid.Row="0" Orientation="Horizontal"  HorizontalAlignment="Left" VerticalAlignment="Center"  Margin="0 3 0 5">
-                <TextBlock Text="RecommendType" Margin="22 0 0 0" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ViewModel.Localization[Recommend_RecommendType]}" Margin="22 0 0 0" VerticalAlignment="Center" />
                 <ComboBox   Margin="10 0 0 0" Width="150"
                             SelectedIndex="{Binding ViewModel.RecommendType_ComboBoxSelectedIndex,UpdateSourceTrigger=PropertyChanged}"
                             SelectedValue="{Binding ViewModel.RecommendType_ComboBoxSelectedValue,UpdateSourceTrigger=PropertyChanged}"
                             ItemsSource="{Binding ViewModel.RecommendTypeList,UpdateSourceTrigger=PropertyChanged}"
                             />
-                <ui:Button Appearance="Primary" Content="Recommend" Margin="5 0 0 0"
+                <ui:Button Appearance="Primary" Content="{Binding ViewModel.Localization[Recommend_Recommend]}" Margin="5 0 0 0"
                            s:View.ActionTarget="{Binding ViewModel}"
                            Command="{s:Action btnRecommend_Click}"
                            Icon="{ui:SymbolIcon ZoomIn24}"
                            />
             </StackPanel>
             <StackPanel  Grid.Row="1" Orientation="Horizontal"  HorizontalAlignment="Left" VerticalAlignment="Center"  Margin="0 3 0 5">
-                <TextBlock Text="Program" Margin="80 0 0 0" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ViewModel.Localization[Recommend_Application]}" Margin="80 0 0 0" VerticalAlignment="Center" />
                 <TextBox Text="{Binding ViewModel.CodeName,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" s:View.ActionTarget="{Binding ViewModel}" Margin="10 0 0 0" Width="150" />
-                <ui:Button Appearance="Info" Content="X"
+                <ui:Button Appearance="Info" Content="{Binding ViewModel.Localization[Recommend_Clear]}"
                            Margin="5 0 0 0 "
                            s:View.ActionTarget="{Binding ViewModel}"
                            Command="{s:Action btnBack_Click}" 
                   />
-                <ui:Button Appearance="Primary" Content="Upl" 
+                <ui:Button Appearance="Primary" Content="{Binding ViewModel.Localization[Recommend_Upload]}"
                            Margin="5 0 0 0"
                            s:View.ActionTarget="{Binding ViewModel}"
                            Command="{s:Action btnAddCode_Click}"
@@ -181,21 +186,21 @@
                
             </StackPanel>
             <StackPanel  Grid.Row="2" x:Name="stackpanel2" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="InputParamCount"  Margin="18 0 0 0" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ViewModel.Localization[Recommend_InputParamCount]}"  Margin="18 0 0 0" VerticalAlignment="Center" />
                 <ui:TextBox x:Name="txbInputParamCount"  Margin="10 0 0 0" VerticalContentAlignment="Center" Width="170"
              InputMethod.IsInputMethodEnabled="False"
              Language="en-US"
              TextWrapping="Wrap"
              Text="{Binding ViewModel.InputParamCount,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
              />
-                <ui:Button Appearance="Primary"  Content="Reset" Margin="3 0 0 0"
+                <ui:Button Appearance="Primary"  Content="{Binding ViewModel.Localization[Recommend_Reset]}" Margin="3 0 0 0"
                 Icon="{ui:SymbolIcon TextBulletListSquareSettings20}"
                 s:View.ActionTarget="{Binding ViewModel}"
                 Command="{s:Action btn_Cancle}"
                />
             </StackPanel>
             <StackPanel  Grid.Row="3" x:Name="stackpanel3" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="InputParamRanges"  Margin="10 0 0 0" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ViewModel.Localization[Recommend_InputParamRanges]}"  Margin="10 0 0 0" VerticalAlignment="Center" />
                 <ui:TextBox x:Name="txbMaxNumber"  Margin="10 0 0 0" VerticalContentAlignment="Center" Width="170"
               InputMethod.IsInputMethodEnabled="False"
               Language="en-US"
@@ -204,7 +209,7 @@
               />
             </StackPanel>
             <StackPanel  Grid.Row="4" x:Name="stackpanel4" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="InputDatatypes"  Margin="33 0 0 0" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ViewModel.Localization[Recommend_InputDatatypes]}"  Margin="33 0 0 0" VerticalAlignment="Center" />
                 <ui:TextBox x:Name="txbExecuteNumb" Margin="10 0 0 0" VerticalContentAlignment="Center" Width="170"
               InputMethod.IsInputMethodEnabled="False"
               Language="en-US"

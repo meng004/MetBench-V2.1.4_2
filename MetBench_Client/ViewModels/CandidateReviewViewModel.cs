@@ -10,6 +10,7 @@ using MetBench_BLL.Discovery;
 using MetBench_BLL.Discovery.Validators;
 using MetBench_Domain;
 using MetBench_IDAL;
+using MetBench_UI.Localization;
 using Wpf.Ui.Controls;
 
 namespace MetBench_Client.ViewModels;
@@ -53,14 +54,18 @@ public sealed partial class CandidateReviewViewModel : ObservableObject, INaviga
         EmpiricalValidator empirical,
         TheoreticalLlmValidator theoreticalLlm,
         ICandidateMRRepository candidateRepo,
-        IValidationRunRepository validationRunRepo)
+        IValidationRunRepository validationRunRepo,
+        LocalizedTextProvider localization)
     {
         _validationService = validationService;
         _empirical = empirical;
         _theoreticalLlm = theoreticalLlm;
         _candidateRepo = candidateRepo;
         _validationRunRepo = validationRunRepo;
+        Localization = localization;
     }
+
+    public LocalizedTextProvider Localization { get; }
 
     public void OnNavigatedTo() => LoadCandidates();
     public void OnNavigatedFrom() { }

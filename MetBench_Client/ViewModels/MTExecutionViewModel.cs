@@ -8,6 +8,7 @@ using MetBench_Client.Helpers;
 using MetBench_Client.Views.Pages;
 using MetBench_Domain;
 using MetBench_IDAL;
+using MetBench_UI.Localization;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -245,13 +246,16 @@ namespace MetBench_Client.ViewModels
         }
 
         // 构造函数
-        public MTExecutionViewModel(IPageService pageService, INavigationService navigationService, ApplicationService applicationSerive, MetamorphicRelationService metamorphicRelationSerive, MTVisualizationService mTVisualizationSerive)
+        public LocalizedTextProvider Localization { get; }
+
+        public MTExecutionViewModel(IPageService pageService, INavigationService navigationService, ApplicationService applicationSerive, MetamorphicRelationService metamorphicRelationSerive, MTVisualizationService mTVisualizationSerive, LocalizedTextProvider localization)
         {
             _navigationService = navigationService;
             _pageService = pageService;
             _applicationSerive = applicationSerive;
             _metamorphicRelationSerive = metamorphicRelationSerive;
             _mTVisualizationSerive = mTVisualizationSerive;
+            Localization = localization;
             IsIndeterminate = false;
             Visibility = Visibility.Collapsed;
 
