@@ -220,4 +220,43 @@
   <data name="ReportGenerator_Export" xml:space="preserve">
     <value>Export</value>
   </data>
+  <data name="Legacy_Add" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="Legacy_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Legacy_Modify" xml:space="preserve">
+    <value>Modify</value>
+  </data>
+  <data name="Legacy_Query" xml:space="preserve">
+    <value>Query</value>
+  </data>
+  <data name="Legacy_Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Legacy_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Legacy_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Legacy_Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Legacy_Domain" xml:space="preserve">
+    <value>Domain</value>
+  </data>
+  <data name="Legacy_Application" xml:space="preserve">
+    <value>Application</value>
+  </data>
+  <data name="Legacy_Recommendation" xml:space="preserve">
+    <value>Recommendation</value>
+  </data>
+  <data name="Legacy_Detection" xml:space="preserve">
+    <value>Detection</value>
+  </data>
+  <data name="Legacy_Coverage" xml:space="preserve">
+    <value>Coverage</value>
+  </data>
 </root>

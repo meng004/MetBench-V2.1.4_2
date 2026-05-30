@@ -6,6 +6,7 @@ using MetBench_Client.Util;
 using MetBench_Client.Views.Pages;
 using MetBench_Domain;
 using MetBench_IDAL;
+using MetBench_UI.Localization;
 using Stylet;
 using System;
 using System.Collections.Generic;
@@ -25,6 +26,8 @@ namespace MetBench_Client.ViewModels
 
     public class MRManagementViewModel : ObservableObject, INavigationAware, IHandle<ApplicationAddEvent>, IHandle<ApplicationMoidfyEvent>, IHandle<ApplicationDeleteEvent>, IHandle<DomainAddEvent>, IHandle<DomainModifyEvent>, IHandle<DomainDeleteEvent>, IHandle<MetamorphicRelationOperationEvent>
     {
+        public LocalizedTextProvider Localization { get; }
+
         // 导航服务 用于页面切换
         private INavigationService _navigationService;
 
@@ -173,7 +176,7 @@ namespace MetBench_Client.ViewModels
         }
 
         // 构造函数
-        public MRManagementViewModel(MetamorphicRelationService metamorphicRelationSerive, ApplicationService applicationSerive, IPageService pageService, INavigationService navigationService, IEventAggregator eventAggregator, IMRBindingRepository mrBindingRepository = null)
+        public MRManagementViewModel(MetamorphicRelationService metamorphicRelationSerive, ApplicationService applicationSerive, IPageService pageService, INavigationService navigationService, IEventAggregator eventAggregator, LocalizedTextProvider localization, IMRBindingRepository mrBindingRepository = null)
         {
             this._metamorphicRelationSerive = metamorphicRelationSerive;
             this._applicationSerive = applicationSerive;
@@ -181,6 +184,7 @@ namespace MetBench_Client.ViewModels
             this._pageService = pageService;
             this._eventAggregator = eventAggregator;
             this._mrBindingRepository = mrBindingRepository;
+            Localization = localization;
             _eventAggregator.Subscribe(this);
             IsIndeterminate = false;
             Visibility = Visibility.Collapsed;
