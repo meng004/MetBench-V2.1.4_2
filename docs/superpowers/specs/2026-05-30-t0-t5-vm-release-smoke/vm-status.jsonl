@@ -1,0 +1,1 @@
+﻿{"timestamp_utc":"2026-05-30T06:01:10.8854412Z","run_id":"t0-t5-2026-05-30","branch":"claude/vm-t0-t5-release-readiness","head":"30cbbfebcacbe4c6b07229077e258ca76b213bc6","step":"vm-claude-bootstrap","status":"running","message":"starting Claude Code CLI from VM bootstrap script","evidence_dir":"docs\\superpowers\\specs\\2026-05-30-t0-t5-vm-release-smoke","screenshots":{}}
