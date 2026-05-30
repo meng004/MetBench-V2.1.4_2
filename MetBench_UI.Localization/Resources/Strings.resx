@@ -262,4 +262,187 @@
   <data name="Legacy_Coverage" xml:space="preserve">
     <value>Coverage</value>
   </data>
+  <data name="SystemMt_PageTitle" xml:space="preserve">
+    <value>System-Level Metamorphic Testing</value>
+  </data>
+  <data name="SystemMt_PageSubtitle" xml:space="preserve">
+    <value>Pick a scenario, optionally override the transformation parameter, run, and review persisted results.</value>
+  </data>
+  <data name="SystemMt_Scenario" xml:space="preserve">
+    <value>Scenario</value>
+  </data>
+  <data name="SystemMt_FactorParameter" xml:space="preserve">
+    <value>Factor parameter</value>
+  </data>
+  <data name="SystemMt_FactorParameterPlaceholder" xml:space="preserve">
+    <value>e.g. 2</value>
+  </data>
+  <data name="SystemMt_RefreshRecent" xml:space="preserve">
+    <value>Refresh recent</value>
+  </data>
+  <data name="SystemMt_LastResult" xml:space="preserve">
+    <value>Last result</value>
+  </data>
+  <data name="SystemMt_Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="SystemMt_RunAt" xml:space="preserve">
+    <value>Run At</value>
+  </data>
+  <data name="SystemMt_Assertion" xml:space="preserve">
+    <value>Assertion</value>
+  </data>
+  <data name="SystemMt_Value" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="SystemMt_Passed" xml:space="preserve">
+    <value>Passed</value>
+  </data>
+  <data name="SystemMt_ExportHtmlReport" xml:space="preserve">
+    <value>Export HTML report</value>
+  </data>
+  <data name="Catalog_Reload" xml:space="preserve">
+    <value>Reload</value>
+  </data>
+  <data name="Catalog_Validate" xml:space="preserve">
+    <value>Validate</value>
+  </data>
+  <data name="Catalog_EquationKey" xml:space="preserve">
+    <value>Equation key</value>
+  </data>
+  <data name="Catalog_MrCatalogTitle" xml:space="preserve">
+    <value>System MT MR Catalog</value>
+  </data>
+  <data name="Catalog_MrCatalogSubtitle" xml:space="preserve">
+    <value>Edit manifest-backed System MT MR bindings. Validation must pass before save.</value>
+  </data>
+  <data name="Catalog_Manifest" xml:space="preserve">
+    <value>Manifest</value>
+  </data>
+  <data name="Catalog_NewMrDraft" xml:space="preserve">
+    <value>New MR draft</value>
+  </data>
+  <data name="Catalog_MrId" xml:space="preserve">
+    <value>MR ID</value>
+  </data>
+  <data name="Catalog_Assertion" xml:space="preserve">
+    <value>Assertion</value>
+  </data>
+  <data name="Catalog_Value" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="Catalog_DisplayName" xml:space="preserve">
+    <value>Display name</value>
+  </data>
+  <data name="Catalog_Transformation" xml:space="preserve">
+    <value>Transformation</value>
+  </data>
+  <data name="Catalog_AssertionName" xml:space="preserve">
+    <value>Assertion name</value>
+  </data>
+  <data name="Catalog_ValueName" xml:space="preserve">
+    <value>Value name</value>
+  </data>
+  <data name="Catalog_MetaPattern" xml:space="preserve">
+    <value>Meta pattern</value>
+  </data>
+  <data name="Catalog_SampleCase" xml:space="preserve">
+    <value>Sample case</value>
+  </data>
+  <data name="Catalog_WorkRoot" xml:space="preserve">
+    <value>Work root</value>
+  </data>
+  <data name="Catalog_TimeoutSeconds" xml:space="preserve">
+    <value>Timeout seconds</value>
+  </data>
+  <data name="Catalog_Factor" xml:space="preserve">
+    <value>Factor</value>
+  </data>
+  <data name="Catalog_TransformStep" xml:space="preserve">
+    <value>Transform step</value>
+  </data>
+  <data name="Catalog_TargetFieldPath" xml:space="preserve">
+    <value>Target field path</value>
+  </data>
+  <data name="Catalog_SutCatalogTitle" xml:space="preserve">
+    <value>System MT SUT Catalog</value>
+  </data>
+  <data name="Catalog_SutCatalogSubtitle" xml:space="preserve">
+    <value>Edit the program section of SUT/&lt;sut&gt;/catalog.json. MR bindings are edited on the MR Catalog page.</value>
+  </data>
+  <data name="Catalog_NewSutDraft" xml:space="preserve">
+    <value>New SUT draft</value>
+  </data>
+  <data name="Catalog_SutId" xml:space="preserve">
+    <value>SUT id</value>
+  </data>
+  <data name="Catalog_Equation" xml:space="preserve">
+    <value>Equation</value>
+  </data>
+  <data name="Catalog_Program" xml:space="preserve">
+    <value>Program</value>
+  </data>
+  <data name="Catalog_SutName" xml:space="preserve">
+    <value>SUT name</value>
+  </data>
+  <data name="Catalog_ProgramName" xml:space="preserve">
+    <value>Program name</value>
+  </data>
+  <data name="Catalog_ProgramType" xml:space="preserve">
+    <value>Program type</value>
+  </data>
+  <data name="Catalog_PythonRuntimeKind" xml:space="preserve">
+    <value>Python runtime kind</value>
+  </data>
+  <data name="Catalog_RunnerScript" xml:space="preserve">
+    <value>Runner script</value>
+  </data>
+  <data name="Catalog_InputParserScript" xml:space="preserve">
+    <value>Input parser script</value>
+  </data>
+  <data name="Catalog_OutputParserScript" xml:space="preserve">
+    <value>Output parser script</value>
+  </data>
+  <data name="Catalog_InputAdapterScript" xml:space="preserve">
+    <value>Input adapter script</value>
+  </data>
+  <data name="Catalog_OutputAdapterScript" xml:space="preserve">
+    <value>Output adapter script</value>
+  </data>
+  <data name="Catalog_EquationCatalogTitle" xml:space="preserve">
+    <value>System MT Equation Catalog</value>
+  </data>
+  <data name="Catalog_EquationCatalogSubtitle" xml:space="preserve">
+    <value>Built-in seed equations are read-only. User-defined equations can be created, edited, and deleted (unless referenced by an MR).</value>
+  </data>
+  <data name="Catalog_NewEquation" xml:space="preserve">
+    <value>New equation</value>
+  </data>
+  <data name="Catalog_Key" xml:space="preserve">
+    <value>Key</value>
+  </data>
+  <data name="Catalog_CanonicalForm" xml:space="preserve">
+    <value>Canonical form</value>
+  </data>
+  <data name="Catalog_Source" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="Catalog_SymbolSystem" xml:space="preserve">
+    <value>Symbol system</value>
+  </data>
+  <data name="Catalog_SampleCatalogTitle" xml:space="preserve">
+    <value>System MT Sample Case Catalog</value>
+  </data>
+  <data name="Catalog_SampleCatalogSubtitle" xml:space="preserve">
+    <value>Browse and edit sample JSON files under SUT/&lt;sut&gt;/sample/. Files referenced by an MR binding cannot be deleted.</value>
+  </data>
+  <data name="Catalog_SutLabel" xml:space="preserve">
+    <value>SUT</value>
+  </data>
+  <data name="Catalog_NewSample" xml:space="preserve">
+    <value>New sample</value>
+  </data>
+  <data name="Catalog_FileName" xml:space="preserve">
+    <value>File name</value>
+  </data>
 </root>

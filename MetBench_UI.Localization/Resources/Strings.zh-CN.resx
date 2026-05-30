@@ -262,4 +262,187 @@
   <data name="Legacy_Coverage" xml:space="preserve">
     <value>覆盖率</value>
   </data>
+  <data name="SystemMt_PageTitle" xml:space="preserve">
+    <value>系统级蜕变测试</value>
+  </data>
+  <data name="SystemMt_PageSubtitle" xml:space="preserve">
+    <value>选择一个场景，可选地覆盖变换参数，运行并查看持久化结果。</value>
+  </data>
+  <data name="SystemMt_Scenario" xml:space="preserve">
+    <value>场景</value>
+  </data>
+  <data name="SystemMt_FactorParameter" xml:space="preserve">
+    <value>变换因子</value>
+  </data>
+  <data name="SystemMt_FactorParameterPlaceholder" xml:space="preserve">
+    <value>例如 2</value>
+  </data>
+  <data name="SystemMt_RefreshRecent" xml:space="preserve">
+    <value>刷新最近记录</value>
+  </data>
+  <data name="SystemMt_LastResult" xml:space="preserve">
+    <value>最近结果</value>
+  </data>
+  <data name="SystemMt_Status" xml:space="preserve">
+    <value>状态</value>
+  </data>
+  <data name="SystemMt_RunAt" xml:space="preserve">
+    <value>运行时间</value>
+  </data>
+  <data name="SystemMt_Assertion" xml:space="preserve">
+    <value>断言</value>
+  </data>
+  <data name="SystemMt_Value" xml:space="preserve">
+    <value>值</value>
+  </data>
+  <data name="SystemMt_Passed" xml:space="preserve">
+    <value>是否通过</value>
+  </data>
+  <data name="SystemMt_ExportHtmlReport" xml:space="preserve">
+    <value>导出 HTML 报告</value>
+  </data>
+  <data name="Catalog_Reload" xml:space="preserve">
+    <value>重新加载</value>
+  </data>
+  <data name="Catalog_Validate" xml:space="preserve">
+    <value>验证</value>
+  </data>
+  <data name="Catalog_EquationKey" xml:space="preserve">
+    <value>方程键</value>
+  </data>
+  <data name="Catalog_MrCatalogTitle" xml:space="preserve">
+    <value>系统级 MR 目录</value>
+  </data>
+  <data name="Catalog_MrCatalogSubtitle" xml:space="preserve">
+    <value>编辑清单驱动的系统级 MR 绑定，保存前必须通过验证。</value>
+  </data>
+  <data name="Catalog_Manifest" xml:space="preserve">
+    <value>清单</value>
+  </data>
+  <data name="Catalog_NewMrDraft" xml:space="preserve">
+    <value>新建 MR 草稿</value>
+  </data>
+  <data name="Catalog_MrId" xml:space="preserve">
+    <value>MR ID</value>
+  </data>
+  <data name="Catalog_Assertion" xml:space="preserve">
+    <value>断言类型</value>
+  </data>
+  <data name="Catalog_Value" xml:space="preserve">
+    <value>值名称</value>
+  </data>
+  <data name="Catalog_DisplayName" xml:space="preserve">
+    <value>显示名称</value>
+  </data>
+  <data name="Catalog_Transformation" xml:space="preserve">
+    <value>变换</value>
+  </data>
+  <data name="Catalog_AssertionName" xml:space="preserve">
+    <value>断言名称</value>
+  </data>
+  <data name="Catalog_ValueName" xml:space="preserve">
+    <value>值名称</value>
+  </data>
+  <data name="Catalog_MetaPattern" xml:space="preserve">
+    <value>元模式</value>
+  </data>
+  <data name="Catalog_SampleCase" xml:space="preserve">
+    <value>样例文件</value>
+  </data>
+  <data name="Catalog_WorkRoot" xml:space="preserve">
+    <value>工作根目录</value>
+  </data>
+  <data name="Catalog_TimeoutSeconds" xml:space="preserve">
+    <value>超时秒数</value>
+  </data>
+  <data name="Catalog_Factor" xml:space="preserve">
+    <value>变换因子</value>
+  </data>
+  <data name="Catalog_TransformStep" xml:space="preserve">
+    <value>变换步骤</value>
+  </data>
+  <data name="Catalog_TargetFieldPath" xml:space="preserve">
+    <value>目标字段路径</value>
+  </data>
+  <data name="Catalog_SutCatalogTitle" xml:space="preserve">
+    <value>系统级 SUT 目录</value>
+  </data>
+  <data name="Catalog_SutCatalogSubtitle" xml:space="preserve">
+    <value>编辑 SUT/&lt;sut&gt;/catalog.json 的程序段。MR 绑定在 MR 目录页编辑。</value>
+  </data>
+  <data name="Catalog_NewSutDraft" xml:space="preserve">
+    <value>新建 SUT 草稿</value>
+  </data>
+  <data name="Catalog_SutId" xml:space="preserve">
+    <value>SUT 标识</value>
+  </data>
+  <data name="Catalog_Equation" xml:space="preserve">
+    <value>方程</value>
+  </data>
+  <data name="Catalog_Program" xml:space="preserve">
+    <value>程序</value>
+  </data>
+  <data name="Catalog_SutName" xml:space="preserve">
+    <value>SUT 名称</value>
+  </data>
+  <data name="Catalog_ProgramName" xml:space="preserve">
+    <value>程序名称</value>
+  </data>
+  <data name="Catalog_ProgramType" xml:space="preserve">
+    <value>程序类型</value>
+  </data>
+  <data name="Catalog_PythonRuntimeKind" xml:space="preserve">
+    <value>Python 运行环境类型</value>
+  </data>
+  <data name="Catalog_RunnerScript" xml:space="preserve">
+    <value>运行脚本</value>
+  </data>
+  <data name="Catalog_InputParserScript" xml:space="preserve">
+    <value>输入解析脚本</value>
+  </data>
+  <data name="Catalog_OutputParserScript" xml:space="preserve">
+    <value>输出解析脚本</value>
+  </data>
+  <data name="Catalog_InputAdapterScript" xml:space="preserve">
+    <value>输入适配脚本</value>
+  </data>
+  <data name="Catalog_OutputAdapterScript" xml:space="preserve">
+    <value>输出适配脚本</value>
+  </data>
+  <data name="Catalog_EquationCatalogTitle" xml:space="preserve">
+    <value>系统级方程目录</value>
+  </data>
+  <data name="Catalog_EquationCatalogSubtitle" xml:space="preserve">
+    <value>内置种子方程为只读。用户自定义方程可创建、编辑和删除（被 MR 引用的除外）。</value>
+  </data>
+  <data name="Catalog_NewEquation" xml:space="preserve">
+    <value>新建方程</value>
+  </data>
+  <data name="Catalog_Key" xml:space="preserve">
+    <value>键</value>
+  </data>
+  <data name="Catalog_CanonicalForm" xml:space="preserve">
+    <value>规范形式</value>
+  </data>
+  <data name="Catalog_Source" xml:space="preserve">
+    <value>来源</value>
+  </data>
+  <data name="Catalog_SymbolSystem" xml:space="preserve">
+    <value>符号系统</value>
+  </data>
+  <data name="Catalog_SampleCatalogTitle" xml:space="preserve">
+    <value>系统级样例目录</value>
+  </data>
+  <data name="Catalog_SampleCatalogSubtitle" xml:space="preserve">
+    <value>浏览并编辑 SUT/&lt;sut&gt;/sample/ 下的样例 JSON 文件。被 MR 绑定引用的文件不可删除。</value>
+  </data>
+  <data name="Catalog_SutLabel" xml:space="preserve">
+    <value>SUT</value>
+  </data>
+  <data name="Catalog_NewSample" xml:space="preserve">
+    <value>新建样例</value>
+  </data>
+  <data name="Catalog_FileName" xml:space="preserve">
+    <value>文件名</value>
+  </data>
 </root>
