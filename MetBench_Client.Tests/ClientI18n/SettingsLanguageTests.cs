@@ -35,4 +35,14 @@ public sealed class SettingsLanguageTests
 
         Assert.Equal("en-US", localization.CurrentCulture.Name);
     }
+
+    [WpfFact]
+    public void ChangeCulture_with_null_or_blank_does_not_throw()
+    {
+        var localization = new AppLocalizationService();
+        var vm = new SettingsViewModel(localization, new LocalizedTextProvider(localization));
+        vm.ChangeCultureCommand.Execute(null);
+        vm.ChangeCultureCommand.Execute("");
+        Assert.Equal("en-US", localization.CurrentCulture.Name); // unchanged
+    }
 }

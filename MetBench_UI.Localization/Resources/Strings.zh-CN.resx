@@ -73,6 +73,9 @@
   <data name="Settings_Language" xml:space="preserve">
     <value>语言</value>
   </data>
+  <data name="Settings_Apply" xml:space="preserve">
+    <value>应用</value>
+  </data>
   <data name="Settings_Language_English" xml:space="preserve">
     <value>English</value>
   </data>

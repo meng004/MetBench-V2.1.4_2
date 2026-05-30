@@ -342,9 +342,9 @@ public static class Flows
             failed++;
         }
 
-        // ---- step C: click Apply (the Settings_Language button) ----
-        // The button's Content is bound to Localization[Settings_Language] = "Language" in English
-        Console.WriteLine("\nC) Click apply/Language button...");
+        // ---- step C: click Apply (the Settings_Apply button) ----
+        // The button's Content is bound to Localization[Settings_Apply] = "Apply" in English
+        Console.WriteLine("\nC) Click apply button...");
         bool applied = InvokeSettingsLanguageButton(app);
         if (!applied)
         {
@@ -642,8 +642,8 @@ public static class Flows
     /// </summary>
     private static bool InvokeSettingsLanguageButton(AutomationElement app)
     {
-        // Try known display-name variations first
-        foreach (var btnName in new[] { "Language", "语言" })
+        // Try known display-name variations first (includes post-Fix3 "Apply"/"应用")
+        foreach (var btnName in new[] { "Apply", "应用", "Language", "语言" })
         {
             var btn = UiaHelpers.FindButton(app, btnName);
             if (btn is not null)

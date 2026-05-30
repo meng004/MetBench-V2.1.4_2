@@ -52,7 +52,7 @@
                 Margin="8,0,0,0"
                 Command="{Binding ViewModel.ChangeCultureCommand}"
                 CommandParameter="{Binding ViewModel.SelectedCulture.Culture.Name}"
-                Content="{Binding ViewModel.Localization[Settings_Language]}" />
+                Content="{Binding ViewModel.Localization[Settings_Apply]}" />
         </StackPanel>
 
         <TextBlock

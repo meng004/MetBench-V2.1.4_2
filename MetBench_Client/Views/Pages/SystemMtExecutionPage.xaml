@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
     xmlns:local="clr-namespace:MetBench_Client.Views.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -14,6 +15,10 @@
     ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     mc:Ignorable="d">
+
+    <Page.Resources>
+        <helpers:BindingProxy x:Key="LocalizationProxy" Data="{Binding}" />
+    </Page.Resources>
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
@@ -128,11 +133,11 @@
                     <DataGridTextColumn
                         Width="110"
                         Binding="{Binding SourceValue}"
-                        Header="{Binding ViewModel.Localization[SystemMt_Source], RelativeSource={RelativeSource AncestorType=Page}}"/>
+                        Header="{Binding Data.ViewModel.Localization[SystemMt_Source], Source={StaticResource LocalizationProxy}}"/>
                     <DataGridTextColumn
                         Width="110"
                         Binding="{Binding FollowUpValue}"
-                        Header="{Binding ViewModel.Localization[SystemMt_FollowUp], RelativeSource={RelativeSource AncestorType=Page}}"/>
+                        Header="{Binding Data.ViewModel.Localization[SystemMt_FollowUp], Source={StaticResource LocalizationProxy}}"/>
                     <DataGridCheckBoxColumn
                         Width="80"
                         Binding="{Binding Passed}"

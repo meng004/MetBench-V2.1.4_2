@@ -20,9 +20,9 @@ _Date: 2026-05-30 | Branch: codex/client-i18n | Task 7 of 8_
 
 | # | File | What it shows |
 |---|------|--------------|
-| 01 | `01-red-green-infra-tests.png` | Text render: SystemMT.Tests 10/10 GREEN + Client.Tests 3/3 GREEN + RED state record (Unknown command: i18n-smoke) |
-| 02 | `02-settings-language-switch-zh.png` | Settings page in Chinese: 个性化, 主题, 浅色/深色, 语言, 中文 in ComboBox, 语言 button |
-| 03 | `03-settings-language-switch-en.png` | Settings page in English: Personalization, Theme, Light/Dark, Language, English in ComboBox, Language button |
+| 01 | `01-red-green-infra-tests.png` | Text render: SystemMT.Tests 10/10 GREEN + Client.Tests 4/4 GREEN (includes null-guard test) + RED state record |
+| 02 | `02-settings-language-switch-zh.png` | Settings page in Chinese: 个性化, 主题, 浅色/深色, 语言, 中文 in ComboBox, 应用 button (Fix3) |
+| 03 | `03-settings-language-switch-en.png` | Settings page in English: Personalization, Theme, Light/Dark, Language, English in ComboBox, Apply button (Fix3) |
 | 04 | `04-navigation-zh.png` | Navigation in Chinese mode — window maximized before capture; Wpf.Ui nav rail is still icon-only at this width (nav text labels visible in 06 via System MT page nav) |
 | 05 | `05-navigation-en.png` | Navigation in English mode — window maximized before capture; distinct screenshot from 03 (different SHA256 / file size) |
 | 06 | `06-system-mt-page-zh.png` | System MT page in Chinese: heading **系统级蜕变测试**, 运行 button — proves nav label switched |

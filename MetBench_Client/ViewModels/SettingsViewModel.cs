@@ -64,6 +64,7 @@ namespace MetBench_Client.ViewModels
         [RelayCommand]
         private void OnChangeCulture(string cultureName)
         {
+            if (string.IsNullOrWhiteSpace(cultureName)) return;
             _localization.SetCulture(new CultureInfo(cultureName));
             SelectedCulture = AvailableCultures.FirstOrDefault(c => c.Culture.Name == _localization.CurrentCulture.Name);
         }
