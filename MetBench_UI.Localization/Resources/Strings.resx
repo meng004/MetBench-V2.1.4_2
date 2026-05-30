@@ -85,4 +85,67 @@
   <data name="Common_NotAvailable" xml:space="preserve">
     <value>N/A</value>
   </data>
+  <data name="Nav_MrDisplay" xml:space="preserve">
+    <value>MR Display</value>
+  </data>
+  <data name="Nav_MrManagement" xml:space="preserve">
+    <value>MR Management</value>
+  </data>
+  <data name="Nav_ApplicationManagement" xml:space="preserve">
+    <value>Application Management</value>
+  </data>
+  <data name="Nav_DomainManagement" xml:space="preserve">
+    <value>Domain Management</value>
+  </data>
+  <data name="Nav_MtExecution" xml:space="preserve">
+    <value>MT Execution</value>
+  </data>
+  <data name="Nav_SystemMtMrCatalog" xml:space="preserve">
+    <value>System MT MR Catalog</value>
+  </data>
+  <data name="Nav_SystemMtSutCatalog" xml:space="preserve">
+    <value>System MT SUT Catalog</value>
+  </data>
+  <data name="Nav_SystemMtEquationCatalog" xml:space="preserve">
+    <value>System MT Equation Catalog</value>
+  </data>
+  <data name="Nav_SystemMtSampleCaseCatalog" xml:space="preserve">
+    <value>System MT Sample Case Catalog</value>
+  </data>
+  <data name="Nav_SystemMtExecutionHistory" xml:space="preserve">
+    <value>System MT Execution History</value>
+  </data>
+  <data name="Nav_Anomalies" xml:space="preserve">
+    <value>Anomalies</value>
+  </data>
+  <data name="Nav_Discovery" xml:space="preserve">
+    <value>Discovery</value>
+  </data>
+  <data name="Nav_CandidateReview" xml:space="preserve">
+    <value>Candidate Review</value>
+  </data>
+  <data name="Nav_Mutation" xml:space="preserve">
+    <value>Mutation</value>
+  </data>
+  <data name="Nav_Replay" xml:space="preserve">
+    <value>Replay</value>
+  </data>
+  <data name="Nav_Coverage" xml:space="preserve">
+    <value>Coverage</value>
+  </data>
+  <data name="Nav_MetaPatterns" xml:space="preserve">
+    <value>MetaPatterns</value>
+  </data>
+  <data name="Nav_MrDetection" xml:space="preserve">
+    <value>MR Detection</value>
+  </data>
+  <data name="Nav_MrRecommendation" xml:space="preserve">
+    <value>MR Recommendation</value>
+  </data>
+  <data name="Nav_MrReportGenerator" xml:space="preserve">
+    <value>MR ReportGenerator</value>
+  </data>
+  <data name="Tray_Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
 </root>
