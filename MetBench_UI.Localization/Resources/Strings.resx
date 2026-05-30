@@ -1078,4 +1078,403 @@
   <data name="MtExec_PlotType" xml:space="preserve">
     <value>PlotType</value>
   </data>
+  <data name="Status_Anomaly_SweepDone_Fmt" xml:space="preserve">
+    <value>Swept {0}, retained {1}, failed {2}.</value>
+  </data>
+  <data name="Status_Anomaly_SweepFailed_Fmt" xml:space="preserve">
+    <value>Sweep failed: {0}</value>
+  </data>
+  <data name="Status_Anomaly_UnknownStatus_Fmt" xml:space="preserve">
+    <value>Unknown status '{0}'.</value>
+  </data>
+  <data name="Status_Anomaly_TransitionReturnedFalse_Fmt" xml:space="preserve">
+    <value>TransitionStatus returned false for anomaly {0}.</value>
+  </data>
+  <data name="Status_CandidateReview_NoValidatorSelected" xml:space="preserve">
+    <value>Select at least one validator.</value>
+  </data>
+  <data name="Status_CandidateReview_Validating" xml:space="preserve">
+    <value>Validating…</value>
+  </data>
+  <data name="Status_CandidateReview_ValidatorsPassed_Fmt" xml:space="preserve">
+    <value>{0}/{1} validators passed</value>
+  </data>
+  <data name="Status_CandidateReview_PromotedSuffix_Fmt" xml:space="preserve">
+    <value> → Promoted as MR #{0}</value>
+  </data>
+  <data name="Status_CandidateReview_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Status_Discovery_Running" xml:space="preserve">
+    <value>Running discovery…</value>
+  </data>
+  <data name="Status_Discovery_Done_Fmt" xml:space="preserve">
+    <value>Done — status: {0}, candidates: {1}</value>
+  </data>
+  <data name="Status_Discovery_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Status_MetaPattern_Seeded_Fmt" xml:space="preserve">
+    <value>Seeded {0} NOETHER MetaPattern rows.</value>
+  </data>
+  <data name="Status_MetaPattern_BeginAdd" xml:space="preserve">
+    <value>Filling new MetaPattern — give it a unique Code (e.g. "m_xxx") then Save.</value>
+  </data>
+  <data name="Status_MetaPattern_BeginEdit_Fmt" xml:space="preserve">
+    <value>Editing {0}. Code is immutable to keep MR foreign-key refs valid.</value>
+  </data>
+  <data name="Error_MetaPattern_CodeRequired" xml:space="preserve">
+    <value>Code is required.</value>
+  </data>
+  <data name="Error_MetaPattern_AlreadyExists_Fmt" xml:space="preserve">
+    <value>MetaPattern '{0}' already exists.</value>
+  </data>
+  <data name="Status_MetaPattern_Added_Fmt" xml:space="preserve">
+    <value>Added {0}.</value>
+  </data>
+  <data name="Error_MetaPattern_ModifyReturnedFalse_Fmt" xml:space="preserve">
+    <value>Modify returned false (Code '{0}' not found).</value>
+  </data>
+  <data name="Status_MetaPattern_Saved_Fmt" xml:space="preserve">
+    <value>Saved {0}.</value>
+  </data>
+  <data name="Error_MetaPattern_NotFound_Fmt" xml:space="preserve">
+    <value>MetaPattern '{0}' not found.</value>
+  </data>
+  <data name="Status_MetaPattern_StatusToggled_Fmt" xml:space="preserve">
+    <value>{0}: {1} → {2}</value>
+  </data>
+  <data name="Status_MetaPattern_AlreadyDeprecated_Fmt" xml:space="preserve">
+    <value>{0} already deprecated; no-op.</value>
+  </data>
+  <data name="Status_MetaPattern_SoftDeleted_Fmt" xml:space="preserve">
+    <value>Soft-deleted {0} ({1} → deprecated).</value>
+  </data>
+  <data name="Status_Mutation_LoadError_Fmt" xml:space="preserve">
+    <value>Load error: {0}</value>
+  </data>
+  <data name="Status_Mutation_SeedError_Fmt" xml:space="preserve">
+    <value>Seed error: {0}</value>
+  </data>
+  <data name="Status_Mutation_Seeded_Fmt" xml:space="preserve">
+    <value>Seeded demo data: {0} mutants, {1} bindings.</value>
+  </data>
+  <data name="Status_Mutation_SelectAtLeastOne" xml:space="preserve">
+    <value>Select at least one mutant and one MR binding.</value>
+  </data>
+  <data name="Status_Mutation_Starting" xml:space="preserve">
+    <value>Starting campaign…</value>
+  </data>
+  <data name="Status_Mutation_CellProgress_Fmt" xml:space="preserve">
+    <value>Cell {0}/{1}: Mut-{2} × Bind-{3}</value>
+  </data>
+  <data name="Status_Mutation_Done_Fmt" xml:space="preserve">
+    <value>Done — {0} cells | Detected: {1} | Missed: {2} | Detection rate: {3:P0}</value>
+  </data>
+  <data name="Status_Mutation_Cancelled" xml:space="preserve">
+    <value>Campaign cancelled.</value>
+  </data>
+  <data name="Status_Mutation_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Status_Replay_NoAnomalySelected" xml:space="preserve">
+    <value>No anomaly selected. Open the Anomalies page, pick a row, and click "Replay this anomaly".</value>
+  </data>
+  <data name="Status_Replay_NoResultRecord_Fmt" xml:space="preserve">
+    <value>No Result record found for Anomaly {0} (ResultId={1}).</value>
+  </data>
+  <data name="Hint_Replay_MrCodePlaceholder" xml:space="preserve">
+    <value>—  (click "Run real replay" to resolve)</value>
+  </data>
+  <data name="Status_Replay_PickAnAction" xml:space="preserve">
+    <value>Pick "Run real replay" to invoke ReplayService, or "Simulate replay" to preview a classification.</value>
+  </data>
+  <data name="Hint_Replay_NoTriggerParameters" xml:space="preserve">
+    <value>(none)</value>
+  </data>
+  <data name="Status_Replay_RealReplayCompleted_Fmt" xml:space="preserve">
+    <value>Real replay completed → {0}.</value>
+  </data>
+  <data name="Status_Replay_RealReplayFailed_Fmt" xml:space="preserve">
+    <value>Real replay failed: {0}</value>
+  </data>
+  <data name="Status_Replay_SimulatedExpression_Fmt" xml:space="preserve">
+    <value>simulated → {0}</value>
+  </data>
+  <data name="Status_Replay_SimulatedOnly" xml:space="preserve">
+    <value>Simulated only — use "Run real replay" for the real pipeline path.</value>
+  </data>
+  <data name="Status_Equation_InitialPrompt" xml:space="preserve">
+    <value>Select an equation row or click "New equation".</value>
+  </data>
+  <data name="Status_Equation_LoadedBuiltInReadOnly_Fmt" xml:space="preserve">
+    <value>Loaded '{0}' (Built-in, read-only).</value>
+  </data>
+  <data name="Status_Equation_NewDraft" xml:space="preserve">
+    <value>New user-defined equation draft. Fill in the fields, then Validate / Save.</value>
+  </data>
+  <data name="Status_Equation_DraftValid" xml:space="preserve">
+    <value>Equation draft is valid.</value>
+  </data>
+  <data name="Status_Equation_ValidationFailed_Fmt" xml:space="preserve">
+    <value>Validation failed: {0}</value>
+  </data>
+  <data name="Status_Equation_Saved_Fmt" xml:space="preserve">
+    <value>Equation '{0}' saved.</value>
+  </data>
+  <data name="Status_Equation_SaveBlocked_Fmt" xml:space="preserve">
+    <value>Save blocked: {0}</value>
+  </data>
+  <data name="Status_Equation_Deleted_Fmt" xml:space="preserve">
+    <value>Equation '{0}' deleted.</value>
+  </data>
+  <data name="Status_Equation_DeleteBlocked_Fmt" xml:space="preserve">
+    <value>Delete blocked: {0}</value>
+  </data>
+  <data name="Status_Equation_Loaded_Fmt" xml:space="preserve">
+    <value>Loaded {0} equation(s) ({1} user-defined).</value>
+  </data>
+  <data name="Status_Equation_ErrorListing_Fmt" xml:space="preserve">
+    <value>ERROR listing equations: {0}</value>
+  </data>
+  <data name="Status_Equation_LoadedUser_Fmt" xml:space="preserve">
+    <value>Loaded user equation '{0}'. Edit and Validate / Save.</value>
+  </data>
+  <data name="Status_Equation_UserNotFound_Fmt" xml:space="preserve">
+    <value>User equation '{0}' not found.</value>
+  </data>
+  <data name="Status_Equation_ErrorLoading_Fmt" xml:space="preserve">
+    <value>ERROR loading '{0}': {1}</value>
+  </data>
+  <data name="Status_History_Loading" xml:space="preserve">
+    <value>Loading execution history...</value>
+  </data>
+  <data name="Pagination_History_NoRows" xml:space="preserve">
+    <value>No rows</value>
+  </data>
+  <data name="Pagination_History_PageOfTotal_Fmt" xml:space="preserve">
+    <value>Page {0} / {1} (total: {2})</value>
+  </data>
+  <data name="Status_History_SelectRowBeforeDelete" xml:space="preserve">
+    <value>Select at least one row before clicking Delete.</value>
+  </data>
+  <data name="Prompt_History_DeleteSingle_Fmt" xml:space="preserve">
+    <value>Delete execution {0} ({1})? Evidence will be removed first, then the result row. This cannot be undone.</value>
+  </data>
+  <data name="Prompt_History_DeleteMultiple_Fmt" xml:space="preserve">
+    <value>Delete {0} execution rows (and their evidence)? This cannot be undone.</value>
+  </data>
+  <data name="Prompt_History_ConfirmDeleteTitle" xml:space="preserve">
+    <value>Confirm delete</value>
+  </data>
+  <data name="Status_History_NoRecordsMatchFilter" xml:space="preserve">
+    <value>No execution records match the filter.</value>
+  </data>
+  <data name="Status_History_LoadedRecords_Fmt" xml:space="preserve">
+    <value>Loaded {0} of {1} record(s).</value>
+  </data>
+  <data name="Status_History_ErrorLoadingExecutions_Fmt" xml:space="preserve">
+    <value>ERROR loading executions: {0}</value>
+  </data>
+  <data name="Evidence_History_NoEvidenceRow" xml:space="preserve">
+    <value>(No evidence row for this execution — legacy or evidence-only-orphan.)</value>
+  </data>
+  <data name="Evidence_History_ErrorLoadingEvidence_Fmt" xml:space="preserve">
+    <value>ERROR loading evidence: {0}</value>
+  </data>
+  <data name="Evidence_History_ExecutionId_Fmt" xml:space="preserve">
+    <value>ExecutionId: {0}</value>
+  </data>
+  <data name="Evidence_History_RecordedAt_Fmt" xml:space="preserve">
+    <value>Recorded at: {0}</value>
+  </data>
+  <data name="Evidence_History_TypedVerificationHeader" xml:space="preserve">
+    <value>Typed verification:</value>
+  </data>
+  <data name="Evidence_History_Spec_Fmt" xml:space="preserve">
+    <value>  Spec       : {0} {1}</value>
+  </data>
+  <data name="Evidence_History_Predicate_Fmt" xml:space="preserve">
+    <value>  Predicate  : {0} {1}</value>
+  </data>
+  <data name="Evidence_History_Status_Fmt" xml:space="preserve">
+    <value>  Status     : {0}</value>
+  </data>
+  <data name="Evidence_History_Expected_Fmt" xml:space="preserve">
+    <value>  Expected   : {0}</value>
+  </data>
+  <data name="Evidence_History_Actual_Fmt" xml:space="preserve">
+    <value>  Actual     : {0}</value>
+  </data>
+  <data name="Evidence_History_Residual_Fmt" xml:space="preserve">
+    <value>  Residual   : {0}</value>
+  </data>
+  <data name="Evidence_History_Tolerance_Fmt" xml:space="preserve">
+    <value>  Tolerance  : {0}</value>
+  </data>
+  <data name="Evidence_History_Reason_Fmt" xml:space="preserve">
+    <value>  Reason     : {0}</value>
+  </data>
+  <data name="Status_History_DeleteDeleted_Fmt" xml:space="preserve">
+    <value>{0} deleted</value>
+  </data>
+  <data name="Status_History_DeleteEvidenceOnly_Fmt" xml:space="preserve">
+    <value>{0} evidence-only (result row left for retry)</value>
+  </data>
+  <data name="Status_History_DeleteFailed_Fmt" xml:space="preserve">
+    <value>{0} failed (no rows touched)</value>
+  </data>
+  <data name="Status_History_NothingDeleted" xml:space="preserve">
+    <value>Nothing deleted.</value>
+  </data>
+  <data name="Status_Execution_Idle" xml:space="preserve">
+    <value>Idle.</value>
+  </data>
+  <data name="Status_Execution_Running_Fmt" xml:space="preserve">
+    <value>Running {0}…</value>
+  </data>
+  <data name="Status_Execution_ResultPass_Fmt" xml:space="preserve">
+    <value>PASS — {0}: source={1:G}, follow-up={2:G}</value>
+  </data>
+  <data name="Status_Execution_ResultFail_Fmt" xml:space="preserve">
+    <value>FAIL — {0}</value>
+  </data>
+  <data name="Status_Execution_Completed_Fmt" xml:space="preserve">
+    <value>Completed in source={0:F2}s, follow-up={1:F2}s.</value>
+  </data>
+  <data name="Status_Execution_Error_Fmt" xml:space="preserve">
+    <value>ERROR: {0}</value>
+  </data>
+  <data name="Status_Execution_RunFailed_Title" xml:space="preserve">
+    <value>System-MT run failed</value>
+  </data>
+  <data name="Status_Execution_Refreshed_Fmt" xml:space="preserve">
+    <value>Refreshed: {0} record(s).</value>
+  </data>
+  <data name="Status_Execution_ReportExported_Fmt" xml:space="preserve">
+    <value>Report exported: {0}</value>
+  </data>
+  <data name="Status_Catalog_SelectManifest" xml:space="preserve">
+    <value>Select a System MT manifest.</value>
+  </data>
+  <data name="Status_Catalog_DraftCreated" xml:space="preserve">
+    <value>New MR draft created. Fill fields, validate, then save.</value>
+  </data>
+  <data name="Status_Catalog_DraftValid" xml:space="preserve">
+    <value>MR draft is valid.</value>
+  </data>
+  <data name="Status_Catalog_ValidationFailed_Fmt" xml:space="preserve">
+    <value>Validation failed: {0}</value>
+  </data>
+  <data name="Status_Catalog_DraftSaved" xml:space="preserve">
+    <value>MR draft saved and catalog reloaded.</value>
+  </data>
+  <data name="Status_Catalog_SaveBlocked_Fmt" xml:space="preserve">
+    <value>Save blocked: {0}</value>
+  </data>
+  <data name="Status_Catalog_NoManifests" xml:space="preserve">
+    <value>No System MT catalog.json files found.</value>
+  </data>
+  <data name="Status_Catalog_ManifestsLoaded_Fmt" xml:space="preserve">
+    <value>Loaded {0} System MT manifest(s).</value>
+  </data>
+  <data name="Status_Catalog_LoadManifestsError_Fmt" xml:space="preserve">
+    <value>ERROR: {0}</value>
+  </data>
+  <data name="Status_Catalog_BindingsLoaded_Fmt" xml:space="preserve">
+    <value>Loaded {0} MR binding(s) from {1}.</value>
+  </data>
+  <data name="Status_SampleCatalog_SelectSut" xml:space="preserve">
+    <value>Select a SUT to browse its sample files.</value>
+  </data>
+  <data name="Status_SampleCatalog_NoSamplesUnderSut_Fmt" xml:space="preserve">
+    <value>No samples under SUT '{0}'.</value>
+  </data>
+  <data name="Status_SampleCatalog_LoadedSamples_Fmt" xml:space="preserve">
+    <value>Loaded {0} sample(s) for SUT '{1}'.</value>
+  </data>
+  <data name="Status_SampleCatalog_ErrorListingSamples_Fmt" xml:space="preserve">
+    <value>ERROR listing samples: {0}</value>
+  </data>
+  <data name="Status_SampleCatalog_LoadedSample_Fmt" xml:space="preserve">
+    <value>Loaded sample '{0}'.</value>
+  </data>
+  <data name="Status_SampleCatalog_ErrorLoadingSample_Fmt" xml:space="preserve">
+    <value>ERROR loading '{0}': {1}</value>
+  </data>
+  <data name="Status_SampleCatalog_EditThenValidate" xml:space="preserve">
+    <value>Edit the file name + JSON body, then Validate / Save.</value>
+  </data>
+  <data name="Status_SampleCatalog_DraftValid" xml:space="preserve">
+    <value>Sample draft is valid.</value>
+  </data>
+  <data name="Status_SampleCatalog_ValidationFailed_Fmt" xml:space="preserve">
+    <value>Validation failed: {0}</value>
+  </data>
+  <data name="Status_SampleCatalog_SampleSaved_Fmt" xml:space="preserve">
+    <value>Sample '{0}' saved.</value>
+  </data>
+  <data name="Status_SampleCatalog_SaveBlocked_Fmt" xml:space="preserve">
+    <value>Save blocked: {0}</value>
+  </data>
+  <data name="Dialog_SampleCatalog_ConfirmDeleteText_Fmt" xml:space="preserve">
+    <value>Delete sample '{0}' from SUT '{1}'? Files referenced by an MR will be blocked.</value>
+  </data>
+  <data name="Dialog_SampleCatalog_ConfirmDeleteCaption" xml:space="preserve">
+    <value>Confirm delete</value>
+  </data>
+  <data name="Status_SampleCatalog_SampleDeleted_Fmt" xml:space="preserve">
+    <value>Sample '{0}' deleted.</value>
+  </data>
+  <data name="Status_SampleCatalog_DeleteBlocked_Fmt" xml:space="preserve">
+    <value>Delete blocked: {0}</value>
+  </data>
+  <data name="Status_SampleCatalog_NoSuts" xml:space="preserve">
+    <value>No SUTs found.</value>
+  </data>
+  <data name="Status_SampleCatalog_LoadedSuts_Fmt" xml:space="preserve">
+    <value>Loaded {0} SUT(s).</value>
+  </data>
+  <data name="Status_SampleCatalog_ErrorListingSuts_Fmt" xml:space="preserve">
+    <value>ERROR listing SUTs: {0}</value>
+  </data>
+  <data name="Status_SutCatalog_InitialHint" xml:space="preserve">
+    <value>Select a SUT to edit its program section, or click "New SUT draft".</value>
+  </data>
+  <data name="Status_SutCatalog_DraftLoaded_Fmt" xml:space="preserve">
+    <value>Loaded program section for SUT '{0}'.</value>
+  </data>
+  <data name="Status_SutCatalog_DraftLoadError_Fmt" xml:space="preserve">
+    <value>ERROR loading '{0}': {1}</value>
+  </data>
+  <data name="Status_SutCatalog_NewDraft" xml:space="preserve">
+    <value>New SUT draft. Fill SUT name and program fields, then Validate / Save.</value>
+  </data>
+  <data name="Status_SutCatalog_ValidationFailed_NameRequired" xml:space="preserve">
+    <value>Validation failed: SUT name is required.</value>
+  </data>
+  <data name="Status_SutCatalog_DraftValid" xml:space="preserve">
+    <value>SUT draft is valid.</value>
+  </data>
+  <data name="Status_SutCatalog_ValidationFailed_Fmt" xml:space="preserve">
+    <value>Validation failed: {0}</value>
+  </data>
+  <data name="Status_SutCatalog_SaveBlocked_NameRequired" xml:space="preserve">
+    <value>Save blocked: SUT name is required.</value>
+  </data>
+  <data name="Status_SutCatalog_DraftSaved_Fmt" xml:space="preserve">
+    <value>SUT draft saved to {0}/catalog.json.</value>
+  </data>
+  <data name="Status_SutCatalog_SaveBlocked_Fmt" xml:space="preserve">
+    <value>Save blocked: {0}</value>
+  </data>
+  <data name="Status_SutCatalog_NoCatalogFiles" xml:space="preserve">
+    <value>No SUT catalog.json files found.</value>
+  </data>
+  <data name="Status_SutCatalog_Loaded_Fmt" xml:space="preserve">
+    <value>Loaded {0} SUT(s).</value>
+  </data>
+  <data name="Status_SutCatalog_ListError_Fmt" xml:space="preserve">
+    <value>ERROR listing SUTs: {0}</value>
+  </data>
 </root>

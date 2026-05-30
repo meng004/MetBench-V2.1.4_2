@@ -1078,4 +1078,403 @@
   <data name="MtExec_PlotType" xml:space="preserve">
     <value>图表类型</value>
   </data>
+  <data name="Status_Anomaly_SweepDone_Fmt" xml:space="preserve">
+    <value>已清理 {0}，保留 {1}，失败 {2}。</value>
+  </data>
+  <data name="Status_Anomaly_SweepFailed_Fmt" xml:space="preserve">
+    <value>清理失败：{0}</value>
+  </data>
+  <data name="Status_Anomaly_UnknownStatus_Fmt" xml:space="preserve">
+    <value>未知状态 '{0}'。</value>
+  </data>
+  <data name="Status_Anomaly_TransitionReturnedFalse_Fmt" xml:space="preserve">
+    <value>异常 {0} 的状态转换返回 false。</value>
+  </data>
+  <data name="Status_CandidateReview_NoValidatorSelected" xml:space="preserve">
+    <value>请至少选择一个验证器。</value>
+  </data>
+  <data name="Status_CandidateReview_Validating" xml:space="preserve">
+    <value>正在验证…</value>
+  </data>
+  <data name="Status_CandidateReview_ValidatorsPassed_Fmt" xml:space="preserve">
+    <value>{0}/{1} 个验证器通过</value>
+  </data>
+  <data name="Status_CandidateReview_PromotedSuffix_Fmt" xml:space="preserve">
+    <value> → 已晋升为 MR #{0}</value>
+  </data>
+  <data name="Status_CandidateReview_Error" xml:space="preserve">
+    <value>错误</value>
+  </data>
+  <data name="Status_Discovery_Running" xml:space="preserve">
+    <value>正在运行发现…</value>
+  </data>
+  <data name="Status_Discovery_Done_Fmt" xml:space="preserve">
+    <value>完成 — 状态：{0}，候选数：{1}</value>
+  </data>
+  <data name="Status_Discovery_Error" xml:space="preserve">
+    <value>错误</value>
+  </data>
+  <data name="Status_MetaPattern_Seeded_Fmt" xml:space="preserve">
+    <value>已注入 {0} 条 NOETHER 元模式记录。</value>
+  </data>
+  <data name="Status_MetaPattern_BeginAdd" xml:space="preserve">
+    <value>正在填写新元模式 —— 请赋予唯一的 Code（例如 "m_xxx"）后保存。</value>
+  </data>
+  <data name="Status_MetaPattern_BeginEdit_Fmt" xml:space="preserve">
+    <value>正在编辑 {0}。Code 不可修改，以保持 MR 外键引用有效。</value>
+  </data>
+  <data name="Error_MetaPattern_CodeRequired" xml:space="preserve">
+    <value>Code 为必填项。</value>
+  </data>
+  <data name="Error_MetaPattern_AlreadyExists_Fmt" xml:space="preserve">
+    <value>元模式 '{0}' 已存在。</value>
+  </data>
+  <data name="Status_MetaPattern_Added_Fmt" xml:space="preserve">
+    <value>已添加 {0}。</value>
+  </data>
+  <data name="Error_MetaPattern_ModifyReturnedFalse_Fmt" xml:space="preserve">
+    <value>修改返回 false（未找到 Code '{0}'）。</value>
+  </data>
+  <data name="Status_MetaPattern_Saved_Fmt" xml:space="preserve">
+    <value>已保存 {0}。</value>
+  </data>
+  <data name="Error_MetaPattern_NotFound_Fmt" xml:space="preserve">
+    <value>未找到元模式 '{0}'。</value>
+  </data>
+  <data name="Status_MetaPattern_StatusToggled_Fmt" xml:space="preserve">
+    <value>{0}：{1} → {2}</value>
+  </data>
+  <data name="Status_MetaPattern_AlreadyDeprecated_Fmt" xml:space="preserve">
+    <value>{0} 已停用；无需操作。</value>
+  </data>
+  <data name="Status_MetaPattern_SoftDeleted_Fmt" xml:space="preserve">
+    <value>已软删除 {0}（{1} → deprecated）。</value>
+  </data>
+  <data name="Status_Mutation_LoadError_Fmt" xml:space="preserve">
+    <value>加载错误：{0}</value>
+  </data>
+  <data name="Status_Mutation_SeedError_Fmt" xml:space="preserve">
+    <value>种子数据错误：{0}</value>
+  </data>
+  <data name="Status_Mutation_Seeded_Fmt" xml:space="preserve">
+    <value>已生成演示数据：{0} 个变异体，{1} 个绑定。</value>
+  </data>
+  <data name="Status_Mutation_SelectAtLeastOne" xml:space="preserve">
+    <value>请至少选择一个变异体和一个 MR 绑定。</value>
+  </data>
+  <data name="Status_Mutation_Starting" xml:space="preserve">
+    <value>正在启动测试活动…</value>
+  </data>
+  <data name="Status_Mutation_CellProgress_Fmt" xml:space="preserve">
+    <value>单元 {0}/{1}：Mut-{2} × Bind-{3}</value>
+  </data>
+  <data name="Status_Mutation_Done_Fmt" xml:space="preserve">
+    <value>完成 — {0} 个单元 | 检出：{1} | 漏检：{2} | 检出率：{3:P0}</value>
+  </data>
+  <data name="Status_Mutation_Cancelled" xml:space="preserve">
+    <value>测试活动已取消。</value>
+  </data>
+  <data name="Status_Mutation_Error" xml:space="preserve">
+    <value>错误</value>
+  </data>
+  <data name="Status_Replay_NoAnomalySelected" xml:space="preserve">
+    <value>未选择异常。请打开异常页面，选中一行，然后点击"重放此异常"。</value>
+  </data>
+  <data name="Status_Replay_NoResultRecord_Fmt" xml:space="preserve">
+    <value>未找到异常 {0} 对应的结果记录（ResultId={1}）。</value>
+  </data>
+  <data name="Hint_Replay_MrCodePlaceholder" xml:space="preserve">
+    <value>—  （点击"运行真实重放"以解析）</value>
+  </data>
+  <data name="Status_Replay_PickAnAction" xml:space="preserve">
+    <value>选择"运行真实重放"以调用 ReplayService，或选择"模拟重放"以预览分类。</value>
+  </data>
+  <data name="Hint_Replay_NoTriggerParameters" xml:space="preserve">
+    <value>（无）</value>
+  </data>
+  <data name="Status_Replay_RealReplayCompleted_Fmt" xml:space="preserve">
+    <value>真实重放已完成 → {0}。</value>
+  </data>
+  <data name="Status_Replay_RealReplayFailed_Fmt" xml:space="preserve">
+    <value>真实重放失败：{0}</value>
+  </data>
+  <data name="Status_Replay_SimulatedExpression_Fmt" xml:space="preserve">
+    <value>模拟 → {0}</value>
+  </data>
+  <data name="Status_Replay_SimulatedOnly" xml:space="preserve">
+    <value>仅为模拟 — 请使用"运行真实重放"以执行真实流水线路径。</value>
+  </data>
+  <data name="Status_Equation_InitialPrompt" xml:space="preserve">
+    <value>请选择一行方程，或点击"新建方程"。</value>
+  </data>
+  <data name="Status_Equation_LoadedBuiltInReadOnly_Fmt" xml:space="preserve">
+    <value>已加载 '{0}'（内置，只读）。</value>
+  </data>
+  <data name="Status_Equation_NewDraft" xml:space="preserve">
+    <value>新建用户自定义方程草稿。请填写各字段，然后进行校验 / 保存。</value>
+  </data>
+  <data name="Status_Equation_DraftValid" xml:space="preserve">
+    <value>方程草稿校验通过。</value>
+  </data>
+  <data name="Status_Equation_ValidationFailed_Fmt" xml:space="preserve">
+    <value>校验失败：{0}</value>
+  </data>
+  <data name="Status_Equation_Saved_Fmt" xml:space="preserve">
+    <value>方程 '{0}' 已保存。</value>
+  </data>
+  <data name="Status_Equation_SaveBlocked_Fmt" xml:space="preserve">
+    <value>保存被阻止：{0}</value>
+  </data>
+  <data name="Status_Equation_Deleted_Fmt" xml:space="preserve">
+    <value>方程 '{0}' 已删除。</value>
+  </data>
+  <data name="Status_Equation_DeleteBlocked_Fmt" xml:space="preserve">
+    <value>删除被阻止：{0}</value>
+  </data>
+  <data name="Status_Equation_Loaded_Fmt" xml:space="preserve">
+    <value>已加载 {0} 个方程（其中 {1} 个用户自定义）。</value>
+  </data>
+  <data name="Status_Equation_ErrorListing_Fmt" xml:space="preserve">
+    <value>列出方程出错：{0}</value>
+  </data>
+  <data name="Status_Equation_LoadedUser_Fmt" xml:space="preserve">
+    <value>已加载用户方程 '{0}'。可编辑并进行校验 / 保存。</value>
+  </data>
+  <data name="Status_Equation_UserNotFound_Fmt" xml:space="preserve">
+    <value>未找到用户方程 '{0}'。</value>
+  </data>
+  <data name="Status_Equation_ErrorLoading_Fmt" xml:space="preserve">
+    <value>加载 '{0}' 出错：{1}</value>
+  </data>
+  <data name="Status_History_Loading" xml:space="preserve">
+    <value>正在加载执行历史…</value>
+  </data>
+  <data name="Pagination_History_NoRows" xml:space="preserve">
+    <value>无记录</value>
+  </data>
+  <data name="Pagination_History_PageOfTotal_Fmt" xml:space="preserve">
+    <value>第 {0} / {1} 页（共 {2} 条）</value>
+  </data>
+  <data name="Status_History_SelectRowBeforeDelete" xml:space="preserve">
+    <value>点击删除前请至少选择一行。</value>
+  </data>
+  <data name="Prompt_History_DeleteSingle_Fmt" xml:space="preserve">
+    <value>删除执行 {0}（{1}）？将先移除证据，再删除结果行。此操作无法撤销。</value>
+  </data>
+  <data name="Prompt_History_DeleteMultiple_Fmt" xml:space="preserve">
+    <value>删除 {0} 个执行行（及其证据）？此操作无法撤销。</value>
+  </data>
+  <data name="Prompt_History_ConfirmDeleteTitle" xml:space="preserve">
+    <value>确认删除</value>
+  </data>
+  <data name="Status_History_NoRecordsMatchFilter" xml:space="preserve">
+    <value>没有符合筛选条件的执行记录。</value>
+  </data>
+  <data name="Status_History_LoadedRecords_Fmt" xml:space="preserve">
+    <value>已加载 {1} 条记录中的 {0} 条。</value>
+  </data>
+  <data name="Status_History_ErrorLoadingExecutions_Fmt" xml:space="preserve">
+    <value>加载执行记录出错：{0}</value>
+  </data>
+  <data name="Evidence_History_NoEvidenceRow" xml:space="preserve">
+    <value>（此执行无证据行——历史遗留或仅证据孤立项。）</value>
+  </data>
+  <data name="Evidence_History_ErrorLoadingEvidence_Fmt" xml:space="preserve">
+    <value>加载证据出错：{0}</value>
+  </data>
+  <data name="Evidence_History_ExecutionId_Fmt" xml:space="preserve">
+    <value>执行 ID：{0}</value>
+  </data>
+  <data name="Evidence_History_RecordedAt_Fmt" xml:space="preserve">
+    <value>记录时间：{0}</value>
+  </data>
+  <data name="Evidence_History_TypedVerificationHeader" xml:space="preserve">
+    <value>类型化验证：</value>
+  </data>
+  <data name="Evidence_History_Spec_Fmt" xml:space="preserve">
+    <value>  规约       ：{0} {1}</value>
+  </data>
+  <data name="Evidence_History_Predicate_Fmt" xml:space="preserve">
+    <value>  谓词       ：{0} {1}</value>
+  </data>
+  <data name="Evidence_History_Status_Fmt" xml:space="preserve">
+    <value>  状态       ：{0}</value>
+  </data>
+  <data name="Evidence_History_Expected_Fmt" xml:space="preserve">
+    <value>  期望       ：{0}</value>
+  </data>
+  <data name="Evidence_History_Actual_Fmt" xml:space="preserve">
+    <value>  实际       ：{0}</value>
+  </data>
+  <data name="Evidence_History_Residual_Fmt" xml:space="preserve">
+    <value>  残差       ：{0}</value>
+  </data>
+  <data name="Evidence_History_Tolerance_Fmt" xml:space="preserve">
+    <value>  容差       ：{0}</value>
+  </data>
+  <data name="Evidence_History_Reason_Fmt" xml:space="preserve">
+    <value>  原因       ：{0}</value>
+  </data>
+  <data name="Status_History_DeleteDeleted_Fmt" xml:space="preserve">
+    <value>已删除 {0} 条</value>
+  </data>
+  <data name="Status_History_DeleteEvidenceOnly_Fmt" xml:space="preserve">
+    <value>{0} 条仅证据（结果行保留以便重试）</value>
+  </data>
+  <data name="Status_History_DeleteFailed_Fmt" xml:space="preserve">
+    <value>{0} 条失败（未改动任何行）</value>
+  </data>
+  <data name="Status_History_NothingDeleted" xml:space="preserve">
+    <value>未删除任何内容。</value>
+  </data>
+  <data name="Status_Execution_Idle" xml:space="preserve">
+    <value>空闲。</value>
+  </data>
+  <data name="Status_Execution_Running_Fmt" xml:space="preserve">
+    <value>正在运行 {0}…</value>
+  </data>
+  <data name="Status_Execution_ResultPass_Fmt" xml:space="preserve">
+    <value>通过 — {0}：源={1:G}，衍生={2:G}</value>
+  </data>
+  <data name="Status_Execution_ResultFail_Fmt" xml:space="preserve">
+    <value>失败 — {0}</value>
+  </data>
+  <data name="Status_Execution_Completed_Fmt" xml:space="preserve">
+    <value>完成，用时 源={0:F2}s，衍生={1:F2}s。</value>
+  </data>
+  <data name="Status_Execution_Error_Fmt" xml:space="preserve">
+    <value>错误：{0}</value>
+  </data>
+  <data name="Status_Execution_RunFailed_Title" xml:space="preserve">
+    <value>System-MT 运行失败</value>
+  </data>
+  <data name="Status_Execution_Refreshed_Fmt" xml:space="preserve">
+    <value>已刷新：{0} 条记录。</value>
+  </data>
+  <data name="Status_Execution_ReportExported_Fmt" xml:space="preserve">
+    <value>报告已导出：{0}</value>
+  </data>
+  <data name="Status_Catalog_SelectManifest" xml:space="preserve">
+    <value>请选择一个 System MT 清单。</value>
+  </data>
+  <data name="Status_Catalog_DraftCreated" xml:space="preserve">
+    <value>已新建 MR 草稿。请填写字段、验证，然后保存。</value>
+  </data>
+  <data name="Status_Catalog_DraftValid" xml:space="preserve">
+    <value>MR 草稿有效。</value>
+  </data>
+  <data name="Status_Catalog_ValidationFailed_Fmt" xml:space="preserve">
+    <value>验证失败：{0}</value>
+  </data>
+  <data name="Status_Catalog_DraftSaved" xml:space="preserve">
+    <value>MR 草稿已保存，目录已重新加载。</value>
+  </data>
+  <data name="Status_Catalog_SaveBlocked_Fmt" xml:space="preserve">
+    <value>保存被阻止：{0}</value>
+  </data>
+  <data name="Status_Catalog_NoManifests" xml:space="preserve">
+    <value>未找到 System MT catalog.json 文件。</value>
+  </data>
+  <data name="Status_Catalog_ManifestsLoaded_Fmt" xml:space="preserve">
+    <value>已加载 {0} 个 System MT 清单。</value>
+  </data>
+  <data name="Status_Catalog_LoadManifestsError_Fmt" xml:space="preserve">
+    <value>错误：{0}</value>
+  </data>
+  <data name="Status_Catalog_BindingsLoaded_Fmt" xml:space="preserve">
+    <value>已从 {1} 加载 {0} 个 MR 绑定。</value>
+  </data>
+  <data name="Status_SampleCatalog_SelectSut" xml:space="preserve">
+    <value>请选择一个 SUT 以浏览其样例文件。</value>
+  </data>
+  <data name="Status_SampleCatalog_NoSamplesUnderSut_Fmt" xml:space="preserve">
+    <value>SUT '{0}' 下没有样例。</value>
+  </data>
+  <data name="Status_SampleCatalog_LoadedSamples_Fmt" xml:space="preserve">
+    <value>已为 SUT '{1}' 加载 {0} 个样例。</value>
+  </data>
+  <data name="Status_SampleCatalog_ErrorListingSamples_Fmt" xml:space="preserve">
+    <value>列出样例时出错：{0}</value>
+  </data>
+  <data name="Status_SampleCatalog_LoadedSample_Fmt" xml:space="preserve">
+    <value>已加载样例 '{0}'。</value>
+  </data>
+  <data name="Status_SampleCatalog_ErrorLoadingSample_Fmt" xml:space="preserve">
+    <value>加载 '{0}' 时出错：{1}</value>
+  </data>
+  <data name="Status_SampleCatalog_EditThenValidate" xml:space="preserve">
+    <value>编辑文件名和 JSON 内容，然后点击校验 / 保存。</value>
+  </data>
+  <data name="Status_SampleCatalog_DraftValid" xml:space="preserve">
+    <value>样例草稿有效。</value>
+  </data>
+  <data name="Status_SampleCatalog_ValidationFailed_Fmt" xml:space="preserve">
+    <value>校验失败：{0}</value>
+  </data>
+  <data name="Status_SampleCatalog_SampleSaved_Fmt" xml:space="preserve">
+    <value>样例 '{0}' 已保存。</value>
+  </data>
+  <data name="Status_SampleCatalog_SaveBlocked_Fmt" xml:space="preserve">
+    <value>保存被阻止：{0}</value>
+  </data>
+  <data name="Dialog_SampleCatalog_ConfirmDeleteText_Fmt" xml:space="preserve">
+    <value>确定从 SUT '{1}' 删除样例 '{0}' 吗？被某个 MR 引用的文件将被阻止删除。</value>
+  </data>
+  <data name="Dialog_SampleCatalog_ConfirmDeleteCaption" xml:space="preserve">
+    <value>确认删除</value>
+  </data>
+  <data name="Status_SampleCatalog_SampleDeleted_Fmt" xml:space="preserve">
+    <value>样例 '{0}' 已删除。</value>
+  </data>
+  <data name="Status_SampleCatalog_DeleteBlocked_Fmt" xml:space="preserve">
+    <value>删除被阻止：{0}</value>
+  </data>
+  <data name="Status_SampleCatalog_NoSuts" xml:space="preserve">
+    <value>未找到任何 SUT。</value>
+  </data>
+  <data name="Status_SampleCatalog_LoadedSuts_Fmt" xml:space="preserve">
+    <value>已加载 {0} 个 SUT。</value>
+  </data>
+  <data name="Status_SampleCatalog_ErrorListingSuts_Fmt" xml:space="preserve">
+    <value>列出 SUT 时出错：{0}</value>
+  </data>
+  <data name="Status_SutCatalog_InitialHint" xml:space="preserve">
+    <value>选择一个 SUT 以编辑其程序段，或点击"新建 SUT 草稿"。</value>
+  </data>
+  <data name="Status_SutCatalog_DraftLoaded_Fmt" xml:space="preserve">
+    <value>已加载 SUT '{0}' 的程序段。</value>
+  </data>
+  <data name="Status_SutCatalog_DraftLoadError_Fmt" xml:space="preserve">
+    <value>加载 '{0}' 出错：{1}</value>
+  </data>
+  <data name="Status_SutCatalog_NewDraft" xml:space="preserve">
+    <value>新建 SUT 草稿。填写 SUT 名称与程序字段，然后验证 / 保存。</value>
+  </data>
+  <data name="Status_SutCatalog_ValidationFailed_NameRequired" xml:space="preserve">
+    <value>验证失败：SUT 名称为必填项。</value>
+  </data>
+  <data name="Status_SutCatalog_DraftValid" xml:space="preserve">
+    <value>SUT 草稿有效。</value>
+  </data>
+  <data name="Status_SutCatalog_ValidationFailed_Fmt" xml:space="preserve">
+    <value>验证失败：{0}</value>
+  </data>
+  <data name="Status_SutCatalog_SaveBlocked_NameRequired" xml:space="preserve">
+    <value>保存已阻止：SUT 名称为必填项。</value>
+  </data>
+  <data name="Status_SutCatalog_DraftSaved_Fmt" xml:space="preserve">
+    <value>SUT 草稿已保存至 {0}/catalog.json。</value>
+  </data>
+  <data name="Status_SutCatalog_SaveBlocked_Fmt" xml:space="preserve">
+    <value>保存已阻止：{0}</value>
+  </data>
+  <data name="Status_SutCatalog_NoCatalogFiles" xml:space="preserve">
+    <value>未找到 SUT catalog.json 文件。</value>
+  </data>
+  <data name="Status_SutCatalog_Loaded_Fmt" xml:space="preserve">
+    <value>已加载 {0} 个 SUT。</value>
+  </data>
+  <data name="Status_SutCatalog_ListError_Fmt" xml:space="preserve">
+    <value>列出 SUT 出错：{0}</value>
+  </data>
 </root>
