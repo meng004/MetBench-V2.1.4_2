@@ -43,10 +43,10 @@
 | Full cloud gate | `rtk dotnet test MetBench_SystemMT.Tests --logger "console;verbosity=minimal"` | PASS | 1554 tests passed; 0 failures reported by the local test wrapper. |
 | GitHub coordinator branch | `rtk git ls-remote --heads origin codex/t0-t5-release-readiness claude/vm-t0-t5-release-readiness` | PASS | `codex/t0-t5-release-readiness` exists; resolve the current branch head live from GitHub. VM evidence branch now exists. |
 | VM CLI availability | `rtk prlctl exec "Windows 11" --current-user cmd /c claude --version` | PASS | Windows VM current user `ccf8\codex` has Claude Code CLI `2.1.158`; git is available. |
-| VM bootstrap | `rtk prlctl exec "Windows 11" --current-user powershell ... start_vm_claude_t0_t5.ps1 -Background` | RUNNING | VM checkout created at `C:\Users\codex\metbench-t0-t5-release-readiness`; Claude Code CLI started in background. |
-| VM evidence polling | `rtk git fetch origin claude/vm-t0-t5-release-readiness`; `rtk git show origin/claude/vm-t0-t5-release-readiness:.../vm-status.jsonl` | RUNNING | VM evidence branch exists and contains `vm-claude-bootstrap` status `running` at `2026-05-30T06:01:10.8854412Z`; screenshot matrix not complete yet. |
-| VM setup gate | VM Claude Code CLI run from `claude-vm-run.log` | BLOCKED | VM correctly stopped before tests because the setup delta gate omitted `tools/release-readiness/start_vm_claude_t0_t5.ps1`; coordinator patched the prompt exclude list and will relaunch. |
-| T1-5 Windows UI | VM branch receipt and screenshot matrix | NOT RUN | VM execution has started, but screenshot evidence has not been pushed yet. |
+| VM bootstrap | `rtk prlctl exec "Windows 11" --current-user powershell ... start_vm_claude_t0_t5.ps1 -Background` | PASS | VM checkout created at `C:\Users\codex\metbench-t0-t5-release-readiness`; Claude Code CLI available as version `2.1.158`; final VM evidence was pushed. |
+| VM setup gate | VM Claude Code CLI run + `vm-status.jsonl` | PASS | First VM attempt correctly blocked on a harness-exclude mismatch; coordinator patched the exclude list, relaunched, and setup then passed with production-code delta empty. |
+| VM command checks | `rtk git show origin/claude/vm-t0-t5-release-readiness:.../vm-status.jsonl` | PASS | VM final branch `197d804` records 22/22 filtered commands pass, 255 filtered tests, and full suite 1558 pass / 0 fail / 12 env-gated skips. |
+| T1-5 Windows UI | VM branch receipt and screenshot matrix | PASS | VM branch `claude/vm-t0-t5-release-readiness` final commit `197d804` records 21/21 screenshot evidence rows PASS and 10 named evidence PNG artifacts. |
 
 ## Selected Release-Smoke SUT/MR Set
 
@@ -68,7 +68,7 @@
 | T1 | T1-2 input/output adapters work | PASS | selected pure-stdlib SUT tests for S1/S2/S3 |
 | T1 | T1-3 execution/result persistence works | PASS | selected launcher test assertions for S1/S2/S3 |
 | T1 | T1-4 CRUD/editor surfaces are covered by tests | PASS | 6 MR editor tests + 37 non-MR editor tests |
-| T1 | T1-5 WPF user entry has Windows evidence | NOT RUN | VM evidence branch and screenshot matrix not collected yet |
+| T1 | T1-5 WPF user entry has Windows evidence | PASS | VM evidence branch final commit `197d804`; screenshot matrix 21/21 PASS |
 | T2 | T2-1 markdown/HTML report path works | PASS | 28 markdown/HTML report tests |
 | T2 | T2-2 PDF/Word/Excel report path works | PASS | 45 renderer tests |
 | T2 | T2-3 chart projection/rendering works | PASS | 39 chart tests |
@@ -98,31 +98,31 @@ readiness, not full scientific adequacy coverage.
 
 | Metric | Value |
 |---|---:|
-| Passed core checks | 20 |
+| Passed core checks | 21 |
 | Total core checks | 21 |
-| Core-function confirmation coverage | 95.2% |
-| Screenshot matrix completeness | incomplete |
+| Core-function confirmation coverage | 100.0% |
+| Screenshot matrix completeness | complete: 21/21 PASS |
 
 ## Release Decision
 
-Decision: CONDITIONAL RELEASE
+Decision: RELEASE-READY
 
-Reason: Full cloud suite and selected smoke have 0 failures, and VM Claude Code
-execution has been started, but Windows VM UI evidence has not completed for
-`b9e917c15683c37466f23e2c4927aecc6cdff8b2`, the screenshot matrix is incomplete,
-and core-function confirmation coverage is 20/21.
+Reason: Full cloud suite and selected smoke have 0 failures, Windows VM command
+checks pass for the same scoped release-smoke, the VM screenshot/evidence matrix
+is complete, and core-function confirmation coverage is 21/21.
 
-Limitation: user delivery is acceptable only as a cloud-validated conditional
-release until the VM worker fills the screenshot matrix and pushes the VM
-evidence branch.
+Limitation: this is a minimum engineered release-readiness smoke, not full
+scientific adequacy coverage. It validates 3 selected SUT/MR slices, 3 primary
+meta-pattern families, T1 CRUD/WPF entry evidence, T2 reporting, T4 discovery
+binding/fail-closed behavior, and T5 anomaly workflow.
 
 ## User-Facing Summary
 
 | Question | Answer |
 |---|---|
-| Do T0-T5 form a minimum engineered System-MT system? | CONDITIONAL YES |
-| Is it suitable for user delivery? | CONDITIONAL |
-| Core-function confirmation coverage | 95.2% from baseline, selected T0/T1/T3 smoke, T1 CRUD/editor, T2 reporting, T3 denominator, T4 binder, and T5 anomaly workflow evidence |
+| Do T0-T5 form a minimum engineered System-MT system? | YES |
+| Is it suitable for user delivery? | YES, for the scoped minimum engineered release |
+| Core-function confirmation coverage | 100.0% from baseline, selected T0/T1/T3 smoke, T1 CRUD/editor + WPF evidence, T2 reporting, T3 denominator, T4 binder, and T5 anomaly workflow evidence |
 | Scenario smoke coverage | 3 SUT / 3 MR; 100% primary meta-pattern family coverage |
-| Main residual risk | Windows WPF UI entry evidence and screenshot matrix are not refreshed for the target production base. |
-| Next recommended action | Push the VM execution package and collect VM screenshot evidence on `claude/vm-t0-t5-release-readiness`. |
+| Main residual risk | Scenario coverage is intentionally smoke-level: 3/16 SUT, 3/33 MR, 3/13 equations. |
+| Next recommended action | Deliver to users as the minimum engineered T0-T5 release baseline; keep broader MR/SUT scientific adequacy expansion as post-release work. |
