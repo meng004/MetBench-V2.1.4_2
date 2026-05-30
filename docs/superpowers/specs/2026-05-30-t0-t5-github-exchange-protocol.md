@@ -42,6 +42,7 @@ production-code delta from the target production base before running tests.
 | `docs/superpowers/specs/2026-05-30-t0-t5-vm-release-smoke/vm-status.jsonl` | VM hook | Append-only status stream |
 | `docs/superpowers/specs/2026-05-30-t0-t5-vm-release-smoke/vm-summary.md` | VM | Final command and UI receipt |
 | `docs/superpowers/specs/2026-05-30-t0-t5-vm-release-smoke/*.png` | VM | Screenshot evidence |
+| `docs/superpowers/specs/2026-05-30-t0-t5-vm-release-smoke/claude-vm-run.log` | VM bootstrap | Claude Code CLI execution log |
 
 ## Status Event Schema
 
@@ -89,6 +90,17 @@ rtk git show origin/claude/vm-t0-t5-release-readiness:docs/superpowers/specs/202
 
 If either file is missing, Windows VM evidence is not available for the target
 head and the final decision cannot be `RELEASE-READY`.
+
+## VM Bootstrap
+
+The coordinator can start the VM-side Claude Code CLI through Parallels Tools:
+
+```bash
+rtk prlctl exec "Windows 11" --current-user powershell -NoProfile -ExecutionPolicy Bypass -Command "if (!(Test-Path C:\Users\codex\metbench-t0-t5-release-readiness\.git)) { git clone https://github.com/meng004/MetBench-V2.1.4_2.git C:\Users\codex\metbench-t0-t5-release-readiness }; Set-Location C:\Users\codex\metbench-t0-t5-release-readiness; git fetch origin; git checkout -B claude/vm-t0-t5-release-readiness origin/codex/t0-t5-release-readiness; powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\release-readiness\start_vm_claude_t0_t5.ps1 -Background"
+```
+
+The bootstrap writes `claude-vm-run.log` under the evidence directory and uses
+the same VM evidence branch.
 
 ## Required Screenshot Set
 

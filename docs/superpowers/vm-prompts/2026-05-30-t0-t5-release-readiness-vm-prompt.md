@@ -62,6 +62,7 @@ docs/superpowers/plans/2026-05-30-t0-t5-minimal-release-readiness-confirmation-p
 docs/superpowers/specs/2026-05-30-t0-t5-github-exchange-protocol.md
 docs/superpowers/vm-prompts/2026-05-30-t0-t5-vm-monitor-hook.md
 tools/release-readiness/vm_status_hook.ps1
+tools/release-readiness/start_vm_claude_t0_t5.ps1
 docs/superpowers/specs/2026-05-30-t0-t5-vm-release-smoke/README.md
 ```
 
