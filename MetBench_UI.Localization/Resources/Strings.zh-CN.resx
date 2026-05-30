@@ -175,4 +175,49 @@
   <data name="Settings_InvalidCultureFallback" xml:space="preserve">
     <value>不支持的语言将回退到英文。</value>
   </data>
+  <data name="SystemMt_Run" xml:space="preserve">
+    <value>运行</value>
+  </data>
+  <data name="SystemMt_SelectedMr" xml:space="preserve">
+    <value>选定 MR</value>
+  </data>
+  <data name="SystemMt_Source" xml:space="preserve">
+    <value>源输入</value>
+  </data>
+  <data name="SystemMt_FollowUp" xml:space="preserve">
+    <value>后续输入</value>
+  </data>
+  <data name="SystemMt_Result" xml:space="preserve">
+    <value>结果</value>
+  </data>
+  <data name="Catalog_LoadedManifests" xml:space="preserve">
+    <value>已加载清单</value>
+  </data>
+  <data name="Catalog_LoadedSuts" xml:space="preserve">
+    <value>已加载 SUT</value>
+  </data>
+  <data name="Catalog_LoadedEquations" xml:space="preserve">
+    <value>已加载方程</value>
+  </data>
+  <data name="Catalog_LoadedSampleCases" xml:space="preserve">
+    <value>已加载样例</value>
+  </data>
+  <data name="History_ExecutionHistory" xml:space="preserve">
+    <value>执行历史</value>
+  </data>
+  <data name="Anomaly_Title" xml:space="preserve">
+    <value>异常</value>
+  </data>
+  <data name="Anomaly_ApplyTransition" xml:space="preserve">
+    <value>应用状态转换</value>
+  </data>
+  <data name="Replay_Title" xml:space="preserve">
+    <value>回放</value>
+  </data>
+  <data name="ReportGenerator_Title" xml:space="preserve">
+    <value>MR 报告生成器</value>
+  </data>
+  <data name="ReportGenerator_Export" xml:space="preserve">
+    <value>导出</value>
+  </data>
 </root>

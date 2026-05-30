@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Persistence;
 using MetBench_BLL.SystemMT.Reporting;
+using MetBench_UI.Localization;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,8 @@ namespace MetBench_Client.ViewModels
         private readonly ISystemMtResultRepository _repository;
         private readonly ISystemMtResultReportRenderer _reportRenderer;
         private bool _isInitialized;
+
+        public LocalizedTextProvider Localization { get; }
 
         [ObservableProperty]
         private ObservableCollection<MrSummary> _availableMrs = new();
@@ -47,11 +50,13 @@ namespace MetBench_Client.ViewModels
         public SystemMtExecutionViewModel(
             ISystemMtLauncher launcher,
             ISystemMtResultRepository repository,
-            ISystemMtResultReportRenderer reportRenderer)
+            ISystemMtResultReportRenderer reportRenderer,
+            LocalizedTextProvider localization)
         {
             _launcher = launcher;
             _repository = repository;
             _reportRenderer = reportRenderer;
+            Localization = localization;
         }
 
         public async void OnNavigatedTo()

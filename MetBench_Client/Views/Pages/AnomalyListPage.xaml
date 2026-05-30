@@ -107,7 +107,7 @@
                 <ComboBoxItem Content="fixed-upstream" />
             </ComboBox>
             <ui:Button Appearance="Primary"
-                       Content="Apply transition"
+                       Content="{Binding ViewModel.Localization[Anomaly_ApplyTransition]}"
                        Icon="{ui:SymbolIcon ArrowSwap24}"
                        Command="{Binding ViewModel.TransitionCommand}" />
             <ui:Button Appearance="Secondary"

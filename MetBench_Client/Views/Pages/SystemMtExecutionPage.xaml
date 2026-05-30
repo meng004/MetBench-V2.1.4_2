@@ -64,7 +64,7 @@
                         <ui:Button
                             Appearance="Primary"
                             Command="{Binding ViewModel.RunCommand, Mode=OneWay}"
-                            Content="Run scenario"
+                            Content="{Binding ViewModel.Localization[SystemMt_Run]}"
                             />
                         <ui:Button
                             Margin="8,0,0,0"
@@ -128,11 +128,11 @@
                     <DataGridTextColumn
                         Width="110"
                         Binding="{Binding SourceValue}"
-                        Header="Source"/>
+                        Header="{Binding ViewModel.Localization[SystemMt_Source], RelativeSource={RelativeSource AncestorType=Page}}"/>
                     <DataGridTextColumn
                         Width="110"
                         Binding="{Binding FollowUpValue}"
-                        Header="Follow-up"/>
+                        Header="{Binding ViewModel.Localization[SystemMt_FollowUp], RelativeSource={RelativeSource AncestorType=Page}}"/>
                     <DataGridCheckBoxColumn
                         Width="80"
                         Binding="{Binding Passed}"

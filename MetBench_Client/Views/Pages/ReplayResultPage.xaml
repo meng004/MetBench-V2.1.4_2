@@ -64,7 +64,7 @@
                 BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
                 CornerRadius="4">
             <StackPanel>
-                <TextBlock FontSize="18" FontWeight="Bold" Text="Anomaly Replay" />
+                <TextBlock FontSize="18" FontWeight="Bold" Text="{Binding ViewModel.Localization[Replay_Title]}" />
                 <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                     <TextBlock Text="Id: " />
                     <TextBlock Text="{Binding ViewModel.Anomaly.IdAnomaly}" Margin="0,0,16,0" />

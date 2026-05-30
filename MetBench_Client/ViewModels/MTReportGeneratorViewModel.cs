@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using MetBench_BLL;
 using MetBench_Client.Views.Pages;
+using MetBench_UI.Localization;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,8 @@ namespace MetBench_Client.ViewModels
         private IPageService _pageService;
 
         private MTReportGeneratorService _mtReportGeneratorSerive;
+
+        public LocalizedTextProvider Localization { get; }
 
         public List<string> ReportTypeList { get { return new List<string>() { "Pdf", "Word", "Excel", "Html" }; } }
 
@@ -141,11 +144,12 @@ namespace MetBench_Client.ViewModels
         }
 
         // 构造函数
-        public MTReportGeneratorViewModel(IPageService pageService, INavigationService navigationService, MTReportGeneratorService mTReportGeneratorSerive)
+        public MTReportGeneratorViewModel(IPageService pageService, INavigationService navigationService, MTReportGeneratorService mTReportGeneratorSerive, LocalizedTextProvider localization)
         {
             _navigationService = navigationService;
             _pageService = pageService;
             _mtReportGeneratorSerive = mTReportGeneratorSerive;
+            Localization = localization;
             IsIndeterminate = false;
             Visibility = Visibility.Collapsed;
         }

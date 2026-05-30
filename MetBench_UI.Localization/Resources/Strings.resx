@@ -175,4 +175,49 @@
   <data name="Settings_InvalidCultureFallback" xml:space="preserve">
     <value>Unsupported language falls back to English.</value>
   </data>
+  <data name="SystemMt_Run" xml:space="preserve">
+    <value>Run</value>
+  </data>
+  <data name="SystemMt_SelectedMr" xml:space="preserve">
+    <value>Selected MR</value>
+  </data>
+  <data name="SystemMt_Source" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="SystemMt_FollowUp" xml:space="preserve">
+    <value>Follow-up</value>
+  </data>
+  <data name="SystemMt_Result" xml:space="preserve">
+    <value>Result</value>
+  </data>
+  <data name="Catalog_LoadedManifests" xml:space="preserve">
+    <value>Loaded manifests</value>
+  </data>
+  <data name="Catalog_LoadedSuts" xml:space="preserve">
+    <value>Loaded SUTs</value>
+  </data>
+  <data name="Catalog_LoadedEquations" xml:space="preserve">
+    <value>Loaded equations</value>
+  </data>
+  <data name="Catalog_LoadedSampleCases" xml:space="preserve">
+    <value>Loaded sample cases</value>
+  </data>
+  <data name="History_ExecutionHistory" xml:space="preserve">
+    <value>Execution History</value>
+  </data>
+  <data name="Anomaly_Title" xml:space="preserve">
+    <value>Anomalies</value>
+  </data>
+  <data name="Anomaly_ApplyTransition" xml:space="preserve">
+    <value>Apply transition</value>
+  </data>
+  <data name="Replay_Title" xml:space="preserve">
+    <value>Replay</value>
+  </data>
+  <data name="ReportGenerator_Title" xml:space="preserve">
+    <value>MR Report Generator</value>
+  </data>
+  <data name="ReportGenerator_Export" xml:space="preserve">
+    <value>Export</value>
+  </data>
 </root>

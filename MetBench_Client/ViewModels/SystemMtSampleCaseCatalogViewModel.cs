@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MetBench_BLL.SystemMT.Catalog.Editing;
+using MetBench_UI.Localization;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -14,6 +15,8 @@ namespace MetBench_Client.ViewModels
         private readonly ISystemMtSampleCaseEditor _sampleEditor;
         private readonly ISystemMtSutEditor _sutEditor;
         private bool _isInitialized;
+
+        public LocalizedTextProvider Localization { get; }
 
         [ObservableProperty]
         private ObservableCollection<SystemMtSutDescriptor> _suts = new();
@@ -49,10 +52,12 @@ namespace MetBench_Client.ViewModels
 
         public SystemMtSampleCaseCatalogViewModel(
             ISystemMtSampleCaseEditor sampleEditor,
-            ISystemMtSutEditor sutEditor)
+            ISystemMtSutEditor sutEditor,
+            LocalizedTextProvider localization)
         {
             _sampleEditor = sampleEditor;
             _sutEditor = sutEditor;
+            Localization = localization;
         }
 
         public void OnNavigatedTo()

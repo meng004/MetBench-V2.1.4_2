@@ -10,6 +10,7 @@ using MetBench_BLL.SystemMT.Anomaly;
 using MetBench_Client.Services;
 using MetBench_Domain;
 using MetBench_IDAL;
+using MetBench_UI.Localization;
 using Wpf.Ui;
 using Wpf.Ui.Controls;
 
@@ -27,6 +28,8 @@ namespace MetBench_Client.ViewModels
         private readonly IAnomalyOrphanSweeper _orphanSweeper;
         private readonly ReplayInbox _replayInbox;
         private readonly INavigationService _navigationService;
+
+        public LocalizedTextProvider Localization { get; }
 
         [ObservableProperty]
         private string? _severityFilter;
@@ -54,13 +57,15 @@ namespace MetBench_Client.ViewModels
             IAnomalyRepository repo,
             IAnomalyOrphanSweeper orphanSweeper,
             ReplayInbox replayInbox,
-            INavigationService navigationService)
+            INavigationService navigationService,
+            LocalizedTextProvider localization)
         {
             _service = service;
             _repo = repo;
             _orphanSweeper = orphanSweeper;
             _replayInbox = replayInbox;
             _navigationService = navigationService;
+            Localization = localization;
             PageSize = 25;
         }
 
