@@ -1,0 +1,26 @@
+﻿
+BUILD MetBench_SystemMT.Tests exit=0
+[ 1/22] PASS   exit=0  SystemMtLauncherTests.RunAsync_heat_equation_with_default_factor_passes_and_persists_execution_result  :: 
+[ 2/22] PASS   exit=0  LauncherEndToEndAdvectionTests.RunAsync_advection_mesh_conservation_passes_end_to_end  :: 
+[ 3/22] PASS   exit=0  LauncherEndToEndWaveTests.RunAsync_wave_mesh_energy_convergence_passes_end_to_end  :: 
+[ 4/22] PASS   exit=0  SystemMtManifestCatalogEditorTests  :: 
+[ 5/22] PASS   exit=0  SystemMtSutEditorTests  :: 
+[ 6/22] PASS   exit=0  SystemMtEquationEditorTests  :: 
+[ 7/22] PASS   exit=0  SystemMtSampleCaseEditorTests  :: 
+[ 8/22] PASS   exit=0  ExecutionHistoryEditorTests  :: 
+[ 9/22] PASS   exit=0  SystemMtLauncherTests.RunAsync_persists_failure_when_assertion_fails  :: 
+[10/22] PASS   exit=0  V2Anomaly.AnomalyStatusTests  :: 
+[11/22] PASS   exit=0  AnomalyStatusPersistenceTests  :: 
+[12/22] PASS   exit=0  AnomalyOrphanSweeperTests  :: 
+[13/22] PASS   exit=0  V2Pipeline.ReplayServiceTests  :: 
+[14/22] PASS   exit=0  V2Pipeline.ReplayContextBuilderTests  :: 
+[15/22] PASS   exit=0  SystemMtReportServiceTests  :: 
+[16/22] PASS   exit=0  HtmlSystemMtResultReportRendererTests  :: 
+[17/22] PASS   exit=0  PdfSystemMtResultReportRendererTests  :: 
+[18/22] PASS   exit=0  WordSystemMtResultReportRendererTests  :: 
+[19/22] PASS   exit=0  ExcelSystemMtResultReportRendererTests  :: 
+[20/22] PASS   exit=0  SystemMT.Reporting.Charts  :: 
+[21/22] PASS   exit=0  DiscoveredMrCatalogBinderTests  :: 
+[22/22] PASS   exit=0  Catalog_MR_id_set_equals_governance_whitelist  :: 
+
+TOTAL: 22/22 filters PASS (build exit=0)
