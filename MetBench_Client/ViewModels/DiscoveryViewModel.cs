@@ -90,7 +90,7 @@ public sealed partial class DiscoveryViewModel : ObservableObject, INavigationAw
         if (SelectedDiscoverer is null) return;
         IsBusy = true;
         ErrorMessage = null;
-        StatusMessage = "Running discovery…";
+        StatusMessage = Localization["Status_Discovery_Running"];
         try
         {
             var sutId = SelectedApplication?.IdApplication;
@@ -98,7 +98,7 @@ public sealed partial class DiscoveryViewModel : ObservableObject, INavigationAw
                 SelectedDiscoverer, methodId: 1,
                 targetApplicationId: sutId, actor: "wpf-user");
             LastRun = result;
-            StatusMessage = $"Done — status: {result.RawOutcome.Status}, candidates: {result.CreatedCandidateIds.Count}";
+            StatusMessage = string.Format(Localization["Status_Discovery_Done_Fmt"], result.RawOutcome.Status, result.CreatedCandidateIds.Count);
             if (!string.IsNullOrEmpty(result.RawOutcome.ErrorMessage))
                 ErrorMessage = result.RawOutcome.ErrorMessage;
             LoadCandidates();
@@ -106,7 +106,7 @@ public sealed partial class DiscoveryViewModel : ObservableObject, INavigationAw
         catch (Exception ex)
         {
             ErrorMessage = ex.Message;
-            StatusMessage = "Error";
+            StatusMessage = Localization["Status_Discovery_Error"];
         }
         finally
         {

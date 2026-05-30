@@ -75,14 +75,14 @@ namespace MetBench_Client.ViewModels
             try
             {
                 var result = await _orphanSweeper.SweepAsync().ConfigureAwait(true);
-                SweepStatus = $"Swept {result.SweptCount}, retained {result.RetainedCount}, failed {result.FailedCount}.";
+                SweepStatus = string.Format(Localization["Status_Anomaly_SweepDone_Fmt"], result.SweptCount, result.RetainedCount, result.FailedCount);
                 ErrorMessage = null;
                 await LoadAsync().ConfigureAwait(true);
             }
             catch (Exception ex)
             {
                 ErrorMessage = ex.Message;
-                SweepStatus = $"Sweep failed: {ex.Message}";
+                SweepStatus = string.Format(Localization["Status_Anomaly_SweepFailed_Fmt"], ex.Message);
             }
         }
 
@@ -161,7 +161,7 @@ namespace MetBench_Client.ViewModels
             {
                 if (!AnomalyStatuses.TryParseKebab(TransitionTarget, out var target))
                 {
-                    ErrorMessage = $"Unknown status '{TransitionTarget}'.";
+                    ErrorMessage = string.Format(Localization["Status_Anomaly_UnknownStatus_Fmt"], TransitionTarget);
                     return;
                 }
 
@@ -173,7 +173,7 @@ namespace MetBench_Client.ViewModels
 
                 if (!ok)
                 {
-                    ErrorMessage = $"TransitionStatus returned false for anomaly {SelectedAnomaly.IdAnomaly}.";
+                    ErrorMessage = string.Format(Localization["Status_Anomaly_TransitionReturnedFalse_Fmt"], SelectedAnomaly.IdAnomaly);
                     return;
                 }
 

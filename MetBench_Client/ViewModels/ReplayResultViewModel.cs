@@ -118,7 +118,7 @@ namespace MetBench_Client.ViewModels
             Anomaly = _inbox.PendingAnomaly;
             if (Anomaly is null)
             {
-                StatusMessage = "No anomaly selected. Open the Anomalies page, pick a row, and click \"Replay this anomaly\".";
+                StatusMessage = Localization["Status_Replay_NoAnomalySelected"];
                 ResetReplay();
                 return;
             }
@@ -126,16 +126,16 @@ namespace MetBench_Client.ViewModels
             OriginalResult = _results.Get(Anomaly.ResultId);
             if (OriginalResult is null)
             {
-                StatusMessage = $"No Result record found for Anomaly {Anomaly.IdAnomaly} (ResultId={Anomaly.ResultId}).";
+                StatusMessage = string.Format(Localization["Status_Replay_NoResultRecord_Fmt"], Anomaly.IdAnomaly, Anomaly.ResultId);
                 ResetReplay();
                 return;
             }
 
             // Pipeline 元数据（MR/SUT/参数）由 RunRealReplay 调 ReplayContextBuilder 解析后填入。
             // 进页时先显示占位，提示用户用按钮拉真实上下文。
-            MrCode = "—  (click \"Run real replay\" to resolve)";
-            SutName = "—  (click \"Run real replay\" to resolve)";
-            TriggerParameters = "—  (click \"Run real replay\" to resolve)";
+            MrCode = Localization["Hint_Replay_MrCodePlaceholder"];
+            SutName = Localization["Hint_Replay_MrCodePlaceholder"];
+            TriggerParameters = Localization["Hint_Replay_MrCodePlaceholder"];
 
             OriginalSourceValue = OriginalResult.SourceValue;
             OriginalFollowupValue = OriginalResult.FollowupValue;
@@ -152,7 +152,7 @@ namespace MetBench_Client.ViewModels
             else
             {
                 ResetReplay();
-                StatusMessage = "Pick \"Run real replay\" to invoke ReplayService, or \"Simulate replay\" to preview a classification.";
+                StatusMessage = Localization["Status_Replay_PickAnAction"];
             }
         }
 
@@ -203,15 +203,15 @@ namespace MetBench_Client.ViewModels
                 MrCode = string.IsNullOrWhiteSpace(built.MrCode) ? "—" : built.MrCode;
                 SutName = string.IsNullOrWhiteSpace(built.SutName) ? "—" : built.SutName;
                 TriggerParameters = built.TriggerParameters.Count == 0
-                    ? "(none)"
+                    ? Localization["Hint_Replay_NoTriggerParameters"]
                     : string.Join(", ", built.TriggerParameters.Select(kv => $"{kv.Key}={kv.Value}"));
 
                 ApplyReplayResult(replay);
-                StatusMessage = $"Real replay completed → {replay.Classification}.";
+                StatusMessage = string.Format(Localization["Status_Replay_RealReplayCompleted_Fmt"], replay.Classification);
             }
             catch (Exception ex)
             {
-                ErrorMessage = $"Real replay failed: {ex.Message}";
+                ErrorMessage = string.Format(Localization["Status_Replay_RealReplayFailed_Fmt"], ex.Message);
             }
             finally
             {
@@ -293,8 +293,8 @@ namespace MetBench_Client.ViewModels
                 ReplayFollowupValue = replayFollowup;
                 ReplayFinalStatus = replayStatus;
                 ReplayAssertionPassed = replayPassed;
-                ReplayAssertionExpression = $"simulated → {DemoClassification}";
-                StatusMessage = "Simulated only — use \"Run real replay\" for the real pipeline path.";
+                ReplayAssertionExpression = string.Format(Localization["Status_Replay_SimulatedExpression_Fmt"], DemoClassification);
+                StatusMessage = Localization["Status_Replay_SimulatedOnly"];
             }
             finally
             {

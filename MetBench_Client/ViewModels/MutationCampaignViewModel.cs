@@ -72,7 +72,7 @@ public sealed partial class MutationCampaignViewModel : ObservableObject, INavig
     public void OnNavigatedTo()
     {
         try { LoadItems(); }
-        catch (Exception ex) { ErrorMessage = $"Load error: {ex.Message}"; }
+        catch (Exception ex) { ErrorMessage = string.Format(Localization["Status_Mutation_LoadError_Fmt"], ex.Message); }
     }
 
     public void OnNavigatedFrom() => _currentCts?.Cancel();
@@ -92,7 +92,7 @@ public sealed partial class MutationCampaignViewModel : ObservableObject, INavig
     private void SeedDemoData()
     {
         try { SeedDemoDataCore(); }
-        catch (Exception ex) { ErrorMessage = $"Seed error: {ex.Message}"; }
+        catch (Exception ex) { ErrorMessage = string.Format(Localization["Status_Mutation_SeedError_Fmt"], ex.Message); }
     }
 
     private void SeedDemoDataCore()
@@ -124,7 +124,7 @@ public sealed partial class MutationCampaignViewModel : ObservableObject, INavig
         }
 
         LoadItems();
-        StatusMessage = $"Seeded demo data: {_mutantRepo.GetActive().Count} mutants, {_mrBindingRepo.GetActive().Count} bindings.";
+        StatusMessage = string.Format(Localization["Status_Mutation_Seeded_Fmt"], _mutantRepo.GetActive().Count, _mrBindingRepo.GetActive().Count);
     }
 
 
@@ -139,7 +139,7 @@ public sealed partial class MutationCampaignViewModel : ObservableObject, INavig
 
         if (mutantIds.Length == 0 || bindingIds.Length == 0)
         {
-            ErrorMessage = "Select at least one mutant and one MR binding.";
+            ErrorMessage = Localization["Status_Mutation_SelectAtLeastOne"];
             return;
         }
 
@@ -154,7 +154,7 @@ public sealed partial class MutationCampaignViewModel : ObservableObject, INavig
         ProgressTotal = mutantIds.Length * bindingIds.Length;
         IsBusy = true;
         ErrorMessage = null;
-        StatusMessage = "Starting campaign…";
+        StatusMessage = Localization["Status_Mutation_Starting"];
         LastSummary = null;
         LastResults.Clear();
 
@@ -164,7 +164,7 @@ public sealed partial class MutationCampaignViewModel : ObservableObject, INavig
         var progressReporter = new Progress<MutationCellProgress>(p =>
         {
             ProgressCurrent = p.Total;
-            StatusMessage = $"Cell {p.Total}/{ProgressTotal}: Mut-{p.LastMutantId} × Bind-{p.LastBindingId}";
+            StatusMessage = string.Format(Localization["Status_Mutation_CellProgress_Fmt"], p.Total, ProgressTotal, p.LastMutantId, p.LastBindingId);
         });
 
         try
@@ -172,19 +172,17 @@ public sealed partial class MutationCampaignViewModel : ObservableObject, INavig
             var summary = await _campaignService.RunAsync(
                 spec, StubCellRunner, "wpf-user", progressReporter, cts.Token);
             LastSummary = summary;
-            StatusMessage = $"Done — {summary.TotalCells} cells | "
-                + $"Detected: {summary.Detected} | Missed: {summary.Missed} | "
-                + $"Detection rate: {summary.DetectionRate:P0}";
+            StatusMessage = string.Format(Localization["Status_Mutation_Done_Fmt"], summary.TotalCells, summary.Detected, summary.Missed, summary.DetectionRate);
             LoadLastResults(summary.CampaignId);
         }
         catch (OperationCanceledException)
         {
-            StatusMessage = "Campaign cancelled.";
+            StatusMessage = Localization["Status_Mutation_Cancelled"];
         }
         catch (Exception ex)
         {
             ErrorMessage = ex.Message;
-            StatusMessage = "Error";
+            StatusMessage = Localization["Status_Mutation_Error"];
         }
         finally
         {

@@ -103,26 +103,26 @@ public sealed partial class CandidateReviewViewModel : ObservableObject, INaviga
         if (UseTheoreticalLlm) validators.Add(_theoreticalLlm);
         if (!validators.Any())
         {
-            ErrorMessage = "Select at least one validator.";
+            ErrorMessage = Localization["Status_CandidateReview_NoValidatorSelected"];
             return;
         }
 
         IsBusy = true;
         ErrorMessage = null;
-        StatusMessage = "Validating…";
+        StatusMessage = Localization["Status_CandidateReview_Validating"];
         try
         {
             var summary = await _validationService.ValidateAsync(
                 SelectedCandidate!.IdCandidate, validators, "wpf-user");
             LastSummary = summary;
-            StatusMessage = $"{summary.PassedValidators}/{summary.TotalValidatorsRun} validators passed" +
-                (summary.Promoted ? $" → Promoted as MR #{summary.PromotedMRId}" : string.Empty);
+            StatusMessage = string.Format(Localization["Status_CandidateReview_ValidatorsPassed_Fmt"], summary.PassedValidators, summary.TotalValidatorsRun) +
+                (summary.Promoted ? string.Format(Localization["Status_CandidateReview_PromotedSuffix_Fmt"], summary.PromotedMRId) : string.Empty);
             LoadCandidates();
         }
         catch (Exception ex)
         {
             ErrorMessage = ex.Message;
-            StatusMessage = "Error";
+            StatusMessage = Localization["Status_CandidateReview_Error"];
         }
         finally
         {
