@@ -51,6 +51,24 @@ public sealed class OpenMocCatalogParityTests
     }
 
     [Fact]
+    public void Ray_track_convergence_uses_atomic_refinement_transform_and_calibrated_phases()
+    {
+        var doc = LoadCatalog();
+
+        var mr = Assert.Single(doc.Mrs, m => m.MrId == "openmoc-pincell-ray-track-convergence");
+        var step = Assert.Single(mr.TransformSteps);
+        Assert.Equal("RefineRayTracks", step.TransformationName);
+        Assert.Equal("/tracking", step.TargetFieldPath);
+
+        Assert.NotNull(mr.RefinementPhases);
+        var phases = mr.RefinementPhases!;
+        Assert.Equal(new[] { "coarse", "medium", "reference" }, phases.Select(p => p.Role).ToArray());
+        Assert.Equal("1", phases[0].Parameters["factor"]);
+        Assert.Equal("3", phases[1].Parameters["factor"]);
+        Assert.Equal("8", phases[2].Parameters["factor"]);
+    }
+
+    [Fact]
     public void Each_mr_carries_boltzmann_num_semantic_tags_with_pattern_per_role()
     {
         var doc = LoadCatalog();
