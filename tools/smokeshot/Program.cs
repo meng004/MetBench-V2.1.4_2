@@ -6,6 +6,7 @@
 //   smokeshot mr-add  <mrCode>  [--out DIR]  Step 2: MR Management add MR
 //   smokeshot mt-exec [--out DIR]            Step 3: MT execution (skips if OpenMOC venv missing)
 //   smokeshot metapatterns [--out DIR]       MetaPatterns CRUD: list / page2 / toggle screenshots
+//   smokeshot i18n-smoke [--out DIR]         Client i18n: language switch en<->zh + fallback evidence
 //   smokeshot debug                          Dump named UIA tree of running app
 //
 // Exit codes: 0 = ok, 1 = failure, 2 = skipped (env not ready), 3 = app not running.
@@ -62,6 +63,7 @@ internal static class Program
                 "mr-add"       => Flows.MrAdd(hwnd, app, outDir, RequirePositional(args, 1, "mrCode")),
                 "mt-exec"      => Flows.MtExec(hwnd, app, outDir),
                 "metapatterns" => Flows.MetaPatterns(hwnd, app, outDir),
+                "i18n-smoke"   => Flows.I18nSmoke(hwnd, app, outDir),
                 "debug"        => Flows.Debug(app),
                 _              => UnknownCommand(cmd),
             };
@@ -110,6 +112,7 @@ internal static class Program
         Console.Error.WriteLine("  smokeshot mr-add  <mrCode>  [--out DIR]  Step 2: MR Management add MR");
         Console.Error.WriteLine("  smokeshot mt-exec [--out DIR]            Step 3: MT execution (skips if no OpenMOC)");
         Console.Error.WriteLine("  smokeshot metapatterns [--out DIR]       MetaPatterns CRUD screenshots");
+        Console.Error.WriteLine("  smokeshot i18n-smoke   [--out DIR]       Client i18n language switch + fallback evidence");
         Console.Error.WriteLine("  smokeshot debug                          Dump named UIA tree");
         Console.Error.WriteLine("Exit codes: 0=ok 1=fail 2=skipped 3=app-not-running");
     }

@@ -9,6 +9,7 @@ using MetBench_BLL.Discovery;
 using MetBench_BLL.Paging;
 using MetBench_Domain;
 using MetBench_IDAL;
+using MetBench_UI.Localization;
 using Wpf.Ui.Controls;
 
 namespace MetBench_Client.ViewModels
@@ -38,10 +39,13 @@ namespace MetBench_Client.ViewModels
         [ObservableProperty] private string? _errorMessage;
         [ObservableProperty] private string? _statusMessage;
 
-        public MetaPatternsViewModel(IMetaPatternRepository repo, IAuditLogRepository audit)
+        public LocalizedTextProvider Localization { get; }
+
+        public MetaPatternsViewModel(IMetaPatternRepository repo, IAuditLogRepository audit, LocalizedTextProvider localization)
         {
             _repo = repo;
             _audit = audit;
+            Localization = localization;
             PageSize = 5;  // 8 seeded rows → 2 pages, makes PagingBar non-trivial
         }
 

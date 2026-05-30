@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using MetBench_BLL.Paging;
 using MetBench_BLL.SystemMT.Persistence;
 using MetBench_BLL.SystemMT.Persistence.Editing;
+using MetBench_UI.Localization;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -23,6 +24,8 @@ namespace MetBench_Client.ViewModels
         private readonly IExecutionHistoryEditor _editor;
         private bool _isInitialized;
         private readonly List<SystemMtResultRecord> _selectedRows = new();
+
+        public LocalizedTextProvider Localization { get; }
 
         [ObservableProperty]
         private ObservableCollection<SystemMtResultRecord> _records = new();
@@ -62,9 +65,10 @@ namespace MetBench_Client.ViewModels
             }
         }
 
-        public SystemMtExecutionHistoryViewModel(IExecutionHistoryEditor editor)
+        public SystemMtExecutionHistoryViewModel(IExecutionHistoryEditor editor, LocalizedTextProvider localization)
         {
             _editor = editor;
+            Localization = localization;
         }
 
         public async void OnNavigatedTo()

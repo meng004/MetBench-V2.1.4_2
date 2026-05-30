@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MetBench_BLL.SystemMT.Metadata.Editing;
+using MetBench_UI.Localization;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -13,6 +14,8 @@ namespace MetBench_Client.ViewModels
     {
         private readonly ISystemMtEquationEditor _editor;
         private bool _isInitialized;
+
+        public LocalizedTextProvider Localization { get; }
 
         [ObservableProperty]
         private ObservableCollection<EquationListItem> _equations = new();
@@ -39,9 +42,10 @@ namespace MetBench_Client.ViewModels
         [NotifyCanExecuteChangedFor(nameof(SaveEquationDraftCommand))]
         private bool _isDraftReadOnly = true;
 
-        public SystemMtEquationCatalogViewModel(ISystemMtEquationEditor editor)
+        public SystemMtEquationCatalogViewModel(ISystemMtEquationEditor editor, LocalizedTextProvider localization)
         {
             _editor = editor;
+            Localization = localization;
         }
 
         public async void OnNavigatedTo()

@@ -31,7 +31,7 @@
                 <StackPanel Orientation="Horizontal" Margin="0 3 0 5">
                     <TextBlock Text="ApplicationName" VerticalAlignment="Center" Margin="15 0 0 0"/>
                     <ui:TextBox TextWrapping="Wrap" Text="{Binding ViewModel.ApplicationNameBoxText,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" s:View.ActionTarget="{Binding ViewModel}" Margin="10 0 0 0" Width="150" />
-                    <ui:Button Appearance="Info" Content="Query" Margin="5 0 0 0" s:View.ActionTarget="{Binding ViewModel}"
+                    <ui:Button Appearance="Info" Content="{Binding ViewModel.Localization[Legacy_Query]}" Margin="5 0 0 0" s:View.ActionTarget="{Binding ViewModel}"
                     Command="{s:Action reload_ItemsSource}"/>
 
                     <!-- PR-VM-6 / F19: Status filter dropdown — default "active" hides deprecated/archived rows -->
@@ -341,22 +341,22 @@ SelectedValue="{Binding ViewModel.ExpressionValue,UpdateSourceTrigger=PropertyCh
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <ui:Button Grid.Column="0" Margin="70,0,0,0" Appearance="Primary" Content="Add" Width="100" Height="40"
+                <ui:Button Grid.Column="0" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Add]}" Width="100" Height="40"
            s:View.ActionTarget="{Binding ViewModel}"
            Command="{s:Action btnAdd_Click}"
            Icon="{ui:SymbolIcon GuestAdd24}"
            />
-                <ui:Button Grid.Column="1" Margin="70,0,0,0" Appearance="Primary" Content="Edit" Width="100" Height="40"
+                <ui:Button Grid.Column="1" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Modify]}" Width="100" Height="40"
            s:View.ActionTarget="{Binding ViewModel}"
            Command="{s:Action btnModify_Click}"
            Icon="{ui:SymbolIcon CalendarEdit24}"
            />
-                <ui:Button Grid.Column="2" Margin="70,0,0,0" Appearance="Primary" Content="Del" Width="100" Height="40"
+                <ui:Button Grid.Column="2" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Delete]}" Width="100" Height="40"
            s:View.ActionTarget="{Binding ViewModel}"
            Command="{s:Action btnDelect_Click}"
            Icon="{ui:SymbolIcon DeleteDismiss24}"
            />
-                <ui:Button Grid.Column="3" Margin="70,0,0,0" Appearance="Primary" Content="Reset" Width="100" Height="40"
+                <ui:Button Grid.Column="3" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Cancel]}" Width="100" Height="40"
            s:View.ActionTarget="{Binding ViewModel}"
            Command="{s:Action btnCancel_Click}"
            Icon="{ui:SymbolIcon TextBulletListSquareSettings20}"

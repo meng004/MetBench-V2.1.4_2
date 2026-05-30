@@ -10,6 +10,7 @@ using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_Client.Services;
 using MetBench_Domain;
 using MetBench_IDAL;
+using MetBench_UI.Localization;
 using Wpf.Ui.Controls;
 
 namespace MetBench_Client.ViewModels
@@ -32,18 +33,22 @@ namespace MetBench_Client.ViewModels
         private readonly ReplayContextBuilder _builder;
         private readonly ReplayService _replayService;
 
+        public LocalizedTextProvider Localization { get; }
+
         public ReplayResultViewModel(
             ReplayInbox inbox,
             IAnomalyRepository anomalies,
             IResultRepository results,
             ReplayContextBuilder builder,
-            ReplayService replayService)
+            ReplayService replayService,
+            LocalizedTextProvider localization)
         {
             _inbox = inbox;
             _anomalies = anomalies;
             _results = results;
             _builder = builder;
             _replayService = replayService;
+            Localization = localization;
         }
 
         // === Anomaly / 原 Result 展示字段 ===

@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="App_Title" xml:space="preserve">
+    <value>MetBench</value>
+  </data>
+  <data name="Nav_SystemMtExecution" xml:space="preserve">
+    <value>系统级蜕变测试</value>
+  </data>
+  <data name="Nav_Settings" xml:space="preserve">
+    <value>设置</value>
+  </data>
+  <data name="Settings_Personalization" xml:space="preserve">
+    <value>个性化</value>
+  </data>
+  <data name="Settings_Language" xml:space="preserve">
+    <value>语言</value>
+  </data>
+  <data name="Settings_Apply" xml:space="preserve">
+    <value>应用</value>
+  </data>
+  <data name="Settings_Language_English" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="Settings_Language_Chinese" xml:space="preserve">
+    <value>中文</value>
+  </data>
+  <data name="Common_Search" xml:space="preserve">
+    <value>搜索</value>
+  </data>
+  <data name="Common_NotAvailable" xml:space="preserve">
+    <value>不可用</value>
+  </data>
+  <data name="Nav_MrDisplay" xml:space="preserve">
+    <value>MR 展示</value>
+  </data>
+  <data name="Nav_MrManagement" xml:space="preserve">
+    <value>MR 管理</value>
+  </data>
+  <data name="Nav_ApplicationManagement" xml:space="preserve">
+    <value>应用管理</value>
+  </data>
+  <data name="Nav_DomainManagement" xml:space="preserve">
+    <value>领域管理</value>
+  </data>
+  <data name="Nav_MtExecution" xml:space="preserve">
+    <value>方法级蜕变测试执行</value>
+  </data>
+  <data name="Nav_SystemMtMrCatalog" xml:space="preserve">
+    <value>系统级 MR 目录</value>
+  </data>
+  <data name="Nav_SystemMtSutCatalog" xml:space="preserve">
+    <value>系统级 SUT 目录</value>
+  </data>
+  <data name="Nav_SystemMtEquationCatalog" xml:space="preserve">
+    <value>系统级方程目录</value>
+  </data>
+  <data name="Nav_SystemMtSampleCaseCatalog" xml:space="preserve">
+    <value>系统级样例目录</value>
+  </data>
+  <data name="Nav_SystemMtExecutionHistory" xml:space="preserve">
+    <value>系统级执行历史</value>
+  </data>
+  <data name="Nav_Anomalies" xml:space="preserve">
+    <value>异常</value>
+  </data>
+  <data name="Nav_Discovery" xml:space="preserve">
+    <value>发现</value>
+  </data>
+  <data name="Nav_CandidateReview" xml:space="preserve">
+    <value>候选评审</value>
+  </data>
+  <data name="Nav_Mutation" xml:space="preserve">
+    <value>变异</value>
+  </data>
+  <data name="Nav_Replay" xml:space="preserve">
+    <value>回放</value>
+  </data>
+  <data name="Nav_Coverage" xml:space="preserve">
+    <value>覆盖率</value>
+  </data>
+  <data name="Nav_MetaPatterns" xml:space="preserve">
+    <value>元模式</value>
+  </data>
+  <data name="Nav_MrDetection" xml:space="preserve">
+    <value>MR 检测</value>
+  </data>
+  <data name="Nav_MrRecommendation" xml:space="preserve">
+    <value>MR 推荐</value>
+  </data>
+  <data name="Nav_MrReportGenerator" xml:space="preserve">
+    <value>MR 报告生成</value>
+  </data>
+  <data name="Tray_Home" xml:space="preserve">
+    <value>主页</value>
+  </data>
+  <data name="Settings_Theme" xml:space="preserve">
+    <value>主题</value>
+  </data>
+  <data name="Settings_Theme_Light" xml:space="preserve">
+    <value>浅色</value>
+  </data>
+  <data name="Settings_Theme_Dark" xml:space="preserve">
+    <value>深色</value>
+  </data>
+  <data name="Settings_About" xml:space="preserve">
+    <value>关于 MetBench</value>
+  </data>
+  <data name="Settings_More" xml:space="preserve">
+    <value>更多</value>
+  </data>
+  <data name="Settings_ProjectIntroduction" xml:space="preserve">
+    <value>MetBench 项目介绍</value>
+  </data>
+  <data name="Settings_SourceCode" xml:space="preserve">
+    <value>MetBench 源代码</value>
+  </data>
+  <data name="Settings_CloneRepository" xml:space="preserve">
+    <value>克隆此仓库</value>
+  </data>
+  <data name="Settings_InvalidCultureFallback" xml:space="preserve">
+    <value>不支持的语言将回退到英文。</value>
+  </data>
+  <data name="SystemMt_Run" xml:space="preserve">
+    <value>运行</value>
+  </data>
+  <data name="SystemMt_SelectedMr" xml:space="preserve">
+    <value>选定 MR</value>
+  </data>
+  <data name="SystemMt_Source" xml:space="preserve">
+    <value>源输入</value>
+  </data>
+  <data name="SystemMt_FollowUp" xml:space="preserve">
+    <value>后续输入</value>
+  </data>
+  <data name="SystemMt_Result" xml:space="preserve">
+    <value>结果</value>
+  </data>
+  <data name="Catalog_LoadedManifests" xml:space="preserve">
+    <value>已加载清单</value>
+  </data>
+  <data name="Catalog_LoadedSuts" xml:space="preserve">
+    <value>已加载 SUT</value>
+  </data>
+  <data name="Catalog_LoadedEquations" xml:space="preserve">
+    <value>已加载方程</value>
+  </data>
+  <data name="Catalog_LoadedSampleCases" xml:space="preserve">
+    <value>已加载样例</value>
+  </data>
+  <data name="History_ExecutionHistory" xml:space="preserve">
+    <value>执行历史</value>
+  </data>
+  <data name="Anomaly_Title" xml:space="preserve">
+    <value>异常</value>
+  </data>
+  <data name="Anomaly_ApplyTransition" xml:space="preserve">
+    <value>应用状态转换</value>
+  </data>
+  <data name="Replay_Title" xml:space="preserve">
+    <value>回放</value>
+  </data>
+  <data name="ReportGenerator_Title" xml:space="preserve">
+    <value>MR 报告生成器</value>
+  </data>
+  <data name="ReportGenerator_Export" xml:space="preserve">
+    <value>导出</value>
+  </data>
+  <data name="Legacy_Add" xml:space="preserve">
+    <value>新增</value>
+  </data>
+  <data name="Legacy_Delete" xml:space="preserve">
+    <value>删除</value>
+  </data>
+  <data name="Legacy_Modify" xml:space="preserve">
+    <value>修改</value>
+  </data>
+  <data name="Legacy_Query" xml:space="preserve">
+    <value>查询</value>
+  </data>
+  <data name="Legacy_Save" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="Legacy_Cancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="Legacy_Name" xml:space="preserve">
+    <value>名称</value>
+  </data>
+  <data name="Legacy_Description" xml:space="preserve">
+    <value>描述</value>
+  </data>
+  <data name="Legacy_Domain" xml:space="preserve">
+    <value>领域</value>
+  </data>
+  <data name="Legacy_Application" xml:space="preserve">
+    <value>应用</value>
+  </data>
+  <data name="Legacy_Recommendation" xml:space="preserve">
+    <value>推荐</value>
+  </data>
+  <data name="Legacy_Detection" xml:space="preserve">
+    <value>检测</value>
+  </data>
+  <data name="Legacy_Coverage" xml:space="preserve">
+    <value>覆盖率</value>
+  </data>
+</root>

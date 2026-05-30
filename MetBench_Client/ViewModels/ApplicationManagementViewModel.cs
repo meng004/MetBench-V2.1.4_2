@@ -6,6 +6,7 @@ using MetBench_Client.Util;
 using MetBench_Client.Views.Pages;
 using MetBench_Client.Views.Windows;
 using MetBench_Domain;
+using MetBench_UI.Localization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
 using Stylet;
@@ -25,6 +26,8 @@ namespace MetBench_Client.ViewModels
 {
     public class ApplicationManagementViewModel : ObservableObject, INavigationAware, IHandle<DomainAddEvent>, IHandle<DomainModifyEvent>, IHandle<DomainDeleteEvent>
     {
+        public LocalizedTextProvider Localization { get; }
+
         //导航服务 用于页面切换
         private INavigationService _navigationService;
 
@@ -159,7 +162,7 @@ namespace MetBench_Client.ViewModels
         }
 
         // 构造函数
-        public ApplicationManagementViewModel(MetamorphicRelationService metamorphicRelationSerive, ApplicationService applicationSerive, DomainService domainSerive, IPageService pageService, INavigationService navigationService, IEventAggregator eventAggregator, IServiceProvider serviceProvider)
+        public ApplicationManagementViewModel(MetamorphicRelationService metamorphicRelationSerive, ApplicationService applicationSerive, DomainService domainSerive, IPageService pageService, INavigationService navigationService, IEventAggregator eventAggregator, IServiceProvider serviceProvider, LocalizedTextProvider localization)
         {
             this._metamorphicRelationSerive = metamorphicRelationSerive;
             this._applicationSerive = applicationSerive;
@@ -168,6 +171,7 @@ namespace MetBench_Client.ViewModels
             this._pageService = pageService;
             this._serviceProvider = serviceProvider;
             this._eventAggregator = eventAggregator;
+            Localization = localization;
             _eventAggregator.Subscribe(this);
             comboBoxDataSourceInit();
             reload_ItemsSource();

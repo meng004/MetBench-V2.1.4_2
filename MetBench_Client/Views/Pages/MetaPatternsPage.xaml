@@ -22,12 +22,12 @@
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
             <TextBlock FontSize="18" FontWeight="Bold" Text="NOETHER MetaPatterns" VerticalAlignment="Center" Margin="0,0,16,0" />
             <ui:Button Appearance="Primary"
-                       Content="Add"
+                       Content="{Binding ViewModel.Localization[Legacy_Add]}"
                        Icon="{ui:SymbolIcon Add24}"
                        Command="{Binding ViewModel.BeginAddCommand}"
                        Margin="0,0,8,0" />
             <ui:Button Appearance="Secondary"
-                       Content="Edit"
+                       Content="{Binding ViewModel.Localization[Legacy_Modify]}"
                        Icon="{ui:SymbolIcon Edit24}"
                        Command="{Binding ViewModel.BeginEditCommand}"
                        Margin="0,0,8,0" />
@@ -145,12 +145,12 @@
 
                     <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
                         <ui:Button Appearance="Primary"
-                                   Content="Save"
+                                   Content="{Binding ViewModel.Localization[Legacy_Save]}"
                                    Icon="{ui:SymbolIcon Save24}"
                                    Command="{Binding ViewModel.SaveCommand}"
                                    Margin="0,0,8,0" />
                         <ui:Button Appearance="Secondary"
-                                   Content="Cancel"
+                                   Content="{Binding ViewModel.Localization[Legacy_Cancel]}"
                                    Icon="{ui:SymbolIcon Dismiss24}"
                                    Command="{Binding ViewModel.CancelCommand}" />
                     </StackPanel>

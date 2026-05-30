@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MetBench_BLL.SystemMT.Catalog.Editing;
+using MetBench_UI.Localization;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -12,6 +13,8 @@ namespace MetBench_Client.ViewModels
     {
         private readonly ISystemMtSutEditor _editor;
         private bool _isInitialized;
+
+        public LocalizedTextProvider Localization { get; }
 
         [ObservableProperty]
         private ObservableCollection<SystemMtSutDescriptor> _suts = new();
@@ -36,9 +39,10 @@ namespace MetBench_Client.ViewModels
         // when false it preserves the existing mrs verbatim.
         private bool _isNewSutDraft;
 
-        public SystemMtSutCatalogViewModel(ISystemMtSutEditor editor)
+        public SystemMtSutCatalogViewModel(ISystemMtSutEditor editor, LocalizedTextProvider localization)
         {
             _editor = editor;
+            Localization = localization;
         }
 
         public void OnNavigatedTo()

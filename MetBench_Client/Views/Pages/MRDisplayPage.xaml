@@ -194,7 +194,7 @@
                          />
             </StackPanel>
             <StackPanel  Grid.Row="2" Grid.Column="2" x:Name="stackpanel7" Orientation="Horizontal" VerticalAlignment="Center">
-                <ui:Button Appearance="Primary" x:Name="btnQuery" Content="Query" Margin="140 0 0 0" VerticalContentAlignment="Center" Width="100" Height="40"
+                <ui:Button Appearance="Primary" x:Name="btnQuery" Content="{Binding ViewModel.Localization[Legacy_Query]}" Margin="140 0 0 0" VerticalContentAlignment="Center" Width="100" Height="40"
                            s:View.ActionTarget="{Binding ViewModel}"
                            Click="{s:Action btnQuery_Click}"
                            Icon="{ui:SymbolIcon DatabaseSearch24}"
