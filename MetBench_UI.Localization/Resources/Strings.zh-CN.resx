@@ -811,4 +811,271 @@
   <data name="History_EvidenceForSelectedRow" xml:space="preserve">
     <value>选中行的证据</value>
   </data>
+  <data name="Dashboard_ClickMe" xml:space="preserve">
+    <value>点击我！</value>
+  </data>
+  <data name="Discovery_DiscovererLabel" xml:space="preserve">
+    <value>发现器：</value>
+  </data>
+  <data name="Discovery_TargetSutLabel" xml:space="preserve">
+    <value>目标 SUT：</value>
+  </data>
+  <data name="Discovery_RunButton" xml:space="preserve">
+    <value>运行发现</value>
+  </data>
+  <data name="Discovery_ColCode" xml:space="preserve">
+    <value>代码</value>
+  </data>
+  <data name="Discovery_ColAssertion" xml:space="preserve">
+    <value>断言</value>
+  </data>
+  <data name="Discovery_ColValue" xml:space="preserve">
+    <value>值</value>
+  </data>
+  <data name="Discovery_ColConfidence" xml:space="preserve">
+    <value>置信度</value>
+  </data>
+  <data name="Discovery_ColStatus" xml:space="preserve">
+    <value>状态</value>
+  </data>
+  <data name="Discovery_ColCreated" xml:space="preserve">
+    <value>创建时间</value>
+  </data>
+  <data name="Candidate_SelectCandidate" xml:space="preserve">
+    <value>选择候选项：</value>
+  </data>
+  <data name="Candidate_Confidence" xml:space="preserve">
+    <value>置信度：</value>
+  </data>
+  <data name="Candidate_Assertion" xml:space="preserve">
+    <value>断言：</value>
+  </data>
+  <data name="Candidate_Rationale" xml:space="preserve">
+    <value>理由：</value>
+  </data>
+  <data name="Candidate_Validators" xml:space="preserve">
+    <value>验证器：</value>
+  </data>
+  <data name="Candidate_Empirical" xml:space="preserve">
+    <value>经验</value>
+  </data>
+  <data name="Candidate_TheoreticalLlm" xml:space="preserve">
+    <value>理论-LLM</value>
+  </data>
+  <data name="Candidate_ValidateSelected" xml:space="preserve">
+    <value>验证所选</value>
+  </data>
+  <data name="Candidate_ColValidator" xml:space="preserve">
+    <value>验证器</value>
+  </data>
+  <data name="Candidate_ColPassed" xml:space="preserve">
+    <value>通过</value>
+  </data>
+  <data name="Candidate_ColRunAt" xml:space="preserve">
+    <value>运行时间</value>
+  </data>
+  <data name="Candidate_ColDetails" xml:space="preserve">
+    <value>详情</value>
+  </data>
+  <data name="Coverage_Title" xml:space="preserve">
+    <value>四维覆盖仪表盘</value>
+  </data>
+  <data name="Coverage_MetaPatternCoverage" xml:space="preserve">
+    <value>元模式覆盖</value>
+  </data>
+  <data name="Coverage_SutMrCoverage" xml:space="preserve">
+    <value>SUT × MR 绑定覆盖</value>
+  </data>
+  <data name="Coverage_BugCoverage" xml:space="preserve">
+    <value>缺陷覆盖</value>
+  </data>
+  <data name="Coverage_MutationCoverage" xml:space="preserve">
+    <value>变异检出覆盖</value>
+  </data>
+  <data name="Mutation_CampaignName" xml:space="preserve">
+    <value>任务名称：</value>
+  </data>
+  <data name="Mutation_SeedDemoData" xml:space="preserve">
+    <value>填充演示数据</value>
+  </data>
+  <data name="Mutation_SeedDemoDataToolTip" xml:space="preserve">
+    <value>若表为空则插入 5 个演示变异体 + 5 个 MR 绑定</value>
+  </data>
+  <data name="Mutation_Mutants" xml:space="preserve">
+    <value>变异体</value>
+  </data>
+  <data name="Mutation_MRBindings" xml:space="preserve">
+    <value>MR 绑定</value>
+  </data>
+  <data name="Mutation_StartCampaign" xml:space="preserve">
+    <value>开始任务</value>
+  </data>
+  <data name="Mutation_CampaignSummary" xml:space="preserve">
+    <value>任务摘要</value>
+  </data>
+  <data name="Mutation_SummaryTotal" xml:space="preserve">
+    <value>总计：</value>
+  </data>
+  <data name="Mutation_SummaryDetected" xml:space="preserve">
+    <value>已检出：</value>
+  </data>
+  <data name="Mutation_SummaryMissed" xml:space="preserve">
+    <value>漏检：</value>
+  </data>
+  <data name="Mutation_SummaryErrors" xml:space="preserve">
+    <value>错误：</value>
+  </data>
+  <data name="Mutation_SummaryDetectionRate" xml:space="preserve">
+    <value>检出率：</value>
+  </data>
+  <data name="Mutation_ColMutant" xml:space="preserve">
+    <value>变异体</value>
+  </data>
+  <data name="Mutation_ColBinding" xml:space="preserve">
+    <value>绑定</value>
+  </data>
+  <data name="Mutation_ColOutcome" xml:space="preserve">
+    <value>结果</value>
+  </data>
+  <data name="Mutation_ColObservedDelta" xml:space="preserve">
+    <value>观测 Δ</value>
+  </data>
+  <data name="Mutation_ColExpectedDelta" xml:space="preserve">
+    <value>预期 Δ</value>
+  </data>
+  <data name="Mutation_ColNotes" xml:space="preserve">
+    <value>备注</value>
+  </data>
+  <data name="Detect_ApplicationName" xml:space="preserve">
+    <value>应用程序名称</value>
+  </data>
+  <data name="Detect_InputPattern" xml:space="preserve">
+    <value>输入模式</value>
+  </data>
+  <data name="Detect_OutputPattern" xml:space="preserve">
+    <value>输出模式</value>
+  </data>
+  <data name="Detect_DimensionOfInputPattern" xml:space="preserve">
+    <value>输入模式维度</value>
+  </data>
+  <data name="Detect_TrueRatio" xml:space="preserve">
+    <value>真值比例</value>
+  </data>
+  <data name="Detect_Program" xml:space="preserve">
+    <value>程序</value>
+  </data>
+  <data name="Detect_WithdrawUpload" xml:space="preserve">
+    <value>撤销上传</value>
+  </data>
+  <data name="Detect_Upload" xml:space="preserve">
+    <value>上传</value>
+  </data>
+  <data name="Detect_InputParamCount" xml:space="preserve">
+    <value>输入参数个数</value>
+  </data>
+  <data name="Detect_Reset" xml:space="preserve">
+    <value>重置</value>
+  </data>
+  <data name="Detect_InputParamRanges" xml:space="preserve">
+    <value>输入参数范围</value>
+  </data>
+  <data name="Detect_InputDatatypes" xml:space="preserve">
+    <value>输入数据类型</value>
+  </data>
+  <data name="Detect_DetectMR" xml:space="preserve">
+    <value>识别蜕变关系</value>
+  </data>
+  <data name="Detect_StoreMR" xml:space="preserve">
+    <value>存储蜕变关系</value>
+  </data>
+  <data name="Detect_ExportCsv" xml:space="preserve">
+    <value>导出CSV</value>
+  </data>
+  <data name="Recommend_Application" xml:space="preserve">
+    <value>程序</value>
+  </data>
+  <data name="Recommend_Similarity" xml:space="preserve">
+    <value>相似度</value>
+  </data>
+  <data name="Recommend_InputPattern" xml:space="preserve">
+    <value>输入模式</value>
+  </data>
+  <data name="Recommend_OutputPattern" xml:space="preserve">
+    <value>输出模式</value>
+  </data>
+  <data name="Recommend_MrInformation" xml:space="preserve">
+    <value>MR 信息</value>
+  </data>
+  <data name="Recommend_View" xml:space="preserve">
+    <value>查看</value>
+  </data>
+  <data name="Recommend_ApplicationInformation" xml:space="preserve">
+    <value>应用信息</value>
+  </data>
+  <data name="Recommend_SupportRate" xml:space="preserve">
+    <value>支持率</value>
+  </data>
+  <data name="Recommend_RecommendType" xml:space="preserve">
+    <value>推荐类型</value>
+  </data>
+  <data name="Recommend_Recommend" xml:space="preserve">
+    <value>推荐</value>
+  </data>
+  <data name="Recommend_Clear" xml:space="preserve">
+    <value>清空</value>
+  </data>
+  <data name="Recommend_Upload" xml:space="preserve">
+    <value>上传</value>
+  </data>
+  <data name="Recommend_InputParamCount" xml:space="preserve">
+    <value>输入参数个数</value>
+  </data>
+  <data name="Recommend_Reset" xml:space="preserve">
+    <value>重置</value>
+  </data>
+  <data name="Recommend_InputParamRanges" xml:space="preserve">
+    <value>输入参数范围</value>
+  </data>
+  <data name="Recommend_InputDatatypes" xml:space="preserve">
+    <value>输入数据类型</value>
+  </data>
+  <data name="MtExec_InputPattern" xml:space="preserve">
+    <value>输入模式</value>
+  </data>
+  <data name="MtExec_OutputPattern" xml:space="preserve">
+    <value>输出模式</value>
+  </data>
+  <data name="MtExec_CodeName" xml:space="preserve">
+    <value>程序名</value>
+  </data>
+  <data name="MtExec_ExecuteMt" xml:space="preserve">
+    <value>执行 MT</value>
+  </data>
+  <data name="MtExec_MinNumber" xml:space="preserve">
+    <value>最小值</value>
+  </data>
+  <data name="MtExec_Reset" xml:space="preserve">
+    <value>重置</value>
+  </data>
+  <data name="MtExec_MaxNumber" xml:space="preserve">
+    <value>最大值</value>
+  </data>
+  <data name="MtExec_ExecuteNumb" xml:space="preserve">
+    <value>执行次数</value>
+  </data>
+  <data name="MtExec_Threshold" xml:space="preserve">
+    <value>阈值</value>
+  </data>
+  <data name="MtExec_MtReport" xml:space="preserve">
+    <value>MT 报告</value>
+  </data>
+  <data name="MtExec_Pass" xml:space="preserve">
+    <value>通过</value>
+  </data>
+  <data name="MtExec_Fail" xml:space="preserve">
+    <value>失败</value>
+  </data>
+  <data name="MtExec_PlotType" xml:space="preserve">
+    <value>图表类型</value>
+  </data>
 </root>

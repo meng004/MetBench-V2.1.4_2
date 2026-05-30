@@ -811,4 +811,271 @@
   <data name="History_EvidenceForSelectedRow" xml:space="preserve">
     <value>Evidence for selected row</value>
   </data>
+  <data name="Dashboard_ClickMe" xml:space="preserve">
+    <value>Click me!</value>
+  </data>
+  <data name="Discovery_DiscovererLabel" xml:space="preserve">
+    <value>Discoverer:</value>
+  </data>
+  <data name="Discovery_TargetSutLabel" xml:space="preserve">
+    <value>Target SUT:</value>
+  </data>
+  <data name="Discovery_RunButton" xml:space="preserve">
+    <value>Run discovery</value>
+  </data>
+  <data name="Discovery_ColCode" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="Discovery_ColAssertion" xml:space="preserve">
+    <value>Assertion</value>
+  </data>
+  <data name="Discovery_ColValue" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="Discovery_ColConfidence" xml:space="preserve">
+    <value>Confidence</value>
+  </data>
+  <data name="Discovery_ColStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Discovery_ColCreated" xml:space="preserve">
+    <value>Created</value>
+  </data>
+  <data name="Candidate_SelectCandidate" xml:space="preserve">
+    <value>Select candidate:</value>
+  </data>
+  <data name="Candidate_Confidence" xml:space="preserve">
+    <value>Confidence: </value>
+  </data>
+  <data name="Candidate_Assertion" xml:space="preserve">
+    <value>Assertion: </value>
+  </data>
+  <data name="Candidate_Rationale" xml:space="preserve">
+    <value>Rationale: </value>
+  </data>
+  <data name="Candidate_Validators" xml:space="preserve">
+    <value>Validators:</value>
+  </data>
+  <data name="Candidate_Empirical" xml:space="preserve">
+    <value>empirical</value>
+  </data>
+  <data name="Candidate_TheoreticalLlm" xml:space="preserve">
+    <value>theoretical-llm</value>
+  </data>
+  <data name="Candidate_ValidateSelected" xml:space="preserve">
+    <value>Validate selected</value>
+  </data>
+  <data name="Candidate_ColValidator" xml:space="preserve">
+    <value>Validator</value>
+  </data>
+  <data name="Candidate_ColPassed" xml:space="preserve">
+    <value>Passed</value>
+  </data>
+  <data name="Candidate_ColRunAt" xml:space="preserve">
+    <value>Run At</value>
+  </data>
+  <data name="Candidate_ColDetails" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="Coverage_Title" xml:space="preserve">
+    <value>4-Dimension Coverage Dashboard</value>
+  </data>
+  <data name="Coverage_MetaPatternCoverage" xml:space="preserve">
+    <value>MetaPattern Coverage</value>
+  </data>
+  <data name="Coverage_SutMrCoverage" xml:space="preserve">
+    <value>SUT × MR Binding Coverage</value>
+  </data>
+  <data name="Coverage_BugCoverage" xml:space="preserve">
+    <value>Bug Coverage</value>
+  </data>
+  <data name="Coverage_MutationCoverage" xml:space="preserve">
+    <value>Mutation Detection Coverage</value>
+  </data>
+  <data name="Mutation_CampaignName" xml:space="preserve">
+    <value>Campaign name:</value>
+  </data>
+  <data name="Mutation_SeedDemoData" xml:space="preserve">
+    <value>Seed demo data</value>
+  </data>
+  <data name="Mutation_SeedDemoDataToolTip" xml:space="preserve">
+    <value>Insert 5 demo mutants + 5 MR bindings if tables are empty</value>
+  </data>
+  <data name="Mutation_Mutants" xml:space="preserve">
+    <value>Mutants</value>
+  </data>
+  <data name="Mutation_MRBindings" xml:space="preserve">
+    <value>MR Bindings</value>
+  </data>
+  <data name="Mutation_StartCampaign" xml:space="preserve">
+    <value>Start campaign</value>
+  </data>
+  <data name="Mutation_CampaignSummary" xml:space="preserve">
+    <value>Campaign Summary</value>
+  </data>
+  <data name="Mutation_SummaryTotal" xml:space="preserve">
+    <value>Total: </value>
+  </data>
+  <data name="Mutation_SummaryDetected" xml:space="preserve">
+    <value>Detected: </value>
+  </data>
+  <data name="Mutation_SummaryMissed" xml:space="preserve">
+    <value>Missed: </value>
+  </data>
+  <data name="Mutation_SummaryErrors" xml:space="preserve">
+    <value>Errors: </value>
+  </data>
+  <data name="Mutation_SummaryDetectionRate" xml:space="preserve">
+    <value>Detection rate: </value>
+  </data>
+  <data name="Mutation_ColMutant" xml:space="preserve">
+    <value>Mutant</value>
+  </data>
+  <data name="Mutation_ColBinding" xml:space="preserve">
+    <value>Binding</value>
+  </data>
+  <data name="Mutation_ColOutcome" xml:space="preserve">
+    <value>Outcome</value>
+  </data>
+  <data name="Mutation_ColObservedDelta" xml:space="preserve">
+    <value>Obs Δ</value>
+  </data>
+  <data name="Mutation_ColExpectedDelta" xml:space="preserve">
+    <value>Exp Δ</value>
+  </data>
+  <data name="Mutation_ColNotes" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="Detect_ApplicationName" xml:space="preserve">
+    <value>ApplicationName</value>
+  </data>
+  <data name="Detect_InputPattern" xml:space="preserve">
+    <value>InputPattern</value>
+  </data>
+  <data name="Detect_OutputPattern" xml:space="preserve">
+    <value>OutputPattern</value>
+  </data>
+  <data name="Detect_DimensionOfInputPattern" xml:space="preserve">
+    <value>DimensionOfInputPattern</value>
+  </data>
+  <data name="Detect_TrueRatio" xml:space="preserve">
+    <value>TrueRatio</value>
+  </data>
+  <data name="Detect_Program" xml:space="preserve">
+    <value>Program</value>
+  </data>
+  <data name="Detect_WithdrawUpload" xml:space="preserve">
+    <value>X</value>
+  </data>
+  <data name="Detect_Upload" xml:space="preserve">
+    <value>Upl</value>
+  </data>
+  <data name="Detect_InputParamCount" xml:space="preserve">
+    <value>InputParamCount</value>
+  </data>
+  <data name="Detect_Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="Detect_InputParamRanges" xml:space="preserve">
+    <value>InputParamRanges</value>
+  </data>
+  <data name="Detect_InputDatatypes" xml:space="preserve">
+    <value>InputDatatypes</value>
+  </data>
+  <data name="Detect_DetectMR" xml:space="preserve">
+    <value>DetectMR</value>
+  </data>
+  <data name="Detect_StoreMR" xml:space="preserve">
+    <value>StoreMR</value>
+  </data>
+  <data name="Detect_ExportCsv" xml:space="preserve">
+    <value>ExportCsv</value>
+  </data>
+  <data name="Recommend_Application" xml:space="preserve">
+    <value>Program</value>
+  </data>
+  <data name="Recommend_Similarity" xml:space="preserve">
+    <value>Similarity</value>
+  </data>
+  <data name="Recommend_InputPattern" xml:space="preserve">
+    <value>InputPattern</value>
+  </data>
+  <data name="Recommend_OutputPattern" xml:space="preserve">
+    <value>OutputPattern</value>
+  </data>
+  <data name="Recommend_MrInformation" xml:space="preserve">
+    <value>MR Infomation</value>
+  </data>
+  <data name="Recommend_View" xml:space="preserve">
+    <value>查看</value>
+  </data>
+  <data name="Recommend_ApplicationInformation" xml:space="preserve">
+    <value>Application Infomation</value>
+  </data>
+  <data name="Recommend_SupportRate" xml:space="preserve">
+    <value>SupportRate</value>
+  </data>
+  <data name="Recommend_RecommendType" xml:space="preserve">
+    <value>RecommendType</value>
+  </data>
+  <data name="Recommend_Recommend" xml:space="preserve">
+    <value>Recommend</value>
+  </data>
+  <data name="Recommend_Clear" xml:space="preserve">
+    <value>X</value>
+  </data>
+  <data name="Recommend_Upload" xml:space="preserve">
+    <value>Upl</value>
+  </data>
+  <data name="Recommend_InputParamCount" xml:space="preserve">
+    <value>InputParamCount</value>
+  </data>
+  <data name="Recommend_Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="Recommend_InputParamRanges" xml:space="preserve">
+    <value>InputParamRanges</value>
+  </data>
+  <data name="Recommend_InputDatatypes" xml:space="preserve">
+    <value>InputDatatypes</value>
+  </data>
+  <data name="MtExec_InputPattern" xml:space="preserve">
+    <value>InputPattern</value>
+  </data>
+  <data name="MtExec_OutputPattern" xml:space="preserve">
+    <value>OutputPattern</value>
+  </data>
+  <data name="MtExec_CodeName" xml:space="preserve">
+    <value>CodeName</value>
+  </data>
+  <data name="MtExec_ExecuteMt" xml:space="preserve">
+    <value>Eecute MT</value>
+  </data>
+  <data name="MtExec_MinNumber" xml:space="preserve">
+    <value>MinNumber</value>
+  </data>
+  <data name="MtExec_Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="MtExec_MaxNumber" xml:space="preserve">
+    <value>MaxNumber</value>
+  </data>
+  <data name="MtExec_ExecuteNumb" xml:space="preserve">
+    <value>ExecuteNumb</value>
+  </data>
+  <data name="MtExec_Threshold" xml:space="preserve">
+    <value>Threshold</value>
+  </data>
+  <data name="MtExec_MtReport" xml:space="preserve">
+    <value>MTReport</value>
+  </data>
+  <data name="MtExec_Pass" xml:space="preserve">
+    <value>Pass</value>
+  </data>
+  <data name="MtExec_Fail" xml:space="preserve">
+    <value>Fail</value>
+  </data>
+  <data name="MtExec_PlotType" xml:space="preserve">
+    <value>PlotType</value>
+  </data>
 </root>
