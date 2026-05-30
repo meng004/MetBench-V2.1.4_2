@@ -32,7 +32,15 @@ Set-Location $Worktree
 
 Invoke-Step "Checkout coordinator package" {
     git fetch origin
-    git checkout -B $VmBranch "origin/$CoordinatorBranch"
+    $remoteVmBranch = "origin/$VmBranch"
+    git rev-parse --verify $remoteVmBranch *> $null
+    if ($LASTEXITCODE -eq 0) {
+        git checkout -B $VmBranch $remoteVmBranch
+        git merge --no-edit "origin/$CoordinatorBranch"
+    }
+    else {
+        git checkout -B $VmBranch "origin/$CoordinatorBranch"
+    }
     git config user.name "Codex VM"
     git config user.email "codex-vm@example.invalid"
 }
