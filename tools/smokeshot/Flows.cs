@@ -631,6 +631,92 @@ public static class Flows
         return failed == 0 ? 0 : 1;
     }
 
+    // =====================================================================
+    // i18n-group-a: switch to a target language (zh / en) via Settings, then
+    // navigate the 9 Group-A function pages capturing one screenshot per page.
+    // Filenames are the Task evidence set 20-37 (zh even, en odd). Best-effort:
+    // each page failure is counted but does not abort the remaining captures.
+    // lang: "zh" or "en". Returns 0 if all 9 captured, else exit 1.
+    // =====================================================================
+    public static int I18nGroupAPages(IntPtr hwnd, AutomationElement app, string outDir, string lang)
+    {
+        bool zh = lang.Equals("zh", StringComparison.OrdinalIgnoreCase);
+        Console.WriteLine($"=== i18n-group-a flow (lang={(zh ? "zh" : "en")}) ===");
+        int failed = 0;
+
+        // ---- step A: navigate to Settings and switch language ----
+        Console.WriteLine("\nA) Navigate to Settings + switch language...");
+        bool settingsOk = false;
+        foreach (var label in new[] { "Settings", "设置" })
+        {
+            try { UiaHelpers.NavigateTo(app, label, settleMs: 1800); settingsOk = true; break; }
+            catch { }
+        }
+        if (!settingsOk)
+        {
+            Console.WriteLine("  FAIL: could not reach Settings — aborting i18n-group-a.");
+            return 1;
+        }
+
+        string comboItem = zh ? "中文" : "English";
+        bool selected = UiaHelpers.SelectComboBoxItem(app, comboItem, settleMs: 800);
+        if (!selected) { Console.WriteLine($"  WARN: ComboBox select '{comboItem}' failed."); failed++; }
+        bool applied = InvokeSettingsLanguageButton(app);
+        if (!applied) { Console.WriteLine("  WARN: apply button not invoked; culture may not have switched."); failed++; }
+        Thread.Sleep(2000);
+        UiaHelpers.MaximizeWindow(hwnd);
+        Thread.Sleep(800);
+
+        // ---- per-page capture ----
+        // (navLabelZh, navLabelEn, zhFile, enFile) — nav labels from Strings(.zh-CN).resx Nav_* keys.
+        var pages = new (string Zh, string En, string ZhFile, string EnFile)[]
+        {
+            ("异常",            "Anomalies",                   "20-anomaly-zh.png",        "21-anomaly-en.png"),
+            ("应用管理",        "Application Management",       "22-app-zh.png",            "23-app-en.png"),
+            ("领域管理",        "Domain Management",           "24-domain-zh.png",         "25-domain-en.png"),
+            ("MR 展示",         "MR Display",                  "26-mrdisplay-zh.png",      "27-mrdisplay-en.png"),
+            ("MR 管理",         "MR Management",               "28-mrmanagement-zh.png",   "29-mrmanagement-en.png"),
+            ("MR 报告生成",     "MR ReportGenerator",          "30-report-zh.png",         "31-report-en.png"),
+            ("元模式",          "MetaPatterns",                "32-metapatterns-zh.png",   "33-metapatterns-en.png"),
+            ("回放",            "Replay",                      "34-replay-zh.png",         "35-replay-en.png"),
+            ("系统级执行历史",  "System MT Execution History", "36-history-zh.png",        "37-history-en.png"),
+        };
+
+        foreach (var page in pages)
+        {
+            string file = zh ? page.ZhFile : page.EnFile;
+            // Prefer the label matching the active culture, fall back to the other.
+            string[] order = zh ? new[] { page.Zh, page.En } : new[] { page.En, page.Zh };
+            bool navOk = false;
+            foreach (var label in order)
+            {
+                try { UiaHelpers.NavigateTo(app, label, settleMs: 1800); navOk = true; Console.WriteLine($"  Navigated via '{label}'"); break; }
+                catch { }
+            }
+            if (!navOk)
+            {
+                Console.WriteLine($"  WARN: could not navigate to page for '{file}'.");
+                failed++;
+                continue;
+            }
+            try
+            {
+                UiaHelpers.FocusAndAttach(hwnd);
+                Thread.Sleep(500);
+                UiaHelpers.SaveScreenshot(hwnd, System.IO.Path.Combine(outDir, file));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"  FAIL screenshot {file}: {ex.Message}");
+                failed++;
+            }
+        }
+
+        if (failed == 0) Console.WriteLine("\ni18n-group-a PASS");
+        else Console.WriteLine($"\ni18n-group-a PARTIAL: {failed} step(s) failed");
+        return failed == 0 ? 0 : 1;
+    }
+
     // ---- private helpers for i18n-smoke ----
 
     /// <summary>
