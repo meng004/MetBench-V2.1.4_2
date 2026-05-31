@@ -29,38 +29,38 @@
     <StackPanel x:Name="Root" Orientation="Horizontal" HorizontalAlignment="Center" Margin="4">
         <!-- First / Previous -->
         <ui:Button Appearance="Secondary" Margin="0,0,4,0"
-                   ToolTip="First page"
+                   ToolTip="{Binding Localization[PagingBar_FirstPage]}"
                    Command="{Binding FirstPageCommand}"
                    Icon="{ui:SymbolIcon ChevronDoubleLeft20}" />
         <ui:Button Appearance="Secondary" Margin="0,0,8,0"
-                   ToolTip="Previous page"
+                   ToolTip="{Binding Localization[PagingBar_PreviousPage]}"
                    Command="{Binding PreviousPageCommand}"
                    Icon="{ui:SymbolIcon ChevronLeft20}" />
 
         <!-- Page x / y (total z) -->
         <TextBlock VerticalAlignment="Center" Margin="0,0,4,0"
                    Foreground="{DynamicResource TextFillColorPrimaryBrush}">
-            <Run Text="Page" />
+            <Run Text="{Binding Localization[PagingBar_Page]}" />
             <Run Text="{Binding PageIndex, Mode=OneWay}" />
             <Run Text="/" />
             <Run Text="{Binding TotalPages, Mode=OneWay}" />
             <Run Text="  (" />
             <Run Text="{Binding TotalCount, Mode=OneWay}" />
-            <Run Text=" total)" />
+            <Run Text="{Binding Localization[PagingBar_TotalSuffix]}" />
         </TextBlock>
 
         <!-- Next / Last -->
         <ui:Button Appearance="Secondary" Margin="8,0,4,0"
-                   ToolTip="Next page"
+                   ToolTip="{Binding Localization[PagingBar_NextPage]}"
                    Command="{Binding NextPageCommand}"
                    Icon="{ui:SymbolIcon ChevronRight20}" />
         <ui:Button Appearance="Secondary" Margin="0,0,12,0"
-                   ToolTip="Last page"
+                   ToolTip="{Binding Localization[PagingBar_LastPage]}"
                    Command="{Binding LastPageCommand}"
                    Icon="{ui:SymbolIcon ChevronDoubleRight20}" />
 
         <!-- Page size -->
-        <TextBlock Text="Page size:" VerticalAlignment="Center" Margin="0,0,4,0"
+        <TextBlock Text="{Binding Localization[PagingBar_PageSize]}" VerticalAlignment="Center" Margin="0,0,4,0"
                    Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
         <ComboBox SelectedValue="{Binding PageSize}"
                   SelectedValuePath="Content"
@@ -73,9 +73,9 @@
 
         <!-- Refresh + busy indicator -->
         <ui:Button Appearance="Primary" Margin="12,0,0,0"
-                   ToolTip="Refresh current page"
+                   ToolTip="{Binding Localization[PagingBar_RefreshTooltip]}"
                    Command="{Binding RefreshCommand}"
-                   Content="Refresh" />
+                   Content="{Binding Localization[PagingBar_Refresh]}" />
         <ProgressBar IsIndeterminate="True" Width="80" Height="4" Margin="12,0,0,0"
                      VerticalAlignment="Center"
                      Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}" />

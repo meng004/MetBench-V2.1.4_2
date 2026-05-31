@@ -1477,4 +1477,31 @@
   <data name="Status_SutCatalog_ListError_Fmt" xml:space="preserve">
     <value>ERROR listing SUTs: {0}</value>
   </data>
+  <data name="PagingBar_Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="PagingBar_RefreshTooltip" xml:space="preserve">
+    <value>Refresh current page</value>
+  </data>
+  <data name="PagingBar_FirstPage" xml:space="preserve">
+    <value>First page</value>
+  </data>
+  <data name="PagingBar_PreviousPage" xml:space="preserve">
+    <value>Previous page</value>
+  </data>
+  <data name="PagingBar_NextPage" xml:space="preserve">
+    <value>Next page</value>
+  </data>
+  <data name="PagingBar_LastPage" xml:space="preserve">
+    <value>Last page</value>
+  </data>
+  <data name="PagingBar_PageSize" xml:space="preserve">
+    <value>Page size:</value>
+  </data>
+  <data name="PagingBar_Page" xml:space="preserve">
+    <value>Page</value>
+  </data>
+  <data name="PagingBar_TotalSuffix" xml:space="preserve">
+    <value> total)</value>
+  </data>
 </root>

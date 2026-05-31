@@ -1477,4 +1477,31 @@
   <data name="Status_SutCatalog_ListError_Fmt" xml:space="preserve">
     <value>列出 SUT 出错：{0}</value>
   </data>
+  <data name="PagingBar_Refresh" xml:space="preserve">
+    <value>刷新</value>
+  </data>
+  <data name="PagingBar_RefreshTooltip" xml:space="preserve">
+    <value>刷新当前页</value>
+  </data>
+  <data name="PagingBar_FirstPage" xml:space="preserve">
+    <value>首页</value>
+  </data>
+  <data name="PagingBar_PreviousPage" xml:space="preserve">
+    <value>上一页</value>
+  </data>
+  <data name="PagingBar_NextPage" xml:space="preserve">
+    <value>下一页</value>
+  </data>
+  <data name="PagingBar_LastPage" xml:space="preserve">
+    <value>末页</value>
+  </data>
+  <data name="PagingBar_PageSize" xml:space="preserve">
+    <value>每页条数：</value>
+  </data>
+  <data name="PagingBar_Page" xml:space="preserve">
+    <value>第</value>
+  </data>
+  <data name="PagingBar_TotalSuffix" xml:space="preserve">
+    <value> 条)</value>
+  </data>
 </root>
