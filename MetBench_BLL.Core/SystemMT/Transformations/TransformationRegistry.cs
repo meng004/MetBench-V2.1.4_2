@@ -26,6 +26,7 @@ public static class TransformationRegistry
         ["PermuteIndices"]       = () => new PermuteIndices(),
         ["MirrorAxis"]           = () => new MirrorAxis(),
         ["ScaleFuelAbsorption"]  = () => new ScaleFuelAbsorption(),
+        ["RefineRayTracks"]     = () => new RefineRayTracks(),
 
         // ── P1 L0 数学基元 ─────────────────────────────────────────────────
         ["MathExp"]     = () => new MathExp(),

@@ -67,20 +67,20 @@ internal static class LegacyCatalogFactory
         // PR-Bol-2B / Bol-Alg-01: OpenMOC angular-discretization convergence — first
         // catalog consumer of the error-monotonic launcher pipeline (PR-Bol-2A #179).
         // Refining num_azim × factor and azim_spacing_cm / factor across three phases
-        // drives k_eff error monotonically toward the most-refined (reference) run.
+        // drives k_eff error toward the most-refined (reference) run.
         yield return new MrBlueprint(
             new MrSummary(
                 Id: "openmoc-pincell-ray-track-convergence",
                 DisplayName: "OpenMOC pin-cell — RefineRayTracks (k_eff error decreases toward reference)",
                 SutName: "openmoc",
-                TransformationName: "ScaleField",
+                TransformationName: "RefineRayTracks",
                 AssertionName: "ErrorMonotonic",
                 ValueName: "k_eff",
                 DefaultParameters: new Dictionary<string, string> { ["factor"] = "1" },
                 Description:
                     "OpenMOC angular-discretization convergence: refining num_azim and " +
-                    "azim_spacing_cm via three phases (16/0.05 → 32/0.025 → 64/0.0125) drives " +
-                    "k_eff monotonically toward the reference. Error is computed under " +
+                    "azim_spacing_cm via three calibrated phases (16/0.05 → 48/0.0166667 → 128/0.00625) drives " +
+                    "k_eff error toward the most-refined reference on the canonical pin-cell case. Error is computed under " +
                     "NormKind.Relative; the assertion passes iff " +
                     "|k_eff(medium)−k_eff(reference)| ≤ |k_eff(coarse)−k_eff(reference)|.",
                 MrFamily: "NeutronTransport.Convergence.RayTracks"),
@@ -93,13 +93,13 @@ internal static class LegacyCatalogFactory
             Timeout: TimeSpan.FromMinutes(5),
             InputParserScriptPath: Path.Combine(options.SutRoot, "openmoc", "openmoc_input_parser.py"),
             OutputParserScriptPath: Path.Combine(options.SutRoot, "openmoc", "openmoc_output_parser.py"),
-            TransformSteps: new[] { new MrTransformStep("ScaleField", "/tracking/num_azim") },
+            TransformSteps: new[] { new MrTransformStep("RefineRayTracks", "/tracking") },
             AssertionTypeCode: "error-monotonic",
             RefinementPhases: new[]
             {
                 new MetBench_BLL.SystemMT.Pipeline.RefinementPhase("coarse",    new Dictionary<string, string> { ["factor"] = "1" }),
-                new MetBench_BLL.SystemMT.Pipeline.RefinementPhase("medium",    new Dictionary<string, string> { ["factor"] = "2" }),
-                new MetBench_BLL.SystemMT.Pipeline.RefinementPhase("reference", new Dictionary<string, string> { ["factor"] = "4" }),
+                new MetBench_BLL.SystemMT.Pipeline.RefinementPhase("medium",    new Dictionary<string, string> { ["factor"] = "3" }),
+                new MetBench_BLL.SystemMT.Pipeline.RefinementPhase("reference", new Dictionary<string, string> { ["factor"] = "8" }),
             });
 
         yield return new MrBlueprint(
