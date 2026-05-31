@@ -168,27 +168,27 @@
             <StackPanel Orientation="Horizontal">
                 <TextBlock FontWeight="Bold" Text="{Binding ViewModel.Localization[Mutation_CampaignSummary]}" VerticalAlignment="Center"
                            Margin="0,0,20,0" />
-                <TextBlock VerticalAlignment="Center" Margin="0,0,16,0">
-                    <Run Text="{Binding ViewModel.Localization[Mutation_SummaryTotal]}" />
-                    <Run Text="{Binding ViewModel.LastSummary.TotalCells, FallbackValue=0}" FontWeight="SemiBold" />
-                </TextBlock>
-                <TextBlock VerticalAlignment="Center" Margin="0,0,16,0">
-                    <Run Text="{Binding ViewModel.Localization[Mutation_SummaryDetected]}" />
-                    <Run Text="{Binding ViewModel.LastSummary.Detected, FallbackValue=0}" FontWeight="SemiBold" Foreground="#27AE60" />
-                </TextBlock>
-                <TextBlock VerticalAlignment="Center" Margin="0,0,16,0">
-                    <Run Text="{Binding ViewModel.Localization[Mutation_SummaryMissed]}" />
-                    <Run Text="{Binding ViewModel.LastSummary.Missed, FallbackValue=0}" FontWeight="SemiBold" Foreground="#E67E22" />
-                </TextBlock>
-                <TextBlock VerticalAlignment="Center" Margin="0,0,16,0">
-                    <Run Text="{Binding ViewModel.Localization[Mutation_SummaryErrors]}" />
-                    <Run Text="{Binding ViewModel.LastSummary.Errors, FallbackValue=0}" />
-                </TextBlock>
-                <TextBlock VerticalAlignment="Center" Margin="0,0,16,0">
-                    <Run Text="{Binding ViewModel.Localization[Mutation_SummaryDetectionRate]}" />
-                    <Run Text="{Binding ViewModel.LastSummary.DetectionRate, StringFormat=P0, FallbackValue=—}"
-                         FontWeight="Bold" FontSize="15" />
-                </TextBlock>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding ViewModel.Localization[Mutation_SummaryTotal]}" />
+                    <TextBlock Text="{Binding ViewModel.LastSummary.TotalCells, FallbackValue=0}" FontWeight="SemiBold" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding ViewModel.Localization[Mutation_SummaryDetected]}" />
+                    <TextBlock Text="{Binding ViewModel.LastSummary.Detected, FallbackValue=0}" FontWeight="SemiBold" Foreground="#27AE60" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding ViewModel.Localization[Mutation_SummaryMissed]}" />
+                    <TextBlock Text="{Binding ViewModel.LastSummary.Missed, FallbackValue=0}" FontWeight="SemiBold" Foreground="#E67E22" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding ViewModel.Localization[Mutation_SummaryErrors]}" />
+                    <TextBlock Text="{Binding ViewModel.LastSummary.Errors, FallbackValue=0}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding ViewModel.Localization[Mutation_SummaryDetectionRate]}" />
+                    <TextBlock Text="{Binding ViewModel.LastSummary.DetectionRate, StringFormat=P0, FallbackValue=—}"
+                               FontWeight="Bold" FontSize="15" />
+                </StackPanel>
             </StackPanel>
         </Border>
 
