@@ -40,13 +40,13 @@
         <!-- Page x / y (total z) -->
         <TextBlock VerticalAlignment="Center" Margin="0,0,4,0"
                    Foreground="{DynamicResource TextFillColorPrimaryBrush}">
-            <Run Text="{Binding Localization[PagingBar_Page]}" />
+            <Run Text="{Binding Localization[PagingBar_Page], Mode=OneWay}" />
             <Run Text="{Binding PageIndex, Mode=OneWay}" />
             <Run Text="/" />
             <Run Text="{Binding TotalPages, Mode=OneWay}" />
             <Run Text="  (" />
             <Run Text="{Binding TotalCount, Mode=OneWay}" />
-            <Run Text="{Binding Localization[PagingBar_TotalSuffix]}" />
+            <Run Text="{Binding Localization[PagingBar_TotalSuffix], Mode=OneWay}" />
         </TextBlock>
 
         <!-- Next / Last -->
