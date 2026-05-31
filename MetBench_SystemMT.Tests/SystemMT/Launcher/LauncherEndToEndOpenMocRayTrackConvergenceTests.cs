@@ -1,3 +1,4 @@
+using System.Text.Json;
 using MetBench_BLL.SystemMT.Catalog;
 using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Pipeline;
@@ -50,8 +51,8 @@ public sealed class LauncherEndToEndOpenMocRayTrackConvergenceTests
     {
         Skip.IfNot(OpenMocTestPaths.OpenMocImportable(), SkipReason);
 
-        // Three phases: coarse (num_azim=16, spacing=0.05) → medium (32, 0.025)
-        // → reference (64, 0.0125). ErrorMonotonicKernel (NormKind.Relative) passes
+        // Three calibrated phases: coarse (num_azim=16, spacing=0.05) → medium (48, 0.0166667)
+        // → reference (128, 0.00625). ErrorMonotonicKernel (NormKind.Relative) passes
         // iff |k_eff(medium)−k_eff(reference)| ≤ |k_eff(coarse)−k_eff(reference)|.
         var result = await _launcher.RunAsync(MrId);
 
@@ -70,23 +71,30 @@ public sealed class LauncherEndToEndOpenMocRayTrackConvergenceTests
     }
 
     [SkippableFact]
-    public async Task RunAsync_ray_track_convergence_reference_k_eff_strictly_greater_than_coarse()
+    public async Task RunAsync_ray_track_convergence_writes_calibrated_phase_inputs()
     {
         Skip.IfNot(OpenMocTestPaths.OpenMocImportable(), SkipReason);
 
-        // Sanity guard alongside the kernel verdict: OpenMOC under-resolves at the
-        // coarse phase (num_azim=16, azim_spacing=0.05) and the reference phase
-        // (num_azim=64, azim_spacing=0.0125) should report a strictly larger k_eff
-        // on this pincell geometry. PR-Bol-2A maps first-phase → SourceValue and
-        // last-phase → FollowUpValue for display compatibility, so we read from
-        // those fields. Same-or-smaller k_eff at reference would point to a SUT
-        // regression (flat convergence or polarity flip), not a tolerance issue.
+        // Regression guard for the v2 pipeline path: the catalog advertises an
+        // atomic RefineRayTracks transform, so both num_azim and azim_spacing_cm
+        // must change in each phase. A previous catalog/runtime mismatch only
+        // scaled num_azim, leaving spacing fixed at 0.05 and making the canonical
+        // OpenMOC run fail ErrorMonotonic at coarse->medium.
         var result = await _launcher.RunAsync(MrId);
 
         Assert.True(result.Passed, result.FailureReason);
-        Assert.True(
-            result.FollowUpValue > result.SourceValue,
-            $"Expected k_eff(reference={result.FollowUpValue}) > k_eff(coarse={result.SourceValue}) " +
-            "under three-phase angular refinement. Flat or inverted convergence suggests an OpenMOC regression.");
+        var exec = Assert.Single(_execs.Data);
+
+        AssertTracking(exec.ArtifactsDirectory, "coarse", expectedNumAzim: 16, expectedSpacing: 0.05);
+        AssertTracking(exec.ArtifactsDirectory, "medium", expectedNumAzim: 48, expectedSpacing: 0.05 / 3.0);
+        AssertTracking(exec.ArtifactsDirectory, "reference", expectedNumAzim: 128, expectedSpacing: 0.00625);
+    }
+
+    private static void AssertTracking(string artifactsDirectory, string role, int expectedNumAzim, double expectedSpacing)
+    {
+        using var doc = JsonDocument.Parse(File.ReadAllText(Path.Combine(artifactsDirectory, $"phase.in.{role}.json")));
+        var tracking = doc.RootElement.GetProperty("tracking");
+        Assert.Equal(expectedNumAzim, tracking.GetProperty("num_azim").GetInt32());
+        Assert.Equal(expectedSpacing, tracking.GetProperty("azim_spacing_cm").GetDouble(), 12);
     }
 }

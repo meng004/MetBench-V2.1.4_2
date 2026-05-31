@@ -6,9 +6,10 @@ convergence). Refines OpenMOC's angular discretization atomically:
     new num_azim        = max(1, round(old num_azim * factor))
     new azim_spacing_cm = old azim_spacing_cm / factor
 
-When chained across phases (factor = 1, 2, 4 by default), the resulting
-k_eff sequence is expected to converge monotonically toward the most-
-refined run via the typed ErrorMonotonicPredicate.
+When chained across the calibrated catalog phases (factor = 1, 3, 8), the
+resulting k_eff error is expected to decrease toward the most-refined run via
+the typed ErrorMonotonicPredicate. Current v2 runtime performs this transform
+in C# (RefineRayTracks); this adapter remains for legacy adapter-path tests.
 
 Invocation contract:
 

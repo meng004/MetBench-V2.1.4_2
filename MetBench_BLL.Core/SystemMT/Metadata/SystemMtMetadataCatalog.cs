@@ -259,7 +259,7 @@ public static class SystemMtMetadataCatalog
             EquationKey = "neutron-transport",
             PhysicalMeaning =
                 "OpenMOC 角度离散收敛性 (Bol-Alg-01)：细化 num_azim 与 azim_spacing_cm 三相位 " +
-                "(16/0.05 → 32/0.025 → 64/0.0125) 使 k_eff 朝最细参考解单调收敛。",
+                "(16/0.05 → 48/0.0166667 → 128/0.00625) 使 k_eff 误差朝最细参考解收敛。",
             InputTransformation = "(num_azim, azim_spacing_cm) → (factor·num_azim, azim_spacing_cm/factor)；factor > 1",
             OutputRelation = "|k_eff(medium) − k_eff(reference)| ≤ |k_eff(coarse) − k_eff(reference)|（NormKind.Relative）",
             ComparisonType = MrComparisonType.Relative,

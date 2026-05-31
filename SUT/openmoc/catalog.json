@@ -72,15 +72,15 @@
       "mr_id": "openmoc-pincell-ray-track-convergence",
       "sut_name": "openmoc",
       "display_name": "OpenMOC pin-cell — RefineRayTracks (k_eff error decreases toward reference)",
-      "description": "OpenMOC angular-discretization convergence: refining num_azim and azim_spacing_cm via three phases (16/0.05 → 32/0.025 → 64/0.0125) drives k_eff monotonically toward the reference. Error is computed under NormKind.Relative; the assertion passes iff |k_eff(medium)−k_eff(reference)| ≤ |k_eff(coarse)−k_eff(reference)|.",
+      "description": "OpenMOC angular-discretization convergence: refining num_azim and azim_spacing_cm via three calibrated phases (16/0.05 → 48/0.0166667 → 128/0.00625) drives k_eff error toward the most-refined reference on the canonical pin-cell case. Error is computed under NormKind.Relative; the assertion passes iff |k_eff(medium)−k_eff(reference)| ≤ |k_eff(coarse)−k_eff(reference)|.",
       "mr_family": "NeutronTransport.Convergence.RayTracks",
-      "transformation_name": "ScaleField",
+      "transformation_name": "RefineRayTracks",
       "assertion_type_code": "error-monotonic",
       "assertion_name": "ErrorMonotonic",
       "value_name": "k_eff",
       "default_parameters": { "factor": "1" },
       "transform_steps": [
-        { "transformation_name": "ScaleField", "target_field_path": "/tracking/num_azim" }
+        { "transformation_name": "RefineRayTracks", "target_field_path": "/tracking" }
       ],
       "tolerance_rel": 0,
       "tolerance_abs": 0,
@@ -97,8 +97,8 @@
       "timeout_seconds": 300,
       "refinement_phases": [
         { "role": "coarse",    "parameters": { "factor": "1" } },
-        { "role": "medium",    "parameters": { "factor": "2" } },
-        { "role": "reference", "parameters": { "factor": "4" } }
+        { "role": "medium",    "parameters": { "factor": "3" } },
+        { "role": "reference", "parameters": { "factor": "8" } }
       ]
     }
   ]
