@@ -32,7 +32,7 @@ namespace MetBench_Client.ViewModels
         private EquationMetadataDraft? _draft;
 
         [ObservableProperty]
-        private string _statusMessage = "Select an equation row or click \"New equation\".";
+        private string _statusMessage = string.Empty;
 
         [ObservableProperty]
         private bool _hasValidDraft;
@@ -46,6 +46,7 @@ namespace MetBench_Client.ViewModels
         {
             _editor = editor;
             Localization = localization;
+            StatusMessage = Localization["Status_Equation_InitialPrompt"];
         }
 
         public async void OnNavigatedTo()
@@ -77,7 +78,7 @@ namespace MetBench_Client.ViewModels
                     CanonicalForm = value.CanonicalForm,
                 };
                 IsDraftReadOnly = true;
-                StatusMessage = $"Loaded '{value.EquationKey}' (Built-in, read-only).";
+                StatusMessage = string.Format(Localization["Status_Equation_LoadedBuiltInReadOnly_Fmt"], value.EquationKey);
                 return;
             }
 
@@ -107,7 +108,7 @@ namespace MetBench_Client.ViewModels
             Draft = new EquationMetadataDraft();
             IsDraftReadOnly = false;
             HasValidDraft = false;
-            StatusMessage = "New user-defined equation draft. Fill in the fields, then Validate / Save.";
+            StatusMessage = Localization["Status_Equation_NewDraft"];
         }
 
         [RelayCommand(CanExecute = nameof(CanValidateDraft))]
@@ -117,8 +118,8 @@ namespace MetBench_Client.ViewModels
             var result = _editor.ValidateDraft(Draft);
             HasValidDraft = result.Success;
             StatusMessage = result.Success
-                ? "Equation draft is valid."
-                : "Validation failed: " + string.Join(" | ", result.Errors);
+                ? Localization["Status_Equation_DraftValid"]
+                : string.Format(Localization["Status_Equation_ValidationFailed_Fmt"], string.Join(" | ", result.Errors));
         }
 
         [RelayCommand(CanExecute = nameof(CanSaveDraft))]
@@ -128,8 +129,8 @@ namespace MetBench_Client.ViewModels
             var result = await _editor.SaveDraftAsync(Draft).ConfigureAwait(false);
             HasValidDraft = result.Success;
             StatusMessage = result.Success
-                ? $"Equation '{Draft.EquationKey}' saved."
-                : "Save blocked: " + string.Join(" | ", result.Errors);
+                ? string.Format(Localization["Status_Equation_Saved_Fmt"], Draft.EquationKey)
+                : string.Format(Localization["Status_Equation_SaveBlocked_Fmt"], string.Join(" | ", result.Errors));
 
             if (result.Success)
                 await LoadEquationsAsync(reselectKey: Draft.EquationKey).ConfigureAwait(false);
@@ -142,8 +143,8 @@ namespace MetBench_Client.ViewModels
             var key = SelectedEquation.EquationKey;
             var result = await _editor.DeleteAsync(key).ConfigureAwait(false);
             StatusMessage = result.Success
-                ? $"Equation '{key}' deleted."
-                : "Delete blocked: " + string.Join(" | ", result.Errors);
+                ? string.Format(Localization["Status_Equation_Deleted_Fmt"], key)
+                : string.Format(Localization["Status_Equation_DeleteBlocked_Fmt"], string.Join(" | ", result.Errors));
 
             if (result.Success)
                 await LoadEquationsAsync().ConfigureAwait(false);
@@ -155,7 +156,7 @@ namespace MetBench_Client.ViewModels
             {
                 var items = await _editor.ListEquationsAsync().ConfigureAwait(false);
                 Equations = new ObservableCollection<EquationListItem>(items);
-                StatusMessage = $"Loaded {Equations.Count} equation(s) ({Equations.Count(e => e.Source == EquationSourceKinds.User)} user-defined).";
+                StatusMessage = string.Format(Localization["Status_Equation_Loaded_Fmt"], Equations.Count, Equations.Count(e => e.Source == EquationSourceKinds.User));
                 if (!string.IsNullOrWhiteSpace(reselectKey))
                 {
                     SelectedEquation = Equations.FirstOrDefault(e =>
@@ -164,7 +165,7 @@ namespace MetBench_Client.ViewModels
             }
             catch (Exception ex)
             {
-                StatusMessage = $"ERROR listing equations: {ex.Message}";
+                StatusMessage = string.Format(Localization["Status_Equation_ErrorListing_Fmt"], ex.Message);
             }
         }
 
@@ -176,14 +177,14 @@ namespace MetBench_Client.ViewModels
                 Draft = draft;
                 IsDraftReadOnly = draft is null;
                 StatusMessage = draft is not null
-                    ? $"Loaded user equation '{equationKey}'. Edit and Validate / Save."
-                    : $"User equation '{equationKey}' not found.";
+                    ? string.Format(Localization["Status_Equation_LoadedUser_Fmt"], equationKey)
+                    : string.Format(Localization["Status_Equation_UserNotFound_Fmt"], equationKey);
             }
             catch (Exception ex)
             {
                 Draft = null;
                 IsDraftReadOnly = true;
-                StatusMessage = $"ERROR loading '{equationKey}': {ex.Message}";
+                StatusMessage = string.Format(Localization["Status_Equation_ErrorLoading_Fmt"], equationKey, ex.Message);
             }
         }
 

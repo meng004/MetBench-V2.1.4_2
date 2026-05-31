@@ -10,6 +10,7 @@ using MetBench_BLL.Discovery;
 using MetBench_BLL.Discovery.Validators;
 using MetBench_Domain;
 using MetBench_IDAL;
+using MetBench_UI.Localization;
 using Wpf.Ui.Controls;
 
 namespace MetBench_Client.ViewModels;
@@ -53,14 +54,18 @@ public sealed partial class CandidateReviewViewModel : ObservableObject, INaviga
         EmpiricalValidator empirical,
         TheoreticalLlmValidator theoreticalLlm,
         ICandidateMRRepository candidateRepo,
-        IValidationRunRepository validationRunRepo)
+        IValidationRunRepository validationRunRepo,
+        LocalizedTextProvider localization)
     {
         _validationService = validationService;
         _empirical = empirical;
         _theoreticalLlm = theoreticalLlm;
         _candidateRepo = candidateRepo;
         _validationRunRepo = validationRunRepo;
+        Localization = localization;
     }
+
+    public LocalizedTextProvider Localization { get; }
 
     public void OnNavigatedTo() => LoadCandidates();
     public void OnNavigatedFrom() { }
@@ -98,26 +103,26 @@ public sealed partial class CandidateReviewViewModel : ObservableObject, INaviga
         if (UseTheoreticalLlm) validators.Add(_theoreticalLlm);
         if (!validators.Any())
         {
-            ErrorMessage = "Select at least one validator.";
+            ErrorMessage = Localization["Status_CandidateReview_NoValidatorSelected"];
             return;
         }
 
         IsBusy = true;
         ErrorMessage = null;
-        StatusMessage = "Validating…";
+        StatusMessage = Localization["Status_CandidateReview_Validating"];
         try
         {
             var summary = await _validationService.ValidateAsync(
                 SelectedCandidate!.IdCandidate, validators, "wpf-user");
             LastSummary = summary;
-            StatusMessage = $"{summary.PassedValidators}/{summary.TotalValidatorsRun} validators passed" +
-                (summary.Promoted ? $" → Promoted as MR #{summary.PromotedMRId}" : string.Empty);
+            StatusMessage = string.Format(Localization["Status_CandidateReview_ValidatorsPassed_Fmt"], summary.PassedValidators, summary.TotalValidatorsRun) +
+                (summary.Promoted ? string.Format(Localization["Status_CandidateReview_PromotedSuffix_Fmt"], summary.PromotedMRId) : string.Empty);
             LoadCandidates();
         }
         catch (Exception ex)
         {
             ErrorMessage = ex.Message;
-            StatusMessage = "Error";
+            StatusMessage = Localization["Status_CandidateReview_Error"];
         }
         finally
         {

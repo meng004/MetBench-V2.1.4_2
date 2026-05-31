@@ -45,7 +45,7 @@ namespace MetBench_Client.ViewModels
         private string _draftJsonBody = string.Empty;
 
         [ObservableProperty]
-        private string _statusMessage = "Select a SUT to browse its sample files.";
+        private string _statusMessage = string.Empty;
 
         [ObservableProperty]
         private bool _hasValidDraft;
@@ -58,6 +58,7 @@ namespace MetBench_Client.ViewModels
             _sampleEditor = sampleEditor;
             _sutEditor = sutEditor;
             Localization = localization;
+            StatusMessage = Localization["Status_SampleCatalog_SelectSut"];
         }
 
         public void OnNavigatedTo()
@@ -83,12 +84,12 @@ namespace MetBench_Client.ViewModels
                 foreach (var s in _sampleEditor.ListSamples(value.SutId))
                     Samples.Add(s);
                 StatusMessage = Samples.Count == 0
-                    ? $"No samples under SUT '{value.SutId}'."
-                    : $"Loaded {Samples.Count} sample(s) for SUT '{value.SutId}'.";
+                    ? string.Format(Localization["Status_SampleCatalog_NoSamplesUnderSut_Fmt"], value.SutId)
+                    : string.Format(Localization["Status_SampleCatalog_LoadedSamples_Fmt"], Samples.Count, value.SutId);
             }
             catch (Exception ex)
             {
-                StatusMessage = $"ERROR listing samples: {ex.Message}";
+                StatusMessage = string.Format(Localization["Status_SampleCatalog_ErrorListingSamples_Fmt"], ex.Message);
             }
         }
 
@@ -106,11 +107,11 @@ namespace MetBench_Client.ViewModels
             {
                 DraftFileName = value.FileName;
                 DraftJsonBody = _sampleEditor.LoadSample(value.SutId, value.FileName);
-                StatusMessage = $"Loaded sample '{value.FileName}'.";
+                StatusMessage = string.Format(Localization["Status_SampleCatalog_LoadedSample_Fmt"], value.FileName);
             }
             catch (Exception ex)
             {
-                StatusMessage = $"ERROR loading '{value.FileName}': {ex.Message}";
+                StatusMessage = string.Format(Localization["Status_SampleCatalog_ErrorLoadingSample_Fmt"], value.FileName, ex.Message);
             }
         }
 
@@ -132,7 +133,7 @@ namespace MetBench_Client.ViewModels
             DraftFileName = "new-sample.json";
             DraftJsonBody = "{ }\n";
             HasValidDraft = false;
-            StatusMessage = "Edit the file name + JSON body, then Validate / Save.";
+            StatusMessage = Localization["Status_SampleCatalog_EditThenValidate"];
         }
 
         [RelayCommand(CanExecute = nameof(HasDraftReadyForValidate))]
@@ -142,8 +143,8 @@ namespace MetBench_Client.ViewModels
             var result = _sampleEditor.ValidateDraft(SelectedSut.SutId, DraftFileName, DraftJsonBody);
             HasValidDraft = result.Success;
             StatusMessage = result.Success
-                ? "Sample draft is valid."
-                : "Validation failed: " + string.Join(" | ", result.Errors);
+                ? Localization["Status_SampleCatalog_DraftValid"]
+                : string.Format(Localization["Status_SampleCatalog_ValidationFailed_Fmt"], string.Join(" | ", result.Errors));
         }
 
         [RelayCommand(CanExecute = nameof(CanSaveDraft))]
@@ -153,8 +154,8 @@ namespace MetBench_Client.ViewModels
             var result = _sampleEditor.SaveDraft(SelectedSut.SutId, DraftFileName, DraftJsonBody);
             HasValidDraft = result.Success;
             StatusMessage = result.Success
-                ? $"Sample '{DraftFileName}' saved."
-                : "Save blocked: " + string.Join(" | ", result.Errors);
+                ? string.Format(Localization["Status_SampleCatalog_SampleSaved_Fmt"], DraftFileName)
+                : string.Format(Localization["Status_SampleCatalog_SaveBlocked_Fmt"], string.Join(" | ", result.Errors));
 
             if (result.Success)
             {
@@ -168,16 +169,16 @@ namespace MetBench_Client.ViewModels
             if (SelectedSut is null || SelectedSample is null) return;
 
             var confirm = System.Windows.MessageBox.Show(
-                $"Delete sample '{SelectedSample.FileName}' from SUT '{SelectedSut.SutId}'? Files referenced by an MR will be blocked.",
-                "Confirm delete",
+                string.Format(Localization["Dialog_SampleCatalog_ConfirmDeleteText_Fmt"], SelectedSample.FileName, SelectedSut.SutId),
+                Localization["Dialog_SampleCatalog_ConfirmDeleteCaption"],
                 System.Windows.MessageBoxButton.OKCancel,
                 System.Windows.MessageBoxImage.Warning);
             if (confirm != System.Windows.MessageBoxResult.OK) return;
 
             var result = _sampleEditor.Delete(SelectedSut.SutId, SelectedSample.FileName);
             StatusMessage = result.Success
-                ? $"Sample '{SelectedSample.FileName}' deleted."
-                : "Delete blocked: " + string.Join(" | ", result.Errors);
+                ? string.Format(Localization["Status_SampleCatalog_SampleDeleted_Fmt"], SelectedSample.FileName)
+                : string.Format(Localization["Status_SampleCatalog_DeleteBlocked_Fmt"], string.Join(" | ", result.Errors));
 
             if (result.Success)
                 ReloadSamples(SelectedSut.SutId);
@@ -192,12 +193,12 @@ namespace MetBench_Client.ViewModels
                     SelectedSut = Suts.FirstOrDefault(s =>
                         string.Equals(s.SutId, reselectSutId, StringComparison.Ordinal));
                 StatusMessage = Suts.Count == 0
-                    ? "No SUTs found."
-                    : $"Loaded {Suts.Count} SUT(s).";
+                    ? Localization["Status_SampleCatalog_NoSuts"]
+                    : string.Format(Localization["Status_SampleCatalog_LoadedSuts_Fmt"], Suts.Count);
             }
             catch (Exception ex)
             {
-                StatusMessage = $"ERROR listing SUTs: {ex.Message}";
+                StatusMessage = string.Format(Localization["Status_SampleCatalog_ErrorListingSuts_Fmt"], ex.Message);
             }
         }
 

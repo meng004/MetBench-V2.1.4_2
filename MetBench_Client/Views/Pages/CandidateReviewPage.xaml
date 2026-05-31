@@ -4,11 +4,16 @@
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
       Title="CandidateReviewPage"
       d:DesignHeight="750" d:DesignWidth="1100"
       ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
       mc:Ignorable="d">
+
+    <Page.Resources>
+        <helpers:BindingProxy x:Key="LocalizationProxy" Data="{Binding}" />
+    </Page.Resources>
 
     <Grid Margin="14">
         <Grid.RowDefinitions>
@@ -33,7 +38,7 @@
 
                 <!-- Candidate picker -->
                 <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
-                    <TextBlock Text="Select candidate:" VerticalAlignment="Center"
+                    <TextBlock Text="{Binding ViewModel.Localization[Candidate_SelectCandidate]}" VerticalAlignment="Center"
                                FontWeight="SemiBold" Margin="0,0,8,0" />
                     <ComboBox ItemsSource="{Binding ViewModel.Candidates}"
                               SelectedItem="{Binding ViewModel.SelectedCandidate, Mode=TwoWay}"
@@ -46,19 +51,19 @@
 
                 <!-- Candidate info row 1 -->
                 <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,4">
-                    <TextBlock Text="Name: " FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding ViewModel.Localization[Legacy_Name]}" FontWeight="SemiBold" />
                     <TextBlock Text="{Binding ViewModel.SelectedCandidate.ProposedName, FallbackValue=—}"
                                Margin="0,0,24,0" TextWrapping="Wrap" MaxWidth="500" />
-                    <TextBlock Text="Confidence: " FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding ViewModel.Localization[Candidate_Confidence]}" FontWeight="SemiBold" />
                     <TextBlock Text="{Binding ViewModel.SelectedCandidate.Confidence, StringFormat=F2, FallbackValue=—}"
                                Margin="0,0,24,0" />
-                    <TextBlock Text="Assertion: " FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding ViewModel.Localization[Candidate_Assertion]}" FontWeight="SemiBold" />
                     <TextBlock Text="{Binding ViewModel.SelectedCandidate.SuggestedAssertionTypeCode, FallbackValue=—}" />
                 </StackPanel>
 
                 <!-- Rationale -->
                 <StackPanel Grid.Row="2" Orientation="Horizontal">
-                    <TextBlock Text="Rationale: " FontWeight="SemiBold" VerticalAlignment="Top" />
+                    <TextBlock Text="{Binding ViewModel.Localization[Candidate_Rationale]}" FontWeight="SemiBold" VerticalAlignment="Top" />
                     <TextBlock Text="{Binding ViewModel.SelectedCandidate.Rationale, FallbackValue=—}"
                                TextWrapping="Wrap" MaxWidth="800"
                                Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
@@ -75,16 +80,16 @@
                 Margin="0,0,0,12">
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                    <TextBlock Text="Validators:" FontWeight="SemiBold"
+                    <TextBlock Text="{Binding ViewModel.Localization[Candidate_Validators]}" FontWeight="SemiBold"
                                VerticalAlignment="Center" Margin="0,0,12,0" />
-                    <CheckBox Content="empirical"
+                    <CheckBox Content="{Binding ViewModel.Localization[Candidate_Empirical]}"
                               IsChecked="{Binding ViewModel.UseEmpirical, Mode=TwoWay}"
                               Margin="0,0,16,0" VerticalAlignment="Center" />
-                    <CheckBox Content="theoretical-llm"
+                    <CheckBox Content="{Binding ViewModel.Localization[Candidate_TheoreticalLlm]}"
                               IsChecked="{Binding ViewModel.UseTheoreticalLlm, Mode=TwoWay}"
                               Margin="0,0,16,0" VerticalAlignment="Center" />
                     <ui:Button Appearance="Primary"
-                               Content="Validate selected"
+                               Content="{Binding ViewModel.Localization[Candidate_ValidateSelected]}"
                                Icon="{ui:SymbolIcon CheckmarkCircle24}"
                                Command="{Binding ViewModel.ValidateSelectedCommand}" />
 
@@ -124,10 +129,10 @@
                      BorderThickness="1"
                      BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}">
             <ui:DataGrid.Columns>
-                <DataGridTextColumn Header="Validator"   Binding="{Binding ValidatorName}"              Width="160" />
-                <DataGridTextColumn Header="Passed"      Binding="{Binding Passed}"                     Width="70" />
-                <DataGridTextColumn Header="Run At"      Binding="{Binding RunAt, StringFormat=yyyy-MM-dd HH:mm:ss}" Width="150" />
-                <DataGridTextColumn Header="Details"     Binding="{Binding DetailsJson}"                Width="*" />
+                <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Candidate_ColValidator], Source={StaticResource LocalizationProxy}}"   Binding="{Binding ValidatorName}"              Width="160" />
+                <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Candidate_ColPassed], Source={StaticResource LocalizationProxy}}"      Binding="{Binding Passed}"                     Width="70" />
+                <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Candidate_ColRunAt], Source={StaticResource LocalizationProxy}}"      Binding="{Binding RunAt, StringFormat=yyyy-MM-dd HH:mm:ss}" Width="150" />
+                <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Candidate_ColDetails], Source={StaticResource LocalizationProxy}}"     Binding="{Binding DetailsJson}"                Width="*" />
             </ui:DataGrid.Columns>
         </ui:DataGrid>
     </Grid>

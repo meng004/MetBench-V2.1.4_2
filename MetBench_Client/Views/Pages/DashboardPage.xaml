@@ -46,8 +46,8 @@
         </Grid.ColumnDefinitions>
 
         <!--<ui:Button Grid.Column="0" Command="{Binding ViewModel.CounterIncrementCommand, Mode=OneWay}" Content="Click me!" Icon="Fluent24" />-->
-        <ui:Button Grid.Column="0" 
-                   Command="{Binding ViewModel.CounterIncrementCommand, Mode=OneWay}" Content="Click me!" Icon="Fluent24" />
+        <ui:Button Grid.Column="0"
+                   Command="{Binding ViewModel.CounterIncrementCommand, Mode=OneWay}" Content="{Binding ViewModel.Localization[Dashboard_ClickMe]}" Icon="Fluent24" />
 
         <TextBlock Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding ViewModel.Counter, Mode=OneWay}" />
     </Grid>

@@ -4,11 +4,16 @@
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
       Title="MutationCampaignPage"
       d:DesignHeight="750" d:DesignWidth="1100"
       ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
       mc:Ignorable="d">
+
+    <Page.Resources>
+        <helpers:BindingProxy x:Key="LocalizationProxy" Data="{Binding}" />
+    </Page.Resources>
 
     <Grid Margin="14">
         <Grid.RowDefinitions>
@@ -21,15 +26,15 @@
 
         <!-- Row 0: campaign name + seed button -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
-            <TextBlock Text="Campaign name:" VerticalAlignment="Center"
+            <TextBlock Text="{Binding ViewModel.Localization[Mutation_CampaignName]}" VerticalAlignment="Center"
                        FontWeight="SemiBold" Margin="0,0,8,0" />
             <ui:TextBox Text="{Binding ViewModel.CampaignName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Width="220" Margin="0,0,16,0" />
             <ui:Button Appearance="Secondary"
-                       Content="Seed demo data"
+                       Content="{Binding ViewModel.Localization[Mutation_SeedDemoData]}"
                        Icon="{ui:SymbolIcon AddSquare24}"
                        Command="{Binding ViewModel.SeedDemoDataCommand}"
-                       ToolTip="Insert 5 demo mutants + 5 MR bindings if tables are empty" />
+                       ToolTip="{Binding ViewModel.Localization[Mutation_SeedDemoDataToolTip]}" />
         </StackPanel>
 
         <!-- Row 1: Mutants | MRBindings two-panel selection -->
@@ -45,7 +50,7 @@
                     BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
                     CornerRadius="4" Padding="10" Margin="0,0,8,0">
                 <StackPanel>
-                    <TextBlock Text="Mutants" FontWeight="Bold" Margin="0,0,0,6" />
+                    <TextBlock Text="{Binding ViewModel.Localization[Mutation_Mutants]}" FontWeight="Bold" Margin="0,0,0,6" />
                     <ScrollViewer MaxHeight="140" VerticalScrollBarVisibility="Auto">
                         <ItemsControl ItemsSource="{Binding ViewModel.AvailableMutants}">
                             <ItemsControl.ItemTemplate>
@@ -75,7 +80,7 @@
                     BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
                     CornerRadius="4" Padding="10" Margin="8,0,0,0">
                 <StackPanel>
-                    <TextBlock Text="MR Bindings" FontWeight="Bold" Margin="0,0,0,6" />
+                    <TextBlock Text="{Binding ViewModel.Localization[Mutation_MRBindings]}" FontWeight="Bold" Margin="0,0,0,6" />
                     <ScrollViewer MaxHeight="140" VerticalScrollBarVisibility="Auto">
                         <ItemsControl ItemsSource="{Binding ViewModel.AvailableBindings}">
                             <ItemsControl.ItemTemplate>
@@ -109,12 +114,12 @@
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                     <ui:Button Appearance="Primary"
-                               Content="Start campaign"
+                               Content="{Binding ViewModel.Localization[Mutation_StartCampaign]}"
                                Icon="{ui:SymbolIcon Play24}"
                                Command="{Binding ViewModel.StartCampaignCommand}"
                                Margin="0,0,8,0" />
                     <ui:Button Appearance="Secondary"
-                               Content="Cancel"
+                               Content="{Binding ViewModel.Localization[Legacy_Cancel]}"
                                Icon="{ui:SymbolIcon Stop24}"
                                Command="{Binding ViewModel.CancelCampaignCommand}"
                                Margin="0,0,16,0" />
@@ -161,26 +166,26 @@
                 </Style>
             </Border.Style>
             <StackPanel Orientation="Horizontal">
-                <TextBlock FontWeight="Bold" Text="Campaign Summary" VerticalAlignment="Center"
+                <TextBlock FontWeight="Bold" Text="{Binding ViewModel.Localization[Mutation_CampaignSummary]}" VerticalAlignment="Center"
                            Margin="0,0,20,0" />
                 <TextBlock VerticalAlignment="Center" Margin="0,0,16,0">
-                    <Run Text="Total: " />
+                    <Run Text="{Binding ViewModel.Localization[Mutation_SummaryTotal]}" />
                     <Run Text="{Binding ViewModel.LastSummary.TotalCells, FallbackValue=0}" FontWeight="SemiBold" />
                 </TextBlock>
                 <TextBlock VerticalAlignment="Center" Margin="0,0,16,0">
-                    <Run Text="Detected: " />
+                    <Run Text="{Binding ViewModel.Localization[Mutation_SummaryDetected]}" />
                     <Run Text="{Binding ViewModel.LastSummary.Detected, FallbackValue=0}" FontWeight="SemiBold" Foreground="#27AE60" />
                 </TextBlock>
                 <TextBlock VerticalAlignment="Center" Margin="0,0,16,0">
-                    <Run Text="Missed: " />
+                    <Run Text="{Binding ViewModel.Localization[Mutation_SummaryMissed]}" />
                     <Run Text="{Binding ViewModel.LastSummary.Missed, FallbackValue=0}" FontWeight="SemiBold" Foreground="#E67E22" />
                 </TextBlock>
                 <TextBlock VerticalAlignment="Center" Margin="0,0,16,0">
-                    <Run Text="Errors: " />
+                    <Run Text="{Binding ViewModel.Localization[Mutation_SummaryErrors]}" />
                     <Run Text="{Binding ViewModel.LastSummary.Errors, FallbackValue=0}" />
                 </TextBlock>
                 <TextBlock VerticalAlignment="Center" Margin="0,0,16,0">
-                    <Run Text="Detection rate: " />
+                    <Run Text="{Binding ViewModel.Localization[Mutation_SummaryDetectionRate]}" />
                     <Run Text="{Binding ViewModel.LastSummary.DetectionRate, StringFormat=P0, FallbackValue=—}"
                          FontWeight="Bold" FontSize="15" />
                 </TextBlock>
@@ -197,12 +202,12 @@
                      BorderThickness="1"
                      BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}">
             <ui:DataGrid.Columns>
-                <DataGridTextColumn Header="Mutant"     Binding="{Binding MutantId}"                  Width="70" />
-                <DataGridTextColumn Header="Binding"    Binding="{Binding MRBindingId}"               Width="70" />
-                <DataGridTextColumn Header="Outcome"    Binding="{Binding Outcome}"                    Width="100" />
-                <DataGridTextColumn Header="Obs Δ"      Binding="{Binding ObservedDelta, StringFormat=F4}"  Width="80" />
-                <DataGridTextColumn Header="Exp Δ"      Binding="{Binding ExpectedDelta, StringFormat=F4}"  Width="80" />
-                <DataGridTextColumn Header="Notes"      Binding="{Binding Notes}"                     Width="*" />
+                <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Mutation_ColMutant], Source={StaticResource LocalizationProxy}}"     Binding="{Binding MutantId}"                  Width="70" />
+                <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Mutation_ColBinding], Source={StaticResource LocalizationProxy}}"    Binding="{Binding MRBindingId}"               Width="70" />
+                <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Mutation_ColOutcome], Source={StaticResource LocalizationProxy}}"    Binding="{Binding Outcome}"                    Width="100" />
+                <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Mutation_ColObservedDelta], Source={StaticResource LocalizationProxy}}"      Binding="{Binding ObservedDelta, StringFormat=F4}"  Width="80" />
+                <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Mutation_ColExpectedDelta], Source={StaticResource LocalizationProxy}}"      Binding="{Binding ExpectedDelta, StringFormat=F4}"  Width="80" />
+                <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Mutation_ColNotes], Source={StaticResource LocalizationProxy}}"      Binding="{Binding Notes}"                     Width="*" />
             </ui:DataGrid.Columns>
         </ui:DataGrid>
     </Grid>

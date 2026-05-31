@@ -262,4 +262,1219 @@
   <data name="Legacy_Coverage" xml:space="preserve">
     <value>覆盖率</value>
   </data>
+  <data name="SystemMt_PageTitle" xml:space="preserve">
+    <value>系统级蜕变测试</value>
+  </data>
+  <data name="SystemMt_PageSubtitle" xml:space="preserve">
+    <value>选择一个场景，可选地覆盖变换参数，运行并查看持久化结果。</value>
+  </data>
+  <data name="SystemMt_Scenario" xml:space="preserve">
+    <value>场景</value>
+  </data>
+  <data name="SystemMt_FactorParameter" xml:space="preserve">
+    <value>变换因子</value>
+  </data>
+  <data name="SystemMt_FactorParameterPlaceholder" xml:space="preserve">
+    <value>例如 2</value>
+  </data>
+  <data name="SystemMt_RefreshRecent" xml:space="preserve">
+    <value>刷新最近记录</value>
+  </data>
+  <data name="SystemMt_LastResult" xml:space="preserve">
+    <value>最近结果</value>
+  </data>
+  <data name="SystemMt_Status" xml:space="preserve">
+    <value>状态</value>
+  </data>
+  <data name="SystemMt_RunAt" xml:space="preserve">
+    <value>运行时间</value>
+  </data>
+  <data name="SystemMt_Assertion" xml:space="preserve">
+    <value>断言</value>
+  </data>
+  <data name="SystemMt_Value" xml:space="preserve">
+    <value>值</value>
+  </data>
+  <data name="SystemMt_Passed" xml:space="preserve">
+    <value>是否通过</value>
+  </data>
+  <data name="SystemMt_ExportHtmlReport" xml:space="preserve">
+    <value>导出 HTML 报告</value>
+  </data>
+  <data name="Catalog_Reload" xml:space="preserve">
+    <value>重新加载</value>
+  </data>
+  <data name="Catalog_Validate" xml:space="preserve">
+    <value>验证</value>
+  </data>
+  <data name="Catalog_EquationKey" xml:space="preserve">
+    <value>方程键</value>
+  </data>
+  <data name="Catalog_MrCatalogTitle" xml:space="preserve">
+    <value>系统级 MR 目录</value>
+  </data>
+  <data name="Catalog_MrCatalogSubtitle" xml:space="preserve">
+    <value>编辑清单驱动的系统级 MR 绑定，保存前必须通过验证。</value>
+  </data>
+  <data name="Catalog_Manifest" xml:space="preserve">
+    <value>清单</value>
+  </data>
+  <data name="Catalog_NewMrDraft" xml:space="preserve">
+    <value>新建 MR 草稿</value>
+  </data>
+  <data name="Catalog_MrId" xml:space="preserve">
+    <value>MR ID</value>
+  </data>
+  <data name="Catalog_Assertion" xml:space="preserve">
+    <value>断言类型</value>
+  </data>
+  <data name="Catalog_Value" xml:space="preserve">
+    <value>值</value>
+  </data>
+  <data name="Catalog_DisplayName" xml:space="preserve">
+    <value>显示名称</value>
+  </data>
+  <data name="Catalog_Transformation" xml:space="preserve">
+    <value>变换</value>
+  </data>
+  <data name="Catalog_AssertionName" xml:space="preserve">
+    <value>断言名称</value>
+  </data>
+  <data name="Catalog_ValueName" xml:space="preserve">
+    <value>值名称</value>
+  </data>
+  <data name="Catalog_MetaPattern" xml:space="preserve">
+    <value>元模式</value>
+  </data>
+  <data name="Catalog_SampleCase" xml:space="preserve">
+    <value>样例文件</value>
+  </data>
+  <data name="Catalog_WorkRoot" xml:space="preserve">
+    <value>工作根目录</value>
+  </data>
+  <data name="Catalog_TimeoutSeconds" xml:space="preserve">
+    <value>超时秒数</value>
+  </data>
+  <data name="Catalog_Factor" xml:space="preserve">
+    <value>变换因子</value>
+  </data>
+  <data name="Catalog_TransformStep" xml:space="preserve">
+    <value>变换步骤</value>
+  </data>
+  <data name="Catalog_TargetFieldPath" xml:space="preserve">
+    <value>目标字段路径</value>
+  </data>
+  <data name="Catalog_SutCatalogTitle" xml:space="preserve">
+    <value>系统级 SUT 目录</value>
+  </data>
+  <data name="Catalog_SutCatalogSubtitle" xml:space="preserve">
+    <value>编辑 SUT/&lt;sut&gt;/catalog.json 的程序段。MR 绑定在 MR 目录页编辑。</value>
+  </data>
+  <data name="Catalog_NewSutDraft" xml:space="preserve">
+    <value>新建 SUT 草稿</value>
+  </data>
+  <data name="Catalog_SutId" xml:space="preserve">
+    <value>SUT 标识</value>
+  </data>
+  <data name="Catalog_Equation" xml:space="preserve">
+    <value>方程</value>
+  </data>
+  <data name="Catalog_Program" xml:space="preserve">
+    <value>程序</value>
+  </data>
+  <data name="Catalog_SutName" xml:space="preserve">
+    <value>SUT 名称</value>
+  </data>
+  <data name="Catalog_ProgramName" xml:space="preserve">
+    <value>程序名称</value>
+  </data>
+  <data name="Catalog_ProgramType" xml:space="preserve">
+    <value>程序类型</value>
+  </data>
+  <data name="Catalog_PythonRuntimeKind" xml:space="preserve">
+    <value>Python 运行环境类型</value>
+  </data>
+  <data name="Catalog_RunnerScript" xml:space="preserve">
+    <value>运行脚本</value>
+  </data>
+  <data name="Catalog_InputParserScript" xml:space="preserve">
+    <value>输入解析脚本</value>
+  </data>
+  <data name="Catalog_OutputParserScript" xml:space="preserve">
+    <value>输出解析脚本</value>
+  </data>
+  <data name="Catalog_InputAdapterScript" xml:space="preserve">
+    <value>输入适配脚本</value>
+  </data>
+  <data name="Catalog_OutputAdapterScript" xml:space="preserve">
+    <value>输出适配脚本</value>
+  </data>
+  <data name="Catalog_EquationCatalogTitle" xml:space="preserve">
+    <value>系统级方程目录</value>
+  </data>
+  <data name="Catalog_EquationCatalogSubtitle" xml:space="preserve">
+    <value>内置种子方程为只读。用户自定义方程可创建、编辑和删除（被 MR 引用的除外）。</value>
+  </data>
+  <data name="Catalog_NewEquation" xml:space="preserve">
+    <value>新建方程</value>
+  </data>
+  <data name="Catalog_Key" xml:space="preserve">
+    <value>键</value>
+  </data>
+  <data name="Catalog_CanonicalForm" xml:space="preserve">
+    <value>规范形式</value>
+  </data>
+  <data name="Catalog_Source" xml:space="preserve">
+    <value>来源</value>
+  </data>
+  <data name="Catalog_SymbolSystem" xml:space="preserve">
+    <value>符号系统</value>
+  </data>
+  <data name="Catalog_SampleCatalogTitle" xml:space="preserve">
+    <value>系统级样例目录</value>
+  </data>
+  <data name="Catalog_SampleCatalogSubtitle" xml:space="preserve">
+    <value>浏览并编辑 SUT/&lt;sut&gt;/sample/ 下的样例 JSON 文件。被 MR 绑定引用的文件不可删除。</value>
+  </data>
+  <data name="Catalog_SutLabel" xml:space="preserve">
+    <value>SUT</value>
+  </data>
+  <data name="Catalog_NewSample" xml:space="preserve">
+    <value>新建样例</value>
+  </data>
+  <data name="Catalog_FileName" xml:space="preserve">
+    <value>文件名</value>
+  </data>
+  <data name="Anomaly_SeverityFilterLabel" xml:space="preserve">
+    <value>严重程度：</value>
+  </data>
+  <data name="Anomaly_StatusFilterLabel" xml:space="preserve">
+    <value>状态：</value>
+  </data>
+  <data name="Anomaly_AnalyzeCommonality" xml:space="preserve">
+    <value>共性分析</value>
+  </data>
+  <data name="Anomaly_SweepOrphans" xml:space="preserve">
+    <value>清理孤立项</value>
+  </data>
+  <data name="Anomaly_SweepOrphansTooltip" xml:space="preserve">
+    <value>删除关联的执行/结果已不存在的异常行（PR-FUP F4 / T5 路线 B）。</value>
+  </data>
+  <data name="Anomaly_ColumnId" xml:space="preserve">
+    <value>编号</value>
+  </data>
+  <data name="Anomaly_ColumnSeverity" xml:space="preserve">
+    <value>严重程度</value>
+  </data>
+  <data name="Anomaly_ColumnStatus" xml:space="preserve">
+    <value>状态</value>
+  </data>
+  <data name="Anomaly_ColumnCategory" xml:space="preserve">
+    <value>类别</value>
+  </data>
+  <data name="Anomaly_ColumnDiscovered" xml:space="preserve">
+    <value>发现时间</value>
+  </data>
+  <data name="Anomaly_ColumnLinkedBug" xml:space="preserve">
+    <value>关联缺陷</value>
+  </data>
+  <data name="Anomaly_ColumnReplayCount" xml:space="preserve">
+    <value>回放次数</value>
+  </data>
+  <data name="Anomaly_ColumnNotes" xml:space="preserve">
+    <value>备注</value>
+  </data>
+  <data name="Anomaly_TransitionSelectedTo" xml:space="preserve">
+    <value>将所选项转换为：</value>
+  </data>
+  <data name="Anomaly_ReplayThisAnomaly" xml:space="preserve">
+    <value>回放此异常</value>
+  </data>
+  <data name="Anomaly_CommonalityReport" xml:space="preserve">
+    <value>共性分析报告</value>
+  </data>
+  <data name="Anomaly_CommonalityTotal" xml:space="preserve">
+    <value>总计：</value>
+  </data>
+  <data name="Anomaly_CommonalityDominantSeverity" xml:space="preserve">
+    <value>主要严重程度：</value>
+  </data>
+  <data name="Anomaly_CommonalityDominantCategory" xml:space="preserve">
+    <value>主要类别：</value>
+  </data>
+  <data name="Anomaly_CommonalityLinkedToKnownBug" xml:space="preserve">
+    <value>关联到已知缺陷：</value>
+  </data>
+  <data name="AppMgmt_ApplicationName" xml:space="preserve">
+    <value>应用名称</value>
+  </data>
+  <data name="AppMgmt_Number" xml:space="preserve">
+    <value>序号</value>
+  </data>
+  <data name="AppMgmt_ProgrammingLanguage" xml:space="preserve">
+    <value>编程语言</value>
+  </data>
+  <data name="AppMgmt_LineOfCode" xml:space="preserve">
+    <value>代码行数</value>
+  </data>
+  <data name="AppMgmt_SoftwareUnderTest" xml:space="preserve">
+    <value>被测软件</value>
+  </data>
+  <data name="AppMgmt_SourceTestCase" xml:space="preserve">
+    <value>源测试用例</value>
+  </data>
+  <data name="AppMgmt_DOI" xml:space="preserve">
+    <value>DOI</value>
+  </data>
+  <data name="AppMgmt_Url" xml:space="preserve">
+    <value>网址</value>
+  </data>
+  <data name="AppMgmt_IdApplication" xml:space="preserve">
+    <value>应用 ID</value>
+  </data>
+  <data name="AppMgmt_DomainName" xml:space="preserve">
+    <value>领域名称</value>
+  </data>
+  <data name="AppMgmt_ClearSelection" xml:space="preserve">
+    <value>清除</value>
+  </data>
+  <data name="AppMgmt_Upload" xml:space="preserve">
+    <value>上传</value>
+  </data>
+  <data name="AppMgmt_Unzip" xml:space="preserve">
+    <value>解压</value>
+  </data>
+  <data name="AppMgmt_InputParams" xml:space="preserve">
+    <value>输入参数</value>
+  </data>
+  <data name="AppMgmt_OutputParams" xml:space="preserve">
+    <value>输出参数</value>
+  </data>
+  <data name="DomainMgmt_DomainName" xml:space="preserve">
+    <value>领域名称</value>
+  </data>
+  <data name="DomainMgmt_ColumnNumber" xml:space="preserve">
+    <value>序号</value>
+  </data>
+  <data name="DomainMgmt_IdDomain" xml:space="preserve">
+    <value>领域 ID</value>
+  </data>
+  <data name="MrDisplay_ColumnNumber" xml:space="preserve">
+    <value>序号</value>
+  </data>
+  <data name="MrDisplay_ColumnContext" xml:space="preserve">
+    <value>上下文</value>
+  </data>
+  <data name="MrDisplay_ColumnArityOfMR" xml:space="preserve">
+    <value>MR元数</value>
+  </data>
+  <data name="MrDisplay_ColumnInputPattern" xml:space="preserve">
+    <value>输入模式</value>
+  </data>
+  <data name="MrDisplay_ColumnOutputPattern" xml:space="preserve">
+    <value>输出模式</value>
+  </data>
+  <data name="MrDisplay_ColumnApplicationName" xml:space="preserve">
+    <value>应用名称</value>
+  </data>
+  <data name="MrDisplay_ColumnCodeName" xml:space="preserve">
+    <value>程序名称</value>
+  </data>
+  <data name="MrDisplay_ColumnDomainName" xml:space="preserve">
+    <value>领域名称</value>
+  </data>
+  <data name="MrDisplay_ColumnOperation" xml:space="preserve">
+    <value>操作</value>
+  </data>
+  <data name="MrDisplay_FilterArityOfMR" xml:space="preserve">
+    <value>MR元数</value>
+  </data>
+  <data name="MrDisplay_FilterDimensionOfInputPattern" xml:space="preserve">
+    <value>输入模式维度</value>
+  </data>
+  <data name="MrDisplay_FilterDimensionOfOutputPattern" xml:space="preserve">
+    <value>输出模式维度</value>
+  </data>
+  <data name="MrDisplay_FilterApplicationName" xml:space="preserve">
+    <value>应用名称</value>
+  </data>
+  <data name="MrDisplay_FilterDomainName" xml:space="preserve">
+    <value>领域名称</value>
+  </data>
+  <data name="MrMgmt_ApplicationName" xml:space="preserve">
+    <value>应用名称</value>
+  </data>
+  <data name="MrMgmt_StatusFilterLabel" xml:space="preserve">
+    <value>状态：</value>
+  </data>
+  <data name="MrMgmt_StatusFilterTooltip" xml:space="preserve">
+    <value>按聚合的 MRBinding.Status 过滤 MR（默认隐藏已弃用/已归档）</value>
+  </data>
+  <data name="MrMgmt_ColNumber" xml:space="preserve">
+    <value>序号</value>
+  </data>
+  <data name="MrMgmt_Context" xml:space="preserve">
+    <value>上下文</value>
+  </data>
+  <data name="MrMgmt_ArityOfMR" xml:space="preserve">
+    <value>MR 元数</value>
+  </data>
+  <data name="MrMgmt_InputPattern" xml:space="preserve">
+    <value>输入模式</value>
+  </data>
+  <data name="MrMgmt_OutputPattern" xml:space="preserve">
+    <value>输出模式</value>
+  </data>
+  <data name="MrMgmt_DomainName" xml:space="preserve">
+    <value>领域名称</value>
+  </data>
+  <data name="MrMgmt_Status" xml:space="preserve">
+    <value>状态</value>
+  </data>
+  <data name="MrMgmt_Operation" xml:space="preserve">
+    <value>操作</value>
+  </data>
+  <data name="MrMgmt_ExecuteMT" xml:space="preserve">
+    <value>执行 MT</value>
+  </data>
+  <data name="MrMgmt_IdMR" xml:space="preserve">
+    <value>MR 编号</value>
+  </data>
+  <data name="MrMgmt_Granularity" xml:space="preserve">
+    <value>粒度</value>
+  </data>
+  <data name="MrMgmt_Hierarchy" xml:space="preserve">
+    <value>层级</value>
+  </data>
+  <data name="MrMgmt_DimensionOfInputPattern" xml:space="preserve">
+    <value>输入模式维度</value>
+  </data>
+  <data name="MrMgmt_DimensionOfOutputPattern" xml:space="preserve">
+    <value>输出模式维度</value>
+  </data>
+  <data name="MrMgmt_Operator" xml:space="preserve">
+    <value>算子</value>
+  </data>
+  <data name="MrMgmt_Expression" xml:space="preserve">
+    <value>表达式</value>
+  </data>
+  <data name="Report_ReportType" xml:space="preserve">
+    <value>报告类型</value>
+  </data>
+  <data name="MetaPattern_Title" xml:space="preserve">
+    <value>NOETHER 元模式</value>
+  </data>
+  <data name="MetaPattern_ToggleStatus" xml:space="preserve">
+    <value>切换状态</value>
+  </data>
+  <data name="MetaPattern_SoftDelete" xml:space="preserve">
+    <value>软删除</value>
+  </data>
+  <data name="MetaPattern_ColumnCode" xml:space="preserve">
+    <value>代码</value>
+  </data>
+  <data name="MetaPattern_ColumnBlock" xml:space="preserve">
+    <value>块</value>
+  </data>
+  <data name="MetaPattern_ColumnDefaultAssertion" xml:space="preserve">
+    <value>默认断言</value>
+  </data>
+  <data name="MetaPattern_ColumnTolRel" xml:space="preserve">
+    <value>相对容差</value>
+  </data>
+  <data name="MetaPattern_ColumnNoise" xml:space="preserve">
+    <value>噪声</value>
+  </data>
+  <data name="MetaPattern_ColumnStatus" xml:space="preserve">
+    <value>状态</value>
+  </data>
+  <data name="MetaPattern_ColumnOutOfScopeReason" xml:space="preserve">
+    <value>超范围原因</value>
+  </data>
+  <data name="MetaPattern_FieldCode" xml:space="preserve">
+    <value>代码（唯一，添加后不可变）：</value>
+  </data>
+  <data name="MetaPattern_FieldName" xml:space="preserve">
+    <value>名称：</value>
+  </data>
+  <data name="MetaPattern_FieldBlock" xml:space="preserve">
+    <value>块：</value>
+  </data>
+  <data name="MetaPattern_FieldDefaultAssertionType" xml:space="preserve">
+    <value>默认断言类型：</value>
+  </data>
+  <data name="MetaPattern_FieldDefaultTolerance" xml:space="preserve">
+    <value>默认容差（相对）：</value>
+  </data>
+  <data name="MetaPattern_FieldNoiseAware" xml:space="preserve">
+    <value>噪声感知</value>
+  </data>
+  <data name="MetaPattern_FieldStatus" xml:space="preserve">
+    <value>状态：</value>
+  </data>
+  <data name="MetaPattern_FieldOutOfScopeReason" xml:space="preserve">
+    <value>超范围原因（仅当状态 = out-of-scope 时）：</value>
+  </data>
+  <data name="MetaPattern_FieldHypothesisTemplate" xml:space="preserve">
+    <value>假设模板：</value>
+  </data>
+  <data name="Replay_FieldId" xml:space="preserve">
+    <value>Id：</value>
+  </data>
+  <data name="Replay_FieldSeverity" xml:space="preserve">
+    <value>严重性：</value>
+  </data>
+  <data name="Replay_FieldStatus" xml:space="preserve">
+    <value>状态：</value>
+  </data>
+  <data name="Replay_FieldDiscovered" xml:space="preserve">
+    <value>发现时间：</value>
+  </data>
+  <data name="Replay_Classification" xml:space="preserve">
+    <value>分类：</value>
+  </data>
+  <data name="Replay_ColumnField" xml:space="preserve">
+    <value>字段</value>
+  </data>
+  <data name="Replay_ColumnOriginal" xml:space="preserve">
+    <value>原始</value>
+  </data>
+  <data name="Replay_ColumnReplay" xml:space="preserve">
+    <value>回放</value>
+  </data>
+  <data name="Replay_RowMr" xml:space="preserve">
+    <value>蜕变关系</value>
+  </data>
+  <data name="Replay_RowSut" xml:space="preserve">
+    <value>被测系统</value>
+  </data>
+  <data name="Replay_RowTriggerParameters" xml:space="preserve">
+    <value>触发参数</value>
+  </data>
+  <data name="Replay_RowSourceValue" xml:space="preserve">
+    <value>源输出值</value>
+  </data>
+  <data name="Replay_RowFollowupValue" xml:space="preserve">
+    <value>衍生输出值</value>
+  </data>
+  <data name="Replay_RowAssertion" xml:space="preserve">
+    <value>断言</value>
+  </data>
+  <data name="Replay_RowFinalStatus" xml:space="preserve">
+    <value>最终状态</value>
+  </data>
+  <data name="Replay_RunRealReplay" xml:space="preserve">
+    <value>运行真实回放</value>
+  </data>
+  <data name="Replay_SimulateClassification" xml:space="preserve">
+    <value>模拟分类：</value>
+  </data>
+  <data name="Replay_SimulateReplay" xml:space="preserve">
+    <value>模拟回放</value>
+  </data>
+  <data name="History_PageSubtitle" xml:space="preserve">
+    <value>浏览历史 System-MT 运行。按 MR 名称过滤。可删除选中行（先删证据，再删结果；重试时显示孤立项）。</value>
+  </data>
+  <data name="History_FilterByMrName" xml:space="preserve">
+    <value>按 MR 名称过滤</value>
+  </data>
+  <data name="History_Refresh" xml:space="preserve">
+    <value>刷新</value>
+  </data>
+  <data name="History_DeleteSelected" xml:space="preserve">
+    <value>删除选中</value>
+  </data>
+  <data name="History_Column_RunAt" xml:space="preserve">
+    <value>运行时间 (UTC)</value>
+  </data>
+  <data name="History_Column_Mr" xml:space="preserve">
+    <value>MR</value>
+  </data>
+  <data name="History_Column_Assertion" xml:space="preserve">
+    <value>断言</value>
+  </data>
+  <data name="History_Column_Value" xml:space="preserve">
+    <value>值</value>
+  </data>
+  <data name="History_Column_Passed" xml:space="preserve">
+    <value>通过</value>
+  </data>
+  <data name="History_Column_FailureReason" xml:space="preserve">
+    <value>失败原因</value>
+  </data>
+  <data name="History_PreviousPage" xml:space="preserve">
+    <value>上一页</value>
+  </data>
+  <data name="History_NextPage" xml:space="preserve">
+    <value>下一页</value>
+  </data>
+  <data name="History_EvidenceForSelectedRow" xml:space="preserve">
+    <value>选中行的证据</value>
+  </data>
+  <data name="Dashboard_ClickMe" xml:space="preserve">
+    <value>点击我！</value>
+  </data>
+  <data name="Discovery_DiscovererLabel" xml:space="preserve">
+    <value>发现器：</value>
+  </data>
+  <data name="Discovery_TargetSutLabel" xml:space="preserve">
+    <value>目标 SUT：</value>
+  </data>
+  <data name="Discovery_RunButton" xml:space="preserve">
+    <value>运行发现</value>
+  </data>
+  <data name="Discovery_ColCode" xml:space="preserve">
+    <value>代码</value>
+  </data>
+  <data name="Discovery_ColAssertion" xml:space="preserve">
+    <value>断言</value>
+  </data>
+  <data name="Discovery_ColValue" xml:space="preserve">
+    <value>值</value>
+  </data>
+  <data name="Discovery_ColConfidence" xml:space="preserve">
+    <value>置信度</value>
+  </data>
+  <data name="Discovery_ColStatus" xml:space="preserve">
+    <value>状态</value>
+  </data>
+  <data name="Discovery_ColCreated" xml:space="preserve">
+    <value>创建时间</value>
+  </data>
+  <data name="Candidate_SelectCandidate" xml:space="preserve">
+    <value>选择候选项：</value>
+  </data>
+  <data name="Candidate_Confidence" xml:space="preserve">
+    <value>置信度：</value>
+  </data>
+  <data name="Candidate_Assertion" xml:space="preserve">
+    <value>断言：</value>
+  </data>
+  <data name="Candidate_Rationale" xml:space="preserve">
+    <value>理由：</value>
+  </data>
+  <data name="Candidate_Validators" xml:space="preserve">
+    <value>验证器：</value>
+  </data>
+  <data name="Candidate_Empirical" xml:space="preserve">
+    <value>经验</value>
+  </data>
+  <data name="Candidate_TheoreticalLlm" xml:space="preserve">
+    <value>理论-LLM</value>
+  </data>
+  <data name="Candidate_ValidateSelected" xml:space="preserve">
+    <value>验证所选</value>
+  </data>
+  <data name="Candidate_ColValidator" xml:space="preserve">
+    <value>验证器</value>
+  </data>
+  <data name="Candidate_ColPassed" xml:space="preserve">
+    <value>通过</value>
+  </data>
+  <data name="Candidate_ColRunAt" xml:space="preserve">
+    <value>运行时间</value>
+  </data>
+  <data name="Candidate_ColDetails" xml:space="preserve">
+    <value>详情</value>
+  </data>
+  <data name="Coverage_Title" xml:space="preserve">
+    <value>四维覆盖仪表盘</value>
+  </data>
+  <data name="Coverage_MetaPatternCoverage" xml:space="preserve">
+    <value>元模式覆盖</value>
+  </data>
+  <data name="Coverage_SutMrCoverage" xml:space="preserve">
+    <value>SUT × MR 绑定覆盖</value>
+  </data>
+  <data name="Coverage_BugCoverage" xml:space="preserve">
+    <value>缺陷覆盖</value>
+  </data>
+  <data name="Coverage_MutationCoverage" xml:space="preserve">
+    <value>变异检出覆盖</value>
+  </data>
+  <data name="Mutation_CampaignName" xml:space="preserve">
+    <value>任务名称：</value>
+  </data>
+  <data name="Mutation_SeedDemoData" xml:space="preserve">
+    <value>填充演示数据</value>
+  </data>
+  <data name="Mutation_SeedDemoDataToolTip" xml:space="preserve">
+    <value>若表为空则插入 5 个演示变异体 + 5 个 MR 绑定</value>
+  </data>
+  <data name="Mutation_Mutants" xml:space="preserve">
+    <value>变异体</value>
+  </data>
+  <data name="Mutation_MRBindings" xml:space="preserve">
+    <value>MR 绑定</value>
+  </data>
+  <data name="Mutation_StartCampaign" xml:space="preserve">
+    <value>开始任务</value>
+  </data>
+  <data name="Mutation_CampaignSummary" xml:space="preserve">
+    <value>任务摘要</value>
+  </data>
+  <data name="Mutation_SummaryTotal" xml:space="preserve">
+    <value>总计：</value>
+  </data>
+  <data name="Mutation_SummaryDetected" xml:space="preserve">
+    <value>已检出：</value>
+  </data>
+  <data name="Mutation_SummaryMissed" xml:space="preserve">
+    <value>漏检：</value>
+  </data>
+  <data name="Mutation_SummaryErrors" xml:space="preserve">
+    <value>错误：</value>
+  </data>
+  <data name="Mutation_SummaryDetectionRate" xml:space="preserve">
+    <value>检出率：</value>
+  </data>
+  <data name="Mutation_ColMutant" xml:space="preserve">
+    <value>变异体</value>
+  </data>
+  <data name="Mutation_ColBinding" xml:space="preserve">
+    <value>绑定</value>
+  </data>
+  <data name="Mutation_ColOutcome" xml:space="preserve">
+    <value>结果</value>
+  </data>
+  <data name="Mutation_ColObservedDelta" xml:space="preserve">
+    <value>观测 Δ</value>
+  </data>
+  <data name="Mutation_ColExpectedDelta" xml:space="preserve">
+    <value>预期 Δ</value>
+  </data>
+  <data name="Mutation_ColNotes" xml:space="preserve">
+    <value>备注</value>
+  </data>
+  <data name="Detect_ApplicationName" xml:space="preserve">
+    <value>应用程序名称</value>
+  </data>
+  <data name="Detect_InputPattern" xml:space="preserve">
+    <value>输入模式</value>
+  </data>
+  <data name="Detect_OutputPattern" xml:space="preserve">
+    <value>输出模式</value>
+  </data>
+  <data name="Detect_DimensionOfInputPattern" xml:space="preserve">
+    <value>输入模式维度</value>
+  </data>
+  <data name="Detect_TrueRatio" xml:space="preserve">
+    <value>真值比例</value>
+  </data>
+  <data name="Detect_Program" xml:space="preserve">
+    <value>程序</value>
+  </data>
+  <data name="Detect_WithdrawUpload" xml:space="preserve">
+    <value>撤销上传</value>
+  </data>
+  <data name="Detect_Upload" xml:space="preserve">
+    <value>上传</value>
+  </data>
+  <data name="Detect_InputParamCount" xml:space="preserve">
+    <value>输入参数个数</value>
+  </data>
+  <data name="Detect_Reset" xml:space="preserve">
+    <value>重置</value>
+  </data>
+  <data name="Detect_InputParamRanges" xml:space="preserve">
+    <value>输入参数范围</value>
+  </data>
+  <data name="Detect_InputDatatypes" xml:space="preserve">
+    <value>输入数据类型</value>
+  </data>
+  <data name="Detect_DetectMR" xml:space="preserve">
+    <value>识别蜕变关系</value>
+  </data>
+  <data name="Detect_StoreMR" xml:space="preserve">
+    <value>存储蜕变关系</value>
+  </data>
+  <data name="Detect_ExportCsv" xml:space="preserve">
+    <value>导出CSV</value>
+  </data>
+  <data name="Recommend_Application" xml:space="preserve">
+    <value>程序</value>
+  </data>
+  <data name="Recommend_Similarity" xml:space="preserve">
+    <value>相似度</value>
+  </data>
+  <data name="Recommend_InputPattern" xml:space="preserve">
+    <value>输入模式</value>
+  </data>
+  <data name="Recommend_OutputPattern" xml:space="preserve">
+    <value>输出模式</value>
+  </data>
+  <data name="Recommend_MrInformation" xml:space="preserve">
+    <value>MR 信息</value>
+  </data>
+  <data name="Recommend_View" xml:space="preserve">
+    <value>查看</value>
+  </data>
+  <data name="Recommend_ApplicationInformation" xml:space="preserve">
+    <value>应用信息</value>
+  </data>
+  <data name="Recommend_SupportRate" xml:space="preserve">
+    <value>支持率</value>
+  </data>
+  <data name="Recommend_RecommendType" xml:space="preserve">
+    <value>推荐类型</value>
+  </data>
+  <data name="Recommend_Recommend" xml:space="preserve">
+    <value>推荐</value>
+  </data>
+  <data name="Recommend_Clear" xml:space="preserve">
+    <value>清空</value>
+  </data>
+  <data name="Recommend_Upload" xml:space="preserve">
+    <value>上传</value>
+  </data>
+  <data name="Recommend_InputParamCount" xml:space="preserve">
+    <value>输入参数个数</value>
+  </data>
+  <data name="Recommend_Reset" xml:space="preserve">
+    <value>重置</value>
+  </data>
+  <data name="Recommend_InputParamRanges" xml:space="preserve">
+    <value>输入参数范围</value>
+  </data>
+  <data name="Recommend_InputDatatypes" xml:space="preserve">
+    <value>输入数据类型</value>
+  </data>
+  <data name="MtExec_InputPattern" xml:space="preserve">
+    <value>输入模式</value>
+  </data>
+  <data name="MtExec_OutputPattern" xml:space="preserve">
+    <value>输出模式</value>
+  </data>
+  <data name="MtExec_CodeName" xml:space="preserve">
+    <value>程序名</value>
+  </data>
+  <data name="MtExec_ExecuteMt" xml:space="preserve">
+    <value>执行 MT</value>
+  </data>
+  <data name="MtExec_MinNumber" xml:space="preserve">
+    <value>最小值</value>
+  </data>
+  <data name="MtExec_Reset" xml:space="preserve">
+    <value>重置</value>
+  </data>
+  <data name="MtExec_MaxNumber" xml:space="preserve">
+    <value>最大值</value>
+  </data>
+  <data name="MtExec_ExecuteNumb" xml:space="preserve">
+    <value>执行次数</value>
+  </data>
+  <data name="MtExec_Threshold" xml:space="preserve">
+    <value>阈值</value>
+  </data>
+  <data name="MtExec_MtReport" xml:space="preserve">
+    <value>MT 报告</value>
+  </data>
+  <data name="MtExec_Pass" xml:space="preserve">
+    <value>通过</value>
+  </data>
+  <data name="MtExec_Fail" xml:space="preserve">
+    <value>失败</value>
+  </data>
+  <data name="MtExec_PlotType" xml:space="preserve">
+    <value>图表类型</value>
+  </data>
+  <data name="Status_Anomaly_SweepDone_Fmt" xml:space="preserve">
+    <value>已清理 {0}，保留 {1}，失败 {2}。</value>
+  </data>
+  <data name="Status_Anomaly_SweepFailed_Fmt" xml:space="preserve">
+    <value>清理失败：{0}</value>
+  </data>
+  <data name="Status_Anomaly_UnknownStatus_Fmt" xml:space="preserve">
+    <value>未知状态 '{0}'。</value>
+  </data>
+  <data name="Status_Anomaly_TransitionReturnedFalse_Fmt" xml:space="preserve">
+    <value>异常 {0} 的状态转换返回 false。</value>
+  </data>
+  <data name="Status_CandidateReview_NoValidatorSelected" xml:space="preserve">
+    <value>请至少选择一个验证器。</value>
+  </data>
+  <data name="Status_CandidateReview_Validating" xml:space="preserve">
+    <value>正在验证…</value>
+  </data>
+  <data name="Status_CandidateReview_ValidatorsPassed_Fmt" xml:space="preserve">
+    <value>{0}/{1} 个验证器通过</value>
+  </data>
+  <data name="Status_CandidateReview_PromotedSuffix_Fmt" xml:space="preserve">
+    <value> → 已晋升为 MR #{0}</value>
+  </data>
+  <data name="Status_CandidateReview_Error" xml:space="preserve">
+    <value>错误</value>
+  </data>
+  <data name="Status_Discovery_Running" xml:space="preserve">
+    <value>正在运行发现…</value>
+  </data>
+  <data name="Status_Discovery_Done_Fmt" xml:space="preserve">
+    <value>完成 — 状态：{0}，候选数：{1}</value>
+  </data>
+  <data name="Status_Discovery_Error" xml:space="preserve">
+    <value>错误</value>
+  </data>
+  <data name="Status_MetaPattern_Seeded_Fmt" xml:space="preserve">
+    <value>已注入 {0} 条 NOETHER 元模式记录。</value>
+  </data>
+  <data name="Status_MetaPattern_BeginAdd" xml:space="preserve">
+    <value>正在填写新元模式 —— 请赋予唯一的 Code（例如 "m_xxx"）后保存。</value>
+  </data>
+  <data name="Status_MetaPattern_BeginEdit_Fmt" xml:space="preserve">
+    <value>正在编辑 {0}。Code 不可修改，以保持 MR 外键引用有效。</value>
+  </data>
+  <data name="Error_MetaPattern_CodeRequired" xml:space="preserve">
+    <value>Code 为必填项。</value>
+  </data>
+  <data name="Error_MetaPattern_AlreadyExists_Fmt" xml:space="preserve">
+    <value>元模式 '{0}' 已存在。</value>
+  </data>
+  <data name="Status_MetaPattern_Added_Fmt" xml:space="preserve">
+    <value>已添加 {0}。</value>
+  </data>
+  <data name="Error_MetaPattern_ModifyReturnedFalse_Fmt" xml:space="preserve">
+    <value>修改返回 false（未找到 Code '{0}'）。</value>
+  </data>
+  <data name="Status_MetaPattern_Saved_Fmt" xml:space="preserve">
+    <value>已保存 {0}。</value>
+  </data>
+  <data name="Error_MetaPattern_NotFound_Fmt" xml:space="preserve">
+    <value>未找到元模式 '{0}'。</value>
+  </data>
+  <data name="Status_MetaPattern_StatusToggled_Fmt" xml:space="preserve">
+    <value>{0}：{1} → {2}</value>
+  </data>
+  <data name="Status_MetaPattern_AlreadyDeprecated_Fmt" xml:space="preserve">
+    <value>{0} 已停用；无需操作。</value>
+  </data>
+  <data name="Status_MetaPattern_SoftDeleted_Fmt" xml:space="preserve">
+    <value>已软删除 {0}（{1} → deprecated）。</value>
+  </data>
+  <data name="Status_Mutation_LoadError_Fmt" xml:space="preserve">
+    <value>加载错误：{0}</value>
+  </data>
+  <data name="Status_Mutation_SeedError_Fmt" xml:space="preserve">
+    <value>种子数据错误：{0}</value>
+  </data>
+  <data name="Status_Mutation_Seeded_Fmt" xml:space="preserve">
+    <value>已生成演示数据：{0} 个变异体，{1} 个绑定。</value>
+  </data>
+  <data name="Status_Mutation_SelectAtLeastOne" xml:space="preserve">
+    <value>请至少选择一个变异体和一个 MR 绑定。</value>
+  </data>
+  <data name="Status_Mutation_Starting" xml:space="preserve">
+    <value>正在启动测试活动…</value>
+  </data>
+  <data name="Status_Mutation_CellProgress_Fmt" xml:space="preserve">
+    <value>单元 {0}/{1}：Mut-{2} × Bind-{3}</value>
+  </data>
+  <data name="Status_Mutation_Done_Fmt" xml:space="preserve">
+    <value>完成 — {0} 个单元 | 检出：{1} | 漏检：{2} | 检出率：{3:P0}</value>
+  </data>
+  <data name="Status_Mutation_Cancelled" xml:space="preserve">
+    <value>测试活动已取消。</value>
+  </data>
+  <data name="Status_Mutation_Error" xml:space="preserve">
+    <value>错误</value>
+  </data>
+  <data name="Status_Replay_NoAnomalySelected" xml:space="preserve">
+    <value>未选择异常。请打开异常页面，选中一行，然后点击"重放此异常"。</value>
+  </data>
+  <data name="Status_Replay_NoResultRecord_Fmt" xml:space="preserve">
+    <value>未找到异常 {0} 对应的结果记录（ResultId={1}）。</value>
+  </data>
+  <data name="Hint_Replay_MrCodePlaceholder" xml:space="preserve">
+    <value>—  （点击"运行真实重放"以解析）</value>
+  </data>
+  <data name="Status_Replay_PickAnAction" xml:space="preserve">
+    <value>选择"运行真实重放"以调用 ReplayService，或选择"模拟重放"以预览分类。</value>
+  </data>
+  <data name="Hint_Replay_NoTriggerParameters" xml:space="preserve">
+    <value>（无）</value>
+  </data>
+  <data name="Status_Replay_RealReplayCompleted_Fmt" xml:space="preserve">
+    <value>真实重放已完成 → {0}。</value>
+  </data>
+  <data name="Status_Replay_RealReplayFailed_Fmt" xml:space="preserve">
+    <value>真实重放失败：{0}</value>
+  </data>
+  <data name="Status_Replay_SimulatedExpression_Fmt" xml:space="preserve">
+    <value>模拟 → {0}</value>
+  </data>
+  <data name="Status_Replay_SimulatedOnly" xml:space="preserve">
+    <value>仅为模拟 — 请使用"运行真实重放"以执行真实流水线路径。</value>
+  </data>
+  <data name="Status_Equation_InitialPrompt" xml:space="preserve">
+    <value>请选择一行方程，或点击"新建方程"。</value>
+  </data>
+  <data name="Status_Equation_LoadedBuiltInReadOnly_Fmt" xml:space="preserve">
+    <value>已加载 '{0}'（内置，只读）。</value>
+  </data>
+  <data name="Status_Equation_NewDraft" xml:space="preserve">
+    <value>新建用户自定义方程草稿。请填写各字段，然后进行校验 / 保存。</value>
+  </data>
+  <data name="Status_Equation_DraftValid" xml:space="preserve">
+    <value>方程草稿校验通过。</value>
+  </data>
+  <data name="Status_Equation_ValidationFailed_Fmt" xml:space="preserve">
+    <value>校验失败：{0}</value>
+  </data>
+  <data name="Status_Equation_Saved_Fmt" xml:space="preserve">
+    <value>方程 '{0}' 已保存。</value>
+  </data>
+  <data name="Status_Equation_SaveBlocked_Fmt" xml:space="preserve">
+    <value>保存被阻止：{0}</value>
+  </data>
+  <data name="Status_Equation_Deleted_Fmt" xml:space="preserve">
+    <value>方程 '{0}' 已删除。</value>
+  </data>
+  <data name="Status_Equation_DeleteBlocked_Fmt" xml:space="preserve">
+    <value>删除被阻止：{0}</value>
+  </data>
+  <data name="Status_Equation_Loaded_Fmt" xml:space="preserve">
+    <value>已加载 {0} 个方程（其中 {1} 个用户自定义）。</value>
+  </data>
+  <data name="Status_Equation_ErrorListing_Fmt" xml:space="preserve">
+    <value>列出方程出错：{0}</value>
+  </data>
+  <data name="Status_Equation_LoadedUser_Fmt" xml:space="preserve">
+    <value>已加载用户方程 '{0}'。可编辑并进行校验 / 保存。</value>
+  </data>
+  <data name="Status_Equation_UserNotFound_Fmt" xml:space="preserve">
+    <value>未找到用户方程 '{0}'。</value>
+  </data>
+  <data name="Status_Equation_ErrorLoading_Fmt" xml:space="preserve">
+    <value>加载 '{0}' 出错：{1}</value>
+  </data>
+  <data name="Status_History_Loading" xml:space="preserve">
+    <value>正在加载执行历史…</value>
+  </data>
+  <data name="Pagination_History_NoRows" xml:space="preserve">
+    <value>无记录</value>
+  </data>
+  <data name="Pagination_History_PageOfTotal_Fmt" xml:space="preserve">
+    <value>第 {0} / {1} 页（共 {2} 条）</value>
+  </data>
+  <data name="Status_History_SelectRowBeforeDelete" xml:space="preserve">
+    <value>点击删除前请至少选择一行。</value>
+  </data>
+  <data name="Prompt_History_DeleteSingle_Fmt" xml:space="preserve">
+    <value>删除执行 {0}（{1}）？将先移除证据，再删除结果行。此操作无法撤销。</value>
+  </data>
+  <data name="Prompt_History_DeleteMultiple_Fmt" xml:space="preserve">
+    <value>删除 {0} 个执行行（及其证据）？此操作无法撤销。</value>
+  </data>
+  <data name="Prompt_History_ConfirmDeleteTitle" xml:space="preserve">
+    <value>确认删除</value>
+  </data>
+  <data name="Status_History_NoRecordsMatchFilter" xml:space="preserve">
+    <value>没有符合筛选条件的执行记录。</value>
+  </data>
+  <data name="Status_History_LoadedRecords_Fmt" xml:space="preserve">
+    <value>已加载 {1} 条记录中的 {0} 条。</value>
+  </data>
+  <data name="Status_History_ErrorLoadingExecutions_Fmt" xml:space="preserve">
+    <value>加载执行记录出错：{0}</value>
+  </data>
+  <data name="Evidence_History_NoEvidenceRow" xml:space="preserve">
+    <value>（此执行无证据行——历史遗留或仅证据孤立项。）</value>
+  </data>
+  <data name="Evidence_History_ErrorLoadingEvidence_Fmt" xml:space="preserve">
+    <value>加载证据出错：{0}</value>
+  </data>
+  <data name="Evidence_History_ExecutionId_Fmt" xml:space="preserve">
+    <value>执行 ID：{0}</value>
+  </data>
+  <data name="Evidence_History_RecordedAt_Fmt" xml:space="preserve">
+    <value>记录时间：{0}</value>
+  </data>
+  <data name="Evidence_History_TypedVerificationHeader" xml:space="preserve">
+    <value>类型化验证：</value>
+  </data>
+  <data name="Evidence_History_Spec_Fmt" xml:space="preserve">
+    <value>  规约       ：{0} {1}</value>
+  </data>
+  <data name="Evidence_History_Predicate_Fmt" xml:space="preserve">
+    <value>  谓词       ：{0} {1}</value>
+  </data>
+  <data name="Evidence_History_Status_Fmt" xml:space="preserve">
+    <value>  状态       ：{0}</value>
+  </data>
+  <data name="Evidence_History_Expected_Fmt" xml:space="preserve">
+    <value>  期望       ：{0}</value>
+  </data>
+  <data name="Evidence_History_Actual_Fmt" xml:space="preserve">
+    <value>  实际       ：{0}</value>
+  </data>
+  <data name="Evidence_History_Residual_Fmt" xml:space="preserve">
+    <value>  残差       ：{0}</value>
+  </data>
+  <data name="Evidence_History_Tolerance_Fmt" xml:space="preserve">
+    <value>  容差       ：{0}</value>
+  </data>
+  <data name="Evidence_History_Reason_Fmt" xml:space="preserve">
+    <value>  原因       ：{0}</value>
+  </data>
+  <data name="Status_History_DeleteDeleted_Fmt" xml:space="preserve">
+    <value>已删除 {0} 条</value>
+  </data>
+  <data name="Status_History_DeleteEvidenceOnly_Fmt" xml:space="preserve">
+    <value>{0} 条仅证据（结果行保留以便重试）</value>
+  </data>
+  <data name="Status_History_DeleteFailed_Fmt" xml:space="preserve">
+    <value>{0} 条失败（未改动任何行）</value>
+  </data>
+  <data name="Status_History_NothingDeleted" xml:space="preserve">
+    <value>未删除任何内容。</value>
+  </data>
+  <data name="Status_Execution_Idle" xml:space="preserve">
+    <value>空闲。</value>
+  </data>
+  <data name="Status_Execution_Running_Fmt" xml:space="preserve">
+    <value>正在运行 {0}…</value>
+  </data>
+  <data name="Status_Execution_ResultPass_Fmt" xml:space="preserve">
+    <value>通过 — {0}：源={1:G}，衍生={2:G}</value>
+  </data>
+  <data name="Status_Execution_ResultFail_Fmt" xml:space="preserve">
+    <value>失败 — {0}</value>
+  </data>
+  <data name="Status_Execution_Completed_Fmt" xml:space="preserve">
+    <value>完成，用时 源={0:F2}s，衍生={1:F2}s。</value>
+  </data>
+  <data name="Status_Execution_Error_Fmt" xml:space="preserve">
+    <value>错误：{0}</value>
+  </data>
+  <data name="Status_Execution_RunFailed_Title" xml:space="preserve">
+    <value>System-MT 运行失败</value>
+  </data>
+  <data name="Status_Execution_Refreshed_Fmt" xml:space="preserve">
+    <value>已刷新：{0} 条记录。</value>
+  </data>
+  <data name="Status_Execution_ReportExported_Fmt" xml:space="preserve">
+    <value>报告已导出：{0}</value>
+  </data>
+  <data name="Status_Catalog_SelectManifest" xml:space="preserve">
+    <value>请选择一个 System MT 清单。</value>
+  </data>
+  <data name="Status_Catalog_DraftCreated" xml:space="preserve">
+    <value>已新建 MR 草稿。请填写字段、验证，然后保存。</value>
+  </data>
+  <data name="Status_Catalog_DraftValid" xml:space="preserve">
+    <value>MR 草稿有效。</value>
+  </data>
+  <data name="Status_Catalog_ValidationFailed_Fmt" xml:space="preserve">
+    <value>验证失败：{0}</value>
+  </data>
+  <data name="Status_Catalog_DraftSaved" xml:space="preserve">
+    <value>MR 草稿已保存，目录已重新加载。</value>
+  </data>
+  <data name="Status_Catalog_SaveBlocked_Fmt" xml:space="preserve">
+    <value>保存被阻止：{0}</value>
+  </data>
+  <data name="Status_Catalog_NoManifests" xml:space="preserve">
+    <value>未找到 System MT catalog.json 文件。</value>
+  </data>
+  <data name="Status_Catalog_ManifestsLoaded_Fmt" xml:space="preserve">
+    <value>已加载 {0} 个 System MT 清单。</value>
+  </data>
+  <data name="Status_Catalog_LoadManifestsError_Fmt" xml:space="preserve">
+    <value>错误：{0}</value>
+  </data>
+  <data name="Status_Catalog_BindingsLoaded_Fmt" xml:space="preserve">
+    <value>已从 {1} 加载 {0} 个 MR 绑定。</value>
+  </data>
+  <data name="Status_SampleCatalog_SelectSut" xml:space="preserve">
+    <value>请选择一个 SUT 以浏览其样例文件。</value>
+  </data>
+  <data name="Status_SampleCatalog_NoSamplesUnderSut_Fmt" xml:space="preserve">
+    <value>SUT '{0}' 下没有样例。</value>
+  </data>
+  <data name="Status_SampleCatalog_LoadedSamples_Fmt" xml:space="preserve">
+    <value>已为 SUT '{1}' 加载 {0} 个样例。</value>
+  </data>
+  <data name="Status_SampleCatalog_ErrorListingSamples_Fmt" xml:space="preserve">
+    <value>列出样例时出错：{0}</value>
+  </data>
+  <data name="Status_SampleCatalog_LoadedSample_Fmt" xml:space="preserve">
+    <value>已加载样例 '{0}'。</value>
+  </data>
+  <data name="Status_SampleCatalog_ErrorLoadingSample_Fmt" xml:space="preserve">
+    <value>加载 '{0}' 时出错：{1}</value>
+  </data>
+  <data name="Status_SampleCatalog_EditThenValidate" xml:space="preserve">
+    <value>编辑文件名和 JSON 内容，然后点击校验 / 保存。</value>
+  </data>
+  <data name="Status_SampleCatalog_DraftValid" xml:space="preserve">
+    <value>样例草稿有效。</value>
+  </data>
+  <data name="Status_SampleCatalog_ValidationFailed_Fmt" xml:space="preserve">
+    <value>校验失败：{0}</value>
+  </data>
+  <data name="Status_SampleCatalog_SampleSaved_Fmt" xml:space="preserve">
+    <value>样例 '{0}' 已保存。</value>
+  </data>
+  <data name="Status_SampleCatalog_SaveBlocked_Fmt" xml:space="preserve">
+    <value>保存被阻止：{0}</value>
+  </data>
+  <data name="Dialog_SampleCatalog_ConfirmDeleteText_Fmt" xml:space="preserve">
+    <value>确定从 SUT '{1}' 删除样例 '{0}' 吗？被某个 MR 引用的文件将被阻止删除。</value>
+  </data>
+  <data name="Dialog_SampleCatalog_ConfirmDeleteCaption" xml:space="preserve">
+    <value>确认删除</value>
+  </data>
+  <data name="Status_SampleCatalog_SampleDeleted_Fmt" xml:space="preserve">
+    <value>样例 '{0}' 已删除。</value>
+  </data>
+  <data name="Status_SampleCatalog_DeleteBlocked_Fmt" xml:space="preserve">
+    <value>删除被阻止：{0}</value>
+  </data>
+  <data name="Status_SampleCatalog_NoSuts" xml:space="preserve">
+    <value>未找到任何 SUT。</value>
+  </data>
+  <data name="Status_SampleCatalog_LoadedSuts_Fmt" xml:space="preserve">
+    <value>已加载 {0} 个 SUT。</value>
+  </data>
+  <data name="Status_SampleCatalog_ErrorListingSuts_Fmt" xml:space="preserve">
+    <value>列出 SUT 时出错：{0}</value>
+  </data>
+  <data name="Status_SutCatalog_InitialHint" xml:space="preserve">
+    <value>选择一个 SUT 以编辑其程序段，或点击"新建 SUT 草稿"。</value>
+  </data>
+  <data name="Status_SutCatalog_DraftLoaded_Fmt" xml:space="preserve">
+    <value>已加载 SUT '{0}' 的程序段。</value>
+  </data>
+  <data name="Status_SutCatalog_DraftLoadError_Fmt" xml:space="preserve">
+    <value>加载 '{0}' 出错：{1}</value>
+  </data>
+  <data name="Status_SutCatalog_NewDraft" xml:space="preserve">
+    <value>新建 SUT 草稿。填写 SUT 名称与程序字段，然后验证 / 保存。</value>
+  </data>
+  <data name="Status_SutCatalog_ValidationFailed_NameRequired" xml:space="preserve">
+    <value>验证失败：SUT 名称为必填项。</value>
+  </data>
+  <data name="Status_SutCatalog_DraftValid" xml:space="preserve">
+    <value>SUT 草稿有效。</value>
+  </data>
+  <data name="Status_SutCatalog_ValidationFailed_Fmt" xml:space="preserve">
+    <value>验证失败：{0}</value>
+  </data>
+  <data name="Status_SutCatalog_SaveBlocked_NameRequired" xml:space="preserve">
+    <value>保存已阻止：SUT 名称为必填项。</value>
+  </data>
+  <data name="Status_SutCatalog_DraftSaved_Fmt" xml:space="preserve">
+    <value>SUT 草稿已保存至 {0}/catalog.json。</value>
+  </data>
+  <data name="Status_SutCatalog_SaveBlocked_Fmt" xml:space="preserve">
+    <value>保存已阻止：{0}</value>
+  </data>
+  <data name="Status_SutCatalog_NoCatalogFiles" xml:space="preserve">
+    <value>未找到 SUT catalog.json 文件。</value>
+  </data>
+  <data name="Status_SutCatalog_Loaded_Fmt" xml:space="preserve">
+    <value>已加载 {0} 个 SUT。</value>
+  </data>
+  <data name="Status_SutCatalog_ListError_Fmt" xml:space="preserve">
+    <value>列出 SUT 出错：{0}</value>
+  </data>
 </root>

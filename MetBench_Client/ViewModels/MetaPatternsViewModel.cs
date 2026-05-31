@@ -56,7 +56,7 @@ namespace MetBench_Client.ViewModels
                 var inserted = MetaPatternSeed.EnsureSeeded(_repo);
                 if (inserted > 0)
                 {
-                    StatusMessage = $"Seeded {inserted} NOETHER MetaPattern rows.";
+                    StatusMessage = string.Format(Localization["Status_MetaPattern_Seeded_Fmt"], inserted);
                 }
                 await LoadAsync().ConfigureAwait(true);
             }
@@ -109,7 +109,7 @@ namespace MetBench_Client.ViewModels
             };
             IsAdding = true;
             ErrorMessage = null;
-            StatusMessage = "Filling new MetaPattern — give it a unique Code (e.g. \"m_xxx\") then Save.";
+            StatusMessage = Localization["Status_MetaPattern_BeginAdd"];
         }
 
         [RelayCommand(CanExecute = nameof(CanBeginEdit))]
@@ -119,7 +119,7 @@ namespace MetBench_Client.ViewModels
             EditingPattern = CloneFor(SelectedPattern);
             IsAdding = false;
             ErrorMessage = null;
-            StatusMessage = $"Editing {SelectedPattern.Code}. Code is immutable to keep MR foreign-key refs valid.";
+            StatusMessage = string.Format(Localization["Status_MetaPattern_BeginEdit_Fmt"], SelectedPattern.Code);
         }
 
         private bool CanBeginEdit() => SelectedPattern is not null && EditingPattern is null;
@@ -134,30 +134,30 @@ namespace MetBench_Client.ViewModels
                 {
                     if (string.IsNullOrWhiteSpace(EditingPattern.Code))
                     {
-                        ErrorMessage = "Code is required.";
+                        ErrorMessage = Localization["Error_MetaPattern_CodeRequired"];
                         return;
                     }
                     if (_repo.Get(EditingPattern.Code) is not null)
                     {
-                        ErrorMessage = $"MetaPattern '{EditingPattern.Code}' already exists.";
+                        ErrorMessage = string.Format(Localization["Error_MetaPattern_AlreadyExists_Fmt"], EditingPattern.Code);
                         return;
                     }
                     _repo.Add(EditingPattern);
                     WriteAudit("catalog.update", EditingPattern.Code,
                         op: "add", reason: "wpf-user-add");
-                    StatusMessage = $"Added {EditingPattern.Code}.";
+                    StatusMessage = string.Format(Localization["Status_MetaPattern_Added_Fmt"], EditingPattern.Code);
                 }
                 else
                 {
                     var ok = _repo.Modify(EditingPattern);
                     if (!ok)
                     {
-                        ErrorMessage = $"Modify returned false (Code '{EditingPattern.Code}' not found).";
+                        ErrorMessage = string.Format(Localization["Error_MetaPattern_ModifyReturnedFalse_Fmt"], EditingPattern.Code);
                         return;
                     }
                     WriteAudit("catalog.update", EditingPattern.Code,
                         op: "edit", reason: "wpf-user-edit");
-                    StatusMessage = $"Saved {EditingPattern.Code}.";
+                    StatusMessage = string.Format(Localization["Status_MetaPattern_Saved_Fmt"], EditingPattern.Code);
                 }
 
                 EditingPattern = null;
@@ -191,7 +191,7 @@ namespace MetBench_Client.ViewModels
                 var pattern = _repo.Get(SelectedPattern.Code);
                 if (pattern is null)
                 {
-                    ErrorMessage = $"MetaPattern '{SelectedPattern.Code}' not found.";
+                    ErrorMessage = string.Format(Localization["Error_MetaPattern_NotFound_Fmt"], SelectedPattern.Code);
                     return;
                 }
 
@@ -200,7 +200,7 @@ namespace MetBench_Client.ViewModels
                 _repo.Modify(pattern);
                 WriteAudit("config.change", pattern.Code,
                     op: "toggle-status", reason: $"{oldStatus}→{pattern.Status}");
-                StatusMessage = $"{pattern.Code}: {oldStatus} → {pattern.Status}";
+                StatusMessage = string.Format(Localization["Status_MetaPattern_StatusToggled_Fmt"], pattern.Code, oldStatus, pattern.Status);
                 ErrorMessage = null;
                 await LoadAsync().ConfigureAwait(true);
             }
@@ -219,13 +219,13 @@ namespace MetBench_Client.ViewModels
                 var pattern = _repo.Get(SelectedPattern.Code);
                 if (pattern is null)
                 {
-                    ErrorMessage = $"MetaPattern '{SelectedPattern.Code}' not found.";
+                    ErrorMessage = string.Format(Localization["Error_MetaPattern_NotFound_Fmt"], SelectedPattern.Code);
                     return;
                 }
 
                 if (pattern.Status == "deprecated")
                 {
-                    StatusMessage = $"{pattern.Code} already deprecated; no-op.";
+                    StatusMessage = string.Format(Localization["Status_MetaPattern_AlreadyDeprecated_Fmt"], pattern.Code);
                     return;
                 }
 
@@ -234,7 +234,7 @@ namespace MetBench_Client.ViewModels
                 _repo.Modify(pattern);
                 WriteAudit("catalog.update", pattern.Code,
                     op: "soft-delete", reason: $"{oldStatus}→deprecated");
-                StatusMessage = $"Soft-deleted {pattern.Code} ({oldStatus} → deprecated).";
+                StatusMessage = string.Format(Localization["Status_MetaPattern_SoftDeleted_Fmt"], pattern.Code, oldStatus);
                 ErrorMessage = null;
                 await LoadAsync().ConfigureAwait(true);
             }
