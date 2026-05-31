@@ -4,6 +4,7 @@
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:controls="clr-namespace:MetBench_Client.Views.Controls"
       xmlns:conv="clr-namespace:MetBench_Client.Converters"
+      xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       Title="AnomalyListPage"
@@ -13,6 +14,7 @@
       mc:Ignorable="d">
     <Page.Resources>
         <conv:AnomalyStatusKebabConverter x:Key="AnomalyStatusKebabConverter" />
+        <helpers:BindingProxy x:Key="LocalizationProxy" Data="{Binding}" />
     </Page.Resources>
     <Grid Margin="12">
         <Grid.RowDefinitions>
@@ -25,7 +27,7 @@
 
         <!-- Row 0: filter bar -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
-            <TextBlock Text="Severity:" VerticalAlignment="Center" Margin="0,0,4,0" />
+            <TextBlock Text="{Binding ViewModel.Localization[Anomaly_SeverityFilterLabel]}" VerticalAlignment="Center" Margin="0,0,4,0" />
             <ComboBox SelectedValue="{Binding ViewModel.SeverityFilter, Mode=TwoWay}"
                       SelectedValuePath="Content"
                       Width="120" Margin="0,0,12,0">
@@ -36,7 +38,7 @@
                 <ComboBoxItem Content="critical" />
             </ComboBox>
 
-            <TextBlock Text="Status:" VerticalAlignment="Center" Margin="0,0,4,0" />
+            <TextBlock Text="{Binding ViewModel.Localization[Anomaly_StatusFilterLabel]}" VerticalAlignment="Center" Margin="0,0,4,0" />
             <ComboBox SelectedValue="{Binding ViewModel.StatusFilter, Mode=TwoWay}"
                       SelectedValuePath="Content"
                       Width="160" Margin="0,0,12,0">
@@ -50,16 +52,16 @@
             </ComboBox>
 
             <ui:Button Appearance="Primary"
-                       Content="Analyze commonality"
+                       Content="{Binding ViewModel.Localization[Anomaly_AnalyzeCommonality]}"
                        Margin="12,0,0,0"
                        Icon="{ui:SymbolIcon ChartMultiple24}"
                        Command="{Binding ViewModel.AnalyzeCommonalityCommand}" />
 
             <ui:Button Appearance="Secondary"
-                       Content="Sweep orphans"
+                       Content="{Binding ViewModel.Localization[Anomaly_SweepOrphans]}"
                        Margin="12,0,0,0"
                        Icon="{ui:SymbolIcon Delete24}"
-                       ToolTip="Remove Anomaly rows whose linked Execution / Result no longer exists (PR-FUP F4 / T5 Route B)."
+                       ToolTip="{Binding ViewModel.Localization[Anomaly_SweepOrphansTooltip]}"
                        Command="{Binding ViewModel.SweepOrphansCommand}" />
 
             <TextBlock Margin="12,0,0,0"
@@ -79,14 +81,14 @@
                      BorderThickness="1"
                      BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}">
             <ui:DataGrid.Columns>
-                <DataGridTextColumn Header="Id"           Binding="{Binding IdAnomaly}"      Width="240" />
-                <DataGridTextColumn Header="Severity"     Binding="{Binding Severity}"       Width="80" />
-                <DataGridTextColumn Header="Status"       Binding="{Binding Status, Converter={StaticResource AnomalyStatusKebabConverter}}" Width="120" />
-                <DataGridTextColumn Header="Category"     Binding="{Binding Category}"       Width="140" />
-                <DataGridTextColumn Header="Discovered"   Binding="{Binding DiscoveredAt, StringFormat=yyyy-MM-dd HH:mm}" Width="140" />
-                <DataGridTextColumn Header="Linked Bug"   Binding="{Binding LinkedKnownBugId}" Width="100" />
-                <DataGridTextColumn Header="Replay #"     Binding="{Binding ReplayCount}"    Width="80" />
-                <DataGridTextColumn Header="Notes"        Binding="{Binding Notes}"          Width="*" />
+                <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Anomaly_ColumnId], Source={StaticResource LocalizationProxy}}"           Binding="{Binding IdAnomaly}"      Width="240" />
+                <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Anomaly_ColumnSeverity], Source={StaticResource LocalizationProxy}}"     Binding="{Binding Severity}"       Width="80" />
+                <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Anomaly_ColumnStatus], Source={StaticResource LocalizationProxy}}"       Binding="{Binding Status, Converter={StaticResource AnomalyStatusKebabConverter}}" Width="120" />
+                <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Anomaly_ColumnCategory], Source={StaticResource LocalizationProxy}}"     Binding="{Binding Category}"       Width="140" />
+                <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Anomaly_ColumnDiscovered], Source={StaticResource LocalizationProxy}}"   Binding="{Binding DiscoveredAt, StringFormat=yyyy-MM-dd HH:mm}" Width="140" />
+                <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Anomaly_ColumnLinkedBug], Source={StaticResource LocalizationProxy}}"   Binding="{Binding LinkedKnownBugId}" Width="100" />
+                <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Anomaly_ColumnReplayCount], Source={StaticResource LocalizationProxy}}"     Binding="{Binding ReplayCount}"    Width="80" />
+                <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Anomaly_ColumnNotes], Source={StaticResource LocalizationProxy}}"        Binding="{Binding Notes}"          Width="*" />
             </ui:DataGrid.Columns>
         </ui:DataGrid>
 
@@ -96,7 +98,7 @@
 
         <!-- Row 3: transition bar -->
         <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,8,0,0">
-            <TextBlock Text="Transition selected to:" VerticalAlignment="Center" Margin="0,0,8,0" />
+            <TextBlock Text="{Binding ViewModel.Localization[Anomaly_TransitionSelectedTo]}" VerticalAlignment="Center" Margin="0,0,8,0" />
             <ComboBox SelectedValue="{Binding ViewModel.TransitionTarget, Mode=TwoWay}"
                       SelectedValuePath="Content"
                       Width="180" Margin="0,0,8,0">
@@ -107,12 +109,12 @@
                 <ComboBoxItem Content="fixed-upstream" />
             </ComboBox>
             <ui:Button Appearance="Primary"
-                       Content="Apply transition"
+                       Content="{Binding ViewModel.Localization[Anomaly_ApplyTransition]}"
                        Icon="{ui:SymbolIcon ArrowSwap24}"
                        Command="{Binding ViewModel.TransitionCommand}" />
             <ui:Button Appearance="Secondary"
                        Margin="12,0,0,0"
-                       Content="Replay this anomaly"
+                       Content="{Binding ViewModel.Localization[Anomaly_ReplayThisAnomaly]}"
                        Icon="{ui:SymbolIcon ArrowCounterclockwise24}"
                        Command="{Binding ViewModel.ReplayCommand}" />
             <TextBlock Text="{Binding ViewModel.ErrorMessage}"
@@ -140,18 +142,18 @@
                 </Style>
             </Border.Style>
             <StackPanel>
-                <TextBlock FontWeight="Bold" Text="Commonality Report" />
+                <TextBlock FontWeight="Bold" Text="{Binding ViewModel.Localization[Anomaly_CommonalityReport]}" />
                 <TextBlock Margin="0,4,0,0"
                            Text="{Binding ViewModel.Commonality.Hypothesis}"
                            TextWrapping="Wrap" />
                 <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                    <TextBlock Text="Total: " />
+                    <TextBlock Text="{Binding ViewModel.Localization[Anomaly_CommonalityTotal]}" />
                     <TextBlock Text="{Binding ViewModel.Commonality.Total}" Margin="0,0,16,0" />
-                    <TextBlock Text="Dominant severity: " />
+                    <TextBlock Text="{Binding ViewModel.Localization[Anomaly_CommonalityDominantSeverity]}" />
                     <TextBlock Text="{Binding ViewModel.Commonality.DominantSeverity}" Margin="0,0,16,0" />
-                    <TextBlock Text="Dominant category: " />
+                    <TextBlock Text="{Binding ViewModel.Localization[Anomaly_CommonalityDominantCategory]}" />
                     <TextBlock Text="{Binding ViewModel.Commonality.DominantCategory}" Margin="0,0,16,0" />
-                    <TextBlock Text="Linked to known bug: " />
+                    <TextBlock Text="{Binding ViewModel.Localization[Anomaly_CommonalityLinkedToKnownBug]}" />
                     <TextBlock Text="{Binding ViewModel.Commonality.LinkedToKnownBugCount}" />
                 </StackPanel>
             </StackPanel>

@@ -35,6 +35,9 @@ public static class UiaHelpers
 
     // ===== Window lifecycle =====
 
+    /// <summary>Maximize the window (SW_MAXIMIZE = 3). Use to expand compact nav panes before screenshots.</summary>
+    public static void MaximizeWindow(IntPtr hwnd) => ShowWindow(hwnd, 3);
+
     /// <summary>Show + foreground + small settle delay. Returns the AutomationElement for further finds.</summary>
     public static AutomationElement FocusAndAttach(IntPtr hwnd)
     {
@@ -180,34 +183,62 @@ public static class UiaHelpers
         var nav = FindNavItem(root, pageName) ?? throw new InvalidOperationException(
             $"Nav item '{pageName}' not found.");
 
-        if (TryInvoke(nav))          { Thread.Sleep(settleMs); return; }
-        if (TrySelect(nav))          { Thread.Sleep(settleMs); return; }
-        if (TryClickViaMouse(nav))   { Thread.Sleep(settleMs); return; }
+        Console.WriteLine($"  NavItem '{pageName}': CT={nav.Current.ControlType?.ProgrammaticName} Class={nav.Current.ClassName}");
+
+        // Try UIA patterns: SelectionItem first (Wpf.Ui DataItem nav responds to Select),
+        // then Invoke, then keyboard focus+Enter, then mouse.
+        if (TrySelect(nav))           { Thread.Sleep(settleMs); return; }
+        if (TryInvoke(nav))           { Thread.Sleep(settleMs); return; }
+        if (TryFocusAndEnter(nav))    { Thread.Sleep(settleMs); return; }
+        if (TryClickViaMouse(nav))    { Thread.Sleep(settleMs); return; }
 
         throw new InvalidOperationException(
-            $"Nav item '{pageName}' found but no activation pattern worked (Invoke/Select/Mouse all failed).");
+            $"Nav item '{pageName}' found but no activation pattern worked (Select/Invoke/FocusEnter/Mouse all failed).");
+    }
+
+    /// <summary>Set focus on element and send Enter key via SendKeys (WinForms). Last resort before mouse.</summary>
+    public static bool TryFocusAndEnter(AutomationElement el)
+    {
+        try
+        {
+            el.SetFocus();
+            Thread.Sleep(120);
+            System.Windows.Forms.SendKeys.SendWait("{ENTER}");
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     /// <summary>
     /// Physical-coordinate left-click on element's center. Last-resort when no UIA pattern works.
     /// Hardcodes 4K + DPI scale 2 per the original smokeshot defaults — adjust if running on a
-    /// different setup.
+    /// different setup. Pass screenW=0 to auto-detect from SM_CXSCREEN.
     /// </summary>
-    private static bool TryClickViaMouse(AutomationElement el, int screenW = 3840, int screenH = 2160, int dpiScale = 2)
+    public static bool TryClickViaMouse(AutomationElement el, int screenW = 0, int screenH = 0, int dpiScale = 0)
     {
         try
         {
+            // Auto-detect screen dimensions if not specified
+            if (screenW <= 0) screenW = GetSystemMetrics(0);   // SM_CXSCREEN
+            if (screenH <= 0) screenH = GetSystemMetrics(1);   // SM_CYSCREEN
+            if (dpiScale <= 0) dpiScale = 1;                   // UIA coords are already in physical pixels at 96 DPI
+
             try { el.SetFocus(); } catch { }
             Thread.Sleep(150);
 
             dynamic rawRect = el.GetCurrentPropertyValue(AutomationElement.BoundingRectangleProperty);
             double rl = (double)rawRect.Left, rt = (double)rawRect.Top,
                    rw = (double)rawRect.Width, rh = (double)rawRect.Height;
-            int physX = (int)(rl + rw / 2);
-            int physY = (int)(rt + rh / 2);
-            int logX  = physX / dpiScale, logY = physY / dpiScale;
-            uint absX = (uint)((long)physX * 65535 / (screenW - 1));
-            uint absY = (uint)((long)physY * 65535 / (screenH - 1));
+            // UIA BoundingRectangle coordinates are in logical pixels (same as SetCursorPos units)
+            int logX = (int)(rl + rw / 2);
+            int logY = (int)(rt + rh / 2);
+            uint absX = (uint)((long)logX * 65535 / (screenW - 1));
+            uint absY = (uint)((long)logY * 65535 / (screenH - 1));
+
+            Console.WriteLine($"  Mouse click: logX={logX} logY={logY} absX={absX} absY={absY} screen={screenW}x{screenH}");
 
             SetCursorPos(logX, logY);
             Thread.Sleep(120);
@@ -218,11 +249,14 @@ public static class UiaHelpers
             mouse_event(MOUSEEVENTF_LEFTUP   | MOUSEEVENTF_ABSOLUTE, absX, absY, 0, UIntPtr.Zero);
             return true;
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine($"  TryClickViaMouse failed: {ex.Message}");
             return false;
         }
     }
+
+    [DllImport("user32.dll")] static extern int GetSystemMetrics(int nIndex);
 
     /// <summary>Click a button by name. Throws if not found or not invokable.</summary>
     public static void ClickButton(AutomationElement root, string buttonName, int settleMs = 400)
@@ -241,6 +275,154 @@ public static class UiaHelpers
     {
         var ed = FindEdit(root, name);
         return ed is not null && TrySetValue(ed, value);
+    }
+
+    /// <summary>
+    /// Open a ComboBox whose current items include the given candidates, then select
+    /// <paramref name="itemName"/>. If no ComboBox has the expected items, falls back
+    /// to direct mouse click on the Nth ComboBox (by index).
+    /// After expand, searches the full desktop subtree since WPF ComboBox popup may be
+    /// a separate UIA element outside the app window.
+    /// </summary>
+    public static bool SelectComboBoxItem(AutomationElement root, string itemName, int settleMs = 600)
+    {
+        try
+        {
+            // Find ALL ComboBoxes and pick the one that contains the target item
+            var allCombos = root.FindAll(TreeScope.Descendants,
+                new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.ComboBox));
+            Console.WriteLine($"  Found {allCombos.Count} ComboBox(es) on screen.");
+
+            AutomationElement? combo = null;
+            // Find the combo whose children already contain 'English' or '中文' (language options)
+            string[] langHints = { "English", "中文" };
+            foreach (AutomationElement c in allCombos)
+            {
+                var children = c.FindAll(TreeScope.Children, Condition.TrueCondition);
+                bool hasLangItem = false;
+                foreach (AutomationElement child in children)
+                {
+                    string cn = child.Current.Name ?? "";
+                    if (langHints.Any(h => cn.Equals(h, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        hasLangItem = true;
+                        break;
+                    }
+                }
+                if (hasLangItem) { combo = c; break; }
+            }
+
+            if (combo is null && allCombos.Count > 0)
+            {
+                Console.WriteLine("  No language ComboBox found by children scan; trying last ComboBox by index.");
+                // Settings page language ComboBox is typically the last one added
+                combo = allCombos.Cast<AutomationElement>().LastOrDefault();
+            }
+
+            if (combo is null)
+            {
+                Console.WriteLine("  SelectComboBoxItem: no ComboBox found.");
+                return false;
+            }
+
+            Console.WriteLine($"  Found ComboBox: Name='{combo.Current.Name}' Class='{combo.Current.ClassName}' Children={combo.FindAll(TreeScope.Children, Condition.TrueCondition).Count}");
+
+            // Expand it
+            if (combo.GetCurrentPattern(ExpandCollapsePattern.Pattern) is ExpandCollapsePattern ecp)
+            {
+                ecp.Expand();
+                Thread.Sleep(600);
+                Console.WriteLine("  ComboBox expanded via ExpandCollapsePattern.");
+            }
+            else
+            {
+                TryClickViaMouse(combo);
+                Thread.Sleep(600);
+                Console.WriteLine("  ComboBox expanded via mouse click.");
+            }
+
+            // After expand: WPF ComboBox popup may be a separate UIA subtree on the desktop.
+            // Try in order: (1) combo subtree, (2) full root subtree, (3) desktop root.
+            AutomationElement? item = null;
+            string[] searchScopes = { "combo", "root", "desktop" };
+            AutomationElement?[] searchRoots = { combo, root, AutomationElement.RootElement };
+
+            for (int i = 0; i < searchScopes.Length && item is null; i++)
+            {
+                Console.WriteLine($"  Searching '{itemName}' in {searchScopes[i]}...");
+                try
+                {
+                    // First try exact name
+                    item = searchRoots[i]!.FindFirst(TreeScope.Subtree,
+                        new PropertyCondition(AutomationElement.NameProperty, itemName));
+                    if (item is null)
+                    {
+                        // Also look for ListItem/DataItem with this name
+                        var candidates = searchRoots[i]!.FindAll(TreeScope.Descendants,
+                            new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.ListItem));
+                        foreach (AutomationElement c in candidates)
+                        {
+                            string n = c.Current.Name ?? "";
+                            Console.WriteLine($"    ListItem found: Name='{n}'");
+                            if (n.Equals(itemName, StringComparison.OrdinalIgnoreCase) ||
+                                n.Contains(itemName, StringComparison.OrdinalIgnoreCase))
+                            {
+                                item = c;
+                                break;
+                            }
+                        }
+                    }
+                }
+                catch (Exception searchEx)
+                {
+                    Console.WriteLine($"    Search {searchScopes[i]} failed: {searchEx.Message}");
+                }
+            }
+
+            if (item is null)
+            {
+                Console.WriteLine($"  SelectComboBoxItem: item '{itemName}' not found after expand (tried combo+root+desktop).");
+                // Try to use SelectionItem pattern directly on combo children
+                try
+                {
+                    var children = combo.FindAll(TreeScope.Children, Condition.TrueCondition);
+                    Console.WriteLine($"  Combo direct children: {children.Count}");
+                    foreach (AutomationElement c in children)
+                        Console.WriteLine($"    Child: Name='{c.Current.Name}' CT={c.Current.ControlType?.ProgrammaticName} Class={c.Current.ClassName}");
+                }
+                catch { }
+
+                // Collapse and fail
+                try { if (combo.GetCurrentPattern(ExpandCollapsePattern.Pattern) is ExpandCollapsePattern ec2) ec2.Collapse(); } catch { }
+                return false;
+            }
+
+            Console.WriteLine($"  Found item: Name='{item.Current.Name}' CT={item.Current.ControlType?.ProgrammaticName}");
+
+            if (TrySelect(item))
+            {
+                Thread.Sleep(settleMs);
+                return true;
+            }
+            if (TryInvoke(item))
+            {
+                Thread.Sleep(settleMs);
+                return true;
+            }
+            if (TryClickViaMouse(item))
+            {
+                Thread.Sleep(settleMs);
+                return true;
+            }
+
+            Console.WriteLine($"  SelectComboBoxItem: item '{itemName}' found but no pattern worked.");
+            return false;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"  SelectComboBoxItem exception: {ex.Message}");
+            return false;
+        }
     }
 
     // ===== Wait =====

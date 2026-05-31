@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MetBench_BLL.SystemMT.Assertions;
 using MetBench_BLL.SystemMT.Catalog.Editing;
+using MetBench_UI.Localization;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -13,6 +14,8 @@ namespace MetBench_Client.ViewModels
     {
         private readonly ISystemMtManifestCatalogEditor _editor;
         private bool _isInitialized;
+
+        public LocalizedTextProvider Localization { get; }
 
         [ObservableProperty]
         private ObservableCollection<SystemMtManifestDescriptor> _manifests = new();
@@ -33,14 +36,16 @@ namespace MetBench_Client.ViewModels
         private ObservableCollection<string> _availableAssertionTypeCodes = new(AssertionTypeCodes.All);
 
         [ObservableProperty]
-        private string _statusMessage = "Select a System MT manifest.";
+        private string _statusMessage = string.Empty;
 
         [ObservableProperty]
         private bool _hasValidDraft;
 
-        public SystemMtMrCatalogViewModel(ISystemMtManifestCatalogEditor editor)
+        public SystemMtMrCatalogViewModel(ISystemMtManifestCatalogEditor editor, LocalizedTextProvider localization)
         {
             _editor = editor;
+            Localization = localization;
+            StatusMessage = Localization["Status_Catalog_SelectManifest"];
         }
 
         public void OnNavigatedTo()
@@ -93,7 +98,7 @@ namespace MetBench_Client.ViewModels
             };
             MrBindings.Add(draft);
             SelectedDraft = draft;
-            StatusMessage = "New MR draft created. Fill fields, validate, then save.";
+            StatusMessage = Localization["Status_Catalog_DraftCreated"];
         }
 
         [RelayCommand(CanExecute = nameof(HasSelectedDraft))]
@@ -104,8 +109,8 @@ namespace MetBench_Client.ViewModels
             var result = _editor.ValidateDraft(SelectedManifest.SutId, SelectedDraft);
             HasValidDraft = result.Success;
             StatusMessage = result.Success
-                ? "MR draft is valid."
-                : "Validation failed: " + string.Join(" | ", result.Errors);
+                ? Localization["Status_Catalog_DraftValid"]
+                : string.Format(Localization["Status_Catalog_ValidationFailed_Fmt"], string.Join(" | ", result.Errors));
         }
 
         [RelayCommand(CanExecute = nameof(CanSaveDraft))]
@@ -116,8 +121,8 @@ namespace MetBench_Client.ViewModels
             var result = _editor.SaveDraft(SelectedManifest.SutId, SelectedDraft);
             HasValidDraft = result.Success;
             StatusMessage = result.Success
-                ? "MR draft saved and catalog reloaded."
-                : "Save blocked: " + string.Join(" | ", result.Errors);
+                ? Localization["Status_Catalog_DraftSaved"]
+                : string.Format(Localization["Status_Catalog_SaveBlocked_Fmt"], string.Join(" | ", result.Errors));
 
             if (result.Success)
                 LoadSelectedManifest(SelectedDraft.MrId);
@@ -131,12 +136,12 @@ namespace MetBench_Client.ViewModels
                 Manifests = new ObservableCollection<SystemMtManifestDescriptor>(manifests);
                 SelectedManifest ??= Manifests.FirstOrDefault();
                 StatusMessage = Manifests.Count == 0
-                    ? "No System MT catalog.json files found."
-                    : $"Loaded {Manifests.Count} System MT manifest(s).";
+                    ? Localization["Status_Catalog_NoManifests"]
+                    : string.Format(Localization["Status_Catalog_ManifestsLoaded_Fmt"], Manifests.Count);
             }
             catch (Exception ex)
             {
-                StatusMessage = $"ERROR: {ex.Message}";
+                StatusMessage = string.Format(Localization["Status_Catalog_LoadManifestsError_Fmt"], ex.Message);
             }
         }
 
@@ -157,11 +162,11 @@ namespace MetBench_Client.ViewModels
                     ? MrBindings.FirstOrDefault()
                     : MrBindings.FirstOrDefault(mr => string.Equals(mr.MrId, selectMrId, StringComparison.Ordinal))
                         ?? MrBindings.FirstOrDefault();
-                StatusMessage = $"Loaded {MrBindings.Count} MR binding(s) from {SelectedManifest.SutId}.";
+                StatusMessage = string.Format(Localization["Status_Catalog_BindingsLoaded_Fmt"], MrBindings.Count, SelectedManifest.SutId);
             }
             catch (Exception ex)
             {
-                StatusMessage = $"ERROR: {ex.Message}";
+                StatusMessage = string.Format(Localization["Status_Catalog_LoadManifestsError_Fmt"], ex.Message);
             }
         }
 

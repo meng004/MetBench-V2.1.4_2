@@ -9,6 +9,7 @@
       xmlns:models1="clr-namespace:MetBench_Client.Models"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:controls="clr-namespace:MetBench_Client.Controls"
+      xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
       mc:Ignorable="d"
       d:DesignHeight="800"
       d:DesignWidth="1000"
@@ -16,6 +17,9 @@
       d:Background="{DynamicResource ApplicationBackgroundBrush}"
       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
       Title="ApplicationManagementPage">
+    <Page.Resources>
+        <helpers:BindingProxy x:Key="LocalizationProxy" Data="{Binding}"/>
+    </Page.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="3*" />
@@ -26,9 +30,9 @@
         <Grid Grid.Row="0">
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0 3 0 5">
-                <TextBlock Text="ApplicationName" VerticalAlignment="Center" Margin="15 0 0 0"/>
+                <TextBlock Text="{Binding ViewModel.Localization[AppMgmt_ApplicationName]}" VerticalAlignment="Center" Margin="15 0 0 0"/>
                     <ui:TextBox  TextWrapping="Wrap" ClearButtonEnabled="True"  Text="{Binding ViewModel.ApplicationNameBoxText,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" s:View.ActionTarget="{Binding ViewModel}"  Margin="10 0 0 0" Width="150" />
-                <ui:Button Appearance="Info" Content="Query" Margin="5 0 0 0" s:View.ActionTarget="{Binding ViewModel}"
+                <ui:Button Appearance="Info" Content="{Binding ViewModel.Localization[Legacy_Query]}" Margin="5 0 0 0" s:View.ActionTarget="{Binding ViewModel}"
      Command="{s:Action reload_ItemsSource}"/>
             </StackPanel>
             <ui:DataGrid x:Name="datagrid" MaxHeight="320"  BorderThickness="2" BorderBrush="LightGray" Margin="10 0 10 10" FontSize="15" LoadingRow="dataGrid_LoadingRow" HeadersVisibility="Column" 
@@ -46,7 +50,7 @@
                 <DataGrid.Columns>
                     <DataGridTemplateColumn  Width="70"  MinWidth="10" IsReadOnly="True" >
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="Number" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+                            <TextBlock Text="{Binding Data.ViewModel.Localization[AppMgmt_Number], Source={StaticResource LocalizationProxy}}" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -57,50 +61,50 @@
 
                     <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}"  Binding="{Binding Name}" Width="200" IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="Name"></TextBlock>
+                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[Legacy_Name], Source={StaticResource LocalizationProxy}}"></TextBlock>
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
 
                     <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}"  Binding="{Binding Description}" Width="200" IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="Description"></TextBlock>
+                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[Legacy_Description], Source={StaticResource LocalizationProxy}}"></TextBlock>
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
 
                     <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}"  Binding="{Binding ProgrammingLanguage}" Width="200" IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="ProgrammingLanguage"></TextBlock>
+                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[AppMgmt_ProgrammingLanguage], Source={StaticResource LocalizationProxy}}"></TextBlock>
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
 
 
                     <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}"  Binding="{Binding LinesOfCode}" Width="200" IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="LineOfCode"></TextBlock>
+                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[AppMgmt_LineOfCode], Source={StaticResource LocalizationProxy}}"></TextBlock>
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
 
                     <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}"  Binding="{Binding CodeName}" Width="200" IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="SoftwareUnderTest"></TextBlock>
+                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[AppMgmt_SoftwareUnderTest], Source={StaticResource LocalizationProxy}}"></TextBlock>
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
 
                     <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}"  Binding="{Binding SourceTestCaseName}" Width="200" IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="SourceTestCase"></TextBlock>
+                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[AppMgmt_SourceTestCase], Source={StaticResource LocalizationProxy}}"></TextBlock>
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
 
                     <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}"  Binding="{Binding DOI}" Width="250" IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="DOI"></TextBlock>
+                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[AppMgmt_DOI], Source={StaticResource LocalizationProxy}}"></TextBlock>
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
 
                     <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}"  Binding="{Binding Url}" IsReadOnly="True">
                         <DataGridTextColumn.Header>
-                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="Url"></TextBlock>
+                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[AppMgmt_Url], Source={StaticResource LocalizationProxy}}"></TextBlock>
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
                 </DataGrid.Columns>
@@ -128,7 +132,7 @@
                 <RowDefinition Height="2*" />
             </Grid.RowDefinitions>
             <StackPanel  Grid.Row="0" x:Name="stackpanel1" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="IdApplication"  Margin="5 0 0 0" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ViewModel.Localization[AppMgmt_IdApplication]}"  Margin="5 0 0 0" VerticalAlignment="Center" />
                 <ui:TextBox x:Name="txbIdApplication"  Margin="5 0 0 0" VerticalContentAlignment="Center" Width="150"
                          ClearButtonEnabled="False" 
                          IsReadOnly="True" 
@@ -137,7 +141,7 @@
                          />
             </StackPanel>
             <StackPanel  Grid.Row="1" x:Name="stackpanel2" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="Name" Margin="55 0 0 0" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ViewModel.Localization[Legacy_Name]}" Margin="55 0 0 0" VerticalAlignment="Center" />
                 <ui:TextBox x:Name="txbName" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="150" 
                          TextWrapping="Wrap"
                          Text="{Binding ViewModel.Name,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
@@ -147,7 +151,7 @@
                 <TextBlock Text="*" Foreground="Red" Margin="5 0 0 0" VerticalAlignment="Center" />
             </StackPanel>
             <StackPanel  Grid.Row="2" x:Name="stackpanel3" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="Description"  Margin="20 0 0 0" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ViewModel.Localization[Legacy_Description]}"  Margin="20 0 0 0" VerticalAlignment="Center" />
                 <ui:TextBox x:Name="rtxbDescriptiont" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="150" 
                              TextWrapping="Wrap"
                             
@@ -157,7 +161,7 @@
                             />
             </StackPanel>
             <StackPanel  Grid.Row="3" x:Name="stackpanel4" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="ProgrammingLanguage"  Margin="5 0 0 0" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ViewModel.Localization[AppMgmt_ProgrammingLanguage]}"  Margin="5 0 0 0" VerticalAlignment="Center" />
                 <ui:TextBox x:Name="txbProgrammingLanguage"  Margin="5 0 0 0" VerticalContentAlignment="Center" Width="100"
                              TextWrapping="Wrap"
                              Text="{Binding ViewModel.ProgrammingLanguage,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
@@ -167,7 +171,7 @@
                 <TextBlock Text="*" Foreground="Red" Margin="5 0 0 0" VerticalAlignment="Center" />
             </StackPanel>
             <StackPanel  Grid.Row="0" Grid.Column="1" x:Name="stackpanel5" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="LineOfCode"  Margin="54 0 0 0" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ViewModel.Localization[AppMgmt_LineOfCode]}"  Margin="54 0 0 0" VerticalAlignment="Center" />
                 <ui:TextBox x:Name="txbLineOfCode"  Margin="5 0 0 0" VerticalContentAlignment="Center" Width="200"
                              TextWrapping="Wrap"
                              Text="{Binding ViewModel.LineOfCode,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
@@ -176,22 +180,22 @@
                          />
             </StackPanel>
             <StackPanel  Grid.Row="1" Grid.Column="1" x:Name="stackpanel6" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="SoftwareUnderTest"  Margin="5 0 0 0" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ViewModel.Localization[AppMgmt_SoftwareUnderTest]}"  Margin="5 0 0 0" VerticalAlignment="Center" />
                 <ui:TextBox x:Name="txbSoftwareUnderTest"   Margin="5 0 0 0" VerticalContentAlignment="Center" Width="100"
                             TextWrapping="Wrap"
                             Text="{Binding ViewModel.Codename}"
                             />
-                <ui:Button Appearance="Info" Content="X" 
+                <ui:Button Appearance="Info" Content="{Binding ViewModel.Localization[AppMgmt_ClearSelection]}"
                            Margin="5 0 0 0"
                            s:View.ActionTarget="{Binding ViewModel}"
-                           Command="{s:Action btnBack_Click}" 
+                           Command="{s:Action btnBack_Click}"
                            />
-                <ui:Button Appearance="Primary" Content="Upl" Margin="5 0 0 0"
+                <ui:Button Appearance="Primary" Content="{Binding ViewModel.Localization[AppMgmt_Upload]}" Margin="5 0 0 0"
                            s:View.ActionTarget="{Binding ViewModel}"
                            Command="{s:Action btnAddCode_Click}"
                            Icon="{ui:SymbolIcon ArrowUpload24}"
                            />
-                <ui:Button Appearance="Primary" Content="Unzip" Margin="5 0 0 0"
+                <ui:Button Appearance="Primary" Content="{Binding ViewModel.Localization[AppMgmt_Unzip]}" Margin="5 0 0 0"
                            s:View.ActionTarget="{Binding ViewModel}" 
                            Command="{s:Action btnExtractCode_Click}"
                            Icon="{ui:SymbolIcon FolderZip24}"
@@ -199,23 +203,23 @@
                 <TextBlock Text="*" Foreground="Red" Margin="5 0 0 0" VerticalAlignment="Center" />
             </StackPanel>
             <StackPanel  Grid.Row="2" Grid.Column="1" x:Name="stackpanel7" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="SourceTestCase" Margin="28 0 0 0" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ViewModel.Localization[AppMgmt_SourceTestCase]}" Margin="28 0 0 0" VerticalAlignment="Center" />
                 <ui:TextBox x:Name="txbSourceTestCase"  Margin="5 0 0 0" VerticalContentAlignment="Center" Width="100"
                          TextWrapping="Wrap"
                          Text="{Binding ViewModel.SourceTestCasename}"
                          />
-                <ui:Button Appearance="Info" Content="X" 
+                <ui:Button Appearance="Info" Content="{Binding ViewModel.Localization[AppMgmt_ClearSelection]}"
                            Margin="5 0 0 0"
                            s:View.ActionTarget="{Binding ViewModel}"
                            Command="{s:Action btnSourceTestCaseBack_Click}"
                            />
-                <ui:Button Appearance="Primary" Content="Upl"  Margin="5 0 0 0"
+                <ui:Button Appearance="Primary" Content="{Binding ViewModel.Localization[AppMgmt_Upload]}"  Margin="5 0 0 0"
                            s:View.ActionTarget="{Binding ViewModel}"
                            Command="{s:Action btnAddSourceTestCase_Click}"
                            />
             </StackPanel>
             <StackPanel  Grid.Row="3" Grid.Column="1" x:Name="stackpanel8" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="DOI" Margin="105 0 0 0"  VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ViewModel.Localization[AppMgmt_DOI]}" Margin="105 0 0 0"  VerticalAlignment="Center" />
                 <ui:TextBox x:Name="txbDOI" Margin="5 0 0 0"  VerticalContentAlignment="Center" Width="200"
                          TextWrapping="Wrap"
                          Text="{Binding ViewModel.DOI,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
@@ -224,7 +228,7 @@
                          />
             </StackPanel>
             <StackPanel  Grid.Row="0" Grid.Column="2" x:Name="stackpanel9" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="Url" Margin="55 0 0 0" VerticalAlignment="Center"  />
+                <TextBlock Text="{Binding ViewModel.Localization[AppMgmt_Url]}" Margin="55 0 0 0" VerticalAlignment="Center"  />
                 <ui:TextBox x:Name="txbUrl" Margin="5 0 0 0" VerticalContentAlignment="Center"  Width="160"
                          TextWrapping="Wrap"
                          Text="{Binding ViewModel.Url,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
@@ -233,7 +237,7 @@
                          />
             </StackPanel>
             <StackPanel  Grid.Row="1" Grid.Column="2" x:Name="stackpanel10" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="DomainName" Margin="5 0 0 0"  VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ViewModel.Localization[AppMgmt_DomainName]}" Margin="5 0 0 0"  VerticalAlignment="Center" />
                 <ComboBox Margin="5 0 0 0" MaxHeight="200"  Text="{Binding ViewModel.SelectedText}" IsEditable="True" ItemsSource="{Binding ViewModel.DomainExs}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate DataType="{x:Type models1:DomainEx}">
@@ -247,14 +251,14 @@
             </StackPanel>
             <StackPanel  Grid.Row="2" Grid.Column="2" x:Name="stackpanel11" Orientation="Horizontal" VerticalAlignment="Center">
 
-                <ui:Button Appearance="Primary" Content="InputParams" Margin="105 0 0 0"
+                <ui:Button Appearance="Primary" Content="{Binding ViewModel.Localization[AppMgmt_InputParams]}" Margin="105 0 0 0"
            s:View.ActionTarget="{Binding ViewModel}"
            Command="{s:Action btnInputParams_Click}"
            Icon="{ui:SymbolIcon CalendarEdit24}"
            />
             </StackPanel>
             <StackPanel  Grid.Row="3" Grid.Column="2" x:Name="stackpanel12" Orientation="Horizontal" VerticalAlignment="Center">
-                <ui:Button Appearance="Primary" Content="OutputParams" Margin="105 0 0 0"
+                <ui:Button Appearance="Primary" Content="{Binding ViewModel.Localization[AppMgmt_OutputParams]}" Margin="105 0 0 0"
            s:View.ActionTarget="{Binding ViewModel}"
            Command="{s:Action btnOutputParams_Click}"
            Icon="{ui:SymbolIcon CalendarEdit24}"
@@ -268,22 +272,22 @@
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <ui:Button Grid.Column="0" Margin="70,0,0,0" Appearance="Primary" Content="Add" Width="100" Height="40"
+            <ui:Button Grid.Column="0" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Add]}" Width="100" Height="40"
                        s:View.ActionTarget="{Binding ViewModel}"
                        Command="{s:Action btnAdd_Click}"
                        Icon="{ui:SymbolIcon GuestAdd24}"
                        />
-            <ui:Button Grid.Column="1" Margin="70,0,0,0" Appearance="Primary" Content="Edit" Width="100" Height="40"
+            <ui:Button Grid.Column="1" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Modify]}" Width="100" Height="40"
                        s:View.ActionTarget="{Binding ViewModel}"
                        Command="{s:Action btnModify_Click}"
                        Icon="{ui:SymbolIcon CalendarEdit24}"
                        />
-            <ui:Button Grid.Column="2" Margin="70,0,0,0" Appearance="Primary" Content="Del" Width="100" Height="40"
+            <ui:Button Grid.Column="2" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Delete]}" Width="100" Height="40"
                        s:View.ActionTarget="{Binding ViewModel}"
                        Command="{s:Action btnDelect_Click}"
                        Icon="{ui:SymbolIcon DeleteDismiss24}"
                        />
-            <ui:Button Grid.Column="3" Margin="70,0,0,0" Appearance="Primary" Content="Reset" Width="100" Height="40"
+            <ui:Button Grid.Column="3" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Cancel]}" Width="100" Height="40"
                        s:View.ActionTarget="{Binding ViewModel}"
                        Command="{s:Action btnCancel_Click}"
                        Icon="{ui:SymbolIcon TextBulletListSquareSettings20}"

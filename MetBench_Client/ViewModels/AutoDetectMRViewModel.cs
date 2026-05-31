@@ -2,6 +2,7 @@
 using MetBench_BLL;
 using MetBench_Client.Helpers;
 using MetBench_Client.Util;
+using MetBench_UI.Localization;
 using Microsoft.Win32;
 using Stylet;
 using System;
@@ -118,7 +119,10 @@ namespace MetBench_Client.ViewModels
 
         // 构造函数订阅事件
         // 构造函数
-        public AutoDetectMRViewModel(IPageService pageService , INavigationService navigationService,ApplicationService applicationSerive,MetamorphicRelationService metamorphicRelationSerive , MRDetector mRDetector, IEventAggregator eventAggregator) 
+        // 本地化文本提供者
+        public LocalizedTextProvider Localization { get; }
+
+        public AutoDetectMRViewModel(IPageService pageService , INavigationService navigationService,ApplicationService applicationSerive,MetamorphicRelationService metamorphicRelationSerive , MRDetector mRDetector, IEventAggregator eventAggregator, LocalizedTextProvider localization)
         {
             _navigationService = navigationService;
             _pageService = pageService;
@@ -129,6 +133,7 @@ namespace MetBench_Client.ViewModels
             _detector = mRDetector;
             IsIndeterminate = false;
             Visibility = Visibility.Collapsed;
+            Localization = localization;
         }
 
         //MRDetector参数验证器

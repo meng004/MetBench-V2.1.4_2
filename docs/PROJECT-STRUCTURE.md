@@ -1,13 +1,13 @@
 # MetBench 项目结构
 
-> **结构快照基线**: 2026-05-26（代码测试基线由 `docs/status/current.md` §2 实时维护；T3 PDE-class 覆盖更新至 PR #140）
+> **结构快照基线**: 2026-05-31（代码测试基线由 `docs/status/current.md` §2 实时维护；已同步 T0-T5 release readiness、client i18n、full-page bilingual UI evidence、usage guide）
 > **目标读者**: 新加入仓库的开发者 / 验收员 / reviewer。文档全息呈现仓库当前结构 + SUT 测试覆盖 + MetBench 框架测试覆盖。
 > **更详细的设计**: [`AGENTS.md`](../AGENTS.md)（roadmap）· [`CLAUDE.md`](../CLAUDE.md)（agent 注意事项）· [`docs/design/`](design/)（架构）
 > **当前状态账本**: [`docs/status/current.md`](status/current.md)。本文件只投影结构与测试矩阵，不重新定义当前主线状态。
 
 ---
 
-## §1 .NET 项目布局（7 个 csproj）
+## §1 .NET 项目布局（10 个主工程/测试/分析器 csproj + 3 个 tools csproj）
 
 | 项目 | Target | 跑哪里 | 用途 |
 |---|---|---|---|
@@ -17,12 +17,17 @@
 | **`MetBench_IDAL/`** | `net8.0` | Anywhere | DAL 接口合约 |
 | **`MetBench_DAL/`** | `net8.0` | Anywhere | LiteDB 持久化：v1 run-result + v2 24-collection schema |
 | **`MetBench_Client/`** | `net8.0-windows7.0` | **Windows only** | WPF UI 应用，入口点；引 `Wpf.Ui` + `CommunityToolkit.Mvvm` + LiveCharts WPF |
-| **`MetBench_SystemMT.Tests/`** | `net8.0` | Anywhere | xUnit + Reqnroll：跨平台事实源测试。当前共享精确代码绿基线见 §4 末尾：`66eb297` (PR #162 PR-A) = **1209 pass / 0 fail / 12 skip / 1221 total** (cloud CI without SciPy / OpenMOC / OpenMC venvs). |
+| **`MetBench_UI.Localization/`** | `net8.0` | Linux + Windows + future Avalonia | UI-neutral bilingual localization core：`.resx` / `ResourceManager` / `IAppLocalizationService` / `LocalizedTextProvider`。不得依赖 WPF、WPF-UI、Avalonia 或 Windows-only API；当前 WPF 客户端引用它，未来 Avalonia UI 可复用同一核心。 |
+| **`MetBench_SystemMT.Tests/`** | `net8.0` | Anywhere | xUnit + Reqnroll：跨平台事实源测试。当前 release gate 与 i18n baseline 见 `docs/status/current.md` §2；T0-T5 VM full suite 为 **1558 pass / 0 fail / 12 skip**，ClientI18n SystemMT tests 为 **10/10 PASS**。 |
+| **`MetBench_Client.Tests/`** | `net8.0-windows7.0` | **Windows only** | WPF/i18n UI-facing xUnit tests（含 `Xunit.StaFact`），覆盖 MainWindow navigation localization、Settings language switcher 等客户端行为。 |
+| **`MetBench_Analyzers/`** | `netstandard2.0` | Build/CI analyzer package | Governance Roslyn analyzers（如 METBENCH001 / METBENCH002），用于把跨文件字段流、防漂移等治理规则机械化。 |
+
+Tools projects: `tools/smokeshot/` (Windows UIA / screenshot evidence), `tools/ScaffoldMr/`, `tools/SeedCrossProgramAnomalies/`.
 
 **硬规则**（cloud 与 Windows 端协作）：
 
 - Cloud agents 可改 `MetBench_BLL.Core/` / `MetBench_DAL/` / `MetBench_BLL/` / `MetBench_SystemMT.Tests/` / docs（**全部可在 Linux 编译**）
-- Cloud agents **不可改** `MetBench_Client/*.xaml*` 没有显式许可（Linux 不能 build WPF SDK）
+- Cloud agents **不可改** `MetBench_Client/*.xaml*` 或 `MetBench_Client.Tests/` 没有显式许可（Linux 不能 build WPF SDK）
 - Windows agents **不可改** `MetBench_BLL.Core/SystemMT/*` public types 没先提 cloud-side 设计（CI 会卡）
 
 ---
@@ -134,10 +139,11 @@ SUT 接入到框架的 hook：
 | **ColdStart** | — | `ColdStart/` | 1 | 1 |
 
 **测试总数对照**：
-- 当前共享精确 Linux / cloud 绿基线：提交 `66eb297`（PR #162 PR-A）= **1209 pass / 0 fail / 12 skip / 1221 total**（12 skip = 8 OpenMOC/OpenMC 未装 venv + 4 SciPy 未装 venv，均通过 `[SkippableFact]` 干净跳过，与回归无关；本地装 SciPy 时为 **1213 pass / 0 fail / 8 skip**）
+- 当前 release-readiness 绿基线：`docs/superpowers/specs/2026-05-30-t0-t5-vm-release-smoke/vm-summary.md` 记录 **22/22** required filtered commands PASS；`dotnet test MetBench_SystemMT.Tests` full suite **1558 pass / 0 fail / 12 env-gated OpenMOC/OpenMC skips**；Windows `dotnet build MetBench.sln` **0 errors**；T0-T5 screenshot matrix **21/21 PASS**。
+- 当前 client i18n 绿基线：`docs/superpowers/specs/2026-05-30-client-i18n-vm-evidence/vm-summary.md` 记录 `MetBench_SystemMT.Tests` ClientI18n **10/10 PASS**、`MetBench_Client.Tests` ClientI18n **3/3 PASS**、base UIA screenshots **9/9 PASS**；后续 `vm-status.jsonl` 追加 full-page bilingual screenshots for System-MT/catalog/legacy/function pages and runtime status strings.
 - v1.2 迁移 / gate 当前真相层：**44 MR + 4 Property** 已进入 typed catalog 工件、golden fixtures 与 coverage gate
 - 历史参考基线：`453e369`（PR #160 docs gate）= 1196 pass；`2f997dd`（PR #161 PR-B differential runner）= 1196 pass；`66eb297`（PR #162 PR-A I/O adapter）= 1209 pass。更早：`5d4dcc7`（PR #119）= **1048 pass / 0 fail / 8 skip / 1056 total**；`e839214`（PR #110）= **1043 pass / 0 fail / 0 skip**（PR-B/C/D 前）；`373bb59` = **961 / 0 / 8 / 969**；`763e067`（PR #93）= **965 / 0 / 0**
-- 当前 Windows WPF 已知旧基线：2026-05-24 在 Parallels Win11 上 `dotnet build MetBench_Client/MetBench_Client.csproj` **0 编译错误**，约 `17.47s`；本轮最新代码回执待补
+- 当前 Windows WPF 证据：T0-T5 release smoke 和 client i18n evidence 均记录 `dotnet build MetBench.sln` / WPF build **0 errors**，并由 `tools/smokeshot/` 产出 UIA/PrintWindow 截图证据。
 - UAT BDD filter（`FullyQualifiedName~UAT`）：**48 Pass / 0 Skip**
 - BDD smoke（Features filter）：**30 Pass / 1 Skip**
 

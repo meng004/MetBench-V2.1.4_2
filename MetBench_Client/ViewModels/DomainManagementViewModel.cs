@@ -3,6 +3,7 @@ using MetBench_BLL;
 using MetBench_Client.Helpers;
 using MetBench_Client.Util;
 using MetBench_Domain;
+using MetBench_UI.Localization;
 using Stylet;
 using System;
 using System.Collections.ObjectModel;
@@ -16,6 +17,8 @@ namespace MetBench_Client.ViewModels
 {
     public class DomainManagementViewModel : ObservableObject, INavigationAware
     {
+        public LocalizedTextProvider Localization { get; }
+
         // 导航服务 用于页面切换
         private INavigationService _navigationService;
 
@@ -72,12 +75,13 @@ namespace MetBench_Client.ViewModels
         }
 
         // 构造函数
-        public DomainManagementViewModel(IPageService pageService, INavigationService navigationService, DomainService domainSerive, IEventAggregator eventAggregator) 
+        public DomainManagementViewModel(IPageService pageService, INavigationService navigationService, DomainService domainSerive, IEventAggregator eventAggregator, LocalizedTextProvider localization)
         {
             _pageService = pageService;
             _navigationService = navigationService;
             _domainSerive = domainSerive;
             _eventAggregator = eventAggregator;
+            Localization = localization;
 
             reload_ItemsSource();
         }

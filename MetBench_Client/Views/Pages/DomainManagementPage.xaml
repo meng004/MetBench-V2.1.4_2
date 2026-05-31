@@ -8,6 +8,7 @@
       xmlns:s="https://github.com/canton7/Stylet"
       xmlns:viewmodels="clr-namespace:MetBench_Client.ViewModels"
       xmlns:controls="clr-namespace:MetBench_Client.Controls"
+      xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
       xmlns:i="clr-namespace:Microsoft.VisualBasic;assembly=Microsoft.VisualBasic"
       mc:Ignorable="d"
       d:DesignHeight="800"
@@ -16,6 +17,10 @@
       d:Background="{DynamicResource ApplicationBackgroundBrush}"
       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
       Title="DomainManagementPage">
+
+    <Page.Resources>
+        <helpers:BindingProxy x:Key="LocalizationProxy" Data="{Binding}"/>
+    </Page.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -27,9 +32,9 @@
         <Grid Grid.Row="0">
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0 3 0 5">
-                    <TextBlock Text="DomainName" VerticalAlignment="Center" Margin="15 0 0 0"/>
+                    <TextBlock Text="{Binding ViewModel.Localization[DomainMgmt_DomainName]}" VerticalAlignment="Center" Margin="15 0 0 0"/>
                     <TextBox Text="{Binding ViewModel.DomainNameBoxText,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" s:View.ActionTarget="{Binding ViewModel}" Margin="10 0 0 0" Width="150" />
-                    <ui:Button Appearance="Info" Content="Query" Margin="5 0 0 0" s:View.ActionTarget="{Binding ViewModel}"
+                    <ui:Button Appearance="Info" Content="{Binding ViewModel.Localization[Legacy_Query]}" Margin="5 0 0 0" s:View.ActionTarget="{Binding ViewModel}"
          Command="{s:Action reload_ItemsSource}"/>
                 </StackPanel>
                 <ui:DataGrid Grid.Row="0"  MaxHeight="350" BorderThickness="2" BorderBrush="LightGray" Margin="10 0 10 10" LoadingRow="dataGrid_LoadingRow" FontSize="15" HeadersVisibility="Column"  
@@ -53,7 +58,7 @@ AutoGenerateColumns="False" CanUserAddRows="False" AutomationProperties.Automati
 
                         <DataGridTemplateColumn  Width="70"  MinWidth="10" IsReadOnly="True" >
                             <DataGridTemplateColumn.Header>
-                                <TextBlock Text="Number" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+                                <TextBlock Text="{Binding Data.ViewModel.Localization[DomainMgmt_ColumnNumber], Source={StaticResource LocalizationProxy}}" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -64,13 +69,13 @@ AutoGenerateColumns="False" CanUserAddRows="False" AutomationProperties.Automati
 
                         <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}"  Binding="{Binding Name}" Width="200" IsReadOnly="True">
                             <DataGridTextColumn.Header>
-                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="Name"></TextBlock>
+                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[Legacy_Name], Source={StaticResource LocalizationProxy}}"></TextBlock>
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
 
                         <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}"  Binding="{Binding Description}" Width="810" IsReadOnly="True">
                             <DataGridTextColumn.Header>
-                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="Description"></TextBlock>
+                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[Legacy_Description], Source={StaticResource LocalizationProxy}}"></TextBlock>
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
 
@@ -97,7 +102,7 @@ AutoGenerateColumns="False" CanUserAddRows="False" AutomationProperties.Automati
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <StackPanel  Grid.Row="0" x:Name="stackpanel1" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="IdDomain"  Margin="48 0 0 0" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ViewModel.Localization[DomainMgmt_IdDomain]}"  Margin="48 0 0 0" VerticalAlignment="Center" />
                 <ui:TextBox x:Name="txbIdDomain" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="250"
                             ClearButtonEnabled="False"
                             IsReadOnly="True"
@@ -106,7 +111,7 @@ AutoGenerateColumns="False" CanUserAddRows="False" AutomationProperties.Automati
                             />
             </StackPanel>
             <StackPanel  Grid.Row="1"  x:Name="stackpanel2" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="Name" Margin="75 0 0 0" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ViewModel.Localization[Legacy_Name]}" Margin="75 0 0 0" VerticalAlignment="Center" />
                 <ui:TextBox x:Name="txbName" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="250"
                          TextWrapping="Wrap"
                          Text="{Binding ViewModel.Name,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
@@ -116,7 +121,7 @@ AutoGenerateColumns="False" CanUserAddRows="False" AutomationProperties.Automati
                 <TextBlock Text="*" Foreground="Red" Margin="5 0 0 0" VerticalAlignment="Center" />
             </StackPanel>
             <StackPanel  Grid.Row="0" Grid.Column="1" x:Name="stackpanel3" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="Desciption"  Margin="50 0 0 0" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ViewModel.Localization[Legacy_Description]}"  Margin="50 0 0 0" VerticalAlignment="Center" />
                 <ui:TextBox x:Name="txbDesciption" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="250"
                          TextWrapping="Wrap"
                          Text="{Binding ViewModel.Description,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
@@ -132,22 +137,22 @@ AutoGenerateColumns="False" CanUserAddRows="False" AutomationProperties.Automati
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <ui:Button Grid.Column="0" Margin="70,0,0,0" Appearance="Primary" Content="Add" Width="100" Height="40"
+            <ui:Button Grid.Column="0" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Add]}" Width="100" Height="40"
                        s:View.ActionTarget="{Binding ViewModel}"
                        Command="{s:Action btnAdd_Click}"
                        Icon="{ui:SymbolIcon GuestAdd24}"
                        />
-            <ui:Button Grid.Column="1" Margin="70,0,0,0" Appearance="Primary" Content="Edit" Width="100" Height="40"
+            <ui:Button Grid.Column="1" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Modify]}" Width="100" Height="40"
                        s:View.ActionTarget="{Binding ViewModel}"
                        Command="{s:Action btnModify_Click}"
                        Icon="{ui:SymbolIcon CalendarEdit24}"
                        />
-            <ui:Button Grid.Column="2" Margin="70,0,0,0" Appearance="Primary" Content="Del" Width="100" Height="40"
+            <ui:Button Grid.Column="2" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Delete]}" Width="100" Height="40"
                        s:View.ActionTarget="{Binding ViewModel}"
                        Command="{s:Action btnDelect_Click}"
                        Icon="{ui:SymbolIcon DeleteDismiss24}"
                        />
-            <ui:Button Grid.Column="3" Margin="70,0,0,0" Appearance="Primary" Content="Reset" Width="100" Height="40"
+            <ui:Button Grid.Column="3" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Cancel]}" Width="100" Height="40"
                        s:View.ActionTarget="{Binding ViewModel}"
                        Command="{s:Action btnCancel_Click}"
                        Icon="{ui:SymbolIcon TextBulletListSquareSettings20}"

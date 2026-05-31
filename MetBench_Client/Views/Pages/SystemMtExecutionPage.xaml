@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
     xmlns:local="clr-namespace:MetBench_Client.Views.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -15,6 +16,10 @@
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     mc:Ignorable="d">
 
+    <Page.Resources>
+        <helpers:BindingProxy x:Key="LocalizationProxy" Data="{Binding}" />
+    </Page.Resources>
+
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -25,11 +30,11 @@
 
         <!--  Header  -->
         <StackPanel Grid.Row="0" Margin="0,0,0,16">
-            <TextBlock FontSize="22" FontWeight="Medium" Text="System-Level Metamorphic Testing"/>
+            <TextBlock FontSize="22" FontWeight="Medium" Text="{Binding ViewModel.Localization[SystemMt_PageTitle]}"/>
             <TextBlock
                 Margin="0,4,0,0"
                 Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                Text="Pick a scenario, optionally override the transformation parameter, run, and review persisted results."/>
+                Text="{Binding ViewModel.Localization[SystemMt_PageSubtitle]}"/>
         </StackPanel>
 
         <!--  Scenario picker + run controls  -->
@@ -47,48 +52,48 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                    <TextBlock FontWeight="SemiBold" Text="Scenario"/>
+                    <TextBlock FontWeight="SemiBold" Text="{Binding ViewModel.Localization[SystemMt_Scenario]}"/>
                     <ComboBox
                         Margin="0,4,0,0"
                         DisplayMemberPath="DisplayName"
                         ItemsSource="{Binding ViewModel.AvailableMrs, Mode=OneWay}"
                         SelectedItem="{Binding ViewModel.SelectedMr, Mode=TwoWay}"/>
 
-                    <TextBlock Margin="0,12,0,0" FontWeight="SemiBold" Text="Factor parameter"/>
+                    <TextBlock Margin="0,12,0,0" FontWeight="SemiBold" Text="{Binding ViewModel.Localization[SystemMt_FactorParameter]}"/>
                     <ui:TextBox
                         Margin="0,4,0,0"
-                        PlaceholderText="e.g. 2"
+                        PlaceholderText="{Binding ViewModel.Localization[SystemMt_FactorParameterPlaceholder]}"
                         Text="{Binding ViewModel.FactorOverride, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                     <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
                         <ui:Button
                             Appearance="Primary"
                             Command="{Binding ViewModel.RunCommand, Mode=OneWay}"
-                            Content="Run scenario"
+                            Content="{Binding ViewModel.Localization[SystemMt_Run]}"
                             />
                         <ui:Button
                             Margin="8,0,0,0"
                             Command="{Binding ViewModel.RefreshRecentCommand, Mode=OneWay}"
-                            Content="Refresh recent"
+                            Content="{Binding ViewModel.Localization[SystemMt_RefreshRecent]}"
                             />
                     </StackPanel>
                 </StackPanel>
 
                 <StackPanel Grid.Column="1">
-                    <TextBlock FontWeight="SemiBold" Text="Description"/>
+                    <TextBlock FontWeight="SemiBold" Text="{Binding ViewModel.Localization[Legacy_Description]}"/>
                     <TextBlock
                         Margin="0,4,0,0"
                         Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                         Text="{Binding ViewModel.SelectedMr.Description, Mode=OneWay}"
                         TextWrapping="Wrap"/>
 
-                    <TextBlock Margin="0,12,0,0" FontWeight="SemiBold" Text="Last result"/>
+                    <TextBlock Margin="0,12,0,0" FontWeight="SemiBold" Text="{Binding ViewModel.Localization[SystemMt_LastResult]}"/>
                     <TextBlock
                         Margin="0,4,0,0"
                         Text="{Binding ViewModel.LastResultSummary, Mode=OneWay}"
                         TextWrapping="Wrap"/>
 
-                    <TextBlock Margin="0,12,0,0" FontWeight="SemiBold" Text="Status"/>
+                    <TextBlock Margin="0,12,0,0" FontWeight="SemiBold" Text="{Binding ViewModel.Localization[SystemMt_Status]}"/>
                     <TextBlock
                         Margin="0,4,0,0"
                         Foreground="{DynamicResource TextFillColorSecondaryBrush}"
@@ -112,31 +117,31 @@
                     <DataGridTextColumn
                         Width="180"
                         Binding="{Binding RunAt, StringFormat=u}"
-                        Header="Run At"/>
+                        Header="{Binding Data.ViewModel.Localization[SystemMt_RunAt], Source={StaticResource LocalizationProxy}}"/>
                     <DataGridTextColumn
                         Width="2*"
                         Binding="{Binding MrName}"
-                        Header="Scenario"/>
+                        Header="{Binding Data.ViewModel.Localization[SystemMt_Scenario], Source={StaticResource LocalizationProxy}}"/>
                     <DataGridTextColumn
                         Width="120"
                         Binding="{Binding AssertionName}"
-                        Header="Assertion"/>
+                        Header="{Binding Data.ViewModel.Localization[SystemMt_Assertion], Source={StaticResource LocalizationProxy}}"/>
                     <DataGridTextColumn
                         Width="100"
                         Binding="{Binding ValueName}"
-                        Header="Value"/>
+                        Header="{Binding Data.ViewModel.Localization[SystemMt_Value], Source={StaticResource LocalizationProxy}}"/>
                     <DataGridTextColumn
                         Width="110"
                         Binding="{Binding SourceValue}"
-                        Header="Source"/>
+                        Header="{Binding Data.ViewModel.Localization[SystemMt_Source], Source={StaticResource LocalizationProxy}}"/>
                     <DataGridTextColumn
                         Width="110"
                         Binding="{Binding FollowUpValue}"
-                        Header="Follow-up"/>
+                        Header="{Binding Data.ViewModel.Localization[SystemMt_FollowUp], Source={StaticResource LocalizationProxy}}"/>
                     <DataGridCheckBoxColumn
                         Width="80"
                         Binding="{Binding Passed}"
-                        Header="Passed"/>
+                        Header="{Binding Data.ViewModel.Localization[SystemMt_Passed], Source={StaticResource LocalizationProxy}}"/>
                 </ui:DataGrid.Columns>
             </ui:DataGrid>
         </Border>
@@ -149,7 +154,7 @@
             Orientation="Horizontal">
             <ui:Button
                 Command="{Binding ViewModel.ExportReportCommand, Mode=OneWay}"
-                Content="Export HTML report"
+                Content="{Binding ViewModel.Localization[SystemMt_ExportHtmlReport]}"
                 />
         </StackPanel>
     </Grid>

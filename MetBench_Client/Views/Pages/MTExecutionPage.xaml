@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:MetBench_Client.Views.Pages"
+      xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
       xmlns:models="clr-namespace:MetBench_Domain;assembly=MetBench_Domain"
       xmlns:s="https://github.com/canton7/Stylet"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -16,6 +17,10 @@
       d:Background="{DynamicResource ApplicationBackgroundBrush}"
       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
       Title="MTExecutionPage">
+
+    <Page.Resources>
+        <helpers:BindingProxy x:Key="LocalizationProxy" Data="{Binding}"/>
+    </Page.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -30,7 +35,7 @@
             <DataGrid.Columns>
                 <DataGridTemplateColumn>
                     <DataGridTemplateColumn.Header>
-                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="InputPattern"></TextBlock>
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[MtExec_InputPattern], Source={StaticResource LocalizationProxy}}"></TextBlock>
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate >
                         <DataTemplate>
@@ -42,7 +47,7 @@
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn >
                     <DataGridTemplateColumn.Header>
-                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="OutputPattern"></TextBlock>
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Data.ViewModel.Localization[MtExec_OutputPattern], Source={StaticResource LocalizationProxy}}"></TextBlock>
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -71,7 +76,7 @@
                     <RowDefinition/>
                 </Grid.RowDefinitions>
                 <StackPanel  Grid.Row="0" x:Name="stackpanel1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="CodeName"  Margin="25 0 0 0" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding ViewModel.Localization[MtExec_CodeName]}"  Margin="25 0 0 0" VerticalAlignment="Center" />
                     <!--<ui:TextBox x:Name="txbCodeName" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="100"
                                 IsReadOnly="True"
                                 ClearButtonEnabled="False"  
@@ -90,40 +95,40 @@
                         >
                     </ComboBox>
 
-                    <ui:Button Appearance="Primary" Content="Eecute MT" Margin="3 0 0 0"
+                    <ui:Button Appearance="Primary" Content="{Binding ViewModel.Localization[MtExec_ExecuteMt]}" Margin="3 0 0 0"
                                Icon="{ui:SymbolIcon CalendarEdit24}"
                                s:View.ActionTarget="{Binding ViewModel}"
                                Command="{s:Action btn_AutoMR2}"
                                />
                 </StackPanel>
                 <StackPanel  Grid.Row="1" x:Name="stackpanel2" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="MinNumber"  Margin="20 0 0 0" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding ViewModel.Localization[MtExec_MinNumber]}"  Margin="20 0 0 0" VerticalAlignment="Center" />
                     <ui:TextBox x:Name="txbMinNumber"  Margin="5 0 0 0" VerticalContentAlignment="Center" Width="170"
                              TextWrapping="Wrap"
                              Text="{Binding ViewModel.MinParam,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                              />
-                    <ui:Button Appearance="Primary"  Content="Reset" Margin="3 0 0 0"
+                    <ui:Button Appearance="Primary"  Content="{Binding ViewModel.Localization[MtExec_Reset]}" Margin="3 0 0 0"
                                 Icon="{ui:SymbolIcon TextBulletListSquareSettings20}"
                                 s:View.ActionTarget="{Binding ViewModel}"
                                 Command="{s:Action btn_Cancle}"
                                />
                 </StackPanel>
                 <StackPanel  Grid.Row="2" x:Name="stackpanel3" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="MaxNumber"  Margin="15 0 0 0" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding ViewModel.Localization[MtExec_MaxNumber]}"  Margin="15 0 0 0" VerticalAlignment="Center" />
                     <ui:TextBox x:Name="txbMaxNumber"  Margin="5 0 0 0" VerticalContentAlignment="Center" Width="170"
                              TextWrapping="Wrap"
                              Text="{Binding ViewModel.MaxParam,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                              />
                 </StackPanel>
                 <StackPanel  Grid.Row="3" x:Name="stackpanel4" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="ExecuteNumb"  Margin="5 0 0 0" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding ViewModel.Localization[MtExec_ExecuteNumb]}"  Margin="5 0 0 0" VerticalAlignment="Center" />
                     <ui:TextBox x:Name="txbExecuteNumb" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="170"
                              TextWrapping="Wrap"
                              Text="{Binding ViewModel.ExecutNumber,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                              />
                 </StackPanel>
                 <StackPanel  Grid.Row="4" x:Name="stackpanel5" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="Threshold"  Margin="32 0 0 0" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding ViewModel.Localization[MtExec_Threshold]}"  Margin="32 0 0 0" VerticalAlignment="Center" />
                     <ui:TextBox x:Name="txbThreshold"
                                 Margin="5 0 0 0"
                                 VerticalContentAlignment="Center"
@@ -133,9 +138,9 @@
                              />
                 </StackPanel>
                 <StackPanel  Grid.Row="5"  Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="MTReport"  Margin="32 0 0 0" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding ViewModel.Localization[MtExec_MtReport]}"  Margin="32 0 0 0" VerticalAlignment="Center" />
                     <ui:Button Appearance="Primary"
-                               Content="MTReport"
+                               Content="{Binding ViewModel.Localization[MtExec_MtReport]}"
                                Margin="5 0 0 0"
                                Width="150"
                                Icon="{ui:SymbolIcon DocumentTable24}"
@@ -156,21 +161,21 @@
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <StackPanel  Grid.Row="0" Grid.Column="0" x:Name="stackpanel6" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0 0 5 0">
-                        <TextBlock Text="Pass"  Margin="30 0 0 0" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding ViewModel.Localization[MtExec_Pass]}"  Margin="30 0 0 0" VerticalAlignment="Center" />
                         <ui:TextBox x:Name="txbPass"  Margin="15 0 0 0" VerticalContentAlignment="Center" Width="130"
                                  TextWrapping="Wrap"
                                  Text="{Binding ViewModel.Passrate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                  />
                     </StackPanel>
                     <StackPanel  Grid.Row="0" Grid.Column="1" x:Name="stackpanel7" Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="Fail"  Margin="32 0 0 0" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding ViewModel.Localization[MtExec_Fail]}"  Margin="32 0 0 0" VerticalAlignment="Center" />
                         <ui:TextBox x:Name="txbFail"  Margin="15 0 0 0" VerticalContentAlignment="Center" Width="130"
                                  TextWrapping="Wrap"
                                  Text="{Binding ViewModel.Failurerate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                  />
                     </StackPanel>
                     <StackPanel  Grid.Row="0" Grid.Column="2" x:Name="stackpanel8" Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="PlotType"  Margin="32 0 0 0" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding ViewModel.Localization[MtExec_PlotType]}"  Margin="32 0 0 0" VerticalAlignment="Center" />
 
                         <ComboBox  x:Name="cmbPlotType" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="100"
 SelectedIndex="{Binding ViewModel.PlotTypeComboBoxSelectedIndex,UpdateSourceTrigger=PropertyChanged}"

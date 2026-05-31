@@ -3,6 +3,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:controls="clr-namespace:MetBench_Client.Views.Controls"
+      xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       Title="MetaPatternsPage"
@@ -10,6 +11,9 @@
       ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
       mc:Ignorable="d">
+    <Page.Resources>
+        <helpers:BindingProxy x:Key="LocalizationProxy" Data="{Binding}" />
+    </Page.Resources>
     <Grid Margin="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />  <!-- 0: toolbar -->
@@ -20,24 +24,24 @@
 
         <!-- Row 0: toolbar -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
-            <TextBlock FontSize="18" FontWeight="Bold" Text="NOETHER MetaPatterns" VerticalAlignment="Center" Margin="0,0,16,0" />
+            <TextBlock FontSize="18" FontWeight="Bold" Text="{Binding ViewModel.Localization[MetaPattern_Title]}" VerticalAlignment="Center" Margin="0,0,16,0" />
             <ui:Button Appearance="Primary"
-                       Content="Add"
+                       Content="{Binding ViewModel.Localization[Legacy_Add]}"
                        Icon="{ui:SymbolIcon Add24}"
                        Command="{Binding ViewModel.BeginAddCommand}"
                        Margin="0,0,8,0" />
             <ui:Button Appearance="Secondary"
-                       Content="Edit"
+                       Content="{Binding ViewModel.Localization[Legacy_Modify]}"
                        Icon="{ui:SymbolIcon Edit24}"
                        Command="{Binding ViewModel.BeginEditCommand}"
                        Margin="0,0,8,0" />
             <ui:Button Appearance="Secondary"
-                       Content="Toggle status"
+                       Content="{Binding ViewModel.Localization[MetaPattern_ToggleStatus]}"
                        Icon="{ui:SymbolIcon ArrowSwap24}"
                        Command="{Binding ViewModel.ToggleStatusCommand}"
                        Margin="0,0,8,0" />
             <ui:Button Appearance="Caution"
-                       Content="Soft-delete"
+                       Content="{Binding ViewModel.Localization[MetaPattern_SoftDelete]}"
                        Icon="{ui:SymbolIcon Delete24}"
                        Command="{Binding ViewModel.SoftDeleteCommand}" />
         </StackPanel>
@@ -61,14 +65,14 @@
                          BorderThickness="1"
                          BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}">
                 <ui:DataGrid.Columns>
-                    <DataGridTextColumn Header="Code"            Binding="{Binding Code}"                     Width="100" />
-                    <DataGridTextColumn Header="Name"            Binding="{Binding Name}"                     Width="160" />
-                    <DataGridTextColumn Header="Block"           Binding="{Binding Block}"                    Width="160" />
-                    <DataGridTextColumn Header="Default assertion" Binding="{Binding DefaultAssertionTypeCode}" Width="140" />
-                    <DataGridTextColumn Header="Tol-rel"         Binding="{Binding DefaultToleranceRel, StringFormat=G6}" Width="80" />
-                    <DataGridCheckBoxColumn Header="Noise"       Binding="{Binding NoiseAware}"               Width="60" />
-                    <DataGridTextColumn Header="Status"          Binding="{Binding Status}"                   Width="100" />
-                    <DataGridTextColumn Header="Out-of-scope reason" Binding="{Binding OutOfScopeReason}"     Width="*" />
+                    <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[MetaPattern_ColumnCode], Source={StaticResource LocalizationProxy}}"            Binding="{Binding Code}"                     Width="100" />
+                    <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Legacy_Name], Source={StaticResource LocalizationProxy}}"            Binding="{Binding Name}"                     Width="160" />
+                    <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[MetaPattern_ColumnBlock], Source={StaticResource LocalizationProxy}}"           Binding="{Binding Block}"                    Width="160" />
+                    <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[MetaPattern_ColumnDefaultAssertion], Source={StaticResource LocalizationProxy}}" Binding="{Binding DefaultAssertionTypeCode}" Width="140" />
+                    <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[MetaPattern_ColumnTolRel], Source={StaticResource LocalizationProxy}}"         Binding="{Binding DefaultToleranceRel, StringFormat=G6}" Width="80" />
+                    <DataGridCheckBoxColumn Header="{Binding Data.ViewModel.Localization[MetaPattern_ColumnNoise], Source={StaticResource LocalizationProxy}}"       Binding="{Binding NoiseAware}"               Width="60" />
+                    <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[MetaPattern_ColumnStatus], Source={StaticResource LocalizationProxy}}"          Binding="{Binding Status}"                   Width="100" />
+                    <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[MetaPattern_ColumnOutOfScopeReason], Source={StaticResource LocalizationProxy}}" Binding="{Binding OutOfScopeReason}"     Width="*" />
                 </ui:DataGrid.Columns>
             </ui:DataGrid>
 
@@ -102,27 +106,27 @@
                         </TextBlock.Text>
                     </TextBlock>
 
-                    <TextBlock Text="Code (unique, immutable after add):" Margin="0,4,0,2" />
+                    <TextBlock Text="{Binding ViewModel.Localization[MetaPattern_FieldCode]}" Margin="0,4,0,2" />
                     <ui:TextBox Text="{Binding ViewModel.EditingPattern.Code, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                 IsEnabled="{Binding ViewModel.IsAdding}" />
 
-                    <TextBlock Text="Name:" Margin="0,8,0,2" />
+                    <TextBlock Text="{Binding ViewModel.Localization[MetaPattern_FieldName]}" Margin="0,8,0,2" />
                     <ui:TextBox Text="{Binding ViewModel.EditingPattern.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <TextBlock Text="Block:" Margin="0,8,0,2" />
+                    <TextBlock Text="{Binding ViewModel.Localization[MetaPattern_FieldBlock]}" Margin="0,8,0,2" />
                     <ui:TextBox Text="{Binding ViewModel.EditingPattern.Block, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <TextBlock Text="Default assertion type:" Margin="0,8,0,2" />
+                    <TextBlock Text="{Binding ViewModel.Localization[MetaPattern_FieldDefaultAssertionType]}" Margin="0,8,0,2" />
                     <ui:TextBox Text="{Binding ViewModel.EditingPattern.DefaultAssertionTypeCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <TextBlock Text="Default tolerance (relative):" Margin="0,8,0,2" />
+                    <TextBlock Text="{Binding ViewModel.Localization[MetaPattern_FieldDefaultTolerance]}" Margin="0,8,0,2" />
                     <ui:TextBox Text="{Binding ViewModel.EditingPattern.DefaultToleranceRel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <CheckBox Content="Noise-aware"
+                    <CheckBox Content="{Binding ViewModel.Localization[MetaPattern_FieldNoiseAware]}"
                               IsChecked="{Binding ViewModel.EditingPattern.NoiseAware, Mode=TwoWay}"
                               Margin="0,8,0,0" />
 
-                    <TextBlock Text="Status:" Margin="0,8,0,2" />
+                    <TextBlock Text="{Binding ViewModel.Localization[MetaPattern_FieldStatus]}" Margin="0,8,0,2" />
                     <ComboBox SelectedValue="{Binding ViewModel.EditingPattern.Status, Mode=TwoWay}"
                               SelectedValuePath="Content">
                         <ComboBoxItem Content="active" />
@@ -131,13 +135,13 @@
                         <ComboBoxItem Content="out-of-scope" />
                     </ComboBox>
 
-                    <TextBlock Text="Out-of-scope reason (only when Status = out-of-scope):" Margin="0,8,0,2" />
+                    <TextBlock Text="{Binding ViewModel.Localization[MetaPattern_FieldOutOfScopeReason]}" Margin="0,8,0,2" />
                     <ui:TextBox Text="{Binding ViewModel.EditingPattern.OutOfScopeReason, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                 TextWrapping="Wrap"
                                 AcceptsReturn="True"
                                 MinHeight="48" />
 
-                    <TextBlock Text="Hypothesis template:" Margin="0,8,0,2" />
+                    <TextBlock Text="{Binding ViewModel.Localization[MetaPattern_FieldHypothesisTemplate]}" Margin="0,8,0,2" />
                     <ui:TextBox Text="{Binding ViewModel.EditingPattern.HypothesisTemplate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                 TextWrapping="Wrap"
                                 AcceptsReturn="True"
@@ -145,12 +149,12 @@
 
                     <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
                         <ui:Button Appearance="Primary"
-                                   Content="Save"
+                                   Content="{Binding ViewModel.Localization[Legacy_Save]}"
                                    Icon="{ui:SymbolIcon Save24}"
                                    Command="{Binding ViewModel.SaveCommand}"
                                    Margin="0,0,8,0" />
                         <ui:Button Appearance="Secondary"
-                                   Content="Cancel"
+                                   Content="{Binding ViewModel.Localization[Legacy_Cancel]}"
                                    Icon="{ui:SymbolIcon Dismiss24}"
                                    Command="{Binding ViewModel.CancelCommand}" />
                     </StackPanel>

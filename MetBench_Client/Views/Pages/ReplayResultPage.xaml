@@ -64,15 +64,15 @@
                 BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
                 CornerRadius="4">
             <StackPanel>
-                <TextBlock FontSize="18" FontWeight="Bold" Text="Anomaly Replay" />
+                <TextBlock FontSize="18" FontWeight="Bold" Text="{Binding ViewModel.Localization[Replay_Title]}" />
                 <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                    <TextBlock Text="Id: " />
+                    <TextBlock Text="{Binding ViewModel.Localization[Replay_FieldId]}" />
                     <TextBlock Text="{Binding ViewModel.Anomaly.IdAnomaly}" Margin="0,0,16,0" />
-                    <TextBlock Text="Severity: " />
+                    <TextBlock Text="{Binding ViewModel.Localization[Replay_FieldSeverity]}" />
                     <TextBlock Text="{Binding ViewModel.Anomaly.Severity}" Margin="0,0,16,0" />
-                    <TextBlock Text="Status: " />
+                    <TextBlock Text="{Binding ViewModel.Localization[Replay_FieldStatus]}" />
                     <TextBlock Text="{Binding ViewModel.Anomaly.Status}" Margin="0,0,16,0" />
-                    <TextBlock Text="Discovered: " />
+                    <TextBlock Text="{Binding ViewModel.Localization[Replay_FieldDiscovered]}" />
                     <TextBlock Text="{Binding ViewModel.Anomaly.DiscoveredAt, StringFormat=yyyy-MM-dd HH:mm}" />
                 </StackPanel>
             </StackPanel>
@@ -80,7 +80,7 @@
 
         <!-- Row 1: Classification badge -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12" VerticalAlignment="Center">
-            <TextBlock Text="Classification:" VerticalAlignment="Center" Margin="0,0,8,0"
+            <TextBlock Text="{Binding ViewModel.Localization[Replay_Classification]}" VerticalAlignment="Center" Margin="0,0,8,0"
                        FontWeight="SemiBold" />
             <Border Style="{StaticResource ClassificationBadgeStyle}">
                 <TextBlock Text="{Binding ViewModel.Classification, FallbackValue=—}"
@@ -117,47 +117,47 @@
 
                 <!-- Header row -->
                 <Border Grid.Row="0" Grid.Column="0" Background="{DynamicResource SubtleFillColorSecondaryBrush}" Padding="10,8">
-                    <TextBlock FontWeight="Bold" Text="Field" />
+                    <TextBlock FontWeight="Bold" Text="{Binding ViewModel.Localization[Replay_ColumnField]}" />
                 </Border>
                 <Border Grid.Row="0" Grid.Column="1" Background="{DynamicResource SubtleFillColorSecondaryBrush}" Padding="10,8">
-                    <TextBlock FontWeight="Bold" Text="Original" />
+                    <TextBlock FontWeight="Bold" Text="{Binding ViewModel.Localization[Replay_ColumnOriginal]}" />
                 </Border>
                 <Border Grid.Row="0" Grid.Column="2" Background="{DynamicResource SubtleFillColorSecondaryBrush}" Padding="10,8">
-                    <TextBlock FontWeight="Bold" Text="Replay" />
+                    <TextBlock FontWeight="Bold" Text="{Binding ViewModel.Localization[Replay_ColumnReplay]}" />
                 </Border>
 
                 <!-- MR -->
-                <TextBlock Grid.Row="1" Grid.Column="0" Padding="10,6" Text="MR" />
+                <TextBlock Grid.Row="1" Grid.Column="0" Padding="10,6" Text="{Binding ViewModel.Localization[Replay_RowMr]}" />
                 <TextBlock Grid.Row="1" Grid.Column="1" Padding="10,6" Text="{Binding ViewModel.MrCode}" />
                 <TextBlock Grid.Row="1" Grid.Column="2" Padding="10,6" Text="{Binding ViewModel.MrCode}" />
 
                 <!-- SUT -->
-                <TextBlock Grid.Row="2" Grid.Column="0" Padding="10,6" Text="SUT" />
+                <TextBlock Grid.Row="2" Grid.Column="0" Padding="10,6" Text="{Binding ViewModel.Localization[Replay_RowSut]}" />
                 <TextBlock Grid.Row="2" Grid.Column="1" Padding="10,6" Text="{Binding ViewModel.SutName}" />
                 <TextBlock Grid.Row="2" Grid.Column="2" Padding="10,6" Text="{Binding ViewModel.SutName}" />
 
                 <!-- Trigger parameters -->
-                <TextBlock Grid.Row="3" Grid.Column="0" Padding="10,6" Text="Trigger parameters" />
+                <TextBlock Grid.Row="3" Grid.Column="0" Padding="10,6" Text="{Binding ViewModel.Localization[Replay_RowTriggerParameters]}" />
                 <TextBlock Grid.Row="3" Grid.Column="1" Padding="10,6" Text="{Binding ViewModel.TriggerParameters}" TextWrapping="Wrap" />
                 <TextBlock Grid.Row="3" Grid.Column="2" Padding="10,6" Text="{Binding ViewModel.TriggerParameters}" TextWrapping="Wrap" />
 
                 <!-- Source value -->
-                <TextBlock Grid.Row="4" Grid.Column="0" Padding="10,6" Text="Source value" />
+                <TextBlock Grid.Row="4" Grid.Column="0" Padding="10,6" Text="{Binding ViewModel.Localization[Replay_RowSourceValue]}" />
                 <TextBlock Grid.Row="4" Grid.Column="1" Padding="10,6" Text="{Binding ViewModel.OriginalSourceValue, StringFormat=F6, FallbackValue=—}" />
                 <TextBlock Grid.Row="4" Grid.Column="2" Padding="10,6" Text="{Binding ViewModel.ReplaySourceValue, StringFormat=F6, FallbackValue=—}" />
 
                 <!-- Followup value -->
-                <TextBlock Grid.Row="5" Grid.Column="0" Padding="10,6" Text="Followup value" />
+                <TextBlock Grid.Row="5" Grid.Column="0" Padding="10,6" Text="{Binding ViewModel.Localization[Replay_RowFollowupValue]}" />
                 <TextBlock Grid.Row="5" Grid.Column="1" Padding="10,6" Text="{Binding ViewModel.OriginalFollowupValue, StringFormat=F6, FallbackValue=—}" />
                 <TextBlock Grid.Row="5" Grid.Column="2" Padding="10,6" Text="{Binding ViewModel.ReplayFollowupValue, StringFormat=F6, FallbackValue=—}" />
 
                 <!-- Assertion expression -->
-                <TextBlock Grid.Row="6" Grid.Column="0" Padding="10,6" Text="Assertion" />
+                <TextBlock Grid.Row="6" Grid.Column="0" Padding="10,6" Text="{Binding ViewModel.Localization[Replay_RowAssertion]}" />
                 <TextBlock Grid.Row="6" Grid.Column="1" Padding="10,6" Text="{Binding ViewModel.OriginalAssertionExpression}" TextWrapping="Wrap" />
                 <TextBlock Grid.Row="6" Grid.Column="2" Padding="10,6" Text="{Binding ViewModel.ReplayAssertionExpression}" TextWrapping="Wrap" />
 
                 <!-- Final status -->
-                <TextBlock Grid.Row="7" Grid.Column="0" Padding="10,6" Text="Final status" />
+                <TextBlock Grid.Row="7" Grid.Column="0" Padding="10,6" Text="{Binding ViewModel.Localization[Replay_RowFinalStatus]}" />
                 <TextBlock Grid.Row="7" Grid.Column="1" Padding="10,6" FontWeight="SemiBold" Text="{Binding ViewModel.OriginalFinalStatus}" />
                 <TextBlock Grid.Row="7" Grid.Column="2" Padding="10,6" FontWeight="SemiBold" Text="{Binding ViewModel.ReplayFinalStatus}" />
             </Grid>
@@ -166,16 +166,16 @@
         <!-- Row 3: replay controls — real path + simulate fallback -->
         <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,12,0,0">
             <ui:Button Appearance="Primary"
-                       Content="Run real replay"
+                       Content="{Binding ViewModel.Localization[Replay_RunRealReplay]}"
                        Icon="{ui:SymbolIcon Play24}"
                        Command="{Binding ViewModel.RunRealReplayCommand}"
                        Margin="0,0,16,0" />
-            <TextBlock Text="Simulate classification:" VerticalAlignment="Center" Margin="0,0,8,0" />
+            <TextBlock Text="{Binding ViewModel.Localization[Replay_SimulateClassification]}" VerticalAlignment="Center" Margin="0,0,8,0" />
             <ComboBox ItemsSource="{Binding Source={StaticResource ClassificationValues}}"
                       SelectedValue="{Binding ViewModel.DemoClassification, Mode=TwoWay}"
                       Width="220" Margin="0,0,8,0" />
             <ui:Button Appearance="Secondary"
-                       Content="Simulate replay"
+                       Content="{Binding ViewModel.Localization[Replay_SimulateReplay]}"
                        Icon="{ui:SymbolIcon ArrowCounterclockwise24}"
                        Command="{Binding ViewModel.SimulateReplayCommand}" />
             <ProgressBar IsIndeterminate="True" Width="120" Height="4"

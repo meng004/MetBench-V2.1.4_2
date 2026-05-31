@@ -2,6 +2,7 @@
 using MetBench_BLL;
 using MetBench_Client.Helpers;
 using MetBench_Client.Views.Pages;
+using MetBench_UI.Localization;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -93,13 +94,16 @@ namespace MetBench_Client.ViewModels
         {
         }
 
-        public MRRecommendationViewModel(MetamorphicRelationService metamorphicRelationSerive, ApplicationService applicationSerive, MRRecommendationService mRRecommendationSerive, IPageService pageService, INavigationService navigationService)
+        public LocalizedTextProvider Localization { get; }
+
+        public MRRecommendationViewModel(MetamorphicRelationService metamorphicRelationSerive, ApplicationService applicationSerive, MRRecommendationService mRRecommendationSerive, IPageService pageService, INavigationService navigationService, LocalizedTextProvider localization)
         {
             _metamorphicRelationSerive = metamorphicRelationSerive;
             _applicationSerive = applicationSerive;
             _mrRecommendationSerive = mRRecommendationSerive;
             _pageService = pageService;
             _navigationService = navigationService;
+            Localization = localization;
             //_eventAggregator = eventAggregator;
             //_eventAggregator.Subscribe(this);
             this.reload_ItemsSource();

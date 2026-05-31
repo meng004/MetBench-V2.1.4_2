@@ -10,14 +10,19 @@
       xmlns:models1="clr-namespace:MetBench_Client.Models"
       xmlns:viewmodels="clr-namespace:MetBench_Client.ViewModels"
       xmlns:controls="clr-namespace:MetBench_Client.Controls"
+      xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
       mc:Ignorable="d"
       d:DataContext="{d:DesignInstance viewmodels:MRManagementViewModel}"
       d:DesignHeight="800"
       d:DesignWidth="1000"
-      
+
       d:Background="{DynamicResource ApplicationBackgroundBrush}"
       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
       Title="MRManagementPage">
+
+    <Page.Resources>
+        <helpers:BindingProxy x:Key="LocalizationProxy" Data="{Binding}"/>
+    </Page.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -29,17 +34,17 @@
         <Grid Grid.Row="0" >
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0 3 0 5">
-                    <TextBlock Text="ApplicationName" VerticalAlignment="Center" Margin="15 0 0 0"/>
+                    <TextBlock Text="{Binding ViewModel.Localization[MrMgmt_ApplicationName]}" VerticalAlignment="Center" Margin="15 0 0 0"/>
                     <ui:TextBox TextWrapping="Wrap" Text="{Binding ViewModel.ApplicationNameBoxText,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" s:View.ActionTarget="{Binding ViewModel}" Margin="10 0 0 0" Width="150" />
-                    <ui:Button Appearance="Info" Content="Query" Margin="5 0 0 0" s:View.ActionTarget="{Binding ViewModel}"
+                    <ui:Button Appearance="Info" Content="{Binding ViewModel.Localization[Legacy_Query]}" Margin="5 0 0 0" s:View.ActionTarget="{Binding ViewModel}"
                     Command="{s:Action reload_ItemsSource}"/>
 
                     <!-- PR-VM-6 / F19: Status filter dropdown — default "active" hides deprecated/archived rows -->
-                    <TextBlock Text="Status:" VerticalAlignment="Center" Margin="20 0 0 0"/>
+                    <TextBlock Text="{Binding ViewModel.Localization[MrMgmt_StatusFilterLabel]}" VerticalAlignment="Center" Margin="20 0 0 0"/>
                     <ComboBox Margin="5 0 0 0" Width="120"
                               ItemsSource="{Binding ViewModel.StatusFilterList}"
                               SelectedValue="{Binding ViewModel.StatusFilter, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                              ToolTip="Filter MRs by aggregated MRBinding.Status (default hides deprecated/archived)"/>
+                              ToolTip="{Binding ViewModel.Localization[MrMgmt_StatusFilterTooltip]}"/>
                 </StackPanel>
 
                 <ui:DataGrid  LoadingRow="dataGrid_LoadingRow" BorderBrush="LightGray"  BorderThickness="2" MaxHeight="320" Margin="10 0 10 10"  FontSize="15" HeadersVisibility="Column"  SelectedItem="{Binding ViewModel.DataGridSelectItem,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" x:Name="datagrid"  ItemsSource="{Binding ViewModel.Data,UpdateSourceTrigger=PropertyChanged}"  AutoGenerateColumns="False" CanUserAddRows="False" AutomationProperties.AutomationId="DataGrid_MR"
@@ -57,7 +62,7 @@
                     <DataGrid.Columns>
                         <DataGridTemplateColumn  Width="70"  MinWidth="10" IsReadOnly="True" >
                             <DataGridTemplateColumn.Header>
-                                <TextBlock Text="Number" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+                                <TextBlock Text="{Binding Data.ViewModel.Localization[MrMgmt_ColNumber], Source={StaticResource LocalizationProxy}}" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -74,7 +79,7 @@
 
                         <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}"  Binding="{Binding Context}" Width="250" IsReadOnly="True">
                             <DataGridTextColumn.Header>
-                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="Context"></TextBlock>
+                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[MrMgmt_Context], Source={StaticResource LocalizationProxy}}"></TextBlock>
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
 
@@ -87,13 +92,13 @@
                         <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}"  Binding="{Binding OrderOfMR}" Width="200" IsReadOnly="True">
                             <DataGridTextColumn.Header>
                                 <!--<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="OrderOfMR"></TextBlock>-->
-                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="ArityOfMR"></TextBlock>
+                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[MrMgmt_ArityOfMR], Source={StaticResource LocalizationProxy}}"></TextBlock>
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
 
                         <DataGridTemplateColumn IsReadOnly="True">
                             <DataGridTemplateColumn.Header>
-                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="InputPattern"></TextBlock>
+                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[MrMgmt_InputPattern], Source={StaticResource LocalizationProxy}}"></TextBlock>
                             </DataGridTemplateColumn.Header>
 
                             <DataGridTemplateColumn.CellTemplate >
@@ -107,7 +112,7 @@
 
                         <DataGridTemplateColumn IsReadOnly="True">
                             <DataGridTemplateColumn.Header>
-                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="OutputPattern"></TextBlock>
+                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[MrMgmt_OutputPattern], Source={StaticResource LocalizationProxy}}"></TextBlock>
                             </DataGridTemplateColumn.Header>
 
                             <DataGridTemplateColumn.CellTemplate>
@@ -121,31 +126,31 @@
 
                         <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}"  Binding="{Binding ApplicationName}" Width="200" IsReadOnly="True">
                             <DataGridTextColumn.Header>
-                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="ApplicationName"></TextBlock>
+                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[MrMgmt_ApplicationName], Source={StaticResource LocalizationProxy}}"></TextBlock>
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
 
                         <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}"  Binding="{Binding DomainName}" Width="200" IsReadOnly="True">
                             <DataGridTextColumn.Header>
-                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="DomainName"></TextBlock>
+                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[MrMgmt_DomainName], Source={StaticResource LocalizationProxy}}"></TextBlock>
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
 
                         <!-- PR-VM-6 / F19: MRBinding-derived Status column -->
                         <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}" Binding="{Binding Status}" Width="100" IsReadOnly="True">
                             <DataGridTextColumn.Header>
-                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="Status"></TextBlock>
+                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Data.ViewModel.Localization[MrMgmt_Status], Source={StaticResource LocalizationProxy}}"></TextBlock>
                             </DataGridTextColumn.Header>
                         </DataGridTextColumn>
 
 
                         <DataGridTemplateColumn  Width="200" IsReadOnly="True">
                             <DataGridTemplateColumn.Header>
-                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="Operation"></TextBlock>
+                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[MrMgmt_Operation], Source={StaticResource LocalizationProxy}}"></TextBlock>
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <ui:Button  Width="100" Height="50" FontSize="14" Content="Execute MT" HorizontalAlignment="Center" AutomationProperties.AutomationId="Button_MT"
+                                    <ui:Button  Width="100" Height="50" FontSize="14" Content="{Binding Data.ViewModel.Localization[MrMgmt_ExecuteMT], Source={StaticResource LocalizationProxy}}" HorizontalAlignment="Center" AutomationProperties.AutomationId="Button_MT"
                                      Appearance="Primary"
                                      Icon="{ui:SymbolIcon CalculatorArrowClockwise24}"
                                      Command="{s:Action btn_MTExcute}"
@@ -182,7 +187,7 @@
                     <RowDefinition Height="2*" />
                 </Grid.RowDefinitions>
                 <StackPanel  Grid.Row="0" x:Name="stackpanel1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock  Text="IdMR" Margin="50 0 0 0" VerticalAlignment="Center" />
+                    <TextBlock  Text="{Binding ViewModel.Localization[MrMgmt_IdMR]}" Margin="50 0 0 0" VerticalAlignment="Center" />
                     <ui:TextBox  x:Name="txbIdMR" Margin="5 0 0 0"  VerticalContentAlignment="Center" Width="250"
              ClearButtonEnabled="False"
              IsReadOnly="True"
@@ -199,7 +204,7 @@
                 />
                 </StackPanel>-->
                 <StackPanel  Grid.Row="2" x:Name="stackpanel2" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock  Text="Granularity" Margin="20
+                    <TextBlock  Text="{Binding ViewModel.Localization[MrMgmt_Granularity]}" Margin="20
                                 0 0 0" VerticalAlignment="Center" />
                     <ComboBox Margin="5 0 0 0" Width="150" ItemsSource="{Binding ViewModel.GranularityList,UpdateSourceTrigger=PropertyChanged}" SelectedValue="{Binding ViewModel.GranularityValue,UpdateSourceTrigger=PropertyChanged}"/>
                     <!--<ui:TextBox  x:Name="rtxbDescription" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="250" 
@@ -210,7 +215,7 @@
                 />-->
                 </StackPanel>
                 <StackPanel  Grid.Row="1" x:Name="stackpanel3" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock  Text="Context" Margin="35 0 0 0" VerticalAlignment="Center" />
+                    <TextBlock  Text="{Binding ViewModel.Localization[MrMgmt_Context]}" Margin="35 0 0 0" VerticalAlignment="Center" />
                     <ui:TextBox  x:Name="txbContext" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="250" 
                 TextWrapping="Wrap"
                 Text="{Binding ViewModel.Context,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
@@ -219,7 +224,7 @@
                 />
                 </StackPanel>
                 <StackPanel  Grid.Row="3" x:Name="stackpanel4" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock  Text="Hierarchy" Margin="30 0 0 0" VerticalAlignment="Center" />
+                    <TextBlock  Text="{Binding ViewModel.Localization[MrMgmt_Hierarchy]}" Margin="30 0 0 0" VerticalAlignment="Center" />
                     <!--<ui:TextBox  x:Name="txbConstraint" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="250" 
                 TextWrapping="Wrap"
                 Text="{Binding ViewModel.Constraint,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
@@ -237,7 +242,7 @@
                     <RowDefinition Height="2*" />
                 </Grid.RowDefinitions>
                 <StackPanel  Grid.Row="0" Grid.Column="1" x:Name="stackpanel5" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock  Text="InputPattern" Margin="50 0 0 0" VerticalAlignment="Center" />
+                    <TextBlock  Text="{Binding ViewModel.Localization[MrMgmt_InputPattern]}" Margin="50 0 0 0" VerticalAlignment="Center" />
                     <ui:TextBox  x:Name="txbInputPattern" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="200"
              TextWrapping="Wrap"
              Text="{Binding ViewModel.InputPattern,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
@@ -247,7 +252,7 @@
                     <TextBlock Text="*" Foreground="Red" Margin="5 0 0 0" VerticalAlignment="Center" />
                 </StackPanel>
                 <StackPanel  Grid.Row="1" Grid.Column="1" x:Name="stackpanel6" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock  Text="OutputPattern" Margin="40 0 0 0" VerticalAlignment="Center" />
+                    <TextBlock  Text="{Binding ViewModel.Localization[MrMgmt_OutputPattern]}" Margin="40 0 0 0" VerticalAlignment="Center" />
                     <ui:TextBox  x:Name="txbOutputPattern" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="200"
                 TextWrapping="Wrap"
                 Text="{Binding ViewModel.OutputPattern,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
@@ -257,7 +262,7 @@
                     <TextBlock Text="*" Foreground="Red" Margin="5 0 0 0" VerticalAlignment="Center" />
                 </StackPanel>
                 <StackPanel  Grid.Row="2" Grid.Column="1" x:Name="stackpanel7" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock  Text="DimensionOfInputPattern" Margin="15 0 0 0" VerticalAlignment="Center" />
+                    <TextBlock  Text="{Binding ViewModel.Localization[MrMgmt_DimensionOfInputPattern]}" Margin="15 0 0 0" VerticalAlignment="Center" />
                     <ui:TextBox  x:Name="txbDimensionOfInputPattern" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="150"
                 Text="{Binding ViewModel.DimensionOfInputPattern,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                 GotFocus="textBox_GotFocus"
@@ -266,7 +271,7 @@
                     <TextBlock Text="*" Foreground="Red" Margin="5 0 0 0" VerticalAlignment="Center" />
                 </StackPanel>
                 <StackPanel  Grid.Row="3" Grid.Column="1" x:Name="stackpanel8" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock  Text="DimensionOfOutputPattern" Margin="5 0 0 0" VerticalAlignment="Center" />
+                    <TextBlock  Text="{Binding ViewModel.Localization[MrMgmt_DimensionOfOutputPattern]}" Margin="5 0 0 0" VerticalAlignment="Center" />
                     <ui:TextBox  x:Name="txbDimensionOfOutputPattern" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="150"
              Text="{Binding ViewModel.DimensionOfOutputPattern,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
              GotFocus="textBox_GotFocus"
@@ -283,7 +288,7 @@
                     <RowDefinition Height="1*"/>
                 </Grid.RowDefinitions>
                 <StackPanel  Grid.Row="0" Grid.Column="2" x:Name="stackpanel9" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="ApplicationName" Margin="5 0 0 0" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding ViewModel.Localization[MrMgmt_ApplicationName]}" Margin="5 0 0 0" VerticalAlignment="Center" />
                     <ComboBox  Margin="5 0 0 0" MaxWidth="140"  Text="{Binding ViewModel.SelectedText,UpdateSourceTrigger=PropertyChanged}" IsEditable="True" ItemsSource="{Binding ViewModel.ApplicationExs,UpdateSourceTrigger=PropertyChanged}"
                                ScrollViewer.VerticalScrollBarVisibility="Visible"
                                s:View.ActionTarget="{Binding ViewModel}"
@@ -301,7 +306,7 @@
                 </StackPanel>
                 <StackPanel  Grid.Row="1" Grid.Column="2" x:Name="stackpanel10" Orientation="Horizontal" VerticalAlignment="Center">
                     <!--<TextBlock Text="OrderOfMR"  Margin="55 0 0 0" VerticalAlignment="Center" />-->
-                    <TextBlock Text="ArityOfMR" Margin="55 0 0 0" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding ViewModel.Localization[MrMgmt_ArityOfMR]}" Margin="55 0 0 0" VerticalAlignment="Center"/>
                     <ComboBox  x:Name="cmbDimensionOfOutputPattern" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="110"
               SelectedIndex="{Binding ViewModel.OrderOfMR_ComboBoxSelectedIndex,UpdateSourceTrigger=PropertyChanged}"
               SelectedValue="{Binding ViewModel.OrderOfMR_ComboBoxSelectedValue,UpdateSourceTrigger=PropertyChanged}"
@@ -310,7 +315,7 @@
                     <TextBlock Text="*" Foreground="Red" Margin="5 0 0 0" VerticalAlignment="Center" />
                 </StackPanel>
                 <StackPanel  Grid.Row="2" Grid.Column="2" x:Name="stackpanel11" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="Operator"  Margin="65 0 0 0" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding ViewModel.Localization[MrMgmt_Operator]}"  Margin="65 0 0 0" VerticalAlignment="Center" />
                     <ComboBox  x:Name="cmbOperator" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="110"
               ItemsSource="{Binding ViewModel.OperatorList,UpdateSourceTrigger=PropertyChanged}"
               SelectedValue="{Binding ViewModel.OperatorValue,UpdateSourceTrigger=PropertyChanged}"
@@ -319,7 +324,7 @@
                 </StackPanel>
 
                 <StackPanel  Grid.Row="3" Grid.Column="2" x:Name="stackpanel12" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="Expression"  Margin="65 0 0 0" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding ViewModel.Localization[MrMgmt_Expression]}"  Margin="65 0 0 0" VerticalAlignment="Center" />
                     <ComboBox  x:Name="cmbExpression" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="110"
 ItemsSource="{Binding ViewModel.ExpressionList,UpdateSourceTrigger=PropertyChanged}"
 SelectedValue="{Binding ViewModel.ExpressionValue,UpdateSourceTrigger=PropertyChanged}"
@@ -341,22 +346,22 @@ SelectedValue="{Binding ViewModel.ExpressionValue,UpdateSourceTrigger=PropertyCh
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <ui:Button Grid.Column="0" Margin="70,0,0,0" Appearance="Primary" Content="Add" Width="100" Height="40"
+                <ui:Button Grid.Column="0" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Add]}" Width="100" Height="40"
            s:View.ActionTarget="{Binding ViewModel}"
            Command="{s:Action btnAdd_Click}"
            Icon="{ui:SymbolIcon GuestAdd24}"
            />
-                <ui:Button Grid.Column="1" Margin="70,0,0,0" Appearance="Primary" Content="Edit" Width="100" Height="40"
+                <ui:Button Grid.Column="1" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Modify]}" Width="100" Height="40"
            s:View.ActionTarget="{Binding ViewModel}"
            Command="{s:Action btnModify_Click}"
            Icon="{ui:SymbolIcon CalendarEdit24}"
            />
-                <ui:Button Grid.Column="2" Margin="70,0,0,0" Appearance="Primary" Content="Del" Width="100" Height="40"
+                <ui:Button Grid.Column="2" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Delete]}" Width="100" Height="40"
            s:View.ActionTarget="{Binding ViewModel}"
            Command="{s:Action btnDelect_Click}"
            Icon="{ui:SymbolIcon DeleteDismiss24}"
            />
-                <ui:Button Grid.Column="3" Margin="70,0,0,0" Appearance="Primary" Content="Reset" Width="100" Height="40"
+                <ui:Button Grid.Column="3" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Cancel]}" Width="100" Height="40"
            s:View.ActionTarget="{Binding ViewModel}"
            Command="{s:Action btnCancel_Click}"
            Icon="{ui:SymbolIcon TextBulletListSquareSettings20}"

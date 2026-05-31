@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
     xmlns:local="clr-namespace:MetBench_Client.Views.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -16,6 +17,10 @@
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     mc:Ignorable="d">
 
+    <Page.Resources>
+        <helpers:BindingProxy x:Key="LocalizationProxy" Data="{Binding}"/>
+    </Page.Resources>
+
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -26,11 +31,11 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Margin="0,0,0,16">
-            <TextBlock FontSize="22" FontWeight="Medium" Text="System MT Execution History"/>
+            <TextBlock FontSize="22" FontWeight="Medium" Text="{Binding ViewModel.Localization[History_ExecutionHistory]}"/>
             <TextBlock
                 Margin="0,4,0,0"
                 Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                Text="Browse past System-MT runs. Filter by MR name. Selected rows can be deleted (Evidence first, then Result; orphans are surfaced on retry)."/>
+                Text="{Binding ViewModel.Localization[History_PageSubtitle]}"/>
         </StackPanel>
 
         <Border
@@ -48,7 +53,7 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0">
-                    <TextBlock FontWeight="SemiBold" Text="Filter by MR name"/>
+                    <TextBlock FontWeight="SemiBold" Text="{Binding ViewModel.Localization[History_FilterByMrName]}"/>
                     <ui:TextBox
                         x:Name="TextBox_MrNameFilter"
                         Margin="0,4,0,0"
@@ -60,14 +65,14 @@
                     <ui:Button
                         Margin="0,0,8,0"
                         Command="{Binding ViewModel.RefreshCommand, Mode=OneWay}"
-                        Content="Refresh"/>
+                        Content="{Binding ViewModel.Localization[History_Refresh]}"/>
                     <ui:Button
                         x:Name="Button_DeleteSelectedExecutions"
                         Margin="0,0,8,0"
                         Appearance="Danger"
                         AutomationProperties.AutomationId="Button_DeleteSelectedExecutions"
                         Command="{Binding ViewModel.DeleteSelectedCommand, Mode=OneWay}"
-                        Content="Delete selected"/>
+                        Content="{Binding ViewModel.Localization[History_DeleteSelected]}"/>
                 </StackPanel>
 
                 <TextBlock
@@ -95,12 +100,12 @@
                 SelectedItem="{Binding ViewModel.SelectedRecord, Mode=TwoWay}"
                 SelectionMode="Extended">
                 <ui:DataGrid.Columns>
-                    <DataGridTextColumn Width="160" Binding="{Binding RunAt, StringFormat=u}" Header="Run at (UTC)"/>
-                    <DataGridTextColumn Width="220" Binding="{Binding MrName}" Header="MR"/>
-                    <DataGridTextColumn Width="140" Binding="{Binding AssertionName}" Header="Assertion"/>
-                    <DataGridTextColumn Width="100" Binding="{Binding ValueName}" Header="Value"/>
-                    <DataGridTextColumn Width="90" Binding="{Binding Passed}" Header="Passed"/>
-                    <DataGridTextColumn Width="*" Binding="{Binding FailureReason}" Header="Failure reason"/>
+                    <DataGridTextColumn Width="160" Binding="{Binding RunAt, StringFormat=u}" Header="{Binding Data.ViewModel.Localization[History_Column_RunAt], Source={StaticResource LocalizationProxy}}"/>
+                    <DataGridTextColumn Width="220" Binding="{Binding MrName}" Header="{Binding Data.ViewModel.Localization[History_Column_Mr], Source={StaticResource LocalizationProxy}}"/>
+                    <DataGridTextColumn Width="140" Binding="{Binding AssertionName}" Header="{Binding Data.ViewModel.Localization[History_Column_Assertion], Source={StaticResource LocalizationProxy}}"/>
+                    <DataGridTextColumn Width="100" Binding="{Binding ValueName}" Header="{Binding Data.ViewModel.Localization[History_Column_Value], Source={StaticResource LocalizationProxy}}"/>
+                    <DataGridTextColumn Width="90" Binding="{Binding Passed}" Header="{Binding Data.ViewModel.Localization[History_Column_Passed], Source={StaticResource LocalizationProxy}}"/>
+                    <DataGridTextColumn Width="*" Binding="{Binding FailureReason}" Header="{Binding Data.ViewModel.Localization[History_Column_FailureReason], Source={StaticResource LocalizationProxy}}"/>
                 </ui:DataGrid.Columns>
             </ui:DataGrid>
         </Border>
@@ -120,10 +125,10 @@
                 <ui:Button
                     Margin="0,0,8,0"
                     Command="{Binding ViewModel.PreviousPageCommand, Mode=OneWay}"
-                    Content="Previous"/>
+                    Content="{Binding ViewModel.Localization[History_PreviousPage]}"/>
                 <ui:Button
                     Command="{Binding ViewModel.NextPageCommand, Mode=OneWay}"
-                    Content="Next"/>
+                    Content="{Binding ViewModel.Localization[History_NextPage]}"/>
             </StackPanel>
         </Border>
 
@@ -138,7 +143,7 @@
                 <TextBlock
                     DockPanel.Dock="Top"
                     FontWeight="SemiBold"
-                    Text="Evidence for selected row"/>
+                    Text="{Binding ViewModel.Localization[History_EvidenceForSelectedRow]}"/>
                 <TextBox
                     AcceptsReturn="True"
                     AutomationProperties.AutomationId="TextBox_EvidenceDetails"

@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MetBench_BLL.SystemMT.Catalog.Editing;
+using MetBench_UI.Localization;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -12,6 +13,8 @@ namespace MetBench_Client.ViewModels
     {
         private readonly ISystemMtSutEditor _editor;
         private bool _isInitialized;
+
+        public LocalizedTextProvider Localization { get; }
 
         [ObservableProperty]
         private ObservableCollection<SystemMtSutDescriptor> _suts = new();
@@ -27,7 +30,7 @@ namespace MetBench_Client.ViewModels
         private SystemMtSutProgramDraft? _draft;
 
         [ObservableProperty]
-        private string _statusMessage = "Select a SUT to edit its program section, or click \"New SUT draft\".";
+        private string _statusMessage;
 
         [ObservableProperty]
         private bool _hasValidDraft;
@@ -36,9 +39,11 @@ namespace MetBench_Client.ViewModels
         // when false it preserves the existing mrs verbatim.
         private bool _isNewSutDraft;
 
-        public SystemMtSutCatalogViewModel(ISystemMtSutEditor editor)
+        public SystemMtSutCatalogViewModel(ISystemMtSutEditor editor, LocalizedTextProvider localization)
         {
             _editor = editor;
+            Localization = localization;
+            _statusMessage = Localization["Status_SutCatalog_InitialHint"];
         }
 
         public void OnNavigatedTo()
@@ -63,12 +68,12 @@ namespace MetBench_Client.ViewModels
             try
             {
                 Draft = _editor.Load(value.SutId);
-                StatusMessage = $"Loaded program section for SUT '{value.SutId}'.";
+                StatusMessage = string.Format(Localization["Status_SutCatalog_DraftLoaded_Fmt"], value.SutId);
             }
             catch (Exception ex)
             {
                 Draft = null;
-                StatusMessage = $"ERROR loading '{value.SutId}': {ex.Message}";
+                StatusMessage = string.Format(Localization["Status_SutCatalog_DraftLoadError_Fmt"], value.SutId, ex.Message);
             }
         }
 
@@ -95,7 +100,7 @@ namespace MetBench_Client.ViewModels
             SelectedSut = null;
             Draft = SystemMtSutProgramDraft.NewForSut(string.Empty);
             HasValidDraft = false;
-            StatusMessage = "New SUT draft. Fill SUT name and program fields, then Validate / Save.";
+            StatusMessage = Localization["Status_SutCatalog_NewDraft"];
         }
 
         [RelayCommand(CanExecute = nameof(HasDraft))]
@@ -107,15 +112,15 @@ namespace MetBench_Client.ViewModels
             if (string.IsNullOrWhiteSpace(sutId))
             {
                 HasValidDraft = false;
-                StatusMessage = "Validation failed: SUT name is required.";
+                StatusMessage = Localization["Status_SutCatalog_ValidationFailed_NameRequired"];
                 return;
             }
 
             var result = _editor.ValidateDraft(sutId, Draft);
             HasValidDraft = result.Success;
             StatusMessage = result.Success
-                ? "SUT draft is valid."
-                : "Validation failed: " + string.Join(" | ", result.Errors);
+                ? Localization["Status_SutCatalog_DraftValid"]
+                : string.Format(Localization["Status_SutCatalog_ValidationFailed_Fmt"], string.Join(" | ", result.Errors));
         }
 
         [RelayCommand(CanExecute = nameof(CanSaveDraft))]
@@ -126,15 +131,15 @@ namespace MetBench_Client.ViewModels
             var sutId = ResolveTargetSutId();
             if (string.IsNullOrWhiteSpace(sutId))
             {
-                StatusMessage = "Save blocked: SUT name is required.";
+                StatusMessage = Localization["Status_SutCatalog_SaveBlocked_NameRequired"];
                 return;
             }
 
             var result = _editor.SaveDraft(sutId, Draft);
             HasValidDraft = result.Success;
             StatusMessage = result.Success
-                ? $"SUT draft saved to {sutId}/catalog.json."
-                : "Save blocked: " + string.Join(" | ", result.Errors);
+                ? string.Format(Localization["Status_SutCatalog_DraftSaved_Fmt"], sutId)
+                : string.Format(Localization["Status_SutCatalog_SaveBlocked_Fmt"], string.Join(" | ", result.Errors));
 
             if (result.Success)
             {
@@ -150,8 +155,8 @@ namespace MetBench_Client.ViewModels
                 var suts = _editor.ListSuts();
                 Suts = new ObservableCollection<SystemMtSutDescriptor>(suts);
                 StatusMessage = Suts.Count == 0
-                    ? "No SUT catalog.json files found."
-                    : $"Loaded {Suts.Count} SUT(s).";
+                    ? Localization["Status_SutCatalog_NoCatalogFiles"]
+                    : string.Format(Localization["Status_SutCatalog_Loaded_Fmt"], Suts.Count);
 
                 if (!string.IsNullOrWhiteSpace(reselectSutId))
                 {
@@ -161,7 +166,7 @@ namespace MetBench_Client.ViewModels
             }
             catch (Exception ex)
             {
-                StatusMessage = $"ERROR listing SUTs: {ex.Message}";
+                StatusMessage = string.Format(Localization["Status_SutCatalog_ListError_Fmt"], ex.Message);
             }
         }
 

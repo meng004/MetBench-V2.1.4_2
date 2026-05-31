@@ -30,9 +30,9 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="Report Type" VerticalAlignment="Center" Margin="5 0 0 0"/>
+                <TextBlock Text="{Binding ViewModel.Localization[Report_ReportType]}" VerticalAlignment="Center" Margin="5 0 0 0"/>
                 <ComboBox Width="150" Margin="5 0 0 0" ItemsSource="{Binding ViewModel.ReportTypeList,UpdateSourceTrigger=PropertyChanged}" SelectedIndex="{Binding ViewModel.SelectedIndex,UpdateSourceTrigger=PropertyChanged}" SelectedValue="{Binding ViewModel.SelectedValue,UpdateSourceTrigger=PropertyChanged}"  s:View.ActionTarget="{Binding ViewModel}"   />
-                <ui:Button Appearance="Primary"  Content="ExportReport"
+                <ui:Button Appearance="Primary"  Content="{Binding ViewModel.Localization[ReportGenerator_Export]}"
                            Margin="5 0 0 0"
                            Icon="{ui:SymbolIcon DocumentArrowDown20}"
                            s:View.ActionTarget="{Binding ViewModel}"

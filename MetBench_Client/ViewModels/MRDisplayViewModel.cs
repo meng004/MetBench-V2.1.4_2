@@ -4,6 +4,7 @@ using MetBench_Client.Util;
 using MetBench_Client.Views.Pages;
 using MetBench_Domain;
 using MetBench_IDAL;
+using MetBench_UI.Localization;
 using Stylet;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,8 @@ namespace MetBench_Client.ViewModels
 {
     public class MRDisplayViewModel : ObservableObject, INavigationAware, IHandle<ApplicationAddEvent>, IHandle<ApplicationMoidfyEvent>, IHandle<ApplicationDeleteEvent>, IHandle<DomainAddEvent>, IHandle<DomainModifyEvent>, IHandle<DomainDeleteEvent>, IHandle<MetamorphicRelationOperationEvent>
     {
+        public LocalizedTextProvider Localization { get; }
+
         //导航服务 用于页面切换
         private INavigationService _navigationService;
         //页面服务 用于获取页面实体
@@ -85,12 +88,13 @@ namespace MetBench_Client.ViewModels
         {
         }
 
-        public MRDisplayViewModel(MetamorphicRelationService metamorphicRelationSerive, IPageService pageService, INavigationService navigationService, IEventAggregator eventAggregator)
+        public MRDisplayViewModel(MetamorphicRelationService metamorphicRelationSerive, IPageService pageService, INavigationService navigationService, IEventAggregator eventAggregator, LocalizedTextProvider localization)
         {
             _metamorphicRelationSerive = metamorphicRelationSerive;
             _pageService = pageService;
             _navigationService = navigationService;
             _eventAggregator = eventAggregator;
+            Localization = localization;
             _eventAggregator.Subscribe(this);
             //Init_MRs();
             this.reload_ItemsSource();

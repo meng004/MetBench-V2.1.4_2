@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Persistence;
 using MetBench_BLL.SystemMT.Reporting;
+using MetBench_UI.Localization;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,8 @@ namespace MetBench_Client.ViewModels
         private readonly ISystemMtResultReportRenderer _reportRenderer;
         private bool _isInitialized;
 
+        public LocalizedTextProvider Localization { get; }
+
         [ObservableProperty]
         private ObservableCollection<MrSummary> _availableMrs = new();
 
@@ -36,7 +39,7 @@ namespace MetBench_Client.ViewModels
         private bool _isRunning;
 
         [ObservableProperty]
-        private string _statusMessage = "Idle.";
+        private string _statusMessage = string.Empty;
 
         [ObservableProperty]
         private string _lastResultSummary = string.Empty;
@@ -47,11 +50,14 @@ namespace MetBench_Client.ViewModels
         public SystemMtExecutionViewModel(
             ISystemMtLauncher launcher,
             ISystemMtResultRepository repository,
-            ISystemMtResultReportRenderer reportRenderer)
+            ISystemMtResultReportRenderer reportRenderer,
+            LocalizedTextProvider localization)
         {
             _launcher = launcher;
             _repository = repository;
             _reportRenderer = reportRenderer;
+            Localization = localization;
+            StatusMessage = Localization["Status_Execution_Idle"];
         }
 
         public async void OnNavigatedTo()
@@ -94,7 +100,7 @@ namespace MetBench_Client.ViewModels
             if (SelectedMr is null) return;
 
             IsRunning = true;
-            StatusMessage = $"Running {SelectedMr.DisplayName}…";
+            StatusMessage = string.Format(Localization["Status_Execution_Running_Fmt"], SelectedMr.DisplayName);
             LastResultSummary = string.Empty;
 
             try
@@ -108,16 +114,16 @@ namespace MetBench_Client.ViewModels
                 var result = await _launcher.RunAsync(SelectedMr.Id, overrides);
 
                 LastResultSummary = result.Passed
-                    ? $"PASS — {result.ValueName}: source={result.SourceValue:G}, follow-up={result.FollowUpValue:G}"
-                    : $"FAIL — {result.FailureReason}";
-                StatusMessage = $"Completed in source={result.SourceElapsed.TotalSeconds:F2}s, follow-up={result.FollowUpElapsed.TotalSeconds:F2}s.";
+                    ? string.Format(Localization["Status_Execution_ResultPass_Fmt"], result.ValueName, result.SourceValue, result.FollowUpValue)
+                    : string.Format(Localization["Status_Execution_ResultFail_Fmt"], result.FailureReason);
+                StatusMessage = string.Format(Localization["Status_Execution_Completed_Fmt"], result.SourceElapsed.TotalSeconds, result.FollowUpElapsed.TotalSeconds);
 
                 await LoadRecentRunsAsync();
             }
             catch (Exception ex)
             {
-                StatusMessage = $"ERROR: {ex.Message}";
-                System.Windows.MessageBox.Show(ex.ToString(), "System-MT run failed", System.Windows.MessageBoxButton.OK, MessageBoxImage.Error);
+                StatusMessage = string.Format(Localization["Status_Execution_Error_Fmt"], ex.Message);
+                System.Windows.MessageBox.Show(ex.ToString(), Localization["Status_Execution_RunFailed_Title"], System.Windows.MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -131,7 +137,7 @@ namespace MetBench_Client.ViewModels
         private async Task RefreshRecentAsync()
         {
             await LoadRecentRunsAsync();
-            StatusMessage = $"Refreshed: {RecentRuns.Count} record(s).";
+            StatusMessage = string.Format(Localization["Status_Execution_Refreshed_Fmt"], RecentRuns.Count);
         }
 
         [RelayCommand]
@@ -147,7 +153,7 @@ namespace MetBench_Client.ViewModels
             var records = await _repository.ListRecentAsync(500);
             var html = _reportRenderer.Render(records);
             await File.WriteAllTextAsync(dialog.FileName, html);
-            StatusMessage = $"Report exported: {dialog.FileName}";
+            StatusMessage = string.Format(Localization["Status_Execution_ReportExported_Fmt"], dialog.FileName);
         }
     }
 }

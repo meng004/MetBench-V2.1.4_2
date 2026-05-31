@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using MetBench_BLL.Paging;
 using MetBench_BLL.SystemMT.Persistence;
 using MetBench_BLL.SystemMT.Persistence.Editing;
+using MetBench_UI.Localization;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -23,6 +24,8 @@ namespace MetBench_Client.ViewModels
         private readonly IExecutionHistoryEditor _editor;
         private bool _isInitialized;
         private readonly List<SystemMtResultRecord> _selectedRows = new();
+
+        public LocalizedTextProvider Localization { get; }
 
         [ObservableProperty]
         private ObservableCollection<SystemMtResultRecord> _records = new();
@@ -46,7 +49,7 @@ namespace MetBench_Client.ViewModels
         private int _totalCount;
 
         [ObservableProperty]
-        private string _statusMessage = "Loading execution history...";
+        private string _statusMessage = string.Empty;
 
         [ObservableProperty]
         private string _selectedEvidenceSummary = string.Empty;
@@ -57,14 +60,16 @@ namespace MetBench_Client.ViewModels
             {
                 int totalPages = TotalCount == 0 ? 0 : (TotalCount + PageSize - 1) / PageSize;
                 return totalPages == 0
-                    ? "No rows"
-                    : $"Page {PageIndex + 1} / {totalPages} (total: {TotalCount})";
+                    ? Localization["Pagination_History_NoRows"]
+                    : string.Format(Localization["Pagination_History_PageOfTotal_Fmt"], PageIndex + 1, totalPages, TotalCount);
             }
         }
 
-        public SystemMtExecutionHistoryViewModel(IExecutionHistoryEditor editor)
+        public SystemMtExecutionHistoryViewModel(IExecutionHistoryEditor editor, LocalizedTextProvider localization)
         {
             _editor = editor;
+            Localization = localization;
+            StatusMessage = Localization["Status_History_Loading"];
         }
 
         public async void OnNavigatedTo()
@@ -109,16 +114,16 @@ namespace MetBench_Client.ViewModels
 
             if (targets.Count == 0)
             {
-                StatusMessage = "Select at least one row before clicking Delete.";
+                StatusMessage = Localization["Status_History_SelectRowBeforeDelete"];
                 return;
             }
 
             var prompt = targets.Count == 1
-                ? $"Delete execution {targets[0].Id} ({targets[0].MrName})? Evidence will be removed first, then the result row. This cannot be undone."
-                : $"Delete {targets.Count} execution rows (and their evidence)? This cannot be undone.";
+                ? string.Format(Localization["Prompt_History_DeleteSingle_Fmt"], targets[0].Id, targets[0].MrName)
+                : string.Format(Localization["Prompt_History_DeleteMultiple_Fmt"], targets.Count);
 
             var confirm = System.Windows.MessageBox.Show(
-                prompt, "Confirm delete", System.Windows.MessageBoxButton.OKCancel, System.Windows.MessageBoxImage.Warning);
+                prompt, Localization["Prompt_History_ConfirmDeleteTitle"], System.Windows.MessageBoxButton.OKCancel, System.Windows.MessageBoxImage.Warning);
             if (confirm != System.Windows.MessageBoxResult.OK) return;
 
             var outcome = await _editor.DeleteBatchAsync(targets.Select(r => r.Id)).ConfigureAwait(false);
@@ -147,12 +152,12 @@ namespace MetBench_Client.ViewModels
                 PageIndex = page.PageIndex;
                 TotalCount = page.TotalCount;
                 StatusMessage = page.TotalCount == 0
-                    ? "No execution records match the filter."
-                    : $"Loaded {Records.Count} of {page.TotalCount} record(s).";
+                    ? Localization["Status_History_NoRecordsMatchFilter"]
+                    : string.Format(Localization["Status_History_LoadedRecords_Fmt"], Records.Count, page.TotalCount);
             }
             catch (Exception ex)
             {
-                StatusMessage = $"ERROR loading executions: {ex.Message}";
+                StatusMessage = string.Format(Localization["Status_History_ErrorLoadingExecutions_Fmt"], ex.Message);
             }
         }
 
@@ -168,47 +173,47 @@ namespace MetBench_Client.ViewModels
             {
                 var ev = await _editor.GetEvidenceAsync(record.Id).ConfigureAwait(false);
                 SelectedEvidenceSummary = ev is null
-                    ? "(No evidence row for this execution — legacy or evidence-only-orphan.)"
+                    ? Localization["Evidence_History_NoEvidenceRow"]
                     : FormatEvidence(ev);
             }
             catch (Exception ex)
             {
-                SelectedEvidenceSummary = $"ERROR loading evidence: {ex.Message}";
+                SelectedEvidenceSummary = string.Format(Localization["Evidence_History_ErrorLoadingEvidence_Fmt"], ex.Message);
             }
         }
 
-        private static string FormatEvidence(ExecutionEvidence ev)
+        private string FormatEvidence(ExecutionEvidence ev)
         {
             var sb = new StringBuilder();
-            sb.AppendLine(CultureInfo.InvariantCulture, $"ExecutionId: {ev.ExecutionId}");
-            sb.AppendLine(CultureInfo.InvariantCulture, $"Recorded at: {ev.RecordedAtUtc:u}");
+            sb.AppendLine(string.Format(CultureInfo.InvariantCulture, Localization["Evidence_History_ExecutionId_Fmt"], ev.ExecutionId));
+            sb.AppendLine(string.Format(CultureInfo.InvariantCulture, Localization["Evidence_History_RecordedAt_Fmt"], string.Format(CultureInfo.InvariantCulture, "{0:u}", ev.RecordedAtUtc)));
             if (ev.TypedVerification is { } tv)
             {
                 sb.AppendLine();
-                sb.AppendLine("Typed verification:");
-                sb.AppendLine(CultureInfo.InvariantCulture, $"  Spec       : {tv.SpecKind} {tv.SpecId}");
-                sb.AppendLine(CultureInfo.InvariantCulture, $"  Predicate  : {tv.PredicateKind} {tv.PredicateId}");
-                sb.AppendLine(CultureInfo.InvariantCulture, $"  Status     : {tv.Status}");
+                sb.AppendLine(Localization["Evidence_History_TypedVerificationHeader"]);
+                sb.AppendLine(string.Format(CultureInfo.InvariantCulture, Localization["Evidence_History_Spec_Fmt"], tv.SpecKind, tv.SpecId));
+                sb.AppendLine(string.Format(CultureInfo.InvariantCulture, Localization["Evidence_History_Predicate_Fmt"], tv.PredicateKind, tv.PredicateId));
+                sb.AppendLine(string.Format(CultureInfo.InvariantCulture, Localization["Evidence_History_Status_Fmt"], tv.Status));
                 if (tv.Diagnostic is { } d)
                 {
-                    sb.AppendLine(CultureInfo.InvariantCulture, $"  Expected   : {d.Expected}");
-                    sb.AppendLine(CultureInfo.InvariantCulture, $"  Actual     : {d.Actual}");
-                    sb.AppendLine(CultureInfo.InvariantCulture, $"  Residual   : {d.Residual}");
-                    sb.AppendLine(CultureInfo.InvariantCulture, $"  Tolerance  : {d.Tolerance}");
+                    sb.AppendLine(string.Format(CultureInfo.InvariantCulture, Localization["Evidence_History_Expected_Fmt"], d.Expected));
+                    sb.AppendLine(string.Format(CultureInfo.InvariantCulture, Localization["Evidence_History_Actual_Fmt"], d.Actual));
+                    sb.AppendLine(string.Format(CultureInfo.InvariantCulture, Localization["Evidence_History_Residual_Fmt"], d.Residual));
+                    sb.AppendLine(string.Format(CultureInfo.InvariantCulture, Localization["Evidence_History_Tolerance_Fmt"], d.Tolerance));
                 }
                 if (!string.IsNullOrWhiteSpace(tv.SkipOrInvalidReason))
-                    sb.AppendLine(CultureInfo.InvariantCulture, $"  Reason     : {tv.SkipOrInvalidReason}");
+                    sb.AppendLine(string.Format(CultureInfo.InvariantCulture, Localization["Evidence_History_Reason_Fmt"], tv.SkipOrInvalidReason));
             }
             return sb.ToString();
         }
 
-        private static string FormatDeleteOutcome(ExecutionHistoryDeleteResult r)
+        private string FormatDeleteOutcome(ExecutionHistoryDeleteResult r)
         {
             var parts = new List<string>();
-            if (r.Deleted > 0) parts.Add($"{r.Deleted} deleted");
-            if (r.EvidenceOnly > 0) parts.Add($"{r.EvidenceOnly} evidence-only (result row left for retry)");
-            if (r.Failed > 0) parts.Add($"{r.Failed} failed (no rows touched)");
-            return parts.Count == 0 ? "Nothing deleted." : string.Join("; ", parts) + ".";
+            if (r.Deleted > 0) parts.Add(string.Format(Localization["Status_History_DeleteDeleted_Fmt"], r.Deleted));
+            if (r.EvidenceOnly > 0) parts.Add(string.Format(Localization["Status_History_DeleteEvidenceOnly_Fmt"], r.EvidenceOnly));
+            if (r.Failed > 0) parts.Add(string.Format(Localization["Status_History_DeleteFailed_Fmt"], r.Failed));
+            return parts.Count == 0 ? Localization["Status_History_NothingDeleted"] : string.Join("; ", parts) + ".";
         }
 
         private bool CanGoPreviousPage() => PageIndex > 0;

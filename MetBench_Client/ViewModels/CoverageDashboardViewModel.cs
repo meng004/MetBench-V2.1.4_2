@@ -5,6 +5,7 @@ using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using MetBench_BLL.Coverage;
+using MetBench_UI.Localization;
 using SkiaSharp;
 using Wpf.Ui.Controls;
 
@@ -41,9 +42,12 @@ public sealed partial class CoverageDashboardViewModel : ObservableObject, INavi
     [ObservableProperty]
     private string? _errorMessage;
 
-    public CoverageDashboardViewModel(CoverageService service)
+    public LocalizedTextProvider Localization { get; }
+
+    public CoverageDashboardViewModel(CoverageService service, LocalizedTextProvider localization)
     {
         _service = service;
+        Localization = localization;
     }
 
     public void OnNavigatedTo()

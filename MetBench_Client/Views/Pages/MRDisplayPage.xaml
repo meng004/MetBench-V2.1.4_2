@@ -9,6 +9,7 @@
       xmlns:s="https://github.com/canton7/Stylet"
       xmlns:models="clr-namespace:MetBench_Client.Models"
       xmlns:controls="clr-namespace:MetBench_Client.Controls"
+      xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
       mc:Ignorable="d"
       d:DataContext="{d:DesignInstance viewmodels:MRDisplayViewModel}"
       d:DesignHeight="800"
@@ -16,6 +17,9 @@
       d:Background="{DynamicResource ApplicationBackgroundBrush}"
       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
       Title="MRDisplayPage">
+    <Page.Resources>
+        <helpers:BindingProxy x:Key="LocalizationProxy" Data="{Binding}"/>
+    </Page.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="3*"/>
@@ -40,7 +44,7 @@
             <DataGrid.Columns >
                 <DataGridTemplateColumn  Width="70"  MinWidth="10" IsReadOnly="True" >
                     <DataGridTemplateColumn.Header>
-                        <TextBlock Text="Number" HorizontalAlignment="Center" VerticalAlignment="Center" ></TextBlock>
+                        <TextBlock Text="{Binding Data.ViewModel.Localization[MrDisplay_ColumnNumber], Source={StaticResource LocalizationProxy}}" HorizontalAlignment="Center" VerticalAlignment="Center" ></TextBlock>
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -57,7 +61,7 @@
 
                 <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}"  Binding="{Binding Context}" Width="200" IsReadOnly="True">
                     <DataGridTextColumn.Header>
-                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="Context"></TextBlock>
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[MrDisplay_ColumnContext], Source={StaticResource LocalizationProxy}}"></TextBlock>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
 
@@ -70,13 +74,13 @@
                 <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}"  Binding="{Binding OrderOfMR}" Width="200" IsReadOnly="True">
                     <DataGridTextColumn.Header>
                         <!--<TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="OrderOfMR"></TextBlock>-->
-                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="ArityOfMR"></TextBlock>
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[MrDisplay_ColumnArityOfMR], Source={StaticResource LocalizationProxy}}"></TextBlock>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
 
                 <DataGridTemplateColumn IsReadOnly="True">
                     <DataGridTemplateColumn.Header>
-                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="InputPattern"></TextBlock>
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[MrDisplay_ColumnInputPattern], Source={StaticResource LocalizationProxy}}"></TextBlock>
                     </DataGridTemplateColumn.Header>
 
                     <DataGridTemplateColumn.CellTemplate >
@@ -89,7 +93,7 @@
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn IsReadOnly="True">
                     <DataGridTemplateColumn.Header>
-                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="OutputPattern"></TextBlock>
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[MrDisplay_ColumnOutputPattern], Source={StaticResource LocalizationProxy}}"></TextBlock>
                     </DataGridTemplateColumn.Header>
 
                     <DataGridTemplateColumn.CellTemplate>
@@ -103,29 +107,29 @@
 
                 <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}"  Binding="{Binding ApplicationName}" Width="200" IsReadOnly="True">
                     <DataGridTextColumn.Header>
-                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="ApplicationName" AutomationProperties.AutomationId="DataGridTextColumn_ApplicationName"></TextBlock>
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[MrDisplay_ColumnApplicationName], Source={StaticResource LocalizationProxy}}" AutomationProperties.AutomationId="DataGridTextColumn_ApplicationName"></TextBlock>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
 
                 <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}"  Binding="{Binding CodeName}" Width="200" IsReadOnly="True">
                     <DataGridTextColumn.Header>
-                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="CodeName"></TextBlock>
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[MrDisplay_ColumnCodeName], Source={StaticResource LocalizationProxy}}"></TextBlock>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
 
                 <DataGridTextColumn ElementStyle="{StaticResource CenteredTextBlockStyle}"  Binding="{Binding DomainName}" Width="200" IsReadOnly="True">
                     <DataGridTextColumn.Header>
-                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="DomainName"></TextBlock>
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[MrDisplay_ColumnDomainName], Source={StaticResource LocalizationProxy}}"></TextBlock>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
 
                 <DataGridTemplateColumn Width="200" IsReadOnly="True">
                     <DataGridTemplateColumn.Header>
-                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="Operation"></TextBlock>
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"  Text="{Binding Data.ViewModel.Localization[MrDisplay_ColumnOperation], Source={StaticResource LocalizationProxy}}"></TextBlock>
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <ui:Button Appearance="Primary"  Width="100" Height="50" FontSize="14"  Content="Edit" HorizontalAlignment="Center" AutomationProperties.AutomationId="Button_Modify"
+                            <ui:Button Appearance="Primary"  Width="100" Height="50" FontSize="14"  Content="{Binding Data.ViewModel.Localization[Legacy_Modify], Source={StaticResource LocalizationProxy}}" HorizontalAlignment="Center" AutomationProperties.AutomationId="Button_Modify"
                                      Icon="{ui:SymbolIcon CalendarEdit24}"
                                      Command="{s:Action EditSelectedMR}"
                                      CommandParameter="{Binding IdMR}" 
@@ -155,7 +159,7 @@
             </Grid.ColumnDefinitions>
             <StackPanel  Grid.Row="0" x:Name="stackpanel1" Orientation="Horizontal" VerticalAlignment="Center">
                 <!--<TextBlock Text="OrderOfMR" Margin="55 0 0 0" VerticalAlignment="Center" />-->
-                <TextBlock Text="ArityOfMR" Margin="55 0 0 0" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding ViewModel.Localization[MrDisplay_FilterArityOfMR]}" Margin="55 0 0 0" VerticalAlignment="Center"/>
                 <ComboBox x:Name="cmbOrderOfMR" Margin="15 0 0 0" VerticalContentAlignment="Center" Width="120"
                           SelectedIndex="{Binding ViewModel.OrderOfMR_ComboBoxSelectedIndex,UpdateSourceTrigger=PropertyChanged}"
                           SelectedValue="{Binding ViewModel.OrderOfMR_ComboBoxSelectedValue,UpdateSourceTrigger=PropertyChanged}"
@@ -170,31 +174,31 @@
                           />
             </StackPanel>-->
             <StackPanel  Grid.Row="0" Grid.Column="1" x:Name="stackpanel3" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="DimensionOfInputPattern"  Margin="13 0 0 0" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ViewModel.Localization[MrDisplay_FilterDimensionOfInputPattern]}"  Margin="13 0 0 0" VerticalAlignment="Center" />
                 <ui:TextBox x:Name="txbDimensionOfInputPattern"  Margin="10 0 0 0" VerticalContentAlignment="Center" Width="120"
                          Text="{Binding ViewModel.DimensionOfInputPattern,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                          />
             </StackPanel>
             <StackPanel  Grid.Row="1" Grid.Column="1" x:Name="stackpanel4" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="DimensionOfOutputPattern"  Margin="6 0 0 0" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ViewModel.Localization[MrDisplay_FilterDimensionOfOutputPattern]}"  Margin="6 0 0 0" VerticalAlignment="Center" />
                 <ui:TextBox x:Name="txbDimensionOfOutputPattern"  Margin="5 0 0 0" VerticalContentAlignment="Center" Width="120"
                          Text="{Binding ViewModel.DimensionOfOutputPattern,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                          />
             </StackPanel>
             <StackPanel  Grid.Row="0" Grid.Column="2" x:Name="stackpanel5" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="ApplicationName"  Margin="6 0 0 0" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ViewModel.Localization[MrDisplay_FilterApplicationName]}"  Margin="6 0 0 0" VerticalAlignment="Center" />
                 <ui:TextBox x:Name="txbApplicationName"  Margin="5 0 0 0" VerticalContentAlignment="Center" Width="120"
                          Text="{Binding ViewModel.ApplicationName,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                          />
             </StackPanel>
             <StackPanel  Grid.Row="1" Grid.Column="2" x:Name="stackpanel6" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="DomainName"  Margin="30 0 0 0" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding ViewModel.Localization[MrDisplay_FilterDomainName]}"  Margin="30 0 0 0" VerticalAlignment="Center" />
                 <ui:TextBox x:Name="txbDomainName"  Margin="5 0 0 0" VerticalContentAlignment="Center" Width="120"
                          Text="{Binding ViewModel.DomainName,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                          />
             </StackPanel>
             <StackPanel  Grid.Row="2" Grid.Column="2" x:Name="stackpanel7" Orientation="Horizontal" VerticalAlignment="Center">
-                <ui:Button Appearance="Primary" x:Name="btnQuery" Content="Query" Margin="140 0 0 0" VerticalContentAlignment="Center" Width="100" Height="40"
+                <ui:Button Appearance="Primary" x:Name="btnQuery" Content="{Binding ViewModel.Localization[Legacy_Query]}" Margin="140 0 0 0" VerticalContentAlignment="Center" Width="100" Height="40"
                            s:View.ActionTarget="{Binding ViewModel}"
                            Click="{s:Action btnQuery_Click}"
                            Icon="{ui:SymbolIcon DatabaseSearch24}"

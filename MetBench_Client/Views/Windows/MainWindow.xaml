@@ -109,7 +109,7 @@
          
             >
             <ui:NavigationView.AutoSuggestBox>
-                <ui:AutoSuggestBox x:Name="AutoSuggestBox" PlaceholderText="Search">
+                <ui:AutoSuggestBox x:Name="AutoSuggestBox" PlaceholderText="{Binding ViewModel.Localization[Common_Search]}">
                     <ui:AutoSuggestBox.Icon>
                         <ui:IconSourceElement>
                             <ui:SymbolIconSource Symbol="Search24" />

@@ -20,7 +20,7 @@
 
         <!-- Header -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
-            <TextBlock Text="4-Dimension Coverage Dashboard"
+            <TextBlock Text="{Binding ViewModel.Localization[Coverage_Title]}"
                        FontSize="18" FontWeight="SemiBold"
                        VerticalAlignment="Center" />
         </StackPanel>
@@ -47,7 +47,7 @@
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Text="MetaPattern Coverage"
+                    <TextBlock Grid.Row="0" Text="{Binding ViewModel.Localization[Coverage_MetaPatternCoverage]}"
                                FontWeight="Bold" Margin="0,0,0,6" />
                     <lvc:PieChart Grid.Row="1"
                                   Series="{Binding ViewModel.MetaPatternSeries}"
@@ -70,7 +70,7 @@
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Text="SUT × MR Binding Coverage"
+                    <TextBlock Grid.Row="0" Text="{Binding ViewModel.Localization[Coverage_SutMrCoverage]}"
                                FontWeight="Bold" Margin="0,0,0,6" />
                     <lvc:PieChart Grid.Row="1"
                                   Series="{Binding ViewModel.SutMrSeries}"
@@ -93,7 +93,7 @@
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Text="Bug Coverage"
+                    <TextBlock Grid.Row="0" Text="{Binding ViewModel.Localization[Coverage_BugCoverage]}"
                                FontWeight="Bold" Margin="0,0,0,6" />
                     <lvc:PieChart Grid.Row="1"
                                   Series="{Binding ViewModel.BugSeries}"
@@ -116,7 +116,7 @@
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Text="Mutation Detection Coverage"
+                    <TextBlock Grid.Row="0" Text="{Binding ViewModel.Localization[Coverage_MutationCoverage]}"
                                FontWeight="Bold" Margin="0,0,0,6" />
                     <lvc:PieChart Grid.Row="1"
                                   Series="{Binding ViewModel.MutationSeries}"
