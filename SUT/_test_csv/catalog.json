@@ -12,6 +12,15 @@
     "output_adapter_script_relative_path": "_test_csv_output_parser.py",
     "python_executable_kind": "system"
   },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "csv-identity-echo",
+    "runtime_key": "system",
+    "input_contract": "CSV scalar input with factor column used by the synthetic I/O helper fixture.",
+    "output_contract": "CSV scalar output echo_value consumed by typed verifier.",
+    "adapter": "Shared metbench_io CSV helper plus _test_csv runner under SUT/_test_csv/.",
+    "dependency_risk": "pure-stdlib synthetic test fixture"
+  },
   "mrs": [
     {
       "mr_id": "csv-roundtrip-identity",

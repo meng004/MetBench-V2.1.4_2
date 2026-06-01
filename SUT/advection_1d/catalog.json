@@ -12,6 +12,15 @@
     "output_adapter_script_relative_path": "advection_1d_output_parser.py",
     "python_executable_kind": "system"
   },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "finite-difference upwind",
+    "runtime_key": "system",
+    "input_contract": "JSON parameters for 1D mesh, velocity, timestep, and initial pulse.",
+    "output_contract": "JSON transport metrics such as peak amplitude, mass, and error proxies.",
+    "adapter": "Python finite-difference runner and JSON parser/adapter under SUT/advection_1d/.",
+    "dependency_risk": "pure-stdlib"
+  },
   "mrs": [
     {
       "mr_id": "advection-amplitude-linearity",

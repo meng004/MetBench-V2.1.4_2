@@ -12,6 +12,15 @@
     "output_adapter_script_relative_path": "poisson_1d_output_parser.py",
     "python_executable_kind": "system"
   },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "finite-difference elliptic solve",
+    "runtime_key": "system",
+    "input_contract": "JSON params with mesh and coefficient fields.",
+    "output_contract": "JSON metrics consumed by typed verifier.",
+    "adapter": "python runner under SUT/<sut>/",
+    "dependency_risk": "pure-stdlib"
+  },
   "mrs": [
     {
       "mr_id": "poisson-source-superposition",

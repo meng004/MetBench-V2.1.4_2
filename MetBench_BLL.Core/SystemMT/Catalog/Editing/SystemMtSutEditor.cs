@@ -54,7 +54,7 @@ public sealed class SystemMtSutEditor : ISystemMtSutEditor
         if (doc.Program is null)
             throw new CatalogValidationException($"Manifest '{path}' has no program section");
 
-        return SystemMtSutProgramDraft.FromProgram(doc.SutName, doc.Program);
+        return SystemMtSutProgramDraft.FromProgram(doc.SutName, doc.Program, doc.Profile);
     }
 
     public SystemMtManifestEditResult ValidateDraft(string sutId, SystemMtSutProgramDraft draft)
@@ -96,6 +96,7 @@ public sealed class SystemMtSutEditor : ISystemMtSutEditor
             {
                 SutName = sutId,
                 Program = program,
+                Profile = draft.ToProfile(),
                 Mrs = existing.Mrs,
             };
             // Full-document validate is safe here: existing Mrs are non-empty by the document
@@ -113,6 +114,7 @@ public sealed class SystemMtSutEditor : ISystemMtSutEditor
             {
                 SutName = sutId,
                 Program = program,
+                Profile = draft.ToProfile(),
                 Mrs = new List<MrBindingDefinition>(),
             };
             // Program-only validate; skip full document validate (would reject Mrs.Count == 0).

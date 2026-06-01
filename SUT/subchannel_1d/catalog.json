@@ -12,6 +12,15 @@
     "output_adapter_script_relative_path": "subchannel_1d_output_parser.py",
     "python_executable_kind": "system"
   },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "analytical 0D axial subchannel model",
+    "runtime_key": "system",
+    "input_contract": "JSON coolant, power, and friction-factor parameters for a reduced subchannel model.",
+    "output_contract": "JSON thermal-hydraulic metrics such as delta_T and pressure/friction summaries.",
+    "adapter": "Python analytical runner and JSON parser/adapter under SUT/subchannel_1d/.",
+    "dependency_risk": "pure-stdlib"
+  },
   "mrs": [
     {
       "mr_id": "subchannel-flow-temperature-monotone",

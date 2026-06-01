@@ -12,6 +12,15 @@
     "output_adapter_script_relative_path": "decay_chain_output_adapter.py",
     "python_executable_kind": "system"
   },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "closed-form Bateman / ODE integration",
+    "runtime_key": "system",
+    "input_contract": "JSON nuclide chain, decay constants, initial populations, and observation times.",
+    "output_contract": "JSON nuclide population metrics consumed by typed verifier.",
+    "adapter": "Python decay-chain runner with input/output adapters under SUT/decay_chain/.",
+    "dependency_risk": "pure-stdlib"
+  },
   "mrs": [
     {
       "mr_id": "decay-chain-scale-initial",

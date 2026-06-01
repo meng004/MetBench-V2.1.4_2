@@ -113,6 +113,71 @@ public sealed class MrArchitectureSchemaP0Tests : IDisposable
     // ===================== 2. EquationMetadata.Functions =====================
 
     [Fact]
+    public void EquationMetadata_default_explanation_profile_is_empty()
+    {
+        var eq = new EquationMetadata { EquationKey = "legacy" };
+
+        Assert.Equal(string.Empty, eq.EquationClass);
+        Assert.Equal(string.Empty, eq.EquationFamily);
+        Assert.NotNull(eq.PrimaryVariables);
+        Assert.Empty(eq.PrimaryVariables);
+        Assert.Equal(string.Empty, eq.PhysicalMeaning);
+        Assert.Equal(string.Empty, eq.BenchmarkRationale);
+        Assert.NotNull(eq.ExpectedLaws);
+        Assert.Empty(eq.ExpectedLaws);
+    }
+
+    [Fact]
+    public void Built_in_equation_catalog_seeds_explanation_profiles()
+    {
+        Assert.All(SystemMtMetadataCatalog.Equations, eq =>
+        {
+            Assert.False(string.IsNullOrWhiteSpace(eq.EquationClass));
+            Assert.False(string.IsNullOrWhiteSpace(eq.EquationFamily));
+            Assert.NotEmpty(eq.PrimaryVariables);
+            Assert.False(string.IsNullOrWhiteSpace(eq.PhysicalMeaning));
+            Assert.False(string.IsNullOrWhiteSpace(eq.BenchmarkRationale));
+            Assert.NotEmpty(eq.ExpectedLaws);
+        });
+
+        var poisson = SystemMtMetadataCatalog.Equations.Single(eq => eq.EquationKey == "poisson");
+        Assert.Equal("PDE", poisson.EquationClass);
+        Assert.Equal("elliptic", poisson.EquationFamily);
+        Assert.Equal(new[] { "u(x)" }, poisson.PrimaryVariables);
+        Assert.Equal("Steady scalar field governed by source balance.", poisson.PhysicalMeaning);
+        Assert.Equal("Representative elliptic PDE used for mesh convergence and source linearity checks.", poisson.BenchmarkRationale);
+        Assert.Equal(new[] { "linearity", "mesh-convergence" }, poisson.ExpectedLaws);
+    }
+
+    [Fact]
+    public async Task EquationMetadata_explanation_profile_round_trips_via_repo()
+    {
+        var eq = new EquationMetadata
+        {
+            EquationKey = "poisson",
+            Name = "Poisson 1D",
+            CanonicalForm = "-u'' = f",
+            EquationClass = "PDE",
+            EquationFamily = "elliptic",
+            PrimaryVariables = new List<string> { "u(x)" },
+            PhysicalMeaning = "Steady scalar field governed by source balance.",
+            BenchmarkRationale = "Representative elliptic PDE used for mesh convergence and source linearity checks.",
+            ExpectedLaws = new List<string> { "linearity", "mesh-convergence" },
+        };
+
+        await _repo.UpsertEquationAsync(eq);
+
+        var back = await _repo.GetEquationAsync("poisson");
+        Assert.NotNull(back);
+        Assert.Equal("PDE", back.EquationClass);
+        Assert.Equal("elliptic", back.EquationFamily);
+        Assert.Equal(new[] { "u(x)" }, back.PrimaryVariables);
+        Assert.Equal("Steady scalar field governed by source balance.", back.PhysicalMeaning);
+        Assert.Equal("Representative elliptic PDE used for mesh convergence and source linearity checks.", back.BenchmarkRationale);
+        Assert.Equal(new[] { "linearity", "mesh-convergence" }, back.ExpectedLaws);
+    }
+
+    [Fact]
     public void EquationMetadata_default_Functions_list_is_empty()
     {
         var eq = new EquationMetadata { EquationKey = "x" };

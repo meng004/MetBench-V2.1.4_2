@@ -6,6 +6,7 @@ public sealed class SystemMtCatalogDocument
 {
     public string SutName { get; set; } = string.Empty;
     public ProgramDefinition? Program { get; set; }
+    public SutProfileDefinition? Profile { get; set; } = new();
     public List<MrBindingDefinition> Mrs { get; set; } = new();
 
     public void Validate()

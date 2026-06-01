@@ -12,6 +12,15 @@
     "output_adapter_script_relative_path": "heat_equation_output_adapter.py",
     "python_executable_kind": "system"
   },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "finite-difference explicit heat solver",
+    "runtime_key": "system",
+    "input_contract": "JSON thermal diffusivity, mesh/time step, and initial temperature profile.",
+    "output_contract": "JSON temperature metrics including max_temperature and convergence proxies.",
+    "adapter": "Python heat-equation runner with input/output adapters under SUT/heat_equation/.",
+    "dependency_risk": "pure-stdlib"
+  },
   "mrs": [
     {
       "mr_id": "heat-equation-amplitude",

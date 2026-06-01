@@ -12,6 +12,15 @@
     "output_adapter_script_relative_path": "scipy_bvp_poisson_1d_output_parser.py",
     "python_executable_kind": "scipy"
   },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "SciPy solve_bvp",
+    "runtime_key": "scipy",
+    "input_contract": "JSON Poisson BVP mesh, boundary, and source parameters.",
+    "output_contract": "JSON BVP solution metrics aligned with pure-stdlib Poisson outputs.",
+    "adapter": "SciPy-backed Python runner and JSON parser/adapter under SUT/scipy_bvp_poisson_1d/.",
+    "dependency_risk": "requires SciPy runtime; skipped when unavailable"
+  },
   "mrs": [
     {
       "mr_id": "scipy-bvp-poisson-source-superposition",

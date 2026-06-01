@@ -12,6 +12,15 @@
     "output_adapter_script_relative_path": "lotka_volterra_output_adapter.py",
     "python_executable_kind": "system"
   },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "Runge-Kutta ODE integration",
+    "runtime_key": "system",
+    "input_contract": "JSON predator-prey initial populations, coefficients, and time grid.",
+    "output_contract": "JSON population metrics and trajectory summaries consumed by typed verifier.",
+    "adapter": "Python Lotka-Volterra runner with input/output adapters under SUT/lotka_volterra/.",
+    "dependency_risk": "pure-stdlib"
+  },
   "mrs": [
     {
       "mr_id": "lotka-volterra-scale-gamma",
