@@ -45,6 +45,15 @@
       "meta_pattern": "Mono",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Mono MR: Energy conservation MP_mono: at fixed wall heat flux q'' and inlet temperature, ΔT = q''·P_h·L/(G·A_xs·c_p) is inversely proportional to mass flux G — higher flow strictly decreases the outlet temperature rise.",
+        "transformation_semantics": "Apply ScaleField via transform steps [ScaleField@/boundary/mass_flux] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `delta_T` from source and follow-up outputs for MR `subchannel-flow-temperature-monotone`.",
+        "predicate_summary": "Predicate `less` / `LessThan` checks the expected relation on `delta_T`.",
+        "tolerance_summary": "Ordinal predicate: no numeric tolerance is applied beyond the declared ordering relation.",
+        "applicability": "Applicable when SUT `subchannel-1d` exposes sample `sample/pwr_channel.json`, the transform target fields, and output `delta_T`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/pwr_channel.json",
       "work_root_name": "MetBenchSubchannel",
       "timeout_seconds": 30
@@ -72,6 +81,15 @@
       "meta_pattern": "Mono",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Mono MR: Energy conservation MP_mono (linearity in heat input): doubling the wall heat flux q'' must strictly increase ΔT (in fact, by the same factor) because energy balance is linear in q'' at constant flow.",
+        "transformation_semantics": "Apply ScaleField via transform steps [ScaleField@/boundary/heat_flux] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `delta_T` from source and follow-up outputs for MR `subchannel-heat-flux-linearity`.",
+        "predicate_summary": "Predicate `greater` / `GreaterThan` checks the expected relation on `delta_T`.",
+        "tolerance_summary": "Ordinal predicate: no numeric tolerance is applied beyond the declared ordering relation.",
+        "applicability": "Applicable when SUT `subchannel-1d` exposes sample `sample/pwr_channel.json`, the transform target fields, and output `delta_T`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/pwr_channel.json",
       "work_root_name": "MetBenchSubchannel",
       "timeout_seconds": 30
@@ -99,6 +117,15 @@
       "meta_pattern": "Inv",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Inv MR: Decoupling invariance MP_inv: in this lumped 0D-axial energy balance the friction factor f only enters the momentum equation (Δp = f·L·G²/(2·ρ·D_h)).",
+        "transformation_semantics": "Apply ScaleField via transform steps [ScaleField@/fluid/friction_factor] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `delta_T` from source and follow-up outputs for MR `subchannel-friction-invariance`.",
+        "predicate_summary": "Predicate `approx` / `ApproxEqual` checks the expected relation on `delta_T`.",
+        "tolerance_summary": "Deterministic tolerance rel=1e-12, abs=1e-12 bounds acceptable numeric deviation.",
+        "applicability": "Applicable when SUT `subchannel-1d` exposes sample `sample/pwr_channel.json`, the transform target fields, and output `delta_T`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/pwr_channel.json",
       "work_root_name": "MetBenchSubchannel",
       "timeout_seconds": 30

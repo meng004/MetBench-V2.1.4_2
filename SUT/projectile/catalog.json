@@ -45,6 +45,15 @@
       "meta_pattern": "Mono",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Mono MR: By the projectile-motion identity R = v0²·sin(2θ)/g, scaling the initial speed v0 by factor > 1 must monotonically increase the horizontal range (in fact, by factor²).",
+        "transformation_semantics": "Apply ScaleField via transform steps [ScaleField@/v0] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `range` from source and follow-up outputs for MR `projectile-scale-v0`.",
+        "predicate_summary": "Predicate `greater` / `GreaterThan` checks the expected relation on `range`.",
+        "tolerance_summary": "Ordinal predicate: no numeric tolerance is applied beyond the declared ordering relation.",
+        "applicability": "Applicable when SUT `projectile` exposes sample `sample/standard.txt`, the transform target fields, and output `range`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/standard.txt",
       "work_root_name": "MetBenchProjectile",
       "timeout_seconds": 30

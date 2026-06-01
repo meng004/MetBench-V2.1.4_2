@@ -45,6 +45,15 @@
       "meta_pattern": "Mono",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Mono MR: Linearity MP_mono: the 1D advection equation u_t + v·u_x = 0 is linear in the initial condition.",
+        "transformation_semantics": "Apply ScaleField via transform steps [ScaleField@/initial/amplitude] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `peak_amplitude` from source and follow-up outputs for MR `advection-amplitude-linearity`.",
+        "predicate_summary": "Predicate `greater` / `GreaterThan` checks the expected relation on `peak_amplitude`.",
+        "tolerance_summary": "Ordinal predicate: no numeric tolerance is applied beyond the declared ordering relation.",
+        "applicability": "Applicable when SUT `advection-1d` exposes sample `sample/standard.json`, the transform target fields, and output `peak_amplitude`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/standard.json",
       "work_root_name": "MetBenchAdvection1d",
       "timeout_seconds": 30
@@ -72,6 +81,15 @@
       "meta_pattern": "Inv",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Inv MR: Mass conservation MP_inv: the conservative first-order upwind scheme with periodic boundaries preserves the integral ∫u dx to floating-point precision.",
+        "transformation_semantics": "Apply ScaleField via transform steps [ScaleField@/geometry/num_points] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `mass_integral` from source and follow-up outputs for MR `advection-mesh-conservation`.",
+        "predicate_summary": "Predicate `approx` / `ApproxEqual` checks the expected relation on `mass_integral`.",
+        "tolerance_summary": "Deterministic tolerance rel=0.001, abs=1e-06 bounds acceptable numeric deviation.",
+        "applicability": "Applicable when SUT `advection-1d` exposes sample `sample/standard.json`, the transform target fields, and output `mass_integral`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/standard.json",
       "work_root_name": "MetBenchAdvection1d",
       "timeout_seconds": 30

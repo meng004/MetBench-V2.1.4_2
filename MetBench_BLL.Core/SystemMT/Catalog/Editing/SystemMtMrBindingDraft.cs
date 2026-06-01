@@ -31,6 +31,13 @@ public sealed record SystemMtMrBindingDraft
     public double ToleranceAbs { get; set; }
     public bool NoiseAware { get; set; }
     public double NoiseMultiplier { get; set; } = 3.0;
+    public string MetaPatternRationale { get; set; } = string.Empty;
+    public string TransformationSemantics { get; set; } = string.Empty;
+    public string ObservableSummary { get; set; } = string.Empty;
+    public string PredicateSummary { get; set; } = string.Empty;
+    public string ToleranceSummary { get; set; } = string.Empty;
+    public string Applicability { get; set; } = string.Empty;
+    public string FailureMeaning { get; set; } = string.Empty;
 
     public static SystemMtMrBindingDraft NewForSut(string sutId) => new()
     {
@@ -73,6 +80,13 @@ public sealed record SystemMtMrBindingDraft
             ToleranceAbs = binding.ToleranceAbs,
             NoiseAware = binding.NoiseAware,
             NoiseMultiplier = binding.NoiseMultiplier,
+            MetaPatternRationale = binding.ExplanationProfile?.MetaPatternRationale ?? string.Empty,
+            TransformationSemantics = binding.ExplanationProfile?.TransformationSemantics ?? string.Empty,
+            ObservableSummary = binding.ExplanationProfile?.ObservableSummary ?? string.Empty,
+            PredicateSummary = binding.ExplanationProfile?.PredicateSummary ?? string.Empty,
+            ToleranceSummary = binding.ExplanationProfile?.ToleranceSummary ?? string.Empty,
+            Applicability = binding.ExplanationProfile?.Applicability ?? string.Empty,
+            FailureMeaning = binding.ExplanationProfile?.FailureMeaning ?? string.Empty,
         };
     }
 
@@ -114,6 +128,16 @@ public sealed record SystemMtMrBindingDraft
             MetaPattern = MetaPattern.Trim(),
             SourceLevel = SourceLevel.Trim(),
             FailureCorrelation = FailureCorrelation.Trim(),
+            ExplanationProfile = new MrExplanationProfileDefinition
+            {
+                MetaPatternRationale = MetaPatternRationale.Trim(),
+                TransformationSemantics = TransformationSemantics.Trim(),
+                ObservableSummary = ObservableSummary.Trim(),
+                PredicateSummary = PredicateSummary.Trim(),
+                ToleranceSummary = ToleranceSummary.Trim(),
+                Applicability = Applicability.Trim(),
+                FailureMeaning = FailureMeaning.Trim(),
+            },
             InputAdapterScriptRelativePath = InputAdapterScriptRelativePath.Trim(),
             OutputAdapterScriptRelativePath = OutputAdapterScriptRelativePath.Trim(),
             SampleCaseRelativePath = SampleCaseRelativePath.Trim(),

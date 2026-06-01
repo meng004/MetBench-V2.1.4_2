@@ -45,6 +45,15 @@
       "meta_pattern": "Mono",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Mono MR: The 3-nuclide Bateman decay chain A→B→C is linear in the initial quantities.",
+        "transformation_semantics": "Apply ScaleInitial via transform steps [ScaleInitial@] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `N_C_final` from source and follow-up outputs for MR `decay-chain-scale-initial`.",
+        "predicate_summary": "Predicate `greater` / `GreaterThan` checks the expected relation on `N_C_final`.",
+        "tolerance_summary": "Ordinal predicate: no numeric tolerance is applied beyond the declared ordering relation.",
+        "applicability": "Applicable when SUT `decay-chain` exposes sample `sample/three_nuclide.json`, the transform target fields, and output `N_C_final`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/three_nuclide.json",
       "work_root_name": "MetBenchDecayChain",
       "timeout_seconds": 60
@@ -72,6 +81,15 @@
       "meta_pattern": "Inv",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Inv MR: Mass conservation MP_inv: the Bateman chain A→B→C conserves total nuclide count (no production/absorption).",
+        "transformation_semantics": "Apply ScaleField via transform steps [ScaleField@/params/lambda_A] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `total` from source and follow-up outputs for MR `bateman-mass-conservation`.",
+        "predicate_summary": "Predicate `approx` / `ApproxEqual` checks the expected relation on `total`.",
+        "tolerance_summary": "Deterministic tolerance rel=1e-06, abs=1e-09 bounds acceptable numeric deviation.",
+        "applicability": "Applicable when SUT `decay-chain` exposes sample `sample/three_nuclide.json`, the transform target fields, and output `total`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/three_nuclide.json",
       "work_root_name": "MetBenchDecayChain",
       "timeout_seconds": 60
@@ -99,6 +117,15 @@
       "meta_pattern": "Conv",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Conv MR: Time-step Cauchy convergence MP_conv: doubling num_steps (halving the RK4 step size) must leave N_C_final within RK4 truncation tolerance — the integrator is already at the fine-grid plateau.",
+        "transformation_semantics": "Apply ScaleField via transform steps [ScaleField@/params/num_steps] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `N_C_final` from source and follow-up outputs for MR `bateman-timestep-cauchy`.",
+        "predicate_summary": "Predicate `approx` / `ApproxEqual` checks the expected relation on `N_C_final`.",
+        "tolerance_summary": "Deterministic tolerance rel=0.001, abs=1e-06 bounds acceptable numeric deviation.",
+        "applicability": "Applicable when SUT `decay-chain` exposes sample `sample/three_nuclide.json`, the transform target fields, and output `N_C_final`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/three_nuclide.json",
       "work_root_name": "MetBenchDecayChain",
       "timeout_seconds": 60

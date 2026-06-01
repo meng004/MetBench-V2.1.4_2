@@ -45,6 +45,15 @@
       "meta_pattern": "Mono",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Mono MR: Linearity MP_mono: the 1D linear wave equation u_tt = c²·u_xx is linear in the initial condition.",
+        "transformation_semantics": "Apply ScaleField via transform steps [ScaleField@/initial/amplitude] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `peak_amplitude` from source and follow-up outputs for MR `wave-amplitude-linearity`.",
+        "predicate_summary": "Predicate `greater` / `GreaterThan` checks the expected relation on `peak_amplitude`.",
+        "tolerance_summary": "Ordinal predicate: no numeric tolerance is applied beyond the declared ordering relation.",
+        "applicability": "Applicable when SUT `wave-1d` exposes sample `sample/standard.json`, the transform target fields, and output `peak_amplitude`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/standard.json",
       "work_root_name": "MetBenchWave1d",
       "timeout_seconds": 30
@@ -72,6 +81,15 @@
       "meta_pattern": "Conv",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Conv MR: Mesh-refinement convergence MP_conv: the second-order leapfrog scheme converges as O(dx², dt²).",
+        "transformation_semantics": "Apply ScaleField via transform steps [ScaleField@/geometry/num_points] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `energy_proxy` from source and follow-up outputs for MR `wave-mesh-energy-convergence`.",
+        "predicate_summary": "Predicate `approx` / `ApproxEqual` checks the expected relation on `energy_proxy`.",
+        "tolerance_summary": "Deterministic tolerance rel=0.001, abs=1e-06 bounds acceptable numeric deviation.",
+        "applicability": "Applicable when SUT `wave-1d` exposes sample `sample/standard.json`, the transform target fields, and output `energy_proxy`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/standard.json",
       "work_root_name": "MetBenchWave1d",
       "timeout_seconds": 30

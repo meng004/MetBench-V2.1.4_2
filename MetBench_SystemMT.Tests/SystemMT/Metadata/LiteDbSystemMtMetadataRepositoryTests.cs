@@ -108,12 +108,34 @@ public sealed class LiteDbSystemMtMetadataRepositoryTests : IDisposable
         InputTransformation = "γ → factor·γ（factor > 1）",
         OutputRelation = "mean_prey(flw) > mean_prey(src)",
         ComparisonType = MrComparisonType.Relative,
+        MetaPatternRationale = "Linearity MR: scaling the source should scale the solution.",
+        TransformationSemantics = "Scale source input field by factor.",
+        ObservableSummary = "Compare selected scalar or field residual after source/follow-up runs.",
+        PredicateSummary = "Binary comparison with configured tolerance.",
+        ToleranceSummary = "Relative tolerance explains accepted numerical deviation.",
+        Applicability = "Only valid when the SUT exposes the named metric.",
+        FailureMeaning = "MR violation indicates inconsistent response to the declared transformation.",
         Parameters = new List<MrParameter>
         {
             new() { Symbol = "γ", PhysicalMeaning = "捕食者死亡率", ValueRange = "γ > 0" },
             new() { Symbol = "δ", PhysicalMeaning = "捕食效率系数", ValueRange = "δ > 0" },
         },
     };
+
+
+    [Fact]
+    public void MrMetadata_default_explanation_profile_is_empty()
+    {
+        var mr = new MrMetadata();
+
+        Assert.Equal(string.Empty, mr.MetaPatternRationale);
+        Assert.Equal(string.Empty, mr.TransformationSemantics);
+        Assert.Equal(string.Empty, mr.ObservableSummary);
+        Assert.Equal(string.Empty, mr.PredicateSummary);
+        Assert.Equal(string.Empty, mr.ToleranceSummary);
+        Assert.Equal(string.Empty, mr.Applicability);
+        Assert.Equal(string.Empty, mr.FailureMeaning);
+    }
 
     [Fact]
     public async Task UpsertMr_then_GetMr_roundtrips_all_fields()
@@ -135,6 +157,13 @@ public sealed class LiteDbSystemMtMetadataRepositoryTests : IDisposable
             Assert.Equal("γ → factor·γ（factor > 1）", loaded.InputTransformation);
             Assert.Equal("mean_prey(flw) > mean_prey(src)", loaded.OutputRelation);
             Assert.Equal(MrComparisonType.Relative, loaded.ComparisonType);
+            Assert.Equal("Linearity MR: scaling the source should scale the solution.", loaded.MetaPatternRationale);
+            Assert.Equal("Scale source input field by factor.", loaded.TransformationSemantics);
+            Assert.Equal("Compare selected scalar or field residual after source/follow-up runs.", loaded.ObservableSummary);
+            Assert.Equal("Binary comparison with configured tolerance.", loaded.PredicateSummary);
+            Assert.Equal("Relative tolerance explains accepted numerical deviation.", loaded.ToleranceSummary);
+            Assert.Equal("Only valid when the SUT exposes the named metric.", loaded.Applicability);
+            Assert.Equal("MR violation indicates inconsistent response to the declared transformation.", loaded.FailureMeaning);
             Assert.Equal(2, loaded.Parameters.Count);
             Assert.Equal("δ", loaded.Parameters[1].Symbol);
             Assert.Equal("捕食效率系数", loaded.Parameters[1].PhysicalMeaning);

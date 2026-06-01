@@ -65,7 +65,33 @@ public sealed class SystemMtMetadataCatalogTests : IDisposable
             Assert.NotEmpty(mr.PhysicalMeaning);
             Assert.NotEmpty(mr.InputTransformation);
             Assert.NotEmpty(mr.OutputRelation);
+            Assert.NotEmpty(mr.MetaPatternRationale);
+            Assert.NotEmpty(mr.TransformationSemantics);
+            Assert.NotEmpty(mr.ObservableSummary);
+            Assert.NotEmpty(mr.PredicateSummary);
+            Assert.NotEmpty(mr.ToleranceSummary);
+            Assert.NotEmpty(mr.Applicability);
+            Assert.NotEmpty(mr.FailureMeaning);
             Assert.NotEmpty(mr.Parameters);
+        }
+    }
+
+    [Fact]
+    public void Seeded_runtime_MR_profiles_cover_mono_inv_and_conv_examples()
+    {
+        var mono = SystemMtMetadataCatalog.MetamorphicRelations.Single(m => m.MrId == "poisson-source-superposition");
+        var inv = SystemMtMetadataCatalog.MetamorphicRelations.Single(m => m.MrId == "subchannel-friction-invariance");
+        var conv = SystemMtMetadataCatalog.MetamorphicRelations.Single(m => m.MrId == "poisson-mesh-richardson");
+
+        foreach (var mr in new[] { mono, inv, conv })
+        {
+            Assert.False(string.IsNullOrWhiteSpace(mr.MetaPatternRationale));
+            Assert.False(string.IsNullOrWhiteSpace(mr.TransformationSemantics));
+            Assert.False(string.IsNullOrWhiteSpace(mr.ObservableSummary));
+            Assert.False(string.IsNullOrWhiteSpace(mr.PredicateSummary));
+            Assert.False(string.IsNullOrWhiteSpace(mr.ToleranceSummary));
+            Assert.False(string.IsNullOrWhiteSpace(mr.Applicability));
+            Assert.False(string.IsNullOrWhiteSpace(mr.FailureMeaning));
         }
     }
 

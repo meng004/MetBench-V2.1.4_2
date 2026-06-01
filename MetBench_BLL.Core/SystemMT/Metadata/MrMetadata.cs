@@ -59,6 +59,27 @@ public sealed class MrMetadata
     /// <summary>Whether the assertion compares absolutely or relatively.</summary>
     public MrComparisonType ComparisonType { get; set; }
 
+    /// <summary>Why the MR belongs to its declared meta-pattern family.</summary>
+    public string MetaPatternRationale { get; set; } = string.Empty;
+
+    /// <summary>Audit prose for source-to-follow-up input semantics.</summary>
+    public string TransformationSemantics { get; set; } = string.Empty;
+
+    /// <summary>Audit prose for the observed source/follow-up output quantity.</summary>
+    public string ObservableSummary { get; set; } = string.Empty;
+
+    /// <summary>Audit prose for the predicate and comparison semantics.</summary>
+    public string PredicateSummary { get; set; } = string.Empty;
+
+    /// <summary>Audit prose for tolerance/noise treatment.</summary>
+    public string ToleranceSummary { get; set; } = string.Empty;
+
+    /// <summary>Applicability and non-applicability conditions for the MR.</summary>
+    public string Applicability { get; set; } = string.Empty;
+
+    /// <summary>What an MR failure means for the SUT or adapter under test.</summary>
+    public string FailureMeaning { get; set; } = string.Empty;
+
     /// <summary>Per-parameter symbols, physical meaning and value ranges.</summary>
     public List<MrParameter> Parameters { get; set; } = new();
 }
