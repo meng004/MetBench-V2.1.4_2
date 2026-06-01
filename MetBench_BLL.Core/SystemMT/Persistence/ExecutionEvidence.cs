@@ -36,4 +36,16 @@ public sealed class ExecutionEvidence
     /// dispatches through the Typed Semantic Catalog runtime.
     /// </summary>
     public TypedVerificationEvidence? TypedVerification { get; set; }
+
+    /// <summary>
+    /// PR-3 pair-level quality summary. Default-empty so evidence rows written
+    /// before this field existed remain safe to read and render.
+    /// </summary>
+    private PairQualitySummary? _pairQuality = new();
+
+    public PairQualitySummary PairQuality
+    {
+        get => _pairQuality ??= new();
+        set => _pairQuality = value ?? new();
+    }
 }

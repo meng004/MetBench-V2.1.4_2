@@ -218,6 +218,10 @@ public sealed class SystemMtExecutionRecorder
         {
             evidence.TypedVerification = TypedVerificationEvidenceMapper
                 .FromVerificationResult(effectiveSpec, effectivePredicate, effectiveVerification);
+            evidence.PairQuality = PairQualitySummary.FromVerificationResult(
+                effectivePredicate,
+                effectiveVerification,
+                RoleOutputsProduced(outcome));
         }
         else if (typedProperty is not null && typedPropertySpec is not null)
         {
@@ -227,6 +231,16 @@ public sealed class SystemMtExecutionRecorder
 
         // Recorder is sync; evidence write also runs sync (LiteDB).
         _evidence!.SaveAsync(evidence).GetAwaiter().GetResult();
+    }
+
+    private static bool RoleOutputsProduced(PipelineOutcome outcome)
+    {
+        if (outcome.PhaseMetrics is not null)
+        {
+            return outcome.PhaseMetrics.Count > 0;
+        }
+
+        return outcome.SourceMetrics is not null && outcome.FollowupMetrics is not null;
     }
 
     private static List<ExecutionSampleTrace> BuildSampleTraces(PipelineContext context, PipelineOutcome outcome)

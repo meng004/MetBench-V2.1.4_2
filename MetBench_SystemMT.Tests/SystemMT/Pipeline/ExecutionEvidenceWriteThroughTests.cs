@@ -270,6 +270,59 @@ public sealed class ExecutionEvidenceWriteThroughTests
     }
 
     [Fact]
+    public async Task Record_writes_pair_quality_from_typed_verification_without_treating_skips_as_failed()
+    {
+        var execRepo = new FakeExecRepo();
+        var resRepo = new FakeResultRepo();
+        var evRepo = new InMemoryEvidenceRepo();
+        var v3Repo = new InMemoryV3Repo();
+
+        var predicate = (MetBench_BLL.SystemMT.Catalog.Typed.Specs.BinaryComparisonPredicate)
+            MetBench_BLL.SystemMT.Catalog.Typed.Migration.LegacyAssertionPredicateMapper.MapScalar(
+                "greater", "followup", "source", "max_u");
+        var spec = MetBench_BLL.SystemMT.Catalog.Typed.Migration.TypedSpecFactory.ForLegacyScalar(
+            mrCode: "heat-equation-amplitude",
+            valueName: "max_u",
+            predicate: predicate,
+            toleranceAbs: 0.0,
+            toleranceRel: 0.0);
+        var skipped = MetBench_BLL.SystemMT.Catalog.Typed.Runtime.VerificationResult
+            .SkippedMissingObservable("max_u missing from followup role");
+
+        var recorder = new SystemMtExecutionRecorder(execRepo, resRepo, evRepo, v3Repo);
+        var recorded = recorder.Record(
+            CtxFor("heat-equation-amplitude"),
+            OkOutcome() with
+            {
+                SourceMetrics = new Dictionary<string, double>(),
+                FollowupMetrics = new Dictionary<string, double>(),
+            },
+            mrInstanceId: 1,
+            batchId: null,
+            typedVerification: skipped,
+            typedProperty: null,
+            typedSpec: spec,
+            typedPredicate: predicate,
+            typedPropertySpec: null);
+
+        var evidence = await evRepo.GetByExecutionAsync(recorded.ExecutionId);
+
+        Assert.NotNull(evidence);
+        Assert.Equal(1, evidence!.PairQuality.PlannedPairs);
+        Assert.Equal(1, evidence.PairQuality.ExecutedPairs);
+        Assert.Equal(0, evidence.PairQuality.ValidPairs);
+        Assert.Equal(0, evidence.PairQuality.PassedPairs);
+        Assert.Equal(0, evidence.PairQuality.FailedPairs);
+        Assert.Equal(1, evidence.PairQuality.SkippedPairs);
+        Assert.Equal(0, evidence.PairQuality.InvalidSpecPairs);
+        Assert.Equal(0.0, evidence.PairQuality.PassRateValid);
+        Assert.Equal(0.0, evidence.PairQuality.PassRateAll);
+        var reason = Assert.Single(evidence.PairQuality.SkipReasons);
+        Assert.Equal("SkippedMissingObservable", reason.Status);
+        Assert.Equal("max_u missing from followup role", reason.Reason);
+    }
+
+    [Fact]
     public async Task Record_writes_evidence_with_null_TypedVerification_when_typed_inputs_are_absent()
     {
         var execRepo = new FakeExecRepo();
