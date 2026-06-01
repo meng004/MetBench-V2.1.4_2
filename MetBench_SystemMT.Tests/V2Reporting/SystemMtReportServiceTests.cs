@@ -241,6 +241,100 @@ public sealed class SystemMtReportServiceTests : IDisposable
         Assert.DoesNotContain("Tolerance:", content);
     }
 
+
+    [Fact]
+    public void GenerateExecution_appends_pair_quality_section_when_evidence_present()
+    {
+        var (svc, fakes) = MakeServiceWithEvidence(out var evRepo);
+        var execId = Guid.NewGuid();
+        fakes.Executions.Add(new Execution
+        {
+            IdExecution = execId, MRInstanceId = 5, Status = "ok",
+            TriggeredBy = "alice", QueuedAt = DateTime.UtcNow,
+            SutVersionSnapshot = "v1.2", MetbenchVersion = "v2.1",
+        });
+        evRepo.Data[execId] = new ExecutionEvidence
+        {
+            IdEvidence = Guid.NewGuid(),
+            ExecutionId = execId,
+            PairQuality = new PairQualitySummary
+            {
+                PlannedPairs = 4,
+                ExecutedPairs = 3,
+                ValidPairs = 2,
+                PassedPairs = 1,
+                FailedPairs = 1,
+                SkippedPairs = 1,
+                InvalidSpecPairs = 1,
+                PassRateValid = 0.5,
+                PassRateAll = 0.25,
+                SkipReasons =
+                {
+                    new PairQualityReasonCount
+                    {
+                        Status = "SkippedMissingObservable",
+                        Reason = "k_eff missing from followup role",
+                        Count = 1,
+                    },
+                },
+                InvalidSpecReasons =
+                {
+                    new PairQualityReasonCount
+                    {
+                        Status = "InvalidSpec",
+                        Reason = "predicate role was not declared",
+                        Count = 1,
+                    },
+                },
+            },
+        };
+
+        var path = Path.Combine(_tmpDir, "exec-pair-quality.md");
+        svc.GenerateExecution(execId, path);
+        var content = File.ReadAllText(path);
+
+        Assert.Contains("## Pair quality", content);
+        Assert.Contains("planned_pairs: 4", content);
+        Assert.Contains("executed_pairs: 3", content);
+        Assert.Contains("valid_pairs: 2", content);
+        Assert.Contains("passed_pairs: 1", content);
+        Assert.Contains("failed_pairs: 1", content);
+        Assert.Contains("skipped_pairs: 1", content);
+        Assert.Contains("invalid_spec_pairs: 1", content);
+        Assert.Contains("pass_rate_valid: 50.0 %", content);
+        Assert.Contains("pass_rate_all: 25.0 %", content);
+        Assert.Contains("skip reasons", content);
+        Assert.Contains("SkippedMissingObservable: k_eff missing from followup role (count: 1)", content);
+        Assert.Contains("invalid spec reasons", content);
+        Assert.Contains("InvalidSpec: predicate role was not declared (count: 1)", content);
+    }
+
+    [Fact]
+    public void GenerateExecution_default_empty_pair_quality_keeps_legacy_no_pair_section_behavior()
+    {
+        var (svc, fakes) = MakeServiceWithEvidence(out var evRepo);
+        var execId = Guid.NewGuid();
+        fakes.Executions.Add(new Execution
+        {
+            IdExecution = execId, MRInstanceId = 5, Status = "ok",
+            TriggeredBy = "alice", QueuedAt = DateTime.UtcNow,
+            SutVersionSnapshot = "v1.2", MetbenchVersion = "v2.1",
+        });
+        evRepo.Data[execId] = new ExecutionEvidence
+        {
+            IdEvidence = Guid.NewGuid(),
+            ExecutionId = execId,
+            PairQuality = new PairQualitySummary(),
+        };
+
+        var path = Path.Combine(_tmpDir, "exec-empty-pair-quality.md");
+        svc.GenerateExecution(execId, path);
+        var content = File.ReadAllText(path);
+
+        Assert.DoesNotContain("Pair quality", content);
+        Assert.DoesNotContain("planned_pairs", content);
+    }
+
     [Fact]
     public void GenerateExecution_typed_property_evidence_lists_predicates_in_order()
     {
