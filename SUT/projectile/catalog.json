@@ -12,6 +12,15 @@
     "output_adapter_script_relative_path": "projectile_output_parser.py",
     "python_executable_kind": "system"
   },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "closed-form ballistic formula",
+    "runtime_key": "system",
+    "input_contract": "JSON launch speed, angle, and gravity parameters.",
+    "output_contract": "JSON range metrics consumed by typed verifier.",
+    "adapter": "Python closed-form runner and JSON parser/adapter under SUT/projectile/.",
+    "dependency_risk": "pure-stdlib"
+  },
   "mrs": [
     {
       "mr_id": "projectile-scale-v0",

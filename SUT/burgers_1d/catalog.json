@@ -12,6 +12,15 @@
     "output_adapter_script_relative_path": "burgers_1d_output_parser.py",
     "python_executable_kind": "system"
   },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "finite-volume Lax-Friedrichs",
+    "runtime_key": "system",
+    "input_contract": "JSON mesh, timestep, flux, and Gaussian pulse parameters for periodic Burgers runs.",
+    "output_contract": "JSON nonlinear conservation metrics including mass and peak amplitude.",
+    "adapter": "Python finite-volume runner and JSON parser/adapter under SUT/burgers_1d/.",
+    "dependency_risk": "pure-stdlib"
+  },
   "mrs": [
     {
       "mr_id": "burgers-amplitude-peak-monotone",

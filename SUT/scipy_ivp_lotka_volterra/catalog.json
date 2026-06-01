@@ -12,6 +12,15 @@
     "output_adapter_script_relative_path": "scipy_ivp_lotka_volterra_output_parser.py",
     "python_executable_kind": "scipy"
   },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "SciPy solve_ivp",
+    "runtime_key": "scipy",
+    "input_contract": "JSON Lotka-Volterra initial populations, coefficients, and time grid.",
+    "output_contract": "JSON IVP trajectory metrics aligned with pure-stdlib Lotka-Volterra outputs.",
+    "adapter": "SciPy-backed Python runner and JSON parser/adapter under SUT/scipy_ivp_lotka_volterra/.",
+    "dependency_risk": "requires SciPy runtime; skipped when unavailable"
+  },
   "mrs": [
     {
       "mr_id": "scipy-ivp-lv-prey-growth-monotone",

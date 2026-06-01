@@ -12,6 +12,15 @@
     "output_adapter_script_relative_path": "wave_1d_output_parser.py",
     "python_executable_kind": "system"
   },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "finite-difference wave solver",
+    "runtime_key": "system",
+    "input_contract": "JSON wave speed, mesh/time step, and initial pulse parameters.",
+    "output_contract": "JSON wave metrics including peak amplitude and energy proxy.",
+    "adapter": "Python finite-difference runner and JSON parser/adapter under SUT/wave_1d/.",
+    "dependency_risk": "pure-stdlib"
+  },
   "mrs": [
     {
       "mr_id": "wave-amplitude-linearity",

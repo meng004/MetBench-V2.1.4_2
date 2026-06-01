@@ -96,6 +96,48 @@ public sealed class ManifestMrCatalogProviderTests : System.IDisposable
     }
 
     [Fact]
+    public void Load_accepts_manifest_profile_without_changing_runtime_entry()
+    {
+        var json = ValidSingleMrManifest.Replace(
+            "  \"mrs\": [",
+            "  \"profile\": {\n" +
+            "    \"program_type\": \"Num\",\n" +
+            "    \"solver_method\": \"finite-difference\",\n" +
+            "    \"runtime_key\": \"system\",\n" +
+            "    \"input_contract\": \"JSON params with mesh and coefficient fields\",\n" +
+            "    \"output_contract\": \"JSON metrics consumed by typed verifier\",\n" +
+            "    \"adapter\": \"python runner under SUT/<sut>/\",\n" +
+            "    \"dependency_risk\": \"pure-stdlib\"\n" +
+            "  },\n" +
+            "  \"mrs\": [");
+        WriteManifest("profile_dir", json);
+
+        var e = Assert.Single(new ManifestMrCatalogProvider(Opts()).Load());
+
+        Assert.Equal("test-mr-1", e.Mr.Id);
+        Assert.Equal("python3", e.PythonExecutable);
+        Assert.Equal(Path.Combine("profile_dir", "sample", "case.json"), e.SampleCaseRelativePath);
+    }
+
+    [Fact]
+    public void SystemMtCatalogDocument_missing_profile_deserializes_to_default_empty_profile()
+    {
+        var doc = System.Text.Json.JsonSerializer.Deserialize<SystemMtCatalogDocument>(
+            ValidSingleMrManifest,
+            new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.SnakeCaseLower });
+
+        Assert.NotNull(doc);
+        Assert.NotNull(doc!.Profile);
+        Assert.Equal(string.Empty, doc.Profile!.ProgramType);
+        Assert.Equal(string.Empty, doc.Profile.SolverMethod);
+        Assert.Equal(string.Empty, doc.Profile.RuntimeKey);
+        Assert.Equal(string.Empty, doc.Profile.InputContract);
+        Assert.Equal(string.Empty, doc.Profile.OutputContract);
+        Assert.Equal(string.Empty, doc.Profile.Adapter);
+        Assert.Equal(string.Empty, doc.Profile.DependencyRisk);
+    }
+
+    [Fact]
     public void Load_normalizes_forward_slash_in_relative_path_to_platform_separator()
     {
         // Regression fix: in PR #91 the manifest's JSON forward-slash sample path

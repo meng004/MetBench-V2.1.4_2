@@ -12,6 +12,15 @@
     "output_adapter_script_relative_path": "openmc_output_adapter.py",
     "python_executable_kind": "openmc"
   },
+  "profile": {
+    "program_type": "MC",
+    "solver_method": "Monte Carlo neutron transport",
+    "runtime_key": "openmc",
+    "input_contract": "OpenMC-compatible pincell case parameters and material perturbation fields.",
+    "output_contract": "Parsed OpenMC output/tally metrics such as k_eff and tally means.",
+    "adapter": "OpenMC Python runner plus input/output adapters under SUT/openmc/.",
+    "dependency_risk": "requires OpenMC Python environment; skipped when unavailable"
+  },
   "mrs": [
     {
       "mr_id": "openmc-pincell-nu-sigma-f",

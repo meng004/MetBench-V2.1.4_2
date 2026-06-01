@@ -47,6 +47,13 @@ public sealed class SystemMtSutEditorTests : IDisposable
         Assert.Equal("Num", draft.ProgramType);
         Assert.Equal("runner.py", draft.RunnerScriptRelativePath);
         Assert.Equal("system", draft.PythonExecutableKind);
+        Assert.Equal("Num", draft.ProfileProgramType);
+        Assert.Equal("finite-difference", draft.SolverMethod);
+        Assert.Equal("system", draft.RuntimeKey);
+        Assert.Equal("JSON params with mesh and coefficient fields", draft.InputContract);
+        Assert.Equal("JSON metrics consumed by typed verifier", draft.OutputContract);
+        Assert.Equal("python runner under SUT/<sut>/", draft.Adapter);
+        Assert.Equal("pure-stdlib", draft.DependencyRisk);
     }
 
     [Fact]
@@ -74,6 +81,8 @@ public sealed class SystemMtSutEditorTests : IDisposable
         {
             Equation = "FourierUpdated",
             ProgramType = "MC",
+            SolverMethod = "stochastic-transport",
+            RuntimeKey = "openmc",
         };
 
         var result = editor.SaveDraft("heat_equation", draft);
@@ -82,6 +91,9 @@ public sealed class SystemMtSutEditorTests : IDisposable
         var reloaded = LoadCatalogJson("heat_equation");
         Assert.Equal("FourierUpdated", reloaded.Program!.Equation);
         Assert.Equal("MC", reloaded.Program.ProgramType);
+        Assert.NotNull(reloaded.Profile);
+        Assert.Equal("stochastic-transport", reloaded.Profile!.SolverMethod);
+        Assert.Equal("openmc", reloaded.Profile.RuntimeKey);
         // Mrs section preserved
         Assert.Single(reloaded.Mrs);
         Assert.Equal("heat-scale", reloaded.Mrs[0].MrId);
@@ -100,6 +112,13 @@ public sealed class SystemMtSutEditorTests : IDisposable
         {
             RunnerScriptRelativePath = "runner.py",
             ProgramName = "new_sut",
+            ProfileProgramType = "Num",
+            SolverMethod = "finite-difference",
+            RuntimeKey = "system",
+            InputContract = "JSON params with mesh and coefficient fields",
+            OutputContract = "JSON metrics consumed by typed verifier",
+            Adapter = "python runner under SUT/<sut>/",
+            DependencyRisk = "pure-stdlib",
         };
 
         var result = editor.SaveDraft("new_sut", draft);
@@ -108,6 +127,8 @@ public sealed class SystemMtSutEditorTests : IDisposable
         Assert.True(File.Exists(Path.Combine(newSutDir, "catalog.json")));
         var json = File.ReadAllText(Path.Combine(newSutDir, "catalog.json"));
         Assert.Contains("\"sut_name\": \"new_sut\"", json, StringComparison.Ordinal);
+        Assert.Contains("\"profile\": {", json, StringComparison.Ordinal);
+        Assert.Contains("\"solver_method\": \"finite-difference\"", json, StringComparison.Ordinal);
         Assert.Contains("\"mrs\": []", json, StringComparison.Ordinal);
     }
 
@@ -159,6 +180,15 @@ public sealed class SystemMtSutEditorTests : IDisposable
             "input_parser_script_relative_path": "input_parser.py",
             "output_parser_script_relative_path": "output_parser.py",
             "python_executable_kind": "system"
+          },
+          "profile": {
+            "program_type": "Num",
+            "solver_method": "finite-difference",
+            "runtime_key": "system",
+            "input_contract": "JSON params with mesh and coefficient fields",
+            "output_contract": "JSON metrics consumed by typed verifier",
+            "adapter": "python runner under SUT/<sut>/",
+            "dependency_risk": "pure-stdlib"
           },
           "mrs": [
             {

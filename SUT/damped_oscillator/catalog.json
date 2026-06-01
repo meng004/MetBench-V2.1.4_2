@@ -12,6 +12,15 @@
     "output_adapter_script_relative_path": "damped_oscillator_output_adapter.py",
     "python_executable_kind": "system"
   },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "explicit ODE integration",
+    "runtime_key": "system",
+    "input_contract": "JSON initial state, damping, stiffness, mass, and time-step parameters.",
+    "output_contract": "JSON displacement and convergence metrics consumed by System MT assertions.",
+    "adapter": "Python ODE runner with input/output adapters under SUT/damped_oscillator/.",
+    "dependency_risk": "pure-stdlib"
+  },
   "mrs": [
     {
       "mr_id": "damped-oscillator-scale-state",
