@@ -10,7 +10,7 @@ namespace MetBench_SystemMT.Tests.SystemMT.Catalog;
 
 /// <summary>
 /// Pin the equivalence between the legacy hardcoded catalog and the manifest-backed catalog
-/// for every MR currently in the launcher (30 entries / 16 SUTs after PR-A non-JSON I/O adapter synthetic _test-csv SUT).
+/// for every MR currently in the launcher (count sourced from .github/governance/expected-catalog-counts.txt).
 /// Any drift in either side fails CI loudly.
 /// </summary>
 public sealed class CatalogParityTests

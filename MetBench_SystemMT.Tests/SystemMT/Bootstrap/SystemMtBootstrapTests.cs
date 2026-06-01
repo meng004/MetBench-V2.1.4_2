@@ -48,14 +48,14 @@ public sealed class SystemMtBootstrapTests
 
         var result = await SystemMtBootstrap.SeedCatalogsAsync(_meta, importer);
 
-        // metadata seed: 13 equations + 30 MRs（T3C-BVP 后 12eq/29MR；
-        // PR-A non-JSON I/O adapter synthetic _test_csv equation + csv-roundtrip-identity MR = 13eq/30MR）
+        // metadata seed follows .github/governance/expected-catalog-counts.txt
+        // (currently 13 equations + 33 MRs; PR-A's 13eq/30MR is historical).
         Assert.Equal(ExpectedCatalogCountsWhitelist.EquationCount, result.EquationsSeeded);
         Assert.Equal(ExpectedCatalogCountsWhitelist.MrCount, result.MrsSeeded);
         Assert.Equal(ExpectedCatalogCountsWhitelist.EquationCount, (await _meta.ListEquationsAsync()).Count);
         Assert.Equal(ExpectedCatalogCountsWhitelist.MrCount, (await _meta.ListMrsAsync()).Count);
 
-        // entity import: 16 SUT + 30 MR + 30 binding
+        // entity import follows whitelist counts (currently 16 SUT + 33 MR + 33 binding).
         Assert.NotNull(result.ImportSummary);
         Assert.Equal(ExpectedCatalogCountsWhitelist.SutCount, result.ImportSummary!.ApplicationsCreated);
         Assert.Equal(ExpectedCatalogCountsWhitelist.MrCount, result.ImportSummary.MrsCreated);

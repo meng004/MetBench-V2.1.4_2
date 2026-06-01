@@ -86,10 +86,10 @@ SUT 接入到框架的 hook：
 
 **Launcher end-to-end 测试（按 SUT）**：`LauncherEndToEndOdeTests`（decay_chain / damped_oscillator / lotka_volterra）· `LauncherEndToEndPoissonTests`（PR #134）· `LauncherEndToEndAdvectionTests`（PR #136）· `LauncherEndToEndWaveTests`（PR #138）· `LauncherEndToEndBurgersTests`（PR #140）· `LauncherEndToEndScipyIvpLotkaVolterraTests`（T3C-IVP，`[SkippableFact]`）· `LauncherEndToEndScipyBvpPoissonTests`（T3C-BVP，`[SkippableFact]`）· `LauncherEndToEndTestCsvTests`（PR-A 合成 _test_csv SUT）。
 
-**SUT 系统级 MR 总数（2026-05-26，post-PR-A）**：
-- launcher / manifest catalog：**30** MR-on-SUT 绑定 = 29 真实物理 + 1 合成 (`csv-roundtrip-identity`)
+**SUT 系统级 MR 总数（2026-06-01，current runtime catalog）**：
+- launcher / manifest catalog：**33** MR-on-SUT 绑定 = 32 真实物理 + 1 合成 (`csv-roundtrip-identity`)
 - 覆盖方程：**13** = 12 真实物理 + 1 合成 (`_test_csv`)
-- 真实物理 inventory（排除合成 SUT）：**15 SUT / 12 equations / 29 MRs**，与 T3C-BVP 后一致
+- 真实物理 inventory（排除合成 SUT）：**15 SUT / 12 equations / 32 MRs**；T3C-BVP 后的 **15 / 12 / 29** 与 PR-A 后的 **16 / 13 / 30** 仅作历史锚点
 - 当前结构风险：runtime 已切到 provider-backed catalog，生产 fallback 与 importer 具体类耦合已删除；sample-level evidence 已落第一条可复盘链，但覆盖粒度仍可继续扩展。T3 代表性 PDE-class 覆盖（椭圆 / 一阶线性双曲 / 二阶线性双曲 / 非线性双曲）已通过 PR #134 / #136 / #138 / #140 闭环；T3C-IVP 通过 `scipy-ivp-lotka-volterra` 把 External-solver-pilot 接入路径打通（`LauncherOptions.ScipyPython` + `PythonExecutableKinds.Scipy` + `ManifestMrCatalogProvider` scipy 分支 + `ScipyTestPaths.cs` clean-skip helper，env var `METBENCH_SCIPY_PYTHON`）；T3C-BVP 通过 `scipy-bvp-poisson-1d` 把 BVP/elliptic external-solver 路径打通（复用 T3C-IVP 基础设施，无新框架变更）；PR-1（#157）把 `LauncherOptions.RuntimePythons` 通用化为 manifest-driven 解析（新增运行时家族纯配置即可，不再改 `LauncherOptions` 字段）；PR-A（#162）把 SUT I/O wire format 从 JSON 单独扩展到 csv-row / plain-text（`metbench_io` helper）；PR-B（#161）与 PR-2（#159）分别落地 same-equation cross-method differential runner 与 T4-to-T0 discovery binder；进一步 T3 扩展由 next-SUT decision record 决定（见 `docs/status/current.md` §4 与 active plan index）
 
 ---

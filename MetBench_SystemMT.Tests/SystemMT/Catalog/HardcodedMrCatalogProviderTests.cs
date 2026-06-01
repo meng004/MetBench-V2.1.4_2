@@ -19,7 +19,7 @@ public sealed class HardcodedMrCatalogProviderTests
 
         var entries = p.Load();
 
-        // Branch state after PR-A non-JSON I/O adapter synthetic _test-csv SUT (+1 MR / +1 SUT): 30 MR × 16 SUT.
+        // Count sourced from .github/governance/expected-catalog-counts.txt.
         Assert.Equal(ExpectedCatalogCountsWhitelist.MrCount, entries.Count);
     }
 
