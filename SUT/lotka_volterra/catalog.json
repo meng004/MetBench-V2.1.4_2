@@ -45,6 +45,15 @@
       "meta_pattern": "Mono",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Mono MR: By the Lotka-Volterra time-average identity ⟨prey⟩ = gamma / delta, scaling the predator death rate gamma by factor > 1 must increase the time-averaged prey population mean_prey.",
+        "transformation_semantics": "Apply ScaleGamma via transform steps [ScaleField@/params/gamma] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `mean_prey` from source and follow-up outputs for MR `lotka-volterra-scale-gamma`.",
+        "predicate_summary": "Predicate `greater` / `GreaterThan` checks the expected relation on `mean_prey`.",
+        "tolerance_summary": "Ordinal predicate: no numeric tolerance is applied beyond the declared ordering relation.",
+        "applicability": "Applicable when SUT `lotka-volterra` exposes sample `sample/classic.json`, the transform target fields, and output `mean_prey`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/classic.json",
       "work_root_name": "MetBenchLotkaVolterra",
       "timeout_seconds": 60

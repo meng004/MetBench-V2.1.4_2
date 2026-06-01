@@ -45,6 +45,15 @@
       "meta_pattern": "Mono",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Mono MR: Synthetic non-physics MR that proves the metbench_io CSV helper round-trips through the MetBench launcher / pipeline / catalog without any framework knowledge of CSV.",
+        "transformation_semantics": "Apply ScaleField via transform steps [ScaleField@/params/factor] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `echo_value` from source and follow-up outputs for MR `csv-roundtrip-identity`.",
+        "predicate_summary": "Predicate `greater` / `GreaterThan` checks the expected relation on `echo_value`.",
+        "tolerance_summary": "Ordinal predicate: no numeric tolerance is applied beyond the declared ordering relation.",
+        "applicability": "Applicable when SUT `_test-csv` exposes sample `sample/standard.csv`, the transform target fields, and output `echo_value`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/standard.csv",
       "work_root_name": "MetBenchTestCsv",
       "timeout_seconds": 30
