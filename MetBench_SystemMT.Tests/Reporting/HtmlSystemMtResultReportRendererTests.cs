@@ -226,12 +226,15 @@ public sealed class HtmlSystemMtResultReportRendererTests
 
     private static readonly Guid TestRecordId = Guid.Parse("507f1f77-bcf8-6cd7-9943-9011deadbeef");
 
-    private static ExecutionEvidence MakeEvidence(TypedVerificationEvidence? typed)
+    private static ExecutionEvidence MakeEvidence(
+        TypedVerificationEvidence? typed,
+        PairQualitySummary? pairQuality = null)
         => new()
         {
             IdEvidence = Guid.NewGuid(),
             ExecutionId = TestRecordId,
             TypedVerification = typed,
+            PairQuality = pairQuality ?? new PairQualitySummary(),
         };
 
     [Fact]
@@ -394,6 +397,84 @@ public sealed class HtmlSystemMtResultReportRendererTests
         Assert.Contains("Decrease at index 4", html);
         // MR-only fields must not leak into a PropertySpec block.
         Assert.DoesNotContain("amplitude-greater", html);
+    }
+
+
+    [Fact]
+    public void Render_record_with_pair_quality_evidence_surfaces_counts_rates_and_reason_distribution()
+    {
+        var renderer = new HtmlSystemMtResultReportRenderer();
+        var record = MakeRecord();
+        var evidence = MakeEvidence(
+            typed: null,
+            pairQuality: new PairQualitySummary
+            {
+                PlannedPairs = 4,
+                ExecutedPairs = 3,
+                ValidPairs = 2,
+                PassedPairs = 1,
+                FailedPairs = 1,
+                SkippedPairs = 1,
+                InvalidSpecPairs = 1,
+                PassRateValid = 0.5,
+                PassRateAll = 0.25,
+                SkipReasons =
+                {
+                    new PairQualityReasonCount
+                    {
+                        Status = "SkippedMissingObservable",
+                        Reason = "k_eff missing from followup role",
+                        Count = 1,
+                    },
+                },
+                InvalidSpecReasons =
+                {
+                    new PairQualityReasonCount
+                    {
+                        Status = "InvalidSpec",
+                        Reason = "predicate role was not declared",
+                        Count = 1,
+                    },
+                },
+            });
+
+        var html = renderer.Render(
+            new[] { record },
+            new Dictionary<Guid, ExecutionEvidence> { [TestRecordId] = evidence });
+
+        Assert.Contains("Pair quality", html);
+        Assert.Contains("planned_pairs", html);
+        Assert.Contains("executed_pairs", html);
+        Assert.Contains("valid_pairs", html);
+        Assert.Contains("passed_pairs", html);
+        Assert.Contains("failed_pairs", html);
+        Assert.Contains("skipped_pairs", html);
+        Assert.Contains("invalid_spec_pairs", html);
+        Assert.Contains("pass_rate_valid", html);
+        Assert.Contains("50.0 %", html);
+        Assert.Contains("pass_rate_all", html);
+        Assert.Contains("25.0 %", html);
+        Assert.Contains("Skip reasons", html);
+        Assert.Contains("SkippedMissingObservable", html);
+        Assert.Contains("k_eff missing from followup role", html);
+        Assert.Contains("Invalid spec reasons", html);
+        Assert.Contains("InvalidSpec", html);
+        Assert.Contains("predicate role was not declared", html);
+    }
+
+    [Fact]
+    public void Render_record_with_default_empty_pair_quality_omits_pair_quality_section()
+    {
+        var renderer = new HtmlSystemMtResultReportRenderer();
+        var record = MakeRecord();
+        var evidence = MakeEvidence(typed: null, pairQuality: new PairQualitySummary());
+
+        var html = renderer.Render(
+            new[] { record },
+            new Dictionary<Guid, ExecutionEvidence> { [TestRecordId] = evidence });
+
+        Assert.DoesNotContain("Pair quality", html);
+        Assert.DoesNotContain("planned_pairs", html);
     }
 
     [Fact]

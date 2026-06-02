@@ -43,16 +43,16 @@ Skipped, not-applicable, and invalid-spec states must never be folded into Passe
 
 ## Plan Table
 
-| Task | Impact range | Progress | Preconditions | Main steps | Acceptance standard | Quality monitoring |
+| Task | Impact range | Status | Preconditions | Main steps | Acceptance standard | Quality monitoring |
 |---|---|---:|---|---|---|---|
-| P0 Design lock and registration | Docs only | 0.5 day | `origin/main` fetched; current ledger and active index read | Record scoped design, formulas, compatibility rule, Windows classification | Plan appears in active index; no code touched | PR checklist; no ambiguous pair formulas |
-| P1 Equation explanation profile | Metadata and seed catalog | 1 day | P0 merged | Extend `EquationMetadata`; seed equation class, variables, canonical law, expected invariants, benchmark rationale | Built-in equations round-trip; editor validation covers required explanation for new user rows | Metadata tests; LiteDB round-trip tests |
-| P2 SUT explanation profile | SUT manifests and SUT editor | 1 day | P1 profile names stable | Add program type, solver method, runtime key, input/output contract, adapter, dependency risk | All runtime SUTs expose a SUT profile; unknown runtime remains fail-closed | Manifest validation; catalog count whitelist |
-| P3 MR explanation profile | MR metadata and typed projection | 1.5 days | P1/P2 completed | Add meta-pattern rationale, transform semantics, observables, predicate, tolerance, applicability, failure meaning | All current runtime MRs can render a meaningful MR card | Typed catalog boundary tests; MR id parity |
-| P4 Pair quality evidence | Pipeline, recorder, evidence schema | 2 days | P3 complete; pair counting rule approved | Add pair summary DTO; populate from two-role and multi-phase outcomes; persist beside typed verification | Existing evidence rows still read; new runs persist pair summary; non-Failed typed statuses do not create false failures | Evidence round-trip tests; anomaly correctness tests |
-| P5 Report projection | HTML / Markdown execution reports | 1 day | P4 data available | Add pair summary block and skip reason distribution; keep legacy no-evidence rendering stable | Reports show pair counts and pass rates; legacy path remains byte-identical when evidence absent | Renderer contract tests; report snapshot tests |
-| P6 WPF display | Catalog pages, execution history, i18n | 2 days | P5 merged; Windows VM available | Add explanation cards and pair quality badges; update localized strings; capture screenshots | Windows build has 0 errors; UI shows explanation and pair metrics on key pages | VM build log; UIA/FlaUI or screenshot matrix |
-| P7 Documentation and status sync | Usage guide, ledger, active index | 0.5 day | P6 evidence collected | Update Chinese usage guide and status ledger with exact evidence | Docs cite concrete commits, commands, screenshots; active plan moved to Completed | Spec-freshness guard; status truth-source review |
+| P0 Design lock and registration | Docs only | Complete (`3129ecb`) | `origin/main` fetched; current ledger and active index read | Record scoped design, formulas, compatibility rule, Windows classification | Plan appears in active index; no code touched | PR checklist; no ambiguous pair formulas |
+| P1 Equation explanation profile | Metadata and seed catalog | Complete (`59b37cc`) | P0 merged | Extend `EquationMetadata`; seed equation class, variables, canonical law, expected invariants, benchmark rationale | Built-in equations round-trip; editor validation covers required explanation for new user rows | Metadata tests; LiteDB round-trip tests |
+| P2 SUT explanation profile | SUT manifests and SUT editor | Complete (`59b37cc`) | P1 profile names stable | Add program type, solver method, runtime key, input/output contract, adapter, dependency risk | All runtime SUTs expose a SUT profile; unknown runtime remains fail-closed | Manifest validation; catalog count whitelist |
+| P3 MR explanation profile | MR metadata and typed projection | Complete (`95f674d`) | P1/P2 completed | Add meta-pattern rationale, transform semantics, observables, predicate, tolerance, applicability, failure meaning | All current runtime MRs can render a meaningful MR card | Typed catalog boundary tests; MR id parity |
+| P4 Pair quality evidence | Pipeline, recorder, evidence schema | Complete (`74a5292`) | P3 complete; pair counting rule approved | Add pair summary DTO; populate from two-role and multi-phase outcomes; persist beside typed verification | Existing evidence rows still read; new runs persist pair summary; non-Failed typed statuses do not create false failures | Evidence round-trip tests; anomaly correctness tests |
+| P5 Report projection | HTML / Markdown execution reports | Complete locally (`730723a`; local `main` ahead of `origin/main`) | P4 data available | Add pair summary block and skip reason distribution; keep legacy no-evidence rendering stable | Reports show pair counts and pass rates; legacy path remains byte-identical when evidence absent | Renderer contract tests; report snapshot tests |
+| P6 WPF display | Catalog pages, execution history, i18n | Pending | P5 merged/pushed; Windows VM available | Add explanation cards and pair quality badges; update localized strings; capture screenshots | Windows build has 0 errors; UI shows explanation and pair metrics on key pages | VM build log; UIA/FlaUI or screenshot matrix |
+| P7 Documentation and status sync | Usage guide, ledger, active index | Partially updated; final completion pending P6 evidence | P6 evidence collected | Update Chinese usage guide and status ledger with exact evidence | Docs cite concrete commits, commands, screenshots; active plan moved to Completed | Spec-freshness guard; status truth-source review |
 
 ## Detailed Implementation Tasks
 
@@ -423,8 +423,8 @@ Expected: no whitespace errors; no unresolved placeholders introduced by this wo
 | PR-1 | Equation + SUT explanation profiles | Metadata and catalog focused tests pass. |
 | PR-2 | MR explanation profile | Metadata and semantic boundary tests pass. |
 | PR-3 | Pair quality evidence | Evidence, pipeline, anomaly tests pass. |
-| PR-4 | Report projection | HTML and Markdown report tests pass. |
-| PR-5 | WPF display + docs/status sync | Cloud-safe tests plus Windows VM build/screenshots pass. |
+| PR-4 | Report projection | Implemented locally at `730723a`; clean `git archive HEAD` snapshot report tests exited 0, but RTK returned binlog-only summaries without counts. |
+| PR-5 | WPF display + final docs/status sync | Pending; cloud-safe tests plus Windows VM build/screenshots must pass before this plan can move to Completed. |
 
 ## Validation Commands
 

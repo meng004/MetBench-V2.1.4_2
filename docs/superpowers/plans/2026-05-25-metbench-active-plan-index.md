@@ -1,9 +1,9 @@
 # MetBench 活跃计划索引
 
-> **日期**: 2026-05-31
+> **日期**: 2026-06-02
 > **状态**: 生效
 > **目的**: 明确哪些计划仍指导当前开发，哪些只是历史记录，防止执行和监控误取旧计划。
-> **当前 live main**: `513657fb8cb0f2006a4947e3a86349ec0cb917f4` (`9a58542`)
+> **当前审查头**: local `main` = `730723ad588341bf6abac80f2f1decdddba05653` (`730723a`); live `origin/main` = `f2ebb001879b87bd79a81b6f1b236b6102b06f56` (`f2ebb00`). Local `main` is ahead by the PR-4 report-projection commit until pushed.
 
 ---
 
@@ -12,7 +12,7 @@
 | Plan | Status | Scope | Expiry condition |
 |---|---|---|---|
 | `docs/superpowers/plans/2026-05-25-metbench-governed-next-stage-plan.md` | Active | Governance-first next-stage planning; blocks further implementation until the named design ambiguities are resolved | Expires when semantic-convergence, Evidence v2, Windows verification policy, and transition plan are completed and replaced by a new implementation plan |
-| `docs/superpowers/plans/2026-06-01-systemmt-explainability-pair-quality-plan.md` | Active scoped plan | Improve System MT equation / SUT / MR explanations and add pair-level execution quality summaries. Implementation sequence is PR-0 docs plan, PR-1 equation/SUT profiles, PR-2 MR profiles, PR-3 pair evidence, PR-4 report projection, PR-5 WPF display + docs/status sync. | Expires when all PR sequence phases land and `docs/status/current.md` records concrete cloud and Windows evidence |
+| `docs/superpowers/plans/2026-06-01-systemmt-explainability-pair-quality-plan.md` | Active scoped plan — cloud-side PR0-PR4 implemented locally; PR5 remains | Improve System MT equation / SUT / MR explanations and add pair-level execution quality summaries. Current local chain: PR-0 docs plan/index (`3129ecb`), PR-1 equation/SUT profiles (`59b37cc`), PR-2 MR profiles (`95f674d`), PR-3 pair-quality evidence (`74a5292`), PR-4 HTML/Markdown report projection (`730723a`). Remaining: PR-5 WPF display + Windows evidence + final docs/status sync. | Expires when PR-5 lands, Windows evidence exists, `docs/status/current.md` records concrete evidence, and this row is moved to Completed |
 | `docs/superpowers/plans/2026-05-30-t0-t5-minimal-release-readiness-confirmation-plan.md` | Completed (release-readiness evidence merged) | Confirmed T0-T5 minimum engineered System-MT release readiness. Final report records 21/21 core checks PASS, 100.0% core-function confirmation coverage, 3 SUT / 3 MR release-smoke slices covering Mono/Inv/Conv, 22/22 VM filtered commands PASS, full suite 1558 / 0 / 12, WPF build 0 errors, and VM screenshot matrix 21/21 PASS. | Already expired (release-readiness confirmation complete); keep as release gate evidence |
 | `docs/superpowers/plans/2026-05-30-metbench-client-multilingual-i18n-plan.md` | Completed (client i18n merged) | Added UI-neutral `MetBench_UI.Localization` (`net8.0`, .resx/ResourceManager, no WPF/Avalonia dependency) plus WPF bindings, Settings language switcher, Chinese/English resources, abnormal fallback coverage, and VM UIA screenshots. | Already expired (i18n foundation complete); future Avalonia UI can reuse the localization core |
 | `docs/superpowers/plans/2026-05-30-systemmt-page-full-i18n-plan.md` | Completed (full-page i18n merged) | Extended localization across System-MT execution/catalog pages, legacy/function pages, and runtime status strings; VM evidence includes paired zh/en screenshots for the major pages and additional ClientI18n resource/status tests. | Already expired (full-page bilingual UI evidence complete) |

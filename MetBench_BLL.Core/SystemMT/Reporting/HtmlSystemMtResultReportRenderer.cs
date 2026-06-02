@@ -62,12 +62,14 @@ public sealed class HtmlSystemMtResultReportRenderer : ISystemMtResultReportRend
             foreach (var r in list)
             {
                 TypedVerificationEvidence? typed = null;
+                PairQualitySummary? pairQuality = null;
                 if (evidenceByExecutionId is not null
                     && evidenceByExecutionId.TryGetValue(r.Id, out var ev))
                 {
                     typed = ev?.TypedVerification;
+                    pairQuality = HasPairQuality(ev?.PairQuality) ? ev!.PairQuality : null;
                 }
-                RenderRow(sb, r, typed);
+                RenderRow(sb, r, typed, pairQuality);
             }
             sb.AppendLine("</tbody>");
             sb.AppendLine("</table>");
@@ -78,7 +80,11 @@ public sealed class HtmlSystemMtResultReportRenderer : ISystemMtResultReportRend
         return sb.ToString();
     }
 
-    private static void RenderRow(StringBuilder sb, SystemMtResultRecord r, TypedVerificationEvidence? typed = null)
+    private static void RenderRow(
+        StringBuilder sb,
+        SystemMtResultRecord r,
+        TypedVerificationEvidence? typed = null,
+        PairQualitySummary? pairQuality = null)
     {
         var rowClass = r.Passed ? "row-pass" : "row-fail";
         sb.Append("<tr class=\"").Append(rowClass).AppendLine("\">");
@@ -142,9 +148,82 @@ public sealed class HtmlSystemMtResultReportRenderer : ISystemMtResultReportRend
         {
             AppendTypedVerification(sb, typed);
         }
+        if (pairQuality is not null)
+        {
+            AppendPairQuality(sb, pairQuality);
+        }
         sb.AppendLine("</dl>");
         sb.AppendLine("</details>");
         sb.AppendLine("</td></tr>");
+    }
+
+    private static void AppendPairQuality(StringBuilder sb, PairQualitySummary pairQuality)
+    {
+        sb.AppendLine("<dt>Pair quality</dt><dd>");
+        sb.AppendLine("<table class=\"pair-quality\">");
+        sb.AppendLine("<thead><tr><th>planned_pairs</th><th>executed_pairs</th><th>valid_pairs</th><th>passed_pairs</th><th>failed_pairs</th><th>skipped_pairs</th><th>invalid_spec_pairs</th><th>pass_rate_valid</th><th>pass_rate_all</th></tr></thead>");
+        sb.Append("<tbody><tr>")
+          .Append("<td>").Append(pairQuality.PlannedPairs.ToString(Inv)).Append("</td>")
+          .Append("<td>").Append(pairQuality.ExecutedPairs.ToString(Inv)).Append("</td>")
+          .Append("<td>").Append(pairQuality.ValidPairs.ToString(Inv)).Append("</td>")
+          .Append("<td>").Append(pairQuality.PassedPairs.ToString(Inv)).Append("</td>")
+          .Append("<td>").Append(pairQuality.FailedPairs.ToString(Inv)).Append("</td>")
+          .Append("<td>").Append(pairQuality.SkippedPairs.ToString(Inv)).Append("</td>")
+          .Append("<td>").Append(pairQuality.InvalidSpecPairs.ToString(Inv)).Append("</td>")
+          .Append("<td>").Append(pairQuality.PassRateValid.ToString("P1", Inv)).Append("</td>")
+          .Append("<td>").Append(pairQuality.PassRateAll.ToString("P1", Inv)).Append("</td>")
+          .AppendLine("</tr></tbody>");
+        sb.AppendLine("</table>");
+        AppendReasonDistribution(sb, "Skip reasons", pairQuality.SkipReasons);
+        AppendReasonDistribution(sb, "Invalid spec reasons", pairQuality.InvalidSpecReasons);
+        sb.AppendLine("</dd>");
+    }
+
+    private static void AppendReasonDistribution(
+        StringBuilder sb,
+        string title,
+        IReadOnlyList<PairQualityReasonCount>? reasons)
+    {
+        if (reasons is not { Count: > 0 })
+        {
+            return;
+        }
+
+        sb.Append("<p class=\"pair-quality-reasons\"><strong>")
+          .Append(Esc(title))
+          .AppendLine(":</strong></p>");
+        sb.AppendLine("<ul class=\"pair-quality-reasons\">");
+        foreach (var reason in reasons)
+        {
+            sb.Append("<li><span class=\"reason-status\">")
+              .Append(Esc(reason.Status))
+              .Append("</span>: ")
+              .Append(Esc(reason.Reason))
+              .Append(" — count: ")
+              .Append(reason.Count.ToString(Inv))
+              .AppendLine("</li>");
+        }
+        sb.AppendLine("</ul>");
+    }
+
+    private static bool HasPairQuality(PairQualitySummary? pairQuality)
+    {
+        if (pairQuality is null)
+        {
+            return false;
+        }
+
+        return pairQuality.PlannedPairs != 0
+            || pairQuality.ExecutedPairs != 0
+            || pairQuality.ValidPairs != 0
+            || pairQuality.PassedPairs != 0
+            || pairQuality.FailedPairs != 0
+            || pairQuality.SkippedPairs != 0
+            || pairQuality.InvalidSpecPairs != 0
+            || pairQuality.PassRateValid != 0.0
+            || pairQuality.PassRateAll != 0.0
+            || pairQuality.SkipReasons.Count != 0
+            || pairQuality.InvalidSpecReasons.Count != 0;
     }
 
     private static void AppendTypedVerification(StringBuilder sb, TypedVerificationEvidence typed)
