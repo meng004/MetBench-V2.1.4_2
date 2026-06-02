@@ -53,10 +53,13 @@ public sealed class SystemMtPairQualityEvidenceTests
 
         var summary = vm.SelectedEvidenceSummary;
         Assert.Contains(loc["Evidence_History_PairQualityHeader"], summary);
-        // counts present
-        Assert.Contains("4", summary);
-        Assert.Contains("3", summary);
-        Assert.Contains("2", summary);
+        Assert.Contains("Planned pairs 4", summary);
+        Assert.Contains("Executed pairs 4", summary);
+        Assert.Contains("Valid pairs 3", summary);
+        Assert.Contains("Passed pairs 2", summary);
+        Assert.Contains("Failed pairs 1", summary);
+        Assert.Contains("Skipped pairs 1", summary);
+        Assert.Contains("Invalid spec pairs 0", summary);
         // invariant P1 rates: 2/3 -> 66.7 %, 2/4 -> 50.0 % (invariant percent pattern keeps a space)
         Assert.Contains("66.7", summary);
         Assert.Contains("50.0", summary);
@@ -79,6 +82,32 @@ public sealed class SystemMtPairQualityEvidenceTests
         // Execution metadata still renders, but no pair-quality section.
         Assert.False(string.IsNullOrWhiteSpace(summary));
         Assert.DoesNotContain(loc["Evidence_History_PairQualityHeader"], summary);
+    }
+
+    [WpfFact]
+    public async Task Refresh_clears_stale_evidence_when_filter_removes_selected_row()
+    {
+        var id = Guid.NewGuid();
+        var pq = new PairQualitySummary
+        {
+            PlannedPairs = 1,
+            ExecutedPairs = 1,
+            ValidPairs = 1,
+            PassedPairs = 1,
+        };
+        pq.RecalculateRates();
+        var evidence = new ExecutionEvidence { ExecutionId = id, PairQuality = pq };
+
+        var (vm, loc) = BuildVm(evidence);
+        vm.SelectedRecord = Record(id);
+        Assert.Contains(loc["Evidence_History_PairQualityHeader"], vm.SelectedEvidenceSummary);
+
+        vm.MrNameFilter = "__missing__";
+        await vm.RefreshCommand.ExecuteAsync(null);
+
+        Assert.Null(vm.SelectedRecord);
+        Assert.True(string.IsNullOrEmpty(vm.SelectedEvidenceSummary));
+        Assert.DoesNotContain(loc["Evidence_History_PairQualityHeader"], vm.SelectedEvidenceSummary);
     }
 
     [WpfFact]

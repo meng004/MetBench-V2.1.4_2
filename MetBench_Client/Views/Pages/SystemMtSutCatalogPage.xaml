@@ -94,6 +94,55 @@
             <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
                 <StackPanel>
                 <Border
+                    x:Name="Border_SutProfileCard"
+                    Margin="0,0,0,12"
+                    Padding="14"
+                    AutomationProperties.AutomationId="Border_SutProfileCard"
+                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,8" FontWeight="Medium" Text="{Binding ViewModel.Localization[SystemMt_Sut_ProfileHeader]}"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Sut_ProfileProgramType]}"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Margin="0,0,0,6" Text="{Binding ViewModel.ProfileProgramTypeDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Sut_SolverMethod]}"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,0,0,6" Text="{Binding ViewModel.SolverMethodDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Sut_RuntimeKey]}"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,0,0,6" Text="{Binding ViewModel.RuntimeKeyDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Sut_InputContract]}"/>
+                        <TextBlock Grid.Row="4" Grid.Column="1" Margin="0,0,0,6" Text="{Binding ViewModel.InputContractDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
+
+                        <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Sut_OutputContract]}"/>
+                        <TextBlock Grid.Row="5" Grid.Column="1" Margin="0,0,0,6" Text="{Binding ViewModel.OutputContractDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
+
+                        <TextBlock Grid.Row="6" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Sut_Adapter]}"/>
+                        <TextBlock Grid.Row="6" Grid.Column="1" Margin="0,0,0,6" Text="{Binding ViewModel.AdapterDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
+
+                        <TextBlock Grid.Row="7" Grid.Column="0" Margin="0,0,8,0" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Sut_DependencyRisk]}"/>
+                        <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding ViewModel.DependencyRiskDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
+                    </Grid>
+                </Border>
+
+                <Border
                     Padding="14"
                     BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
                     BorderThickness="1"
@@ -227,54 +276,6 @@
                     </Grid>
                 </Border>
 
-                <Border
-                    x:Name="Border_SutProfileCard"
-                    Margin="0,12,0,0"
-                    Padding="14"
-                    AutomationProperties.AutomationId="Border_SutProfileCard"
-                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-                    BorderThickness="1"
-                    CornerRadius="4">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="200"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,8" FontWeight="Medium" Text="{Binding ViewModel.Localization[SystemMt_Sut_ProfileHeader]}"/>
-
-                        <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Sut_ProfileProgramType]}"/>
-                        <TextBlock Grid.Row="1" Grid.Column="1" Margin="0,0,0,6" Text="{Binding ViewModel.ProfileProgramTypeDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
-
-                        <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Sut_SolverMethod]}"/>
-                        <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,0,0,6" Text="{Binding ViewModel.SolverMethodDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
-
-                        <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Sut_RuntimeKey]}"/>
-                        <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,0,0,6" Text="{Binding ViewModel.RuntimeKeyDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
-
-                        <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Sut_InputContract]}"/>
-                        <TextBlock Grid.Row="4" Grid.Column="1" Margin="0,0,0,6" Text="{Binding ViewModel.InputContractDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
-
-                        <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Sut_OutputContract]}"/>
-                        <TextBlock Grid.Row="5" Grid.Column="1" Margin="0,0,0,6" Text="{Binding ViewModel.OutputContractDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
-
-                        <TextBlock Grid.Row="6" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Sut_Adapter]}"/>
-                        <TextBlock Grid.Row="6" Grid.Column="1" Margin="0,0,0,6" Text="{Binding ViewModel.AdapterDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
-
-                        <TextBlock Grid.Row="7" Grid.Column="0" Margin="0,0,8,0" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Sut_DependencyRisk]}"/>
-                        <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding ViewModel.DependencyRiskDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
-                    </Grid>
-                </Border>
                 </StackPanel>
             </ScrollViewer>
         </Grid>

@@ -115,6 +115,55 @@
             <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
                 <StackPanel>
                 <Border
+                    x:Name="Border_MrExplanationCard"
+                    Margin="0,0,0,12"
+                    Padding="14"
+                    AutomationProperties.AutomationId="Border_MrExplanationCard"
+                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,8" FontWeight="Medium" Text="{Binding ViewModel.Localization[SystemMt_Mr_ExplanationHeader]}"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Mr_MetaPatternRationale]}"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Margin="0,0,0,6" Text="{Binding ViewModel.MetaPatternRationaleDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Mr_TransformationSemantics]}"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,0,0,6" Text="{Binding ViewModel.TransformationSemanticsDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Mr_Observables]}"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,0,0,6" Text="{Binding ViewModel.ObservablesDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Mr_Predicate]}"/>
+                        <TextBlock Grid.Row="4" Grid.Column="1" Margin="0,0,0,6" Text="{Binding ViewModel.PredicateDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
+
+                        <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Mr_Tolerance]}"/>
+                        <TextBlock Grid.Row="5" Grid.Column="1" Margin="0,0,0,6" Text="{Binding ViewModel.ToleranceDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
+
+                        <TextBlock Grid.Row="6" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Mr_Applicability]}"/>
+                        <TextBlock Grid.Row="6" Grid.Column="1" Margin="0,0,0,6" Text="{Binding ViewModel.ApplicabilityDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
+
+                        <TextBlock Grid.Row="7" Grid.Column="0" Margin="0,0,8,0" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Mr_FailureMeaning]}"/>
+                        <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding ViewModel.FailureMeaningDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
+                    </Grid>
+                </Border>
+
+                <Border
                     Padding="14"
                     BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
                     BorderThickness="1"
@@ -287,54 +336,6 @@
                     </Grid>
                 </Border>
 
-                <Border
-                    x:Name="Border_MrExplanationCard"
-                    Margin="0,12,0,0"
-                    Padding="14"
-                    AutomationProperties.AutomationId="Border_MrExplanationCard"
-                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-                    BorderThickness="1"
-                    CornerRadius="4">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="180"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,8" FontWeight="Medium" Text="{Binding ViewModel.Localization[SystemMt_Mr_ExplanationHeader]}"/>
-
-                        <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Mr_MetaPatternRationale]}"/>
-                        <TextBlock Grid.Row="1" Grid.Column="1" Margin="0,0,0,6" Text="{Binding ViewModel.MetaPatternRationaleDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
-
-                        <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Mr_TransformationSemantics]}"/>
-                        <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,0,0,6" Text="{Binding ViewModel.TransformationSemanticsDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
-
-                        <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Mr_Observables]}"/>
-                        <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,0,0,6" Text="{Binding ViewModel.ObservablesDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
-
-                        <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Mr_Predicate]}"/>
-                        <TextBlock Grid.Row="4" Grid.Column="1" Margin="0,0,0,6" Text="{Binding ViewModel.PredicateDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
-
-                        <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Mr_Tolerance]}"/>
-                        <TextBlock Grid.Row="5" Grid.Column="1" Margin="0,0,0,6" Text="{Binding ViewModel.ToleranceDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
-
-                        <TextBlock Grid.Row="6" Grid.Column="0" Margin="0,0,8,6" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Mr_Applicability]}"/>
-                        <TextBlock Grid.Row="6" Grid.Column="1" Margin="0,0,0,6" Text="{Binding ViewModel.ApplicabilityDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
-
-                        <TextBlock Grid.Row="7" Grid.Column="0" Margin="0,0,8,0" VerticalAlignment="Top" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding ViewModel.Localization[SystemMt_Mr_FailureMeaning]}"/>
-                        <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding ViewModel.FailureMeaningDisplay, Mode=OneWay}" TextWrapping="Wrap"/>
-                    </Grid>
-                </Border>
                 </StackPanel>
             </ScrollViewer>
         </Grid>
