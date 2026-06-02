@@ -1,52 +1,68 @@
-# PR-5 VM Verification — System MT explainability + pair-quality WPF surfaces
+# PR-5 VM Verification - System MT Explainability + Pair Quality WPF Surfaces
 
-Branch: `claude/systemmt-explainability-pr5-wpf-display`
-Captured on the Windows VM (200% HiDPI, physical desktop ≈ 2640×1848).
-Driver: [`drive.ps1`](drive.ps1) (UIA, adapted from `tools/uia-verify-i18n.ps1`).
+Branch: `claude/systemmt-explainability-pr5-strict-acceptance`
+Base evidence: PR #265 is merged; GitHub MCP confirmed merge commit
+`a58a72c6c7cb84cc4af10d44724887a8fa73bfe2`. Local `git fetch origin`
+could not refresh during this strict pass because the VM DNS could not resolve
+`github.com`; local `origin/main` already pointed at `a58a72c`.
 
-## Build / test evidence (Step 6)
+Captured on the Windows VM at 200% HiDPI. No `rtk` executable was available on
+this VM, so commands used native PowerShell.
 
-- `dotnet build MetBench.sln`: **0 errors** (10028 pre-existing StyleCop/Fody warnings).
-- `dotnet test MetBench_Client.Tests --filter ClientI18n`: **15 passed, 0 failed**.
-- `dotnet test MetBench_SystemMT.Tests --filter ClientI18n`: **18 passed, 0 failed** (incl. en/zh resx key parity).
+Driver: [`drive.ps1`](drive.ps1) (UIA, adapted from
+`tools/uia-verify-i18n.ps1`). The driver starts the WPF client, launches a real
+pure-stdlib System MT run, visits the catalog/history pages, captures the
+screenshots, and toggles language where UIA can find the culture menu.
 
-New client tests (functional proof of the display surfaces):
-- `SystemMtExplanationCardTests` — equation/SUT/MR ViewModels expose the persisted
-  explanation/profile fields for the selected row, and empty fields fall back to the
-  shared localized "unavailable" text.
-- `SystemMtPairQualityEvidenceTests` — execution-history evidence summary renders
-  pair-quality counts/rates when present and stays quiet for default-empty / missing rows.
-- `SystemMtExplanationLocalizationTests` — every new resource key resolves in en-US and zh-CN.
+## Build / Test Evidence
 
-## Screenshots
+- `dotnet build MetBench.sln`: 0 errors, 12 warnings.
+- `dotnet test MetBench_Client.Tests --no-build --filter ClientI18n`: 16 passed, 0 failed.
+- `dotnet test MetBench_SystemMT.Tests --no-build --filter ClientI18n`: 18 passed, 0 failed.
+- `dotnet test MetBench_Client.Tests --no-build --filter "FullyQualifiedName~SystemMtExplanationCardTests|FullyQualifiedName~SystemMtPairQualityEvidenceTests|FullyQualifiedName~SystemMtExplanationLocalizationTests"`: 12 passed, 0 failed.
+
+New/updated client proof points:
+
+- `SystemMtExplanationCardTests`: equation/SUT/MR ViewModels expose persisted
+  explanation/profile fields for the selected row.
+- `SystemMtPairQualityEvidenceTests`: evidence summary renders pair-quality
+  counts/rates when present, stays quiet for default-empty/missing rows, and
+  clears stale evidence when a history filter removes the selected row.
+- `SystemMtExplanationLocalizationTests`: all new resource keys resolve in
+  en-US and zh-CN.
+
+## Real Execution Evidence
+
+The non-empty pair-quality screenshot was produced by a real WPF-launched
+System MT execution, not by inserting fake LiteDB rows. The UIA driver clicked
+the System MT run button for the default pure-stdlib scenario and the history
+page captured real `advection-amplitude-linearity` rows. Screenshot 04 shows
+execution `101a6cc7-fb9c-45db-8cc9-878ad23d585d` at
+`2026-06-02T07:38:02Z` with non-empty PairQuality.
+
+## Screenshot Matrix
 
 | File | What it shows |
 |---|---|
-| `01-equation-explanation-card.png` | Equation Catalog, built-in `bateman` selected. Full explanation card: class `ODE`, family `linear decay chain`, primary variables, physical meaning, benchmark rationale, expected laws. |
-| `02-sut-profile-card.png` | SUT Catalog, `heat_equation` selected; program section loaded. SUT-profile card is wired below the editor fields (see capture limitation below). |
-| `03-mr-explanation-card.png` | MR Catalog, `heat_equation` manifest (3 physics MR bindings), `heat-equation-amplitude` selected; MR explanation card wired below the editor fields. |
-| `04-...` (MISSING — documented blocker) | Non-empty pair-quality evidence. **Blocker:** all 3 execution-history rows in the local `SystemMT.Litedb` predate PR-3 pair-quality capture, so none expose a non-empty `PairQuality`. No System-MT pipeline was re-run on this VM, and a production DB row was **not** fabricated. The rendering is proven instead by `SystemMtPairQualityEvidenceTests.Evidence_summary_renders_pair_quality_counts_and_rates`. |
-| `05-execution-history-no-evidence-or-empty-pair-quality.png` | Execution History, a row with typed verification but default-empty pair-quality — the evidence summary shows typed verification and **no** pair-quality section (quiet-empty path confirmed). |
-| `06-zh-cn-equation-or-history.png` | Language switched to 中文: nav, page title, and explanation-card labels (方程类别 / 方程族 / 物理含义 / 基准选型理由 / 预期规律) are localized; data values stay as catalog content. |
-| `07-en-us-equation-or-history.png` | Language switched back to English: same surface localized back. |
+| `01-equation-explanation-card.png` | Equation Catalog, built-in `bateman` selected. The card shows equation class, family, primary variables, physical meaning, benchmark rationale, and expected laws. |
+| `02-sut-profile-card.png` | SUT Catalog, `heat_equation` selected. The SUT profile card is visible and shows program type, solver method, runtime key, input/output contract, adapter, and dependency risk. |
+| `03-mr-explanation-card.png` | MR Catalog, `heat_equation` manifest and `heat-equation-amplitude` selected. The MR explanation card shows meta-pattern rationale, transformation semantics, observables, predicate, tolerance, applicability, and failure meaning. |
+| `04-execution-history-non-empty-pair-quality.png` | Execution History with a real non-empty PairQuality block: planned/executed/valid/passed pairs = 1, failed/skipped/invalid spec pairs = 0, pass-rate valid/all = 100.0%. |
+| `05-execution-history-no-evidence-or-empty-pair-quality.png` | Execution History filtered to no matching rows. The evidence panel is quiet and does not show a stale or default-empty PairQuality block. Default-empty evidence is also pinned by `SystemMtPairQualityEvidenceTests`. |
+| `06-zh-cn-equation-or-history.png` | zh-CN equation catalog surface with localized navigation/title/card labels. Data values stay as catalog content. |
+| `07-en-us-equation-or-history.png` | en-US equation catalog surface after switching back to English. |
 
-## Capture limitation (SUT / MR card body, screenshots 02 & 03)
+## Fixes Verified By This Pass
 
-On this VM the display is **200% HiDPI** and the FluentWindow enforces a minimum
-height that exceeds the visible screen. Consequence: the SUT/MR detail panels
-(long editor forms) fit inside the window without the inner `ScrollViewer`
-becoming scrollable (`VerticallyScrollable = False`), but the window's lower
-region — where the explanation/profile card sits, below the editor fields —
-falls below the physical screen edge and cannot be captured. UIA scroll,
-mouse-wheel, window maximize, and `MoveWindow` resize were all attempted; the
-window min-height clamps the resize and the panel never scrolls.
+- The SUT and MR explanation/profile cards are placed before the long editor
+  forms so they are capturable at 200% DPI.
+- Execution history shows PairQuality before the longer typed-verification
+  details.
+- PairQuality count labels explicitly name planned/executed/valid/passed/failed
+  /skipped/invalid spec pairs.
+- Execution-history filtering clears stale selected evidence, so quiet paths do
+  not keep showing the previous row's PairQuality.
 
-This is purely a capture constraint of this VM's resolution + scaling. At normal
-user resolution (100% DPI) the window is short enough that the card renders in
-view without scrolling. Functional correctness of the SUT profile card and MR
-explanation card is proven by `SystemMtExplanationCardTests`, which asserts the
-exact fields flow to the ViewModel display properties bound by the XAML cards.
+## Remaining Blockers
 
-Screenshots 02/03 therefore show the correct page with the target row selected
-and its data loaded (the card is wired into the same `ScrollViewer`, immediately
-below the editor fields).
+None for PR-5 strict VM acceptance.

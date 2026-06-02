@@ -1580,10 +1580,10 @@
     <value>Pair quality</value>
   </data>
   <data name="Evidence_History_PairQualityCounts_Fmt" xml:space="preserve">
-    <value>Planned {0} · Executed {1} · Valid {2} · Passed {3} · Failed {4} · Skipped {5} · Invalid {6}</value>
+    <value>Planned pairs {0} - Executed pairs {1} - Valid pairs {2} - Passed pairs {3} - Failed pairs {4} - Skipped pairs {5} - Invalid spec pairs {6}</value>
   </data>
   <data name="Evidence_History_PairQualityRates_Fmt" xml:space="preserve">
-    <value>Pass rate (valid): {0} · Pass rate (all): {1}</value>
+    <value>Pass rate (valid): {0} - Pass rate (all): {1}</value>
   </data>
   <data name="Evidence_History_PairQualitySkipReasonsHeader" xml:space="preserve">
     <value>Skip reasons:</value>

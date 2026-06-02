@@ -87,6 +87,38 @@ function Scroll-NavDown {
     }
     Start-Sleep -Milliseconds 250
 }
+function Set-NavSearch($text) {
+    $editCond = Prop ([System.Windows.Automation.AutomationElement]::ControlTypeProperty) ([System.Windows.Automation.ControlType]::Edit)
+    $edits = $script:win.FindAll($TS::Descendants, $editCond)
+    foreach ($edit in $edits) {
+        $vp = $null
+        if ($edit.TryGetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern, [ref]$vp)) {
+            try {
+                if (-not $vp.Current.IsReadOnly) {
+                    $vp.SetValue($text)
+                    Start-Sleep -Milliseconds 350
+                    return $true
+                }
+            } catch {}
+        }
+    }
+    return $false
+}
+function Set-ValueById($id, $text) {
+    $el = Find-ById $script:win $id 8
+    if (-not $el) { return $false }
+    $vp = $null
+    if ($el.TryGetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern, [ref]$vp)) {
+        try {
+            if (-not $vp.Current.IsReadOnly) {
+                $vp.SetValue($text)
+                Start-Sleep -Milliseconds 350
+                return $true
+            }
+        } catch {}
+    }
+    return $false
+}
 function Click-Element($el) {
     if (-not $el) { return $false }
     $ip = $null
@@ -101,18 +133,26 @@ function Click-Element($el) {
     }
     return $false
 }
+function Click-ElementMouse($el) {
+    if (-not $el) { return $false }
+    Bring-Front
+    $r = $el.Current.BoundingRectangle
+    if ($r.Width -gt 0 -and $r.Height -gt 0) {
+        [Win32Ui]::Click([int](($r.X + $r.Width/2) / $script:scale), [int](($r.Y + $r.Height/2) / $script:scale))
+        return $true
+    }
+    return $false
+}
 function Select-FirstRow($grid, $preferName = $null) {
     if (-not $grid) { return $false }
     # Prefer a row whose cell text matches $preferName, else the first DataItem.
     if ($preferName) {
         $hit = Find-ByName $grid $preferName 3
-        if ($hit -and (Click-Element $hit)) { return $true }
+        if ($hit -and (Click-ElementMouse $hit)) { return $true }
     }
     $rows = $grid.FindAll($TS::Descendants, (Prop ([System.Windows.Automation.AutomationElement]::ControlTypeProperty) ([System.Windows.Automation.ControlType]::DataItem)))
     if ($rows.Count -gt 0) {
-        $sp = $null
-        if ($rows[0].TryGetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern, [ref]$sp)) { $sp.Select(); return $true }
-        return (Click-Element $rows[0])
+        return (Click-ElementMouse $rows[0])
     }
     return $false
 }
@@ -170,12 +210,22 @@ function Select-ComboItem($comboId, $itemName) {
     return $ok
 }
 function Nav($name) {
-    Scroll-NavDown
+    [void](Set-NavSearch $name)
     $item = Find-ByName $script:win $name 8
+    if (-not $item) {
+        [void](Set-NavSearch '')
+        $item = Find-ByName $script:win $name 8
+    }
     if (-not $item) { Write-Host ("  [warn] nav item not found: " + $name); return $false }
-    $ok = Click-Element $item
+    $ok = Click-ElementMouse $item
     Start-Sleep -Seconds 2
+    [void](Set-NavSearch '')
     return $ok
+}
+function Wait-Page($automationId, $timeoutSec = 8) {
+    $page = Find-ById $script:win $automationId $timeoutSec
+    if (-not $page) { Write-Host ("  [warn] page not reached: " + $automationId); return $false }
+    return $true
 }
 function Shot($file) {
     try {
@@ -194,8 +244,8 @@ function Shot($file) {
 }
 function Set-Culture($itemName, $confirmNav) {
     Scroll-NavDown
-    if (-not (Click-Element (Find-ByName $script:win 'Settings' 4))) {
-        [void](Click-Element (Find-ByName $script:win '设置' 4))
+    if (-not (Click-ElementMouse (Find-ByName $script:win 'Settings' 4))) {
+        [void](Click-ElementMouse (Find-ByName $script:win '设置' 4))
     }
     Start-Sleep -Seconds 2
     $comboCond = Prop ([System.Windows.Automation.AutomationElement]::ControlTypeProperty) ([System.Windows.Automation.ControlType]::ComboBox)
@@ -257,8 +307,20 @@ $logW  = [System.Windows.Forms.SystemInformation]::VirtualScreen.Width
 $script:scale = if ($logW -gt 0) { $physW / $logW } else { 1.0 }
 Write-Host ("[ok] window '" + $script:win.Current.Name + "' scale=" + [math]::Round($script:scale,3))
 
+# --- 0) Produce one real pure-stdlib System MT execution with PR-3 pair-quality evidence ---
+if ((Nav 'System MT') -and (Wait-Page 'Button_RunSystemMt')) {
+    Start-Sleep -Seconds 2
+    $run = Find-ById $script:win 'Button_RunSystemMt' 8
+    if ($run -and (Click-Element $run)) {
+        Write-Host "  [run] started default pure-stdlib System MT scenario"
+        Start-Sleep -Seconds 12
+    } else {
+        Write-Host "  [warn] run button not found; history may not contain fresh pair-quality evidence"
+    }
+}
+
 # --- 1) Equation Catalog (en) ---
-if (Nav 'System MT Equation Catalog') {
+if ((Nav 'System MT Equation Catalog') -and (Wait-Page 'DataGrid_SystemMtEquations')) {
     [void](Select-FirstRow (Find-ById $script:win 'DataGrid_SystemMtEquations' 8) 'bateman')
     Start-Sleep -Seconds 1
     if (Find-ById $script:win 'Border_EquationExplanationCard' 5) { Write-Host "  [ok] equation explanation card present" }
@@ -266,14 +328,14 @@ if (Nav 'System MT Equation Catalog') {
 }
 
 # --- 2) SUT Catalog (en) ---
-if (Nav 'System MT SUT Catalog') {
+if ((Nav 'System MT SUT Catalog') -and (Wait-Page 'DataGrid_SystemMtSuts')) {
     [void](Select-FirstRow (Find-ById $script:win 'DataGrid_SystemMtSuts' 8) 'heat_equation')
     Start-Sleep -Seconds 1
     Shot '02-sut-profile-card.png'
 }
 
 # --- 3) MR Catalog (en) — manifest + first MR auto-select on load ---
-if (Nav 'System MT MR Catalog') {
+if ((Nav 'System MT MR Catalog') -and (Wait-Page 'ComboBox_SystemMtManifest')) {
     Start-Sleep -Seconds 1
     # Prefer a physics MR manifest over the synthetic _test_csv default.
     [void](Select-ComboItem 'ComboBox_SystemMtManifest' 'heat_equation')
@@ -284,13 +346,13 @@ if (Nav 'System MT MR Catalog') {
 }
 
 # --- 4/5) Execution History (en) — probe rows for pair-quality vs empty ---
-if (Nav 'System MT Execution History') {
+if ((Nav 'System MT Execution History') -and (Wait-Page 'DataGrid_SystemMtExecutionHistory')) {
     Start-Sleep -Seconds 1
     $grid = Find-ById $script:win 'DataGrid_SystemMtExecutionHistory' 8
     $rows = @()
     if ($grid) { $rows = $grid.FindAll($TS::Descendants, (Prop ([System.Windows.Automation.AutomationElement]::ControlTypeProperty) ([System.Windows.Automation.ControlType]::DataItem))) }
     Write-Host ("  [info] execution-history rows: " + $rows.Count)
-    $pairShot = $false; $emptyShot = $false
+    $pairShot = $false
     for ($i = 0; $i -lt [Math]::Min($rows.Count, 12); $i++) {
         $sp = $null
         if ($rows[$i].TryGetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern, [ref]$sp)) { $sp.Select() } else { [void](Click-Element $rows[$i]) }
@@ -303,20 +365,20 @@ if (Nav 'System MT Execution History') {
         }
         if (-not $pairShot -and ($txt -match 'Pair quality')) {
             Write-Host ("  [ok] row " + $i + " has pair-quality evidence")
-            Shot '04-execution-history-pair-quality.png'; $pairShot = $true
+            Shot '04-execution-history-non-empty-pair-quality.png'; $pairShot = $true
         }
-        elseif (-not $emptyShot) {
-            Shot '05-execution-history-no-evidence-or-empty-pair-quality.png'; $emptyShot = $true
-        }
-        if ($pairShot -and $emptyShot) { break }
+        if ($pairShot) { break }
     }
-    if (-not $emptyShot -and -not $pairShot) { Shot '05-execution-history-no-evidence-or-empty-pair-quality.png' }
+    [void](Set-ValueById 'TextBox_MrNameFilter' '__no_evidence_or_empty_pair_quality__')
+    [void](Click-Element (Find-ById $script:win 'Button_RefreshSystemMtExecutionHistory' 4))
+    Start-Sleep -Seconds 1
+    Shot '05-execution-history-no-evidence-or-empty-pair-quality.png'
     if (-not $pairShot) { Write-Host "  [BLOCKER] no execution-history row exposed non-empty pair-quality evidence" }
 }
 
 # --- 6) zh-CN equation surface ---
 if (Set-Culture '中文') {
-    if (Nav '系统级方程目录') {
+    if ((Nav '系统级方程目录') -and (Wait-Page 'DataGrid_SystemMtEquations')) {
         [void](Select-FirstRow (Find-ById $script:win 'DataGrid_SystemMtEquations' 8) 'bateman')
         Start-Sleep -Seconds 1
         Shot '06-zh-cn-equation-or-history.png'
@@ -325,7 +387,7 @@ if (Set-Culture '中文') {
 
 # --- 7) back to en-US equation surface ---
 if (Set-Culture 'English') {
-    if (Nav 'System MT Equation Catalog') {
+    if ((Nav 'System MT Equation Catalog') -and (Wait-Page 'DataGrid_SystemMtEquations')) {
         [void](Select-FirstRow (Find-ById $script:win 'DataGrid_SystemMtEquations' 8) 'bateman')
         Start-Sleep -Seconds 1
         Shot '07-en-us-equation-or-history.png'
