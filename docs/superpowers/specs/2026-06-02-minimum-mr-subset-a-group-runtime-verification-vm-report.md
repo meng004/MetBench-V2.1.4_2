@@ -76,7 +76,7 @@ The external source repository was not present initially, so it was cloned to
 `C:\tmp\Minimum-MR-SubSet` after sandbox escalation.
 
 - Remote: `https://github.com/meng004/Minimum-MR-SubSet.git`
-- Commit: `0ec59b82f6a60df2b011e18dd077c68ade4d08ea`
+- Commit: `b931b5f74d0f3f3cb704cd6fedbcb4f523cccd7f`
 - `experiments\puts\p5_pke.py`: present.
 - `experiments\puts\p4_pendulum.py`: present.
 - `experiments\puts\p9_openmc.py`: present.
@@ -89,28 +89,25 @@ C:\Users\codex\AppData\Local\Programs\Python\Python312-arm64\python.exe: No modu
 ```
 
 The direct smoke was rerun from the external repository root so that the
-`experiments` package imports resolved. Results:
+`experiments` package imports resolved. The source repository was checked out
+at the MetBench fixture provenance commit before this run. Results:
 
 ```text
 P5: PASS observables=t,power,precursor,power_extrema
 P4: PASS observables=q,p,energy
-ModuleNotFoundError: No module named 'openmc'
+P9: PASS observables=k_eff,sigma_k,reaction_balance
 ```
-
-P9 did not execute because the VM does not have the `openmc` Python package.
-No dependency was installed.
 
 ## Runtime Readiness Classification
 
 - `AGroupImportExportStaging`: `PASS`
-- `ExternalSourceCanonicalRun`: `BLOCKED`
+- `ExternalSourceCanonicalRun`: `PASS`
 - `MetBenchLauncherRuntimeRun`: `NOT_PROMOTED`
 
 Staging import/export is green on Windows. External source canonical execution
-is only partially verified: P5 and P4 execute, while P9 is blocked by missing
-`openmc`. The imported A-group MRs are not live MetBench launcher MRs yet
-because they are absent from live `SUT/**/catalog.json` and remain
-`ImportedOnly`.
+is verified for P5, P4, and P9 at the pinned source commit. The imported A-group
+MRs are not live MetBench launcher MRs yet because they are absent from live
+`SUT/**/catalog.json` and remain `ImportedOnly`.
 
 ## Scope Drift Review
 
