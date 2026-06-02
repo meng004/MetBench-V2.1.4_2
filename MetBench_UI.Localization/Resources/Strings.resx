@@ -1504,4 +1504,94 @@
   <data name="PagingBar_TotalSuffix" xml:space="preserve">
     <value> total)</value>
   </data>
+  <data name="SystemMt_Explanation_Unavailable" xml:space="preserve">
+    <value>Not specified</value>
+  </data>
+  <data name="SystemMt_Equation_ExplanationHeader" xml:space="preserve">
+    <value>Equation explanation</value>
+  </data>
+  <data name="SystemMt_Equation_Class" xml:space="preserve">
+    <value>Equation class</value>
+  </data>
+  <data name="SystemMt_Equation_Family" xml:space="preserve">
+    <value>Equation family</value>
+  </data>
+  <data name="SystemMt_Equation_PrimaryVariables" xml:space="preserve">
+    <value>Primary variables</value>
+  </data>
+  <data name="SystemMt_Equation_PhysicalMeaning" xml:space="preserve">
+    <value>Physical meaning</value>
+  </data>
+  <data name="SystemMt_Equation_BenchmarkRationale" xml:space="preserve">
+    <value>Benchmark rationale</value>
+  </data>
+  <data name="SystemMt_Equation_ExpectedLaws" xml:space="preserve">
+    <value>Expected laws</value>
+  </data>
+  <data name="SystemMt_Sut_ProfileHeader" xml:space="preserve">
+    <value>SUT profile</value>
+  </data>
+  <data name="SystemMt_Sut_ProfileProgramType" xml:space="preserve">
+    <value>Program type</value>
+  </data>
+  <data name="SystemMt_Sut_SolverMethod" xml:space="preserve">
+    <value>Solver method</value>
+  </data>
+  <data name="SystemMt_Sut_RuntimeKey" xml:space="preserve">
+    <value>Runtime key</value>
+  </data>
+  <data name="SystemMt_Sut_InputContract" xml:space="preserve">
+    <value>Input contract</value>
+  </data>
+  <data name="SystemMt_Sut_OutputContract" xml:space="preserve">
+    <value>Output contract</value>
+  </data>
+  <data name="SystemMt_Sut_Adapter" xml:space="preserve">
+    <value>Adapter</value>
+  </data>
+  <data name="SystemMt_Sut_DependencyRisk" xml:space="preserve">
+    <value>Dependency risk</value>
+  </data>
+  <data name="SystemMt_Mr_ExplanationHeader" xml:space="preserve">
+    <value>MR explanation</value>
+  </data>
+  <data name="SystemMt_Mr_MetaPatternRationale" xml:space="preserve">
+    <value>Meta-pattern rationale</value>
+  </data>
+  <data name="SystemMt_Mr_TransformationSemantics" xml:space="preserve">
+    <value>Transformation semantics</value>
+  </data>
+  <data name="SystemMt_Mr_Observables" xml:space="preserve">
+    <value>Observables</value>
+  </data>
+  <data name="SystemMt_Mr_Predicate" xml:space="preserve">
+    <value>Predicate</value>
+  </data>
+  <data name="SystemMt_Mr_Tolerance" xml:space="preserve">
+    <value>Tolerance</value>
+  </data>
+  <data name="SystemMt_Mr_Applicability" xml:space="preserve">
+    <value>Applicability</value>
+  </data>
+  <data name="SystemMt_Mr_FailureMeaning" xml:space="preserve">
+    <value>Failure meaning</value>
+  </data>
+  <data name="Evidence_History_PairQualityHeader" xml:space="preserve">
+    <value>Pair quality</value>
+  </data>
+  <data name="Evidence_History_PairQualityCounts_Fmt" xml:space="preserve">
+    <value>Planned {0} · Executed {1} · Valid {2} · Passed {3} · Failed {4} · Skipped {5} · Invalid {6}</value>
+  </data>
+  <data name="Evidence_History_PairQualityRates_Fmt" xml:space="preserve">
+    <value>Pass rate (valid): {0} · Pass rate (all): {1}</value>
+  </data>
+  <data name="Evidence_History_PairQualitySkipReasonsHeader" xml:space="preserve">
+    <value>Skip reasons:</value>
+  </data>
+  <data name="Evidence_History_PairQualityInvalidSpecReasonsHeader" xml:space="preserve">
+    <value>Invalid-spec reasons:</value>
+  </data>
+  <data name="Evidence_History_PairQualityReason_Fmt" xml:space="preserve">
+    <value>{0}: {1} — count {2}</value>
+  </data>
 </root>
