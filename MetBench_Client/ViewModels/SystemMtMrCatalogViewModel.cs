@@ -30,6 +30,13 @@ namespace MetBench_Client.ViewModels
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(ValidateMrDraftCommand))]
         [NotifyCanExecuteChangedFor(nameof(SaveMrDraftCommand))]
+        [NotifyPropertyChangedFor(nameof(MetaPatternRationaleDisplay))]
+        [NotifyPropertyChangedFor(nameof(TransformationSemanticsDisplay))]
+        [NotifyPropertyChangedFor(nameof(ObservablesDisplay))]
+        [NotifyPropertyChangedFor(nameof(PredicateDisplay))]
+        [NotifyPropertyChangedFor(nameof(ToleranceDisplay))]
+        [NotifyPropertyChangedFor(nameof(ApplicabilityDisplay))]
+        [NotifyPropertyChangedFor(nameof(FailureMeaningDisplay))]
         private SystemMtMrBindingDraft? _selectedDraft;
 
         [ObservableProperty]
@@ -169,6 +176,20 @@ namespace MetBench_Client.ViewModels
                 StatusMessage = string.Format(Localization["Status_Catalog_LoadManifestsError_Fmt"], ex.Message);
             }
         }
+
+        // PR-5 MR explanation card — read-only projection of the selected MR
+        // binding's explanation profile (PR-2 fields). Empty fields fall back to
+        // the shared localized "unavailable" text.
+        public string MetaPatternRationaleDisplay => OrUnavailable(SelectedDraft?.MetaPatternRationale);
+        public string TransformationSemanticsDisplay => OrUnavailable(SelectedDraft?.TransformationSemantics);
+        public string ObservablesDisplay => OrUnavailable(SelectedDraft?.ObservableSummary);
+        public string PredicateDisplay => OrUnavailable(SelectedDraft?.PredicateSummary);
+        public string ToleranceDisplay => OrUnavailable(SelectedDraft?.ToleranceSummary);
+        public string ApplicabilityDisplay => OrUnavailable(SelectedDraft?.Applicability);
+        public string FailureMeaningDisplay => OrUnavailable(SelectedDraft?.FailureMeaning);
+
+        private string OrUnavailable(string? value)
+            => string.IsNullOrWhiteSpace(value) ? Localization["SystemMt_Explanation_Unavailable"] : value;
 
         private bool CanCreateDraft() => SelectedManifest is not null;
 

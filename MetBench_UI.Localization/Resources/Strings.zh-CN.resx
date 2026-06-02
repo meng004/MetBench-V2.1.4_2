@@ -1504,4 +1504,94 @@
   <data name="PagingBar_TotalSuffix" xml:space="preserve">
     <value> 条)</value>
   </data>
+  <data name="SystemMt_Explanation_Unavailable" xml:space="preserve">
+    <value>未填写</value>
+  </data>
+  <data name="SystemMt_Equation_ExplanationHeader" xml:space="preserve">
+    <value>方程说明</value>
+  </data>
+  <data name="SystemMt_Equation_Class" xml:space="preserve">
+    <value>方程类别</value>
+  </data>
+  <data name="SystemMt_Equation_Family" xml:space="preserve">
+    <value>方程族</value>
+  </data>
+  <data name="SystemMt_Equation_PrimaryVariables" xml:space="preserve">
+    <value>主要变量</value>
+  </data>
+  <data name="SystemMt_Equation_PhysicalMeaning" xml:space="preserve">
+    <value>物理含义</value>
+  </data>
+  <data name="SystemMt_Equation_BenchmarkRationale" xml:space="preserve">
+    <value>基准选型理由</value>
+  </data>
+  <data name="SystemMt_Equation_ExpectedLaws" xml:space="preserve">
+    <value>预期规律</value>
+  </data>
+  <data name="SystemMt_Sut_ProfileHeader" xml:space="preserve">
+    <value>SUT 概况</value>
+  </data>
+  <data name="SystemMt_Sut_ProfileProgramType" xml:space="preserve">
+    <value>程序类型</value>
+  </data>
+  <data name="SystemMt_Sut_SolverMethod" xml:space="preserve">
+    <value>求解方法</value>
+  </data>
+  <data name="SystemMt_Sut_RuntimeKey" xml:space="preserve">
+    <value>运行时标识</value>
+  </data>
+  <data name="SystemMt_Sut_InputContract" xml:space="preserve">
+    <value>输入契约</value>
+  </data>
+  <data name="SystemMt_Sut_OutputContract" xml:space="preserve">
+    <value>输出契约</value>
+  </data>
+  <data name="SystemMt_Sut_Adapter" xml:space="preserve">
+    <value>适配器</value>
+  </data>
+  <data name="SystemMt_Sut_DependencyRisk" xml:space="preserve">
+    <value>依赖风险</value>
+  </data>
+  <data name="SystemMt_Mr_ExplanationHeader" xml:space="preserve">
+    <value>蜕变关系说明</value>
+  </data>
+  <data name="SystemMt_Mr_MetaPatternRationale" xml:space="preserve">
+    <value>元模式依据</value>
+  </data>
+  <data name="SystemMt_Mr_TransformationSemantics" xml:space="preserve">
+    <value>变换语义</value>
+  </data>
+  <data name="SystemMt_Mr_Observables" xml:space="preserve">
+    <value>观测量</value>
+  </data>
+  <data name="SystemMt_Mr_Predicate" xml:space="preserve">
+    <value>判定谓词</value>
+  </data>
+  <data name="SystemMt_Mr_Tolerance" xml:space="preserve">
+    <value>容差</value>
+  </data>
+  <data name="SystemMt_Mr_Applicability" xml:space="preserve">
+    <value>适用条件</value>
+  </data>
+  <data name="SystemMt_Mr_FailureMeaning" xml:space="preserve">
+    <value>违例含义</value>
+  </data>
+  <data name="Evidence_History_PairQualityHeader" xml:space="preserve">
+    <value>样本对质量</value>
+  </data>
+  <data name="Evidence_History_PairQualityCounts_Fmt" xml:space="preserve">
+    <value>计划 {0} · 执行 {1} · 有效 {2} · 通过 {3} · 失败 {4} · 跳过 {5} · 非法规格 {6}</value>
+  </data>
+  <data name="Evidence_History_PairQualityRates_Fmt" xml:space="preserve">
+    <value>有效通过率：{0} · 总通过率：{1}</value>
+  </data>
+  <data name="Evidence_History_PairQualitySkipReasonsHeader" xml:space="preserve">
+    <value>跳过原因：</value>
+  </data>
+  <data name="Evidence_History_PairQualityInvalidSpecReasonsHeader" xml:space="preserve">
+    <value>非法规格原因：</value>
+  </data>
+  <data name="Evidence_History_PairQualityReason_Fmt" xml:space="preserve">
+    <value>{0}：{1} — 计数 {2}</value>
+  </data>
 </root>

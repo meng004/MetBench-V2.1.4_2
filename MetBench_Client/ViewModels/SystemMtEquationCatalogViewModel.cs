@@ -1,8 +1,10 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MetBench_BLL.SystemMT.Metadata;
 using MetBench_BLL.SystemMT.Metadata.Editing;
 using MetBench_UI.Localization;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -29,6 +31,12 @@ namespace MetBench_Client.ViewModels
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(ValidateEquationDraftCommand))]
         [NotifyCanExecuteChangedFor(nameof(SaveEquationDraftCommand))]
+        [NotifyPropertyChangedFor(nameof(EquationClassDisplay))]
+        [NotifyPropertyChangedFor(nameof(EquationFamilyDisplay))]
+        [NotifyPropertyChangedFor(nameof(PrimaryVariablesDisplay))]
+        [NotifyPropertyChangedFor(nameof(PhysicalMeaningDisplay))]
+        [NotifyPropertyChangedFor(nameof(BenchmarkRationaleDisplay))]
+        [NotifyPropertyChangedFor(nameof(ExpectedLawsDisplay))]
         private EquationMetadataDraft? _draft;
 
         [ObservableProperty]
@@ -69,14 +77,22 @@ namespace MetBench_Client.ViewModels
             }
 
             // Built-in rows are read-only — populate the form for inspection only.
+            // Surface the full seed metadata (class / family / physical meaning /
+            // rationale / expected laws) so the explanation card is not blank for
+            // built-in equations; fall back to the list-row fields if the key is
+            // somehow absent from the seed catalog.
             if (string.Equals(value.Source, EquationSourceKinds.BuiltIn, StringComparison.Ordinal))
             {
-                Draft = new EquationMetadataDraft
-                {
-                    EquationKey = value.EquationKey,
-                    Name = value.Name,
-                    CanonicalForm = value.CanonicalForm,
-                };
+                var seed = SystemMtMetadataCatalog.Equations
+                    .FirstOrDefault(e => string.Equals(e.EquationKey, value.EquationKey, StringComparison.Ordinal));
+                Draft = seed is not null
+                    ? EquationMetadataDraft.FromMetadata(seed)
+                    : new EquationMetadataDraft
+                    {
+                        EquationKey = value.EquationKey,
+                        Name = value.Name,
+                        CanonicalForm = value.CanonicalForm,
+                    };
                 IsDraftReadOnly = true;
                 StatusMessage = string.Format(Localization["Status_Equation_LoadedBuiltInReadOnly_Fmt"], value.EquationKey);
                 return;
@@ -187,6 +203,22 @@ namespace MetBench_Client.ViewModels
                 StatusMessage = string.Format(Localization["Status_Equation_ErrorLoading_Fmt"], equationKey, ex.Message);
             }
         }
+
+        // PR-5 explanation card — read-only projection of the selected equation's
+        // structured metadata. Empty fields fall back to the shared localized
+        // "unavailable" text so the card never renders blank.
+        public string EquationClassDisplay => OrUnavailable(Draft?.EquationClass);
+        public string EquationFamilyDisplay => OrUnavailable(Draft?.EquationFamily);
+        public string PrimaryVariablesDisplay => OrUnavailable(JoinList(Draft?.PrimaryVariables));
+        public string PhysicalMeaningDisplay => OrUnavailable(Draft?.PhysicalMeaning);
+        public string BenchmarkRationaleDisplay => OrUnavailable(Draft?.BenchmarkRationale);
+        public string ExpectedLawsDisplay => OrUnavailable(JoinList(Draft?.ExpectedLaws));
+
+        private string OrUnavailable(string? value)
+            => string.IsNullOrWhiteSpace(value) ? Localization["SystemMt_Explanation_Unavailable"] : value;
+
+        private static string JoinList(IEnumerable<string>? items)
+            => items is null ? string.Empty : string.Join(", ", items.Where(s => !string.IsNullOrWhiteSpace(s)));
 
         private bool CanValidateDraft() => Draft is not null && !IsDraftReadOnly;
         private bool CanSaveDraft() => CanValidateDraft() && HasValidDraft;
