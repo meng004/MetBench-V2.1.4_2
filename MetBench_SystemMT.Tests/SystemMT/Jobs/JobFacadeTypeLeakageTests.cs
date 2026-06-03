@@ -26,25 +26,34 @@ public class JobFacadeTypeLeakageTests
     {
         foreach (var m in typeof(ISystemMtJobService).GetMethods(BindingFlags.Public | BindingFlags.Instance))
         {
-            AssertAllowed(Unwrap(m.ReturnType), $"{m.Name} return");
+            AssertAllowed(m.ReturnType, $"{m.Name} return");
             foreach (var p in m.GetParameters())
-                AssertAllowed(Unwrap(p.ParameterType), $"{m.Name} param {p.Name}");
+                AssertAllowed(p.ParameterType, $"{m.Name} param {p.Name}");
         }
     }
 
-    private static Type Unwrap(Type t)
+    /// <summary>
+    /// All leaf types of a (possibly generic) type. Recurses through EVERY generic argument —
+    /// including the KEY of a dictionary — so a disallowed type in any position is caught,
+    /// not just the last argument.
+    /// </summary>
+    private static IEnumerable<Type> LeafTypes(Type t)
     {
         if (t.IsGenericType)
         {
             var def = t.GetGenericTypeDefinition();
             if (def == typeof(Task<>) || def == typeof(Nullable<>) ||
-                def == typeof(IReadOnlyDictionary<,>) || def == typeof(IReadOnlyList<>))
-                return Unwrap(t.GetGenericArguments()[^1]);
+                def == typeof(IReadOnlyDictionary<,>) || def == typeof(IReadOnlyList<>) ||
+                def == typeof(IEnumerable<>) || def == typeof(IReadOnlyCollection<>))
+                return t.GetGenericArguments().SelectMany(LeafTypes);
         }
-        return t;
+        return new[] { t };
     }
 
-    private static void AssertAllowed(Type t, string where)
-        => Assert.True(Allowed.Contains(t),
-            $"{where} exposes disallowed type {t.FullName} through job facade (CLAUDE.md §6).");
+    private static void AssertAllowed(Type type, string where)
+    {
+        foreach (var leaf in LeafTypes(type))
+            Assert.True(Allowed.Contains(leaf),
+                $"{where} exposes disallowed type {leaf.FullName} through job facade (CLAUDE.md §6).");
+    }
 }

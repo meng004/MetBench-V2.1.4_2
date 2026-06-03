@@ -76,6 +76,33 @@ public class SystemMtJobServiceTests
     }
 
     [Fact]
+    public async Task SubmitAsync_marks_record_Failed_if_enqueue_throws()
+    {
+        var store = new InMemoryJobStore();
+        var queue = new CapturingThrowingQueue();
+        var svc = Build(store, queue);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => svc.SubmitAsync(new SystemMtJobRequest("mr"), default));
+
+        Assert.NotNull(queue.Captured);   // record was created + enqueue attempted
+        var rec = await store.GetAsync(queue.Captured!.Value, default);
+        Assert.Equal(SystemMtJobState.Failed, rec!.State);   // not a phantom Queued
+    }
+
+    private sealed class CapturingThrowingQueue : IJobQueue
+    {
+        public Guid? Captured;
+        public ValueTask EnqueueAsync(Guid jobId, CancellationToken cancellationToken)
+        {
+            Captured = jobId;
+            throw new InvalidOperationException("queue closed");
+        }
+        public ValueTask<Guid> DequeueAsync(CancellationToken cancellationToken)
+            => throw new NotSupportedException();
+    }
+
+    [Fact]
     public async Task CancelAsync_does_not_overwrite_terminal_job()
     {
         var store = new InMemoryJobStore();

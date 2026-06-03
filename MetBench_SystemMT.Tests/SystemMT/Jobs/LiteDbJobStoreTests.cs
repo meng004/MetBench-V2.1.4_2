@@ -84,6 +84,21 @@ public class LiteDbJobStoreTests : IDisposable
     }
 
     [Fact]
+    public async Task UpdateStatus_terminal_record_is_immutable()
+    {
+        using var store = new LiteDbJobStore(Conn);
+        var id = Guid.NewGuid();
+        await store.CreateAsync(JobsTestData.Record(id), default);
+        var rec = await store.GetAsync(id, default);
+        await store.UpdateStatusAsync(rec! with { State = SystemMtJobState.Succeeded }, default);
+
+        await store.UpdateStatusAsync(rec! with { State = SystemMtJobState.Cancelled }, default);
+
+        var got = await store.GetAsync(id, default);
+        Assert.Equal(SystemMtJobState.Succeeded, got!.State);
+    }
+
+    [Fact]
     public async Task Get_unknown_id_returns_null()
     {
         using var store = new LiteDbJobStore(Conn);

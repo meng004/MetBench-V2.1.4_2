@@ -65,11 +65,29 @@ public sealed class LiteDbJobStore : IJobStore, IDisposable
     public Task UpdateStatusAsync(SystemMtJobRecord record, CancellationToken cancellationToken)
     {
         EnsureNotDisposed();
-        // Fail closed (spec §10 / §6): Update returns false when _id is absent — never
-        // silently insert a ghost record. Mirrors InMemoryJobStore semantics.
-        if (!_records.Update(record))
-            throw new InvalidOperationException(
-                $"Cannot update unknown job {record.JobId}; it was never created.");
+        // Fail closed (spec §10 / §6) + terminal-immutable invariant (first-terminal-wins),
+        // mirroring InMemoryJobStore. Read-check-update is wrapped in a LiteDB transaction so the
+        // existence check and the conditional write are atomic against a concurrent CancelAsync /
+        // worker Finalize race; without it a Succeeded terminal state could be silently overwritten
+        // by a racing Cancelled write.
+        _database.BeginTrans();
+        try
+        {
+            var existing = _records.FindById(record.JobId);
+            if (existing is null)
+                throw new InvalidOperationException(
+                    $"Cannot update unknown job {record.JobId}; it was never created.");
+
+            if (!existing.State.IsTerminal())
+                _records.Update(record);
+
+            _database.Commit();
+        }
+        catch
+        {
+            _database.Rollback();
+            throw;
+        }
         return Task.CompletedTask;
     }
 

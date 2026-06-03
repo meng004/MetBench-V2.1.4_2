@@ -23,41 +23,62 @@ public sealed class SystemMtJobWorker
         var record = await _store.GetAsync(jobId, cancellationToken)
             ?? throw new InvalidOperationException($"Job {jobId} not found in store.");
 
-        // Inline (synchronous, ordered) progress: the handler runs on the pipeline's
-        // calling thread before ExecuteJobAsync continues, so intermediate progress writes
-        // strictly precede the terminal Finalize write. A default Progress<T> would post to
-        // the thread pool and could land AFTER Finalize, corrupting the terminal state.
+        // Last progress reported by the pipeline; preserved into the terminal record so a
+        // failed/timed-out/cancelled job keeps its last-known percent instead of resetting to 0.
+        var lastProgress = record.ProgressPercent;
+
+        // Inline (synchronous, ordered) progress: the handler runs on the pipeline's calling
+        // thread before ExecuteJobAsync continues, so intermediate progress writes strictly
+        // precede the terminal Finalize write. A default Progress<T> would post to the thread
+        // pool and could land AFTER Finalize, corrupting the terminal state.
         var progress = new InlineProgress<SystemMtJobProgress>(p =>
+        {
+            lastProgress = p.ProgressPercent;
             _store.UpdateStatusAsync(record with
             {
                 State = p.State,
                 CurrentPhase = p.Phase,
                 ProgressPercent = p.ProgressPercent,
                 UpdatedAtUtc = _utcNow(),
-            }, CancellationToken.None).GetAwaiter().GetResult());
+            }, CancellationToken.None).GetAwaiter().GetResult();
+        });
 
         try
         {
             var outcome = await _pipeline.ExecuteJobAsync(jobId, ToRequest(record), progress, cancellationToken);
 
-            if (outcome.FinalState == SystemMtJobState.Succeeded && outcome.Result is not null)
+            var finalState = outcome.FinalState;
+            var reason = outcome.FailureReason;
+
+            // Fail closed: a pipeline that returns a NON-terminal state would otherwise leave the
+            // record live-looking forever. Treat it as an infrastructure Failed (spec §10 / §6).
+            if (!finalState.IsTerminal())
+            {
+                reason = $"pipeline returned non-terminal final state {outcome.FinalState}";
+                finalState = SystemMtJobState.Failed;
+            }
+
+            if (finalState == SystemMtJobState.Succeeded && outcome.Result is not null)
                 await _store.SaveResultAsync(jobId, outcome.Result, CancellationToken.None);
 
-            await FinalizeAsync(record, outcome.FinalState, outcome.SutName, outcome.FailureReason);
+            await FinalizeAsync(record, finalState, outcome.SutName, reason, lastProgress);
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            await FinalizeAsync(record, SystemMtJobState.Cancelled, record.SutName, "cancellation requested");
+            // Only a cancellation actually requested on OUR token is Cancelled. An OCE from an
+            // internal/unrelated token (e.g. a launcher-side timeout source) falls through to the
+            // generic catch below and is classified Failed, not silently Cancelled.
+            await FinalizeAsync(record, SystemMtJobState.Cancelled, record.SutName, "cancellation requested", lastProgress);
         }
         catch (Exception ex)
         {
-            await FinalizeAsync(record, SystemMtJobState.Failed, record.SutName, ex.Message);
+            await FinalizeAsync(record, SystemMtJobState.Failed, record.SutName, ex.Message, lastProgress);
         }
     }
 
     private static SystemMtJobRequest ToRequest(SystemMtJobRecord r) => new(r.MrId);
 
-    private Task FinalizeAsync(SystemMtJobRecord record, SystemMtJobState state, string sutName, string? reason)
+    private Task FinalizeAsync(SystemMtJobRecord record, SystemMtJobState state, string sutName, string? reason, int lastProgress)
     {
         var now = _utcNow();
         return _store.UpdateStatusAsync(record with
@@ -65,7 +86,7 @@ public sealed class SystemMtJobWorker
             State = state,
             SutName = string.IsNullOrEmpty(sutName) ? record.SutName : sutName,
             FailureReason = state == SystemMtJobState.Succeeded ? null : reason,
-            ProgressPercent = state == SystemMtJobState.Succeeded ? 100 : record.ProgressPercent,
+            ProgressPercent = state == SystemMtJobState.Succeeded ? 100 : lastProgress,
             CurrentPhase = state.ToString().ToLowerInvariant(),
             UpdatedAtUtc = now,
             FinishedAtUtc = now,

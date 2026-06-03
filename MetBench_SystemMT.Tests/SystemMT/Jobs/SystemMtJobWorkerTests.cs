@@ -91,6 +91,44 @@ public class SystemMtJobWorkerTests
         Assert.Equal(SystemMtJobState.Cancelled, rec!.State);
     }
 
+    [Fact]
+    public async Task Internal_OCE_unrelated_to_our_token_is_Failed_not_Cancelled()
+    {
+        var (store, id) = Seed();
+        var worker = new SystemMtJobWorker(store, new InternalOceThrowingPipeline());
+
+        await worker.RunJobAsync(id, default);   // our token is never cancelled
+
+        var rec = await store.GetAsync(id, default);
+        Assert.Equal(SystemMtJobState.Failed, rec!.State);
+    }
+
+    [Fact]
+    public async Task Pipeline_returning_non_terminal_state_is_coerced_to_Failed()
+    {
+        var (store, id) = Seed();
+        var worker = new SystemMtJobWorker(store, new NonTerminalPipeline());
+
+        await worker.RunJobAsync(id, default);
+
+        var rec = await store.GetAsync(id, default);
+        Assert.Equal(SystemMtJobState.Failed, rec!.State);
+        Assert.Contains("non-terminal", rec.FailureReason);
+    }
+
+    [Fact]
+    public async Task Failure_preserves_last_reported_progress_percent()
+    {
+        var (store, id) = Seed();
+        var worker = new SystemMtJobWorker(store, new ProgressThenThrowPipeline(40));
+
+        await worker.RunJobAsync(id, default);
+
+        var rec = await store.GetAsync(id, default);
+        Assert.Equal(SystemMtJobState.Failed, rec!.State);
+        Assert.Equal(40, rec.ProgressPercent);   // not reset to 0
+    }
+
     private sealed class ThrowingPipeline : ISystemMtAsyncPipeline
     {
         private readonly string _message;
@@ -99,5 +137,38 @@ public class SystemMtJobWorkerTests
             Guid jobId, SystemMtJobRequest request,
             IProgress<SystemMtJobProgress>? progress, CancellationToken cancellationToken)
             => throw new InvalidOperationException(_message);
+    }
+
+    private sealed class InternalOceThrowingPipeline : ISystemMtAsyncPipeline
+    {
+        public Task<JobExecutionOutcome> ExecuteJobAsync(
+            Guid jobId, SystemMtJobRequest request,
+            IProgress<SystemMtJobProgress>? progress, CancellationToken cancellationToken)
+        {
+            using var internalCts = new CancellationTokenSource();
+            internalCts.Cancel();
+            throw new OperationCanceledException(internalCts.Token);   // unrelated token
+        }
+    }
+
+    private sealed class NonTerminalPipeline : ISystemMtAsyncPipeline
+    {
+        public Task<JobExecutionOutcome> ExecuteJobAsync(
+            Guid jobId, SystemMtJobRequest request,
+            IProgress<SystemMtJobProgress>? progress, CancellationToken cancellationToken)
+            => Task.FromResult(new JobExecutionOutcome(SystemMtJobState.Asserting, "openmc", null, null));
+    }
+
+    private sealed class ProgressThenThrowPipeline : ISystemMtAsyncPipeline
+    {
+        private readonly int _percent;
+        public ProgressThenThrowPipeline(int percent) => _percent = percent;
+        public Task<JobExecutionOutcome> ExecuteJobAsync(
+            Guid jobId, SystemMtJobRequest request,
+            IProgress<SystemMtJobProgress>? progress, CancellationToken cancellationToken)
+        {
+            progress?.Report(new SystemMtJobProgress(SystemMtJobState.RunningSource, "running-source", _percent));
+            throw new InvalidOperationException("boom mid-run");
+        }
     }
 }

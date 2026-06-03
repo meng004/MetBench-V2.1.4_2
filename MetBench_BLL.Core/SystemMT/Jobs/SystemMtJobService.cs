@@ -28,7 +28,7 @@ public sealed class SystemMtJobService : ISystemMtJobService
 
         var now = _utcNow();
         var id = Guid.NewGuid();
-        await _store.CreateAsync(new SystemMtJobRecord
+        var record = new SystemMtJobRecord
         {
             JobId = id,
             MrId = request.MrId,
@@ -38,9 +38,30 @@ public sealed class SystemMtJobService : ISystemMtJobService
             ProgressPercent = 0,
             CreatedAtUtc = now,
             UpdatedAtUtc = now,
-        }, cancellationToken);
+        };
+        await _store.CreateAsync(record, cancellationToken);
 
-        await _queue.EnqueueAsync(id, cancellationToken);
+        try
+        {
+            await _queue.EnqueueAsync(id, cancellationToken);
+        }
+        catch
+        {
+            // The record is already persisted Queued; if enqueue fails (e.g. queue closed at
+            // shutdown) no worker will ever pick it up. Mark it Failed rather than leaving a
+            // phantom Queued record that polls forever as "waiting" (接 §6 显式报错), then rethrow.
+            var failedAt = _utcNow();
+            await _store.UpdateStatusAsync(record with
+            {
+                State = SystemMtJobState.Failed,
+                FailureReason = "failed to enqueue job for execution",
+                CurrentPhase = "failed",
+                UpdatedAtUtc = failedAt,
+                FinishedAtUtc = failedAt,
+            }, CancellationToken.None);
+            throw;
+        }
+
         return new SystemMtJobHandle(id, now);
     }
 
