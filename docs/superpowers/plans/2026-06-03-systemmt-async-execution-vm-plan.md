@@ -7,9 +7,9 @@
 
 ## VM Execution Note - 2026-06-03
 
-Status: In progress / blocked on AC-V5 failure-state evidence.
+Status: VM evidence complete for AC-V1 through AC-V8; pending PR merge.
 
-Branch `claude/async-execution-vm` implements the WPF async execution consumer and collected real VM evidence in `docs/superpowers/specs/2026-06-03-async-execution-vm-verification/`. AC-V1, AC-V2, AC-V3, AC-V4, AC-V6, AC-V7, and AC-V8 are verified. AC-V5 remains blocked because all attempted dependency-sensitive failure candidates reached `Succeeded` on this VM, so no real Failed / TimedOut / ArtifactMissing screenshot was produced. Do not mark this plan Completed or Controlled until that evidence gap is resolved.
+Branch `claude/async-execution-vm` implements the WPF async execution consumer and collected real VM evidence in `docs/superpowers/specs/2026-06-03-async-execution-vm-verification/`. AC-V1 through AC-V8 are verified. AC-V5 is now covered by `08-failed-result.png`: the UIA driver temporarily hid the build-output copy of `SUT/advection_1d/sample/standard.json`, submitted the existing `advection-amplitude-linearity` MR through the real WPF async page, observed job `e98cd8ad-9b95-4c0f-a0b6-fcf9c4e727fd` transition to `Failed`, captured the failure reason, and restored the sample file in `finally`. Do not mark mainline Controlled until PR #280 lands.
 
 # System MT 异步执行 + Polling（VM 消费侧 / WPF）Implementation Plan
 

@@ -31,6 +31,8 @@ $buildLog = Join-Path $shotDir 'build-output.txt'
 $statusLog = Join-Path $shotDir 'observed-status-sequence.txt'
 $script:win = $null
 $script:scale = 1.0
+$script:hiddenSamplePath = $null
+$script:hiddenSampleBackup = $null
 
 function Prop($id, $value) {
     New-Object System.Windows.Automation.PropertyCondition($id, $value)
@@ -182,16 +184,16 @@ function Wait-Terminal($timeoutSec = 45) {
     throw "Timed out waiting for terminal async job state."
 }
 
-Push-Location $repo
-try {
-    dotnet build MetBench_Client\MetBench_Client.csproj -v:quiet *> $buildLog
-    if ($LASTEXITCODE -ne 0) { throw "dotnet build failed with exit $LASTEXITCODE" }
-    $tail = (Get-Content $buildLog -Tail 45) -join [Environment]::NewLine
-    Text-Shot '01-build-output.png' $tail
+function Start-MetBench($exe) {
+    $psi = New-Object System.Diagnostics.ProcessStartInfo
+    $psi.FileName = $exe
+    $psi.WorkingDirectory = Split-Path $exe -Parent
+    $psi.UseShellExecute = $false
+    return [System.Diagnostics.Process]::Start($psi)
+}
 
-    if (Test-Path $statusLog) { Remove-Item $statusLog -Force }
-    $exe = Join-Path $repo 'MetBench_Client\bin\Debug\net8.0-windows7.0\MetBench_Client.exe'
-    $proc = Start-Process $exe -WorkingDirectory (Split-Path $exe -Parent) -PassThru
+function Attach-MainWindow($proc) {
+    $script:win = $null
     Start-Sleep -Seconds 7
     $winCond = Prop ([System.Windows.Automation.AutomationElement]::ProcessIdProperty) $proc.Id
     for ($i = 0; $i -lt 30 -and -not $script:win; $i++) {
@@ -203,7 +205,9 @@ try {
     $physW = $AE::RootElement.Current.BoundingRectangle.Width
     $logW = [System.Windows.Forms.SystemInformation]::VirtualScreen.Width
     $script:scale = if ($logW -gt 0) { $physW / $logW } else { 1.0 }
+}
 
+function Open-AsyncPage {
     [void](Set-NavSearch 'Async')
     $nav = Find-ByName $script:win 'System MT Async Execution' 12
     if (-not $nav) { throw "Async navigation item not found." }
@@ -212,6 +216,20 @@ try {
         Shot 'diagnostic-after-async-nav.png'
         throw "Async page not reached."
     }
+}
+
+Push-Location $repo
+try {
+    dotnet build MetBench_Client\MetBench_Client.csproj -v:quiet *> $buildLog
+    if ($LASTEXITCODE -ne 0) { throw "dotnet build failed with exit $LASTEXITCODE" }
+    $tail = (Get-Content $buildLog -Tail 45) -join [Environment]::NewLine
+    Text-Shot '01-build-output.png' $tail
+
+    if (Test-Path $statusLog) { Remove-Item $statusLog -Force }
+    $exe = Join-Path $repo 'MetBench_Client\bin\Debug\net8.0-windows7.0\MetBench_Client.exe'
+    $proc = Start-MetBench $exe
+    Attach-MainWindow $proc
+    Open-AsyncPage
     Shot '02-async-page-loaded.png'
 
     Select-Mr 'advection-amplitude-linearity'
@@ -273,8 +291,42 @@ try {
     Start-Sleep -Milliseconds 300
     Dump-State 'cancel-clicked'
     Shot '10-cancelled.png'
+
+    if ($proc -and -not $proc.HasExited) {
+        $proc | Stop-Process -Force
+        Start-Sleep -Seconds 2
+    }
+
+    $script:hiddenSamplePath = Join-Path (Split-Path $exe -Parent) 'SUT\advection_1d\sample\standard.json'
+    $script:hiddenSampleBackup = "$script:hiddenSamplePath.vm-hidden"
+    if (Test-Path -LiteralPath $script:hiddenSampleBackup) {
+        Move-Item -LiteralPath $script:hiddenSampleBackup -Destination $script:hiddenSamplePath -Force
+    }
+    Move-Item -LiteralPath $script:hiddenSamplePath -Destination $script:hiddenSampleBackup -Force
+    Add-Content -Path $statusLog -Value "$(Get-Date -Format o) [failure-trigger] restarting WPF after temporarily hiding build-output SUT\advection_1d\sample\standard.json"
+    $proc = Start-MetBench $exe
+    Attach-MainWindow $proc
+    Open-AsyncPage
+    Select-Mr 'advection-amplitude-linearity'
+    [void](Click-Element (Find-ById $script:win 'AsyncSubmitButton' 5))
+    Start-Sleep -Milliseconds 500
+    Dump-State 'missing-sample-submit'
+    $failedState = Wait-Terminal 45
+    if ($failedState -ne 'Failed') {
+        throw "Expected missing-sample async run to fail, got $failedState."
+    }
+    Add-Content -Path $statusLog -Value "$(Get-Date -Format o) [failure-trigger] mr=advection-amplitude-linearity terminal=$failedState reason=$(Get-TextById 'AsyncFailureReason')"
+    if (Test-Path (Join-Path $shotDir 'failure-path-blocked.txt')) {
+        Remove-Item (Join-Path $shotDir 'failure-path-blocked.txt') -Force
+    }
+    Shot '08-failed-result.png'
 }
 finally {
+    try {
+        if ($script:hiddenSamplePath -and $script:hiddenSampleBackup -and (Test-Path -LiteralPath $script:hiddenSampleBackup)) {
+            Move-Item -LiteralPath $script:hiddenSampleBackup -Destination $script:hiddenSamplePath -Force
+        }
+    } catch {}
     try { if ($proc -and -not $proc.HasExited) { $proc | Stop-Process -Force } } catch {}
     Pop-Location
 }

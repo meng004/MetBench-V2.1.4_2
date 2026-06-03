@@ -2,6 +2,7 @@ using MetBench_BLL.SystemMT.Jobs;
 using MetBench_BLL.SystemMT.Launcher;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,12 +17,18 @@ public sealed class SystemMtJobWorkerHostedService : BackgroundService
     private readonly IJobQueue _queue;
     private readonly IJobStore _store;
     private readonly IServiceScopeFactory _scopeFactory;
+    private readonly ILogger<SystemMtJobWorkerHostedService> _logger;
 
-    public SystemMtJobWorkerHostedService(IJobQueue queue, IJobStore store, IServiceScopeFactory scopeFactory)
+    public SystemMtJobWorkerHostedService(
+        IJobQueue queue,
+        IJobStore store,
+        IServiceScopeFactory scopeFactory,
+        ILogger<SystemMtJobWorkerHostedService> logger)
     {
         _queue = queue;
         _store = store;
         _scopeFactory = scopeFactory;
+        _logger = logger;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -50,10 +57,36 @@ public sealed class SystemMtJobWorkerHostedService : BackgroundService
             {
                 break;
             }
-            catch
+            catch (Exception ex)
             {
-                // SystemMtJobWorker records per-job failures; keep the host alive for later jobs.
+                await MarkJobFailedAsync(jobId, ex).ConfigureAwait(false);
             }
+        }
+    }
+
+    private async Task MarkJobFailedAsync(Guid jobId, Exception exception)
+    {
+        try
+        {
+            var record = await _store.GetAsync(jobId, CancellationToken.None).ConfigureAwait(false);
+            if (record is null || record.State.IsTerminal()) return;
+
+            var now = DateTime.UtcNow;
+            await _store.UpdateStatusAsync(record with
+            {
+                State = SystemMtJobState.Failed,
+                CurrentPhase = "failed",
+                FailureReason = $"{exception.GetType().Name}: {exception.Message}",
+                UpdatedAtUtc = now,
+                FinishedAtUtc = now,
+            }, CancellationToken.None).ConfigureAwait(false);
+        }
+        catch (Exception markFailedException)
+        {
+            _logger.LogError(
+                markFailedException,
+                "Failed to mark System MT async job {JobId} as failed after worker infrastructure error.",
+                jobId);
         }
     }
 }

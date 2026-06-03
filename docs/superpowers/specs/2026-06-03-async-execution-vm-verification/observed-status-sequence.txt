@@ -1,15 +1,19 @@
-2026-06-03T20:07:25.1005730+08:00 [submit-immediate] state=Queued phase=queued progress=0 job=3f6dd1db-1265-4db8-b417-42fff745fa62
-2026-06-03T20:07:27.4025596+08:00 [auto-poll] state=Succeeded phase=succeeded progress=100 job=3f6dd1db-1265-4db8-b417-42fff745fa62
-2026-06-03T20:07:29.0331931+08:00 [manual-refresh] state=Succeeded phase=succeeded progress=100 job=3f6dd1db-1265-4db8-b417-42fff745fa62
-2026-06-03T20:07:30.1906869+08:00 [poll] state=Succeeded phase=succeeded progress=100 job=3f6dd1db-1265-4db8-b417-42fff745fa62
-2026-06-03T20:07:34.5485917+08:00 [poll] state=Succeeded phase=succeeded progress=100 job=bd750756-d0dd-4a4b-b977-2390a9a318d9
-2026-06-03T20:07:35.5860447+08:00 [failure-candidate-succeeded] mr=openmc-pincell-particle-count-convergence terminal=Succeeded
-2026-06-03T20:07:38.8142321+08:00 [poll] state=RunningSource phase=succeeded progress=100 job=409e5bff-15ac-48c3-af04-fe372e766a48
-2026-06-03T20:07:40.1570520+08:00 [failure-candidate-succeeded] mr=openmc-pincell-nu-sigma-f terminal=Succeeded
-2026-06-03T20:07:45.0914366+08:00 [poll] state=RunningSource phase=succeeded progress=100 job=845ae754-f073-402e-ab9b-47f1d2318517
-2026-06-03T20:07:48.9764218+08:00 [failure-candidate-succeeded] mr=scipy-bvp-poisson-seed-mesh-insensitivity terminal=Succeeded
-2026-06-03T20:07:52.9013291+08:00 [poll] state=RunningSource phase=succeeded progress=100 job=123dda49-4808-4452-8c92-5722c7f5b7e1
-2026-06-03T20:07:54.9216544+08:00 [failure-candidate-succeeded] mr=scipy-ivp-lv-step-convergence terminal=Succeeded
-2026-06-03T20:07:58.0635944+08:00 [poll] state=Succeeded phase=succeeded progress=100 job=a62b4231-960b-4eee-a7a2-de17d005a574
-2026-06-03T20:07:59.0024341+08:00 [failure-candidate-succeeded] mr=openmoc-pincell-ray-track-convergence terminal=Succeeded
-2026-06-03T20:08:01.5876946+08:00 [cancel-clicked] state=Cancelled phase=cancelled progress=40 job=6d28323c-6486-459d-b937-a8c124d5e45d
+2026-06-03T21:05:33.9449897+08:00 [submit-immediate] state=Queued phase=running-source progress=40 job=91cb2f56-2528-4ba1-a073-02785eafa7ea
+2026-06-03T21:05:37.4484665+08:00 [auto-poll] state=Succeeded phase=succeeded progress=100 job=91cb2f56-2528-4ba1-a073-02785eafa7ea
+2026-06-03T21:05:39.4286644+08:00 [manual-refresh] state=Succeeded phase=succeeded progress=100 job=91cb2f56-2528-4ba1-a073-02785eafa7ea
+2026-06-03T21:05:40.9177342+08:00 [poll] state=Succeeded phase=succeeded progress=100 job=91cb2f56-2528-4ba1-a073-02785eafa7ea
+2026-06-03T21:05:45.9254017+08:00 [poll] state=RunningSource phase=running-source progress=100 job=ea255293-5c85-43ab-91c7-32df5b5e53db
+2026-06-03T21:05:47.4281863+08:00 [failure-candidate-succeeded] mr=openmc-pincell-particle-count-convergence terminal=Succeeded
+2026-06-03T21:05:50.5751855+08:00 [poll] state=RunningSource phase=succeeded progress=100 job=d95fd953-1ada-456b-976f-fe369c4a202c
+2026-06-03T21:05:51.9904895+08:00 [failure-candidate-succeeded] mr=openmc-pincell-nu-sigma-f terminal=Succeeded
+2026-06-03T21:05:55.3000771+08:00 [poll] state=RunningSource phase=succeeded progress=100 job=5267378f-d71f-4d8e-b44a-eec2995cd54b
+2026-06-03T21:05:57.1263989+08:00 [failure-candidate-succeeded] mr=scipy-bvp-poisson-seed-mesh-insensitivity terminal=Succeeded
+2026-06-03T21:06:00.3525007+08:00 [poll] state=RunningSource phase=succeeded progress=100 job=5f104d8e-d55c-474d-817d-b919799b2110
+2026-06-03T21:06:01.9456791+08:00 [failure-candidate-succeeded] mr=scipy-ivp-lv-step-convergence terminal=Succeeded
+2026-06-03T21:06:05.1515403+08:00 [poll] state=Succeeded phase=succeeded progress=100 job=12c6aa92-4c29-4c82-af95-9514c0536b31
+2026-06-03T21:06:06.7210497+08:00 [failure-candidate-succeeded] mr=openmoc-pincell-ray-track-convergence terminal=Succeeded
+2026-06-03T21:06:10.2213363+08:00 [cancel-clicked] state=Cancelled phase=cancelled progress=40 job=071d247a-efcf-4b47-be76-8a8d93e372b1
+2026-06-03T21:06:14.9087019+08:00 [failure-trigger] restarting WPF after temporarily hiding build-output SUT\advection_1d\sample\standard.json
+2026-06-03T21:06:25.8426491+08:00 [missing-sample-submit] state=Queued phase=queued progress=40 job=e98cd8ad-9b95-4c0f-a0b6-fcf9c4e727fd
+2026-06-03T21:06:26.8322522+08:00 [poll] state=Failed phase=failed progress=40 job=e98cd8ad-9b95-4c0f-a0b6-fcf9c4e727fd
+2026-06-03T21:06:28.0253124+08:00 [failure-trigger] mr=advection-amplitude-linearity terminal=Failed reason=MR 'advection-amplitude-linearity' sample case not found at C:\MetBench-V2.1.4_2\_worktrees\async-execution-vm\MetBench_Client\bin\Debug\net8.0-windows7.0\SUT\advection_1d\sample\standard.json
