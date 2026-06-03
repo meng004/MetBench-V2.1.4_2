@@ -17,7 +17,7 @@
 1. **契约已入 main（硬阻塞）**：`git fetch origin main` 后，确认 `MetBench_BLL.Core/SystemMT/Jobs/ISystemMtJobService.cs` 存在于 main。命令：`git cat-file -e origin/main:MetBench_BLL.Core/SystemMT/Jobs/ISystemMtJobService.cs && echo OK`。**不存在 → 立即停**：Cloud 计划未合入，VM 计划被 block，`dotnet build MetBench_Client` 必因缺 `MetBench_BLL.SystemMT.Jobs.*` 失败。
 2. 计划文件存在且可读：`docs/superpowers/plans/2026-06-03-systemmt-async-execution-vm-plan.md`。
 3. 环境是 **Windows**：`dotnet build MetBench_Client/MetBench_Client.csproj` 能跑（Linux 上必 MSB4019，说明走错环境）。先空跑一次确认当前 main 头能编译通过，作为「改动前可编译」基线。
-4. 从含 job 契约的 main 切 VM 分支 `claude/vm-async-execution`；**该分支不含 `MetBench_BLL.Core`/`MetBench_DAL` 生产契约改动**（VM 只动 `MetBench_Client/` + 证据 docs，对齐 AC-V7）。
+4. 从含 job 契约的 main 切 VM 分支 `claude/async-execution-vm`；**该分支不含 `MetBench_BLL.Core`/`MetBench_DAL` 生产契约改动**（VM 只动 `MetBench_Client/` + 证据 docs，对齐 AC-V7）。
 5. 读 `MetBench_BLL.Core/SystemMT/Launcher/MrRunResult.cs` 真实字段——计划 Task 1 的 `DescribeResult` 依赖它的「通过位 + 摘要」真实 API，不得用 `ToString()` 凑数。
 6. 确认 `MetBench_Client` 现有 converters（`InverseBoolConverter` / `NullToCollapsedConverter`）——计划 Task 2 XAML 引用它们，缺则复用既有同义 converter，不新造重复实现（先读再写）。
 

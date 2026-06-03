@@ -18,7 +18,7 @@
 2. 设计 spec 存在：`docs/superpowers/specs/2026-06-03-systemmt-async-execution-polling-design.md`（契约边界来源）。
 3. 计划文件存在且可读：`docs/superpowers/plans/2026-06-03-systemmt-async-execution-cloud-plan.md`。
 4. 基线测试可跑且现状已知：`dotnet test MetBench_SystemMT.Tests` 当前**全绿**——先跑一次记录基线 pass/skip/fail 计数，作为「兼容零回归」(AC-1) 的对照锚点。**禁止**在未知基线下开工。
-5. 当前不在 `main` 上：从 main 切新分支 `codex/async-execution-jobs`（接 CLAUDE.md：默认分支先开分支）。
+5. 当前不在 `main` 上：从 main 切新分支 `claude/async-execution-cloud`（接 CLAUDE.md：默认分支先开分支）。
 6. 读 `MetBench_BLL.Core/SystemMT/Launcher/MrRunResult.cs` 真实字段——计划 Task 2/4/7/8 多处依赖它的「通过位 / SUT 名 / 失败原因 / 工厂方法」真实 API，**占位调用名必须替换为真实签名**，不得照抄计划里的 `MrRunResult.Passed/Failed` 占位。
 
 ## 核心步骤（计划已给完整代码，此处只列骨架，细节以计划为准）
