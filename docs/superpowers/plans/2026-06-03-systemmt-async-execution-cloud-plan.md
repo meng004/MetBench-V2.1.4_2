@@ -1,5 +1,5 @@
 ---
-状态: Proposed (not started)
+状态: Implemented — Task 1-3 merged via PR #278; Task 4-10 in PR-2 (this chain)
 环境: Cloud (Linux / CI-gated)
 依赖设计: docs/superpowers/specs/2026-06-03-systemmt-async-execution-polling-design.md
 配套计划: docs/superpowers/plans/2026-06-03-systemmt-async-execution-vm-plan.md (VM 消费侧，后行)
@@ -8,6 +8,13 @@
 # System MT 异步执行 + Polling（Cloud 侧契约层）Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+> **实施偏差记录（§12.4 R3 — 实施时对照真实 `MrRunResult.cs` 修正了计划占位）：**
+> 1. **无 `MrRunResult.Passed()/Failed()` 工厂** —— `MrRunResult` 是 9 参位置 record（`RecordId/MrId/Passed/FailureReason/ValueName/SourceValue/FollowUpValue/SourceElapsed/FollowUpElapsed`）。Task 2/4/7/8 的测试改用真实构造（见 `JobsTestData.Result`）。
+> 2. **`MrRunResult` 无 `SutName` 字段** —— SUT 名改由 `SystemMtAsyncPipeline` 经 `ISystemMtLauncher.ListAvailableAsync()` 按 MrId 查 `MrSummary.SutName` 解析；worker 在 finalize 时回填 `SystemMtJobRecord.SutName`；未知 MR 留空字符串。
+> 3. **`MrRunResult.Passed` 是 MR 断言位、非基础设施位** —— `RunAsync` 返回即基础设施成功 → 终止态 `Succeeded`（即便断言 `Passed=false`，按 spec §10 走结果/异常调查路径）。`SystemMtAsyncPipeline` 因此**删去 Failed 分支**；基础设施失败由 `RunAsync` 抛异常表达，在 `SystemMtJobWorker` catch 中归类 Failed。v1 launcher 路径只产生 `Succeeded`（或抛异常→Failed）；`TimedOut`/`ArtifactMissing` 为后续 backend 预留。
+> 4. **worker 进度回写并发修正** —— 用内联同步 `IProgress`（回调原地有序执行）替代默认 `Progress<T>`，避免线程池投递导致中间进度写在终止态 finalize **之后**、覆盖终止态。
+> 5. **manifest `execution` 扩展（spec §9）v1 不实现** —— 所有 job 走 launcher 默认同步路径；catalog 解析延后到接 Docker/remote 后端时。
 
 **Goal:** 在 `MetBench_BLL.Core` 内新增一个**加性的** System MT job 子系统，让调用方提交一个 MR 运行后立即拿到 `JobId`，由后台 worker 执行、把状态变更落库，调用方仅通过 polling（`GetStatusAsync(jobId)`）读取持久快照；不改 MR 语义 / typed predicate / catalog 含义 / 现有同步 `SystemMtLauncher.RunAsync` 行为。
 
