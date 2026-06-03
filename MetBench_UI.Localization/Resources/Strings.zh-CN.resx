@@ -64,6 +64,9 @@
   <data name="Nav_SystemMtExecution" xml:space="preserve">
     <value>系统级蜕变测试</value>
   </data>
+  <data name="Nav_SystemMtAsyncExecution" xml:space="preserve">
+    <value>系统级异步执行</value>
+  </data>
   <data name="Nav_Settings" xml:space="preserve">
     <value>设置</value>
   </data>

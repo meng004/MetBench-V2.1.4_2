@@ -64,6 +64,9 @@
   <data name="Nav_SystemMtExecution" xml:space="preserve">
     <value>System MT</value>
   </data>
+  <data name="Nav_SystemMtAsyncExecution" xml:space="preserve">
+    <value>System MT Async Execution</value>
+  </data>
   <data name="Nav_Settings" xml:space="preserve">
     <value>Settings</value>
   </data>
