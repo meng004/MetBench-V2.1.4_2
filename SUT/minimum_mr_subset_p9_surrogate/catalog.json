@@ -1,0 +1,62 @@
+{
+  "sut_name": "minimum-mr-subset-p9-surrogate",
+  "program": {
+    "program_name": "minimum-mr-subset-p9-surrogate",
+    "equation": "Neutron transport surrogate",
+    "equation_key": "neutron-transport",
+    "program_type": "Surr",
+    "runner_script_relative_path": "minimum_mr_subset_p9_surrogate.py",
+    "input_parser_script_relative_path": "minimum_mr_subset_p9_surrogate_input_parser.py",
+    "output_parser_script_relative_path": "minimum_mr_subset_p9_surrogate_output_parser.py",
+    "input_adapter_script_relative_path": "minimum_mr_subset_p9_surrogate_input_parser.py",
+    "output_adapter_script_relative_path": "minimum_mr_subset_p9_surrogate_output_parser.py",
+    "python_executable_kind": "system"
+  },
+  "profile": {
+    "program_type": "Surr",
+    "solver_method": "deterministic k_eff uncertainty surrogate",
+    "runtime_key": "system",
+    "input_contract": "JSON enrichment and synthetic particle-count settings for a deterministic OpenMC surrogate.",
+    "output_contract": "JSON scalar k_eff, sigma_k, and reaction-balance surrogate metrics.",
+    "adapter": "Pure-stdlib surrogate runner and JSON parser/adapter under SUT/minimum_mr_subset_p9_surrogate/.",
+    "dependency_risk": "pure-stdlib; explicitly not real OpenMC"
+  },
+  "mrs": [
+    {
+      "mr_id": "p9-k-eff-noise-aware",
+      "sut_name": "minimum-mr-subset-p9-surrogate",
+      "display_name": "Minimum-MR-SubSet P9 - surrogate k_eff uncertainty convergence",
+      "description": "Surrogate particle-count convergence: this is a deterministic OpenMC surrogate, not real OpenMC. Scaling particle count by factor=4 must reduce the reported k_eff standard error sigma_k by approximately 1/sqrt(4), which is represented through the existing variance-ratio typed runtime path.",
+      "mr_family": "MinimumMrSubset.P9.Convergence.KeffNoiseSurrogate",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "variance-ratio",
+      "assertion_name": "VarianceRatio",
+      "value_name": "sigma_k",
+      "default_parameters": { "factor": "4" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/simulation/particles" }
+      ],
+      "tolerance_rel": 0.05,
+      "tolerance_abs": 0,
+      "noise_aware": false,
+      "equation_key": "neutron-transport",
+      "equation": "Neutron transport surrogate",
+      "program_type": "Surr",
+      "meta_pattern": "Conv",
+      "source_level": "ImportedResearchPromotion",
+      "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Conv MR: increasing Monte Carlo particle count should reduce standard error; this surrogate encodes sigma_k = 0.75/sqrt(particles).",
+        "transformation_semantics": "Apply ScaleField to /simulation/particles with factor=4; enrichment and surrogate formula remain unchanged.",
+        "observable_summary": "Observe `sigma_k` from source and follow-up surrogate outputs for MR `p9-k-eff-noise-aware`.",
+        "predicate_summary": "Predicate `variance-ratio` / `VarianceRatio` checks that follow-up sigma_k matches the expected 1/sqrt(factor) reduction using the existing typed runtime.",
+        "tolerance_summary": "Deterministic variance-ratio tolerance rel=0.05, abs=0 bounds acceptable deviation from the expected standard-error shrinkage.",
+        "applicability": "Applicable only to the explicit `minimum-mr-subset-p9-surrogate` runtime. It must not be interpreted as real OpenMC execution evidence.",
+        "failure_meaning": "Failure indicates the surrogate, adapter, transform binding, or existing variance-ratio predicate disagrees with the declared uncertainty-convergence relation."
+      },
+      "sample_case_relative_path": "sample/standard.json",
+      "work_root_name": "MetBenchMinimumMrSubsetP9Surrogate",
+      "timeout_seconds": 30
+    }
+  ]
+}

@@ -84,7 +84,7 @@ public sealed class LauncherCatalogV2ImporterTests
         Assert.Equal(ExpectedCatalogCountsWhitelist.SutCount, _apps.Data.Count);
         var sutNames = _apps.Data.Select(a => a.Name).OrderBy(n => n, System.StringComparer.Ordinal).ToArray();
         Assert.Equal(
-            new[] { "_test-csv", "advection-1d", "burgers-1d", "damped-oscillator", "decay-chain", "diffusion-1d", "heat-equation", "lotka-volterra", "openmc", "openmoc", "poisson-1d", "projectile", "scipy-bvp-poisson-1d", "scipy-ivp-lotka-volterra", "subchannel-1d", "wave-1d" },
+            new[] { "_test-csv", "advection-1d", "burgers-1d", "damped-oscillator", "decay-chain", "diffusion-1d", "heat-equation", "lotka-volterra", "minimum-mr-subset-p4", "minimum-mr-subset-p5", "minimum-mr-subset-p9-surrogate", "openmc", "openmoc", "poisson-1d", "projectile", "scipy-bvp-poisson-1d", "scipy-ivp-lotka-volterra", "subchannel-1d", "wave-1d" },
             sutNames);
         Assert.All(_apps.Data, a => Assert.Equal("system-level", a.Kind));
         Assert.All(_apps.Data, a => Assert.Equal("Python", a.ProgrammingLanguage));
@@ -180,8 +180,8 @@ public sealed class LauncherCatalogV2ImporterTests
         Assert.Equal("launcher.catalog.import", log.Action);
         Assert.Equal("launcher-import", log.Actor);
         Assert.Contains("applicationsCreated", log.DetailsJson);
-        Assert.Contains("\"mrsCreated\":33", log.DetailsJson);
-        Assert.Contains("\"bindingsCreated\":33", log.DetailsJson);
+        Assert.Contains($"\"mrsCreated\":{ExpectedCatalogCountsWhitelist.MrCount}", log.DetailsJson);
+        Assert.Contains($"\"bindingsCreated\":{ExpectedCatalogCountsWhitelist.MrCount}", log.DetailsJson);
     }
 
     [Fact]

@@ -966,6 +966,92 @@ internal static class LegacyCatalogFactory
             // （初始 Gaussian 采样误差 O(dx²)）；ToleranceRel=1e-3 + Atol=1e-6 充裕。
             Tolerance: new AssertionTolerance(ToleranceRel: 1e-3, ToleranceAbs: 1e-6));
 
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "p4-energy-invariant",
+                DisplayName: "Minimum-MR-SubSet P4 - Hamiltonian energy refinement",
+                SutName: "minimum-mr-subset-p4",
+                TransformationName: "ScaleField",
+                AssertionName: "LessThan",
+                ValueName: "energy_drift",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Energy-invariant convergence: for the same Hamiltonian pendulum " +
+                    "initial state and physical time interval, doubling the number of " +
+                    "velocity-Verlet integration steps halves dt and must reduce the " +
+                    "bounded energy-drift observable.",
+                MrFamily: "MinimumMrSubset.P4.Convergence.EnergyInvariant"),
+            SampleCaseRelativePath: Path.Combine("minimum_mr_subset_p4", "sample", "standard.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p4", "minimum_mr_subset_p4.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p4", "minimum_mr_subset_p4_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p4", "minimum_mr_subset_p4_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchMinimumMrSubsetP4",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p4", "minimum_mr_subset_p4_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p4", "minimum_mr_subset_p4_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/integration/n_steps") },
+            AssertionTypeCode: "less",
+            EquationKey: "hamiltonian-pendulum");
+
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "p5-power-response",
+                DisplayName: "Minimum-MR-SubSet P5 - point-kinetics reactivity response",
+                SutName: "minimum-mr-subset-p5",
+                TransformationName: "ScaleField",
+                AssertionName: "GreaterThan",
+                ValueName: "max_power",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Power-response monotonicity: for the same initial delayed-neutron " +
+                    "precursor state and time interval, scaling the positive reactivity " +
+                    "insertion rho upward must strictly increase the maximum reactor " +
+                    "power response observed over the transient.",
+                MrFamily: "MinimumMrSubset.P5.Scaling.PowerResponse"),
+            SampleCaseRelativePath: Path.Combine("minimum_mr_subset_p5", "sample", "standard.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p5", "minimum_mr_subset_p5.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p5", "minimum_mr_subset_p5_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p5", "minimum_mr_subset_p5_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchMinimumMrSubsetP5",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p5", "minimum_mr_subset_p5_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p5", "minimum_mr_subset_p5_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/kinetics/rho") },
+            AssertionTypeCode: "greater",
+            EquationKey: "point-kinetics");
+
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "p9-k-eff-noise-aware",
+                DisplayName: "Minimum-MR-SubSet P9 - surrogate k_eff uncertainty convergence",
+                SutName: "minimum-mr-subset-p9-surrogate",
+                TransformationName: "ScaleField",
+                AssertionName: "VarianceRatio",
+                ValueName: "sigma_k",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "4" },
+                Description:
+                    "Surrogate particle-count convergence: this is a deterministic OpenMC " +
+                    "surrogate, not real OpenMC. Scaling particle count by factor=4 must " +
+                    "reduce the reported k_eff standard error sigma_k by approximately " +
+                    "1/sqrt(4), which is represented through the existing variance-ratio " +
+                    "typed runtime path.",
+                MrFamily: "MinimumMrSubset.P9.Convergence.KeffNoiseSurrogate"),
+            SampleCaseRelativePath: Path.Combine("minimum_mr_subset_p9_surrogate", "sample", "standard.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p9_surrogate", "minimum_mr_subset_p9_surrogate.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p9_surrogate", "minimum_mr_subset_p9_surrogate_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p9_surrogate", "minimum_mr_subset_p9_surrogate_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchMinimumMrSubsetP9Surrogate",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p9_surrogate", "minimum_mr_subset_p9_surrogate_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p9_surrogate", "minimum_mr_subset_p9_surrogate_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/simulation/particles") },
+            AssertionTypeCode: "variance-ratio",
+            EquationKey: "neutron-transport",
+            Tolerance: new AssertionTolerance(ToleranceRel: 0.05, ToleranceAbs: 0));
+
         // PR-A T1 non-JSON I/O adapter: synthetic test SUT proving the metbench_io
         // helper round-trips through the unchanged launcher / pipeline / catalog. Not
         // a real physics SUT — see SUT/_test_csv/catalog.json for the canonical
