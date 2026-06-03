@@ -40,6 +40,9 @@ mr:openmc-pincell-sigma-a
 mr:openmoc-pincell-nu-sigma-f
 mr:openmoc-pincell-ray-track-convergence
 mr:openmoc-pincell-sigma-a
+mr:p4-energy-invariant
+mr:p5-power-response
+mr:p9-k-eff-noise-aware
 mr:poisson-mesh-richardson
 mr:poisson-source-superposition
 mr:projectile-scale-v0
@@ -62,6 +65,9 @@ sut:decay-chain
 sut:diffusion-1d
 sut:heat-equation
 sut:lotka-volterra
+sut:minimum-mr-subset-p4
+sut:minimum-mr-subset-p5
+sut:minimum-mr-subset-p9-surrogate
 sut:openmc
 sut:openmoc
 sut:poisson-1d
@@ -79,9 +85,11 @@ eq:burgers
 eq:damped-oscillator
 eq:diffusion
 eq:heat-equation-1d
+eq:hamiltonian-pendulum
 eq:lotka-volterra
 eq:navier-stokes
 eq:neutron-transport
+eq:point-kinetics
 eq:poisson
 eq:projectile-motion
 eq:wave

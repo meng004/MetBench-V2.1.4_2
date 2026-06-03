@@ -1,0 +1,10 @@
+{
+  "initial": {
+    "q": 0.7,
+    "p": 0.0
+  },
+  "integration": {
+    "n_steps": 500,
+    "t_final": 10.0
+  }
+}

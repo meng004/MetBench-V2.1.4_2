@@ -1,0 +1,8 @@
+{
+  "surrogate": {
+    "enrichment": 0.045
+  },
+  "simulation": {
+    "particles": 10000
+  }
+}

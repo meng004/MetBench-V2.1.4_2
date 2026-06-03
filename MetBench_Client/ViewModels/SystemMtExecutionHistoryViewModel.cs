@@ -149,6 +149,9 @@ namespace MetBench_Client.ViewModels
                     : await _editor.ListPagedByMrNameAsync(MrNameFilter, request).ConfigureAwait(false);
 
                 Records = new ObservableCollection<SystemMtResultRecord>(page.Items);
+                _selectedRows.Clear();
+                if (SelectedRecord is not null && Records.All(r => r.Id != SelectedRecord.Id))
+                    SelectedRecord = null;
                 PageIndex = page.PageIndex;
                 TotalCount = page.TotalCount;
                 StatusMessage = page.TotalCount == 0
@@ -187,6 +190,8 @@ namespace MetBench_Client.ViewModels
             var sb = new StringBuilder();
             sb.AppendLine(string.Format(CultureInfo.InvariantCulture, Localization["Evidence_History_ExecutionId_Fmt"], ev.ExecutionId));
             sb.AppendLine(string.Format(CultureInfo.InvariantCulture, Localization["Evidence_History_RecordedAt_Fmt"], string.Format(CultureInfo.InvariantCulture, "{0:u}", ev.RecordedAtUtc)));
+            if (HasPairQuality(ev.PairQuality))
+                AppendPairQuality(sb, ev.PairQuality);
             if (ev.TypedVerification is { } tv)
             {
                 sb.AppendLine();
@@ -204,8 +209,6 @@ namespace MetBench_Client.ViewModels
                 if (!string.IsNullOrWhiteSpace(tv.SkipOrInvalidReason))
                     sb.AppendLine(string.Format(CultureInfo.InvariantCulture, Localization["Evidence_History_Reason_Fmt"], tv.SkipOrInvalidReason));
             }
-            if (HasPairQuality(ev.PairQuality))
-                AppendPairQuality(sb, ev.PairQuality);
             return sb.ToString();
         }
 

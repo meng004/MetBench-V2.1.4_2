@@ -92,4 +92,69 @@ public sealed class LauncherEndToEndOdeTests
         // 而 ScaleField 自身始终在 registry
         Assert.IsType<ScaleField>(TransformationRegistry.Get("ScaleField"));
     }
+
+    // ═════════════════════════════════════════════════════════════════════════
+    // Stage 8 新 MR 端到端 RunAsync 覆盖（原 s8-p5d 分支改写适配当前 main）
+    //
+    // 此前云端测试只验了 descriptor / catalog 元数据，**未跑过端到端 SystemMtPipeline**。
+    // 本批次直接 RunAsync 真跑，验证：
+    //   (1) approx MR 在数值噪声下 result.Passed=true（Tolerance 充分）
+    //   (2) less MR 物理单调性（alpha↑ → max_u↓；G↑ → ΔT↓）成立
+    //   (3) greater MR 线性 / 单调（S↑ → φ_max↑；q''↑ → ΔT↑）成立
+    //   (4) launcher → pipeline → recorder 数据链对 8 个新 MR 全部通畅
+    // SUT 均为 system python（+ scipy/numpy），CI 可达，与上方 3 个 ODE MR 同环境门控。
+    // ═════════════════════════════════════════════════════════════════════════
+
+    public static IEnumerable<object[]> Stage8NewMrCases() => new[]
+    {
+        // bateman（复用 decay-chain SUT, RK4）
+        new object[] { "bateman-mass-conservation",            "approx",  "total" },
+        new object[] { "bateman-timestep-cauchy",             "approx",  "N_C_final" },
+        // fourier（复用 heat-equation SUT, forward-Euler FD）
+        new object[] { "fourier-timestep-convergence",        "approx",  "max_u" },
+        new object[] { "fourier-alpha-monotonic",             "less",    "max_u" },
+        // diffusion（1D FD + Thomas algorithm）
+        new object[] { "diffusion-source-linearity",          "greater", "phi_max" },
+        new object[] { "diffusion-mesh-richardson",           "approx",  "phi_max" },
+        // navier-stokes（1D subchannel, closed-form algebra）
+        new object[] { "subchannel-flow-temperature-monotone", "less",    "delta_T" },
+        new object[] { "subchannel-heat-flux-linearity",       "greater", "delta_T" },
+    };
+
+    [Theory]
+    [MemberData(nameof(Stage8NewMrCases))]
+    public async Task RunAsync_stage8_new_mr_passes_end_to_end(
+        string mrId, string assertionCode, string expectedValueName)
+    {
+        var result = await _launcher.RunAsync(mrId);
+
+        Assert.True(result.Passed,
+            $"MR '{mrId}' (assertion='{assertionCode}', value='{expectedValueName}') failed: " +
+            $"src={result.SourceValue}, followup={result.FollowUpValue}, reason={result.FailureReason}");
+        Assert.Equal(expectedValueName, result.ValueName);
+
+        // 按 assertion 类型校验数值方向（容差由 launcher Tolerance 控制）
+        switch (assertionCode)
+        {
+            case "greater":
+                Assert.True(result.FollowUpValue > result.SourceValue,
+                    $"{mrId}: expected followup > source, got src={result.SourceValue}, flw={result.FollowUpValue}");
+                break;
+            case "less":
+                Assert.True(result.FollowUpValue < result.SourceValue,
+                    $"{mrId}: expected followup < source, got src={result.SourceValue}, flw={result.FollowUpValue}");
+                break;
+            case "approx":
+                // approx 容差由 MrBlueprint.Tolerance 决定；result.Passed=true 已证 Tolerance 充分
+                break;
+        }
+
+        // v2 schema: Execution + Result 各 1 行，FK 一致
+        var exec = Assert.Single(_execs.Data);
+        var res  = Assert.Single(_results.Data);
+        Assert.Equal("ok", exec.Status);
+        Assert.True(res.AssertionPassed);
+        Assert.Equal(exec.IdExecution, res.ExecutionId);
+        Assert.Empty(_anomalyService.Recorded);
+    }
 }

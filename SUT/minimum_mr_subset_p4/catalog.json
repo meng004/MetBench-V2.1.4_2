@@ -1,0 +1,62 @@
+{
+  "sut_name": "minimum-mr-subset-p4",
+  "program": {
+    "program_name": "minimum-mr-subset-p4",
+    "equation": "Hamiltonian pendulum",
+    "equation_key": "hamiltonian-pendulum",
+    "program_type": "Num",
+    "runner_script_relative_path": "minimum_mr_subset_p4.py",
+    "input_parser_script_relative_path": "minimum_mr_subset_p4_input_parser.py",
+    "output_parser_script_relative_path": "minimum_mr_subset_p4_output_parser.py",
+    "input_adapter_script_relative_path": "minimum_mr_subset_p4_input_parser.py",
+    "output_adapter_script_relative_path": "minimum_mr_subset_p4_output_parser.py",
+    "python_executable_kind": "system"
+  },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "velocity-Verlet Hamiltonian integration",
+    "runtime_key": "system",
+    "input_contract": "JSON pendulum initial state and integration horizon.",
+    "output_contract": "JSON scalar phase-space and Hamiltonian energy metrics.",
+    "adapter": "Pure-stdlib Python runner and JSON parser/adapter under SUT/minimum_mr_subset_p4/.",
+    "dependency_risk": "pure-stdlib"
+  },
+  "mrs": [
+    {
+      "mr_id": "p4-energy-invariant",
+      "sut_name": "minimum-mr-subset-p4",
+      "display_name": "Minimum-MR-SubSet P4 - Hamiltonian energy refinement",
+      "description": "Energy-invariant convergence: for the same Hamiltonian pendulum initial state and physical time interval, doubling the number of velocity-Verlet integration steps halves dt and must reduce the bounded energy-drift observable.",
+      "mr_family": "MinimumMrSubset.P4.Convergence.EnergyInvariant",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "less",
+      "assertion_name": "LessThan",
+      "value_name": "energy_drift",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/integration/n_steps" }
+      ],
+      "tolerance_rel": 0,
+      "tolerance_abs": 0,
+      "noise_aware": false,
+      "equation_key": "hamiltonian-pendulum",
+      "equation": "Hamiltonian pendulum",
+      "program_type": "Num",
+      "meta_pattern": "Conv",
+      "source_level": "ImportedResearchPromotion",
+      "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Conv MR: refining the time step of a symplectic Hamiltonian integrator should reduce measured energy drift for the same trajectory interval.",
+        "transformation_semantics": "Apply ScaleField to /integration/n_steps with factor=2; t_final and initial q/p remain unchanged, so dt is halved.",
+        "observable_summary": "Observe `energy_drift` from source and follow-up outputs for MR `p4-energy-invariant`.",
+        "predicate_summary": "Predicate `less` / `LessThan` checks that follow-up energy_drift is strictly less than source energy_drift.",
+        "tolerance_summary": "Ordinal deterministic predicate: no numeric tolerance is applied beyond the declared ordering relation.",
+        "applicability": "Applicable when the SUT exposes /integration/n_steps and outputs scalar `energy_drift` over a deterministic Hamiltonian pendulum run.",
+        "failure_meaning": "Failure indicates the solver, adapter, or transform binding did not preserve the expected energy-invariant refinement behavior."
+      },
+      "sample_case_relative_path": "sample/standard.json",
+      "work_root_name": "MetBenchMinimumMrSubsetP4",
+      "timeout_seconds": 30
+    }
+  ]
+}

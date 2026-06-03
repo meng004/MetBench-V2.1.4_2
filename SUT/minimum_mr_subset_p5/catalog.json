@@ -1,0 +1,62 @@
+{
+  "sut_name": "minimum-mr-subset-p5",
+  "program": {
+    "program_name": "minimum-mr-subset-p5",
+    "equation": "Point kinetics",
+    "equation_key": "point-kinetics",
+    "program_type": "Num",
+    "runner_script_relative_path": "minimum_mr_subset_p5.py",
+    "input_parser_script_relative_path": "minimum_mr_subset_p5_input_parser.py",
+    "output_parser_script_relative_path": "minimum_mr_subset_p5_output_parser.py",
+    "input_adapter_script_relative_path": "minimum_mr_subset_p5_input_parser.py",
+    "output_adapter_script_relative_path": "minimum_mr_subset_p5_output_parser.py",
+    "python_executable_kind": "system"
+  },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "RK4 point-kinetics integration",
+    "runtime_key": "system",
+    "input_contract": "JSON point-kinetics parameters, time grid, and initial power/precursor state.",
+    "output_contract": "JSON scalar power and precursor response metrics.",
+    "adapter": "Pure-stdlib Python runner and JSON parser/adapter under SUT/minimum_mr_subset_p5/.",
+    "dependency_risk": "pure-stdlib"
+  },
+  "mrs": [
+    {
+      "mr_id": "p5-power-response",
+      "sut_name": "minimum-mr-subset-p5",
+      "display_name": "Minimum-MR-SubSet P5 - point-kinetics reactivity response",
+      "description": "Power-response monotonicity: for the same initial delayed-neutron precursor state and time interval, scaling the positive reactivity insertion rho upward must strictly increase the maximum reactor power response observed over the transient.",
+      "mr_family": "MinimumMrSubset.P5.Scaling.PowerResponse",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "greater",
+      "assertion_name": "GreaterThan",
+      "value_name": "max_power",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/kinetics/rho" }
+      ],
+      "tolerance_rel": 0,
+      "tolerance_abs": 0,
+      "noise_aware": false,
+      "equation_key": "point-kinetics",
+      "equation": "Point kinetics",
+      "program_type": "Num",
+      "meta_pattern": "Mono",
+      "source_level": "ImportedResearchPromotion",
+      "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Mono MR: increasing positive reactivity in the same point-kinetics transient increases the maximum power response.",
+        "transformation_semantics": "Apply ScaleField to /kinetics/rho with factor=2; all other kinetic and initial-state parameters remain unchanged.",
+        "observable_summary": "Observe `max_power` from source and follow-up outputs for MR `p5-power-response`.",
+        "predicate_summary": "Predicate `greater` / `GreaterThan` checks that follow-up max_power is strictly greater than source max_power.",
+        "tolerance_summary": "Ordinal deterministic predicate: no numeric tolerance is applied beyond the declared ordering relation.",
+        "applicability": "Applicable when the SUT exposes /kinetics/rho in the JSON input and outputs scalar `max_power` from a deterministic point-kinetics transient.",
+        "failure_meaning": "Failure indicates the solver, adapter, or transform binding violated the expected positive-reactivity power response relation."
+      },
+      "sample_case_relative_path": "sample/standard.json",
+      "work_root_name": "MetBenchMinimumMrSubsetP5",
+      "timeout_seconds": 30
+    }
+  ]
+}
