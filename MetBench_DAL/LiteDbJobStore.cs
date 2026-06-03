@@ -19,6 +19,7 @@ public sealed class LiteDbJobStore : IJobStore, IDisposable
     private readonly bool _ownsDatabase;
     private readonly ILiteCollection<SystemMtJobRecord> _records;
     private readonly ILiteCollection<JobResultEntry> _results;
+    private readonly object _updateLock = new();
     private bool _disposed;
 
     /// <summary>Open against a LiteDB file. The store owns and disposes the handle.</summary>
@@ -66,27 +67,31 @@ public sealed class LiteDbJobStore : IJobStore, IDisposable
     {
         EnsureNotDisposed();
         // Fail closed (spec §10 / §6) + terminal-immutable invariant (first-terminal-wins),
-        // mirroring InMemoryJobStore. Read-check-update is wrapped in a LiteDB transaction so the
-        // existence check and the conditional write are atomic against a concurrent CancelAsync /
-        // worker Finalize race; without it a Succeeded terminal state could be silently overwritten
-        // by a racing Cancelled write.
-        _database.BeginTrans();
-        try
+        // mirroring InMemoryJobStore's atomic AddOrUpdate. A LiteDB transaction does NOT serialize
+        // the read against a concurrent transaction's read (no SELECT FOR UPDATE), so two racing
+        // UpdateStatusAsync callers (e.g. CancelAsync vs worker Finalize) could both read a
+        // non-terminal record and both write — bypassing first-terminal-wins. A process-level lock
+        // makes the read-check-write genuinely atomic (single shared connection, single process).
+        lock (_updateLock)
         {
-            var existing = _records.FindById(record.JobId);
-            if (existing is null)
-                throw new InvalidOperationException(
-                    $"Cannot update unknown job {record.JobId}; it was never created.");
+            _database.BeginTrans();
+            try
+            {
+                var existing = _records.FindById(record.JobId);
+                if (existing is null)
+                    throw new InvalidOperationException(
+                        $"Cannot update unknown job {record.JobId}; it was never created.");
 
-            if (!existing.State.IsTerminal())
-                _records.Update(record);
+                if (!existing.State.IsTerminal())
+                    _records.Update(record);
 
-            _database.Commit();
-        }
-        catch
-        {
-            _database.Rollback();
-            throw;
+                _database.Commit();
+            }
+            catch
+            {
+                _database.Rollback();
+                throw;
+            }
         }
         return Task.CompletedTask;
     }
