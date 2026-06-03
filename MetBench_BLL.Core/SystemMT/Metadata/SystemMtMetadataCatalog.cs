@@ -275,6 +275,44 @@ public static class SystemMtMetadataCatalog
                 new() { Symbol = "R", Description = "水平射程（输出）", Unit = "m" },
             },
         },
+        new EquationMetadata
+        {
+            EquationKey = "hamiltonian-pendulum",
+            Name = "Hamiltonian pendulum",
+            CanonicalForm = "dq/dt = p; dp/dt = -sin(q); H(q,p) = p^2/2 + 1 - cos(q)",
+            SymbolSystem = "q angular displacement; p conjugate momentum; H Hamiltonian energy.",
+            EquationClass = "ODE",
+            EquationFamily = "Hamiltonian dynamics",
+            PrimaryVariables = new List<string> { "q(t)", "p(t)", "H(q,p)" },
+            PhysicalMeaning = "A nonlinear pendulum evolves under a conservative Hamiltonian with bounded energy error under symplectic integration.",
+            BenchmarkRationale = "Representative conservative ODE used to check invariant-aware refinement and long-run energy behavior.",
+            ExpectedLaws = new List<string> { "energy-invariance", "time-refinement-convergence" },
+            Parameters = new List<EquationParameter>
+            {
+                new() { Symbol = "q", Description = "Angular displacement", Unit = "rad" },
+                new() { Symbol = "p", Description = "Conjugate momentum", Unit = "rad/s" },
+                new() { Symbol = "H", Description = "Hamiltonian energy", Unit = "dimensionless" },
+            },
+        },
+        new EquationMetadata
+        {
+            EquationKey = "point-kinetics",
+            Name = "Point kinetics",
+            CanonicalForm = "dP/dt = ((rho - beta)/Lambda)P + lambda C; dC/dt = beta/Lambda P - lambda C",
+            SymbolSystem = "P reactor power; C delayed-neutron precursor concentration; rho reactivity; beta delayed fraction; lambda precursor decay constant.",
+            EquationClass = "ODE",
+            EquationFamily = "reactor point kinetics",
+            PrimaryVariables = new List<string> { "P(t)", "C(t)" },
+            PhysicalMeaning = "Reactor power and delayed-neutron precursor concentration evolve under a point-kinetics transient.",
+            BenchmarkRationale = "Representative stiff-ish reactor ODE used for reactivity-response monotonicity checks.",
+            ExpectedLaws = new List<string> { "reactivity-monotonicity", "power-response" },
+            Parameters = new List<EquationParameter>
+            {
+                new() { Symbol = "rho", Description = "Reactivity insertion", Unit = "dimensionless" },
+                new() { Symbol = "P", Description = "Reactor power", Unit = "relative" },
+                new() { Symbol = "C", Description = "Delayed-neutron precursor concentration", Unit = "relative" },
+            },
+        },
         // PR-A T1 non-JSON I/O adapter: synthetic "equation" registered solely so
         // the synthetic _test_csv SUT has an EquationKey to bind to. NOT a real
         // physics equation. Leading underscore in the key marks the synthetic nature.
@@ -1042,6 +1080,69 @@ public static class SystemMtMetadataCatalog
             {
                 new() { Symbol = "factor", PhysicalMeaning = "v0 缩放倍率", ValueRange = "factor > 1" },
                 new() { Symbol = "range", PhysicalMeaning = "水平射程（输出）", ValueRange = "range > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "p4-energy-invariant",
+            EquationKey = "hamiltonian-pendulum",
+            PhysicalMeaning = "For the same Hamiltonian pendulum initial state and physical time interval, refining the velocity-Verlet time step reduces the measured bounded energy drift.",
+            InputTransformation = "n_steps -> factor * n_steps with factor = 2 and unchanged t_final.",
+            OutputRelation = "energy_drift(flw) < energy_drift(src)",
+            ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "Conv MR: time-step refinement of a symplectic Hamiltonian integrator should reduce measured energy drift for this smooth trajectory.",
+            TransformationSemantics = "Apply ScaleField to /integration/n_steps while keeping initial q/p and t_final unchanged.",
+            ObservableSummary = "Compare scalar energy_drift from the source and follow-up pendulum outputs.",
+            PredicateSummary = "Use the existing `less` / LessThan runtime predicate on energy_drift.",
+            ToleranceSummary = "Ordinal deterministic predicate: no numeric tolerance is applied beyond strict ordering.",
+            Applicability = "Applicable when the live P4 SUT exposes /integration/n_steps and outputs scalar energy_drift.",
+            FailureMeaning = "Violation means the solver, adapter, transform binding, or catalog assertion no longer demonstrates the declared energy-refinement relation.",
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "Integration-step scaling factor", ValueRange = "factor = 2" },
+                new() { Symbol = "energy_drift", PhysicalMeaning = "Max-minus-min Hamiltonian energy over the trajectory", ValueRange = "energy_drift >= 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "p5-power-response",
+            EquationKey = "point-kinetics",
+            PhysicalMeaning = "Increasing a positive reactivity insertion in the same point-kinetics transient raises the maximum reactor power response.",
+            InputTransformation = "rho -> factor * rho with factor = 2 and unchanged kinetic/initial parameters.",
+            OutputRelation = "max_power(flw) > max_power(src)",
+            ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "Mono MR: positive reactivity monotonicity increases the transient power response.",
+            TransformationSemantics = "Apply ScaleField to /kinetics/rho while preserving beta, lambda, generation time, time grid, and initial state.",
+            ObservableSummary = "Compare scalar max_power from source and follow-up point-kinetics outputs.",
+            PredicateSummary = "Use the existing `greater` / GreaterThan runtime predicate on max_power.",
+            ToleranceSummary = "Ordinal deterministic predicate: no numeric tolerance is applied beyond strict ordering.",
+            Applicability = "Applicable when the live P5 SUT exposes /kinetics/rho and outputs scalar max_power.",
+            FailureMeaning = "Violation means the solver, adapter, transform binding, or catalog assertion no longer demonstrates the declared reactivity-response relation.",
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "Positive reactivity scaling factor", ValueRange = "factor > 1" },
+                new() { Symbol = "max_power", PhysicalMeaning = "Maximum relative power over the transient", ValueRange = "max_power > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "p9-k-eff-noise-aware",
+            EquationKey = "neutron-transport",
+            PhysicalMeaning = "For the explicit OpenMC surrogate only, increasing synthetic particle count reduces the k_eff standard-error observable sigma_k.",
+            InputTransformation = "particles -> factor * particles with factor = 4 and unchanged surrogate enrichment.",
+            OutputRelation = "sigma_k(flw) ~= sigma_k(src) / sqrt(factor)",
+            ComparisonType = MrComparisonType.Relative,
+            MetaPatternRationale = "Conv MR: Monte Carlo standard error scales approximately with 1/sqrt(N); this live runtime is a deterministic surrogate of that relation.",
+            TransformationSemantics = "Apply ScaleField to /simulation/particles while keeping the surrogate enrichment fixed.",
+            ObservableSummary = "Compare scalar sigma_k from source and follow-up surrogate outputs.",
+            PredicateSummary = "Use the existing `variance-ratio` / VarianceRatio typed runtime predicate; no new Core typed semantics are introduced.",
+            ToleranceSummary = "Relative tolerance 0.05 bounds deterministic variance-ratio comparison around the expected 1/sqrt(factor) shrinkage.",
+            Applicability = "Applicable only to SUT minimum-mr-subset-p9-surrogate; this is not real OpenMC execution evidence.",
+            FailureMeaning = "Violation means the surrogate, adapter, transform binding, or existing variance-ratio runtime no longer demonstrates the declared uncertainty-convergence relation.",
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "Synthetic particle-count scaling factor", ValueRange = "factor = 4" },
+                new() { Symbol = "sigma_k", PhysicalMeaning = "Surrogate k_eff standard error", ValueRange = "sigma_k > 0" },
             },
         },
         // PR-A T1 non-JSON I/O adapter: synthetic test-SUT MR. NOT a real physics MR.
