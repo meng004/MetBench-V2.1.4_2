@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
@@ -16,8 +15,8 @@ namespace MetBench_Client.ViewModels;
 
 /// <summary>
 /// Chart view modes the result page can render. Phase mode is reserved for a
-/// follow-up — <see cref="SystemMtResultRecord"/> does not currently carry the
-/// per-phase metric dictionary that <c>PhaseConvergenceProjector</c> needs.
+/// follow-up because <see cref="SystemMtResultRecord"/> does not currently carry
+/// the per-phase metric dictionary that <c>PhaseConvergenceProjector</c> needs.
 /// </summary>
 public enum ChartViewMode
 {
@@ -69,6 +68,18 @@ public partial class SystemMtResultViewModel : ObservableObject, INavigationAwar
     public Visibility BusyVisibility =>
         IsBusy ? Visibility.Visible : Visibility.Collapsed;
 
+    public bool IsBinaryView
+    {
+        get => !IsHistoricalView;
+        set
+        {
+            if (value)
+            {
+                IsHistoricalView = false;
+            }
+        }
+    }
+
     public SystemMtResultViewModel(
         ISystemMtResultRepository repo,
         HistoricalTrendProjector historyProjector,
@@ -81,7 +92,9 @@ public partial class SystemMtResultViewModel : ObservableObject, INavigationAwar
 
     public async void OnNavigatedTo() => await RefreshAsync();
 
-    public void OnNavigatedFrom() { }
+    public void OnNavigatedFrom()
+    {
+    }
 
     [RelayCommand]
     private async Task RefreshAsync()
@@ -89,21 +102,24 @@ public partial class SystemMtResultViewModel : ObservableObject, INavigationAwar
         try
         {
             IsBusy = true;
-            StatusMessage = "正在加载结果...";
-            // ISystemMtResultRepository does not expose "load every record" —
-            // use ListRecentAsync (limit 100 is sufficient for a viewer; users
-            // wanting more should narrow by MR via ListByMrNameAsync).
+            StatusMessage = "Loading SystemMT results...";
+            // ISystemMtResultRepository does not expose "load every record";
+            // use ListRecentAsync for the viewer's initial page.
             var all = await _repo.ListRecentAsync(limit: 100, CancellationToken.None);
             Records.Clear();
-            foreach (var r in all) Records.Add(r);
+            foreach (var result in all)
+            {
+                Records.Add(result);
+            }
+
             SelectedRecord = Records.FirstOrDefault();
             StatusMessage = Records.Count == 0
-                ? "暂无 SystemMT 运行结果，请先在执行页运行 MR"
-                : $"加载 {Records.Count} 条记录";
+                ? "No SystemMT results yet. Run an MR from the execution page first."
+                : $"Loaded {Records.Count} result records.";
         }
         catch (Exception ex)
         {
-            StatusMessage = $"加载失败：{ex.Message}";
+            StatusMessage = $"Failed to load results: {ex.Message}";
         }
         finally
         {
@@ -119,8 +135,11 @@ public partial class SystemMtResultViewModel : ObservableObject, INavigationAwar
 
     partial void OnViewModeChanged(ChartViewMode value) => TriggerProjection();
 
-    partial void OnIsHistoricalViewChanged(bool value) =>
+    partial void OnIsHistoricalViewChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsBinaryView));
         ViewMode = value ? ChartViewMode.Historical : ChartViewMode.Binary;
+    }
 
     private void UpdateViewModeAvailability(SystemMtResultRecord? record)
     {
@@ -130,16 +149,14 @@ public partial class SystemMtResultViewModel : ObservableObject, INavigationAwar
             return;
         }
 
-        var sameMrCount = Records.Count(r =>
-            string.Equals(r.MrName, record.MrName, StringComparison.Ordinal));
+        var sameMrCount = Records.Count(candidate =>
+            string.Equals(candidate.MrName, record.MrName, StringComparison.Ordinal));
         CanShowHistoricalView = sameMrCount >= 2;
 
         if (ViewMode == ChartViewMode.Historical && !CanShowHistoricalView)
         {
-            // Auto-fallback (spec §3.2): if user-currently-selected mode becomes
-            // unavailable for the new record, drop to Binary and tell the user.
             IsHistoricalView = false;
-            StatusMessage = "历史数据点不足 (<2)，已切回 Binary 视图";
+            StatusMessage = "Historical data has fewer than 2 points; switched back to Binary view.";
         }
     }
 
@@ -164,9 +181,6 @@ public partial class SystemMtResultViewModel : ObservableObject, INavigationAwar
     {
         try
         {
-            // BinaryRunPointProjector is `public static class` — call directly.
-            // HistoricalTrendProjector is an instance (ctor takes repo);
-            // ProjectAsync takes (mrId, lookbackRuns, ct) only — repo is not a param.
             ChartFigure figure = mode switch
             {
                 ChartViewMode.Binary => BinaryRunPointProjector.Project(record),
@@ -177,23 +191,26 @@ public partial class SystemMtResultViewModel : ObservableObject, INavigationAwar
 
             ct.ThrowIfCancellationRequested();
 
-            var binding = _plotterFactory.Build(figure);
-            ChartBinding = binding;
+            ChartBinding = _plotterFactory.Build(figure);
 
             var nanCount = figure.SeriesList
-                .SelectMany(s => s.Points)
-                .Count(p => double.IsNaN(p.X) || double.IsNaN(p.Y)
-                         || double.IsInfinity(p.X) || double.IsInfinity(p.Y));
+                .SelectMany(series => series.Points)
+                .Count(point => double.IsNaN(point.X)
+                             || double.IsNaN(point.Y)
+                             || double.IsInfinity(point.X)
+                             || double.IsInfinity(point.Y));
             if (nanCount > 0)
-                StatusMessage = $"提示：{nanCount} 个数据点为 NaN/Inf，已跳过";
+            {
+                StatusMessage = $"Skipped {nanCount} NaN/Inf chart points.";
+            }
         }
         catch (OperationCanceledException)
         {
-            // expected on rapid record/view-mode switch — silent
+            // Expected on rapid record/view-mode switches.
         }
         catch (Exception ex)
         {
-            StatusMessage = $"图表投影失败：{ex.Message}";
+            StatusMessage = $"Chart projection failed: {ex.Message}";
             ChartBinding = null;
         }
     }
