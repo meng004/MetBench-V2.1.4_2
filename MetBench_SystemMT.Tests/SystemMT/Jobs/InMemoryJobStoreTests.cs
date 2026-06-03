@@ -67,6 +67,22 @@ public class InMemoryJobStoreTests
     }
 
     [Fact]
+    public async Task UpdateStatus_terminal_record_is_immutable()
+    {
+        var store = new InMemoryJobStore();
+        var id = Guid.NewGuid();
+        await store.CreateAsync(JobsTestData.Record(id), default);
+        var rec = await store.GetAsync(id, default);
+        await store.UpdateStatusAsync(rec! with { State = SystemMtJobState.Succeeded }, default);
+
+        // racing write (e.g. a late CancelAsync) must not overwrite the terminal state
+        await store.UpdateStatusAsync(rec! with { State = SystemMtJobState.Cancelled }, default);
+
+        var got = await store.GetAsync(id, default);
+        Assert.Equal(SystemMtJobState.Succeeded, got!.State);
+    }
+
+    [Fact]
     public async Task Get_unknown_id_returns_null()
         => Assert.Null(await new InMemoryJobStore().GetAsync(Guid.NewGuid(), default));
 
