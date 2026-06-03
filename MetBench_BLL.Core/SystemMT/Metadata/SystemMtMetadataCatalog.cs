@@ -275,6 +275,44 @@ public static class SystemMtMetadataCatalog
                 new() { Symbol = "R", Description = "水平射程（输出）", Unit = "m" },
             },
         },
+        new EquationMetadata
+        {
+            EquationKey = "hamiltonian-pendulum",
+            Name = "Hamiltonian pendulum surrogate",
+            CanonicalForm = "H(q,p) = 0.5·(q² + p²)",
+            SymbolSystem = "q generalized coordinate; p generalized momentum; H Hamiltonian energy.",
+            EquationClass = "ODE",
+            EquationFamily = "Hamiltonian dynamics",
+            PrimaryVariables = new List<string> { "q(t)", "p(t)", "H" },
+            PhysicalMeaning = "Cloud-safe surrogate of the Minimum-MR-SubSet P4 pendulum contract used for live-launcher energy-invariance checks.",
+            BenchmarkRationale = "Representative Hamiltonian ODE slice promoted from the staged A-group import to prove live launcher execution without WPF or external dependencies.",
+            ExpectedLaws = new List<string> { "energy-invariance", "phase-space-consistency" },
+            Parameters = new List<EquationParameter>
+            {
+                new() { Symbol = "q", Description = "Generalized coordinate", Unit = "rad" },
+                new() { Symbol = "p", Description = "Generalized momentum", Unit = "rad/s" },
+                new() { Symbol = "H", Description = "Hamiltonian energy", Unit = "dimensionless" },
+            },
+        },
+        new EquationMetadata
+        {
+            EquationKey = "point-kinetics",
+            Name = "Point kinetics surrogate",
+            CanonicalForm = "power_extrema = f(reactivity, precursor)",
+            SymbolSystem = "t time samples; power reactor-power trajectory; precursor delayed-neutron precursor trajectory; ρ reactivity.",
+            EquationClass = "ODE",
+            EquationFamily = "reactor point kinetics",
+            PrimaryVariables = new List<string> { "power(t)", "precursor(t)", "power_extrema" },
+            PhysicalMeaning = "Cloud-safe surrogate of the Minimum-MR-SubSet P5 point-kinetics contract used for live-launcher power-response checks.",
+            BenchmarkRationale = "Representative reactor-dynamics ODE slice promoted from the staged A-group import to prove live launcher execution without external dependencies.",
+            ExpectedLaws = new List<string> { "reactivity-monotonicity", "power-response" },
+            Parameters = new List<EquationParameter>
+            {
+                new() { Symbol = "ρ", Description = "Reactivity control parameter", Unit = "dimensionless" },
+                new() { Symbol = "power", Description = "Power trajectory", Unit = "relative" },
+                new() { Symbol = "precursor", Description = "Precursor trajectory", Unit = "relative" },
+            },
+        },
         // PR-A T1 non-JSON I/O adapter: synthetic "equation" registered solely so
         // the synthetic _test_csv SUT has an EquationKey to bind to. NOT a real
         // physics equation. Leading underscore in the key marks the synthetic nature.
@@ -1042,6 +1080,68 @@ public static class SystemMtMetadataCatalog
             {
                 new() { Symbol = "factor", PhysicalMeaning = "v0 缩放倍率", ValueRange = "factor > 1" },
                 new() { Symbol = "range", PhysicalMeaning = "水平射程（输出）", ValueRange = "range > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "p4-energy-invariant",
+            EquationKey = "hamiltonian-pendulum",
+            PhysicalMeaning = "Minimum-MR-SubSet P4 live-launcher MR: identity follow-up preserves the Hamiltonian energy observable of the cloud-safe pendulum surrogate.",
+            InputTransformation = "identity(q,p,params)",
+            OutputRelation = "energy(flw) ≈ energy(src) within 1e-12 deterministic tolerance",
+            ComparisonType = MrComparisonType.Absolute,
+            MetaPatternRationale = "Inv MR: Hamiltonian energy is unchanged by the identity source-to-follow-up transformation.",
+            TransformationSemantics = "Apply Identity to the full P4 JSON input document while keeping q, p, steps, and dt unchanged.",
+            ObservableSummary = "Compare scalar energy; q and p series remain emitted for A-group observable provenance.",
+            PredicateSummary = "The approx-invariant predicate checks deterministic equality of source and follow-up energy.",
+            ToleranceSummary = "ToleranceRel=1e-12 and ToleranceAbs=1e-12 pin the identity-invariance contract.",
+            Applicability = "Applicable to SUT/minimum_mr_subset_p4/sample/canonical.json and the pure-stdlib P4 launcher surrogate.",
+            FailureMeaning = "MR violation indicates a runtime promotion, adapter, or energy-invariance regression.",
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "energy", PhysicalMeaning = "Hamiltonian energy observable", ValueRange = "energy >= 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "p5-power-response",
+            EquationKey = "point-kinetics",
+            PhysicalMeaning = "Minimum-MR-SubSet P5 live-launcher MR: increasing reactivity increases the deterministic power_extrema summary.",
+            InputTransformation = "reactivity → factor·reactivity（factor > 1）",
+            OutputRelation = "power_extrema(flw) > power_extrema(src)",
+            ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "Mono MR: larger reactivity produces a larger power-response extrema summary in the P5 surrogate.",
+            TransformationSemantics = "Apply ScaleField at /params/reactivity while keeping precursor0, steps, and dt fixed.",
+            ObservableSummary = "Compare scalar power_extrema; t, power, and precursor are also emitted for A-group observable provenance.",
+            PredicateSummary = "The greater predicate checks follow-up power_extrema exceeds source power_extrema.",
+            ToleranceSummary = "Ordinal predicate: no numeric tolerance is applied beyond strict ordering.",
+            Applicability = "Applicable to SUT/minimum_mr_subset_p5/sample/canonical.json and the pure-stdlib P5 launcher surrogate.",
+            FailureMeaning = "MR violation indicates a runtime promotion, adapter, or point-kinetics monotonicity regression.",
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "Reactivity scaling factor", ValueRange = "factor > 1" },
+                new() { Symbol = "power_extrema", PhysicalMeaning = "Power trajectory extrema summary", ValueRange = "power_extrema > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "p9-k-eff-noise-aware",
+            EquationKey = "neutron-transport",
+            PhysicalMeaning = "Minimum-MR-SubSet P9 live-launcher surrogate MR: increasing particle count reduces sigma_k while k_eff remains deterministic for the same production/absorption inputs.",
+            InputTransformation = "particles → factor·particles（factor > 1）",
+            OutputRelation = "sigma_k(flw) < sigma_k(src); k_eff is emitted as provenance for the imported noise-aware MR",
+            ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "Conv MR: Monte-Carlo-style uncertainty decreases with larger sample count in the P9 surrogate.",
+            TransformationSemantics = "Apply ScaleField at /params/particles while keeping absorption and production fixed.",
+            ObservableSummary = "Compare scalar sigma_k; k_eff and reaction_balance are also emitted for A-group observable provenance.",
+            PredicateSummary = "The less predicate checks follow-up sigma_k is smaller than source sigma_k.",
+            ToleranceSummary = "Ordinal predicate: no numeric tolerance is applied beyond strict ordering in this runnable surrogate slice.",
+            Applicability = "Applicable to SUT/minimum_mr_subset_p9/sample/canonical.json and the pure-stdlib P9 surrogate; this is not a live OpenMC binding.",
+            FailureMeaning = "MR violation indicates a runtime promotion, adapter, or particle-count convergence regression.",
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "Particle-count scaling factor", ValueRange = "factor > 1" },
+                new() { Symbol = "sigma_k", PhysicalMeaning = "Estimated k_eff uncertainty", ValueRange = "sigma_k > 0" },
             },
         },
         // PR-A T1 non-JSON I/O adapter: synthetic test-SUT MR. NOT a real physics MR.

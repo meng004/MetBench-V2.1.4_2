@@ -1,0 +1,62 @@
+{
+  "sut_name": "minimum-mr-subset-p9",
+  "program": {
+    "program_name": "minimum-mr-subset-p9",
+    "equation": "NeutronTransportSurrogate",
+    "equation_key": "neutron-transport",
+    "program_type": "Surr",
+    "runner_script_relative_path": "minimum_mr_subset_p9.py",
+    "input_parser_script_relative_path": "minimum_mr_subset_p9_input_parser.py",
+    "output_parser_script_relative_path": "minimum_mr_subset_p9_output_parser.py",
+    "input_adapter_script_relative_path": "minimum_mr_subset_p9_input_parser.py",
+    "output_adapter_script_relative_path": "minimum_mr_subset_p9_output_parser.py",
+    "python_executable_kind": "system"
+  },
+  "profile": {
+    "program_type": "Surr",
+    "solver_method": "pure-stdlib OpenMC-style criticality surrogate",
+    "runtime_key": "system",
+    "input_contract": "JSON surrogate criticality parameters with particles, absorption, and production.",
+    "output_contract": "JSON scalar observables k_eff, sigma_k, and reaction_balance.",
+    "adapter": "Cloud-safe Python runner and JSON parser/adapter under SUT/minimum_mr_subset_p9/; this is explicitly not a live OpenMC binding.",
+    "dependency_risk": "pure-stdlib surrogate"
+  },
+  "mrs": [
+    {
+      "mr_id": "p9-k-eff-noise-aware",
+      "sut_name": "minimum-mr-subset-p9",
+      "display_name": "Minimum-MR-SubSet P9 — particle-count sigma contraction",
+      "description": "P9 OpenMC-style surrogate live launcher slice: scaling particle count leaves k_eff deterministic but reduces sigma_k by the Monte-Carlo 1/sqrt(N) trend. The runnable assertion checks sigma_k contraction while the ID preserves the imported k_eff noise-aware MR provenance.",
+      "mr_family": "NeutronTransport.Convergence.ParticleCount",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "less",
+      "assertion_name": "LessThan",
+      "value_name": "sigma_k",
+      "default_parameters": { "factor": "4" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/params/particles" }
+      ],
+      "tolerance_rel": 0,
+      "tolerance_abs": 0,
+      "noise_aware": false,
+      "equation_key": "neutron-transport",
+      "equation": "NeutronTransportSurrogate",
+      "program_type": "Surr",
+      "meta_pattern": "Conv",
+      "source_level": "ImportedResearchPromoted",
+      "failure_correlation": "ImportedMinimumMrSubsetAGroup",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Conv MR: larger particle count lowers the deterministic sigma_k surrogate following the 1/sqrt(N) trend.",
+        "transformation_semantics": "Apply ScaleField at /params/particles with factor > 1; absorption and production remain fixed so k_eff remains deterministic.",
+        "observable_summary": "Observe scalar `sigma_k`; the runner also emits imported observables `k_eff` and `reaction_balance` for provenance parity.",
+        "predicate_summary": "Predicate `less` / `LessThan` checks that follow-up sigma_k is smaller than source sigma_k.",
+        "tolerance_summary": "Ordinal predicate: no numeric tolerance is applied beyond the declared ordering relation.",
+        "applicability": "Applicable to the cloud-safe Minimum-MR-SubSet P9 surrogate sample under SUT/minimum_mr_subset_p9/sample/canonical.json; it is not a live OpenMC execution.",
+        "failure_meaning": "Failure indicates that the P9 runtime promotion, adapter mapping, or particle-count convergence contract disagrees with the staged import metadata."
+      },
+      "sample_case_relative_path": "sample/canonical.json",
+      "work_root_name": "MetBenchMinimumMrSubsetP9",
+      "timeout_seconds": 30
+    }
+  ]
+}

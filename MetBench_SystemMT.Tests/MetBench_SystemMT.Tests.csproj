@@ -141,6 +141,30 @@
       <Link>TestAssets\scipy_bvp_poisson_1d\sample\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\SUT\minimum_mr_subset_p5\*.py">
+      <Link>TestAssets\minimum_mr_subset_p5\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\SUT\minimum_mr_subset_p5\sample\*.json">
+      <Link>TestAssets\minimum_mr_subset_p5\sample\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\SUT\minimum_mr_subset_p4\*.py">
+      <Link>TestAssets\minimum_mr_subset_p4\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\SUT\minimum_mr_subset_p4\sample\*.json">
+      <Link>TestAssets\minimum_mr_subset_p4\sample\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\SUT\minimum_mr_subset_p9\*.py">
+      <Link>TestAssets\minimum_mr_subset_p9\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\SUT\minimum_mr_subset_p9\sample\*.json">
+      <Link>TestAssets\minimum_mr_subset_p9\sample\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="..\SUT\_shared\metbench_io\*.py">
       <Link>TestAssets\_shared\metbench_io\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

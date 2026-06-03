@@ -13,18 +13,18 @@ public sealed class HardcodedMrCatalogProviderTests
         new(SutRoot: "/tmp/sut", SystemPython: "python3", OpenMocPython: "python3");
 
     [Fact]
-    public void Load_pins_30_entries()
+    public void Load_pins_expected_entries()
     {
         var p = new HardcodedMrCatalogProvider(Opts());
 
         var entries = p.Load();
 
-        // Branch state after PR-A non-JSON I/O adapter synthetic _test-csv SUT (+1 MR / +1 SUT): 30 MR × 16 SUT.
+        // Branch state after Minimum-MR-SubSet A-group live-launcher promotion: 36 MR × 19 SUT.
         Assert.Equal(ExpectedCatalogCountsWhitelist.MrCount, entries.Count);
     }
 
     [Fact]
-    public void Load_spans_16_distinct_SUTs()
+    public void Load_spans_expected_distinct_SUTs()
     {
         var p = new HardcodedMrCatalogProvider(Opts());
 
@@ -48,6 +48,9 @@ public sealed class HardcodedMrCatalogProviderTests
         Assert.Contains("scipy-ivp-lotka-volterra", distinctSuts);
         Assert.Contains("scipy-bvp-poisson-1d", distinctSuts);
         Assert.Contains("_test-csv", distinctSuts);
+        Assert.Contains("minimum-mr-subset-p4", distinctSuts);
+        Assert.Contains("minimum-mr-subset-p5", distinctSuts);
+        Assert.Contains("minimum-mr-subset-p9", distinctSuts);
     }
 
     [Fact]

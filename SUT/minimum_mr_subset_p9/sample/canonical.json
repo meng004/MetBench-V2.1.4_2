@@ -1,0 +1,7 @@
+{
+  "params": {
+    "particles": 1000,
+    "absorption": 0.1,
+    "production": 0.12
+  }
+}

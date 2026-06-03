@@ -1,0 +1,8 @@
+{
+  "params": {
+    "reactivity": 0.01,
+    "precursor0": 1.0,
+    "steps": 8,
+    "dt": 0.1
+  }
+}

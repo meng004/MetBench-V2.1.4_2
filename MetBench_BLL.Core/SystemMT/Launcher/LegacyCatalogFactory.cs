@@ -1001,5 +1001,91 @@ internal static class LegacyCatalogFactory
             TransformSteps: new[] { new MrTransformStep("ScaleField", "/params/factor") },
             AssertionTypeCode: "greater",
             EquationKey: "_test_csv");
+
+        // Minimum-MR-SubSet A-group live-launcher slices. These are cloud-safe
+        // pure-stdlib surrogate bindings promoted from the staged import records;
+        // P9 remains explicitly a surrogate and is not a live OpenMC binding.
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "p5-power-response",
+                DisplayName: "Minimum-MR-SubSet P5 — reactivity power response",
+                SutName: "minimum-mr-subset-p5",
+                TransformationName: "ScaleField",
+                AssertionName: "GreaterThan",
+                ValueName: "power_extrema",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "P5 point-kinetics live launcher slice: scaling the source reactivity " +
+                    "by factor > 1 increases the deterministic power_extrema summary while " +
+                    "preserving the imported observable names t, power, precursor, and power_extrema.",
+                MrFamily: "PointKinetics.Scaling.PowerResponse"),
+            SampleCaseRelativePath: Path.Combine("minimum_mr_subset_p5", "sample", "canonical.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p5", "minimum_mr_subset_p5.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p5", "minimum_mr_subset_p5_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p5", "minimum_mr_subset_p5_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchMinimumMrSubsetP5",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p5", "minimum_mr_subset_p5_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p5", "minimum_mr_subset_p5_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/params/reactivity") },
+            AssertionTypeCode: "greater",
+            EquationKey: "point-kinetics");
+
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "p4-energy-invariant",
+                DisplayName: "Minimum-MR-SubSet P4 — Hamiltonian energy invariant",
+                SutName: "minimum-mr-subset-p4",
+                TransformationName: "Identity",
+                AssertionName: "ApproxInvariant",
+                ValueName: "energy",
+                DefaultParameters: new Dictionary<string, string>(),
+                Description:
+                    "P4 Hamiltonian pendulum live launcher slice: an identity follow-up " +
+                    "preserves the scalar Hamiltonian energy while the runner also emits " +
+                    "imported q and p observable series.",
+                MrFamily: "Hamiltonian.Invariance.Energy"),
+            SampleCaseRelativePath: Path.Combine("minimum_mr_subset_p4", "sample", "canonical.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p4", "minimum_mr_subset_p4.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p4", "minimum_mr_subset_p4_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p4", "minimum_mr_subset_p4_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchMinimumMrSubsetP4",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p4", "minimum_mr_subset_p4_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p4", "minimum_mr_subset_p4_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("Identity", "/") },
+            AssertionTypeCode: "approx-invariant",
+            EquationKey: "hamiltonian-pendulum",
+            Tolerance: new AssertionTolerance(ToleranceRel: 1e-12, ToleranceAbs: 1e-12));
+
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "p9-k-eff-noise-aware",
+                DisplayName: "Minimum-MR-SubSet P9 — particle-count sigma contraction",
+                SutName: "minimum-mr-subset-p9",
+                TransformationName: "ScaleField",
+                AssertionName: "LessThan",
+                ValueName: "sigma_k",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "4" },
+                Description:
+                    "P9 OpenMC-style surrogate live launcher slice: scaling particle count " +
+                    "leaves k_eff deterministic but reduces sigma_k by the Monte-Carlo " +
+                    "1/sqrt(N) trend. The runnable assertion checks sigma_k contraction " +
+                    "while the ID preserves the imported k_eff noise-aware MR provenance.",
+                MrFamily: "NeutronTransport.Convergence.ParticleCount"),
+            SampleCaseRelativePath: Path.Combine("minimum_mr_subset_p9", "sample", "canonical.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p9", "minimum_mr_subset_p9.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p9", "minimum_mr_subset_p9_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p9", "minimum_mr_subset_p9_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchMinimumMrSubsetP9",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p9", "minimum_mr_subset_p9_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p9", "minimum_mr_subset_p9_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/params/particles") },
+            AssertionTypeCode: "less",
+            EquationKey: "neutron-transport");
     }
 }

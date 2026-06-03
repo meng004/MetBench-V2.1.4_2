@@ -1,0 +1,62 @@
+{
+  "sut_name": "minimum-mr-subset-p4",
+  "program": {
+    "program_name": "minimum-mr-subset-p4",
+    "equation": "HamiltonianPendulum",
+    "equation_key": "hamiltonian-pendulum",
+    "program_type": "Num",
+    "runner_script_relative_path": "minimum_mr_subset_p4.py",
+    "input_parser_script_relative_path": "minimum_mr_subset_p4_input_parser.py",
+    "output_parser_script_relative_path": "minimum_mr_subset_p4_output_parser.py",
+    "input_adapter_script_relative_path": "minimum_mr_subset_p4_input_parser.py",
+    "output_adapter_script_relative_path": "minimum_mr_subset_p4_output_parser.py",
+    "python_executable_kind": "system"
+  },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "pure-stdlib Hamiltonian pendulum surrogate",
+    "runtime_key": "system",
+    "input_contract": "JSON pendulum initial q/p and step parameters.",
+    "output_contract": "JSON observables q, p, and scalar energy.",
+    "adapter": "Cloud-safe Python runner and JSON parser/adapter under SUT/minimum_mr_subset_p4/.",
+    "dependency_risk": "pure-stdlib"
+  },
+  "mrs": [
+    {
+      "mr_id": "p4-energy-invariant",
+      "sut_name": "minimum-mr-subset-p4",
+      "display_name": "Minimum-MR-SubSet P4 — Hamiltonian energy invariant",
+      "description": "P4 Hamiltonian pendulum live launcher slice: an identity follow-up preserves the scalar Hamiltonian energy while the runner also emits imported q and p observable series.",
+      "mr_family": "Hamiltonian.Invariance.Energy",
+      "transformation_name": "Identity",
+      "assertion_type_code": "approx-invariant",
+      "assertion_name": "ApproxInvariant",
+      "value_name": "energy",
+      "default_parameters": {},
+      "transform_steps": [
+        { "transformation_name": "Identity", "target_field_path": "/" }
+      ],
+      "tolerance_rel": 1e-12,
+      "tolerance_abs": 1e-12,
+      "noise_aware": false,
+      "equation_key": "hamiltonian-pendulum",
+      "equation": "HamiltonianPendulum",
+      "program_type": "Num",
+      "meta_pattern": "Inv",
+      "source_level": "ImportedResearchPromoted",
+      "failure_correlation": "ImportedMinimumMrSubsetAGroup",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Inv MR: the identity follow-up must preserve Hamiltonian energy for the deterministic P4 surrogate.",
+        "transformation_semantics": "Apply Identity to the full input document and run source/follow-up through the same pendulum adapter contract.",
+        "observable_summary": "Observe scalar `energy`; the runner also emits imported observables `q` and `p` for provenance parity.",
+        "predicate_summary": "Predicate `approx-invariant` checks source and follow-up energy equality within a tight deterministic tolerance.",
+        "tolerance_summary": "ToleranceRel=1e-12 and ToleranceAbs=1e-12 pin the identity-invariance claim.",
+        "applicability": "Applicable to the cloud-safe Minimum-MR-SubSet P4 surrogate sample under SUT/minimum_mr_subset_p4/sample/canonical.json.",
+        "failure_meaning": "Failure indicates that the P4 runtime promotion, adapter mapping, or Hamiltonian energy contract disagrees with the staged import metadata."
+      },
+      "sample_case_relative_path": "sample/canonical.json",
+      "work_root_name": "MetBenchMinimumMrSubsetP4",
+      "timeout_seconds": 30
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "sut_name": "minimum-mr-subset-p5",
+  "program": {
+    "program_name": "minimum-mr-subset-p5",
+    "equation": "PointKinetics",
+    "equation_key": "point-kinetics",
+    "program_type": "Num",
+    "runner_script_relative_path": "minimum_mr_subset_p5.py",
+    "input_parser_script_relative_path": "minimum_mr_subset_p5_input_parser.py",
+    "output_parser_script_relative_path": "minimum_mr_subset_p5_output_parser.py",
+    "input_adapter_script_relative_path": "minimum_mr_subset_p5_input_parser.py",
+    "output_adapter_script_relative_path": "minimum_mr_subset_p5_output_parser.py",
+    "python_executable_kind": "system"
+  },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "pure-stdlib point-kinetics surrogate",
+    "runtime_key": "system",
+    "input_contract": "JSON point-kinetics parameters with reactivity, precursor0, steps, and dt.",
+    "output_contract": "JSON observables t, power, precursor, and scalar power_extrema.",
+    "adapter": "Cloud-safe Python runner and JSON parser/adapter under SUT/minimum_mr_subset_p5/.",
+    "dependency_risk": "pure-stdlib"
+  },
+  "mrs": [
+    {
+      "mr_id": "p5-power-response",
+      "sut_name": "minimum-mr-subset-p5",
+      "display_name": "Minimum-MR-SubSet P5 — reactivity power response",
+      "description": "P5 point-kinetics live launcher slice: scaling the source reactivity by factor > 1 increases the deterministic power_extrema summary while preserving the imported observable names t, power, precursor, and power_extrema.",
+      "mr_family": "PointKinetics.Scaling.PowerResponse",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "greater",
+      "assertion_name": "GreaterThan",
+      "value_name": "power_extrema",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/params/reactivity" }
+      ],
+      "tolerance_rel": 0,
+      "tolerance_abs": 0,
+      "noise_aware": false,
+      "equation_key": "point-kinetics",
+      "equation": "PointKinetics",
+      "program_type": "Num",
+      "meta_pattern": "Mono",
+      "source_level": "ImportedResearchPromoted",
+      "failure_correlation": "ImportedMinimumMrSubsetAGroup",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Mono MR: larger reactivity produces a larger deterministic power_extrema summary in this P5 live-launcher surrogate.",
+        "transformation_semantics": "Apply ScaleField at /params/reactivity with factor > 1; all other point-kinetics inputs remain fixed.",
+        "observable_summary": "Observe scalar `power_extrema`; the runner also emits imported observables `t`, `power`, and `precursor` for provenance parity.",
+        "predicate_summary": "Predicate `greater` / `GreaterThan` checks that follow-up power_extrema is larger than source power_extrema.",
+        "tolerance_summary": "Ordinal predicate: no numeric tolerance is applied beyond the declared ordering relation.",
+        "applicability": "Applicable to the cloud-safe Minimum-MR-SubSet P5 surrogate sample under SUT/minimum_mr_subset_p5/sample/canonical.json.",
+        "failure_meaning": "Failure indicates that the P5 runtime promotion, adapter mapping, or monotonic power-response contract disagrees with the staged import metadata."
+      },
+      "sample_case_relative_path": "sample/canonical.json",
+      "work_root_name": "MetBenchMinimumMrSubsetP5",
+      "timeout_seconds": 30
+    }
+  ]
+}
