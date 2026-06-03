@@ -125,6 +125,14 @@
       <Link>TestAssets\subchannel_1d\sample\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\SUT\diffusion_1d\*.py">
+      <Link>TestAssets\diffusion_1d\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\SUT\diffusion_1d\sample\*.json">
+      <Link>TestAssets\diffusion_1d\sample\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="..\SUT\minimum_mr_subset_p4\*.py">
       <Link>TestAssets\minimum_mr_subset_p4\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
