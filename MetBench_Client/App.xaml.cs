@@ -203,6 +203,20 @@ namespace MetBench_Client
                 services.AddScoped<Views.Pages.SystemMtExecutionHistoryPage>();
                 services.AddScoped<ViewModels.SystemMtExecutionHistoryViewModel>();
 
+                // === SystemMT result viewer (PR-W1) ===
+                // WPF plotters that consume the renderer-agnostic ChartFigure
+                // produced by MetBench_BLL.Core projectors.
+                services.AddSingleton<Services.Plotting.SystemMt.BinaryRunPlotter>();
+                services.AddSingleton<Services.Plotting.SystemMt.PhaseConvergencePlotter>();
+                services.AddSingleton<Services.Plotting.SystemMt.HistoricalTrendPlotter>();
+                services.AddSingleton<Services.Plotting.SystemMt.SystemMtChartPlotterFactory>();
+                // HistoricalTrendProjector is an instance (ctor takes ISystemMtResultRepository).
+                // BinaryRunPointProjector / PhaseConvergenceProjector are static classes —
+                // no DI registration needed.
+                services.AddSingleton<MetBench_BLL.SystemMT.Reporting.Charts.HistoricalTrendProjector>();
+                services.AddScoped<Views.Pages.SystemMtResultPage>();
+                services.AddScoped<ViewModels.SystemMtResultViewModel>();
+
                 // === v2 SystemMT repositories (LiteDB) + Anomaly stack ===
                 services.AddSystemMtRepositories();
                 services.AddScoped<IAnomalyService, AnomalyService>();
