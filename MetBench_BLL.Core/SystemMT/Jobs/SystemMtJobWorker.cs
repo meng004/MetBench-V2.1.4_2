@@ -9,12 +9,18 @@ public sealed class SystemMtJobWorker
 {
     private readonly IJobStore _store;
     private readonly ISystemMtAsyncPipeline _pipeline;
+    private readonly IJobCancellationRegistry? _cancellation;
     private readonly Func<DateTime> _utcNow;
 
-    public SystemMtJobWorker(IJobStore store, ISystemMtAsyncPipeline pipeline, Func<DateTime>? utcNow = null)
+    public SystemMtJobWorker(
+        IJobStore store,
+        ISystemMtAsyncPipeline pipeline,
+        IJobCancellationRegistry? cancellation = null,
+        Func<DateTime>? utcNow = null)
     {
         _store = store;
         _pipeline = pipeline;
+        _cancellation = cancellation;
         _utcNow = utcNow ?? (() => DateTime.UtcNow);
     }
 
@@ -23,14 +29,19 @@ public sealed class SystemMtJobWorker
         var record = await _store.GetAsync(jobId, cancellationToken)
             ?? throw new InvalidOperationException($"Job {jobId} not found in store.");
 
-        // Last progress reported by the pipeline; preserved into the terminal record so a
-        // failed/timed-out/cancelled job keeps its last-known percent instead of resetting to 0.
         var lastProgress = record.ProgressPercent;
 
-        // Inline (synchronous, ordered) progress: the handler runs on the pipeline's calling
-        // thread before ExecuteJobAsync continues, so intermediate progress writes strictly
-        // precede the terminal Finalize write. A default Progress<T> would post to the thread
-        // pool and could land AFTER Finalize, corrupting the terminal state.
+        // P1-cancel: a per-job token, linked with the host (shutdown) token, lets
+        // ISystemMtJobService.CancelAsync co-operatively interrupt the running pipeline instead of
+        // only flipping the store record (which would leave the SUT running + orphan a result).
+        var jobToken = _cancellation?.Register(jobId) ?? CancellationToken.None;
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, jobToken);
+        var runToken = linked.Token;
+
+        // Inline (synchronous, ordered) progress: the handler runs on the pipeline's calling thread
+        // before ExecuteJobAsync continues, so intermediate progress writes strictly precede the
+        // terminal Finalize write (a default Progress<T> would post to the thread pool and could
+        // land AFTER Finalize, corrupting the terminal state).
         var progress = new InlineProgress<SystemMtJobProgress>(p =>
         {
             lastProgress = p.ProgressPercent;
@@ -45,13 +56,19 @@ public sealed class SystemMtJobWorker
 
         try
         {
-            var outcome = await _pipeline.ExecuteJobAsync(jobId, ToRequest(record), progress, cancellationToken);
+            var outcome = await _pipeline.ExecuteJobAsync(jobId, ToRequest(record), progress, runToken);
+
+            // P1-orphan: if a concurrent cancel (or any other writer) already drove the job to a
+            // terminal state while the pipeline was running, honor it — do NOT save an orphaned
+            // result nor try to overwrite the terminal state. (Terminal-immutable in the store also
+            // blocks the overwrite, but skipping SaveResultAsync is what prevents the orphan.)
+            var current = await _store.GetAsync(jobId, CancellationToken.None);
+            if (current is not null && current.State.IsTerminal())
+                return;
 
             var finalState = outcome.FinalState;
             var reason = outcome.FailureReason;
 
-            // Fail closed: a pipeline that returns a NON-terminal state would otherwise leave the
-            // record live-looking forever. Treat it as an infrastructure Failed (spec §10 / §6).
             if (!finalState.IsTerminal())
             {
                 reason = $"pipeline returned non-terminal final state {outcome.FinalState}";
@@ -63,16 +80,20 @@ public sealed class SystemMtJobWorker
 
             await FinalizeAsync(record, finalState, outcome.SutName, reason, lastProgress);
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        catch (OperationCanceledException) when (runToken.IsCancellationRequested)
         {
-            // Only a cancellation actually requested on OUR token is Cancelled. An OCE from an
-            // internal/unrelated token (e.g. a launcher-side timeout source) falls through to the
-            // generic catch below and is classified Failed, not silently Cancelled.
+            // Cancellation requested on OUR (host OR per-job) token. An OCE from an unrelated token
+            // (e.g. a launcher-internal timeout source) leaves runToken un-cancelled and falls
+            // through to the generic catch below → Failed, not silently Cancelled.
             await FinalizeAsync(record, SystemMtJobState.Cancelled, record.SutName, "cancellation requested", lastProgress);
         }
         catch (Exception ex)
         {
             await FinalizeAsync(record, SystemMtJobState.Failed, record.SutName, ex.Message, lastProgress);
+        }
+        finally
+        {
+            _cancellation?.Release(jobId);
         }
     }
 

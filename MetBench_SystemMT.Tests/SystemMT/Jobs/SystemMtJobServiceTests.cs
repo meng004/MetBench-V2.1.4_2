@@ -8,6 +8,22 @@ public class SystemMtJobServiceTests
     private static SystemMtJobService Build(IJobStore store, IJobQueue queue) => new(store, queue);
 
     [Fact]
+    public async Task CancelAsync_signals_cancellation_registry_and_marks_store()
+    {
+        var store = new InMemoryJobStore();
+        var registry = new JobCancellationRegistry();
+        var svc = new SystemMtJobService(store, new ChannelJobQueue(), registry);
+        var handle = await svc.SubmitAsync(new SystemMtJobRequest("mr"), default);
+        var workerToken = registry.Register(handle.JobId);   // the running worker's token
+
+        await svc.CancelAsync(handle.JobId, default);
+
+        Assert.True(workerToken.IsCancellationRequested);     // worker is actually interrupted
+        var status = await svc.GetStatusAsync(handle.JobId, default);
+        Assert.Equal(SystemMtJobState.Cancelled, status!.State);   // store also flipped
+    }
+
+    [Fact]
     public async Task SubmitAsync_persists_Queued_and_enqueues_before_worker_runs()
     {
         var store = new InMemoryJobStore();

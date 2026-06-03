@@ -129,6 +129,91 @@ public class SystemMtJobWorkerTests
         Assert.Equal(40, rec.ProgressPercent);   // not reset to 0
     }
 
+    [Fact]
+    public async Task Concurrent_cancel_during_run_does_not_orphan_result_nor_overwrite_terminal()
+    {
+        // P1-orphan: a cancel lands (store → Cancelled) WHILE the pipeline is running and the
+        // launcher completes anyway (cooperative cancel the launcher ignored). The worker must
+        // re-read, see the terminal Cancelled state, and skip SaveResult + Finalize.
+        var (store, id) = Seed("mr");
+        // pipeline marks the store Cancelled mid-run, then returns Succeeded with a result
+        var pipeline = new CancelMidRunThenSucceedPipeline(store, id);
+        var worker = new SystemMtJobWorker(store, pipeline);
+
+        await worker.RunJobAsync(id, default);
+
+        var rec = await store.GetAsync(id, default);
+        Assert.Equal(SystemMtJobState.Cancelled, rec!.State);          // terminal preserved
+        Assert.Null(await store.GetResultAsync(id, default));         // no orphaned result
+    }
+
+    [Fact]
+    public async Task Registry_cancel_propagates_to_pipeline_token_and_reaches_Cancelled()
+    {
+        // P1-cancel: registry.Cancel(jobId) trips the per-job token the worker links into the
+        // pipeline, so a running job is actually interrupted (not just store-marked).
+        var (store, id) = Seed("mr");
+        var registry = new JobCancellationRegistry();
+        var pipeline = new WaitForTokenPipeline();
+        var worker = new SystemMtJobWorker(store, pipeline, registry);
+
+        var run = worker.RunJobAsync(id, default);
+        await pipeline.Started.Task;     // pipeline is now awaiting the linked token
+        registry.Cancel(id);             // user cancel → trips the token
+        await run;
+
+        var rec = await store.GetAsync(id, default);
+        Assert.Equal(SystemMtJobState.Cancelled, rec!.State);
+    }
+
+    [Fact]
+    public async Task Worker_releases_registry_entry_after_run()
+    {
+        var (store, id) = Seed("mr-ok");
+        var registry = new JobCancellationRegistry();
+        var worker = new SystemMtJobWorker(store, FakeAsyncPipeline.Succeeds("mr-ok", "openmc"), registry);
+
+        await worker.RunJobAsync(id, default);
+
+        // after release, a late cancel must not affect a freshly registered token
+        registry.Cancel(id);
+        Assert.False(registry.Register(id).IsCancellationRequested);
+    }
+
+    private sealed class CancelMidRunThenSucceedPipeline : ISystemMtAsyncPipeline
+    {
+        private readonly InMemoryJobStore _store;
+        private readonly Guid _id;
+        public CancelMidRunThenSucceedPipeline(InMemoryJobStore store, Guid id) { _store = store; _id = id; }
+        public async Task<JobExecutionOutcome> ExecuteJobAsync(
+            Guid jobId, SystemMtJobRequest request,
+            IProgress<SystemMtJobProgress>? progress, CancellationToken cancellationToken)
+        {
+            var rec = await _store.GetAsync(_id, default);
+            await _store.UpdateStatusAsync(rec! with
+            {
+                State = SystemMtJobState.Cancelled,
+                CurrentPhase = "cancelled",
+                FailureReason = "cancellation requested",
+            }, default);
+            return new JobExecutionOutcome(SystemMtJobState.Succeeded, "openmc",
+                JobsTestData.Result("mr", passed: true), null);
+        }
+    }
+
+    private sealed class WaitForTokenPipeline : ISystemMtAsyncPipeline
+    {
+        public readonly TaskCompletionSource Started = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public async Task<JobExecutionOutcome> ExecuteJobAsync(
+            Guid jobId, SystemMtJobRequest request,
+            IProgress<SystemMtJobProgress>? progress, CancellationToken cancellationToken)
+        {
+            Started.TrySetResult();
+            await Task.Delay(Timeout.Infinite, cancellationToken);   // throws OCE when token trips
+            return new JobExecutionOutcome(SystemMtJobState.Succeeded, "openmc", null, null);
+        }
+    }
+
     private sealed class ThrowingPipeline : ISystemMtAsyncPipeline
     {
         private readonly string _message;

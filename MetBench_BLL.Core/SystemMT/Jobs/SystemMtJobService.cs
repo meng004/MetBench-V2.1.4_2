@@ -4,19 +4,26 @@ namespace MetBench_BLL.SystemMT.Jobs;
 
 /// <summary>
 /// 默认 job service。Submit 落 <see cref="SystemMtJobState.Queued"/> + 入队即返回；
-/// polling 只读 store。<see cref="CancelAsync"/> 在 v1 仅标记意图（运行中 worker 的实际中断
-/// 由共享 <see cref="CancellationToken"/> 协作处理）。
+/// polling 只读 store。<see cref="CancelAsync"/> 既标记 store Cancelled，又（若注入了
+/// <see cref="IJobCancellationRegistry"/>）触发运行中 worker 的 per-job token，使取消真正中断
+/// 在跑的 SUT，而不只是翻转记录。
 /// </summary>
 public sealed class SystemMtJobService : ISystemMtJobService
 {
     private readonly IJobStore _store;
     private readonly IJobQueue _queue;
+    private readonly IJobCancellationRegistry? _cancellation;
     private readonly Func<DateTime> _utcNow;
 
-    public SystemMtJobService(IJobStore store, IJobQueue queue, Func<DateTime>? utcNow = null)
+    public SystemMtJobService(
+        IJobStore store,
+        IJobQueue queue,
+        IJobCancellationRegistry? cancellation = null,
+        Func<DateTime>? utcNow = null)
     {
         _store = store;
         _queue = queue;
+        _cancellation = cancellation;
         _utcNow = utcNow ?? (() => DateTime.UtcNow);
     }
 
@@ -75,6 +82,11 @@ public sealed class SystemMtJobService : ISystemMtJobService
     {
         var rec = await _store.GetAsync(jobId, cancellationToken);
         if (rec is null || rec.State.IsTerminal()) return;
+
+        // Interrupt the running worker first (co-operative), then mark the durable record. The
+        // worker's re-read guard + the store's terminal-immutable invariant keep the two consistent
+        // regardless of which lands first.
+        _cancellation?.Cancel(jobId);
 
         var now = _utcNow();
         await _store.UpdateStatusAsync(rec with
