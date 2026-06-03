@@ -54,6 +54,19 @@ public class InMemoryJobStoreTests
     }
 
     [Fact]
+    public async Task UpdateStatus_unknown_id_throws_does_not_ghost_insert()
+    {
+        var store = new InMemoryJobStore();
+        var unknown = Guid.NewGuid();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => store.UpdateStatusAsync(JobsTestData.Record(unknown), default));
+
+        // fail-closed: no ghost record was inserted
+        Assert.Null(await store.GetAsync(unknown, default));
+    }
+
+    [Fact]
     public async Task Get_unknown_id_returns_null()
         => Assert.Null(await new InMemoryJobStore().GetAsync(Guid.NewGuid(), default));
 
