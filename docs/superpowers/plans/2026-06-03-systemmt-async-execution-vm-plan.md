@@ -5,6 +5,12 @@
 硬依赖: docs/superpowers/plans/2026-06-03-systemmt-async-execution-cloud-plan.md (契约方，必须先合入 main)
 ---
 
+## VM Execution Note - 2026-06-03
+
+Status: In progress / blocked on AC-V5 failure-state evidence.
+
+Branch `claude/async-execution-vm` implements the WPF async execution consumer and collected real VM evidence in `docs/superpowers/specs/2026-06-03-async-execution-vm-verification/`. AC-V1, AC-V2, AC-V3, AC-V4, AC-V6, AC-V7, and AC-V8 are verified. AC-V5 remains blocked because all attempted dependency-sensitive failure candidates reached `Succeeded` on this VM, so no real Failed / TimedOut / ArtifactMissing screenshot was produced. Do not mark this plan Completed or Controlled until that evidence gap is resolved.
+
 # System MT 异步执行 + Polling（VM 消费侧 / WPF）Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.

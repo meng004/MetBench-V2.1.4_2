@@ -462,6 +462,7 @@ launcher catalog，2026-05-22）；MR/程序元信息持久化计划 **P-A + P-C
 **当前仍未闭环的项**：
 
 - `ExecutionEvidence.SampleTraces` 已开始写入目标字段的 source / transformed / output triples；当前待补的是更细粒度的多变量 / 多路径 trace。
+- System MT async execution WPF consumer is partially verified on `claude/async-execution-vm` but not Controlled: VM evidence covers queued submit, polling success, manual refresh, result projection, cancel, no UI blocking waits, and zero Core/DAL diff; AC-V5 failure-state screenshot remains blocked because all dependency-sensitive candidates succeeded on the VM. Evidence: `docs/superpowers/specs/2026-06-03-async-execution-vm-verification/`.
 - `flw≈k·src` 缩放等式 assertion 仍未实现，P1 的 3 条齐次 MR 仍未从 MP_mono 升到 MP_inv。
 - Windows 侧 UI MR CRUD（`docs/superpowers/plans/2026-05-26-t1-ui-mr-crud-windows-vm-plan.md`）仍 Open，待 Windows/VM 启动。
 - Windows 侧对 `e839214` 之后后续新增主线代码的回执，需要按双环境 runbook 持续补记。

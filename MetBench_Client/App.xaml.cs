@@ -1,4 +1,5 @@
 ﻿using MetBench_Client.Models;
+using MetBench_Client.Hosting;
 using MetBench_Client.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +16,7 @@ using MetBench_BLL;
 using MetBench_BLL.SystemMT;
 using MetBench_BLL.SystemMT.Anomaly;
 using MetBench_BLL.SystemMT.Bootstrap;
+using MetBench_BLL.SystemMT.Jobs;
 using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Metadata;
 using MetBench_BLL.SystemMT.Metadata.Editing;
@@ -184,9 +186,19 @@ namespace MetBench_Client
                 services.AddScoped<ISystemMtCatalogReader>(provider =>
                     (ISystemMtCatalogReader)provider.GetRequiredService<ISystemMtLauncher>());
                 services.AddSingleton<ISystemMtResultReportRenderer, HtmlSystemMtResultReportRenderer>();
+                services.AddSingleton<IJobQueue, ChannelJobQueue>();
+                services.AddSingleton<IJobStore>(provider =>
+                {
+                    var dataDir = Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!;
+                    return new LiteDbJobStore($"Filename={Path.Combine(dataDir, "SystemMtJobs.Litedb")}");
+                });
+                services.AddSingleton<ISystemMtJobService, SystemMtJobService>();
+                services.AddHostedService<SystemMtJobWorkerHostedService>();
 
                 services.AddScoped<Views.Pages.SystemMtExecutionPage>();
                 services.AddScoped<ViewModels.SystemMtExecutionViewModel>();
+                services.AddScoped<Views.Pages.SystemMtAsyncJobPage>();
+                services.AddScoped<ViewModels.SystemMtAsyncJobViewModel>();
                 services.AddScoped<Views.Pages.SystemMtMrCatalogPage>();
                 services.AddScoped<ViewModels.SystemMtMrCatalogViewModel>();
                 services.AddScoped<Views.Pages.SystemMtSutCatalogPage>();

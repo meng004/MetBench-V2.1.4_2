@@ -1,0 +1,15 @@
+2026-06-03T20:07:25.1005730+08:00 [submit-immediate] state=Queued phase=queued progress=0 job=3f6dd1db-1265-4db8-b417-42fff745fa62
+2026-06-03T20:07:27.4025596+08:00 [auto-poll] state=Succeeded phase=succeeded progress=100 job=3f6dd1db-1265-4db8-b417-42fff745fa62
+2026-06-03T20:07:29.0331931+08:00 [manual-refresh] state=Succeeded phase=succeeded progress=100 job=3f6dd1db-1265-4db8-b417-42fff745fa62
+2026-06-03T20:07:30.1906869+08:00 [poll] state=Succeeded phase=succeeded progress=100 job=3f6dd1db-1265-4db8-b417-42fff745fa62
+2026-06-03T20:07:34.5485917+08:00 [poll] state=Succeeded phase=succeeded progress=100 job=bd750756-d0dd-4a4b-b977-2390a9a318d9
+2026-06-03T20:07:35.5860447+08:00 [failure-candidate-succeeded] mr=openmc-pincell-particle-count-convergence terminal=Succeeded
+2026-06-03T20:07:38.8142321+08:00 [poll] state=RunningSource phase=succeeded progress=100 job=409e5bff-15ac-48c3-af04-fe372e766a48
+2026-06-03T20:07:40.1570520+08:00 [failure-candidate-succeeded] mr=openmc-pincell-nu-sigma-f terminal=Succeeded
+2026-06-03T20:07:45.0914366+08:00 [poll] state=RunningSource phase=succeeded progress=100 job=845ae754-f073-402e-ab9b-47f1d2318517
+2026-06-03T20:07:48.9764218+08:00 [failure-candidate-succeeded] mr=scipy-bvp-poisson-seed-mesh-insensitivity terminal=Succeeded
+2026-06-03T20:07:52.9013291+08:00 [poll] state=RunningSource phase=succeeded progress=100 job=123dda49-4808-4452-8c92-5722c7f5b7e1
+2026-06-03T20:07:54.9216544+08:00 [failure-candidate-succeeded] mr=scipy-ivp-lv-step-convergence terminal=Succeeded
+2026-06-03T20:07:58.0635944+08:00 [poll] state=Succeeded phase=succeeded progress=100 job=a62b4231-960b-4eee-a7a2-de17d005a574
+2026-06-03T20:07:59.0024341+08:00 [failure-candidate-succeeded] mr=openmoc-pincell-ray-track-convergence terminal=Succeeded
+2026-06-03T20:08:01.5876946+08:00 [cancel-clicked] state=Cancelled phase=cancelled progress=40 job=6d28323c-6486-459d-b937-a8c124d5e45d

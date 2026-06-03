@@ -1,0 +1,108 @@
+<Page x:Class="MetBench_Client.Views.Pages.SystemMtAsyncJobPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      AutomationProperties.AutomationId="SystemMtAsyncJobPage"
+      ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+      Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+    <Page.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </Page.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <ComboBox Grid.Column="0"
+                      AutomationProperties.AutomationId="AsyncMrCombo"
+                      MinWidth="320"
+                      ItemsSource="{Binding ViewModel.AvailableMrIds}"
+                      SelectedItem="{Binding ViewModel.SelectedMrId, Mode=TwoWay}" />
+            <ui:Button Grid.Column="1"
+                       AutomationProperties.AutomationId="AsyncSubmitButton"
+                       Margin="12,0,0,0"
+                       Content="Submit"
+                       Command="{Binding ViewModel.SubmitCommand}"
+                       IsEnabled="{Binding ViewModel.IsNotRunning}" />
+            <ui:Button Grid.Column="2"
+                       AutomationProperties.AutomationId="AsyncRefreshButton"
+                       Margin="12,0,0,0"
+                       Content="Refresh"
+                       Command="{Binding ViewModel.RefreshCommand}" />
+            <ui:Button Grid.Column="3"
+                       AutomationProperties.AutomationId="AsyncCancelButton"
+                       Margin="12,0,0,0"
+                       Content="Cancel"
+                       Command="{Binding ViewModel.CancelCommand}"
+                       IsEnabled="{Binding ViewModel.IsRunning}" />
+        </Grid>
+
+        <Grid Grid.Row="1" Margin="0,16,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,12,4" FontWeight="SemiBold" Text="Job" />
+            <TextBlock Grid.Row="0" Grid.Column="1" Margin="0,0,0,4" AutomationProperties.AutomationId="AsyncJobId" Text="{Binding ViewModel.JobIdDisplay}" />
+            <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,12,4" FontWeight="SemiBold" Text="State" />
+            <TextBlock Grid.Row="1" Grid.Column="1" Margin="0,0,0,4" AutomationProperties.AutomationId="AsyncState" Text="{Binding ViewModel.StateDisplay}" />
+            <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,0,12,4" FontWeight="SemiBold" Text="SUT" />
+            <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,0,0,4" AutomationProperties.AutomationId="AsyncSut" Text="{Binding ViewModel.SutNameDisplay}" />
+            <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,0,12,4" FontWeight="SemiBold" Text="Phase" />
+            <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,0,0,4" AutomationProperties.AutomationId="AsyncPhase" Text="{Binding ViewModel.PhaseDisplay}" />
+            <ProgressBar Grid.Row="4"
+                         Grid.Column="0"
+                         Grid.ColumnSpan="2"
+                         AutomationProperties.AutomationId="AsyncProgress"
+                         AutomationProperties.Name="{Binding ViewModel.ProgressPercent}"
+                         Minimum="0"
+                         Maximum="100"
+                         Height="10"
+                         Value="{Binding ViewModel.ProgressPercent}" />
+        </Grid>
+
+        <TextBlock Grid.Row="1"
+                   Margin="0,116,0,0"
+                   Foreground="{DynamicResource SystemFillColorCriticalBrush}"
+                   AutomationProperties.AutomationId="AsyncFailureReason"
+                   Text="{Binding ViewModel.FailureReason}"
+                   Visibility="{Binding ViewModel.HasFailureReason, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+        <Grid Grid.Row="2" Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <TextBox Grid.Column="0"
+                     AutomationProperties.AutomationId="AsyncResultSummary"
+                     IsReadOnly="True"
+                     TextWrapping="Wrap"
+                     VerticalScrollBarVisibility="Auto"
+                     Text="{Binding ViewModel.ResultSummary, Mode=OneWay}" />
+            <ListView Grid.Column="1"
+                      AutomationProperties.AutomationId="AsyncPollLog"
+                      Margin="12,0,0,0"
+                      ItemsSource="{Binding ViewModel.PollLog}" />
+        </Grid>
+    </Grid>
+</Page>

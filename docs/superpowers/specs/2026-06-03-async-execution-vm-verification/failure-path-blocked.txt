@@ -1,0 +1,1 @@
+﻿AC-V5 blocker: all attempted dependency-sensitive failure candidates reached Succeeded on this VM: openmc-pincell-particle-count-convergence, openmc-pincell-nu-sigma-f, scipy-bvp-poisson-seed-mesh-insensitivity, scipy-ivp-lv-step-convergence, openmoc-pincell-ray-track-convergence
