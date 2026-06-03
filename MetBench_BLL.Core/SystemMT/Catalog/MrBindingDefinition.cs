@@ -32,6 +32,7 @@ public sealed class MrBindingDefinition
     public string MetaPattern { get; set; } = string.Empty;
     public string SourceLevel { get; set; } = string.Empty;
     public string FailureCorrelation { get; set; } = string.Empty;
+    public MrExplanationProfileDefinition? ExplanationProfile { get; set; } = new();
 
     /// <summary>Per-binding override of the program-level input adapter; openmoc/openmc have per-MR variants.</summary>
     public string InputAdapterScriptRelativePath { get; set; } = string.Empty;

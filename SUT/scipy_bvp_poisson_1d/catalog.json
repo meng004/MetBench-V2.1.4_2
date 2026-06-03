@@ -12,6 +12,15 @@
     "output_adapter_script_relative_path": "scipy_bvp_poisson_1d_output_parser.py",
     "python_executable_kind": "scipy"
   },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "SciPy solve_bvp",
+    "runtime_key": "scipy",
+    "input_contract": "JSON Poisson BVP mesh, boundary, and source parameters.",
+    "output_contract": "JSON BVP solution metrics aligned with pure-stdlib Poisson outputs.",
+    "adapter": "SciPy-backed Python runner and JSON parser/adapter under SUT/scipy_bvp_poisson_1d/.",
+    "dependency_risk": "requires SciPy runtime; skipped when unavailable"
+  },
   "mrs": [
     {
       "mr_id": "scipy-bvp-poisson-source-superposition",
@@ -36,6 +45,15 @@
       "meta_pattern": "Mono",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Mono MR: Superposition / linearity MP_mono: the 1D Poisson equation -u'' = f is linear in the source f.",
+        "transformation_semantics": "Apply ScaleField via transform steps [ScaleField@/source/strength] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `u_max` from source and follow-up outputs for MR `scipy-bvp-poisson-source-superposition`.",
+        "predicate_summary": "Predicate `greater` / `GreaterThan` checks the expected relation on `u_max`.",
+        "tolerance_summary": "Ordinal predicate: no numeric tolerance is applied beyond the declared ordering relation.",
+        "applicability": "Applicable when SUT `scipy-bvp-poisson-1d` exposes sample `sample/standard.json`, the transform target fields, and output `u_max`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/standard.json",
       "work_root_name": "MetBenchScipyBvpPoisson1d",
       "timeout_seconds": 120
@@ -63,6 +81,15 @@
       "meta_pattern": "Conv",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Conv MR: SciPy solve_bvp adaptively refines its own mesh until residual is below tolerance; the user-supplied num_points only seeds the initial mesh.",
+        "transformation_semantics": "Apply ScaleField via transform steps [ScaleField@/geometry/num_points] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `u_max` from source and follow-up outputs for MR `scipy-bvp-poisson-seed-mesh-insensitivity`.",
+        "predicate_summary": "Predicate `approx` / `ApproxEqual` checks the expected relation on `u_max`.",
+        "tolerance_summary": "Deterministic tolerance rel=0.001, abs=1e-06 bounds acceptable numeric deviation.",
+        "applicability": "Applicable when SUT `scipy-bvp-poisson-1d` exposes sample `sample/standard.json`, the transform target fields, and output `u_max`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/standard.json",
       "work_root_name": "MetBenchScipyBvpPoisson1d",
       "timeout_seconds": 120

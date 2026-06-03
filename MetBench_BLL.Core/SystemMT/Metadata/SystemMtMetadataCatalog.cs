@@ -24,6 +24,12 @@ public static class SystemMtMetadataCatalog
             SymbolSystem =
                 "ψ 角通量；Ω 中子飞行方向；Σ_t/Σ_s/Σ_f 总/散射/裂变宏观截面；" +
                 "Σ_a 吸收截面；ν 每次裂变中子数；χ 裂变能谱；k 有效增殖因子 k_eff。",
+            EquationClass = "PDE",
+            EquationFamily = "linear Boltzmann transport",
+            PrimaryVariables = new List<string> { "ψ(r,Ω,E)", "k_eff" },
+            PhysicalMeaning = "Particle balance for neutron angular flux with streaming, collision, scattering, and fission source terms.",
+            BenchmarkRationale = "Representative reactor-physics transport equation used to check cross-section monotonicity, tally consistency, and Monte Carlo/deterministic convergence.",
+            ExpectedLaws = new List<string> { "particle-balance", "cross-section-monotonicity", "source-linearity", "stochastic-convergence" },
             Parameters = new List<EquationParameter>
             {
                 new() { Symbol = "Σ_a", Description = "燃料宏观吸收截面", Unit = "1/cm" },
@@ -37,6 +43,12 @@ public static class SystemMtMetadataCatalog
             Name = "一维热传导方程（Fourier 扩散方程）",
             CanonicalForm = "∂u/∂t = α·∂²u/∂x²",
             SymbolSystem = "u(x,t) 温度场；α 热扩散系数；x 空间坐标；t 时间。",
+            EquationClass = "PDE",
+            EquationFamily = "parabolic diffusion",
+            PrimaryVariables = new List<string> { "u(x,t)" },
+            PhysicalMeaning = "Transient scalar temperature field governed by Fourier diffusion.",
+            BenchmarkRationale = "Representative parabolic PDE used for amplitude scaling, diffusivity response, and time-discretization checks.",
+            ExpectedLaws = new List<string> { "diffusion-smoothing", "linearity", "time-convergence" },
             Parameters = new List<EquationParameter>
             {
                 new() { Symbol = "u", Description = "温度场（初值即初始温度分布）", Unit = "K" },
@@ -49,6 +61,12 @@ public static class SystemMtMetadataCatalog
             Name = "Bateman 衰变链方程",
             CanonicalForm = "dN_i/dt = λ_{i-1}·N_{i-1} − λ_i·N_i",
             SymbolSystem = "N_i 核素 i 的原子数；λ_i 核素 i 的衰变常数；i 衰变链上的核素序号。",
+            EquationClass = "ODE",
+            EquationFamily = "linear decay chain",
+            PrimaryVariables = new List<string> { "N_i(t)" },
+            PhysicalMeaning = "Nuclide populations evolve through radioactive decay and production along a chain.",
+            BenchmarkRationale = "Representative linear ODE system with analytic solutions for scaling and time-step convergence checks.",
+            ExpectedLaws = new List<string> { "superposition", "positivity", "mass-decay", "time-convergence" },
             Parameters = new List<EquationParameter>
             {
                 new() { Symbol = "N_i", Description = "核素 i 的（初始）原子数", Unit = "atoms" },
@@ -61,6 +79,12 @@ public static class SystemMtMetadataCatalog
             Name = "阻尼谐振子方程",
             CanonicalForm = "x'' + 2ζω·x' + ω²·x = 0",
             SymbolSystem = "x(t) 位移；ζ 阻尼比；ω 固有角频率；(x0, v0) 初始位移与速度。",
+            EquationClass = "ODE",
+            EquationFamily = "second-order damped dynamics",
+            PrimaryVariables = new List<string> { "x(t)", "v(t)" },
+            PhysicalMeaning = "A scalar displacement and velocity evolve under restoring and damping forces.",
+            BenchmarkRationale = "Representative second-order ODE used for damping monotonicity and numerical integration consistency checks.",
+            ExpectedLaws = new List<string> { "energy-decay", "linearity", "time-convergence" },
             Parameters = new List<EquationParameter>
             {
                 new() { Symbol = "x0", Description = "初始位移", Unit = "m" },
@@ -77,6 +101,12 @@ public static class SystemMtMetadataCatalog
             SymbolSystem =
                 "x 猎物数量；y 捕食者数量；α 猎物自然增长率；β 捕食率；" +
                 "δ 捕食转化率；γ 捕食者死亡率。",
+            EquationClass = "ODE",
+            EquationFamily = "nonlinear population dynamics",
+            PrimaryVariables = new List<string> { "prey(t)", "predator(t)" },
+            PhysicalMeaning = "Coupled predator-prey populations exchange growth and predation effects through nonlinear interaction terms.",
+            BenchmarkRationale = "Representative nonlinear ODE system used for solver parity, parameter sensitivity, and invariant-like trajectory checks.",
+            ExpectedLaws = new List<string> { "positivity", "phase-trajectory-consistency", "time-convergence" },
             Parameters = new List<EquationParameter>
             {
                 new() { Symbol = "α", Description = "猎物自然增长率", Unit = "1/t" },
@@ -93,6 +123,12 @@ public static class SystemMtMetadataCatalog
             SymbolSystem =
                 "φ(x) 中子通量 [n/(cm²·s)]；D 扩散系数 [cm]；Σ_a 宏观吸收截面 [1/cm]；" +
                 "S(x) 外中子源 [n/(cm³·s)]；L_dif = √(D/Σ_a) 扩散长度 [cm]。",
+            EquationClass = "PDE",
+            EquationFamily = "parabolic diffusion",
+            PrimaryVariables = new List<string> { "u(x,t)" },
+            PhysicalMeaning = "A scalar field diffuses from high to low concentration under a diffusion operator.",
+            BenchmarkRationale = "Representative diffusion PDE used for mesh/time convergence and smoothing-law checks.",
+            ExpectedLaws = new List<string> { "maximum-principle", "diffusion-smoothing", "mesh-convergence" },
             Parameters = new List<EquationParameter>
             {
                 new() { Symbol = "D", Description = "扩散系数", Unit = "cm" },
@@ -111,6 +147,12 @@ public static class SystemMtMetadataCatalog
                 "G 质量流密度 [kg/(m²·s)]；p 压力 [Pa]；T 温度 [K]；ρ 密度 [kg/m³]；" +
                 "c_p 比热 [J/(kg·K)]；f Darcy 摩擦因子；D_h 水力直径 [m]；" +
                 "q'' 壁面热流密度 [W/m²]；P_h 加热周长 [m]；A_xs 横截面积 [m²]。",
+            EquationClass = "PDE",
+            EquationFamily = "fluid conservation laws",
+            PrimaryVariables = new List<string> { "u", "p", "T" },
+            PhysicalMeaning = "Fluid momentum, pressure, and thermal state satisfy conservation-style balance equations.",
+            BenchmarkRationale = "Representative fluid/thermal equation family used for subchannel response and friction/power invariance checks.",
+            ExpectedLaws = new List<string> { "mass-balance", "momentum-balance", "energy-balance" },
             Parameters = new List<EquationParameter>
             {
                 new() { Symbol = "G", Description = "质量流密度", Unit = "kg/(m²·s)" },
@@ -129,6 +171,12 @@ public static class SystemMtMetadataCatalog
                 "u(x) 解（如静电势、稳态位移、稳态温度场等通用椭圆 PDE 解）；" +
                 "f 体源（常数或分布）；L 区域长度；u_max 内部峰值（输出）。" +
                 "常数源 f 时解析解 u(x) = f·x·(L-x)/2，u_max = f·L²/8。",
+            EquationClass = "PDE",
+            EquationFamily = "elliptic",
+            PrimaryVariables = new List<string> { "u(x)" },
+            PhysicalMeaning = "Steady scalar field governed by source balance.",
+            BenchmarkRationale = "Representative elliptic PDE used for mesh convergence and source linearity checks.",
+            ExpectedLaws = new List<string> { "linearity", "mesh-convergence" },
             Parameters = new List<EquationParameter>
             {
                 new() { Symbol = "f", Description = "体源强度", Unit = "无量纲" },
@@ -145,6 +193,12 @@ public static class SystemMtMetadataCatalog
                 "u(x,t) 输运标量（如浓度、温度被动场、密度等）；v 输运速度（标量，符号决定方向）；" +
                 "L 区域长度；解析解为纯平移 u(x,t) = u₀(x - v·t mod L)。" +
                 "对周期边界条件，∫u dx 严格守恒（独立于 dx / dt）；峰值幅度在一阶迎风格式下因数值耗散而减小。",
+            EquationClass = "PDE",
+            EquationFamily = "linear hyperbolic",
+            PrimaryVariables = new List<string> { "u(x,t)" },
+            PhysicalMeaning = "A scalar quantity is transported by a prescribed velocity without changing shape in the continuous model.",
+            BenchmarkRationale = "Representative first-order hyperbolic PDE used for transport invariance, timestep sensitivity, and CFL-style convergence checks.",
+            ExpectedLaws = new List<string> { "translation-invariance", "mass-conservation", "time-convergence" },
             Parameters = new List<EquationParameter>
             {
                 new() { Symbol = "v", Description = "输运速度", Unit = "无量纲" },
@@ -163,6 +217,12 @@ public static class SystemMtMetadataCatalog
                 "d'Alembert 解将零初始速度的 Gaussian 拆成两半幅度对称行波；" +
                 "在 c=const 与 Dirichlet 反射下能量泛函 0.5·∫(u_t² + c²·u_x²)dx 严格守恒，" +
                 "本 SUT 用代理 0.5·∫u² dx（L² 能量代理）作为输出。",
+            EquationClass = "PDE",
+            EquationFamily = "second-order hyperbolic",
+            PrimaryVariables = new List<string> { "u(x,t)", "u_t(x,t)" },
+            PhysicalMeaning = "A scalar displacement field propagates as left- and right-moving waves with conserved continuous energy.",
+            BenchmarkRationale = "Representative second-order hyperbolic PDE used for amplitude symmetry and wave propagation consistency checks.",
+            ExpectedLaws = new List<string> { "amplitude-linearity", "energy-conservation", "time-convergence" },
             Parameters = new List<EquationParameter>
             {
                 new() { Symbol = "c", Description = "波速", Unit = "无量纲" },
@@ -181,6 +241,12 @@ public static class SystemMtMetadataCatalog
                 "代表性的标量非线性双曲守恒律：光滑初值在迎风侧自陡化、有限时间内形成激波；" +
                 "激波形成后熵解失去光滑性、L² 范数因激波耗散严格递减，但通量差分（Lax-Friedrichs）" +
                 "格式 + 周期边界对总质量 ∫u dx 仍是严格守恒的（与 dx / dt 无关）。",
+            EquationClass = "PDE",
+            EquationFamily = "nonlinear hyperbolic conservation law",
+            PrimaryVariables = new List<string> { "u(x,t)" },
+            PhysicalMeaning = "A nonlinear scalar conservation law transports and steepens a positive pulse while conserving mass under periodic boundaries.",
+            BenchmarkRationale = "Representative nonlinear hyperbolic PDE used for mass invariance and shock-forming conservation-law checks.",
+            ExpectedLaws = new List<string> { "mass-conservation", "entropy-dissipation", "mesh-convergence" },
             Parameters = new List<EquationParameter>
             {
                 new() { Symbol = "F(u)", Description = "守恒通量 u²/2", Unit = "无量纲" },
@@ -195,12 +261,56 @@ public static class SystemMtMetadataCatalog
             Name = "射程方程（真空、平面、点抛体）",
             CanonicalForm = "R = v0²·sin(2θ)/g",
             SymbolSystem = "R 水平射程；v0 初速度大小；θ 抛射角（相对水平面）；g 重力加速度。",
+            EquationClass = "algebraic",
+            EquationFamily = "ballistic kinematics",
+            PrimaryVariables = new List<string> { "R", "v0", "θ" },
+            PhysicalMeaning = "Vacuum projectile range follows a closed-form kinematic relationship among speed, angle, and gravity.",
+            BenchmarkRationale = "Representative explicit physics formula used for symmetry and parameter scaling checks without numerical solver complexity.",
+            ExpectedLaws = new List<string> { "angle-complement-symmetry", "quadratic-speed-scaling" },
             Parameters = new List<EquationParameter>
             {
                 new() { Symbol = "v0", Description = "初速度大小", Unit = "m/s" },
                 new() { Symbol = "θ", Description = "抛射角", Unit = "°" },
                 new() { Symbol = "g", Description = "重力加速度", Unit = "m/s²" },
                 new() { Symbol = "R", Description = "水平射程（输出）", Unit = "m" },
+            },
+        },
+        new EquationMetadata
+        {
+            EquationKey = "hamiltonian-pendulum",
+            Name = "Hamiltonian pendulum",
+            CanonicalForm = "dq/dt = p; dp/dt = -sin(q); H(q,p) = p^2/2 + 1 - cos(q)",
+            SymbolSystem = "q angular displacement; p conjugate momentum; H Hamiltonian energy.",
+            EquationClass = "ODE",
+            EquationFamily = "Hamiltonian dynamics",
+            PrimaryVariables = new List<string> { "q(t)", "p(t)", "H(q,p)" },
+            PhysicalMeaning = "A nonlinear pendulum evolves under a conservative Hamiltonian with bounded energy error under symplectic integration.",
+            BenchmarkRationale = "Representative conservative ODE used to check invariant-aware refinement and long-run energy behavior.",
+            ExpectedLaws = new List<string> { "energy-invariance", "time-refinement-convergence" },
+            Parameters = new List<EquationParameter>
+            {
+                new() { Symbol = "q", Description = "Angular displacement", Unit = "rad" },
+                new() { Symbol = "p", Description = "Conjugate momentum", Unit = "rad/s" },
+                new() { Symbol = "H", Description = "Hamiltonian energy", Unit = "dimensionless" },
+            },
+        },
+        new EquationMetadata
+        {
+            EquationKey = "point-kinetics",
+            Name = "Point kinetics",
+            CanonicalForm = "dP/dt = ((rho - beta)/Lambda)P + lambda C; dC/dt = beta/Lambda P - lambda C",
+            SymbolSystem = "P reactor power; C delayed-neutron precursor concentration; rho reactivity; beta delayed fraction; lambda precursor decay constant.",
+            EquationClass = "ODE",
+            EquationFamily = "reactor point kinetics",
+            PrimaryVariables = new List<string> { "P(t)", "C(t)" },
+            PhysicalMeaning = "Reactor power and delayed-neutron precursor concentration evolve under a point-kinetics transient.",
+            BenchmarkRationale = "Representative stiff-ish reactor ODE used for reactivity-response monotonicity checks.",
+            ExpectedLaws = new List<string> { "reactivity-monotonicity", "power-response" },
+            Parameters = new List<EquationParameter>
+            {
+                new() { Symbol = "rho", Description = "Reactivity insertion", Unit = "dimensionless" },
+                new() { Symbol = "P", Description = "Reactor power", Unit = "relative" },
+                new() { Symbol = "C", Description = "Delayed-neutron precursor concentration", Unit = "relative" },
             },
         },
         // PR-A T1 non-JSON I/O adapter: synthetic "equation" registered solely so
@@ -214,6 +324,12 @@ public static class SystemMtMetadataCatalog
             SymbolSystem =
                 "factor 输入标量；echo_value 输出标量。本条目仅为 _test_csv 合成 SUT 提供 EquationKey 绑定，" +
                 "不代表任何真实物理过程。",
+            EquationClass = "synthetic",
+            EquationFamily = "csv identity",
+            PrimaryVariables = new List<string> { "factor", "echo_value" },
+            PhysicalMeaning = "Synthetic CSV echo contract used only to exercise non-JSON System MT I/O plumbing.",
+            BenchmarkRationale = "Non-physics regression fixture that verifies adapter round-tripping without affecting real SUT inventory claims.",
+            ExpectedLaws = new List<string> { "identity", "io-roundtrip" },
             Parameters = new List<EquationParameter>
             {
                 new() { Symbol = "factor", Description = "输入标量（CSV 单字段）", Unit = "无量纲" },
@@ -233,6 +349,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "νΣ_f → factor·νΣ_f（factor > 1）",
             OutputRelation = "k_eff(flw) > k_eff(src)",
             ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "νΣ_f 缩放倍率", ValueRange = "factor > 1" },
@@ -247,6 +370,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "Σ_a → factor·Σ_a（factor > 1）",
             OutputRelation = "k_eff(flw) < k_eff(src)",
             ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "Σ_a 缩放倍率", ValueRange = "factor > 1" },
@@ -263,6 +393,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "(num_azim, azim_spacing_cm) → (factor·num_azim, azim_spacing_cm/factor)；factor > 1",
             OutputRelation = "|k_eff(medium) − k_eff(reference)| ≤ |k_eff(coarse) − k_eff(reference)|（NormKind.Relative）",
             ComparisonType = MrComparisonType.Relative,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "角度细化倍率（per-phase）",       ValueRange = "factor ≥ 1" },
@@ -278,6 +415,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "νΣ_f → factor·νΣ_f（factor > 1）",
             OutputRelation = "k_eff(flw) > k_eff(src)",
             ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "νΣ_f 缩放倍率", ValueRange = "factor > 1" },
@@ -293,6 +437,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "Σ_a → factor·Σ_a（factor > 1）",
             OutputRelation = "k_eff(flw) < k_eff(src)",
             ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "Σ_a 缩放倍率", ValueRange = "factor > 1" },
@@ -312,6 +463,13 @@ public static class SystemMtMetadataCatalog
             // band around low.StdError / √factor — equality within a tolerated relative
             // deviation ratio (= MrComparisonType.Relative semantics).
             ComparisonType = MrComparisonType.Relative,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor",    PhysicalMeaning = "particles 放大倍率",                 ValueRange = "factor > 1" },
@@ -328,6 +486,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "u(x,0) → factor·u(x,0)（factor > 1）",
             OutputRelation = "max_u(flw) > max_u(src)（齐次性严格意义下 = factor·max_u(src)）",
             ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "初始幅值缩放倍率", ValueRange = "factor > 1" },
@@ -344,6 +509,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "num_steps → factor·num_steps（factor > 1）",
             OutputRelation = "max_u(flw) ≈ max_u(src)（Euler 截断误差容差内）",
             ComparisonType = MrComparisonType.Absolute,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "num_steps 缩放倍率", ValueRange = "factor > 1" },
@@ -359,6 +531,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "α → factor·α（factor > 1）",
             OutputRelation = "max_u(flw) < max_u(src)",
             ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "α 缩放倍率", ValueRange = "factor > 1" },
@@ -374,6 +553,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "N_i(0) → factor·N_i(0)（对所有 i，factor > 1）",
             OutputRelation = "N_C_final(flw) > N_C_final(src)（线性性严格意义下 = factor·N_C_final(src)）",
             ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "初始核素数缩放倍率", ValueRange = "factor > 1" },
@@ -390,6 +576,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "λ_A → factor·λ_A（factor > 1）",
             OutputRelation = "total(flw) ≈ total(src)（容差内严格等）",
             ComparisonType = MrComparisonType.Absolute,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "λ_A 缩放倍率", ValueRange = "factor > 0" },
@@ -406,6 +599,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "num_steps → factor·num_steps（factor > 1）",
             OutputRelation = "N_C_final(flw) ≈ N_C_final(src)（RK4 截断误差容差内）",
             ComparisonType = MrComparisonType.Absolute,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "num_steps 缩放倍率", ValueRange = "factor > 1" },
@@ -422,6 +622,13 @@ public static class SystemMtMetadataCatalog
             OutputRelation =
                 "max_abs_displacement(flw) > max_abs_displacement(src)（齐次性严格意义下 = factor·max_abs_displacement(src)）",
             ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "初始状态缩放倍率", ValueRange = "factor > 1" },
@@ -437,6 +644,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "γ → factor·γ（factor > 1）",
             OutputRelation = "mean_prey(flw) > mean_prey(src)",
             ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "γ（捕食者死亡率）缩放倍率", ValueRange = "factor > 1" },
@@ -454,6 +668,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "γ → factor·γ（factor > 1）",
             OutputRelation = "mean_prey(flw) > mean_prey(src)",
             ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "γ（捕食者死亡率）缩放倍率", ValueRange = "factor > 1" },
@@ -471,6 +692,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "num_eval_points → factor·num_eval_points（factor > 1）",
             OutputRelation = "mean_prey(flw) ≈ mean_prey(src)（O(Δt²) 容差内）",
             ComparisonType = MrComparisonType.Absolute,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "num_eval_points 缩放倍率", ValueRange = "factor > 1" },
@@ -487,6 +715,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "S → factor·S（factor > 1）",
             OutputRelation = "φ_max(flw) > φ_max(src)（严格意义下 = factor·φ_max(src)）",
             ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "S 缩放倍率", ValueRange = "factor > 1" },
@@ -503,6 +738,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "num_points → factor·num_points（factor > 1）",
             OutputRelation = "φ_max(flw) ≈ φ_max(src)（O(dx²) 截断误差容差内）",
             ComparisonType = MrComparisonType.Absolute,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "num_points 缩放倍率", ValueRange = "factor > 1" },
@@ -519,6 +761,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "f → factor·f（factor > 1）",
             OutputRelation = "u_max(flw) > u_max(src)（严格意义下 = factor·u_max(src)）",
             ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "源缩放倍率", ValueRange = "factor > 1" },
@@ -536,6 +785,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "f → factor·f（factor > 1）",
             OutputRelation = "u_max(flw) > u_max(src)（严格意义下 = factor·u_max(src)）",
             ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "源缩放倍率", ValueRange = "factor > 1" },
@@ -553,6 +809,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "num_points → factor·num_points（factor > 1）",
             OutputRelation = "u_max(flw) ≈ u_max(src)（O(tol) 容差内）",
             ComparisonType = MrComparisonType.Absolute,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "种子 num_points 缩放倍率", ValueRange = "factor > 1" },
@@ -570,6 +833,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "num_points → factor·num_points（factor > 1）",
             OutputRelation = "u_max(flw) ≈ u_max(src)（O(dx²) 截断误差容差内）",
             ComparisonType = MrComparisonType.Absolute,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "num_points 缩放倍率", ValueRange = "factor > 1" },
@@ -587,6 +857,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "amplitude → factor·amplitude（factor > 1）",
             OutputRelation = "peak_amplitude(flw) > peak_amplitude(src)（严格意义下 = factor·peak_amplitude(src)）",
             ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "初始幅度缩放倍率", ValueRange = "factor > 1" },
@@ -604,6 +881,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "num_points → factor·num_points（factor > 1）",
             OutputRelation = "mass_integral(flw) ≈ mass_integral(src)（O(dx²) 初始采样误差容差内）",
             ComparisonType = MrComparisonType.Absolute,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "num_points 缩放倍率", ValueRange = "factor > 1" },
@@ -621,6 +905,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "amplitude → factor·amplitude（factor > 1）",
             OutputRelation = "peak_amplitude(flw) > peak_amplitude(src)（严格意义下 = factor·peak_amplitude(src)）",
             ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "初始幅度缩放倍率", ValueRange = "factor > 1" },
@@ -638,6 +929,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "num_points → factor·num_points（factor > 1）",
             OutputRelation = "energy_proxy(flw) ≈ energy_proxy(src)（O(dx²) 截断容差内）",
             ComparisonType = MrComparisonType.Absolute,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "num_points 缩放倍率", ValueRange = "factor > 1" },
@@ -656,6 +954,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "amplitude → factor·amplitude（factor > 1）",
             OutputRelation = "peak_amplitude(flw) > peak_amplitude(src)",
             ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "初始幅度缩放倍率", ValueRange = "factor > 1" },
@@ -673,6 +978,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "num_points → factor·num_points（factor > 1）",
             OutputRelation = "mass_integral(flw) ≈ mass_integral(src)（O(dx²) 截断容差内）",
             ComparisonType = MrComparisonType.Absolute,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "num_points 缩放倍率", ValueRange = "factor > 1" },
@@ -689,6 +1001,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "G → factor·G（factor > 1）",
             OutputRelation = "ΔT(flw) < ΔT(src)（严格意义下 = ΔT(src) / factor）",
             ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "G 缩放倍率", ValueRange = "factor > 1" },
@@ -704,6 +1023,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "q'' → factor·q''（factor > 1）",
             OutputRelation = "ΔT(flw) > ΔT(src)（严格意义下 = factor·ΔT(src)）",
             ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "q'' 缩放倍率", ValueRange = "factor > 1" },
@@ -721,6 +1047,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "f → factor·f（factor > 1）",
             OutputRelation = "delta_T(flw) ≈ delta_T(src)（解析意义下严格相等，1e-12 容差守 FP 误差）",
             ComparisonType = MrComparisonType.Absolute,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "f 缩放倍率", ValueRange = "factor > 1" },
@@ -736,10 +1069,80 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "v0 → factor·v0（factor > 1）",
             OutputRelation = "range(flw) > range(src)（严格意义下 = factor²·range(src)）",
             ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "v0 缩放倍率", ValueRange = "factor > 1" },
                 new() { Symbol = "range", PhysicalMeaning = "水平射程（输出）", ValueRange = "range > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "p4-energy-invariant",
+            EquationKey = "hamiltonian-pendulum",
+            PhysicalMeaning = "For the same Hamiltonian pendulum initial state and physical time interval, refining the velocity-Verlet time step reduces the measured bounded energy drift.",
+            InputTransformation = "n_steps -> factor * n_steps with factor = 2 and unchanged t_final.",
+            OutputRelation = "energy_drift(flw) < energy_drift(src)",
+            ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "Conv MR: time-step refinement of a symplectic Hamiltonian integrator should reduce measured energy drift for this smooth trajectory.",
+            TransformationSemantics = "Apply ScaleField to /integration/n_steps while keeping initial q/p and t_final unchanged.",
+            ObservableSummary = "Compare scalar energy_drift from the source and follow-up pendulum outputs.",
+            PredicateSummary = "Use the existing `less` / LessThan runtime predicate on energy_drift.",
+            ToleranceSummary = "Ordinal deterministic predicate: no numeric tolerance is applied beyond strict ordering.",
+            Applicability = "Applicable when the live P4 SUT exposes /integration/n_steps and outputs scalar energy_drift.",
+            FailureMeaning = "Violation means the solver, adapter, transform binding, or catalog assertion no longer demonstrates the declared energy-refinement relation.",
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "Integration-step scaling factor", ValueRange = "factor = 2" },
+                new() { Symbol = "energy_drift", PhysicalMeaning = "Max-minus-min Hamiltonian energy over the trajectory", ValueRange = "energy_drift >= 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "p5-power-response",
+            EquationKey = "point-kinetics",
+            PhysicalMeaning = "Increasing a positive reactivity insertion in the same point-kinetics transient raises the maximum reactor power response.",
+            InputTransformation = "rho -> factor * rho with factor = 2 and unchanged kinetic/initial parameters.",
+            OutputRelation = "max_power(flw) > max_power(src)",
+            ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "Mono MR: positive reactivity monotonicity increases the transient power response.",
+            TransformationSemantics = "Apply ScaleField to /kinetics/rho while preserving beta, lambda, generation time, time grid, and initial state.",
+            ObservableSummary = "Compare scalar max_power from source and follow-up point-kinetics outputs.",
+            PredicateSummary = "Use the existing `greater` / GreaterThan runtime predicate on max_power.",
+            ToleranceSummary = "Ordinal deterministic predicate: no numeric tolerance is applied beyond strict ordering.",
+            Applicability = "Applicable when the live P5 SUT exposes /kinetics/rho and outputs scalar max_power.",
+            FailureMeaning = "Violation means the solver, adapter, transform binding, or catalog assertion no longer demonstrates the declared reactivity-response relation.",
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "Positive reactivity scaling factor", ValueRange = "factor > 1" },
+                new() { Symbol = "max_power", PhysicalMeaning = "Maximum relative power over the transient", ValueRange = "max_power > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "p9-k-eff-noise-aware",
+            EquationKey = "neutron-transport",
+            PhysicalMeaning = "For the explicit OpenMC surrogate only, increasing synthetic particle count reduces the k_eff standard-error observable sigma_k.",
+            InputTransformation = "particles -> factor * particles with factor = 4 and unchanged surrogate enrichment.",
+            OutputRelation = "sigma_k(flw) ~= sigma_k(src) / sqrt(factor)",
+            ComparisonType = MrComparisonType.Relative,
+            MetaPatternRationale = "Conv MR: Monte Carlo standard error scales approximately with 1/sqrt(N); this live runtime is a deterministic surrogate of that relation.",
+            TransformationSemantics = "Apply ScaleField to /simulation/particles while keeping the surrogate enrichment fixed.",
+            ObservableSummary = "Compare scalar sigma_k from source and follow-up surrogate outputs.",
+            PredicateSummary = "Use the existing `variance-ratio` / VarianceRatio typed runtime predicate; no new Core typed semantics are introduced.",
+            ToleranceSummary = "Relative tolerance 0.05 bounds deterministic variance-ratio comparison around the expected 1/sqrt(factor) shrinkage.",
+            Applicability = "Applicable only to SUT minimum-mr-subset-p9-surrogate; this is not real OpenMC execution evidence.",
+            FailureMeaning = "Violation means the surrogate, adapter, transform binding, or existing variance-ratio runtime no longer demonstrates the declared uncertainty-convergence relation.",
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "Synthetic particle-count scaling factor", ValueRange = "factor = 4" },
+                new() { Symbol = "sigma_k", PhysicalMeaning = "Surrogate k_eff standard error", ValueRange = "sigma_k > 0" },
             },
         },
         // PR-A T1 non-JSON I/O adapter: synthetic test-SUT MR. NOT a real physics MR.
@@ -753,6 +1156,13 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "factor → factor·factor（factor > 1）",
             OutputRelation = "echo_value(flw) > echo_value(src)（严格意义下 = factor·echo_value(src)）",
             ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "This MR documents a metamorphic law through its declared transformation and expected output relation.",
+            TransformationSemantics = "Apply the source-to-follow-up transformation described by InputTransformation while keeping unrelated inputs fixed.",
+            ObservableSummary = "Compare the source and follow-up output quantity named by OutputRelation after both runs complete.",
+            PredicateSummary = "Evaluate the declared relation using the catalog predicate associated with this MR binding.",
+            ToleranceSummary = "Use the tolerance/noise policy declared by the runtime MR binding; ordinal checks use exact ordering.",
+            Applicability = "Applicable when the SUT exposes the declared input fields and observable output metric; not applicable when those contracts are absent.",
+            FailureMeaning = "MR violation indicates inconsistent behavior for the declared transformation, observable, or adapter contract.",
             Parameters = new List<MrParameter>
             {
                 new() { Symbol = "factor", PhysicalMeaning = "输入 factor 的缩放倍率", ValueRange = "factor > 1" },

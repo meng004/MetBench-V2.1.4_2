@@ -12,6 +12,15 @@
     "output_adapter_script_relative_path": "heat_equation_output_adapter.py",
     "python_executable_kind": "system"
   },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "finite-difference explicit heat solver",
+    "runtime_key": "system",
+    "input_contract": "JSON thermal diffusivity, mesh/time step, and initial temperature profile.",
+    "output_contract": "JSON temperature metrics including max_temperature and convergence proxies.",
+    "adapter": "Python heat-equation runner with input/output adapters under SUT/heat_equation/.",
+    "dependency_risk": "pure-stdlib"
+  },
   "mrs": [
     {
       "mr_id": "heat-equation-amplitude",
@@ -36,6 +45,15 @@
       "meta_pattern": "Mono",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Mono MR: 1D heat equation with homogeneous Dirichlet BCs is linear in the initial profile.",
+        "transformation_semantics": "Apply ScaleAmplitude via transform steps [ScaleField@/initial/amplitude] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `max_u` from source and follow-up outputs for MR `heat-equation-amplitude`.",
+        "predicate_summary": "Predicate `greater` / `GreaterThan` checks the expected relation on `max_u`.",
+        "tolerance_summary": "Ordinal predicate: no numeric tolerance is applied beyond the declared ordering relation.",
+        "applicability": "Applicable when SUT `heat-equation` exposes sample `sample/gaussian.json`, the transform target fields, and output `max_u`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/gaussian.json",
       "work_root_name": "MetBenchHeatEq",
       "timeout_seconds": 60
@@ -63,6 +81,15 @@
       "meta_pattern": "Conv",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Conv MR: Time-step convergence MP_conv: doubling num_steps (halving the forward-Euler time-step dt) must leave max_u(t_final) within Euler truncation tolerance — the integrator is already at the fine-grid plateau given the chosen alpha.",
+        "transformation_semantics": "Apply ScaleField via transform steps [ScaleField@/params/num_steps] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `max_u` from source and follow-up outputs for MR `fourier-timestep-convergence`.",
+        "predicate_summary": "Predicate `approx` / `ApproxEqual` checks the expected relation on `max_u`.",
+        "tolerance_summary": "Deterministic tolerance rel=0.01, abs=1e-06 bounds acceptable numeric deviation.",
+        "applicability": "Applicable when SUT `heat-equation` exposes sample `sample/gaussian.json`, the transform target fields, and output `max_u`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/gaussian.json",
       "work_root_name": "MetBenchHeatEq",
       "timeout_seconds": 60
@@ -90,6 +117,15 @@
       "meta_pattern": "Mono",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Mono MR: Diffusion coefficient monotonicity MP_mono: at fixed t_final, larger alpha causes faster diffusive smoothing of the initial profile, so scaling alpha by factor > 1 must strictly decrease max_u(t_final).",
+        "transformation_semantics": "Apply ScaleField via transform steps [ScaleField@/params/alpha] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `max_u` from source and follow-up outputs for MR `fourier-alpha-monotonic`.",
+        "predicate_summary": "Predicate `less` / `LessThan` checks the expected relation on `max_u`.",
+        "tolerance_summary": "Ordinal predicate: no numeric tolerance is applied beyond the declared ordering relation.",
+        "applicability": "Applicable when SUT `heat-equation` exposes sample `sample/gaussian.json`, the transform target fields, and output `max_u`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/gaussian.json",
       "work_root_name": "MetBenchHeatEq",
       "timeout_seconds": 60

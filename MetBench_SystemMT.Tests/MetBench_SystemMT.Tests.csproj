@@ -125,6 +125,38 @@
       <Link>TestAssets\subchannel_1d\sample\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\SUT\diffusion_1d\*.py">
+      <Link>TestAssets\diffusion_1d\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\SUT\diffusion_1d\sample\*.json">
+      <Link>TestAssets\diffusion_1d\sample\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\SUT\minimum_mr_subset_p4\*.py">
+      <Link>TestAssets\minimum_mr_subset_p4\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\SUT\minimum_mr_subset_p4\sample\*.json">
+      <Link>TestAssets\minimum_mr_subset_p4\sample\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\SUT\minimum_mr_subset_p5\*.py">
+      <Link>TestAssets\minimum_mr_subset_p5\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\SUT\minimum_mr_subset_p5\sample\*.json">
+      <Link>TestAssets\minimum_mr_subset_p5\sample\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\SUT\minimum_mr_subset_p9_surrogate\*.py">
+      <Link>TestAssets\minimum_mr_subset_p9_surrogate\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\SUT\minimum_mr_subset_p9_surrogate\sample\*.json">
+      <Link>TestAssets\minimum_mr_subset_p9_surrogate\sample\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="..\SUT\scipy_ivp_lotka_volterra\*.py">
       <Link>TestAssets\scipy_ivp_lotka_volterra\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

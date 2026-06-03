@@ -12,6 +12,15 @@
     "output_adapter_script_relative_path": "diffusion_1d_output_parser.py",
     "python_executable_kind": "system"
   },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "finite-difference diffusion",
+    "runtime_key": "system",
+    "input_contract": "JSON mesh, timestep, diffusivity, and initial scalar field parameters.",
+    "output_contract": "JSON diffusion metrics such as maxima, mass, and convergence values.",
+    "adapter": "Python finite-difference runner and JSON parser/adapter under SUT/diffusion_1d/.",
+    "dependency_risk": "pure-stdlib"
+  },
   "mrs": [
     {
       "mr_id": "diffusion-source-linearity",
@@ -36,6 +45,15 @@
       "meta_pattern": "Mono",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Mono MR: Linearity MP_mono: the steady-state diffusion equation -D·φ″ + Σ_a·φ = S is linear in the source S.",
+        "transformation_semantics": "Apply ScaleField via transform steps [ScaleField@/source/strength] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `phi_max` from source and follow-up outputs for MR `diffusion-source-linearity`.",
+        "predicate_summary": "Predicate `greater` / `GreaterThan` checks the expected relation on `phi_max`.",
+        "tolerance_summary": "Ordinal predicate: no numeric tolerance is applied beyond the declared ordering relation.",
+        "applicability": "Applicable when SUT `diffusion-1d` exposes sample `sample/slab.json`, the transform target fields, and output `phi_max`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/slab.json",
       "work_root_name": "MetBenchDiffusion1d",
       "timeout_seconds": 30
@@ -63,6 +81,15 @@
       "meta_pattern": "Conv",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Conv MR: Mesh-refinement Richardson convergence MP_conv: doubling num_points (halving the FD spacing dx) must leave φ_max within FD truncation tolerance — the second-order scheme is already at the fine-mesh plateau.",
+        "transformation_semantics": "Apply ScaleField via transform steps [ScaleField@/geometry/num_points] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `phi_max` from source and follow-up outputs for MR `diffusion-mesh-richardson`.",
+        "predicate_summary": "Predicate `approx` / `ApproxEqual` checks the expected relation on `phi_max`.",
+        "tolerance_summary": "Deterministic tolerance rel=0.001, abs=1e-06 bounds acceptable numeric deviation.",
+        "applicability": "Applicable when SUT `diffusion-1d` exposes sample `sample/slab.json`, the transform target fields, and output `phi_max`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/slab.json",
       "work_root_name": "MetBenchDiffusion1d",
       "timeout_seconds": 30

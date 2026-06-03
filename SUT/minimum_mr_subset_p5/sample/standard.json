@@ -1,0 +1,17 @@
+{
+  "kinetics": {
+    "rho": 0.001,
+    "beta": 0.0065,
+    "lambda": 0.08,
+    "generation_time": 0.1
+  },
+  "time": {
+    "t_start": 0.0,
+    "t_end": 2.0,
+    "n_steps": 240
+  },
+  "initial": {
+    "power": 1.0,
+    "precursor": 0.8125
+  }
+}

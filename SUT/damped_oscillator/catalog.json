@@ -12,6 +12,15 @@
     "output_adapter_script_relative_path": "damped_oscillator_output_adapter.py",
     "python_executable_kind": "system"
   },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "explicit ODE integration",
+    "runtime_key": "system",
+    "input_contract": "JSON initial state, damping, stiffness, mass, and time-step parameters.",
+    "output_contract": "JSON displacement and convergence metrics consumed by System MT assertions.",
+    "adapter": "Python ODE runner with input/output adapters under SUT/damped_oscillator/.",
+    "dependency_risk": "pure-stdlib"
+  },
   "mrs": [
     {
       "mr_id": "damped-oscillator-scale-state",
@@ -37,6 +46,15 @@
       "meta_pattern": "Mono",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Mono MR: The damped harmonic oscillator is linear and homogeneous in the initial state (x0, v0).",
+        "transformation_semantics": "Apply ScaleInitialState via transform steps [ScaleField@/initial/x0, ScaleField@/initial/v0] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `max_abs_displacement` from source and follow-up outputs for MR `damped-oscillator-scale-state`.",
+        "predicate_summary": "Predicate `greater` / `GreaterThan` checks the expected relation on `max_abs_displacement`.",
+        "tolerance_summary": "Ordinal predicate: no numeric tolerance is applied beyond the declared ordering relation.",
+        "applicability": "Applicable when SUT `damped-oscillator` exposes sample `sample/underdamped.json`, the transform target fields, and output `max_abs_displacement`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/underdamped.json",
       "work_root_name": "MetBenchDampedOsc",
       "timeout_seconds": 60

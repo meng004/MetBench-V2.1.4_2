@@ -49,7 +49,10 @@ public sealed class SystemMtReportService
         var exec = _executions.Get(executionId)
             ?? throw new InvalidOperationException($"Execution {executionId} not found");
         var evidence = _evidence?.GetByExecutionAsync(executionId).GetAwaiter().GetResult();
-        var content = BuildExecutionMarkdown(exec, evidence?.TypedVerification);
+        var content = BuildExecutionMarkdown(
+            exec,
+            evidence?.TypedVerification,
+            HasPairQuality(evidence?.PairQuality) ? evidence!.PairQuality : null);
         return Persist(ScopeExecution, executionId.ToString(), contentPath, content);
     }
 
@@ -95,9 +98,15 @@ public sealed class SystemMtReportService
     }
 
     internal static string BuildExecutionMarkdown(Execution e) =>
-        BuildExecutionMarkdown(e, typedVerification: null);
+        BuildExecutionMarkdown(e, typedVerification: null, pairQuality: null);
 
-    internal static string BuildExecutionMarkdown(Execution e, TypedVerificationEvidence? typedVerification)
+    internal static string BuildExecutionMarkdown(Execution e, TypedVerificationEvidence? typedVerification) =>
+        BuildExecutionMarkdown(e, typedVerification, pairQuality: null);
+
+    internal static string BuildExecutionMarkdown(
+        Execution e,
+        TypedVerificationEvidence? typedVerification,
+        PairQualitySummary? pairQuality)
     {
         var sb = new StringBuilder();
         sb.AppendLine("# Execution Report");
@@ -115,8 +124,68 @@ public sealed class SystemMtReportService
             sb.AppendLine();
             AppendTypedVerificationMarkdown(sb, typed);
         }
+        if (pairQuality is not null)
+        {
+            sb.AppendLine();
+            AppendPairQualityMarkdown(sb, pairQuality);
+        }
 
         return sb.ToString();
+    }
+
+    private static void AppendPairQualityMarkdown(StringBuilder sb, PairQualitySummary pairQuality)
+    {
+        var inv = CultureInfo.InvariantCulture;
+        sb.AppendLine();
+        sb.AppendLine("## Pair quality");
+        sb.AppendLine($"- planned_pairs: {pairQuality.PlannedPairs.ToString(inv)}");
+        sb.AppendLine($"- executed_pairs: {pairQuality.ExecutedPairs.ToString(inv)}");
+        sb.AppendLine($"- valid_pairs: {pairQuality.ValidPairs.ToString(inv)}");
+        sb.AppendLine($"- passed_pairs: {pairQuality.PassedPairs.ToString(inv)}");
+        sb.AppendLine($"- failed_pairs: {pairQuality.FailedPairs.ToString(inv)}");
+        sb.AppendLine($"- skipped_pairs: {pairQuality.SkippedPairs.ToString(inv)}");
+        sb.AppendLine($"- invalid_spec_pairs: {pairQuality.InvalidSpecPairs.ToString(inv)}");
+        sb.AppendLine($"- pass_rate_valid: {pairQuality.PassRateValid.ToString("P1", inv)}");
+        sb.AppendLine($"- pass_rate_all: {pairQuality.PassRateAll.ToString("P1", inv)}");
+        AppendReasonDistributionMarkdown(sb, "skip reasons", pairQuality.SkipReasons);
+        AppendReasonDistributionMarkdown(sb, "invalid spec reasons", pairQuality.InvalidSpecReasons);
+    }
+
+    private static void AppendReasonDistributionMarkdown(
+        StringBuilder sb,
+        string title,
+        IReadOnlyList<PairQualityReasonCount>? reasons)
+    {
+        if (reasons is not { Count: > 0 })
+        {
+            return;
+        }
+
+        sb.AppendLine($"- {title}:");
+        foreach (var reason in reasons)
+        {
+            sb.AppendLine($"  - {reason.Status}: {reason.Reason} (count: {reason.Count.ToString(CultureInfo.InvariantCulture)})");
+        }
+    }
+
+    private static bool HasPairQuality(PairQualitySummary? pairQuality)
+    {
+        if (pairQuality is null)
+        {
+            return false;
+        }
+
+        return pairQuality.PlannedPairs != 0
+            || pairQuality.ExecutedPairs != 0
+            || pairQuality.ValidPairs != 0
+            || pairQuality.PassedPairs != 0
+            || pairQuality.FailedPairs != 0
+            || pairQuality.SkippedPairs != 0
+            || pairQuality.InvalidSpecPairs != 0
+            || pairQuality.PassRateValid != 0.0
+            || pairQuality.PassRateAll != 0.0
+            || pairQuality.SkipReasons.Count != 0
+            || pairQuality.InvalidSpecReasons.Count != 0;
     }
 
     private static void AppendTypedVerificationMarkdown(StringBuilder sb, TypedVerificationEvidence typed)

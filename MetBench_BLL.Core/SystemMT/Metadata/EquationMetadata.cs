@@ -33,6 +33,24 @@ public sealed class EquationMetadata
     /// <summary>Prose description of the symbol system used by the equation.</summary>
     public string SymbolSystem { get; set; } = string.Empty;
 
+    /// <summary>Broad equation kind (for example ODE, PDE, algebraic, or synthetic).</summary>
+    public string EquationClass { get; set; } = string.Empty;
+
+    /// <summary>More specific mathematical family such as elliptic, parabolic, or hyperbolic.</summary>
+    public string EquationFamily { get; set; } = string.Empty;
+
+    /// <summary>Primary unknowns / state variables users should inspect in reports and UI.</summary>
+    public List<string> PrimaryVariables { get; set; } = new();
+
+    /// <summary>Auditable explanation of what physical or mathematical state the equation represents.</summary>
+    public string PhysicalMeaning { get; set; } = string.Empty;
+
+    /// <summary>Why this equation is useful as a System-MT benchmark target.</summary>
+    public string BenchmarkRationale { get; set; } = string.Empty;
+
+    /// <summary>Expected laws or invariants that motivate associated metamorphic checks.</summary>
+    public List<string> ExpectedLaws { get; set; } = new();
+
     /// <summary>Per-parameter descriptions.</summary>
     public List<EquationParameter> Parameters { get; set; } = new();
 

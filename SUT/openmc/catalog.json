@@ -12,6 +12,15 @@
     "output_adapter_script_relative_path": "openmc_output_adapter.py",
     "python_executable_kind": "openmc"
   },
+  "profile": {
+    "program_type": "MC",
+    "solver_method": "Monte Carlo neutron transport",
+    "runtime_key": "openmc",
+    "input_contract": "OpenMC-compatible pincell case parameters and material perturbation fields.",
+    "output_contract": "Parsed OpenMC output/tally metrics such as k_eff and tally means.",
+    "adapter": "OpenMC Python runner plus input/output adapters under SUT/openmc/.",
+    "dependency_risk": "requires OpenMC Python environment; skipped when unavailable"
+  },
   "mrs": [
     {
       "mr_id": "openmc-pincell-nu-sigma-f",
@@ -36,6 +45,15 @@
       "meta_pattern": "Mono",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Mono MR: Monte Carlo counterpart of the OpenMOC ScaleNuSigmaF MR.",
+        "transformation_semantics": "Apply ScaleNuSigmaF via transform steps [ScaleField@/materials/fuel/nu_sigma_f] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `k_eff` from source and follow-up outputs for MR `openmc-pincell-nu-sigma-f`.",
+        "predicate_summary": "Predicate `greater` / `GreaterThan` checks the expected relation on `k_eff`.",
+        "tolerance_summary": "Ordinal predicate: no numeric tolerance is applied beyond the declared ordering relation.",
+        "applicability": "Applicable when SUT `openmc` exposes sample `sample/pincell.json`, the transform target fields, and output `k_eff`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/pincell.json",
       "work_root_name": "MetBenchOpenMcNuSigmaF",
       "timeout_seconds": 300
@@ -64,6 +82,15 @@
       "source_level": "Manual",
       "failure_correlation": "None",
       "input_adapter_script_relative_path": "openmc_input_adapter_sigma_a.py",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Mono MR: Monte Carlo counterpart of the OpenMOC ScaleFuelSigmaA MR.",
+        "transformation_semantics": "Apply ScaleFuelSigmaA via transform steps [ScaleFuelAbsorption@/materials/fuel] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `k_eff` from source and follow-up outputs for MR `openmc-pincell-sigma-a`.",
+        "predicate_summary": "Predicate `less` / `LessThan` checks the expected relation on `k_eff`.",
+        "tolerance_summary": "Ordinal predicate: no numeric tolerance is applied beyond the declared ordering relation.",
+        "applicability": "Applicable when SUT `openmc` exposes sample `sample/pincell.json`, the transform target fields, and output `k_eff`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/pincell.json",
       "work_root_name": "MetBenchOpenMcSigmaA",
       "timeout_seconds": 300
@@ -93,6 +120,15 @@
       "source_level": "Manual",
       "failure_correlation": "None",
       "input_adapter_script_relative_path": "openmc_input_adapter_refine_particles.py",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Conv MR: Same physical input on both sides; the follow-up case multiplies OpenMC's `particles` count by factor > 1.",
+        "transformation_semantics": "Apply ScaleField via transform steps [ScaleField@/solver/particles] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `k_eff_std` from source and follow-up outputs for MR `openmc-pincell-particle-count-convergence`.",
+        "predicate_summary": "Predicate `variance-ratio` / `VarianceRatio` checks the expected relation on `k_eff_std`.",
+        "tolerance_summary": "Noise-aware comparison using multiplier 1.0 and declared runtime noise model.",
+        "applicability": "Applicable when SUT `openmc` exposes sample `sample/pincell.json`, the transform target fields, and output `k_eff_std`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/pincell.json",
       "work_root_name": "MetBenchOpenMcRefineParticles",
       "timeout_seconds": 300

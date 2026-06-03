@@ -12,6 +12,15 @@
     "output_adapter_script_relative_path": "scipy_ivp_lotka_volterra_output_parser.py",
     "python_executable_kind": "scipy"
   },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "SciPy solve_ivp",
+    "runtime_key": "scipy",
+    "input_contract": "JSON Lotka-Volterra initial populations, coefficients, and time grid.",
+    "output_contract": "JSON IVP trajectory metrics aligned with pure-stdlib Lotka-Volterra outputs.",
+    "adapter": "SciPy-backed Python runner and JSON parser/adapter under SUT/scipy_ivp_lotka_volterra/.",
+    "dependency_risk": "requires SciPy runtime; skipped when unavailable"
+  },
   "mrs": [
     {
       "mr_id": "scipy-ivp-lv-prey-growth-monotone",
@@ -36,6 +45,15 @@
       "meta_pattern": "Mono",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Mono MR: By the Lotka-Volterra time-average identity ⟨prey⟩ = gamma / delta, scaling the predator death rate gamma by factor > 1 must strictly increase the time-averaged prey population mean_prey, even when the integrator is SciPy's adaptive RK45.",
+        "transformation_semantics": "Apply ScaleGamma via transform steps [ScaleField@/params/gamma] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `mean_prey` from source and follow-up outputs for MR `scipy-ivp-lv-prey-growth-monotone`.",
+        "predicate_summary": "Predicate `greater` / `GreaterThan` checks the expected relation on `mean_prey`.",
+        "tolerance_summary": "Ordinal predicate: no numeric tolerance is applied beyond the declared ordering relation.",
+        "applicability": "Applicable when SUT `scipy-ivp-lotka-volterra` exposes sample `sample/standard.json`, the transform target fields, and output `mean_prey`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/standard.json",
       "work_root_name": "MetBenchScipyIvpLotkaVolterra",
       "timeout_seconds": 120
@@ -63,6 +81,15 @@
       "meta_pattern": "Conv",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Conv MR: SciPy adaptive RK45 decouples solution accuracy from num_eval_points (which only controls the output sampling grid).",
+        "transformation_semantics": "Apply ScaleField via transform steps [ScaleField@/params/num_eval_points] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `mean_prey` from source and follow-up outputs for MR `scipy-ivp-lv-step-convergence`.",
+        "predicate_summary": "Predicate `approx` / `ApproxEqual` checks the expected relation on `mean_prey`.",
+        "tolerance_summary": "Deterministic tolerance rel=0.001, abs=1e-06 bounds acceptable numeric deviation.",
+        "applicability": "Applicable when SUT `scipy-ivp-lotka-volterra` exposes sample `sample/standard.json`, the transform target fields, and output `mean_prey`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/standard.json",
       "work_root_name": "MetBenchScipyIvpLotkaVolterra",
       "timeout_seconds": 120

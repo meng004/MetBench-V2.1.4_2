@@ -20,16 +20,25 @@ public sealed record SystemMtSutProgramDraft
     public string InputAdapterScriptRelativePath { get; set; } = string.Empty;
     public string OutputAdapterScriptRelativePath { get; set; } = string.Empty;
     public string PythonExecutableKind { get; set; } = PythonExecutableKinds.System;
+    public string ProfileProgramType { get; set; } = string.Empty;
+    public string SolverMethod { get; set; } = string.Empty;
+    public string RuntimeKey { get; set; } = string.Empty;
+    public string InputContract { get; set; } = string.Empty;
+    public string OutputContract { get; set; } = string.Empty;
+    public string Adapter { get; set; } = string.Empty;
+    public string DependencyRisk { get; set; } = string.Empty;
 
     public static SystemMtSutProgramDraft NewForSut(string sutId) => new()
     {
         SutName = sutId,
         ProgramName = sutId,
         ProgramType = "Num",
+        ProfileProgramType = "Num",
+        RuntimeKey = PythonExecutableKinds.System,
         PythonExecutableKind = PythonExecutableKinds.System,
     };
 
-    public static SystemMtSutProgramDraft FromProgram(string sutName, ProgramDefinition program) => new()
+    public static SystemMtSutProgramDraft FromProgram(string sutName, ProgramDefinition program, SutProfileDefinition? profile = null) => new()
     {
         SutName = sutName,
         ProgramName = program.ProgramName,
@@ -42,6 +51,13 @@ public sealed record SystemMtSutProgramDraft
         InputAdapterScriptRelativePath = program.InputAdapterScriptRelativePath,
         OutputAdapterScriptRelativePath = program.OutputAdapterScriptRelativePath,
         PythonExecutableKind = program.PythonExecutableKind,
+        ProfileProgramType = profile?.ProgramType ?? string.Empty,
+        SolverMethod = profile?.SolverMethod ?? string.Empty,
+        RuntimeKey = profile?.RuntimeKey ?? string.Empty,
+        InputContract = profile?.InputContract ?? string.Empty,
+        OutputContract = profile?.OutputContract ?? string.Empty,
+        Adapter = profile?.Adapter ?? string.Empty,
+        DependencyRisk = profile?.DependencyRisk ?? string.Empty,
     };
 
     public ProgramDefinition ToProgram() => new()
@@ -56,5 +72,19 @@ public sealed record SystemMtSutProgramDraft
         InputAdapterScriptRelativePath = InputAdapterScriptRelativePath,
         OutputAdapterScriptRelativePath = OutputAdapterScriptRelativePath,
         PythonExecutableKind = PythonExecutableKind,
+    };
+}
+
+public static class SystemMtSutProgramDraftProfileExtensions
+{
+    public static SutProfileDefinition ToProfile(this SystemMtSutProgramDraft draft) => new()
+    {
+        ProgramType = draft.ProfileProgramType,
+        SolverMethod = draft.SolverMethod,
+        RuntimeKey = draft.RuntimeKey,
+        InputContract = draft.InputContract,
+        OutputContract = draft.OutputContract,
+        Adapter = draft.Adapter,
+        DependencyRisk = draft.DependencyRisk,
     };
 }

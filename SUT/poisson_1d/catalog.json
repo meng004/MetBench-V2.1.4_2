@@ -12,6 +12,15 @@
     "output_adapter_script_relative_path": "poisson_1d_output_parser.py",
     "python_executable_kind": "system"
   },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "finite-difference elliptic solve",
+    "runtime_key": "system",
+    "input_contract": "JSON params with mesh and coefficient fields.",
+    "output_contract": "JSON metrics consumed by typed verifier.",
+    "adapter": "python runner under SUT/<sut>/",
+    "dependency_risk": "pure-stdlib"
+  },
   "mrs": [
     {
       "mr_id": "poisson-source-superposition",
@@ -36,6 +45,15 @@
       "meta_pattern": "Mono",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Mono MR: Superposition / linearity MP_mono: the 1D Poisson equation -u'' = f is linear in the source f.",
+        "transformation_semantics": "Apply ScaleField via transform steps [ScaleField@/source/strength] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `u_max` from source and follow-up outputs for MR `poisson-source-superposition`.",
+        "predicate_summary": "Predicate `greater` / `GreaterThan` checks the expected relation on `u_max`.",
+        "tolerance_summary": "Ordinal predicate: no numeric tolerance is applied beyond the declared ordering relation.",
+        "applicability": "Applicable when SUT `poisson-1d` exposes sample `sample/standard.json`, the transform target fields, and output `u_max`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/standard.json",
       "work_root_name": "MetBenchPoisson1d",
       "timeout_seconds": 30
@@ -63,6 +81,15 @@
       "meta_pattern": "Conv",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Conv MR: Mesh-refinement Richardson convergence MP_conv: doubling num_points (halving the FD spacing dx) must leave u_max within O(dx²) FD truncation tolerance — the second-order central-difference scheme is already at the fine-mesh plateau.",
+        "transformation_semantics": "Apply ScaleField via transform steps [ScaleField@/geometry/num_points] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `u_max` from source and follow-up outputs for MR `poisson-mesh-richardson`.",
+        "predicate_summary": "Predicate `approx` / `ApproxEqual` checks the expected relation on `u_max`.",
+        "tolerance_summary": "Deterministic tolerance rel=0.001, abs=1e-06 bounds acceptable numeric deviation.",
+        "applicability": "Applicable when SUT `poisson-1d` exposes sample `sample/standard.json`, the transform target fields, and output `u_max`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/standard.json",
       "work_root_name": "MetBenchPoisson1d",
       "timeout_seconds": 30

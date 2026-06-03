@@ -149,6 +149,9 @@ namespace MetBench_Client.ViewModels
                     : await _editor.ListPagedByMrNameAsync(MrNameFilter, request).ConfigureAwait(false);
 
                 Records = new ObservableCollection<SystemMtResultRecord>(page.Items);
+                _selectedRows.Clear();
+                if (SelectedRecord is not null && Records.All(r => r.Id != SelectedRecord.Id))
+                    SelectedRecord = null;
                 PageIndex = page.PageIndex;
                 TotalCount = page.TotalCount;
                 StatusMessage = page.TotalCount == 0
@@ -187,6 +190,8 @@ namespace MetBench_Client.ViewModels
             var sb = new StringBuilder();
             sb.AppendLine(string.Format(CultureInfo.InvariantCulture, Localization["Evidence_History_ExecutionId_Fmt"], ev.ExecutionId));
             sb.AppendLine(string.Format(CultureInfo.InvariantCulture, Localization["Evidence_History_RecordedAt_Fmt"], string.Format(CultureInfo.InvariantCulture, "{0:u}", ev.RecordedAtUtc)));
+            if (HasPairQuality(ev.PairQuality))
+                AppendPairQuality(sb, ev.PairQuality);
             if (ev.TypedVerification is { } tv)
             {
                 sb.AppendLine();
@@ -205,6 +210,57 @@ namespace MetBench_Client.ViewModels
                     sb.AppendLine(string.Format(CultureInfo.InvariantCulture, Localization["Evidence_History_Reason_Fmt"], tv.SkipOrInvalidReason));
             }
             return sb.ToString();
+        }
+
+        // Mirrors HtmlSystemMtResultReportRenderer.HasPairQuality so a default-empty
+        // (legacy) PairQuality stays quiet in the UI just as it does in reports.
+        private static bool HasPairQuality(PairQualitySummary? pairQuality)
+        {
+            if (pairQuality is null)
+                return false;
+
+            return pairQuality.PlannedPairs != 0
+                || pairQuality.ExecutedPairs != 0
+                || pairQuality.ValidPairs != 0
+                || pairQuality.PassedPairs != 0
+                || pairQuality.FailedPairs != 0
+                || pairQuality.SkippedPairs != 0
+                || pairQuality.InvalidSpecPairs != 0
+                || pairQuality.PassRateValid != 0.0
+                || pairQuality.PassRateAll != 0.0
+                || pairQuality.SkipReasons.Count != 0
+                || pairQuality.InvalidSpecReasons.Count != 0;
+        }
+
+        private void AppendPairQuality(StringBuilder sb, PairQualitySummary pq)
+        {
+            sb.AppendLine();
+            sb.AppendLine(Localization["Evidence_History_PairQualityHeader"]);
+            sb.AppendLine(string.Format(
+                CultureInfo.InvariantCulture,
+                Localization["Evidence_History_PairQualityCounts_Fmt"],
+                pq.PlannedPairs, pq.ExecutedPairs, pq.ValidPairs, pq.PassedPairs,
+                pq.FailedPairs, pq.SkippedPairs, pq.InvalidSpecPairs));
+            sb.AppendLine(string.Format(
+                CultureInfo.InvariantCulture,
+                Localization["Evidence_History_PairQualityRates_Fmt"],
+                pq.PassRateValid.ToString("P1", CultureInfo.InvariantCulture),
+                pq.PassRateAll.ToString("P1", CultureInfo.InvariantCulture)));
+            AppendReasonDistribution(sb, Localization["Evidence_History_PairQualitySkipReasonsHeader"], pq.SkipReasons);
+            AppendReasonDistribution(sb, Localization["Evidence_History_PairQualityInvalidSpecReasonsHeader"], pq.InvalidSpecReasons);
+        }
+
+        private void AppendReasonDistribution(StringBuilder sb, string header, IReadOnlyList<PairQualityReasonCount> reasons)
+        {
+            if (reasons is not { Count: > 0 })
+                return;
+
+            sb.AppendLine(header);
+            foreach (var reason in reasons)
+                sb.AppendLine(string.Format(
+                    CultureInfo.InvariantCulture,
+                    Localization["Evidence_History_PairQualityReason_Fmt"],
+                    reason.Status, reason.Reason, reason.Count));
         }
 
         private string FormatDeleteOutcome(ExecutionHistoryDeleteResult r)

@@ -27,6 +27,13 @@ namespace MetBench_Client.ViewModels
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(ValidateSutDraftCommand))]
         [NotifyCanExecuteChangedFor(nameof(SaveSutDraftCommand))]
+        [NotifyPropertyChangedFor(nameof(ProfileProgramTypeDisplay))]
+        [NotifyPropertyChangedFor(nameof(SolverMethodDisplay))]
+        [NotifyPropertyChangedFor(nameof(RuntimeKeyDisplay))]
+        [NotifyPropertyChangedFor(nameof(InputContractDisplay))]
+        [NotifyPropertyChangedFor(nameof(OutputContractDisplay))]
+        [NotifyPropertyChangedFor(nameof(AdapterDisplay))]
+        [NotifyPropertyChangedFor(nameof(DependencyRiskDisplay))]
         private SystemMtSutProgramDraft? _draft;
 
         [ObservableProperty]
@@ -176,6 +183,20 @@ namespace MetBench_Client.ViewModels
                 return Draft?.SutName ?? string.Empty;
             return SelectedSut?.SutId ?? Draft?.SutName ?? string.Empty;
         }
+
+        // PR-5 SUT profile card — read-only projection of the selected SUT's
+        // documentation profile (PR-1 fields). Empty fields fall back to the
+        // shared localized "unavailable" text.
+        public string ProfileProgramTypeDisplay => OrUnavailable(Draft?.ProfileProgramType);
+        public string SolverMethodDisplay => OrUnavailable(Draft?.SolverMethod);
+        public string RuntimeKeyDisplay => OrUnavailable(Draft?.RuntimeKey);
+        public string InputContractDisplay => OrUnavailable(Draft?.InputContract);
+        public string OutputContractDisplay => OrUnavailable(Draft?.OutputContract);
+        public string AdapterDisplay => OrUnavailable(Draft?.Adapter);
+        public string DependencyRiskDisplay => OrUnavailable(Draft?.DependencyRisk);
+
+        private string OrUnavailable(string? value)
+            => string.IsNullOrWhiteSpace(value) ? Localization["SystemMt_Explanation_Unavailable"] : value;
 
         private bool HasDraft() => Draft is not null;
         private bool CanSaveDraft() => HasDraft() && HasValidDraft;

@@ -63,7 +63,9 @@
 
                 <StackPanel Grid.Column="1" Margin="12,22,0,0" Orientation="Horizontal">
                     <ui:Button
+                        x:Name="Button_RefreshSystemMtExecutionHistory"
                         Margin="0,0,8,0"
+                        AutomationProperties.AutomationId="Button_RefreshSystemMtExecutionHistory"
                         Command="{Binding ViewModel.RefreshCommand, Mode=OneWay}"
                         Content="{Binding ViewModel.Localization[History_Refresh]}"/>
                     <ui:Button

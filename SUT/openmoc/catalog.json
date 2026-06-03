@@ -12,6 +12,15 @@
     "output_adapter_script_relative_path": "openmoc_output_adapter.py",
     "python_executable_kind": "openmoc"
   },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "deterministic method of characteristics",
+    "runtime_key": "openmoc",
+    "input_contract": "OpenMOC pincell case parameters and cross-section perturbation fields.",
+    "output_contract": "Parsed OpenMOC output metrics such as k_eff and convergence traces.",
+    "adapter": "OpenMOC Python runner plus input/output adapters under SUT/openmoc/.",
+    "dependency_risk": "requires OpenMOC Python environment; skipped when unavailable"
+  },
   "mrs": [
     {
       "mr_id": "openmoc-pincell-nu-sigma-f",
@@ -36,6 +45,15 @@
       "meta_pattern": "Mono",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Mono MR: Scaling the fuel material's nu-sigma-f cross section by factor > 1 must monotonically increase the dominant eigenvalue k_eff of the OpenMOC neutron-transport solution.",
+        "transformation_semantics": "Apply ScaleNuSigmaF via transform steps [ScaleField@/materials/fuel/nu_sigma_f] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `k_eff` from source and follow-up outputs for MR `openmoc-pincell-nu-sigma-f`.",
+        "predicate_summary": "Predicate `greater` / `GreaterThan` checks the expected relation on `k_eff`.",
+        "tolerance_summary": "Ordinal predicate: no numeric tolerance is applied beyond the declared ordering relation.",
+        "applicability": "Applicable when SUT `openmoc` exposes sample `sample/pincell.json`, the transform target fields, and output `k_eff`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/pincell.json",
       "work_root_name": "MetBenchOpenMocNuSigmaF",
       "timeout_seconds": 120
@@ -64,6 +82,15 @@
       "source_level": "Manual",
       "failure_correlation": "None",
       "input_adapter_script_relative_path": "openmoc_input_adapter_sigma_a.py",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Mono MR: Scaling the fuel material's absorption cross section by factor > 1 must monotonically decrease the dominant eigenvalue k_eff.",
+        "transformation_semantics": "Apply ScaleFuelSigmaA via transform steps [ScaleFuelAbsorption@/materials/fuel] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `k_eff` from source and follow-up outputs for MR `openmoc-pincell-sigma-a`.",
+        "predicate_summary": "Predicate `less` / `LessThan` checks the expected relation on `k_eff`.",
+        "tolerance_summary": "Ordinal predicate: no numeric tolerance is applied beyond the declared ordering relation.",
+        "applicability": "Applicable when SUT `openmoc` exposes sample `sample/pincell.json`, the transform target fields, and output `k_eff`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/pincell.json",
       "work_root_name": "MetBenchOpenMocSigmaA",
       "timeout_seconds": 120
@@ -92,6 +119,15 @@
       "source_level": "Manual",
       "failure_correlation": "None",
       "input_adapter_script_relative_path": "openmoc_input_adapter_refine_ray_tracks.py",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Conv MR: OpenMOC angular-discretization convergence: refining num_azim and azim_spacing_cm via three calibrated phases (16/0.",
+        "transformation_semantics": "Apply RefineRayTracks via transform steps [RefineRayTracks@/tracking] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `k_eff` from source and follow-up outputs for MR `openmoc-pincell-ray-track-convergence`.",
+        "predicate_summary": "Predicate `error-monotonic` / `ErrorMonotonic` checks the expected relation on `k_eff`.",
+        "tolerance_summary": "Ordinal predicate: no numeric tolerance is applied beyond the declared ordering relation.",
+        "applicability": "Applicable when SUT `openmoc` exposes sample `sample/pincell.json`, the transform target fields, and output `k_eff`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/pincell.json",
       "work_root_name": "MetBenchOpenMocRayTracks",
       "timeout_seconds": 300,

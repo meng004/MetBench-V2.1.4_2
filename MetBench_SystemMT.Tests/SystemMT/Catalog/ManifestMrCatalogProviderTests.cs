@@ -96,6 +96,127 @@ public sealed class ManifestMrCatalogProviderTests : System.IDisposable
     }
 
     [Fact]
+    public void Load_accepts_manifest_profile_without_changing_runtime_entry()
+    {
+        var json = ValidSingleMrManifest.Replace(
+            "  \"mrs\": [",
+            "  \"profile\": {\n" +
+            "    \"program_type\": \"Num\",\n" +
+            "    \"solver_method\": \"finite-difference\",\n" +
+            "    \"runtime_key\": \"system\",\n" +
+            "    \"input_contract\": \"JSON params with mesh and coefficient fields\",\n" +
+            "    \"output_contract\": \"JSON metrics consumed by typed verifier\",\n" +
+            "    \"adapter\": \"python runner under SUT/<sut>/\",\n" +
+            "    \"dependency_risk\": \"pure-stdlib\"\n" +
+            "  },\n" +
+            "  \"mrs\": [");
+        WriteManifest("profile_dir", json);
+
+        var e = Assert.Single(new ManifestMrCatalogProvider(Opts()).Load());
+
+        Assert.Equal("test-mr-1", e.Mr.Id);
+        Assert.Equal("python3", e.PythonExecutable);
+        Assert.Equal(Path.Combine("profile_dir", "sample", "case.json"), e.SampleCaseRelativePath);
+    }
+
+    [Fact]
+    public void SystemMtCatalogDocument_missing_profile_deserializes_to_default_empty_profile()
+    {
+        var doc = System.Text.Json.JsonSerializer.Deserialize<SystemMtCatalogDocument>(
+            ValidSingleMrManifest,
+            new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.SnakeCaseLower });
+
+        Assert.NotNull(doc);
+        Assert.NotNull(doc!.Profile);
+        Assert.Equal(string.Empty, doc.Profile!.ProgramType);
+        Assert.Equal(string.Empty, doc.Profile.SolverMethod);
+        Assert.Equal(string.Empty, doc.Profile.RuntimeKey);
+        Assert.Equal(string.Empty, doc.Profile.InputContract);
+        Assert.Equal(string.Empty, doc.Profile.OutputContract);
+        Assert.Equal(string.Empty, doc.Profile.Adapter);
+        Assert.Equal(string.Empty, doc.Profile.DependencyRisk);
+    }
+
+    [Fact]
+    public void Load_accepts_mr_explanation_profile_without_changing_runtime_entry()
+    {
+        var json = ValidSingleMrManifest.Replace(
+            "              \"sample_case_relative_path\": \"sample/case.json\",",
+            "              \"explanation_profile\": {\n" +
+            "                \"meta_pattern_rationale\": \"Linearity MR: scaling the source should scale the solution.\",\n" +
+            "                \"transformation_semantics\": \"Scale source input field by factor.\",\n" +
+            "                \"observable_summary\": \"Compare selected scalar or field residual after source/follow-up runs.\",\n" +
+            "                \"predicate_summary\": \"Binary comparison with configured tolerance.\",\n" +
+            "                \"tolerance_summary\": \"No tolerance for strict ordinal relation.\",\n" +
+            "                \"applicability\": \"Only valid when the SUT exposes the named metric.\",\n" +
+            "                \"failure_meaning\": \"MR violation indicates inconsistent response to the declared transformation.\"\n" +
+            "              },\n" +
+            "              \"sample_case_relative_path\": \"sample/case.json\",");
+        WriteManifest("mr_profile_dir", json);
+
+        var e = Assert.Single(new ManifestMrCatalogProvider(Opts()).Load());
+
+        Assert.Equal("test-mr-1", e.Mr.Id);
+        Assert.Equal("ScaleField", e.PrimaryTransformationName);
+        Assert.Equal("greater", e.AssertionTypeCode);
+        Assert.Equal(Path.Combine("mr_profile_dir", "sample", "case.json"), e.SampleCaseRelativePath);
+    }
+
+    [Fact]
+    public void MrBindingDefinition_missing_explanation_profile_deserializes_to_default_empty_profile()
+    {
+        var doc = System.Text.Json.JsonSerializer.Deserialize<SystemMtCatalogDocument>(
+            ValidSingleMrManifest,
+            new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.SnakeCaseLower });
+
+        var binding = Assert.Single(doc!.Mrs);
+        Assert.NotNull(binding.ExplanationProfile);
+        Assert.Equal(string.Empty, binding.ExplanationProfile!.MetaPatternRationale);
+        Assert.Equal(string.Empty, binding.ExplanationProfile.TransformationSemantics);
+        Assert.Equal(string.Empty, binding.ExplanationProfile.ObservableSummary);
+        Assert.Equal(string.Empty, binding.ExplanationProfile.PredicateSummary);
+        Assert.Equal(string.Empty, binding.ExplanationProfile.ToleranceSummary);
+        Assert.Equal(string.Empty, binding.ExplanationProfile.Applicability);
+        Assert.Equal(string.Empty, binding.ExplanationProfile.FailureMeaning);
+    }
+
+    [Fact]
+    public void Live_manifest_MR_profiles_cover_mono_inv_and_conv_examples()
+    {
+        var options = new LauncherOptions(
+            SutRoot: TestAssetPaths.AssetRoot(),
+            SystemPython: TestAssetPaths.PythonExecutable(),
+            OpenMocPython: TestAssetPaths.PythonExecutable());
+        var entries = new ManifestMrCatalogProvider(options).Load();
+
+        Assert.Contains(entries, e => e.Mr.Id == "poisson-source-superposition" && e.MetaPattern == "Mono");
+        Assert.Contains(entries, e => e.Mr.Id == "subchannel-friction-invariance" && e.MetaPattern == "Inv");
+        Assert.Contains(entries, e => e.Mr.Id == "poisson-mesh-richardson" && e.MetaPattern == "Conv");
+
+        foreach (var (sutDir, mrId) in new[]
+        {
+            ("poisson_1d", "poisson-source-superposition"),
+            ("subchannel_1d", "subchannel-friction-invariance"),
+            ("poisson_1d", "poisson-mesh-richardson"),
+        })
+        {
+            var path = Path.Combine(TestAssetPaths.AssetRoot(), sutDir, "catalog.json");
+            var doc = System.Text.Json.JsonSerializer.Deserialize<SystemMtCatalogDocument>(
+                File.ReadAllText(path),
+                new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.SnakeCaseLower })!;
+            var profile = doc.Mrs.Single(m => m.MrId == mrId).ExplanationProfile;
+            Assert.NotNull(profile);
+            Assert.False(string.IsNullOrWhiteSpace(profile!.MetaPatternRationale));
+            Assert.False(string.IsNullOrWhiteSpace(profile.TransformationSemantics));
+            Assert.False(string.IsNullOrWhiteSpace(profile.ObservableSummary));
+            Assert.False(string.IsNullOrWhiteSpace(profile.PredicateSummary));
+            Assert.False(string.IsNullOrWhiteSpace(profile.ToleranceSummary));
+            Assert.False(string.IsNullOrWhiteSpace(profile.Applicability));
+            Assert.False(string.IsNullOrWhiteSpace(profile.FailureMeaning));
+        }
+    }
+
+    [Fact]
     public void Load_normalizes_forward_slash_in_relative_path_to_platform_separator()
     {
         // Regression fix: in PR #91 the manifest's JSON forward-slash sample path

@@ -12,6 +12,15 @@
     "output_adapter_script_relative_path": "burgers_1d_output_parser.py",
     "python_executable_kind": "system"
   },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "finite-volume Lax-Friedrichs",
+    "runtime_key": "system",
+    "input_contract": "JSON mesh, timestep, flux, and Gaussian pulse parameters for periodic Burgers runs.",
+    "output_contract": "JSON nonlinear conservation metrics including mass and peak amplitude.",
+    "adapter": "Python finite-volume runner and JSON parser/adapter under SUT/burgers_1d/.",
+    "dependency_risk": "pure-stdlib"
+  },
   "mrs": [
     {
       "mr_id": "burgers-amplitude-peak-monotone",
@@ -36,6 +45,15 @@
       "meta_pattern": "Mono",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Mono MR: Amplitude-monotonicity MP_mono: the inviscid Burgers equation u_t + (u²/2)_x = 0 is nonlinear, but strictly-positive scaling of the initial Gaussian pulse must strictly increase the final peak amplitude.",
+        "transformation_semantics": "Apply ScaleField via transform steps [ScaleField@/initial/amplitude] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `peak_amplitude` from source and follow-up outputs for MR `burgers-amplitude-peak-monotone`.",
+        "predicate_summary": "Predicate `greater` / `GreaterThan` checks the expected relation on `peak_amplitude`.",
+        "tolerance_summary": "Ordinal predicate: no numeric tolerance is applied beyond the declared ordering relation.",
+        "applicability": "Applicable when SUT `burgers-1d` exposes sample `sample/standard.json`, the transform target fields, and output `peak_amplitude`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/standard.json",
       "work_root_name": "MetBenchBurgers1d",
       "timeout_seconds": 30
@@ -63,6 +81,15 @@
       "meta_pattern": "Inv",
       "source_level": "Manual",
       "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Inv MR: Mass conservation MP_inv: the conservative Lax-Friedrichs flux differencing with periodic boundaries preserves ∫u dx exactly per step regardless of the shock structure.",
+        "transformation_semantics": "Apply ScaleField via transform steps [ScaleField@/geometry/num_points] to derive follow-up input while preserving unrelated fields.",
+        "observable_summary": "Observe `mass_integral` from source and follow-up outputs for MR `burgers-mesh-conservation`.",
+        "predicate_summary": "Predicate `approx` / `ApproxEqual` checks the expected relation on `mass_integral`.",
+        "tolerance_summary": "Deterministic tolerance rel=0.001, abs=1e-06 bounds acceptable numeric deviation.",
+        "applicability": "Applicable when SUT `burgers-1d` exposes sample `sample/standard.json`, the transform target fields, and output `mass_integral`; otherwise not applicable.",
+        "failure_meaning": "Failure indicates the SUT output, adapter mapping, or predicate evidence disagrees with the declared metamorphic expectation."
+      },
       "sample_case_relative_path": "sample/standard.json",
       "work_root_name": "MetBenchBurgers1d",
       "timeout_seconds": 30

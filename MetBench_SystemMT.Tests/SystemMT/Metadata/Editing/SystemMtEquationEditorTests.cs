@@ -113,6 +113,43 @@ public sealed class SystemMtEquationEditorTests
     }
 
     [Fact]
+    public async Task SaveDraftAsync_preserves_explanation_profile_fields()
+    {
+        var repo = new FakeMetadataRepository();
+        var editor = new SystemMtEquationEditor(repo, SeedFixture);
+
+        var result = await editor.SaveDraftAsync(new EquationMetadataDraft
+        {
+            EquationKey = "poisson-user",
+            Name = "Poisson User",
+            CanonicalForm = "-u'' = f",
+            EquationClass = "PDE",
+            EquationFamily = "elliptic",
+            PrimaryVariables = new List<string> { "u(x)" },
+            PhysicalMeaning = "Steady scalar field governed by source balance.",
+            BenchmarkRationale = "Representative elliptic PDE used for mesh convergence and source linearity checks.",
+            ExpectedLaws = new List<string> { "linearity", "mesh-convergence" },
+        });
+
+        Assert.True(result.Success, string.Join(" | ", result.Errors));
+        var fetched = await repo.GetEquationAsync("poisson-user");
+        Assert.NotNull(fetched);
+        Assert.Equal("PDE", fetched!.EquationClass);
+        Assert.Equal("elliptic", fetched.EquationFamily);
+        Assert.Equal(new[] { "u(x)" }, fetched.PrimaryVariables);
+        Assert.Equal("Steady scalar field governed by source balance.", fetched.PhysicalMeaning);
+        Assert.Equal("Representative elliptic PDE used for mesh convergence and source linearity checks.", fetched.BenchmarkRationale);
+        Assert.Equal(new[] { "linearity", "mesh-convergence" }, fetched.ExpectedLaws);
+
+        var loaded = await editor.LoadAsync("poisson-user");
+        Assert.NotNull(loaded);
+        Assert.Equal("PDE", loaded!.EquationClass);
+        Assert.Equal("elliptic", loaded.EquationFamily);
+        Assert.Equal(new[] { "u(x)" }, loaded.PrimaryVariables);
+        Assert.Equal(new[] { "linearity", "mesh-convergence" }, loaded.ExpectedLaws);
+    }
+
+    [Fact]
     public async Task DeleteAsync_blocks_when_mr_metadata_references_the_equation()
     {
         var repo = new FakeMetadataRepository();
