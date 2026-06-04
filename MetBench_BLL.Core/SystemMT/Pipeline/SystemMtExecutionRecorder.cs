@@ -2,6 +2,7 @@ using MetBench_BLL.SystemMT.Catalog.Typed.Property;
 using MetBench_BLL.SystemMT.Catalog.Typed.Runtime;
 using MetBench_BLL.SystemMT.Catalog.Typed.Specs;
 using MetBench_BLL.SystemMT.Persistence;
+using MetBench_BLL.SystemMT.Runtime;
 using MetBench_Domain;
 using MetBench_IDAL;
 using System.IO;
@@ -70,7 +71,8 @@ public sealed class SystemMtExecutionRecorder
         TypedPropertyResult? typedProperty = null,
         MrSpec? typedSpec = null,
         PredicateSpec? typedPredicate = null,
-        PropertySpec? typedPropertySpec = null)
+        PropertySpec? typedPropertySpec = null,
+        RuntimeEvidence? runtimeEvidence = null)
     {
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(outcome);
@@ -96,6 +98,15 @@ public sealed class SystemMtExecutionRecorder
         // Result 只在 pipeline 跑到断言阶段时存在；error/timeout/cancelled 无 Result。
         if (outcome.AssertionResult is not { } assertion)
         {
+            if (_evidence is not null && runtimeEvidence is not null)
+            {
+                WriteEvidence(
+                    executionId,
+                    context,
+                    outcome,
+                    runtimeEvidence: runtimeEvidence);
+            }
+
             return new RecordedExecution(executionId, null);
         }
 
@@ -132,7 +143,8 @@ public sealed class SystemMtExecutionRecorder
                 typedProperty,
                 typedSpec,
                 typedPredicate,
-                typedPropertySpec);
+                typedPropertySpec,
+                runtimeEvidence);
         }
 
         // Legacy SystemMtResults mirror — populates the collection
@@ -170,6 +182,68 @@ public sealed class SystemMtExecutionRecorder
         return new RecordedExecution(executionId, resultId);
     }
 
+    public RecordedExecution RecordBlockedPreflight(
+        PipelineContext context,
+        RuntimePreflightResult preflight,
+        int mrInstanceId,
+        Guid? batchId = null)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(preflight);
+        if (preflight.Passed)
+            throw new ArgumentException("Blocked preflight recorder path requires a failed preflight result.", nameof(preflight));
+
+        var executionId = Guid.NewGuid();
+        var now = DateTime.UtcNow;
+        var errorMessage = $"Runtime preflight failed: {preflight.Detail}";
+
+        _executions.Add(new Execution
+        {
+            IdExecution = executionId,
+            MRInstanceId = mrInstanceId,
+            BatchId = batchId,
+            TriggeredBy = context.TriggeredBy,
+            QueuedAt = now,
+            StartedAt = now,
+            FinishedAt = now,
+            Status = PipelineStatus.Error,
+            CatalogVersionSha = context.CatalogVersionSha,
+            SutVersionSnapshot = context.SutVersionSnapshot,
+            MetbenchVersion = context.MetbenchVersion,
+            ArtifactsDirectory = context.WorkingDirectory,
+            ErrorMessage = errorMessage,
+        });
+
+        if (_evidence is not null)
+        {
+            var outcome = new PipelineOutcome(
+                FinalStatus: PipelineStatus.Error,
+                ErrorMessage: errorMessage,
+                StartedAt: now,
+                FinishedAt: now,
+                ArtifactsDirectory: context.WorkingDirectory,
+                SourceInputPath: context.SourceCasePath,
+                FollowupInputPath: string.Empty,
+                SourceOutputPath: string.Empty,
+                FollowupOutputPath: string.Empty,
+                SourceMetrics: null,
+                FollowupMetrics: null,
+                AssertionResult: null,
+                SourceElapsed: TimeSpan.Zero,
+                FollowupElapsed: TimeSpan.Zero,
+                SourceExitCode: 0,
+                FollowupExitCode: 0);
+
+            WriteEvidence(
+                executionId,
+                context,
+                outcome,
+                runtimeEvidence: RuntimeEvidence.FromPreflightResult(preflight));
+        }
+
+        return new RecordedExecution(executionId, null);
+    }
+
     private void WriteEvidence(
         Guid executionId,
         PipelineContext context,
@@ -178,7 +252,8 @@ public sealed class SystemMtExecutionRecorder
         TypedPropertyResult? typedProperty = null,
         MrSpec? typedSpec = null,
         PredicateSpec? typedPredicate = null,
-        PropertySpec? typedPropertySpec = null)
+        PropertySpec? typedPropertySpec = null,
+        RuntimeEvidence? runtimeEvidence = null)
     {
         var v3 = _v3?.GetByCode(context.MrCode);
         var snapshot = new ExecutionMetadataSnapshot
@@ -202,6 +277,7 @@ public sealed class SystemMtExecutionRecorder
             SampleTraces = BuildSampleTraces(context, outcome),
             TransformationParameters = new Dictionary<string, string>(context.Parameters),
             RecordedAtUtc = outcome.FinishedAt.ToUniversalTime(),
+            RuntimeEvidence = runtimeEvidence,
         };
 
         // ExecutionEvidence v2: project typed verifier output. Precedence is

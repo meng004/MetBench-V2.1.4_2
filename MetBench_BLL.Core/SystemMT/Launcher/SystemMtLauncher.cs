@@ -4,6 +4,8 @@ using MetBench_BLL.SystemMT.Anomaly;
 using MetBench_BLL.SystemMT.Assertions;
 using MetBench_BLL.SystemMT.Catalog;
 using MetBench_BLL.SystemMT.Pipeline;
+using MetBench_BLL.SystemMT.Persistence;
+using MetBench_BLL.SystemMT.Runtime;
 using MetBench_BLL.SystemMT.Transformations;
 
 namespace MetBench_BLL.SystemMT.Launcher;
@@ -30,6 +32,8 @@ public sealed class SystemMtLauncher : ISystemMtLauncher, ISystemMtCatalogReader
     private readonly SystemMtExecutionRecorder _recorder;
     private readonly IAnomalyService _anomalyService;
     private readonly AnomalySeverityThresholds _severityThresholds;
+    private readonly IRuntimeProfileProvider _runtimeProfileProvider;
+    private readonly IRuntimePreflightService _runtimePreflightService;
     private readonly IReadOnlyDictionary<string, MrBlueprint> _mrCatalog;
     private readonly EquationFunctionRegistry _equationFunctions;
 
@@ -40,6 +44,27 @@ public sealed class SystemMtLauncher : ISystemMtLauncher, ISystemMtCatalogReader
         IAnomalyService anomalyService,
         IMrCatalogProvider catalogProvider,
         AnomalySeverityThresholds? severityThresholds = null)
+        : this(
+            options,
+            pipeline,
+            recorder,
+            anomalyService,
+            catalogProvider,
+            severityThresholds,
+            runtimeProfileProvider: null,
+            runtimePreflightService: null)
+    {
+    }
+
+    public SystemMtLauncher(
+        LauncherOptions options,
+        ISystemMtPipeline pipeline,
+        SystemMtExecutionRecorder recorder,
+        IAnomalyService anomalyService,
+        IMrCatalogProvider catalogProvider,
+        AnomalySeverityThresholds? severityThresholds,
+        IRuntimeProfileProvider? runtimeProfileProvider,
+        IRuntimePreflightService? runtimePreflightService)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _pipeline = pipeline ?? throw new ArgumentNullException(nameof(pipeline));
@@ -47,6 +72,10 @@ public sealed class SystemMtLauncher : ISystemMtLauncher, ISystemMtCatalogReader
         _anomalyService = anomalyService ?? throw new ArgumentNullException(nameof(anomalyService));
         ArgumentNullException.ThrowIfNull(catalogProvider);
         _severityThresholds = severityThresholds ?? AnomalySeverityThresholds.Default;
+        _runtimeProfileProvider = runtimeProfileProvider
+            ?? new LauncherOptionsRuntimeProfileProvider(_options);
+        _runtimePreflightService = runtimePreflightService
+            ?? new RuntimePreflightService(new DefaultProcessExecutor());
         _mrCatalog = catalogProvider.Load()
             .Select(entry => entry.ToBlueprint())
             .ToDictionary(b => b.Mr.Id, StringComparer.Ordinal);
@@ -185,6 +214,24 @@ public sealed class SystemMtLauncher : ISystemMtLauncher, ISystemMtCatalogReader
         // PR-Bol-2A: 多相 error-monotonic 分支 — launcher 预构建 TypedSpec + TypedPredicate
         // via TypedSpecFactory.ForErrorMonotonic (string-code 分派仍封闭在 Migration/ 内),
         // 然后调 ExecuteMultiPhaseAsync. 30+ 现存 2-side MR 走 else 分支保持字节一致.
+        var runtimePreflight = await CreateRuntimePreflightResultAsync(blueprint, cancellationToken)
+            .ConfigureAwait(false);
+        var runtimeEvidence = RuntimeEvidence.FromPreflightResult(runtimePreflight);
+        if (!runtimePreflight.Passed)
+        {
+            var blocked = _recorder.RecordBlockedPreflight(context, runtimePreflight, mrInstanceId: -1);
+            return new MrRunResult(
+                RecordId: blocked.ExecutionId.ToString(),
+                MrId: mrId,
+                Passed: false,
+                FailureReason: $"Runtime preflight failed: {runtimePreflight.Detail}",
+                ValueName: blueprint.Mr.ValueName,
+                SourceValue: 0.0,
+                FollowUpValue: 0.0,
+                SourceElapsed: TimeSpan.Zero,
+                FollowUpElapsed: TimeSpan.Zero);
+        }
+
         PipelineOutcome outcome;
         if (blueprint.RefinementPhases is { Count: > 0 } phases)
         {
@@ -214,7 +261,7 @@ public sealed class SystemMtLauncher : ISystemMtLauncher, ISystemMtCatalogReader
                 .ConfigureAwait(false);
         }
 
-        var recorded = _recorder.Record(context, outcome, mrInstanceId: -1);
+        var recorded = _recorder.Record(context, outcome, mrInstanceId: -1, runtimeEvidence: runtimeEvidence);
 
         await RecordAnomalyIfFailedAsync(blueprint.Mr.DisplayName, recorded.ResultId, outcome, cancellationToken)
             .ConfigureAwait(false);
@@ -229,6 +276,52 @@ public sealed class SystemMtLauncher : ISystemMtLauncher, ISystemMtCatalogReader
             FollowUpValue: outcome.AssertionResult?.FollowupValue ?? 0.0,
             SourceElapsed: outcome.SourceElapsed,
             FollowUpElapsed: outcome.FollowupElapsed);
+    }
+
+    private RuntimeProfile CreateRuntimeProfile(MrBlueprint blueprint)
+    {
+        var resolved = _runtimeProfileProvider.GetProfile(blueprint.RuntimeKey);
+        return new RuntimeProfile(
+            resolved.RuntimeKey,
+            resolved.DisplayName,
+            resolved.Kind,
+            resolved.ExecutablePath,
+            resolved.DependencyChecks,
+            resolved.VersionChecks,
+            resolved.RequiredEnvironmentVariables,
+            timeout: blueprint.Timeout);
+    }
+
+    private async Task<RuntimePreflightResult> CreateRuntimePreflightResultAsync(
+        MrBlueprint blueprint,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await _runtimePreflightService
+                .CheckAsync(CreateRuntimeProfile(blueprint), cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (RuntimeEnvironmentResolutionException ex)
+        {
+            var runtimeKey = RuntimeProfile.NormalizeRuntimeKey(blueprint.RuntimeKey);
+            var profile = RuntimeProfile.Placeholder(
+                runtimeKey,
+                $"{runtimeKey} runtime",
+                RuntimeKind.RemotePlaceholder);
+            var diagnostic = new RuntimePreflightDiagnostic(
+                "profile",
+                runtimeKey,
+                false,
+                RuntimeFailureKind.RuntimeProfileMissing,
+                ex.Message);
+
+            return RuntimePreflightResult.Blocked(
+                profile,
+                RuntimeFailureKind.RuntimeProfileMissing,
+                ex.Message,
+                new[] { diagnostic });
+        }
     }
 
     private static (string TransformationName, string TargetFieldPath) ResolveTransformation(MrBlueprint blueprint)
@@ -451,7 +544,10 @@ internal sealed record MrBlueprint(
     // BeApproximately(src, 0) 退化为 bit-exact equality，永远 fail 在数值噪声上
     AssertionTolerance? Tolerance = null,
     // PR-Bol-2A: 多相 error-monotonic MR 用 (null/empty = 走传统 2-side ExecuteAsync)
-    IReadOnlyList<MetBench_BLL.SystemMT.Pipeline.RefinementPhase>? RefinementPhases = null);
+    IReadOnlyList<MetBench_BLL.SystemMT.Pipeline.RefinementPhase>? RefinementPhases = null)
+{
+    public string RuntimeKey { get; init; } = PythonExecutableKinds.System;
+}
 
 /// <summary>v2 pipeline 的单步变换规格。多步在 launcher.RunAsync 内包 <c>CompositeTransform</c>。</summary>
 internal sealed record MrTransformStep(
@@ -495,6 +591,12 @@ public sealed record MrCatalogEntry(
     /// </summary>
     public string MetaPattern { get; init; } = string.Empty;
 
+    /// <summary>
+    /// Manifest runtime key (system/openmoc/openmc/scipy/custom). Kept separate
+    /// from the resolved executable so runtime evidence is not guessed from paths.
+    /// </summary>
+    public string RuntimeKey { get; init; } = PythonExecutableKinds.System;
+
     /// <summary>UI convenience: first step's transformation name (engine name, not display).</summary>
     public string PrimaryTransformationName =>
         TransformSteps.Count > 0 ? TransformSteps[0].TransformationName : string.Empty;
@@ -523,6 +625,7 @@ public sealed record MrCatalogEntry(
             // projected from the legacy hardcoded path carries the same metadata
             // as the manifest-backed projection. See MrMetaPatternConventions.
             MetaPattern = MrMetaPatternConventions.FromMrFamily(bp.Mr.MrFamily),
+            RuntimeKey = bp.RuntimeKey,
         };
 
     /// <summary>
@@ -543,7 +646,10 @@ public sealed record MrCatalogEntry(
             AssertionTypeCode,
             EquationKey,
             Tolerance,
-            RefinementPhases);
+            RefinementPhases)
+        {
+            RuntimeKey = RuntimeKey,
+        };
 }
 
 /// <summary>Public mirror of internal MrTransformStep for IMrCatalogProvider boundary.</summary>

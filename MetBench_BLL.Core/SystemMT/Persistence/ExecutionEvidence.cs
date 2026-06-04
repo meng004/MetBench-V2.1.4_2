@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using MetBench_BLL.SystemMT.Runtime;
 
 namespace MetBench_BLL.SystemMT.Persistence;
 
@@ -38,6 +40,12 @@ public sealed class ExecutionEvidence
     public TypedVerificationEvidence? TypedVerification { get; set; }
 
     /// <summary>
+    /// Nullable runtime preflight evidence. Null for rows written before T1
+    /// runtime governance and for callers that do not run a runtime preflight.
+    /// </summary>
+    public RuntimeEvidence? RuntimeEvidence { get; set; }
+
+    /// <summary>
     /// PR-3 pair-level quality summary. Default-empty so evidence rows written
     /// before this field existed remain safe to read and render.
     /// </summary>
@@ -48,4 +56,79 @@ public sealed class ExecutionEvidence
         get => _pairQuality ??= new();
         set => _pairQuality = value ?? new();
     }
+}
+
+public sealed class RuntimeEvidence
+{
+    public string RuntimeKey { get; set; } = string.Empty;
+
+    public string RuntimeProfileDisplayName { get; set; } = string.Empty;
+
+    public string RuntimeKind { get; set; } = string.Empty;
+
+    public string ResolvedExecutablePath { get; set; } = string.Empty;
+
+    public bool Passed { get; set; }
+
+    public string FailureKind { get; set; } = RuntimeFailureKind.None.ToString();
+
+    public string FailureDetail { get; set; } = string.Empty;
+
+    public DateTime CheckedAtUtc { get; set; } = DateTime.UtcNow;
+
+    public List<RuntimeCheckEvidence> Diagnostics { get; set; } = new();
+
+    public static RuntimeEvidence FromPreflightResult(RuntimePreflightResult result)
+    {
+        ArgumentNullException.ThrowIfNull(result);
+
+        return new RuntimeEvidence
+        {
+            RuntimeKey = result.Profile.RuntimeKey,
+            RuntimeProfileDisplayName = result.Profile.DisplayName,
+            RuntimeKind = result.Profile.Kind.ToString(),
+            ResolvedExecutablePath = result.Profile.ExecutablePath ?? string.Empty,
+            Passed = result.Passed,
+            FailureKind = result.FailureKind.ToString(),
+            FailureDetail = result.Detail,
+            Diagnostics = result.Diagnostics.Select(RuntimeCheckEvidence.FromDiagnostic).ToList(),
+        };
+    }
+}
+
+public sealed class RuntimeCheckEvidence
+{
+    public string CheckKind { get; set; } = string.Empty;
+
+    public string Name { get; set; } = string.Empty;
+
+    public bool Passed { get; set; }
+
+    public string FailureKind { get; set; } = RuntimeFailureKind.None.ToString();
+
+    public string Detail { get; set; } = string.Empty;
+
+    public bool Blocking { get; set; } = true;
+
+    public int? ExitCode { get; set; }
+
+    public bool TimedOut { get; set; }
+
+    public string Stdout { get; set; } = string.Empty;
+
+    public string Stderr { get; set; } = string.Empty;
+
+    public static RuntimeCheckEvidence FromDiagnostic(RuntimePreflightDiagnostic diagnostic) => new()
+    {
+        CheckKind = diagnostic.CheckKind,
+        Name = diagnostic.Name,
+        Passed = diagnostic.Passed,
+        FailureKind = diagnostic.FailureKind.ToString(),
+        Detail = diagnostic.Detail,
+        Blocking = diagnostic.Blocking,
+        ExitCode = diagnostic.ExitCode,
+        TimedOut = diagnostic.TimedOut,
+        Stdout = diagnostic.Stdout,
+        Stderr = diagnostic.Stderr,
+    };
 }

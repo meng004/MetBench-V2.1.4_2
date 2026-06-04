@@ -120,7 +120,7 @@ public sealed class ManifestMrCatalogProvider : IMrCatalogProvider
         // unknown non-system keys fail closed with a clear diagnostic naming the missing key.
         // Adding a new runtime family (fenics, fipy, ...) is now a config-only change —
         // no switch arm here, no new LauncherOptions field.
-        var pythonExecutable = _options.ResolvePythonExecutable(program.PythonExecutableKind);
+        var pythonExecutable = TryResolvePythonExecutable(program.PythonExecutableKind);
 
         var tolerance = (binding.NoiseAware || binding.ToleranceRel > 0 || binding.ToleranceAbs > 0)
             ? new AssertionTolerance(
@@ -168,6 +168,21 @@ public sealed class ManifestMrCatalogProvider : IMrCatalogProvider
             // PR-T3-7: surface manifest meta_pattern so the coverage auditor can
             // build the (equation × meta-pattern) matrix without re-parsing JSON.
             MetaPattern = binding.MetaPattern,
+            RuntimeKey = program.PythonExecutableKind,
         };
+    }
+
+    private string TryResolvePythonExecutable(string runtimeKey)
+    {
+        try
+        {
+            return _options.ResolvePythonExecutable(runtimeKey);
+        }
+        catch (RuntimeEnvironmentResolutionException)
+        {
+            // Keep future runtime manifests loadable. Launcher preflight owns the
+            // fail-closed evidence path for unmapped runtime profiles.
+            return string.Empty;
+        }
     }
 }

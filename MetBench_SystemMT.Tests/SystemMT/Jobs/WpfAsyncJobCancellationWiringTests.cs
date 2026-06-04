@@ -29,6 +29,16 @@ public sealed class WpfAsyncJobCancellationWiringTests
         Assert.Contains("new SystemMtJobWorker(_store, pipeline, _cancellation)", hosted);
     }
 
+    [Fact]
+    public void Hosted_worker_passes_execution_evidence_repository_to_async_pipeline()
+    {
+        var hosted = ReadRepoFile("MetBench_Client", "Hosting", "SystemMtJobWorkerHostedService.cs");
+
+        Assert.Contains("IExecutionEvidenceRepository", hosted);
+        Assert.Contains("GetService<IExecutionEvidenceRepository>()", hosted);
+        Assert.Contains("new SystemMtAsyncPipeline(launcher, evidenceRepository)", hosted);
+    }
+
     private static string ReadRepoFile(params string[] parts)
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);

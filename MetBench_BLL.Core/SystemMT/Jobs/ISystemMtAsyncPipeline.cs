@@ -26,4 +26,5 @@ public sealed record JobExecutionOutcome(
     SystemMtJobState FinalState,
     string SutName,
     MrRunResult? Result,
-    string? FailureReason);
+    string? FailureReason,
+    string? FailureKind = null);

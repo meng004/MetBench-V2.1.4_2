@@ -434,7 +434,7 @@ public sealed class ManifestMrCatalogProviderTests : System.IDisposable
     // ---- PR-1 T1 manifest-driven runtime environments ------------------------------------
     // New manifest python_executable_kind values must resolve through
     // LauncherOptions.RuntimePythons without growing per-runtime fields. Unknown non-system
-    // keys must fail closed at manifest-load time with a diagnostic naming the missing key.
+    // keys stay loadable so launcher preflight can record RuntimeProfileMissing evidence.
 
     private const string FutureRuntimeManifest = """
         {
@@ -491,18 +491,19 @@ public sealed class ManifestMrCatalogProviderTests : System.IDisposable
     }
 
     [Fact]
-    public void Load_fails_closed_when_manifest_runtime_key_is_unknown_and_unmapped()
+    public void Load_preserves_unknown_unmapped_runtime_key_for_launcher_preflight()
     {
         WriteManifest("fenics_demo_dir", FutureRuntimeManifest);
 
-        // No RuntimePythons entry for "fenics", and "fenics" is not a known compat key.
         var opts = new LauncherOptions(
             SutRoot: _tmpRoot,
             SystemPython: "python3",
             OpenMocPython: "python3");
 
-        var ex = Assert.Throws<RuntimeEnvironmentResolutionException>(() => new ManifestMrCatalogProvider(opts).Load());
-        Assert.Contains("fenics", ex.Message, System.StringComparison.Ordinal);
+        var entries = new ManifestMrCatalogProvider(opts).Load();
+        var entry = Assert.Single(entries);
+        Assert.Equal("fenics", entry.RuntimeKey);
+        Assert.Equal(string.Empty, entry.PythonExecutable);
     }
 
     [Fact]
