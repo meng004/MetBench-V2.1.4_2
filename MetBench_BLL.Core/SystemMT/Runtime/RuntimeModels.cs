@@ -41,6 +41,18 @@ public sealed record RuntimeVersionCheck(
     string Arguments = "--version",
     TimeSpan? Timeout = null);
 
+public sealed record RuntimePreflightDiagnostic(
+    string CheckKind,
+    string Name,
+    bool Passed,
+    RuntimeFailureKind FailureKind,
+    string Detail,
+    bool Blocking = true,
+    int? ExitCode = null,
+    bool TimedOut = false,
+    string Stdout = "",
+    string Stderr = "");
+
 public sealed record RuntimeResourceHints(
     int? CpuCores = null,
     long? MemoryMegabytes = null,
@@ -122,7 +134,8 @@ public sealed record RuntimePreflightResult
         RuntimeProfile profile,
         bool passed,
         RuntimeFailureKind failureKind,
-        string detail)
+        string detail,
+        IReadOnlyList<RuntimePreflightDiagnostic>? diagnostics = null)
     {
         if (passed && failureKind != RuntimeFailureKind.None)
             throw new ArgumentException("Passing preflight results must use failure kind None.", nameof(failureKind));
@@ -133,19 +146,42 @@ public sealed record RuntimePreflightResult
         Passed = passed;
         FailureKind = failureKind;
         Detail = detail ?? string.Empty;
+        Diagnostics = diagnostics?.ToArray() ?? Array.Empty<RuntimePreflightDiagnostic>();
+
+        foreach (var diagnostic in Diagnostics)
+        {
+            if (diagnostic.Passed && diagnostic.FailureKind != RuntimeFailureKind.None)
+                throw new ArgumentException("Passing diagnostics must use failure kind None.", nameof(diagnostics));
+            if (!diagnostic.Passed && diagnostic.FailureKind == RuntimeFailureKind.None)
+                throw new ArgumentException("Failed diagnostics require a failure kind.", nameof(diagnostics));
+            if (!diagnostic.Passed && string.IsNullOrWhiteSpace(diagnostic.Detail))
+                throw new ArgumentException("Failed diagnostics require detail.", nameof(diagnostics));
+        }
+        if (passed && Diagnostics.Any(d => !d.Passed && d.Blocking))
+            throw new ArgumentException("Passing preflight results cannot contain blocking failed diagnostics.", nameof(diagnostics));
+        if (!passed && Diagnostics.Count > 0
+            && !Diagnostics.Any(d => !d.Passed && d.Blocking && d.FailureKind == failureKind))
+        {
+            throw new ArgumentException("Failed preflight results require a matching blocking diagnostic.", nameof(diagnostics));
+        }
     }
 
     public RuntimeProfile Profile { get; }
     public bool Passed { get; }
     public RuntimeFailureKind FailureKind { get; }
     public string Detail { get; }
+    public IReadOnlyList<RuntimePreflightDiagnostic> Diagnostics { get; }
 
-    public static RuntimePreflightResult Pass(RuntimeProfile profile, string detail = "") =>
-        new(profile, true, RuntimeFailureKind.None, detail);
+    public static RuntimePreflightResult Pass(
+        RuntimeProfile profile,
+        string detail = "",
+        IReadOnlyList<RuntimePreflightDiagnostic>? diagnostics = null) =>
+        new(profile, true, RuntimeFailureKind.None, detail, diagnostics);
 
     public static RuntimePreflightResult Blocked(
         RuntimeProfile profile,
         RuntimeFailureKind failureKind,
-        string detail) =>
-        new(profile, false, failureKind, detail);
+        string detail,
+        IReadOnlyList<RuntimePreflightDiagnostic>? diagnostics = null) =>
+        new(profile, false, failureKind, detail, diagnostics);
 }
