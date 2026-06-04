@@ -192,6 +192,7 @@ namespace MetBench_Client
                     var dataDir = Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!;
                     return new LiteDbJobStore($"Filename={Path.Combine(dataDir, "SystemMtJobs.Litedb")}");
                 });
+                services.AddSingleton<IJobCancellationRegistry, JobCancellationRegistry>();
                 services.AddSingleton<ISystemMtJobService, SystemMtJobService>();
                 services.AddHostedService<SystemMtJobWorkerHostedService>();
 

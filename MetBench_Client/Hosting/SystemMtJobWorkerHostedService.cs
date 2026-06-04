@@ -17,17 +17,20 @@ public sealed class SystemMtJobWorkerHostedService : BackgroundService
     private readonly IJobQueue _queue;
     private readonly IJobStore _store;
     private readonly IServiceScopeFactory _scopeFactory;
+    private readonly IJobCancellationRegistry _cancellation;
     private readonly ILogger<SystemMtJobWorkerHostedService> _logger;
 
     public SystemMtJobWorkerHostedService(
         IJobQueue queue,
         IJobStore store,
         IServiceScopeFactory scopeFactory,
+        IJobCancellationRegistry cancellation,
         ILogger<SystemMtJobWorkerHostedService> logger)
     {
         _queue = queue;
         _store = store;
         _scopeFactory = scopeFactory;
+        _cancellation = cancellation;
         _logger = logger;
     }
 
@@ -50,7 +53,7 @@ public sealed class SystemMtJobWorkerHostedService : BackgroundService
                 using var scope = _scopeFactory.CreateScope();
                 var launcher = scope.ServiceProvider.GetRequiredService<ISystemMtLauncher>();
                 var pipeline = new SystemMtAsyncPipeline(launcher);
-                var worker = new SystemMtJobWorker(_store, pipeline);
+                var worker = new SystemMtJobWorker(_store, pipeline, _cancellation);
                 await worker.RunJobAsync(jobId, stoppingToken).ConfigureAwait(false);
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
