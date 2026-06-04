@@ -2,7 +2,7 @@
 # PR-5 UIA verification: drive the WPF client to the System MT catalog + execution-history
 # pages, select rows, capture the explanation/profile/pair-quality surfaces, and toggle
 # language. Screenshots land in this verification directory.
-# Adapted from tools/uia-verify-i18n.ps1 (same HiDPI / coord-scale handling).
+# Includes HiDPI / coordinate-scale handling for the Windows VM.
 Add-Type -AssemblyName UIAutomationClient
 Add-Type -AssemblyName UIAutomationTypes
 Add-Type -AssemblyName System.Drawing

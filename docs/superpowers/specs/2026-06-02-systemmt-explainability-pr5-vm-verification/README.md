@@ -9,10 +9,10 @@ could not refresh during this strict pass because the VM DNS could not resolve
 Captured on the Windows VM at 200% HiDPI. No `rtk` executable was available on
 this VM, so commands used native PowerShell.
 
-Driver: [`drive.ps1`](drive.ps1) (UIA, adapted from
-`tools/uia-verify-i18n.ps1`). The driver starts the WPF client, launches a real
-pure-stdlib System MT run, visits the catalog/history pages, captures the
-screenshots, and toggles language where UIA can find the culture menu.
+Driver: [`drive.ps1`](drive.ps1) (UIA). The driver starts the WPF client,
+launches a real pure-stdlib System MT run, visits the catalog/history pages,
+captures the screenshots, and toggles language where UIA can find the culture
+menu.
 
 ## Build / Test Evidence
 
