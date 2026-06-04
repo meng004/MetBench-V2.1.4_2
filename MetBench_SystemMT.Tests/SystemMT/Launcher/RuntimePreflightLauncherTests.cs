@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using MetBench_BLL.SystemMT.Catalog;
@@ -180,6 +181,48 @@ public sealed class RuntimePreflightLauncherTests
         Assert.Empty(anomalies.Recorded);
     }
 
+    [Fact]
+    public async Task Missing_runtime_profile_records_runtime_profile_missing_evidence_before_SUT_execution()
+    {
+        var execs = new FakeExecRepo();
+        var results = new FakeResultRepo();
+        var evidence = new InMemoryEvidenceRepo();
+        var anomalies = new RecordingAnomalyService();
+        var options = Options();
+        var launcher = new SystemMtLauncher(
+            options,
+            new ThrowingPipeline(),
+            new SystemMtExecutionRecorder(execs, results, evidence),
+            anomalies,
+            new SingleEntryCatalogProvider(CreateFutureRuntimeEntry(options)),
+            severityThresholds: null,
+            runtimeProfileProvider: null,
+            runtimePreflightService: new ThrowingPreflightService());
+
+        var result = await launcher.RunAsync("future-runtime-mr");
+
+        Assert.False(result.Passed);
+        Assert.Contains("Runtime preflight failed", result.FailureReason, StringComparison.Ordinal);
+        Assert.Contains("fenics", result.FailureReason, StringComparison.OrdinalIgnoreCase);
+        Assert.True(Guid.TryParse(result.RecordId, out var executionId));
+        Assert.Empty(results.Data);
+        Assert.Empty(anomalies.Recorded);
+
+        var execution = Assert.Single(execs.Data);
+        Assert.Equal(executionId, execution.IdExecution);
+        Assert.Equal(PipelineStatus.Error, execution.Status);
+
+        var loadedEvidence = await evidence.GetByExecutionAsync(executionId);
+        Assert.NotNull(loadedEvidence);
+        Assert.NotNull(loadedEvidence!.RuntimeEvidence);
+        Assert.Equal("fenics", loadedEvidence.RuntimeEvidence!.RuntimeKey);
+        Assert.False(loadedEvidence.RuntimeEvidence.Passed);
+        Assert.Equal(RuntimeFailureKind.RuntimeProfileMissing.ToString(), loadedEvidence.RuntimeEvidence.FailureKind);
+        var diagnostic = Assert.Single(loadedEvidence.RuntimeEvidence.Diagnostics);
+        Assert.Equal("profile", diagnostic.CheckKind);
+        Assert.Equal(RuntimeFailureKind.RuntimeProfileMissing.ToString(), diagnostic.FailureKind);
+    }
+
     private static LauncherOptions Options() => new(
         SutRoot: TestAssetPaths.AssetRoot(),
         SystemPython: TestAssetPaths.PythonExecutable(),
@@ -220,6 +263,60 @@ public sealed class RuntimePreflightLauncherTests
             CancellationToken cancellationToken = default) =>
             throw new InvalidOperationException("SUT pipeline should not run after a failed runtime preflight.");
     }
+
+    private sealed class ThrowingPreflightService : IRuntimePreflightService
+    {
+        public Task<RuntimePreflightResult> CheckAsync(
+            RuntimeProfile profile,
+            CancellationToken cancellationToken = default) =>
+            throw new InvalidOperationException("Runtime preflight service should not run when profile resolution failed.");
+    }
+
+    private sealed class SingleEntryCatalogProvider : IMrCatalogProvider
+    {
+        private readonly MrCatalogEntry _entry;
+
+        public SingleEntryCatalogProvider(MrCatalogEntry entry)
+        {
+            _entry = entry;
+        }
+
+        public string SourceDescription => "Single test entry";
+
+        public IReadOnlyList<MrCatalogEntry> Load() => new[] { _entry };
+    }
+
+    private static MrCatalogEntry CreateFutureRuntimeEntry(LauncherOptions options) =>
+        new(
+            Mr: new MrSummary(
+                Id: "future-runtime-mr",
+                DisplayName: "Future runtime MR",
+                SutName: "heat-equation",
+                TransformationName: "ScaleField",
+                AssertionName: "GreaterThan",
+                ValueName: "max_u",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description: "test",
+                MrFamily: "HeatEquation.Mono.Amplitude"),
+            SampleCaseRelativePath: Path.Combine("heat_equation", "sample", "gaussian.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_input_adapter.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_output_adapter.py"),
+            PythonExecutable: string.Empty,
+            WorkRootName: "metbench-runtime-profile-missing-test",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_output_parser.py"),
+            TransformSteps: new[]
+            {
+                new MrCatalogTransformStep("ScaleField", "/initial/amplitude"),
+            },
+            AssertionTypeCode: "greater",
+            EquationKey: string.Empty,
+            Tolerance: null)
+        {
+            RuntimeKey = "fenics",
+        };
 
     private sealed class InMemoryEvidenceRepo : IExecutionEvidenceRepository
     {
