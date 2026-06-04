@@ -13,6 +13,7 @@
 > Date: 2026-06-04
 > Status: Active scoped T1 plan
 > Design: `docs/superpowers/specs/2026-06-04-systemmt-runtime-environment-governance-v1-design.md`
+> Execution task: `docs/superpowers/tasks/2026-06-04-t1-runtime-governance-v1-cloud-task.md`
 > Execution mode: TDD, cloud-safe core implementation first
 
 ## Goal
@@ -39,11 +40,22 @@ This plan does not reopen T0 MR semantics, T3 SUT coverage selection, T5 anomaly
 
 ## Preconditions
 
-- Start from current `origin/main`.
+- Start from branch `t1-runtime-governance-v1-implementation`, which is created from the accepted runtime-governance plan branch.
 - Read `docs/status/current.md`, this plan, the design spec, and `CLAUDE.md` before editing code.
 - Confirm the worktree is clean or isolate work in a fresh branch or worktree.
 - Preserve current async execution path: `SystemMtJobService -> SystemMtJobWorker -> SystemMtAsyncPipeline -> ISystemMtLauncher`.
 - Preserve current manifest runtime key behavior: `LauncherOptions.RuntimePythons` and `ResolvePythonExecutable(...)`.
+
+## Execution Handoff
+
+Use the dedicated task prompt:
+
+```bash
+rtk git switch t1-runtime-governance-v1-implementation
+rtk sed -n '1,260p' docs/superpowers/tasks/2026-06-04-t1-runtime-governance-v1-cloud-task.md
+```
+
+Then execute the task exactly as written. The task requires subagent-driven development, TDD, per-task spec review, per-task code-quality review, final review, and verification before completion.
 
 ## Task 1: Runtime Profile Model
 
