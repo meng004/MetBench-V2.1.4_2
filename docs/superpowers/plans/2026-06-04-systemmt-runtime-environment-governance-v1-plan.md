@@ -11,10 +11,11 @@
 ---
 
 > Date: 2026-06-04
-> Status: Active scoped T1 plan
+> Status: Completed / Controlled on branch `t1-runtime-governance-v1-implementation`; becomes mainline truth when the implementation PR merges
 > Design: `docs/superpowers/specs/2026-06-04-systemmt-runtime-environment-governance-v1-design.md`
 > Execution task: `docs/superpowers/tasks/2026-06-04-t1-runtime-governance-v1-cloud-task.md`
 > Execution mode: TDD, cloud-safe core implementation first
+> Verification summary: runtime profile/preflight/evidence tests 27/27 pass; job/async tests 37/37 pass; semantic boundary/governance tests 4/4 pass; `MetBench_SystemMT.Tests` build 0 warnings / 0 errors; `MetBench.sln --no-restore` exit 0 with existing WPF/StyleCop warnings; `git diff --check` pass.
 
 ## Goal
 
