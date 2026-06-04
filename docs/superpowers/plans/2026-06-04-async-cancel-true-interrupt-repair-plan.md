@@ -1,7 +1,7 @@
 # Async Cancel True-Interrupt Repair Plan
 
 > Date: 2026-06-04
-> Status: Active
+> Status: Completed (PR #288 merged to `origin/main` as `3ad26e57b186c68976fdfb44379ef5b90ddcfab1`)
 > Owner: Codex / Windows VM follow-up
 > Trigger: VM evidence from `codex/async-cancel-registry-docs-postmerge` commit `bedfe31` shows the WPF async job reaches `Cancelled`, but the underlying `advection_1d.py` process remains alive after Cancel.
 
