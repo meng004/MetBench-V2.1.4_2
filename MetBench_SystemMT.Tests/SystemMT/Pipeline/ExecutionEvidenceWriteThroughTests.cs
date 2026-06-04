@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MetBench_BLL.SystemMT.Assertions;
 using MetBench_BLL.SystemMT.Persistence;
 using MetBench_BLL.SystemMT.Pipeline;
+using MetBench_BLL.SystemMT.Runtime;
 using MetBench_Domain.V2;
 using MetBench_Domain.V2.Enums;
 using MetBench_IDAL;
@@ -159,6 +160,53 @@ public sealed class ExecutionEvidenceWriteThroughTests
         Assert.Null(recorded.ResultId);
         var evidence = await evRepo.GetByExecutionAsync(recorded.ExecutionId);
         Assert.Null(evidence);
+    }
+
+    [Fact]
+    public async Task Record_writes_runtime_evidence_when_outcome_has_no_AssertionResult()
+    {
+        var execRepo = new FakeExecRepo();
+        var resRepo = new FakeResultRepo();
+        var evRepo = new InMemoryEvidenceRepo();
+        var v3Repo = new InMemoryV3Repo();
+
+        var runtimeEvidence = new RuntimeEvidence
+        {
+            RuntimeKey = "system",
+            RuntimeProfileDisplayName = "System Python",
+            RuntimeKind = RuntimeKind.LocalPython.ToString(),
+            ResolvedExecutablePath = "python",
+            Passed = true,
+            FailureKind = RuntimeFailureKind.None.ToString(),
+            Diagnostics =
+            {
+                new RuntimeCheckEvidence
+                {
+                    CheckKind = "startup",
+                    Name = "System Python",
+                    Passed = true,
+                    FailureKind = RuntimeFailureKind.None.ToString(),
+                    Detail = "startup passed",
+                    ExitCode = 0,
+                },
+            },
+        };
+
+        var recorder = new SystemMtExecutionRecorder(execRepo, resRepo, evRepo, v3Repo);
+        var errored = OkOutcome() with { FinalStatus = "error", AssertionResult = null };
+        var recorded = recorder.Record(
+            CtxFor("heat-equation-amplitude"),
+            errored,
+            mrInstanceId: 1,
+            runtimeEvidence: runtimeEvidence);
+
+        Assert.Null(recorded.ResultId);
+        Assert.Empty(resRepo.Data);
+        var evidence = await evRepo.GetByExecutionAsync(recorded.ExecutionId);
+        Assert.NotNull(evidence);
+        Assert.NotNull(evidence!.RuntimeEvidence);
+        Assert.Equal("system", evidence.RuntimeEvidence!.RuntimeKey);
+        Assert.True(evidence.RuntimeEvidence.Passed);
     }
 
     [Fact]

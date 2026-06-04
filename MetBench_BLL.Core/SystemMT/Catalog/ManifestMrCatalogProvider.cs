@@ -168,6 +168,7 @@ public sealed class ManifestMrCatalogProvider : IMrCatalogProvider
             // PR-T3-7: surface manifest meta_pattern so the coverage auditor can
             // build the (equation × meta-pattern) matrix without re-parsing JSON.
             MetaPattern = binding.MetaPattern,
+            RuntimeKey = program.PythonExecutableKind,
         };
     }
 }

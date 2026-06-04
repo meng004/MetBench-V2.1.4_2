@@ -41,6 +41,12 @@ public sealed class SystemMtAsyncPipeline : ISystemMtAsyncPipeline
         // RunAsync 不抛即基础设施成功；抛异常（Python 失败 / 缺 SUT 文件等）由 worker catch → Failed。
         MrRunResult result = await _launcher.RunAsync(request.MrId, request.ParameterOverrides, cancellationToken);
 
+        if (!result.Passed
+            && result.FailureReason.StartsWith("Runtime preflight failed:", StringComparison.OrdinalIgnoreCase))
+        {
+            return new JobExecutionOutcome(SystemMtJobState.Failed, sutName, null, result.FailureReason);
+        }
+
         progress?.Report(new SystemMtJobProgress(SystemMtJobState.Asserting, "asserting", 90));
 
         return new JobExecutionOutcome(SystemMtJobState.Succeeded, sutName, result, null);
