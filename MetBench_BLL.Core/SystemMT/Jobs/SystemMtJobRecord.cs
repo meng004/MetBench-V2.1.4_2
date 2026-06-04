@@ -13,6 +13,7 @@ public sealed record SystemMtJobRecord
     public int ProgressPercent { get; init; }
     public string CurrentPhase { get; init; } = string.Empty;
     public string? FailureReason { get; init; }
+    public string? FailureKind { get; init; }
     public string? BackendKind { get; init; }
     public string? BackendExternalId { get; init; }
     public DateTime CreatedAtUtc { get; init; }
@@ -24,5 +25,5 @@ public sealed record SystemMtJobRecord
     public SystemMtJobStatus ToStatus() => new(
         JobId, MrId, SutName, State, CurrentPhase, ProgressPercent,
         CreatedAtUtc, UpdatedAtUtc, FinishedAtUtc, FailureReason,
-        BackendKind, BackendExternalId, LastPolledAtUtc);
+        BackendKind, BackendExternalId, LastPolledAtUtc, FailureKind);
 }

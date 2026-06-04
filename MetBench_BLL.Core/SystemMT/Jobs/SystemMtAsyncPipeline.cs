@@ -1,4 +1,5 @@
 using MetBench_BLL.SystemMT.Launcher;
+using MetBench_BLL.SystemMT.Persistence;
 
 namespace MetBench_BLL.SystemMT.Jobs;
 
@@ -25,8 +26,15 @@ namespace MetBench_BLL.SystemMT.Jobs;
 public sealed class SystemMtAsyncPipeline : ISystemMtAsyncPipeline
 {
     private readonly ISystemMtLauncher _launcher;
+    private readonly IExecutionEvidenceRepository? _evidenceRepository;
 
-    public SystemMtAsyncPipeline(ISystemMtLauncher launcher) => _launcher = launcher;
+    public SystemMtAsyncPipeline(
+        ISystemMtLauncher launcher,
+        IExecutionEvidenceRepository? evidenceRepository = null)
+    {
+        _launcher = launcher;
+        _evidenceRepository = evidenceRepository;
+    }
 
     public async Task<JobExecutionOutcome> ExecuteJobAsync(
         Guid jobId, SystemMtJobRequest request,
@@ -41,10 +49,15 @@ public sealed class SystemMtAsyncPipeline : ISystemMtAsyncPipeline
         // RunAsync 不抛即基础设施成功；抛异常（Python 失败 / 缺 SUT 文件等）由 worker catch → Failed。
         MrRunResult result = await _launcher.RunAsync(request.MrId, request.ParameterOverrides, cancellationToken);
 
-        if (!result.Passed
-            && result.FailureReason.StartsWith("Runtime preflight failed:", StringComparison.OrdinalIgnoreCase))
+        var runtimeFailureKind = await ResolveRuntimeFailureKindAsync(result, cancellationToken);
+        if (runtimeFailureKind is not null)
         {
-            return new JobExecutionOutcome(SystemMtJobState.Failed, sutName, null, result.FailureReason);
+            return new JobExecutionOutcome(
+                SystemMtJobState.Failed,
+                sutName,
+                Result: null,
+                FailureReason: result.FailureReason,
+                FailureKind: runtimeFailureKind);
         }
 
         progress?.Report(new SystemMtJobProgress(SystemMtJobState.Asserting, "asserting", 90));
@@ -59,5 +72,19 @@ public sealed class SystemMtAsyncPipeline : ISystemMtAsyncPipeline
             if (string.Equals(summary.Id, mrId, StringComparison.Ordinal))
                 return summary.SutName;
         return string.Empty;
+    }
+
+    private async Task<string?> ResolveRuntimeFailureKindAsync(
+        MrRunResult result,
+        CancellationToken cancellationToken)
+    {
+        if (result.Passed || _evidenceRepository is null)
+            return null;
+        if (!Guid.TryParse(result.RecordId, out var executionId))
+            return null;
+
+        var evidence = await _evidenceRepository.GetByExecutionAsync(executionId, cancellationToken);
+        var runtime = evidence?.RuntimeEvidence;
+        return runtime is { Passed: false } ? runtime.FailureKind : null;
     }
 }

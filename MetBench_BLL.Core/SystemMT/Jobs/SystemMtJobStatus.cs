@@ -16,4 +16,5 @@ public sealed record SystemMtJobStatus(
     string? FailureReason,
     string? BackendKind = null,
     string? BackendExternalId = null,
-    DateTime? LastPolledAtUtc = null);
+    DateTime? LastPolledAtUtc = null,
+    string? FailureKind = null);
