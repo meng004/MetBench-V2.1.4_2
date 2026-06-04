@@ -13,7 +13,7 @@ public sealed class HardcodedMrCatalogProviderTests
         new(SutRoot: "/tmp/sut", SystemPython: "python3", OpenMocPython: "python3");
 
     [Fact]
-    public void Load_pins_30_entries()
+    public void Load_pins_governed_entry_count()
     {
         var p = new HardcodedMrCatalogProvider(Opts());
 
@@ -24,7 +24,7 @@ public sealed class HardcodedMrCatalogProviderTests
     }
 
     [Fact]
-    public void Load_spans_16_distinct_SUTs()
+    public void Load_spans_governed_distinct_SUTs()
     {
         var p = new HardcodedMrCatalogProvider(Opts());
 
@@ -47,6 +47,11 @@ public sealed class HardcodedMrCatalogProviderTests
         Assert.Contains("burgers-1d", distinctSuts);
         Assert.Contains("scipy-ivp-lotka-volterra", distinctSuts);
         Assert.Contains("scipy-bvp-poisson-1d", distinctSuts);
+        Assert.Contains("minimum-mr-subset-p3", distinctSuts);
+        Assert.Contains("minimum-mr-subset-p4", distinctSuts);
+        Assert.Contains("minimum-mr-subset-p5", distinctSuts);
+        Assert.Contains("minimum-mr-subset-p8", distinctSuts);
+        Assert.Contains("minimum-mr-subset-p9-surrogate", distinctSuts);
         Assert.Contains("_test-csv", distinctSuts);
     }
 

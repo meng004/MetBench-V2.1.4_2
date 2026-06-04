@@ -1,13 +1,14 @@
 # Minimum-MR-SubSet PUT Import/Export Staging
 
-This directory contains the cloud-side first version of the A-group import/export staging model for `minimum-mr-subset`.
+This directory contains the cloud-side import/export staging model for `minimum-mr-subset`.
 
 Scope:
 
-- Included SUTs: P5, P4, P9.
-- Excluded SUTs: P8, P3, P10, P1, P2, P6, P7.
+- Included staged SUTs: A group P5, P4, P9; B group P8, P3.
+- Excluded SUTs: P10, P1, P2, P6, P7.
 - The exported package is a JSON staging artifact only.
 - The exporter does not write `SUT/`, live System-MT manifests, LiteDB files, or execution evidence repositories.
+- A group has separate live runtime promotion evidence; B group remains import-only until its runtime promotion stage lands.
 
 Evidence captured in the fixtures:
 
@@ -16,7 +17,14 @@ Evidence captured in the fixtures:
 - P5 source path: `experiments/puts/p5_pke.py`
 - P4 source path: `experiments/puts/p4_pendulum.py`
 - P9 source path: `experiments/puts/p9_openmc.py`
+- P3 source path: `experiments/puts/p3_lorenz.py`
+- P8 source path: `experiments/puts/p8_schrodinger.py`
 - Shared smoke source path: `tests/puts/test_smoke.py`
+
+Evidence limits:
+
+- Local external P3/P8 smoke was not claimed by this staging model; the observed external sources import NumPy, and P3 also imports SciPy.
+- No P3/P8 detection matrix was observed in the external source tree; P3/P8 detection records are staged as `Inconclusive`.
 
 Runtime readiness rule:
 

@@ -296,6 +296,26 @@ public static class SystemMtMetadataCatalog
         },
         new EquationMetadata
         {
+            EquationKey = "lorenz",
+            Name = "Lorenz system",
+            CanonicalForm = "dx/dt = sigma(y-x); dy/dt = x(rho-z)-y; dz/dt = xy-beta z",
+            SymbolSystem = "x,y,z state variables; sigma, rho, beta Lorenz parameters.",
+            EquationClass = "ODE",
+            EquationFamily = "chaotic nonlinear dynamics",
+            PrimaryVariables = new List<string> { "x(t)", "y(t)", "z(t)" },
+            PhysicalMeaning = "A three-variable nonlinear dynamical system amplifies nearby initial states over finite horizons.",
+            BenchmarkRationale = "Representative chaotic ODE used to check trajectory-sensitivity transform and observable binding.",
+            ExpectedLaws = new List<string> { "initial-condition-sensitivity", "deterministic-reproducibility" },
+            Parameters = new List<EquationParameter>
+            {
+                new() { Symbol = "sigma", Description = "Prandtl-like Lorenz parameter", Unit = "dimensionless" },
+                new() { Symbol = "rho", Description = "Rayleigh-like Lorenz parameter", Unit = "dimensionless" },
+                new() { Symbol = "beta", Description = "Geometric Lorenz parameter", Unit = "dimensionless" },
+                new() { Symbol = "separation", Description = "Final-state distance between base and perturbed trajectories", Unit = "dimensionless" },
+            },
+        },
+        new EquationMetadata
+        {
             EquationKey = "point-kinetics",
             Name = "Point kinetics",
             CanonicalForm = "dP/dt = ((rho - beta)/Lambda)P + lambda C; dC/dt = beta/Lambda P - lambda C",
@@ -311,6 +331,25 @@ public static class SystemMtMetadataCatalog
                 new() { Symbol = "rho", Description = "Reactivity insertion", Unit = "dimensionless" },
                 new() { Symbol = "P", Description = "Reactor power", Unit = "relative" },
                 new() { Symbol = "C", Description = "Delayed-neutron precursor concentration", Unit = "relative" },
+            },
+        },
+        new EquationMetadata
+        {
+            EquationKey = "schrodinger",
+            Name = "Schrodinger equation",
+            CanonicalForm = "i dpsi/dt = H psi",
+            SymbolSystem = "psi wavefunction; H Hamiltonian operator; ||psi||^2 probability norm.",
+            EquationClass = "PDE",
+            EquationFamily = "complex wave mechanics",
+            PrimaryVariables = new List<string> { "psi(x,t)", "||psi||" },
+            PhysicalMeaning = "Quantum wavefunction propagation preserves probability norm under unitary dynamics.",
+            BenchmarkRationale = "Representative complex PDE used to check norm-conservation and propagation refinement behavior.",
+            ExpectedLaws = new List<string> { "norm-conservation", "time-refinement-convergence" },
+            Parameters = new List<EquationParameter>
+            {
+                new() { Symbol = "psi", Description = "Wavefunction", Unit = "dimensionless" },
+                new() { Symbol = "norm_drift", Description = "Absolute drift from the initial probability norm", Unit = "dimensionless" },
+                new() { Symbol = "time_steps", Description = "Propagation step count", Unit = "count" },
             },
         },
         // PR-A T1 non-JSON I/O adapter: synthetic "equation" registered solely so
@@ -1084,6 +1123,27 @@ public static class SystemMtMetadataCatalog
         },
         new MrMetadata
         {
+            MrId = "p3-trajectory-sensitivity",
+            EquationKey = "lorenz",
+            PhysicalMeaning = "Increasing a Lorenz initial-state perturbation over the same integration horizon increases the final trajectory separation in the deterministic MetBench runtime slice.",
+            InputTransformation = "perturbation -> factor * perturbation with factor = 2 and unchanged Lorenz parameters, base state, dt, and steps.",
+            OutputRelation = "separation(flw) > separation(src)",
+            ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "Mono MR: Lorenz dynamics amplify nearby initial states over a fixed horizon, so a larger initial offset should create a larger final-state distance.",
+            TransformationSemantics = "Apply ScaleField to /initial/perturbation while preserving sigma, rho, beta, dt, step count, and the base initial state.",
+            ObservableSummary = "Compare scalar separation from source and follow-up Lorenz outputs.",
+            PredicateSummary = "Use the existing `greater` / GreaterThan runtime predicate on separation.",
+            ToleranceSummary = "Ordinal deterministic predicate: no numeric tolerance is applied beyond strict ordering.",
+            Applicability = "Applicable when the live P3 SUT exposes /initial/perturbation and outputs scalar separation.",
+            FailureMeaning = "Violation means the solver, adapter, transform binding, or catalog assertion no longer demonstrates the declared trajectory-sensitivity relation.",
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "Initial perturbation scaling factor", ValueRange = "factor > 1" },
+                new() { Symbol = "separation", PhysicalMeaning = "Final-state distance between base and perturbed Lorenz trajectories", ValueRange = "separation >= 0" },
+            },
+        },
+        new MrMetadata
+        {
             MrId = "p4-energy-invariant",
             EquationKey = "hamiltonian-pendulum",
             PhysicalMeaning = "For the same Hamiltonian pendulum initial state and physical time interval, refining the velocity-Verlet time step reduces the measured bounded energy drift.",
@@ -1122,6 +1182,27 @@ public static class SystemMtMetadataCatalog
             {
                 new() { Symbol = "factor", PhysicalMeaning = "Positive reactivity scaling factor", ValueRange = "factor > 1" },
                 new() { Symbol = "max_power", PhysicalMeaning = "Maximum relative power over the transient", ValueRange = "max_power > 0" },
+            },
+        },
+        new MrMetadata
+        {
+            MrId = "p8-norm-conservation",
+            EquationKey = "schrodinger",
+            PhysicalMeaning = "Increasing the propagation step count in the deterministic Schrodinger runtime slice reduces the measured scalar norm drift.",
+            InputTransformation = "time_steps -> factor * time_steps with factor = 2 and unchanged initial norm and drift constant.",
+            OutputRelation = "norm_drift(flw) < norm_drift(src)",
+            ComparisonType = MrComparisonType.Ordinal,
+            MetaPatternRationale = "Conv MR: norm-preserving propagation should show smaller measured norm drift when the step count is refined.",
+            TransformationSemantics = "Apply ScaleField to /solver/time_steps while preserving the wave initial norm and drift constant.",
+            ObservableSummary = "Compare scalar norm_drift from source and follow-up Schrodinger runtime-slice outputs.",
+            PredicateSummary = "Use the existing `less` / LessThan runtime predicate on norm_drift.",
+            ToleranceSummary = "Ordinal deterministic predicate: no numeric tolerance is applied beyond strict ordering.",
+            Applicability = "Applicable when the live P8 SUT exposes /solver/time_steps and outputs scalar norm_drift.",
+            FailureMeaning = "Violation means the solver, adapter, transform binding, or catalog assertion no longer demonstrates the declared norm-conservation refinement relation.",
+            Parameters = new List<MrParameter>
+            {
+                new() { Symbol = "factor", PhysicalMeaning = "Propagation-step scaling factor", ValueRange = "factor = 2" },
+                new() { Symbol = "norm_drift", PhysicalMeaning = "Absolute drift from the initial probability norm", ValueRange = "norm_drift >= 0" },
             },
         },
         new MrMetadata

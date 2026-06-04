@@ -1,0 +1,62 @@
+{
+  "sut_name": "minimum-mr-subset-p8",
+  "program": {
+    "program_name": "minimum-mr-subset-p8",
+    "equation": "Schrodinger equation",
+    "equation_key": "schrodinger",
+    "program_type": "Num",
+    "runner_script_relative_path": "minimum_mr_subset_p8.py",
+    "input_parser_script_relative_path": "minimum_mr_subset_p8_input_parser.py",
+    "output_parser_script_relative_path": "minimum_mr_subset_p8_output_parser.py",
+    "input_adapter_script_relative_path": "minimum_mr_subset_p8_input_parser.py",
+    "output_adapter_script_relative_path": "minimum_mr_subset_p8_output_parser.py",
+    "python_executable_kind": "system"
+  },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "deterministic norm-drift convergence slice",
+    "runtime_key": "system",
+    "input_contract": "JSON initial norm, drift constant, and propagation step count.",
+    "output_contract": "JSON scalar norm and norm-drift metrics.",
+    "adapter": "Pure-stdlib Python runner and JSON parser/adapter under SUT/minimum_mr_subset_p8/.",
+    "dependency_risk": "pure-stdlib"
+  },
+  "mrs": [
+    {
+      "mr_id": "p8-norm-conservation",
+      "sut_name": "minimum-mr-subset-p8",
+      "display_name": "Minimum-MR-SubSet P8 - Schrodinger norm conservation",
+      "description": "Norm-conservation convergence: for the same wave state and propagation interval, increasing the propagation step count must reduce the scalar norm-drift observable in the deterministic MetBench runtime slice.",
+      "mr_family": "MinimumMrSubset.P8.Convergence.NormConservation",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "less",
+      "assertion_name": "LessThan",
+      "value_name": "norm_drift",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/solver/time_steps" }
+      ],
+      "tolerance_rel": 0,
+      "tolerance_abs": 0,
+      "noise_aware": false,
+      "equation_key": "schrodinger",
+      "equation": "Schrodinger equation",
+      "program_type": "Num",
+      "meta_pattern": "Conv",
+      "source_level": "ImportedResearchPromotion",
+      "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Conv MR: a norm-preserving Schrodinger propagation should show smaller measured norm drift when the propagation step count is refined.",
+        "transformation_semantics": "Apply ScaleField to /solver/time_steps with factor=2; initial norm and drift constant remain unchanged.",
+        "observable_summary": "Observe `norm_drift` from source and follow-up outputs for MR `p8-norm-conservation`.",
+        "predicate_summary": "Predicate `less` / `LessThan` checks that follow-up norm_drift is strictly less than source norm_drift.",
+        "tolerance_summary": "Ordinal deterministic predicate: no numeric tolerance is applied beyond the declared ordering relation.",
+        "applicability": "Applicable when the SUT exposes /solver/time_steps and outputs scalar `norm_drift` from deterministic norm-conservation runs.",
+        "failure_meaning": "Failure indicates the solver, adapter, or transform binding did not preserve the expected Schrodinger norm-conservation refinement behavior."
+      },
+      "sample_case_relative_path": "sample/standard.json",
+      "work_root_name": "MetBenchMinimumMrSubsetP8",
+      "timeout_seconds": 30
+    }
+  ]
+}
