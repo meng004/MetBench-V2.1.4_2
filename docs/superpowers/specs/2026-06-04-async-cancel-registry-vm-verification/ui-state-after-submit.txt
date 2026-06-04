@@ -1,0 +1,7 @@
+﻿job=094ce1e7-a82b-4265-9cde-d8fd626ec267
+state=RunningSource
+sut=-
+phase=running-source
+progress=40
+failure=
+result=

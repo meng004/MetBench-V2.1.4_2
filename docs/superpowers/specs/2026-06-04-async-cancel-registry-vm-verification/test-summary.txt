@@ -1,0 +1,15 @@
+branch=codex/async-cancel-true-interrupt-repair-plan
+head=4b0628617e50fe2b46d51d06229dba23268576e2
+selected_mr=advection-amplitude-linearity
+selected_value=peak_amplitude
+selected_relation=launcher asserts followup>source for factor=2; VM preflight screenshot showed source=0.75585863737664949, followup=1.511717274753299
+build_exit=0
+build_warnings=21322
+build_errors=0
+probe_modified_build_output=C:\MetBench-V2.1.4_2\_worktrees\async-cancel-true-interrupt-repair-plan\MetBench_Client\bin\Debug\net8.0-windows7.0\SUT\advection_1d\advection_1d.py
+before_pid=5860
+after_pid_alive=False
+ui_cancelled=True
+before_pid_gone=True
+result_line=result=
+result=PASS
