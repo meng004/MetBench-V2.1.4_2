@@ -42,14 +42,24 @@ public sealed class DefaultProcessExecutor : IProcessExecutor
         {
             await process.WaitForExitAsync(timeoutCts.Token).ConfigureAwait(false);
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            TryKillProcessTree(process);
+            await DrainAfterKillAsync(stdoutTask, stderrTask).ConfigureAwait(false);
+            throw new OperationCanceledException(cancellationToken);
+        }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
             timedOut = true;
-            try { process.Kill(entireProcessTree: true); } catch { /* swallow */ }
+            TryKillProcessTree(process);
         }
 
-        var stdout = await stdoutTask.ConfigureAwait(false);
-        var stderr = await stderrTask.ConfigureAwait(false);
+        var stdout = timedOut
+            ? await ReadAfterKillAsync(stdoutTask).ConfigureAwait(false)
+            : await stdoutTask.ConfigureAwait(false);
+        var stderr = timedOut
+            ? await ReadAfterKillAsync(stderrTask).ConfigureAwait(false)
+            : await stderrTask.ConfigureAwait(false);
         sw.Stop();
 
         return new ProcessResult(
@@ -58,6 +68,39 @@ public sealed class DefaultProcessExecutor : IProcessExecutor
             Stderr: stderr,
             Elapsed: sw.Elapsed,
             TimedOut: timedOut);
+    }
+
+    private static void TryKillProcessTree(Process process)
+    {
+        try
+        {
+            if (!process.HasExited)
+            {
+                process.Kill(entireProcessTree: true);
+            }
+        }
+        catch
+        {
+            // Timeout/cancellation handling is already the reported outcome.
+        }
+    }
+
+    private static async Task DrainAfterKillAsync(Task<string> stdoutTask, Task<string> stderrTask)
+    {
+        await ReadAfterKillAsync(stdoutTask).ConfigureAwait(false);
+        await ReadAfterKillAsync(stderrTask).ConfigureAwait(false);
+    }
+
+    private static async Task<string> ReadAfterKillAsync(Task<string> task)
+    {
+        try
+        {
+            return await task.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+        }
+        catch
+        {
+            return string.Empty;
+        }
     }
 
     private static (string FileName, string Arguments) PlatformShell(string command)
