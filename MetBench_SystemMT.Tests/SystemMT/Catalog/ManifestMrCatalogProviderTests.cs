@@ -434,7 +434,7 @@ public sealed class ManifestMrCatalogProviderTests : System.IDisposable
     // ---- PR-1 T1 manifest-driven runtime environments ------------------------------------
     // New manifest python_executable_kind values must resolve through
     // LauncherOptions.RuntimePythons without growing per-runtime fields. Unknown non-system
-    // keys must fail closed at manifest-load time with a diagnostic naming the missing key.
+    // keys stay loadable so launcher preflight can record RuntimeProfileMissing evidence.
 
     private const string FutureRuntimeManifest = """
         {
