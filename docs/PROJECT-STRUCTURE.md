@@ -1,6 +1,6 @@
 # MetBench 项目结构
 
-> **结构快照基线**: 2026-05-31（代码测试基线由 `docs/status/current.md` §2 实时维护；已同步 T0-T5 release readiness、client i18n、full-page bilingual UI evidence、usage guide）
+> **结构快照基线**: 2026-06-04（代码测试基线由 `docs/status/current.md` §2 实时维护；已同步 T0-T5 release readiness、client i18n、full-page bilingual UI evidence、usage guide、Minimum-MR-SubSet A/B group runtime promotion、async/runtime governance v1）
 > **目标读者**: 新加入仓库的开发者 / 验收员 / reviewer。文档全息呈现仓库当前结构 + SUT 测试覆盖 + MetBench 框架测试覆盖。
 > **更详细的设计**: [`AGENTS.md`](../AGENTS.md)（roadmap）· [`CLAUDE.md`](../CLAUDE.md)（agent 注意事项）· [`docs/design/`](design/)（架构）
 > **当前状态账本**: [`docs/status/current.md`](status/current.md)。本文件只投影结构与测试矩阵，不重新定义当前主线状态。
@@ -32,7 +32,7 @@ Tools projects: `tools/smokeshot/` (Windows UIA / screenshot evidence), `tools/S
 
 ---
 
-## §2 SUT 清单（当前 launcher catalog：16 个 — 15 真实物理 SUT + 1 合成测试 SUT）
+## §2 SUT 清单（当前 launcher catalog：21 个 — runtime provider inventory = 21 SUT / 17 equations / 38 MRs）
 
 | SUT | 目录 | 域 | 算法 / 程序类型 | Runner | Sample / catalog | 接入 PR |
 |---|---|---|---|---|---|---|
@@ -51,6 +51,11 @@ Tools projects: `tools/smokeshot/` (Windows UIA / screenshot evidence), `tools/S
 | **Burgers 1D** | `SUT/burgers_1d/` | PDE (nonlinear hyperbolic) | Pure-stdlib conservative Lax-Friedrichs flux differencing + periodic BC | `burgers_1d_runner.py` | `catalog.json` + sample | PR #140 |
 | **SciPy IVP Lotka-Volterra** | `SUT/scipy_ivp_lotka_volterra/` | ODE (Lotka-Volterra, predator-prey nonlinear) | **External library**: SciPy `solve_ivp` adaptive RK45 (rtol=1e-9 / atol=1e-12) | `scipy_ivp_lotka_volterra.py` | `catalog.json` + sample | T3C-IVP |
 | **SciPy BVP Poisson 1D** | `SUT/scipy_bvp_poisson_1d/` | PDE (elliptic Poisson `-u''=f`, Dirichlet BC) | **External library**: SciPy `solve_bvp` adaptive BVP (tol=1e-9) | `scipy_bvp_poisson_1d.py` | `catalog.json` + sample | T3C-BVP |
+| **Minimum-MR-SubSet P3** | `SUT/minimum_mr_subset_p3/` | Lorenz / trajectory sensitivity surrogate | Pure-stdlib staged-import runtime slice | `minimum_mr_subset_p3.py` | `catalog.json` + sample | B-group runtime promotion |
+| **Minimum-MR-SubSet P4** | `SUT/minimum_mr_subset_p4/` | Hamiltonian pendulum / energy invariant surrogate | Pure-stdlib staged-import runtime slice | `minimum_mr_subset_p4.py` | `catalog.json` + sample | A-group runtime promotion |
+| **Minimum-MR-SubSet P5** | `SUT/minimum_mr_subset_p5/` | Point kinetics / power response surrogate | Pure-stdlib staged-import runtime slice | `minimum_mr_subset_p5.py` | `catalog.json` + sample | A-group runtime promotion |
+| **Minimum-MR-SubSet P8** | `SUT/minimum_mr_subset_p8/` | Schrodinger / norm conservation surrogate | Pure-stdlib staged-import runtime slice | `minimum_mr_subset_p8.py` | `catalog.json` + sample | B-group runtime promotion |
+| **Minimum-MR-SubSet P9 surrogate** | `SUT/minimum_mr_subset_p9/` | Neutron transport / OpenMC surrogate | Pure-stdlib deterministic surrogate; **not real OpenMC execution** | `minimum_mr_subset_p9.py` | `catalog.json` + sample | A-group runtime promotion |
 | **_test-csv** (合成测试 SUT) | `SUT/_test_csv/` | **非物理** — `metbench_io` helper 集成回归 | Pure-stdlib echo runner; uses `SUT/_shared/metbench_io/` csv-row helper | `_test_csv_runner.py` | `catalog.json` + sample CSV | PR-A (#162) |
 
 辅助包：
@@ -86,11 +91,11 @@ SUT 接入到框架的 hook：
 
 **Launcher end-to-end 测试（按 SUT）**：`LauncherEndToEndOdeTests`（decay_chain / damped_oscillator / lotka_volterra）· `LauncherEndToEndPoissonTests`（PR #134）· `LauncherEndToEndAdvectionTests`（PR #136）· `LauncherEndToEndWaveTests`（PR #138）· `LauncherEndToEndBurgersTests`（PR #140）· `LauncherEndToEndScipyIvpLotkaVolterraTests`（T3C-IVP，`[SkippableFact]`）· `LauncherEndToEndScipyBvpPoissonTests`（T3C-BVP，`[SkippableFact]`）· `LauncherEndToEndTestCsvTests`（PR-A 合成 _test_csv SUT）。
 
-**SUT 系统级 MR 总数（2026-05-26，post-PR-A）**：
-- launcher / manifest catalog：**30** MR-on-SUT 绑定 = 29 真实物理 + 1 合成 (`csv-roundtrip-identity`)
-- 覆盖方程：**13** = 12 真实物理 + 1 合成 (`_test_csv`)
-- 真实物理 inventory（排除合成 SUT）：**15 SUT / 12 equations / 29 MRs**，与 T3C-BVP 后一致
-- 当前结构风险：runtime 已切到 provider-backed catalog，生产 fallback 与 importer 具体类耦合已删除；sample-level evidence 已落第一条可复盘链，但覆盖粒度仍可继续扩展。T3 代表性 PDE-class 覆盖（椭圆 / 一阶线性双曲 / 二阶线性双曲 / 非线性双曲）已通过 PR #134 / #136 / #138 / #140 闭环；T3C-IVP 通过 `scipy-ivp-lotka-volterra` 把 External-solver-pilot 接入路径打通（`LauncherOptions.ScipyPython` + `PythonExecutableKinds.Scipy` + `ManifestMrCatalogProvider` scipy 分支 + `ScipyTestPaths.cs` clean-skip helper，env var `METBENCH_SCIPY_PYTHON`）；T3C-BVP 通过 `scipy-bvp-poisson-1d` 把 BVP/elliptic external-solver 路径打通（复用 T3C-IVP 基础设施，无新框架变更）；PR-1（#157）把 `LauncherOptions.RuntimePythons` 通用化为 manifest-driven 解析（新增运行时家族纯配置即可，不再改 `LauncherOptions` 字段）；PR-A（#162）把 SUT I/O wire format 从 JSON 单独扩展到 csv-row / plain-text（`metbench_io` helper）；PR-B（#161）与 PR-2（#159）分别落地 same-equation cross-method differential runner 与 T4-to-T0 discovery binder；进一步 T3 扩展由 next-SUT decision record 决定（见 `docs/status/current.md` §4 与 active plan index）
+**SUT 系统级 MR 总数（2026-06-04，post Minimum-MR-SubSet A/B runtime promotion）**：
+- launcher / manifest catalog runtime provider inventory：**38** MR-on-SUT 绑定。
+- 当前 SUT inventory：**21** SUT = 15 real-physics / external-solver SUT + 1 synthetic `_test-csv` + 5 controlled Minimum-MR-SubSet staged-import runtime slices (`P3` / `P4` / `P5` / `P8` / explicit `P9` surrogate)。
+- 当前 equation inventory：**17** = 12 prior real-physics equations + `_test_csv` + `lorenz` + `hamiltonian-pendulum` + `point-kinetics` + `schrodinger`。`minimum-mr-subset-p9-surrogate` reuses the neutron-transport category but remains deterministic surrogate evidence, not real OpenMC evidence。
+- 当前结构风险：runtime 已切到 provider-backed catalog，生产 fallback 与 importer 具体类耦合已删除；sample-level evidence 已落第一条可复盘链，但覆盖粒度仍可继续扩展。T3 代表性 PDE-class 覆盖（椭圆 / 一阶线性双曲 / 二阶线性双曲 / 非线性双曲）已通过 PR #134 / #136 / #138 / #140 闭环；T3C-IVP / T3C-BVP 打通 SciPy external-solver pilot；Minimum-MR-SubSet A/B group promotion 打通 import-only → live runtime → async pipeline 的受控增量路径，但外部 P3/P8 NumPy/SciPy smoke 仍不在 MetBench runtime 完成证据内。进一步 T3 / heavy dependency / surrogate replacement 扩展由 next-SUT decision record 决定（见 `docs/status/current.md` §4 与 active plan index）。
 
 ---
 
