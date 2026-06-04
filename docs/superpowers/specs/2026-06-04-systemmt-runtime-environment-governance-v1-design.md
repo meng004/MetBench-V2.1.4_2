@@ -2,6 +2,7 @@
 
 > Date: 2026-06-04
 > Status: Accepted scoped design
+> T-plan placement: T1 direct support / runtime execution boundary
 > Scope: System MT runtime environment attribution, preflight gating, and evidence classification
 > Source decision: user accepted the three-layer scheme and the recommended v1 boundary on 2026-06-04
 
@@ -153,3 +154,18 @@ An implementation PR for this design needs concrete evidence:
 - `git diff --check`
 
 If .NET or external dependencies are unavailable in a local environment, the PR must state that limitation and avoid claiming those checks passed.
+
+## 8. T-Plan Activation
+
+This design is activated as a T1 follow-up, not as a new T0, T3, or T5 track.
+
+Reason:
+
+- T1 already owns runner, adapter, runtime entry, multi-environment resolution, and operational support around executing SUTs.
+- Current T1 multi-environment management is Controlled for runtime-key resolution, but it does not yet make runtime/dependency/middleware health a first-class preflight and evidence object.
+- Runtime failures must be separated before MR assertion evaluation, so this belongs before T0 assertion interpretation and before T5 anomaly workflow classification.
+
+Activation rule:
+
+- Active implementation must use `docs/superpowers/plans/2026-06-04-systemmt-runtime-environment-governance-v1-plan.md`.
+- The plan remains Active until implementation lands, focused launcher/async/evidence tests pass, and `docs/status/current.md` records the T1 runtime governance path as Controlled.

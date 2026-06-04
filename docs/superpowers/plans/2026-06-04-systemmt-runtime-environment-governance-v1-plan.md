@@ -1,13 +1,31 @@
-# System MT Runtime Environment Governance v1 Implementation Plan
+# T1 System MT Runtime Environment Governance v1 Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Add T1 runtime environment governance so SUT runtime, dependency, and middleware failures are preflight-checked and recorded separately from MetBench orchestration failures and MR assertion failures.
+
+**Architecture:** Build on the existing System MT launcher facade and async pipeline. Add runtime profile/capsule models, a preflight gate, and runtime failure evidence without adding Docker, remote, HPC, WPF UI, dependency auto-installation, or MR semantic changes in v1.
+
+**Tech Stack:** .NET 8, C#, xUnit, System MT launcher, async job pipeline, existing execution evidence recorder, manifest runtime keys.
+
+---
 
 > Date: 2026-06-04
-> Status: Active scoped plan
+> Status: Active scoped T1 plan
 > Design: `docs/superpowers/specs/2026-06-04-systemmt-runtime-environment-governance-v1-design.md`
 > Execution mode: TDD, cloud-safe core implementation first
 
 ## Goal
 
 Make SUT runtime environments explicit, preflight-checked, and evidence-backed before System MT execution runs. The first version must separate runtime/dependency/middleware failures from MetBench orchestration failures and MR assertion failures.
+
+## T-Plan Placement
+
+This plan is a T1 follow-up.
+
+T1 owns the direct support layer around System MT execution: runner, adapter, runtime entry, I/O boundary, multi-environment resolution, and operational execution support. The existing T1 multi-env work made runtime keys configurable through `LauncherOptions.RuntimePythons` and `ResolvePythonExecutable(...)`; this plan activates the next T1 step by turning runtime/dependency/middleware health into preflight and evidence.
+
+This plan does not reopen T0 MR semantics, T3 SUT coverage selection, T5 anomaly workflow behavior, or T6 mutation testing.
 
 ## Non-Goals
 
