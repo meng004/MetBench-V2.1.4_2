@@ -25,7 +25,7 @@
 
 ## Stage 1 Import-Only Evidence
 
-Stage 1 commit: `61afaac feat(systemmt): stage minimum MR subset B group imports`.
+Stage 1 commit: `8ff573a feat(systemmt): stage minimum MR subset B group imports`.
 
 - Adds `BGroupPutFixtures.Create("P3")` and `Create("P8")`.
 - P3 observables: `t`, `trajectory`, `centroid`.
