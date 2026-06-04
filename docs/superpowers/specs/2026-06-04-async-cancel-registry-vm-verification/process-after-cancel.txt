@@ -1,0 +1,6 @@
+﻿label=after-cancel
+pid=5860
+alive=False
+sut_script=C:\MetBench-V2.1.4_2\_worktrees\async-cancel-true-interrupt-repair-plan\MetBench_Client\bin\Debug\net8.0-windows7.0\SUT\advection_1d\advection_1d.py
+process_name=
+start_time=

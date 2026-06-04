@@ -1,0 +1,2 @@
+MetBench_Client/App.xaml.cs registers singleton IJobCancellationRegistry -> JobCancellationRegistry.
+MetBench_Client/Hosting/SystemMtJobWorkerHostedService.cs constructs SystemMtJobWorker with _cancellation.
