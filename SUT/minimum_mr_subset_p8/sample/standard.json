@@ -1,0 +1,9 @@
+{
+  "wave": {
+    "initial_norm": 1.0,
+    "drift_constant": 0.25
+  },
+  "solver": {
+    "time_steps": 256
+  }
+}

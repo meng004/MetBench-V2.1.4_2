@@ -968,6 +968,34 @@ internal static class LegacyCatalogFactory
 
         yield return new MrBlueprint(
             new MrSummary(
+                Id: "p3-trajectory-sensitivity",
+                DisplayName: "Minimum-MR-SubSet P3 - Lorenz trajectory sensitivity",
+                SutName: "minimum-mr-subset-p3",
+                TransformationName: "ScaleField",
+                AssertionName: "GreaterThan",
+                ValueName: "separation",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Trajectory-sensitivity relation: for the same Lorenz parameters " +
+                    "and integration horizon, increasing the initial-state perturbation " +
+                    "must increase the final trajectory separation observable in the " +
+                    "deterministic MetBench runtime slice.",
+                MrFamily: "MinimumMrSubset.P3.Sensitivity.Trajectory"),
+            SampleCaseRelativePath: Path.Combine("minimum_mr_subset_p3", "sample", "standard.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p3", "minimum_mr_subset_p3.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p3", "minimum_mr_subset_p3_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p3", "minimum_mr_subset_p3_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchMinimumMrSubsetP3",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p3", "minimum_mr_subset_p3_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p3", "minimum_mr_subset_p3_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/initial/perturbation") },
+            AssertionTypeCode: "greater",
+            EquationKey: "lorenz");
+
+        yield return new MrBlueprint(
+            new MrSummary(
                 Id: "p4-energy-invariant",
                 DisplayName: "Minimum-MR-SubSet P4 - Hamiltonian energy refinement",
                 SutName: "minimum-mr-subset-p4",
@@ -1021,6 +1049,34 @@ internal static class LegacyCatalogFactory
             TransformSteps: new[] { new MrTransformStep("ScaleField", "/kinetics/rho") },
             AssertionTypeCode: "greater",
             EquationKey: "point-kinetics");
+
+        yield return new MrBlueprint(
+            new MrSummary(
+                Id: "p8-norm-conservation",
+                DisplayName: "Minimum-MR-SubSet P8 - Schrodinger norm conservation",
+                SutName: "minimum-mr-subset-p8",
+                TransformationName: "ScaleField",
+                AssertionName: "LessThan",
+                ValueName: "norm_drift",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description:
+                    "Norm-conservation convergence: for the same wave state and " +
+                    "propagation interval, increasing the propagation step count " +
+                    "must reduce the scalar norm-drift observable in the deterministic " +
+                    "MetBench runtime slice.",
+                MrFamily: "MinimumMrSubset.P8.Convergence.NormConservation"),
+            SampleCaseRelativePath: Path.Combine("minimum_mr_subset_p8", "sample", "standard.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p8", "minimum_mr_subset_p8.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p8", "minimum_mr_subset_p8_input_parser.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p8", "minimum_mr_subset_p8_output_parser.py"),
+            PythonExecutable: options.SystemPython,
+            WorkRootName: "MetBenchMinimumMrSubsetP8",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p8", "minimum_mr_subset_p8_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p8", "minimum_mr_subset_p8_output_parser.py"),
+            TransformSteps: new[] { new MrTransformStep("ScaleField", "/solver/time_steps") },
+            AssertionTypeCode: "less",
+            EquationKey: "schrodinger");
 
         yield return new MrBlueprint(
             new MrSummary(

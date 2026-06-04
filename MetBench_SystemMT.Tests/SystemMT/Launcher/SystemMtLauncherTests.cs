@@ -95,21 +95,23 @@ public sealed class SystemMtLauncherTests
         Assert.Equal("openmoc-pincell-nu-sigma-f", descriptors[18].Id);
         Assert.Equal("openmoc-pincell-ray-track-convergence", descriptors[19].Id);
         Assert.Equal("openmoc-pincell-sigma-a", descriptors[20].Id);
-        Assert.Equal("p4-energy-invariant", descriptors[21].Id);
-        Assert.Equal("p5-power-response", descriptors[22].Id);
-        Assert.Equal("p9-k-eff-noise-aware", descriptors[23].Id);
-        Assert.Equal("poisson-mesh-richardson", descriptors[24].Id);
-        Assert.Equal("poisson-source-superposition", descriptors[25].Id);
-        Assert.Equal("projectile-scale-v0", descriptors[26].Id);
-        Assert.Equal("scipy-bvp-poisson-seed-mesh-insensitivity", descriptors[27].Id);
-        Assert.Equal("scipy-bvp-poisson-source-superposition", descriptors[28].Id);
-        Assert.Equal("scipy-ivp-lv-prey-growth-monotone", descriptors[29].Id);
-        Assert.Equal("scipy-ivp-lv-step-convergence", descriptors[30].Id);
-        Assert.Equal("subchannel-flow-temperature-monotone", descriptors[31].Id);
-        Assert.Equal("subchannel-friction-invariance", descriptors[32].Id);
-        Assert.Equal("subchannel-heat-flux-linearity", descriptors[33].Id);
-        Assert.Equal("wave-amplitude-linearity", descriptors[34].Id);
-        Assert.Equal("wave-mesh-energy-convergence", descriptors[35].Id);
+        Assert.Equal("p3-trajectory-sensitivity", descriptors[21].Id);
+        Assert.Equal("p4-energy-invariant", descriptors[22].Id);
+        Assert.Equal("p5-power-response", descriptors[23].Id);
+        Assert.Equal("p8-norm-conservation", descriptors[24].Id);
+        Assert.Equal("p9-k-eff-noise-aware", descriptors[25].Id);
+        Assert.Equal("poisson-mesh-richardson", descriptors[26].Id);
+        Assert.Equal("poisson-source-superposition", descriptors[27].Id);
+        Assert.Equal("projectile-scale-v0", descriptors[28].Id);
+        Assert.Equal("scipy-bvp-poisson-seed-mesh-insensitivity", descriptors[29].Id);
+        Assert.Equal("scipy-bvp-poisson-source-superposition", descriptors[30].Id);
+        Assert.Equal("scipy-ivp-lv-prey-growth-monotone", descriptors[31].Id);
+        Assert.Equal("scipy-ivp-lv-step-convergence", descriptors[32].Id);
+        Assert.Equal("subchannel-flow-temperature-monotone", descriptors[33].Id);
+        Assert.Equal("subchannel-friction-invariance", descriptors[34].Id);
+        Assert.Equal("subchannel-heat-flux-linearity", descriptors[35].Id);
+        Assert.Equal("wave-amplitude-linearity", descriptors[36].Id);
+        Assert.Equal("wave-mesh-energy-convergence", descriptors[37].Id);
     }
 
     [Fact]
