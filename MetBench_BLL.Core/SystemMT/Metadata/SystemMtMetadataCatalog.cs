@@ -1129,7 +1129,7 @@ public static class SystemMtMetadataCatalog
             InputTransformation = "perturbation -> factor * perturbation with factor = 2 and unchanged Lorenz parameters, base state, dt, and steps.",
             OutputRelation = "separation(flw) > separation(src)",
             ComparisonType = MrComparisonType.Ordinal,
-            MetaPatternRationale = "Sensitivity MR: Lorenz dynamics amplify nearby initial states over a fixed horizon, so a larger initial offset should create a larger final-state distance.",
+            MetaPatternRationale = "Mono MR: Lorenz dynamics amplify nearby initial states over a fixed horizon, so a larger initial offset should create a larger final-state distance.",
             TransformationSemantics = "Apply ScaleField to /initial/perturbation while preserving sigma, rho, beta, dt, step count, and the base initial state.",
             ObservableSummary = "Compare scalar separation from source and follow-up Lorenz outputs.",
             PredicateSummary = "Use the existing `greater` / GreaterThan runtime predicate on separation.",

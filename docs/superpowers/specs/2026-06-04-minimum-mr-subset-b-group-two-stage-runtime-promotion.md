@@ -23,6 +23,8 @@
 | P3 | `minimum-mr-subset-p3` | `p3-trajectory-sensitivity` | `/initial/perturbation` | `greater` / `GreaterThan` | `separation` | Doubling the initial perturbation increases final trajectory separation in the deterministic Lorenz runtime slice. |
 | P8 | `minimum-mr-subset-p8` | `p8-norm-conservation` | `/solver/time_steps` | `less` / `LessThan` | `norm_drift` | Doubling propagation steps reduces norm drift in the deterministic Schrodinger runtime slice. |
 
+P3 remains a trajectory-sensitivity stress case at the SUT level, but its live catalog governance meta-pattern is `Mono` / `m_mono` because the promoted predicate is monotone: a larger perturbation must produce a larger `separation` observable. This keeps the runtime slice inside the existing `Mono` / `Inv` / `Conv` catalog matrix instead of adding a new meta-pattern category without a separate governance plan.
+
 ## Stage 1 Import-Only Evidence
 
 Stage 1 commit: `8ff573a feat(systemmt): stage minimum MR subset B group imports`.

@@ -980,7 +980,7 @@ internal static class LegacyCatalogFactory
                     "and integration horizon, increasing the initial-state perturbation " +
                     "must increase the final trajectory separation observable in the " +
                     "deterministic MetBench runtime slice.",
-                MrFamily: "MinimumMrSubset.P3.Sensitivity.Trajectory"),
+                MrFamily: "MinimumMrSubset.P3.Scaling.TrajectorySeparation"),
             SampleCaseRelativePath: Path.Combine("minimum_mr_subset_p3", "sample", "standard.json"),
             RunnerScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p3", "minimum_mr_subset_p3.py"),
             InputAdapterScriptPath: Path.Combine(options.SutRoot, "minimum_mr_subset_p3", "minimum_mr_subset_p3_input_parser.py"),
