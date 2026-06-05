@@ -8,6 +8,12 @@ Validate PR #298 / branch `t0-t2-async-import-export-pr1-job-model`.
 
 This PR changes WPF-hosted async worker wiring and `SystemMtAsyncJobViewModel`, so Windows evidence is required before merge. Do not implement unrelated fixes. Do not edit files unless a build/test failure is directly attributable to this PR and the smallest fix is obvious.
 
+The branch includes review-fix commit `98dc8bd` for three PR #298 inline comments:
+
+- WPF `SystemMtAsyncJobViewModel` must compile with `IReadOnlyList<>` by importing `System.Collections.Generic`.
+- A queued job already marked terminal, especially cancelled RunBatch jobs, must not be dispatched by `SystemMtJobWorker`.
+- RunBatch duplicate MR ids must fail closed before launcher dispatch.
+
 ## Preconditions
 
 1. You are in the MetBench repository on the Windows VM.
@@ -51,8 +57,14 @@ dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj --no-restore 
 Expected:
 
 - Exit code 0.
-- Test count should be at least 73 passed.
+- Test count should be at least 75 passed.
 - No failed tests.
+
+The focused run must include these review-fix guards:
+
+- `RunBatchJobOperationHandlerTests.ExecuteAsync_rejects_duplicate_mr_ids_before_dispatch`
+- `SystemMtJobWorkerTests.Terminal_queued_operation_job_is_not_dispatched`
+- `WpfAsyncJobCancellationWiringTests.Async_job_view_model_projects_batch_items_from_polling_status`
 
 ## WPF UI-Visible Smoke
 
@@ -76,6 +88,7 @@ Evidence to collect:
 - Exact MR id used.
 - Final state text.
 - Poll log text, especially whether it remains readable after the ViewModel change.
+- Confirmation that the app build did not fail on `SystemMtAsyncJobViewModel` / `IReadOnlyList<>`.
 
 Note: PR-1 does not add a UI command for RunBatch submission. Batch item visibility is cloud-safe projected into `PollLog` for future batch jobs; this VM smoke only needs to confirm the existing async page still builds, opens, submits, polls, and displays logs.
 
