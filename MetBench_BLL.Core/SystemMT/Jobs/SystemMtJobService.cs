@@ -157,11 +157,11 @@ public sealed class SystemMtJobService : ISystemMtJobService
             case SystemMtJobKind.ImportAssets:
                 RequireNonBlank(request.PackageRoot, nameof(request.PackageRoot));
                 RequireNonBlank(request.StagingRoot, nameof(request.StagingRoot));
-                throw UnsupportedUntilHandlerExists(request.Kind);
+                break;
             case SystemMtJobKind.ExportAssets:
                 RequireNonBlank(request.PackageRoot, nameof(request.PackageRoot));
                 RequireNonBlank(request.ExportRoot, nameof(request.ExportRoot));
-                throw UnsupportedUntilHandlerExists(request.Kind);
+                break;
             case SystemMtJobKind.ExportExecutionEvidence:
             case SystemMtJobKind.ExportReport:
                 if (request.ExecutionId is null || request.ExecutionId == Guid.Empty)

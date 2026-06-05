@@ -71,12 +71,12 @@ public class SystemMtJobServiceTests
     }
 
     [Fact]
-    public async Task SubmitOperationAsync_rejects_export_until_operation_handler_exists()
+    public async Task SubmitOperationAsync_rejects_execution_artifact_export_until_operation_handler_exists()
     {
         var svc = Build(new InMemoryJobStore(), new ChannelJobQueue());
         var request = new SystemMtOperationJobRequest(
-            SystemMtJobKind.ExportAssets,
-            PackageRoot: "/tmp/source-package",
+            SystemMtJobKind.ExportExecutionEvidence,
+            ExecutionId: Guid.NewGuid(),
             ExportRoot: "/tmp/export");
 
         var ex = await Assert.ThrowsAsync<NotSupportedException>(

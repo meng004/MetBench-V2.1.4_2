@@ -1,6 +1,7 @@
 using MetBench_BLL.SystemMT.Jobs;
 using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Persistence;
+using MetBench_BLL.Core.SystemMT.ImportExport.Put;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -55,7 +56,12 @@ public sealed class SystemMtJobWorkerHostedService : BackgroundService
                 var launcher = scope.ServiceProvider.GetRequiredService<ISystemMtLauncher>();
                 var evidenceRepository = scope.ServiceProvider.GetService<IExecutionEvidenceRepository>();
                 var pipeline = new SystemMtAsyncPipeline(launcher, evidenceRepository);
-                var operationDispatcher = new RunBatchJobOperationHandler(launcher, evidenceRepository);
+                var operationDispatcher = new SystemMtJobOperationDispatcher(new ISystemMtJobOperationHandler[]
+                {
+                    new RunBatchJobOperationHandler(launcher, evidenceRepository),
+                    new ImportAssetsJobOperationHandler(new SutImportStagingService()),
+                    new ExportAssetsJobOperationHandler(),
+                });
                 var worker = new SystemMtJobWorker(
                     _store,
                     pipeline,
