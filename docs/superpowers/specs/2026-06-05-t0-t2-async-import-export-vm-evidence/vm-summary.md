@@ -1,9 +1,10 @@
 ﻿# T0-T2 Async Import/Export PR4 WPF VM Summary
 
 branch=t0-t2-async-import-export-pr4-wpf
-head=0cada90de6cc40e75f76a5dfe90103bb2924675e
-validation_base=4c46ec08da632afb47adbb91d63467dd5f7b8b88
-origin_main=22748408e3fa01b67aecedf57b0b4cdc23e6d328
+vm_validation_head=0cada90de6cc40e75f76a5dfe90103bb2924675e
+pre_validation_base=4c46ec08da632afb47adbb91d63467dd5f7b8b88
+origin_main_at_validation=22748408e3fa01b67aecedf57b0b4cdc23e6d328
+current_pr_head=resolve from git/GitHub; do not copy a static value from this evidence file
 
 ## Commands
 
