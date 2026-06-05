@@ -11,7 +11,7 @@ public sealed class ExportExecutionArtifactsJobOperationHandler : ISystemMtJobOp
         _exporter = exporter ?? throw new ArgumentNullException(nameof(exporter));
     }
 
-    public SystemMtJobKind Kind => SystemMtJobKind.ExportExecutionEvidence;
+    public SystemMtJobKind Kind => SystemMtJobKind.ExportExecutionArtifacts;
 
     public async Task<JobExecutionOutcome> ExecuteAsync(
         Guid jobId,

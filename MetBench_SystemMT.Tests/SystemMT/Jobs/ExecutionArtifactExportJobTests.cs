@@ -10,7 +10,23 @@ namespace MetBench_SystemMT.Tests.SystemMT.Jobs;
 public sealed class ExecutionArtifactExportJobTests
 {
     [Fact]
-    public async Task ExportExecutionEvidence_job_writes_manifest_artifact_path()
+    public void Execution_artifact_export_operation_kind_matches_plan_contract()
+    {
+        Assert.True(
+            Enum.TryParse<SystemMtJobKind>("ExportExecutionArtifacts", out var kind),
+            "The T0-T2 async import/export plan and VM prompt require SystemMtJobKind.ExportExecutionArtifacts.");
+
+        Assert.Equal(
+            "ExportExecutionArtifacts",
+            new ExportExecutionArtifactsJobOperationHandler(new ExecutionArtifactExporter(
+                new FakeResultRepository(),
+                new FakeEvidenceRepository(),
+                new HtmlSystemMtResultReportRenderer())).Kind.ToString());
+        Assert.Equal("ExportExecutionArtifacts", kind.ToString());
+    }
+
+    [Fact]
+    public async Task ExportExecutionArtifacts_job_writes_manifest_artifact_path()
     {
         using var temp = TempDirectory.Create();
         var executionId = Guid.NewGuid();
@@ -30,7 +46,7 @@ public sealed class ExecutionArtifactExportJobTests
             operationDispatcher: dispatcher);
 
         var handle = await service.SubmitOperationAsync(new SystemMtOperationJobRequest(
-            SystemMtJobKind.ExportExecutionEvidence,
+            SystemMtJobKind.ExportExecutionArtifacts,
             ExportRoot: temp.Root,
             ExecutionId: executionId));
         await worker.RunJobAsync(await queue.DequeueAsync(default), default);

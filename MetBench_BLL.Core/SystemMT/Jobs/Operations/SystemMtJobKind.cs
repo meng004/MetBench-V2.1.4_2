@@ -7,6 +7,6 @@ public enum SystemMtJobKind
     RunBatch,
     ImportAssets,
     ExportAssets,
-    ExportExecutionEvidence,
+    ExportExecutionArtifacts,
     ExportReport,
 }

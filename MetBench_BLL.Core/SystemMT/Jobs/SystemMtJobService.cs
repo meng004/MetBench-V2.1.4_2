@@ -162,7 +162,7 @@ public sealed class SystemMtJobService : ISystemMtJobService
                 RequireNonBlank(request.PackageRoot, nameof(request.PackageRoot));
                 RequireNonBlank(request.ExportRoot, nameof(request.ExportRoot));
                 break;
-            case SystemMtJobKind.ExportExecutionEvidence:
+            case SystemMtJobKind.ExportExecutionArtifacts:
                 if (request.ExecutionId is null || request.ExecutionId == Guid.Empty)
                     throw new ArgumentException("ExecutionId must be a non-empty Guid.", nameof(request));
                 RequireNonBlank(request.ExportRoot, nameof(request.ExportRoot));
