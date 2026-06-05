@@ -3,7 +3,7 @@
 > **日期**: 2026-06-06
 > **状态**: 生效
 > **目的**: 明确哪些计划仍指导当前开发，哪些只是历史记录，防止执行和监控误取旧计划。
-> **Current audited head**: local `origin/main` = `066bae48ff87ef300d4591efab09d1073f92fff5` (PR #298 merge commit after T0-T2 async import/export PR-1, verified by `git fetch origin` on 2026-06-06).
+> **Audited checkpoints**: PR #298 (`066bae48ff87ef300d4591efab09d1073f92fff5`) is the first merged implementation checkpoint for T0-T2 async import/export; PR #303 (`3460b1ba8885fe259e66f076faa1393e83c2246a`) is the docs-sync checkpoint. Live `origin/main` must still be resolved from git before status claims.
 
 ---
 
