@@ -598,7 +598,8 @@ Tests must assert:
 - export writes `manifest.json`;
 - export writes `execution-result.json`;
 - export writes `execution-evidence.json` only when evidence exists;
-- export writes at least HTML and Markdown report files through existing render/report services;
+- export writes an HTML report through the existing result renderer;
+- Markdown report export is fail-closed unless `SystemMtReportService` and a real domain `Execution` row are available;
 - result/evidence import APIs are not introduced, guarded by `ExecutionArtifactImportBoundaryTests`.
 
 Run:

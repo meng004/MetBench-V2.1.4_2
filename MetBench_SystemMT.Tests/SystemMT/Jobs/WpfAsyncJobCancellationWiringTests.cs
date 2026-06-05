@@ -39,6 +39,9 @@ public sealed class WpfAsyncJobCancellationWiringTests
         Assert.Contains("new RunBatchJobOperationHandler(launcher, evidenceRepository)", hosted);
         Assert.Contains("new ImportAssetsJobOperationHandler(new SutImportStagingService())", hosted);
         Assert.Contains("new ExportAssetsJobOperationHandler()", hosted);
+        Assert.Contains("new ExportExecutionArtifactsJobOperationHandler(new ExecutionArtifactExporter", hosted);
+        Assert.Contains("GetRequiredService<ISystemMtResultRepository>()", hosted);
+        Assert.Contains("GetRequiredService<ISystemMtResultReportRenderer>()", hosted);
         Assert.Contains("operationDispatcher: operationDispatcher", hosted);
     }
 
