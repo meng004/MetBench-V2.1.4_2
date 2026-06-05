@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MetBench System-Level MT Run Report</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+       margin: 2rem auto; max-width: 1100px; color: #1f2328; }
+h1 { font-size: 1.6rem; margin-bottom: 0.4rem; }
+.summary { margin-bottom: 1rem; padding: 0.6rem 0.9rem; background: #f6f8fa;
+           border: 1px solid #d0d7de; border-radius: 6px; }
+.meta { margin: 0; font-size: 0.85rem; color: #57606a; }
+.counts { margin: 0.3rem 0 0 0; font-weight: 600; }
+.counts .passed { color: #1a7f37; }
+.counts .failed { color: #cf222e; }
+.empty { padding: 1rem; background: #f6f8fa; border-radius: 6px; color: #57606a; }
+table { width: 100%; border-collapse: collapse; }
+thead th { text-align: left; padding: 0.4rem 0.6rem; border-bottom: 2px solid #d0d7de; }
+tbody td { padding: 0.4rem 0.6rem; border-bottom: 1px solid #eaeef2; }
+tr.row-pass { background: #ffffff; }
+tr.row-fail { background: #fff8f8; }
+tr.detail td { padding: 0; border-bottom: 1px solid #d0d7de; }
+tr.detail dl { margin: 0.3rem 0.6rem 0.6rem 1.2rem; display: grid;
+               grid-template-columns: max-content 1fr; gap: 0.2rem 0.8rem; }
+tr.detail dt { font-weight: 600; color: #57606a; }
+tr.detail dd { margin: 0; }
+.badge { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 999px;
+         font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em; }
+.badge-pass { background: #dcfce7; color: #166534; }
+.badge-fail { background: #fee2e2; color: #991b1b; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+       font-size: 0.85rem; background: #eaeef2; padding: 0 0.25rem; border-radius: 3px; }
+</style>
+</head>
+<body>
+<h1>MetBench System-Level MT Run Report</h1>
+<section class="summary">
+<p class="meta">Generated at <time datetime="2026-06-05T22:38:29.5163146+00:00">2026-06-05 22:38:29Z</time></p>
+<p class="counts"><span class="total">Total: 1</span> <span class="passed">Passed: 1</span> <span class="failed">Failed: 0</span></p>
+</section>
+<table>
+<thead><tr>
+<th>Run At</th><th>Scenario</th><th>Assertion</th><th>Source</th><th>Follow-up</th><th>Result</th>
+</tr></thead>
+<tbody>
+<tr class="row-pass">
+<td>2026-06-05 22:38:07Z</td>
+<td>advection-amplitude-linearity</td>
+<td>Greater on <code>peak_amplitude</code></td>
+<td>0.7558586373766495</td>
+<td>1.511717274753299</td>
+<td><span class="badge badge-pass">PASS</span></td>
+</tr>
+<tr class="detail"><td colspan="6">
+<details>
+<summary>Details</summary>
+<dl>
+<dt>Source case</dt><dd>source.in.json</dd>
+<dt>Follow-up case</dt><dd>followup.in.json</dd>
+<dt>Source exit code</dt><dd>0</dd>
+<dt>Follow-up exit code</dt><dd>0</dd>
+<dt>Source elapsed</dt><dd>00:00:00.1167936</dd>
+<dt>Follow-up elapsed</dt><dd>00:00:00.1181466</dd>
+<dt>Transformation</dt><dd>ScaleField</dd>
+<dt>Transformation parameters</dt><dd><code>factor</code>=<code>2</code></dd>
+<dt>Source metrics</dt><dd><code>mass_integral</code>=<code>0.12533138634818491</code>, <code>peak_amplitude</code>=<code>0.7558586373766495</code>, <code>peak_location</code>=<code>0.75</code></dd>
+<dt>Follow-up metrics</dt><dd><code>mass_integral</code>=<code>0.25066277269636983</code>, <code>peak_amplitude</code>=<code>1.511717274753299</code>, <code>peak_location</code>=<code>0.75</code></dd>
+<dt>Spec ID</dt><dd>advection-amplitude-linearity</dd>
+<dt>Spec kind</dt><dd>MrSpec</dd>
+<dt>Predicate</dt><dd>peak_amplitude-greater (BinaryComparison)</dd>
+<dt>Typed status</dt><dd><span class="badge typed-status-passed">Passed</span></dd>
+<dt>Expected</dt><dd>0.7558586373766495</dd>
+<dt>Actual</dt><dd>1.511717274753299</dd>
+<dt>Residual</dt><dd>0.7558586373766495</dd>
+<dt>Tolerance</dt><dd>0</dd>
+<dt>Pair quality</dt><dd>
+<table class="pair-quality">
+<thead><tr><th>planned_pairs</th><th>executed_pairs</th><th>valid_pairs</th><th>passed_pairs</th><th>failed_pairs</th><th>skipped_pairs</th><th>invalid_spec_pairs</th><th>pass_rate_valid</th><th>pass_rate_all</th></tr></thead>
+<tbody><tr><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>100.0 %</td><td>100.0 %</td></tr></tbody>
+</table>
+</dd>
+</dl>
+</details>
+</td></tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -66,6 +66,37 @@ public sealed class WpfAsyncJobCancellationWiringTests
         Assert.Contains("batch:", viewModel);
     }
 
+    [Fact]
+    public void Async_job_view_model_submits_all_release_closure_operation_kinds()
+    {
+        var viewModel = ReadRepoFile("MetBench_Client", "ViewModels", "SystemMtAsyncJobViewModel.cs");
+
+        Assert.Contains("SubmitOperationAsync", viewModel);
+        Assert.Contains("SystemMtOperationJobRequest", viewModel);
+        Assert.Contains("SystemMtJobKind.RunMr", viewModel);
+        Assert.Contains("SystemMtJobKind.RunBatch", viewModel);
+        Assert.Contains("SystemMtJobKind.ImportAssets", viewModel);
+        Assert.Contains("SystemMtJobKind.ExportAssets", viewModel);
+        Assert.Contains("SystemMtJobKind.ExportExecutionArtifacts", viewModel);
+        Assert.Contains("ArtifactPathDisplay", viewModel);
+        Assert.Contains("status.ArtifactPath", viewModel);
+    }
+
+    [Fact]
+    public void Async_job_page_exposes_operation_selector_and_release_closure_inputs()
+    {
+        var xaml = ReadRepoFile("MetBench_Client", "Views", "Pages", "SystemMtAsyncJobPage.xaml");
+
+        Assert.Contains("AsyncOperationCombo", xaml);
+        Assert.Contains("AsyncMrCombo", xaml);
+        Assert.Contains("AsyncBatchMrIdsBox", xaml);
+        Assert.Contains("AsyncPackageRootBox", xaml);
+        Assert.Contains("AsyncStagingRootBox", xaml);
+        Assert.Contains("AsyncExportRootBox", xaml);
+        Assert.Contains("AsyncExecutionIdBox", xaml);
+        Assert.Contains("AsyncArtifactPath", xaml);
+    }
+
     private static string ReadRepoFile(params string[] parts)
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);

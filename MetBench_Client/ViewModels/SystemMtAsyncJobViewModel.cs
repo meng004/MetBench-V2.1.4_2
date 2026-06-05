@@ -24,10 +24,52 @@ public sealed partial class SystemMtAsyncJobViewModel : ObservableObject, INavig
     private string _selectedMrId = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsRunBatchSelected))]
+    [NotifyPropertyChangedFor(nameof(IsImportAssetsSelected))]
+    [NotifyPropertyChangedFor(nameof(IsExportAssetsSelected))]
+    [NotifyPropertyChangedFor(nameof(IsExportExecutionArtifactsSelected))]
+    [NotifyCanExecuteChangedFor(nameof(SubmitCommand))]
+    private SystemMtJobKind _selectedOperationKind = SystemMtJobKind.RunMr;
+
+    [ObservableProperty]
+    private ObservableCollection<SystemMtJobKind> _availableOperationKinds = new(
+        new[]
+        {
+            SystemMtJobKind.RunMr,
+            SystemMtJobKind.RunBatch,
+            SystemMtJobKind.ImportAssets,
+            SystemMtJobKind.ExportAssets,
+            SystemMtJobKind.ExportExecutionArtifacts,
+        });
+
+    [ObservableProperty]
     private ObservableCollection<string> _availableMrIds = new();
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SubmitCommand))]
+    private string _batchMrIdsText = string.Empty;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SubmitCommand))]
+    private string _packageRoot = string.Empty;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SubmitCommand))]
+    private string _stagingRoot = string.Empty;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SubmitCommand))]
+    private string _exportRoot = string.Empty;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SubmitCommand))]
+    private string _executionIdText = string.Empty;
+
+    [ObservableProperty]
     private string _jobIdDisplay = "-";
+
+    [ObservableProperty]
+    private string _operationKindDisplay = "-";
 
     [ObservableProperty]
     private string _stateDisplay = "-";
@@ -49,6 +91,9 @@ public sealed partial class SystemMtAsyncJobViewModel : ObservableObject, INavig
     private string _resultSummary = string.Empty;
 
     [ObservableProperty]
+    private string _artifactPathDisplay = "-";
+
+    [ObservableProperty]
     private ObservableCollection<string> _pollLog = new();
 
     [ObservableProperty]
@@ -63,6 +108,14 @@ public sealed partial class SystemMtAsyncJobViewModel : ObservableObject, INavig
     public bool IsNotRunning => !IsRunning;
 
     public bool HasFailureReason => !string.IsNullOrWhiteSpace(FailureReason);
+
+    public bool IsRunBatchSelected => SelectedOperationKind == SystemMtJobKind.RunBatch;
+
+    public bool IsImportAssetsSelected => SelectedOperationKind == SystemMtJobKind.ImportAssets;
+
+    public bool IsExportAssetsSelected => SelectedOperationKind == SystemMtJobKind.ExportAssets;
+
+    public bool IsExportExecutionArtifactsSelected => SelectedOperationKind == SystemMtJobKind.ExportExecutionArtifacts;
 
     public SystemMtAsyncJobViewModel(ISystemMtJobService jobs, ISystemMtLauncher launcher)
     {
@@ -85,17 +138,22 @@ public sealed partial class SystemMtAsyncJobViewModel : ObservableObject, INavig
     [RelayCommand(CanExecute = nameof(CanSubmit))]
     private async Task SubmitAsync()
     {
-        if (!CanSubmit()) return;
+        if (!CanSubmit())
+        {
+            return;
+        }
 
         ResetForNewJob();
-        var handle = await _jobs.SubmitAsync(new SystemMtJobRequest(SelectedMrId)).ConfigureAwait(true);
+        var request = BuildOperationRequest();
+        var handle = await _jobs.SubmitOperationAsync(request).ConfigureAwait(true);
         _currentJobId = handle.JobId;
         JobIdDisplay = handle.JobId.ToString();
+        OperationKindDisplay = request.Kind.ToString();
         StateDisplay = SystemMtJobState.Queued.ToString();
         SutNameDisplay = "-";
         PhaseDisplay = "queued";
         ProgressPercent = 0;
-        PollLog.Add($"{DateTime.UtcNow:HH:mm:ss.fff} {SystemMtJobState.Queued} / queued / 0%");
+        PollLog.Add($"{DateTime.UtcNow:HH:mm:ss.fff} {request.Kind} / {SystemMtJobState.Queued} / queued / 0%");
         IsRunning = true;
 
         _pollTimer.Start();
@@ -110,7 +168,10 @@ public sealed partial class SystemMtAsyncJobViewModel : ObservableObject, INavig
     [RelayCommand(CanExecute = nameof(CanCancel))]
     private async Task CancelAsync()
     {
-        if (_currentJobId is not { } id) return;
+        if (_currentJobId is not { } id)
+        {
+            return;
+        }
 
         await _jobs.CancelAsync(id).ConfigureAwait(true);
         await PollOnceAsync().ConfigureAwait(true);
@@ -118,7 +179,24 @@ public sealed partial class SystemMtAsyncJobViewModel : ObservableObject, INavig
 
     private bool CanSubmit()
     {
-        return IsNotRunning && !string.IsNullOrWhiteSpace(SelectedMrId);
+        if (!IsNotRunning)
+        {
+            return false;
+        }
+
+        return SelectedOperationKind switch
+        {
+            SystemMtJobKind.RunMr => !string.IsNullOrWhiteSpace(SelectedMrId),
+            SystemMtJobKind.RunBatch => ParseBatchMrIds().Count > 0,
+            SystemMtJobKind.ImportAssets => !string.IsNullOrWhiteSpace(PackageRoot)
+                && !string.IsNullOrWhiteSpace(StagingRoot),
+            SystemMtJobKind.ExportAssets => !string.IsNullOrWhiteSpace(PackageRoot)
+                && !string.IsNullOrWhiteSpace(ExportRoot),
+            SystemMtJobKind.ExportExecutionArtifacts => Guid.TryParse(ExecutionIdText, out var id)
+                && id != Guid.Empty
+                && !string.IsNullOrWhiteSpace(ExportRoot),
+            _ => false,
+        };
     }
 
     private bool CanCancel()
@@ -135,42 +213,62 @@ public sealed partial class SystemMtAsyncJobViewModel : ObservableObject, INavig
         {
             SelectedMrId = AvailableMrIds[0];
         }
+
+        if (AvailableMrIds.Count > 0 && string.IsNullOrWhiteSpace(BatchMrIdsText))
+        {
+            BatchMrIdsText = string.Join(", ", AvailableMrIds.Take(2));
+        }
     }
 
     private async Task PollOnceAsync()
     {
-        if (_currentJobId is not { } id) return;
+        if (_currentJobId is not { } id)
+        {
+            return;
+        }
 
         var status = await _jobs.GetStatusAsync(id).ConfigureAwait(true);
-        if (status is null) return;
+        if (status is null)
+        {
+            return;
+        }
 
+        OperationKindDisplay = status.Kind.ToString();
         StateDisplay = status.State.ToString();
         SutNameDisplay = string.IsNullOrWhiteSpace(status.SutName) ? "-" : status.SutName;
         PhaseDisplay = string.IsNullOrWhiteSpace(status.CurrentPhase) ? "-" : status.CurrentPhase;
         ProgressPercent = status.ProgressPercent;
         FailureReason = status.FailureReason;
+        ArtifactPathDisplay = string.IsNullOrWhiteSpace(status.ArtifactPath) ? "-" : status.ArtifactPath;
         ApplyBatchItems(status.BatchItems);
         var batchSuffix = BatchItemsDisplay.Count == 0 ? string.Empty : $" / batch: {string.Join(", ", BatchItemsDisplay)}";
-        PollLog.Add($"{status.UpdatedAtUtc:HH:mm:ss.fff} {status.State} / {PhaseDisplay} / {status.ProgressPercent}%{batchSuffix}");
+        var artifactSuffix = string.IsNullOrWhiteSpace(status.ArtifactPath) ? string.Empty : $" / artifact: {status.ArtifactPath}";
+        PollLog.Add($"{status.UpdatedAtUtc:HH:mm:ss.fff} {status.Kind} / {status.State} / {PhaseDisplay} / {status.ProgressPercent}%{batchSuffix}{artifactSuffix}");
 
         if (status.State.IsTerminal())
         {
             _pollTimer.Stop();
             IsRunning = false;
-            await LoadResultAsync(id, status.State).ConfigureAwait(true);
+            await LoadResultAsync(id, status).ConfigureAwait(true);
         }
     }
 
-    private async Task LoadResultAsync(Guid id, SystemMtJobState finalState)
+    private async Task LoadResultAsync(Guid id, SystemMtJobStatus status)
     {
-        if (finalState == SystemMtJobState.Succeeded)
+        if (status.State == SystemMtJobState.Succeeded)
         {
+            if (status.Kind != SystemMtJobKind.RunMr)
+            {
+                ResultSummary = DescribeOperationResult(status);
+                return;
+            }
+
             var result = await _jobs.GetResultAsync(id).ConfigureAwait(true);
             ResultSummary = result is null ? "(no result)" : DescribeResult(result);
             return;
         }
 
-        ResultSummary = $"{finalState}: {FailureReason ?? "(no reason)"}";
+        ResultSummary = $"{status.Kind} {status.State}: {FailureReason ?? "(no reason)"}";
     }
 
     private static string DescribeResult(MrRunResult result)
@@ -189,17 +287,86 @@ public sealed partial class SystemMtAsyncJobViewModel : ObservableObject, INavig
             string.IsNullOrWhiteSpace(result.FailureReason) ? "Failure reason: -" : $"Failure reason: {result.FailureReason}");
     }
 
+    private static string DescribeOperationResult(SystemMtJobStatus status)
+    {
+        var lines = new List<string>
+        {
+            $"{status.Kind} succeeded",
+            $"Job: {status.JobId}",
+            $"Artifact path: {Readable(status.ArtifactPath)}",
+        };
+
+        if (!string.IsNullOrWhiteSpace(status.PackageRoot))
+        {
+            lines.Add($"Package root: {status.PackageRoot}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(status.StagingRoot))
+        {
+            lines.Add($"Staging root: {status.StagingRoot}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(status.ExportRoot))
+        {
+            lines.Add($"Export root: {status.ExportRoot}");
+        }
+
+        if (status.ExecutionId is { } executionId)
+        {
+            lines.Add($"Execution id: {executionId}");
+        }
+
+        return string.Join(Environment.NewLine, lines);
+    }
+
     private void ApplyBatchItems(IReadOnlyList<SystemMtBatchJobItem>? items)
     {
         BatchItemsDisplay.Clear();
         if (items is null || items.Count == 0)
+        {
             return;
+        }
 
         foreach (var item in items)
         {
             var reason = string.IsNullOrWhiteSpace(item.FailureReason) ? string.Empty : $" ({item.FailureReason})";
             BatchItemsDisplay.Add($"{item.MrId}: {item.State}{reason}");
         }
+    }
+
+    private SystemMtOperationJobRequest BuildOperationRequest()
+    {
+        return SelectedOperationKind switch
+        {
+            SystemMtJobKind.RunMr => new SystemMtOperationJobRequest(
+                SystemMtJobKind.RunMr,
+                MrId: SelectedMrId),
+            SystemMtJobKind.RunBatch => new SystemMtOperationJobRequest(
+                SystemMtJobKind.RunBatch,
+                MrIds: ParseBatchMrIds()),
+            SystemMtJobKind.ImportAssets => new SystemMtOperationJobRequest(
+                SystemMtJobKind.ImportAssets,
+                PackageRoot: PackageRoot.Trim(),
+                StagingRoot: StagingRoot.Trim()),
+            SystemMtJobKind.ExportAssets => new SystemMtOperationJobRequest(
+                SystemMtJobKind.ExportAssets,
+                PackageRoot: PackageRoot.Trim(),
+                ExportRoot: ExportRoot.Trim()),
+            SystemMtJobKind.ExportExecutionArtifacts => new SystemMtOperationJobRequest(
+                SystemMtJobKind.ExportExecutionArtifacts,
+                ExportRoot: ExportRoot.Trim(),
+                ExecutionId: Guid.Parse(ExecutionIdText.Trim())),
+            _ => throw new InvalidOperationException($"Unsupported async operation: {SelectedOperationKind}"),
+        };
+    }
+
+    private IReadOnlyList<string> ParseBatchMrIds()
+    {
+        return BatchMrIdsText
+            .Split(new[] { ',', ';', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
     }
 
     private void ResetForNewJob()
@@ -211,7 +378,11 @@ public sealed partial class SystemMtAsyncJobViewModel : ObservableObject, INavig
         ResultSummary = string.Empty;
         ProgressPercent = 0;
         StateDisplay = "-";
+        OperationKindDisplay = "-";
         SutNameDisplay = "-";
         PhaseDisplay = "-";
+        ArtifactPathDisplay = "-";
     }
+
+    private static string Readable(string? value) => string.IsNullOrWhiteSpace(value) ? "-" : value;
 }

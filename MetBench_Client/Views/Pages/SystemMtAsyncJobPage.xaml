@@ -17,39 +17,134 @@
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <ComboBox Grid.Column="0"
+            <TextBlock Grid.Row="0"
+                       Grid.Column="0"
+                       Margin="0,0,12,8"
+                       VerticalAlignment="Center"
+                       FontWeight="SemiBold"
+                       Text="Operation" />
+            <ComboBox Grid.Row="0"
+                      Grid.Column="1"
+                      AutomationProperties.AutomationId="AsyncOperationCombo"
+                      MinWidth="220"
+                      ItemsSource="{Binding ViewModel.AvailableOperationKinds}"
+                      SelectedItem="{Binding ViewModel.SelectedOperationKind, Mode=TwoWay}" />
+
+            <TextBlock Grid.Row="0"
+                       Grid.Column="2"
+                       Margin="16,0,12,8"
+                       VerticalAlignment="Center"
+                       FontWeight="SemiBold"
+                       Text="MR" />
+            <ComboBox Grid.Row="0"
+                      Grid.Column="3"
                       AutomationProperties.AutomationId="AsyncMrCombo"
                       MinWidth="320"
                       ItemsSource="{Binding ViewModel.AvailableMrIds}"
                       SelectedItem="{Binding ViewModel.SelectedMrId, Mode=TwoWay}" />
-            <ui:Button Grid.Column="1"
+            <ui:Button Grid.Row="0"
+                       Grid.Column="4"
                        AutomationProperties.AutomationId="AsyncSubmitButton"
                        Margin="12,0,0,0"
                        Content="Submit"
                        Command="{Binding ViewModel.SubmitCommand}"
                        IsEnabled="{Binding ViewModel.IsNotRunning}" />
-            <ui:Button Grid.Column="2"
+            <ui:Button Grid.Row="0"
+                       Grid.Column="5"
                        AutomationProperties.AutomationId="AsyncRefreshButton"
                        Margin="12,0,0,0"
                        Content="Refresh"
                        Command="{Binding ViewModel.RefreshCommand}" />
-            <ui:Button Grid.Column="3"
+            <ui:Button Grid.Row="0"
+                       Grid.Column="6"
                        AutomationProperties.AutomationId="AsyncCancelButton"
                        Margin="12,0,0,0"
                        Content="Cancel"
                        Command="{Binding ViewModel.CancelCommand}"
                        IsEnabled="{Binding ViewModel.IsRunning}" />
+
+            <TextBlock Grid.Row="1"
+                       Grid.Column="0"
+                       Margin="0,8,12,4"
+                       VerticalAlignment="Center"
+                       FontWeight="SemiBold"
+                       Text="Batch MRs" />
+            <TextBox Grid.Row="1"
+                     Grid.Column="1"
+                     Grid.ColumnSpan="6"
+                     AutomationProperties.AutomationId="AsyncBatchMrIdsBox"
+                     Margin="0,8,0,4"
+                     Text="{Binding ViewModel.BatchMrIdsText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBlock Grid.Row="2"
+                       Grid.Column="0"
+                       Margin="0,4,12,4"
+                       VerticalAlignment="Center"
+                       FontWeight="SemiBold"
+                       Text="Package root" />
+            <TextBox Grid.Row="2"
+                     Grid.Column="1"
+                     AutomationProperties.AutomationId="AsyncPackageRootBox"
+                     Margin="0,4,0,4"
+                     Text="{Binding ViewModel.PackageRoot, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Grid.Row="2"
+                       Grid.Column="2"
+                       Margin="16,4,12,4"
+                       VerticalAlignment="Center"
+                       FontWeight="SemiBold"
+                       Text="Staging root" />
+            <TextBox Grid.Row="2"
+                     Grid.Column="3"
+                     Grid.ColumnSpan="4"
+                     AutomationProperties.AutomationId="AsyncStagingRootBox"
+                     Margin="0,4,0,4"
+                     Text="{Binding ViewModel.StagingRoot, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBlock Grid.Row="3"
+                       Grid.Column="0"
+                       Margin="0,4,12,0"
+                       VerticalAlignment="Center"
+                       FontWeight="SemiBold"
+                       Text="Export root" />
+            <TextBox Grid.Row="3"
+                     Grid.Column="1"
+                     AutomationProperties.AutomationId="AsyncExportRootBox"
+                     Margin="0,4,0,0"
+                     Text="{Binding ViewModel.ExportRoot, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Grid.Row="3"
+                       Grid.Column="2"
+                       Margin="16,4,12,0"
+                       VerticalAlignment="Center"
+                       FontWeight="SemiBold"
+                       Text="Execution id" />
+            <TextBox Grid.Row="3"
+                     Grid.Column="3"
+                     Grid.ColumnSpan="4"
+                     AutomationProperties.AutomationId="AsyncExecutionIdBox"
+                     Margin="0,4,0,0"
+                     Text="{Binding ViewModel.ExecutionIdText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
         </Grid>
 
         <Grid Grid.Row="1" Margin="0,16,0,0">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -63,13 +158,17 @@
 
             <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,12,4" FontWeight="SemiBold" Text="Job" />
             <TextBlock Grid.Row="0" Grid.Column="1" Margin="0,0,0,4" AutomationProperties.AutomationId="AsyncJobId" Text="{Binding ViewModel.JobIdDisplay}" />
-            <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,12,4" FontWeight="SemiBold" Text="State" />
-            <TextBlock Grid.Row="1" Grid.Column="1" Margin="0,0,0,4" AutomationProperties.AutomationId="AsyncState" Text="{Binding ViewModel.StateDisplay}" />
-            <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,0,12,4" FontWeight="SemiBold" Text="SUT" />
-            <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,0,0,4" AutomationProperties.AutomationId="AsyncSut" Text="{Binding ViewModel.SutNameDisplay}" />
-            <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,0,12,4" FontWeight="SemiBold" Text="Phase" />
-            <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,0,0,4" AutomationProperties.AutomationId="AsyncPhase" Text="{Binding ViewModel.PhaseDisplay}" />
-            <ProgressBar Grid.Row="4"
+            <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,12,4" FontWeight="SemiBold" Text="Operation" />
+            <TextBlock Grid.Row="1" Grid.Column="1" Margin="0,0,0,4" AutomationProperties.AutomationId="AsyncOperationKind" Text="{Binding ViewModel.OperationKindDisplay}" />
+            <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,0,12,4" FontWeight="SemiBold" Text="State" />
+            <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,0,0,4" AutomationProperties.AutomationId="AsyncState" Text="{Binding ViewModel.StateDisplay}" />
+            <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,0,12,4" FontWeight="SemiBold" Text="SUT" />
+            <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,0,0,4" AutomationProperties.AutomationId="AsyncSut" Text="{Binding ViewModel.SutNameDisplay}" />
+            <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,0,12,4" FontWeight="SemiBold" Text="Phase" />
+            <TextBlock Grid.Row="4" Grid.Column="1" Margin="0,0,0,4" AutomationProperties.AutomationId="AsyncPhase" Text="{Binding ViewModel.PhaseDisplay}" />
+            <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,0,12,4" FontWeight="SemiBold" Text="Artifact" />
+            <TextBlock Grid.Row="5" Grid.Column="1" Margin="0,0,0,4" AutomationProperties.AutomationId="AsyncArtifactPath" Text="{Binding ViewModel.ArtifactPathDisplay}" TextWrapping="Wrap" />
+            <ProgressBar Grid.Row="6"
                          Grid.Column="0"
                          Grid.ColumnSpan="2"
                          AutomationProperties.AutomationId="AsyncProgress"
@@ -81,7 +180,7 @@
         </Grid>
 
         <TextBlock Grid.Row="1"
-                   Margin="0,116,0,0"
+                   Margin="0,162,0,0"
                    Foreground="{DynamicResource SystemFillColorCriticalBrush}"
                    AutomationProperties.AutomationId="AsyncFailureReason"
                    Text="{Binding ViewModel.FailureReason}"
