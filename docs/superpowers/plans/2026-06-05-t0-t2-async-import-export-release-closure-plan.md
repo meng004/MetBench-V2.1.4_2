@@ -525,11 +525,11 @@ public sealed class ExportAssetsJobOperationHandler : ISystemMtJobOperationHandl
         if (string.IsNullOrWhiteSpace(record.PackageRoot) || string.IsNullOrWhiteSpace(record.ExportRoot))
             return Task.FromResult(new SystemMtJobOperationOutcome(SystemMtJobState.Failed, "PackageRoot and ExportRoot are required."));
 
-        progress.Report(new SystemMtJobProgress("reading source package", 20));
+        progress.Report(new SystemMtJobProgress(SystemMtJobState.Running, "reading source package", 20));
         var unit = SutImportPackageExporter.Import(record.PackageRoot);
-        progress.Report(new SystemMtJobProgress("writing export package", 80));
+        progress.Report(new SystemMtJobProgress(SystemMtJobState.Running, "writing export package", 80));
         var artifact = SutImportPackageExporter.Export(unit, record.ExportRoot);
-        progress.Report(new SystemMtJobProgress("asset export complete", 100));
+        progress.Report(new SystemMtJobProgress(SystemMtJobState.Succeeded, "asset export complete", 100));
         return Task.FromResult(new SystemMtJobOperationOutcome(SystemMtJobState.Succeeded, ArtifactPath: artifact));
     }
 }
