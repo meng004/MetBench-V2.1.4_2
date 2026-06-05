@@ -618,7 +618,7 @@ public sealed record ExecutionArtifactExportManifest(
 
 - [ ] **Step 4: Implement exporter**
 
-Use structured JSON serialization and the exact interfaces discovered in Task 0. The following code is illustrative; update it to exact current method names before implementation:
+Use structured JSON serialization and the exact interfaces discovered in Task 0. The code below reflects the current interface shape verified on 2026-06-05: `ISystemMtResultRepository.GetAsync(string, ...)`, `IExecutionEvidenceRepository.GetByExecutionAsync(Guid, ...)`, `ISystemMtResultReportRenderer.Render(records, evidenceMap, context)`, and `SystemMtReportService.GenerateExecution(Guid, string)`.
 
 ```csharp
 public sealed class ExecutionArtifactExporter
@@ -634,7 +634,7 @@ public sealed class ExecutionArtifactExporter
         CancellationToken cancellationToken = default)
     {
         Directory.CreateDirectory(request.ExportRoot);
-        var record = await _results.GetByIdAsync(request.ExecutionId, cancellationToken)
+        var record = await _results.GetAsync(request.ExecutionId.ToString(), cancellationToken)
             ?? throw new InvalidOperationException($"Execution result '{request.ExecutionId}' was not found.");
 
         var files = new List<string>();
@@ -642,9 +642,10 @@ public sealed class ExecutionArtifactExporter
         await File.WriteAllTextAsync(resultFile, JsonSerializer.Serialize(record, JsonOptions), cancellationToken);
         files.Add("execution-result.json");
 
+        ExecutionEvidence? evidence = null;
         if (request.IncludeEvidence && _evidence is not null)
         {
-            var evidence = await _evidence.GetByExecutionAsync(request.ExecutionId, cancellationToken);
+            evidence = await _evidence.GetByExecutionAsync(request.ExecutionId, cancellationToken);
             if (evidence is not null)
             {
                 var evidenceFile = Path.Combine(request.ExportRoot, "execution-evidence.json");
@@ -656,14 +657,17 @@ public sealed class ExecutionArtifactExporter
         if (request.IncludeHtml)
         {
             var htmlFile = Path.Combine(request.ExportRoot, "report.html");
-            await File.WriteAllTextAsync(htmlFile, _html.Render(new[] { record }), cancellationToken);
+            var evidenceMap = evidence is null
+                ? null
+                : new Dictionary<Guid, ExecutionEvidence> { [request.ExecutionId] = evidence };
+            await File.WriteAllTextAsync(htmlFile, _html.Render(new[] { record }, evidenceMap), cancellationToken);
             files.Add("report.html");
         }
 
         if (request.IncludeMarkdown)
         {
             var markdownFile = Path.Combine(request.ExportRoot, "report.md");
-            await File.WriteAllTextAsync(markdownFile, _markdown.GenerateExecution(record), cancellationToken);
+            _markdown.GenerateExecution(request.ExecutionId, markdownFile);
             files.Add("report.md");
         }
 
