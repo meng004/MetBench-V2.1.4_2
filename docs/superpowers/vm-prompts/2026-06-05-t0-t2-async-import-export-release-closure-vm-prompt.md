@@ -122,7 +122,7 @@ Run the WPF app and capture real evidence:
 9. Submit asset import and asset export jobs.
 10. Confirm asset import/export produces real artifact paths, including `staging-manifest.json` and `sut-import-unit.json` where applicable.
 11. Submit execution artifact export for the successful pure-stdlib MR execution from step 3. Export to `%TEMP%\metbench-async-ie\execution-export\`.
-12. Confirm execution artifact export produces `manifest.json`, `execution-result.json`, and the requested report files.
+12. Confirm execution artifact export produces `manifest.json`, `execution-result.json`, and `report.html`. Do not expect `report.md` from this async job path; Markdown export remains fail-closed unless a real `SystemMtReportService` and matching domain `Execution` row are explicitly wired.
 13. Confirm UI remains responsive while jobs are pending/running. Do not use sleeps on the dispatcher thread or blocking waits in UI code.
 
 Screenshots must be real VM captures and saved under:
@@ -176,7 +176,7 @@ This VM task passes only if all are true:
 - The async page can submit and poll a `RunBatch` job.
 - The async page can submit and poll `ImportAssets` and `ExportAssets`.
 - The async page can submit and poll `ExportExecutionArtifacts`.
-- Real artifact files exist at the recorded paths.
+- Real artifact files exist at the recorded paths, including execution-export `manifest.json`, `execution-result.json`, and `report.html`.
 - UI displays artifact paths and failure reasons.
 - No result/evidence import UI or API is added.
 - VM evidence summary and screenshots are committed.
