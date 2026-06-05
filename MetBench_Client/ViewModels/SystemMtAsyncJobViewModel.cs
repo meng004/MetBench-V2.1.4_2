@@ -51,6 +51,9 @@ public sealed partial class SystemMtAsyncJobViewModel : ObservableObject, INavig
     private ObservableCollection<string> _pollLog = new();
 
     [ObservableProperty]
+    private ObservableCollection<string> _batchItemsDisplay = new();
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsNotRunning))]
     [NotifyCanExecuteChangedFor(nameof(SubmitCommand))]
     [NotifyCanExecuteChangedFor(nameof(CancelCommand))]
@@ -145,7 +148,9 @@ public sealed partial class SystemMtAsyncJobViewModel : ObservableObject, INavig
         PhaseDisplay = string.IsNullOrWhiteSpace(status.CurrentPhase) ? "-" : status.CurrentPhase;
         ProgressPercent = status.ProgressPercent;
         FailureReason = status.FailureReason;
-        PollLog.Add($"{status.UpdatedAtUtc:HH:mm:ss.fff} {status.State} / {PhaseDisplay} / {status.ProgressPercent}%");
+        ApplyBatchItems(status.BatchItems);
+        var batchSuffix = BatchItemsDisplay.Count == 0 ? string.Empty : $" / batch: {string.Join(", ", BatchItemsDisplay)}";
+        PollLog.Add($"{status.UpdatedAtUtc:HH:mm:ss.fff} {status.State} / {PhaseDisplay} / {status.ProgressPercent}%{batchSuffix}");
 
         if (status.State.IsTerminal())
         {
@@ -183,10 +188,24 @@ public sealed partial class SystemMtAsyncJobViewModel : ObservableObject, INavig
             string.IsNullOrWhiteSpace(result.FailureReason) ? "Failure reason: -" : $"Failure reason: {result.FailureReason}");
     }
 
+    private void ApplyBatchItems(IReadOnlyList<SystemMtBatchJobItem>? items)
+    {
+        BatchItemsDisplay.Clear();
+        if (items is null || items.Count == 0)
+            return;
+
+        foreach (var item in items)
+        {
+            var reason = string.IsNullOrWhiteSpace(item.FailureReason) ? string.Empty : $" ({item.FailureReason})";
+            BatchItemsDisplay.Add($"{item.MrId}: {item.State}{reason}");
+        }
+    }
+
     private void ResetForNewJob()
     {
         _pollTimer.Stop();
         PollLog.Clear();
+        BatchItemsDisplay.Clear();
         FailureReason = null;
         ResultSummary = string.Empty;
         ProgressPercent = 0;

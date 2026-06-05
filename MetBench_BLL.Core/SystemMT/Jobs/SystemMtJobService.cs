@@ -38,7 +38,9 @@ public sealed class SystemMtJobService : ISystemMtJobService
         var record = new SystemMtJobRecord
         {
             JobId = id,
+            Kind = SystemMtJobKind.RunMr,
             MrId = request.MrId,
+            ParameterOverrides = CopyOverrides(request.ParameterOverrides),
             SutName = string.Empty,   // worker 解析 MR → SUT 后回填（MrSummary.SutName）
             State = SystemMtJobState.Queued,
             CurrentPhase = "queued",
@@ -46,11 +48,50 @@ public sealed class SystemMtJobService : ISystemMtJobService
             CreatedAtUtc = now,
             UpdatedAtUtc = now,
         };
+        return await CreateAndEnqueueAsync(record, now, cancellationToken);
+    }
+
+    public async Task<SystemMtJobHandle> SubmitOperationAsync(
+        SystemMtOperationJobRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        ValidateOperation(request);
+
+        var now = _utcNow();
+        var id = Guid.NewGuid();
+        var record = new SystemMtJobRecord
+        {
+            JobId = id,
+            Kind = request.Kind,
+            MrId = ResolvePrimaryMrId(request),
+            ParameterOverrides = CopyOverrides(request.ParameterOverrides),
+            State = SystemMtJobState.Queued,
+            CurrentPhase = "queued",
+            ProgressPercent = 0,
+            CreatedAtUtc = now,
+            UpdatedAtUtc = now,
+            PackageRoot = request.PackageRoot,
+            StagingRoot = request.StagingRoot,
+            ExportRoot = request.ExportRoot,
+            ExecutionId = request.ExecutionId,
+            BatchItems = request.Kind == SystemMtJobKind.RunBatch
+                ? request.MrIds!.Select(id => new SystemMtBatchJobItem(id, SystemMtBatchItemState.Pending)).ToList()
+                : Array.Empty<SystemMtBatchJobItem>(),
+        };
+        return await CreateAndEnqueueAsync(record, now, cancellationToken);
+    }
+
+    private async Task<SystemMtJobHandle> CreateAndEnqueueAsync(
+        SystemMtJobRecord record,
+        DateTime createdAtUtc,
+        CancellationToken cancellationToken)
+    {
         await _store.CreateAsync(record, cancellationToken);
 
         try
         {
-            await _queue.EnqueueAsync(id, cancellationToken);
+            await _queue.EnqueueAsync(record.JobId, cancellationToken);
         }
         catch
         {
@@ -69,7 +110,7 @@ public sealed class SystemMtJobService : ISystemMtJobService
             throw;
         }
 
-        return new SystemMtJobHandle(id, now);
+        return new SystemMtJobHandle(record.JobId, createdAtUtc);
     }
 
     public async Task<SystemMtJobStatus?> GetStatusAsync(Guid jobId, CancellationToken cancellationToken = default)
@@ -96,6 +137,72 @@ public sealed class SystemMtJobService : ISystemMtJobService
             CurrentPhase = "cancelled",
             UpdatedAtUtc = now,
             FinishedAtUtc = now,
+            BatchItems = CancelPendingBatchItems(rec.BatchItems),
         }, cancellationToken);
+    }
+
+    private static void ValidateOperation(SystemMtOperationJobRequest request)
+    {
+        switch (request.Kind)
+        {
+            case SystemMtJobKind.RunMr:
+                RequireNonBlank(request.MrId, nameof(request.MrId));
+                break;
+            case SystemMtJobKind.RunBatch:
+                if (request.MrIds is null || request.MrIds.Count == 0)
+                    throw new ArgumentException("MrIds must contain at least one MR id.", nameof(request));
+                for (var i = 0; i < request.MrIds.Count; i++)
+                    RequireNonBlank(request.MrIds[i], $"{nameof(request.MrIds)}[{i}]");
+                break;
+            case SystemMtJobKind.ImportAssets:
+                RequireNonBlank(request.PackageRoot, nameof(request.PackageRoot));
+                RequireNonBlank(request.StagingRoot, nameof(request.StagingRoot));
+                throw UnsupportedUntilHandlerExists(request.Kind);
+            case SystemMtJobKind.ExportAssets:
+                RequireNonBlank(request.PackageRoot, nameof(request.PackageRoot));
+                RequireNonBlank(request.ExportRoot, nameof(request.ExportRoot));
+                throw UnsupportedUntilHandlerExists(request.Kind);
+            case SystemMtJobKind.ExportExecutionEvidence:
+            case SystemMtJobKind.ExportReport:
+                if (request.ExecutionId is null || request.ExecutionId == Guid.Empty)
+                    throw new ArgumentException("ExecutionId must be a non-empty Guid.", nameof(request));
+                RequireNonBlank(request.ExportRoot, nameof(request.ExportRoot));
+                throw UnsupportedUntilHandlerExists(request.Kind);
+            default:
+                throw new ArgumentOutOfRangeException(nameof(request), request.Kind, "Unsupported job kind.");
+        }
+    }
+
+    private static string ResolvePrimaryMrId(SystemMtOperationJobRequest request) =>
+        request.Kind switch
+        {
+            SystemMtJobKind.RunMr => request.MrId!,
+            SystemMtJobKind.RunBatch => request.MrIds![0],
+            _ => string.Empty,
+        };
+
+    private static void RequireNonBlank(string? value, string name)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            throw new ArgumentException($"{name} must be non-blank.", name);
+    }
+
+    private static Dictionary<string, string>? CopyOverrides(IReadOnlyDictionary<string, string>? overrides) =>
+        overrides is null ? null : new Dictionary<string, string>(overrides, StringComparer.Ordinal);
+
+    private static NotSupportedException UnsupportedUntilHandlerExists(SystemMtJobKind kind) =>
+        new($"{kind} async jobs are not supported until a matching operation handler is registered.");
+
+    private static IReadOnlyList<SystemMtBatchJobItem> CancelPendingBatchItems(
+        IReadOnlyList<SystemMtBatchJobItem> items)
+    {
+        if (items.Count == 0)
+            return items;
+
+        return items
+            .Select(item => item.State is SystemMtBatchItemState.Pending or SystemMtBatchItemState.Running
+                ? item with { State = SystemMtBatchItemState.Cancelled, FailureReason = "cancellation requested" }
+                : item)
+            .ToList();
     }
 }

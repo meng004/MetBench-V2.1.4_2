@@ -10,17 +10,20 @@ public sealed class SystemMtJobWorker
     private readonly IJobStore _store;
     private readonly ISystemMtAsyncPipeline _pipeline;
     private readonly IJobCancellationRegistry? _cancellation;
+    private readonly ISystemMtJobOperationDispatcher? _operationDispatcher;
     private readonly Func<DateTime> _utcNow;
 
     public SystemMtJobWorker(
         IJobStore store,
         ISystemMtAsyncPipeline pipeline,
         IJobCancellationRegistry? cancellation = null,
-        Func<DateTime>? utcNow = null)
+        Func<DateTime>? utcNow = null,
+        ISystemMtJobOperationDispatcher? operationDispatcher = null)
     {
         _store = store;
         _pipeline = pipeline;
         _cancellation = cancellation;
+        _operationDispatcher = operationDispatcher;
         _utcNow = utcNow ?? (() => DateTime.UtcNow);
     }
 
@@ -51,12 +54,15 @@ public sealed class SystemMtJobWorker
                 CurrentPhase = p.Phase,
                 ProgressPercent = p.ProgressPercent,
                 UpdatedAtUtc = _utcNow(),
+                BatchItems = p.BatchItems ?? record.BatchItems,
             }, CancellationToken.None).GetAwaiter().GetResult();
         });
 
         try
         {
-            var outcome = await _pipeline.ExecuteJobAsync(jobId, ToRequest(record), progress, runToken);
+            var outcome = record.Kind == SystemMtJobKind.RunMr
+                ? await _pipeline.ExecuteJobAsync(jobId, ToRequest(record), progress, runToken)
+                : await ExecuteOperationAsync(jobId, record, progress, runToken);
 
             // P1-orphan: if a concurrent cancel (or any other writer) already drove the job to a
             // terminal state while the pipeline was running, honor it — do NOT save an orphaned
@@ -80,7 +86,7 @@ public sealed class SystemMtJobWorker
             if (finalState == SystemMtJobState.Succeeded && outcome.Result is not null)
                 await _store.SaveResultAsync(jobId, outcome.Result, CancellationToken.None);
 
-            await FinalizeAsync(record, finalState, outcome.SutName, reason, failureKind, lastProgress);
+            await FinalizeAsync(record, finalState, outcome.SutName, reason, failureKind, lastProgress, outcome);
         }
         catch (OperationCanceledException) when (runToken.IsCancellationRequested)
         {
@@ -99,7 +105,25 @@ public sealed class SystemMtJobWorker
         }
     }
 
-    private static SystemMtJobRequest ToRequest(SystemMtJobRecord r) => new(r.MrId);
+    private Task<JobExecutionOutcome> ExecuteOperationAsync(
+        Guid jobId,
+        SystemMtJobRecord record,
+        IProgress<SystemMtJobProgress>? progress,
+        CancellationToken cancellationToken)
+    {
+        if (_operationDispatcher is null)
+        {
+            return Task.FromResult(new JobExecutionOutcome(
+                SystemMtJobState.Failed,
+                record.SutName,
+                Result: null,
+                FailureReason: $"No operation dispatcher is registered for job kind {record.Kind}."));
+        }
+
+        return _operationDispatcher.ExecuteAsync(jobId, record, progress, cancellationToken);
+    }
+
+    private static SystemMtJobRequest ToRequest(SystemMtJobRecord r) => new(r.MrId, r.ParameterOverrides);
 
     private Task FinalizeAsync(
         SystemMtJobRecord record,
@@ -107,7 +131,8 @@ public sealed class SystemMtJobWorker
         string sutName,
         string? reason,
         string? failureKind,
-        int lastProgress)
+        int lastProgress,
+        JobExecutionOutcome? outcome = null)
     {
         var now = _utcNow();
         return _store.UpdateStatusAsync(record with
@@ -120,6 +145,8 @@ public sealed class SystemMtJobWorker
             CurrentPhase = state.ToString().ToLowerInvariant(),
             UpdatedAtUtc = now,
             FinishedAtUtc = now,
+            ArtifactPath = outcome?.ArtifactPath ?? record.ArtifactPath,
+            BatchItems = outcome?.BatchItems ?? record.BatchItems,
         }, CancellationToken.None);
     }
 

@@ -41,6 +41,65 @@ public class SystemMtJobServiceTests
     }
 
     [Fact]
+    public async Task SubmitAsync_old_mr_request_persists_run_mr_job_kind()
+    {
+        var store = new InMemoryJobStore();
+        var queue = new ChannelJobQueue();
+        var svc = Build(store, queue);
+
+        var handle = await svc.SubmitAsync(new SystemMtJobRequest("openmc-q-value"), default);
+
+        var record = await store.GetAsync(handle.JobId, default);
+        var status = await svc.GetStatusAsync(handle.JobId, default);
+        Assert.Equal(SystemMtJobKind.RunMr, record!.Kind);
+        Assert.Equal(SystemMtJobKind.RunMr, status!.Kind);
+        Assert.Equal("openmc-q-value", status.MrId);
+    }
+
+    [Fact]
+    public async Task SubmitOperationAsync_rejects_export_without_export_root()
+    {
+        var svc = Build(new InMemoryJobStore(), new ChannelJobQueue());
+        var request = new SystemMtOperationJobRequest(
+            SystemMtJobKind.ExportAssets,
+            PackageRoot: "/tmp/source-package");
+
+        var ex = await Assert.ThrowsAsync<ArgumentException>(
+            () => svc.SubmitOperationAsync(request, default));
+
+        Assert.Contains("ExportRoot", ex.Message);
+    }
+
+    [Fact]
+    public async Task SubmitOperationAsync_rejects_export_until_operation_handler_exists()
+    {
+        var svc = Build(new InMemoryJobStore(), new ChannelJobQueue());
+        var request = new SystemMtOperationJobRequest(
+            SystemMtJobKind.ExportAssets,
+            PackageRoot: "/tmp/source-package",
+            ExportRoot: "/tmp/export");
+
+        var ex = await Assert.ThrowsAsync<NotSupportedException>(
+            () => svc.SubmitOperationAsync(request, default));
+
+        Assert.Contains("matching operation handler", ex.Message);
+    }
+
+    [Fact]
+    public async Task SubmitOperationAsync_rejects_empty_batch_mr_ids()
+    {
+        var svc = Build(new InMemoryJobStore(), new ChannelJobQueue());
+        var request = new SystemMtOperationJobRequest(
+            SystemMtJobKind.RunBatch,
+            MrIds: Array.Empty<string>());
+
+        var ex = await Assert.ThrowsAsync<ArgumentException>(
+            () => svc.SubmitOperationAsync(request, default));
+
+        Assert.Contains("MrIds", ex.Message);
+    }
+
+    [Fact]
     public async Task GetStatusAsync_reads_store_snapshot_only()
     {
         var store = new InMemoryJobStore();
@@ -89,6 +148,22 @@ public class SystemMtJobServiceTests
 
         var status = await svc.GetStatusAsync(handle.JobId, default);
         Assert.Equal(SystemMtJobState.Cancelled, status!.State);
+    }
+
+    [Fact]
+    public async Task CancelAsync_marks_pending_batch_items_cancelled()
+    {
+        var store = new InMemoryJobStore();
+        var svc = Build(store, new ChannelJobQueue());
+        var handle = await svc.SubmitOperationAsync(
+            new SystemMtOperationJobRequest(SystemMtJobKind.RunBatch, MrIds: new[] { "mr-a", "mr-b" }),
+            default);
+
+        await svc.CancelAsync(handle.JobId, default);
+
+        var status = await svc.GetStatusAsync(handle.JobId, default);
+        Assert.Equal(SystemMtJobState.Cancelled, status!.State);
+        Assert.All(status.BatchItems!, item => Assert.Equal(SystemMtBatchItemState.Cancelled, item.State));
     }
 
     [Fact]
