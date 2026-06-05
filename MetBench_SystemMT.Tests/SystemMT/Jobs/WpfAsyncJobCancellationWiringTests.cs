@@ -67,6 +67,17 @@ public sealed class WpfAsyncJobCancellationWiringTests
     }
 
     [Fact]
+    public void Async_job_view_model_summarizes_batch_assertion_outcomes_without_plain_success()
+    {
+        var viewModel = ReadRepoFile("MetBench_Client", "ViewModels", "SystemMtAsyncJobViewModel.cs");
+
+        Assert.Contains("DescribeBatchOperationResult(status)", viewModel);
+        Assert.Contains("Batch MR assertions:", viewModel);
+        Assert.Contains("failed=", viewModel);
+        Assert.DoesNotContain("\"RunBatch succeeded\"", viewModel);
+    }
+
+    [Fact]
     public void Async_job_view_model_submits_all_release_closure_operation_kinds()
     {
         var viewModel = ReadRepoFile("MetBench_Client", "ViewModels", "SystemMtAsyncJobViewModel.cs");
@@ -95,6 +106,19 @@ public sealed class WpfAsyncJobCancellationWiringTests
         Assert.Contains("AsyncExportRootBox", xaml);
         Assert.Contains("AsyncExecutionIdBox", xaml);
         Assert.Contains("AsyncArtifactPath", xaml);
+    }
+
+    [Fact]
+    public void Async_job_page_hides_operation_specific_inputs_when_not_selected()
+    {
+        var xaml = ReadRepoFile("MetBench_Client", "Views", "Pages", "SystemMtAsyncJobPage.xaml");
+
+        Assert.Contains("ViewModel.IsRunMrSelected, Converter={StaticResource BooleanToVisibilityConverter}", xaml);
+        Assert.Contains("ViewModel.IsRunBatchSelected, Converter={StaticResource BooleanToVisibilityConverter}", xaml);
+        Assert.Contains("ViewModel.IsPackageRootSelected, Converter={StaticResource BooleanToVisibilityConverter}", xaml);
+        Assert.Contains("ViewModel.IsImportAssetsSelected, Converter={StaticResource BooleanToVisibilityConverter}", xaml);
+        Assert.Contains("ViewModel.IsExportRootSelected, Converter={StaticResource BooleanToVisibilityConverter}", xaml);
+        Assert.Contains("ViewModel.IsExportExecutionArtifactsSelected, Converter={StaticResource BooleanToVisibilityConverter}", xaml);
     }
 
     private static string ReadRepoFile(params string[] parts)

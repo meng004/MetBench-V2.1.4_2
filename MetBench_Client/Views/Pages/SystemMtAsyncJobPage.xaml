@@ -51,13 +51,15 @@
                        Margin="16,0,12,8"
                        VerticalAlignment="Center"
                        FontWeight="SemiBold"
-                       Text="MR" />
+                       Text="MR"
+                       Visibility="{Binding ViewModel.IsRunMrSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <ComboBox Grid.Row="0"
                       Grid.Column="3"
                       AutomationProperties.AutomationId="AsyncMrCombo"
                       MinWidth="320"
                       ItemsSource="{Binding ViewModel.AvailableMrIds}"
-                      SelectedItem="{Binding ViewModel.SelectedMrId, Mode=TwoWay}" />
+                      SelectedItem="{Binding ViewModel.SelectedMrId, Mode=TwoWay}"
+                      Visibility="{Binding ViewModel.IsRunMrSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <ui:Button Grid.Row="0"
                        Grid.Column="4"
                        AutomationProperties.AutomationId="AsyncSubmitButton"
@@ -84,61 +86,71 @@
                        Margin="0,8,12,4"
                        VerticalAlignment="Center"
                        FontWeight="SemiBold"
-                       Text="Batch MRs" />
+                       Text="Batch MRs"
+                       Visibility="{Binding ViewModel.IsRunBatchSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBox Grid.Row="1"
                      Grid.Column="1"
                      Grid.ColumnSpan="6"
                      AutomationProperties.AutomationId="AsyncBatchMrIdsBox"
                      Margin="0,8,0,4"
-                     Text="{Binding ViewModel.BatchMrIdsText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                     Text="{Binding ViewModel.BatchMrIdsText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     Visibility="{Binding ViewModel.IsRunBatchSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
             <TextBlock Grid.Row="2"
                        Grid.Column="0"
                        Margin="0,4,12,4"
                        VerticalAlignment="Center"
                        FontWeight="SemiBold"
-                       Text="Package root" />
+                       Text="Package root"
+                       Visibility="{Binding ViewModel.IsPackageRootSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBox Grid.Row="2"
                      Grid.Column="1"
                      AutomationProperties.AutomationId="AsyncPackageRootBox"
                      Margin="0,4,0,4"
-                     Text="{Binding ViewModel.PackageRoot, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                     Text="{Binding ViewModel.PackageRoot, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     Visibility="{Binding ViewModel.IsPackageRootSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBlock Grid.Row="2"
                        Grid.Column="2"
                        Margin="16,4,12,4"
                        VerticalAlignment="Center"
                        FontWeight="SemiBold"
-                       Text="Staging root" />
+                       Text="Staging root"
+                       Visibility="{Binding ViewModel.IsImportAssetsSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBox Grid.Row="2"
                      Grid.Column="3"
                      Grid.ColumnSpan="4"
                      AutomationProperties.AutomationId="AsyncStagingRootBox"
                      Margin="0,4,0,4"
-                     Text="{Binding ViewModel.StagingRoot, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                     Text="{Binding ViewModel.StagingRoot, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     Visibility="{Binding ViewModel.IsImportAssetsSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
             <TextBlock Grid.Row="3"
                        Grid.Column="0"
                        Margin="0,4,12,0"
                        VerticalAlignment="Center"
                        FontWeight="SemiBold"
-                       Text="Export root" />
+                       Text="Export root"
+                       Visibility="{Binding ViewModel.IsExportRootSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBox Grid.Row="3"
                      Grid.Column="1"
                      AutomationProperties.AutomationId="AsyncExportRootBox"
                      Margin="0,4,0,0"
-                     Text="{Binding ViewModel.ExportRoot, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                     Text="{Binding ViewModel.ExportRoot, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     Visibility="{Binding ViewModel.IsExportRootSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBlock Grid.Row="3"
                        Grid.Column="2"
                        Margin="16,4,12,0"
                        VerticalAlignment="Center"
                        FontWeight="SemiBold"
-                       Text="Execution id" />
+                       Text="Execution id"
+                       Visibility="{Binding ViewModel.IsExportExecutionArtifactsSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBox Grid.Row="3"
                      Grid.Column="3"
                      Grid.ColumnSpan="4"
                      AutomationProperties.AutomationId="AsyncExecutionIdBox"
                      Margin="0,4,0,0"
-                     Text="{Binding ViewModel.ExecutionIdText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                     Text="{Binding ViewModel.ExecutionIdText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     Visibility="{Binding ViewModel.IsExportExecutionArtifactsSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
         </Grid>
 
         <Grid Grid.Row="1" Margin="0,16,0,0">

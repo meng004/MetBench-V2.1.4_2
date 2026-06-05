@@ -24,8 +24,11 @@ public sealed partial class SystemMtAsyncJobViewModel : ObservableObject, INavig
     private string _selectedMrId = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsRunMrSelected))]
     [NotifyPropertyChangedFor(nameof(IsRunBatchSelected))]
+    [NotifyPropertyChangedFor(nameof(IsPackageRootSelected))]
     [NotifyPropertyChangedFor(nameof(IsImportAssetsSelected))]
+    [NotifyPropertyChangedFor(nameof(IsExportRootSelected))]
     [NotifyPropertyChangedFor(nameof(IsExportAssetsSelected))]
     [NotifyPropertyChangedFor(nameof(IsExportExecutionArtifactsSelected))]
     [NotifyCanExecuteChangedFor(nameof(SubmitCommand))]
@@ -109,9 +112,15 @@ public sealed partial class SystemMtAsyncJobViewModel : ObservableObject, INavig
 
     public bool HasFailureReason => !string.IsNullOrWhiteSpace(FailureReason);
 
+    public bool IsRunMrSelected => SelectedOperationKind == SystemMtJobKind.RunMr;
+
     public bool IsRunBatchSelected => SelectedOperationKind == SystemMtJobKind.RunBatch;
 
+    public bool IsPackageRootSelected => IsImportAssetsSelected || IsExportAssetsSelected;
+
     public bool IsImportAssetsSelected => SelectedOperationKind == SystemMtJobKind.ImportAssets;
+
+    public bool IsExportRootSelected => IsExportAssetsSelected || IsExportExecutionArtifactsSelected;
 
     public bool IsExportAssetsSelected => SelectedOperationKind == SystemMtJobKind.ExportAssets;
 
@@ -259,7 +268,9 @@ public sealed partial class SystemMtAsyncJobViewModel : ObservableObject, INavig
         {
             if (status.Kind != SystemMtJobKind.RunMr)
             {
-                ResultSummary = DescribeOperationResult(status);
+                ResultSummary = status.Kind == SystemMtJobKind.RunBatch
+                    ? DescribeBatchOperationResult(status)
+                    : DescribeOperationResult(status);
                 return;
             }
 
@@ -314,6 +325,32 @@ public sealed partial class SystemMtAsyncJobViewModel : ObservableObject, INavig
         if (status.ExecutionId is { } executionId)
         {
             lines.Add($"Execution id: {executionId}");
+        }
+
+        return string.Join(Environment.NewLine, lines);
+    }
+
+    private static string DescribeBatchOperationResult(SystemMtJobStatus status)
+    {
+        var items = status.BatchItems ?? Array.Empty<SystemMtBatchJobItem>();
+        var passed = items.Count(item => item.State == SystemMtBatchItemState.Succeeded);
+        var failed = items.Count(item => item.State == SystemMtBatchItemState.Failed);
+        var cancelled = items.Count(item => item.State == SystemMtBatchItemState.Cancelled);
+        var pending = items.Count(item => item.State is SystemMtBatchItemState.Pending or SystemMtBatchItemState.Running);
+        var lines = new List<string>
+        {
+            "RunBatch completed",
+            $"Job: {status.JobId}",
+            $"Batch MR assertions: total={items.Count}; passed={passed}; failed={failed}; cancelled={cancelled}; pending={pending}",
+            failed == 0 && cancelled == 0 && pending == 0
+                ? "All completed MR assertions passed."
+                : "Batch contains non-passing MR items.",
+        };
+
+        foreach (var item in items)
+        {
+            var reason = string.IsNullOrWhiteSpace(item.FailureReason) ? string.Empty : $" ({item.FailureReason})";
+            lines.Add($"{item.MrId}: {item.State}{reason}");
         }
 
         return string.Join(Environment.NewLine, lines);
