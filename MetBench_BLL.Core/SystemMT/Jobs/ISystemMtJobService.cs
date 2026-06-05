@@ -10,6 +10,7 @@ namespace MetBench_BLL.SystemMT.Jobs;
 public interface ISystemMtJobService
 {
     Task<SystemMtJobHandle> SubmitAsync(SystemMtJobRequest request, CancellationToken cancellationToken = default);
+    Task<SystemMtJobHandle> SubmitOperationAsync(SystemMtOperationJobRequest request, CancellationToken cancellationToken = default);
     Task<SystemMtJobStatus?> GetStatusAsync(Guid jobId, CancellationToken cancellationToken = default);
     Task<MrRunResult?> GetResultAsync(Guid jobId, CancellationToken cancellationToken = default);
     Task CancelAsync(Guid jobId, CancellationToken cancellationToken = default);

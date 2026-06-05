@@ -16,7 +16,11 @@ public interface ISystemMtAsyncPipeline
 }
 
 /// <summary>worker 据此把状态机写入 store 的进度事件。</summary>
-public sealed record SystemMtJobProgress(SystemMtJobState State, string Phase, int ProgressPercent);
+public sealed record SystemMtJobProgress(
+    SystemMtJobState State,
+    string Phase,
+    int ProgressPercent,
+    IReadOnlyList<SystemMtBatchJobItem>? BatchItems = null);
 
 /// <summary>
 /// async pipeline 的最终产物。<see cref="FinalState"/> 必属终止态；
@@ -27,4 +31,6 @@ public sealed record JobExecutionOutcome(
     string SutName,
     MrRunResult? Result,
     string? FailureReason,
-    string? FailureKind = null);
+    string? FailureKind = null,
+    IReadOnlyList<SystemMtBatchJobItem>? BatchItems = null,
+    string? ArtifactPath = null);

@@ -26,7 +26,17 @@ public sealed class WpfAsyncJobCancellationWiringTests
         var hosted = ReadRepoFile("MetBench_Client", "Hosting", "SystemMtJobWorkerHostedService.cs");
 
         Assert.Contains("IJobCancellationRegistry", hosted);
-        Assert.Contains("new SystemMtJobWorker(_store, pipeline, _cancellation)", hosted);
+        Assert.Contains("new SystemMtJobWorker(", hosted);
+        Assert.Contains("_cancellation", hosted);
+    }
+
+    [Fact]
+    public void Hosted_worker_passes_batch_operation_dispatcher_to_worker()
+    {
+        var hosted = ReadRepoFile("MetBench_Client", "Hosting", "SystemMtJobWorkerHostedService.cs");
+
+        Assert.Contains("new RunBatchJobOperationHandler(launcher, evidenceRepository)", hosted);
+        Assert.Contains("operationDispatcher: operationDispatcher", hosted);
     }
 
     [Fact]
@@ -37,6 +47,17 @@ public sealed class WpfAsyncJobCancellationWiringTests
         Assert.Contains("IExecutionEvidenceRepository", hosted);
         Assert.Contains("GetService<IExecutionEvidenceRepository>()", hosted);
         Assert.Contains("new SystemMtAsyncPipeline(launcher, evidenceRepository)", hosted);
+    }
+
+    [Fact]
+    public void Async_job_view_model_projects_batch_items_from_polling_status()
+    {
+        var viewModel = ReadRepoFile("MetBench_Client", "ViewModels", "SystemMtAsyncJobViewModel.cs");
+
+        Assert.Contains("using System.Collections.Generic;", viewModel);
+        Assert.Contains("ObservableCollection<string> _batchItemsDisplay", viewModel);
+        Assert.Contains("ApplyBatchItems(status.BatchItems)", viewModel);
+        Assert.Contains("batch:", viewModel);
     }
 
     private static string ReadRepoFile(params string[] parts)

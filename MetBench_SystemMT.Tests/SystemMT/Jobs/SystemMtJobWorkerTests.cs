@@ -1,4 +1,5 @@
 using MetBench_BLL.SystemMT.Jobs;
+using MetBench_BLL.SystemMT.Launcher;
 using Xunit;
 
 namespace MetBench_SystemMT.Tests.SystemMT.Jobs;
@@ -167,6 +168,67 @@ public class SystemMtJobWorkerTests
     }
 
     [Fact]
+    public async Task RunBatch_job_uses_operation_dispatcher_and_persists_per_mr_summary()
+    {
+        var store = new InMemoryJobStore();
+        var id = Guid.NewGuid();
+        await store.CreateAsync(JobsTestData.Record(id, "mr-a") with
+        {
+            Kind = SystemMtJobKind.RunBatch,
+            BatchItems = new[]
+            {
+                new SystemMtBatchJobItem("mr-a", SystemMtBatchItemState.Pending),
+                new SystemMtBatchJobItem("mr-b", SystemMtBatchItemState.Pending),
+            },
+        }, default);
+        var handler = new RunBatchJobOperationHandler(new WorkerBatchLauncher());
+        var worker = new SystemMtJobWorker(
+            store,
+            FakeAsyncPipeline.Succeeds("unused", "sut"),
+            operationDispatcher: handler);
+
+        await worker.RunJobAsync(id, default);
+
+        var rec = await store.GetAsync(id, default);
+        Assert.Equal(SystemMtJobState.Succeeded, rec!.State);
+        Assert.Equal(2, rec.BatchItems.Count);
+        Assert.Equal(SystemMtBatchItemState.Succeeded, rec.BatchItems[0].State);
+        Assert.Equal(SystemMtBatchItemState.Failed, rec.BatchItems[1].State);
+        Assert.Equal("assertion failed", rec.BatchItems[1].FailureReason);
+        Assert.Null(await store.GetResultAsync(id, default));
+    }
+
+    [Fact]
+    public async Task Terminal_queued_operation_job_is_not_dispatched()
+    {
+        var store = new InMemoryJobStore();
+        var id = Guid.NewGuid();
+        await store.CreateAsync(JobsTestData.Record(id, "mr-a") with
+        {
+            Kind = SystemMtJobKind.RunBatch,
+            State = SystemMtJobState.Cancelled,
+            CurrentPhase = "cancelled",
+            FailureReason = "cancellation requested",
+            BatchItems = new[]
+            {
+                new SystemMtBatchJobItem("mr-a", SystemMtBatchItemState.Cancelled, "cancellation requested"),
+            },
+        }, default);
+        var dispatcher = new CountingOperationDispatcher();
+        var worker = new SystemMtJobWorker(
+            store,
+            FakeAsyncPipeline.Succeeds("unused", "sut"),
+            operationDispatcher: dispatcher);
+
+        await worker.RunJobAsync(id, default);
+
+        Assert.Equal(0, dispatcher.CallCount);
+        var rec = await store.GetAsync(id, default);
+        Assert.Equal(SystemMtJobState.Cancelled, rec!.State);
+        Assert.Equal("cancellation requested", rec.FailureReason);
+    }
+
+    [Fact]
     public async Task Worker_releases_registry_entry_after_run()
     {
         var (store, id) = Seed("mr-ok");
@@ -211,6 +273,56 @@ public class SystemMtJobWorkerTests
             Started.TrySetResult();
             await Task.Delay(Timeout.Infinite, cancellationToken);   // throws OCE when token trips
             return new JobExecutionOutcome(SystemMtJobState.Succeeded, "openmc", null, null);
+        }
+    }
+
+    private sealed class WorkerBatchLauncher : ISystemMtLauncher
+    {
+        public Task<IReadOnlyList<MrSummary>> ListAvailableAsync(CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyList<MrSummary>>(Array.Empty<MrSummary>());
+
+        public Task<MrRunResult> RunAsync(
+            string mrId,
+            IReadOnlyDictionary<string, string>? parameterOverrides = null,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult(JobsTestData.Result(mrId, passed: true));
+
+        public Task<IReadOnlyList<MrRunResult>> RunBatchAsync(
+            IReadOnlyList<BatchMrRunRequest> requests,
+            IProgress<BatchProgress>? progress = null,
+            CancellationToken cancellationToken = default)
+        {
+            var results = new[]
+            {
+                JobsTestData.Result("mr-a", passed: true),
+                JobsTestData.Result("mr-b", passed: false, "assertion failed"),
+            };
+            for (var i = 0; i < results.Length; i++)
+            {
+                progress?.Report(new BatchProgress(i, results.Length, results[i].MrId, null));
+                progress?.Report(new BatchProgress(i + 1, results.Length, results[i].MrId, results[i]));
+            }
+
+            return Task.FromResult<IReadOnlyList<MrRunResult>>(results);
+        }
+    }
+
+    private sealed class CountingOperationDispatcher : ISystemMtJobOperationDispatcher
+    {
+        public int CallCount { get; private set; }
+
+        public Task<JobExecutionOutcome> ExecuteAsync(
+            Guid jobId,
+            SystemMtJobRecord record,
+            IProgress<SystemMtJobProgress>? progress,
+            CancellationToken cancellationToken)
+        {
+            CallCount++;
+            return Task.FromResult(new JobExecutionOutcome(
+                SystemMtJobState.Succeeded,
+                record.SutName,
+                Result: null,
+                FailureReason: null));
         }
     }
 

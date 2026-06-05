@@ -17,4 +17,11 @@ public sealed record SystemMtJobStatus(
     string? BackendKind = null,
     string? BackendExternalId = null,
     DateTime? LastPolledAtUtc = null,
-    string? FailureKind = null);
+    string? FailureKind = null,
+    string? PackageRoot = null,
+    string? StagingRoot = null,
+    string? ExportRoot = null,
+    Guid? ExecutionId = null,
+    string? ArtifactPath = null,
+    IReadOnlyList<SystemMtBatchJobItem>? BatchItems = null,
+    SystemMtJobKind Kind = SystemMtJobKind.RunMr);

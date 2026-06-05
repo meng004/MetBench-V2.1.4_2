@@ -14,10 +14,11 @@ public class JobFacadeTypeLeakageTests
 {
     private static readonly HashSet<Type> Allowed = new()
     {
-        typeof(void), typeof(Task), typeof(string), typeof(Guid), typeof(bool), typeof(int),
+        typeof(void), typeof(Task), typeof(string), typeof(Guid), typeof(bool), typeof(int), typeof(DateTime),
         typeof(CancellationToken),
-        typeof(SystemMtJobRequest), typeof(SystemMtJobHandle),
-        typeof(SystemMtJobStatus), typeof(SystemMtJobState),
+        typeof(SystemMtJobRequest), typeof(SystemMtOperationJobRequest), typeof(SystemMtJobHandle),
+        typeof(SystemMtJobStatus), typeof(SystemMtJobState), typeof(SystemMtJobKind),
+        typeof(SystemMtBatchJobItem), typeof(SystemMtBatchItemState),
         typeof(MrRunResult),
     };
 
@@ -29,6 +30,18 @@ public class JobFacadeTypeLeakageTests
             AssertAllowed(m.ReturnType, $"{m.Name} return");
             foreach (var p in m.GetParameters())
                 AssertAllowed(p.ParameterType, $"{m.Name} param {p.Name}");
+        }
+    }
+
+    [Fact]
+    public void Job_facade_dtos_do_not_leak_engine_internal_types_through_properties()
+    {
+        foreach (var dto in Allowed.Where(t => t.Namespace == typeof(SystemMtJobStatus).Namespace))
+        {
+            foreach (var property in dto.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                AssertAllowed(property.PropertyType, $"{dto.Name}.{property.Name}");
+            }
         }
     }
 

@@ -17,8 +17,20 @@ public class LiteDbJobStoreTests : IDisposable
         var record = new SystemMtJobRecord
         {
             JobId = id, MrId = "openmc-q-value", SutName = "openmc",
+            Kind = SystemMtJobKind.RunBatch,
+            ParameterOverrides = new Dictionary<string, string> { ["factor"] = "2" },
             State = SystemMtJobState.RunningFollowup, ProgressPercent = 70,
             CurrentPhase = "running-followup", FailureReason = null,
+            PackageRoot = "/tmp/package",
+            StagingRoot = "/tmp/stage",
+            ExportRoot = "/tmp/export",
+            ExecutionId = Guid.Parse("11111111-1111-1111-1111-111111111111"),
+            ArtifactPath = "/tmp/export/result.json",
+            BatchItems = new[]
+            {
+                new SystemMtBatchJobItem("openmc-q-value", SystemMtBatchItemState.Succeeded, RecordId: "r1"),
+                new SystemMtBatchJobItem("openmc-keff", SystemMtBatchItemState.Failed, "assertion failed", "r2"),
+            },
             BackendKind = "local", BackendExternalId = "pid-1234",
             CreatedAtUtc = new DateTime(2026, 6, 3, 1, 0, 0, DateTimeKind.Utc),
             UpdatedAtUtc = new DateTime(2026, 6, 3, 1, 2, 0, DateTimeKind.Utc),
@@ -27,11 +39,20 @@ public class LiteDbJobStoreTests : IDisposable
 
         var got = await store.GetAsync(id, default);
         Assert.NotNull(got);
+        Assert.Equal(record.Kind, got!.Kind);
         Assert.Equal(record.MrId, got!.MrId);
+        Assert.Equal("2", got.ParameterOverrides!["factor"]);
         Assert.Equal(record.SutName, got.SutName);
         Assert.Equal(record.State, got.State);
         Assert.Equal(record.ProgressPercent, got.ProgressPercent);
         Assert.Equal(record.CurrentPhase, got.CurrentPhase);
+        Assert.Equal(record.PackageRoot, got.PackageRoot);
+        Assert.Equal(record.StagingRoot, got.StagingRoot);
+        Assert.Equal(record.ExportRoot, got.ExportRoot);
+        Assert.Equal(record.ExecutionId, got.ExecutionId);
+        Assert.Equal(record.ArtifactPath, got.ArtifactPath);
+        Assert.Equal(2, got.BatchItems.Count);
+        Assert.Equal(SystemMtBatchItemState.Failed, got.BatchItems[1].State);
         Assert.Equal(record.BackendExternalId, got.BackendExternalId);
         Assert.Equal(record.CreatedAtUtc, got.CreatedAtUtc);
     }

@@ -55,7 +55,12 @@ public sealed class SystemMtJobWorkerHostedService : BackgroundService
                 var launcher = scope.ServiceProvider.GetRequiredService<ISystemMtLauncher>();
                 var evidenceRepository = scope.ServiceProvider.GetService<IExecutionEvidenceRepository>();
                 var pipeline = new SystemMtAsyncPipeline(launcher, evidenceRepository);
-                var worker = new SystemMtJobWorker(_store, pipeline, _cancellation);
+                var operationDispatcher = new RunBatchJobOperationHandler(launcher, evidenceRepository);
+                var worker = new SystemMtJobWorker(
+                    _store,
+                    pipeline,
+                    _cancellation,
+                    operationDispatcher: operationDispatcher);
                 await worker.RunJobAsync(jobId, stoppingToken).ConfigureAwait(false);
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
