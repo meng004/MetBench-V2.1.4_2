@@ -16,15 +16,17 @@ The target closure is a release closure, not only a code closure:
 
 ## 2. Current Evidence Baseline
 
-The current repository already has these controlled foundations:
+The current repository already has these controlled foundations. These are baseline facts for planning, not fresh verification for the future implementation PRs:
 
-- T0-T5 release readiness is Controlled, with VM release smoke evidence: 22/22 filtered commands PASS, full `MetBench_SystemMT.Tests` suite 1558 pass / 0 fail / 12 env-gated skips, WPF build 0 errors, screenshot matrix 21/21 PASS.
-- The current runtime catalog provider inventory is 21 SUT / 17 equations / 38 MRs.
-- System-MT async execution v1 exists through `SystemMtJobService -> SystemMtJobWorker -> SystemMtAsyncPipeline -> ISystemMtLauncher`.
-- WPF has `SystemMtAsyncJobPage` and `SystemMtAsyncJobViewModel` for submit, polling, refresh, cancel, and result projection.
-- Runtime governance v1 is Controlled and preflight failures are recorded as runtime evidence and surfaced through async failed-state propagation.
-- Minimum-MR-SubSet A/B staged import packages exist under `MetBench_BLL.Core/SystemMT/ImportExport/Put/`; A/B live runtime promotion is already validated through launcher and async job tests.
-- Reporting and evidence projection exist: HTML/Markdown/Word/Excel/PDF reporting surfaces and `ExecutionEvidence` persistence are present.
+| Baseline fact | Evidence source |
+|---|---|
+| T0-T5 release readiness is Controlled, with VM release smoke evidence: 22/22 filtered commands PASS, full `MetBench_SystemMT.Tests` suite 1558 pass / 0 fail / 12 env-gated skips, WPF build 0 errors, screenshot matrix 21/21 PASS. | `docs/status/current.md` §2 and §3 row "T0-T5 minimum release readiness"; supporting files under `docs/superpowers/specs/2026-05-30-t0-t5-*`. |
+| The current runtime catalog provider inventory is 21 SUT / 17 equations / 38 MRs. | `docs/status/current.md` §2 "Current SUT / equation / MR inventory"; `docs/PROJECT-STRUCTURE.md` §2. |
+| System-MT async execution v1 exists through `SystemMtJobService -> SystemMtJobWorker -> SystemMtAsyncPipeline -> ISystemMtLauncher`. | `docs/status/current.md` §3 rows "System MT async execution WPF consumer" and "Minimum-MR-SubSet B-group two-stage import/runtime promotion"; code under `MetBench_BLL.Core/SystemMT/Jobs/`. |
+| WPF has `SystemMtAsyncJobPage` and `SystemMtAsyncJobViewModel` for submit, polling, refresh, cancel, and result projection. | `docs/status/current.md` §3 row "System MT async execution WPF consumer"; code under `MetBench_Client/Views/Pages/SystemMtAsyncJobPage.xaml` and `MetBench_Client/ViewModels/SystemMtAsyncJobViewModel.cs`. |
+| Runtime governance v1 is Controlled and preflight failures are recorded as runtime evidence and surfaced through async failed-state propagation. | `docs/status/current.md` §3 row "T1 runtime environment governance v1"; active index row for `2026-06-04-systemmt-runtime-environment-governance-v1-plan.md`. |
+| Minimum-MR-SubSet A/B staged import packages exist under `MetBench_BLL.Core/SystemMT/ImportExport/Put/`; A/B live runtime promotion is already validated through launcher and async job tests. | `docs/status/current.md` §3 rows "Minimum-MR-SubSet A-group live runtime promotion" and "Minimum-MR-SubSet B-group two-stage import/runtime promotion"; tests under `MetBench_SystemMT.Tests/SystemMT/ImportExport/`. |
+| Reporting and evidence projection exist: HTML/Markdown/Word/Excel/PDF reporting surfaces and `ExecutionEvidence` persistence are present. | `docs/status/current.md` §3 rows "ExecutionEvidence v2 schema and recorder", "Evidence-aware HTML report rendering", and "Evidence-aware execution markdown report"; requirements rows F-T2-01/F-T2-02. |
 
 These facts mean the next work should compose existing seams rather than rewrite the launcher, typed catalog, evidence recorder, or WPF navigation shell.
 
@@ -85,6 +87,7 @@ public sealed record SystemMtOperationJobRequest(
     string? MrId,
     IReadOnlyList<string>? MrIds,
     string? PackageRoot,
+    string? StagingRoot,
     string? ExportRoot,
     Guid? ExecutionId,
     IReadOnlyDictionary<string, string>? ParameterOverrides);
@@ -160,11 +163,13 @@ The same PR chain must update:
 - Polling status reaches terminal state and result is visible.
 - Synchronous launcher API remains available and covered by existing tests.
 - Async tests prove the real path uses `SystemMtJobService -> SystemMtJobWorker -> SystemMtAsyncPipeline -> ISystemMtLauncher`.
+- Batch execution must include per-MR summary, partial-failure semantics, and cancellation semantics; otherwise batch must be removed from the release scope before implementation starts.
 
 ### T1 Closure
 
 - Asset import/export for SUT/MR/sample/mutation package runs as async jobs.
 - Validation failures become terminal failed jobs with explicit diagnostics.
+- Successful asset import must create a concrete staged artifact in a deterministic staging root; validation-only import is not sufficient for T1 closure.
 - Runtime preflight failures preserve structured failure kind when evidence exists.
 - WPF asset import/export operation is visible and verified on Windows VM.
 
@@ -179,8 +184,8 @@ The same PR chain must update:
 
 - Cloud focused tests pass.
 - Windows VM build and UI operation evidence pass.
-- Status ledger and projections are updated.
-- PRs are merged and feature branches are cleaned.
+- Implementation PRs are merged with required checks green and review findings handled.
+- A post-merge status/projection closure PR records the actual merge commit, fetched `origin/main`, VM evidence path, and branch cleanup state before any Controlled claim is made.
 
 ## 7. Risks and Controls
 
@@ -202,4 +207,3 @@ The following are intentionally not solved in this closure:
 - dependency auto-install;
 - full Method-MT async conversion;
 - T6 semantic mutation and minimum MR subset analytics.
-
