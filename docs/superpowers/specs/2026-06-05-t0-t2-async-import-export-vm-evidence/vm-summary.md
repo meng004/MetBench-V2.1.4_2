@@ -1,7 +1,8 @@
 ﻿# T0-T2 Async Import/Export PR4 WPF VM Summary
 
 branch=t0-t2-async-import-export-pr4-wpf
-head=4c46ec08da632afb47adbb91d63467dd5f7b8b88
+head=0cada90de6cc40e75f76a5dfe90103bb2924675e
+validation_base=4c46ec08da632afb47adbb91d63467dd5f7b8b88
 origin_main=22748408e3fa01b67aecedf57b0b4cdc23e6d328
 
 ## Commands
