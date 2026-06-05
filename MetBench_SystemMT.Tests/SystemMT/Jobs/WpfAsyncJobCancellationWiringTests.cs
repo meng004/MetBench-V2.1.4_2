@@ -54,6 +54,7 @@ public sealed class WpfAsyncJobCancellationWiringTests
     {
         var viewModel = ReadRepoFile("MetBench_Client", "ViewModels", "SystemMtAsyncJobViewModel.cs");
 
+        Assert.Contains("using System.Collections.Generic;", viewModel);
         Assert.Contains("ObservableCollection<string> _batchItemsDisplay", viewModel);
         Assert.Contains("ApplyBatchItems(status.BatchItems)", viewModel);
         Assert.Contains("batch:", viewModel);

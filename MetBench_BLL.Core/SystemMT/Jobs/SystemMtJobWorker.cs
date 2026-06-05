@@ -31,6 +31,8 @@ public sealed class SystemMtJobWorker
     {
         var record = await _store.GetAsync(jobId, cancellationToken)
             ?? throw new InvalidOperationException($"Job {jobId} not found in store.");
+        if (record.State.IsTerminal())
+            return;
 
         var lastProgress = record.ProgressPercent;
 

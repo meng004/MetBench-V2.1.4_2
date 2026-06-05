@@ -28,6 +28,20 @@ public sealed class RunBatchJobOperationHandlerTests
     }
 
     [Fact]
+    public async Task ExecuteAsync_rejects_duplicate_mr_ids_before_dispatch()
+    {
+        var launcher = new BatchStubLauncher(new[] { Result("mr-a", passed: true) });
+        var handler = new RunBatchJobOperationHandler(launcher);
+        var record = Record("mr-a", "mr-a");
+
+        var outcome = await handler.ExecuteAsync(Guid.NewGuid(), record, progress: null, default);
+
+        Assert.Equal(SystemMtJobState.Failed, outcome.FinalState);
+        Assert.Contains("Duplicate MR id", outcome.FailureReason, StringComparison.Ordinal);
+        Assert.Empty(launcher.SeenMrIds);
+    }
+
+    [Fact]
     public async Task ExecuteAsync_partial_failed_mr_reaches_succeeded_but_preserves_all_summaries()
     {
         var launcher = new BatchStubLauncher(new[]

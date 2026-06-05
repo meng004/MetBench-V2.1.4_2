@@ -31,6 +31,17 @@ public sealed class RunBatchJobOperationHandler : ISystemMtJobOperationDispatche
                 string.Empty,
                 Result: null,
                 FailureReason: "RunBatch job has no MR ids.");
+        var duplicateMrId = record.BatchItems
+            .GroupBy(item => item.MrId, StringComparer.Ordinal)
+            .FirstOrDefault(group => group.Count() > 1)?.Key;
+        if (!string.IsNullOrWhiteSpace(duplicateMrId))
+        {
+            return new JobExecutionOutcome(
+                SystemMtJobState.Failed,
+                string.Empty,
+                Result: null,
+                FailureReason: $"Duplicate MR id '{duplicateMrId}' is not allowed in RunBatch jobs.");
+        }
 
         var items = record.BatchItems.ToList();
         progress?.Report(new SystemMtJobProgress(SystemMtJobState.Preparing, "preparing-batch", 5));
