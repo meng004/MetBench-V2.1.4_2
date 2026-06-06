@@ -71,7 +71,7 @@ public class SystemMtJobServiceTests
     }
 
     [Fact]
-    public async Task SubmitOperationAsync_rejects_report_export_until_operation_handler_exists()
+    public async Task SubmitOperationAsync_accepts_report_export_with_execution_and_root()
     {
         var svc = Build(new InMemoryJobStore(), new ChannelJobQueue());
         var request = new SystemMtOperationJobRequest(
@@ -79,10 +79,26 @@ public class SystemMtJobServiceTests
             ExecutionId: Guid.NewGuid(),
             ExportRoot: "/tmp/export");
 
-        var ex = await Assert.ThrowsAsync<NotSupportedException>(
+        var handle = await svc.SubmitOperationAsync(request, default);
+
+        var status = await svc.GetStatusAsync(handle.JobId, default);
+        Assert.NotNull(status);
+        Assert.Equal(SystemMtJobKind.ExportReport, status!.Kind);
+    }
+
+    [Fact]
+    public async Task SubmitOperationAsync_rejects_report_export_without_execution_id()
+    {
+        var svc = Build(new InMemoryJobStore(), new ChannelJobQueue());
+        var request = new SystemMtOperationJobRequest(
+            SystemMtJobKind.ExportReport,
+            ExecutionId: null,
+            ExportRoot: "/tmp/export");
+
+        var ex = await Assert.ThrowsAsync<ArgumentException>(
             () => svc.SubmitOperationAsync(request, default));
 
-        Assert.Contains("matching operation handler", ex.Message);
+        Assert.Contains("ExecutionId", ex.Message);
     }
 
     [Fact]

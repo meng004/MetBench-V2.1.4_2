@@ -8,4 +8,5 @@ public sealed record ExecutionArtifactExportRequest(
     bool IncludeMarkdown = true,
     bool IncludeWord = false,
     bool IncludeExcel = false,
-    bool IncludePdf = false);
+    bool IncludePdf = false,
+    bool IncludeResultJson = true);
