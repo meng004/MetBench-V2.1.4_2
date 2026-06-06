@@ -1,6 +1,12 @@
 # T0-T2 Gap-Fill A1/A3 WPF Wiring VM Prompt
 
-切换到分支 `claude/upbeat-fermi-CrlXj`（或合并后的 `main`），读取本文件，执行任务。
+**执行人**：Windows VM 上的 Claude Code 会话（CLAUDE.md §9 *VM track*：VS 2022 / Parallels，能本地编译运行 WPF）。云端 agent 不编译 WPF，只拥有契约。
+
+**怎么起**：在 Windows 仓库里
+1. `git fetch origin && git switch main && git pull`（A1/A3/C1/C2 全部云端代码已在 `main`，截至 PR #315 合并、head `0ae7111`）；
+2. 从 `main` 起一个**新的 VM 工作分支**：`git switch -c claude/t0t2-gapfill-wpf-wiring`（**不要**复用云端开发分支 `claude/upbeat-fermi-CrlXj`，也不要直接推它）；
+3. 读取本文件（`docs/superpowers/vm-prompts/2026-06-06-t0-t2-gap-fill-a1-a3-wpf-wiring-vm-prompt.md`）并执行下面任务；
+4. 完成后从该 VM 分支开 PR 回 `main`。
 
 ## 背景
 
@@ -8,7 +14,7 @@
 
 ## Preconditions
 
-- `git status --short --branch` 显示目标分支、无无关脏文件。
+- `git status --short --branch` 显示当前在新建的 VM 工作分支（基于 `main`）、无无关脏文件。
 - `dotnet --info` 成功。
 
 ## 改动点（唯一文件：`MetBench_Client/Hosting/SystemMtJobWorkerHostedService.cs`）
