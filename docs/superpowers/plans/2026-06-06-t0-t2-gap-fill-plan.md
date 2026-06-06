@@ -5,23 +5,21 @@
 > **P2 deliberate boundaries (result/evidence import, asset live-promotion) are
 > explicitly OUT of scope** and remain as-is until a separate trust-model plan.
 >
-> **Progress — all cloud scope done:** P0 **A1** (#308 four-end async export),
-> **A2** (#309 recorder async / no sync-over-async), **A3** (#310 ExportReport
-> handler), **C4** (#311 BLL.Core TreatWarningsAsErrors), **C1** (#313 batch/range
-> export — `ExecutionIds` on request/record/status with R1 parity roundtrip;
-> continue-on-error batch manifest) and **C2** (#314 richer SampleTraces — honest
-> per-changed-input-field diff, not metric-stuffing) are merged to `origin/main`.
-> Two fresh §12.4 R2 chain-end holistic reviews ran: #308–#311 (no Critical/Important;
-> 2 minor stale-doc findings fixed in #312) and C1+C2 #313/#314 (no Critical/Important;
-> all batch-cancellation / R1-parity / pointer-escaping / no-fabrication concerns
-> verified correct). Full suite progressed 1784 → 1800 pass / 0 fail / 19 env-gated
-> skips. **P2 boundary items remain explicitly OUT of scope.**
+> **Status — async/export scope COMPLETE & Controlled (updated 2026-06-06).**
+> P0 **A1** (#308), **A2** (#309), **A3** (#310), **C4** (#311), **C1** (#313),
+> **C2** (#314) merged to `origin/main`; **WPF runtime wiring #317** (hosted-service
+> Word/Excel/PDF renderer injection + `ExportReportJobOperationHandler` registration
+> + async-page `ExportReport` exposure) merged with **real Windows VM evidence**
+> (`docs/superpowers/specs/2026-06-06-t0-t2-gap-fill-vm-evidence/`): RunMr →
+> ExportExecutionArtifacts (real docx/xlsx/pdf bytes) → ExportReport (report-only)
+> all Succeeded via UIA. Two §12.4 R2 chain-end reviews (#308–#311, C1+C2) found
+> no Critical/Important. Cloud full suite 1800/0/19. **P2 boundary items remain
+> OUT of scope.**
 >
-> **Remaining = VM only:** P3 **C3** (UI-only MR CRUD) plus the A1/A3 WPF
-> renderer/handler wiring (so the running WPF app emits Word/Excel/PDF and dispatches
-> ExportReport) are captured in
-> `docs/superpowers/vm-prompts/2026-06-06-t0-t2-gap-fill-a1-a3-wpf-wiring-vm-prompt.md`
-> and await a VM run. This row is **not Controlled** until that VM evidence is captured.
+> **Carved out (not part of this Controlled chain):** P3 **C3** (UI-only MR CRUD)
+> was deferred from the outset as a distinct T1/T2 feature and has **not** been
+> built; it now has its own "Not started" row in `docs/status/current.md` and needs
+> a dedicated design before planning. The async/export gap-fill is not blocked on it.
 >
 > **REQUIRED SUB-SKILL:** use superpowers:subagent-driven-development or
 > superpowers:executing-plans, task-by-task, TDD-first.
