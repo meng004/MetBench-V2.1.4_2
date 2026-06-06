@@ -16,10 +16,16 @@
 > no Critical/Important. Cloud full suite 1800/0/19. **P2 boundary items remain
 > OUT of scope.**
 >
-> **Carved out (not part of this Controlled chain):** P3 **C3** (UI-only MR CRUD)
-> was deferred from the outset as a distinct T1/T2 feature and has **not** been
-> built; it now has its own "Not started" row in `docs/status/current.md` and needs
-> a dedicated design before planning. The async/export gap-fill is not blocked on it.
+> **C3 status correction (2026-06-06):** an earlier pass through this plan
+> claimed C3 (UI-only MR CRUD) was "Not started — needs own design/plan". That
+> was wrong. C3 is already shipped on `origin/main`: cloud
+> `ISystemMtManifestCatalogEditor` + `SystemMtMrBindingDraft` with persistence-time
+> validation (CLAUDE.md §1·7), WPF `SystemMtMrCatalogViewModel` +
+> `SystemMtMrCatalogPage.xaml` with `NewMrDraft/ValidateDraft/SaveDraft`, DI in
+> `App.xaml.cs`, nav entry in `MainWindowViewModel.cs:88`,
+> `SystemMtManifestCatalogEditorTests.cs` 6/6 green. The status ledger row in
+> `docs/status/current.md` is now corrected to Controlled with the file:line
+> evidence. No new C3 work follows from this plan.
 >
 > **REQUIRED SUB-SKILL:** use superpowers:subagent-driven-development or
 > superpowers:executing-plans, task-by-task, TDD-first.
