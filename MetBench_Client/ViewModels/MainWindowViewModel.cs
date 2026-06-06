@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using MetBench_UI.Localization;
 using Wpf.Ui.Controls;
 using Wpf.Ui;
+using System.Windows.Automation;
 
 namespace MetBench_Client.ViewModels
 {
@@ -68,6 +69,7 @@ namespace MetBench_Client.ViewModels
                 Icon = new SymbolIcon { Symbol = symbol },
                 TargetPageType = targetPageType
             };
+            AutomationProperties.SetAutomationId(item, key);
             registry.Add((item, key));
             return item;
         }

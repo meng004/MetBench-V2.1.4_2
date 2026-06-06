@@ -17,6 +17,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 //using System.Windows;
 using Wpf.Ui;
 using Wpf.Ui.Controls;
@@ -332,7 +333,7 @@ namespace MetBench_Client.ViewModels
         }
 
         // 提示信息弹窗
-        public bool showMessage(string message, string title)
+        public async Task<bool> showMessageAsync(string message, string title)
         {
             var uiMessageBox = new Wpf.Ui.Controls.MessageBox
             {
@@ -343,13 +344,13 @@ namespace MetBench_Client.ViewModels
             uiMessageBox.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner;
             uiMessageBox.HorizontalAlignment = System.Windows.HorizontalAlignment.Center;
             uiMessageBox.CloseButtonText = "OK";
-            var messageResult = uiMessageBox.ShowDialogAsync().Result.ToString();
+            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
             //primary为第一个按钮
             return messageResult == "Primary" ? true : false;
         }
 
         //增加
-        public void btnAdd_Click()
+        public async Task btnAdd_Click()
         {
             var application = Create();
             var validationResult = GetValidationResult(application);
@@ -369,7 +370,7 @@ namespace MetBench_Client.ViewModels
                     }
                 }
 
-                showMessage(message, "Tips");
+                await showMessageAsync(message, "Tips");
                 return;
 
             }
@@ -378,12 +379,12 @@ namespace MetBench_Client.ViewModels
             if (result == 0)
             {
                 var message = "添加记录 失败！";
-                showMessage(message, "Tips");
+                await showMessageAsync(message, "Tips");
             }
             else if (result == 1)
             {
                 var message = "该应用程序已存在！";
-                showMessage(message, "Tips");
+                await showMessageAsync(message, "Tips");
             }
             else
             {
@@ -391,7 +392,7 @@ namespace MetBench_Client.ViewModels
                 ApplicationAddEvent applicationAddEvent = new ApplicationAddEvent() { Name = applicationName };
                 _eventAggregator.Publish(applicationAddEvent);
                 var message = "添加记录 成功！";
-                showMessage(message, "Tips");
+                await showMessageAsync(message, "Tips");
             }
             //if (result)
             //{
@@ -413,12 +414,12 @@ namespace MetBench_Client.ViewModels
         }
 
         // 修改
-        public void btnModify_Click()
+        public async Task btnModify_Click()
         {
             if (DataGridSelectedItem == null)
             {
                 var msg = "请选择要修改的应用程序！";
-                showMessage(msg, "Tips");
+                await showMessageAsync(msg, "Tips");
                 return;
             }
 
@@ -439,7 +440,7 @@ namespace MetBench_Client.ViewModels
                         message += validationResult.Errors[i].ErrorMessage;
                     }
                 }
-                showMessage(message, "Tips");
+                await showMessageAsync(message, "Tips");
                 //System.Windows.MessageBox.Show(message, "提示", System.Windows.MessageBoxButton.OK);
                 return;
 
@@ -490,7 +491,7 @@ namespace MetBench_Client.ViewModels
             uiMessageBox.CloseButtonText = "No";
             uiMessageBox.IsPrimaryButtonEnabled = true;
             uiMessageBox.PrimaryButtonText = "Yes";
-            var messageResult = uiMessageBox.ShowDialogAsync().Result.ToString();
+            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
             var result = messageResult == "Primary" ? true : false;
             if (result)
             {
@@ -498,19 +499,19 @@ namespace MetBench_Client.ViewModels
                 if (res == 0)
                 {
                     var message = "修改记录 失败！";
-                    showMessage(message, "Tips");
+                    await showMessageAsync(message, "Tips");
                 }
                 else if (res == 1)
                 {
                     var message = "该应用程序已存在！";
-                    showMessage(message, "Tips");
+                    await showMessageAsync(message, "Tips");
                 }
                 else
                 {
                     ApplicationMoidfyEvent applicationMoidfyEvent = new ApplicationMoidfyEvent() { Name = applictionName, newName = newapplicationName };
                     _eventAggregator.Publish(applicationMoidfyEvent);
                     var message = "修改记录 成功！";
-                    showMessage(message, "Tips");
+                    await showMessageAsync(message, "Tips");
                 }
                 //if (res)
                 //{
@@ -533,11 +534,11 @@ namespace MetBench_Client.ViewModels
         }
 
         //删除
-        public void btnDelect_Click()
+        public async Task btnDelect_Click()
         {
             if (DataGridSelectedItem == null)
             {
-                showMessage("请选择要删除的应用程序！", "Tips");
+                await showMessageAsync("请选择要删除的应用程序！", "Tips");
                 return;
             }
 
@@ -552,7 +553,7 @@ namespace MetBench_Client.ViewModels
             uiMessageBox.CloseButtonText = "No";
             uiMessageBox.IsPrimaryButtonEnabled = true;
             uiMessageBox.PrimaryButtonText = "Yes";
-            var messageResult = uiMessageBox.ShowDialogAsync().Result.ToString();
+            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
             var result = messageResult == "Primary" ? true : false;
             if (result)
             {
@@ -564,12 +565,12 @@ namespace MetBench_Client.ViewModels
                     ApplicationDeleteEvent applicationDeleteEvent = new ApplicationDeleteEvent() { Name = name };
                     _eventAggregator.Publish(applicationDeleteEvent);
                     var msg3 = "删除记录 成功";
-                    showMessage(msg3, "Tips");
+                    await showMessageAsync(msg3, "Tips");
                 }
                 else
                 {
                     var msg3 = "删除记录 失败";
-                    showMessage(msg3, "Tips");
+                    await showMessageAsync(msg3, "Tips");
                 }
             }
 
@@ -631,13 +632,13 @@ namespace MetBench_Client.ViewModels
             }
             else
             {
-                showMessage("请点击表格中的行数据！", "Tips");
+                _ = showMessageAsync("请点击表格中的行数据！", "Tips");
                 return false;
             }
         }
 
         // 解压文件并导出至系统缓存目录的metlib文件夹下
-        public void btnExtractCode_Click()
+        public async Task btnExtractCode_Click()
         {
             FileCompressionAndStorageUtility fileCompressionAndStorageUtility = new FileCompressionAndStorageUtility(_applicationSerive);
             var application = Create();
@@ -645,7 +646,7 @@ namespace MetBench_Client.ViewModels
             if (DataGridSelectedItem == null)
             {
                 var message = "请选择应用程序！";
-                showMessage(message, "Tips");
+                await showMessageAsync(message, "Tips");
                 return;
             }
             fileCompressionAndStorageUtility.ExtractAllZipFilesFromDatabase(application);
@@ -737,25 +738,25 @@ namespace MetBench_Client.ViewModels
         }
 
         // 撤回上传SourceTestCaseBack
-        public void btnSourceTestCaseBack_Click()
+        public async Task btnSourceTestCaseBack_Click()
         {
             if (SourceTestCase != null)
             {
                 SourceTestCase = null;
                 SourceTestCasename = string.Empty;
-                showMessage("撤销上传成功", "Tips");
+                await showMessageAsync("撤销上传成功", "Tips");
             }
         }
 
         // 撤回上传
-        public void btnBack_Click()
+        public async Task btnBack_Click()
         {
             if (Code != null)
             {
                 Code = null;
                 Codename = string.Empty;
                 ProgrammingLanguage = string.Empty;
-                showMessage("撤销上传成功", "Tips");
+                await showMessageAsync("撤销上传成功", "Tips");
             }
         }
 

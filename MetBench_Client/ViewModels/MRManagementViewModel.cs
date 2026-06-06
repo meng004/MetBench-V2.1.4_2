@@ -393,7 +393,7 @@ namespace MetBench_Client.ViewModels
         }
 
         // 提示信息弹窗
-        public bool showMessage(string message, string title)
+        public async Task<bool> showMessageAsync(string message, string title)
         {
             var uiMessageBox = new Wpf.Ui.Controls.MessageBox
             {
@@ -404,14 +404,14 @@ namespace MetBench_Client.ViewModels
             uiMessageBox.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             uiMessageBox.HorizontalAlignment = System.Windows.HorizontalAlignment.Center;
             uiMessageBox.CloseButtonText = "OK";
-            var messageResult = uiMessageBox.ShowDialogAsync().Result.ToString();
+            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
 
             // primary为第一个按钮
             return messageResult == "Primary" ? true : false;
         }
 
         // 增加蜕变关系
-        public async void btnAdd_Click()
+        public async Task btnAdd_Click()
         {
             MetamorphicRelation metamorphicRelation = null;
             //使用异步方式，将Latex转换为Sympy，Latex渲染图片
@@ -437,24 +437,24 @@ namespace MetBench_Client.ViewModels
                         }
                     }
 
-                    showMessage(message, "Tips");
+                    await showMessageAsync(message, "Tips");
                     return;
                 }
                 int result = await _metamorphicRelationSerive.AddService(metamorphicRelation);
                 if (result == 0)
                 {
                     var message = "添加记录 失败！";
-                    showMessage(message, "Tips");
+                    await showMessageAsync(message, "Tips");
                 }
                 else if (result == 1)
                 {
                     var message = "该蜕变关系已存在！";
-                    showMessage(message, "Tips");
+                    await showMessageAsync(message, "Tips");
                 }
                 else
                 {
                     var message = "添加记录 成功！";
-                    showMessage(message, "Tips");
+                    await showMessageAsync(message, "Tips");
                 }
 
                 var ms = "蜕变关系添加成功";
@@ -484,7 +484,7 @@ namespace MetBench_Client.ViewModels
             if (DataGridSelectItem == null)
             {
                 var msg = "请选择要修改的蜕变关系！";
-                showMessage(msg, "Tips");
+                await showMessageAsync(msg, "Tips");
                 return;
             }
             var msg2 = "是否修改该记录?";
@@ -498,7 +498,7 @@ namespace MetBench_Client.ViewModels
             uiMessageBox.CloseButtonText = "No";
             uiMessageBox.IsPrimaryButtonEnabled = true;
             uiMessageBox.PrimaryButtonText = "Yes";
-            var messageResult = uiMessageBox.ShowDialogAsync().Result.ToString();
+            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
             var result = messageResult == "Primary" ? true : false;
             MetamorphicRelation metamorphicRelation = null;
             //使用异步方式，将Latex转换为Sympy，Latex渲染图片
@@ -529,7 +529,7 @@ namespace MetBench_Client.ViewModels
                         }
                     }
 
-                    showMessage(mesg, "Tips");
+                    await showMessageAsync(mesg, "Tips");
                     return;
                 }
 
@@ -537,17 +537,17 @@ namespace MetBench_Client.ViewModels
                 if (editResult == 0)
                 {
                     var message = "修改记录 失败！";
-                    showMessage(message, "Tips");
+                    await showMessageAsync(message, "Tips");
                 }
                 else if (editResult == 1)
                 {
                     var message = "该蜕变关系已存在！";
-                    showMessage(message, "Tips");
+                    await showMessageAsync(message, "Tips");
                 }
                 else
                 {
                     var message = "修改记录 成功！";
-                    showMessage(message, "Tips");
+                    await showMessageAsync(message, "Tips");
                 }
                 var ms = "蜕变关系修改成功";
                 MetamorphicRelationOperationEvent metamorphicRelationOperationEvent = new MetamorphicRelationOperationEvent() { message = ms };
@@ -570,12 +570,12 @@ namespace MetBench_Client.ViewModels
         }
 
         // 删除蜕变关系
-        public void btnDelect_Click()
+        public async Task btnDelect_Click()
         {
             if (DataGridSelectItem == null)
             {
                 var message = "请选择要删除的蜕变关系！";
-                showMessage(message, "Tips");
+                await showMessageAsync(message, "Tips");
                 return;
             }
 
@@ -591,7 +591,7 @@ namespace MetBench_Client.ViewModels
             uiMessageBox.CloseButtonText = "No";
             uiMessageBox.IsPrimaryButtonEnabled = true;
             uiMessageBox.PrimaryButtonText = "Yes";
-            var messageResult = uiMessageBox.ShowDialogAsync().Result.ToString();
+            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
             var result = messageResult == "Primary" ? true : false;
 
             if (result)
@@ -600,7 +600,7 @@ namespace MetBench_Client.ViewModels
 
                 var msg = suc ? "成功" : "失败";
                 var msgs = "删除记录" + msg;
-                showMessage(msgs, "Tips");
+                await showMessageAsync(msgs, "Tips");
             }
 
             var ms = "蜕变关系删除成功";
@@ -676,7 +676,7 @@ namespace MetBench_Client.ViewModels
             }
             else
             {
-                showMessage("请点击表格中的行数据！", "Tips");
+                _ = showMessageAsync("请点击表格中的行数据！", "Tips");
                 return false;
             }
         }

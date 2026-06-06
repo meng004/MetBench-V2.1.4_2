@@ -151,7 +151,7 @@ namespace MetBench_Client.ViewModels
         }
 
         // 提示信息弹窗
-        public bool showMessage(string message, string title)
+        public async Task<bool> showMessageAsync(string message, string title)
         {
             var uiMessageBox = new Wpf.Ui.Controls.MessageBox
             {
@@ -162,21 +162,21 @@ namespace MetBench_Client.ViewModels
             uiMessageBox.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             uiMessageBox.HorizontalAlignment = System.Windows.HorizontalAlignment.Center;
             uiMessageBox.CloseButtonText = "OK";
-            var messageResult = uiMessageBox.ShowDialogAsync().Result.ToString();
+            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
             //primary为第一个按钮
             return messageResult == "Primary" ? true : false;
         }
 
         // 撤回上传
-        public void btnBack_Click()
+        public async Task btnBack_Click()
         {
             programFilePath = string.Empty;
             CodeName = string.Empty;
-            showMessage("撤销上传成功", "Tips");
+            await showMessageAsync("撤销上传成功", "Tips");
         }
 
         // 将目标程序复制粘贴到fuction文件夹
-        public void btnAddCode_Click()
+        public async Task btnAddCode_Click()
         {
             var uiMessageBox = new Wpf.Ui.Controls.MessageBox
             {
@@ -190,7 +190,7 @@ namespace MetBench_Client.ViewModels
             uiMessageBox.HorizontalAlignment = HorizontalAlignment.Center;
             uiMessageBox.PrimaryButtonText = "Yes";
 
-            var messageResult = uiMessageBox.ShowDialogAsync().Result.ToString();
+            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
             //primary为第一个按钮
             var confirmResult = messageResult == "Primary" ? true : false;
             if (!confirmResult)
@@ -231,13 +231,13 @@ namespace MetBench_Client.ViewModels
                     if (!fileExtension.Equals(".py") && !fileExtension.Equals(".java"))
                     {
                         string msg = "目前仅支持Python或Java语言程序！";
-                        showMessage(msg, "Tips");
+                        await showMessageAsync(msg, "Tips");
                         btn_Cancle();
                         return;
                     }
                 }
                 programFilePath = filePath;
-                showMessage("文件上传成功！", "Tips");
+                await showMessageAsync("文件上传成功！", "Tips");
             }
         }
 
@@ -246,7 +246,7 @@ namespace MetBench_Client.ViewModels
         {
             if (!(programFilePath.Length > 0))
             {
-                showMessage("请上传目标程序", "Tips");
+                await showMessageAsync("请上传目标程序", "Tips");
                 btn_Cancle();
                 return;
             }
@@ -269,7 +269,7 @@ namespace MetBench_Client.ViewModels
                     }
                 }
 
-                showMessage(message, "Tips");
+                await showMessageAsync(message, "Tips");
                 return;
             }
 
@@ -286,14 +286,14 @@ namespace MetBench_Client.ViewModels
                     mrRecommendationResults = await _mrRecommendationSerive.SyntaxMRRRecommend(program, candidatePrograms);
                     if (mrRecommendationResults == null)
                     {
-                        showMessage("没有可推荐的MR！","Tips");
+                        await showMessageAsync("没有可推荐的MR！","Tips");
                         return;
                     }
                     var viusalResults = await convertCollection(mrRecommendationResults);
                     var list  = viusalResults.ToList();
                     datas = viusalResults;
                     reload_ItemsSource();
-                    showMessage($"共推荐{list.Count}条MR", "Tips");
+                    await showMessageAsync($"共推荐{list.Count}条MR", "Tips");
                 }
 
                 // 语义相似推荐
@@ -302,14 +302,14 @@ namespace MetBench_Client.ViewModels
                     mrRecommendationResults = await _mrRecommendationSerive.SemanticMRRRecommend(program, candidatePrograms);
                     if (mrRecommendationResults == null)
                     {
-                        showMessage("没有可推荐的MR！", "Tips");
+                        await showMessageAsync("没有可推荐的MR！", "Tips");
                         return;
                     }
                     var viusalResults = await convertCollection(mrRecommendationResults);
                     var list = viusalResults.ToList();
                     datas = viusalResults;
                     reload_ItemsSource();
-                    showMessage($"共推荐{list.Count}条MR", "Tips");
+                    await showMessageAsync($"共推荐{list.Count}条MR", "Tips");
                 }
             }
             finally
