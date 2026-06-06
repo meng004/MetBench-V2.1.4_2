@@ -11,7 +11,8 @@
 > - **P2 done**（PR #324）：BLL §6 违规清理 —— 2 处 CS1998 假异步（`CopyCandidateProgrmsToDestination`）改 `Task.FromResult` + 3 处 CS0168 静默吞异常加 `Debug.WriteLine`，最小修改。
 > - **P3 done**（PR #325 #326 #327）：遗留层警告棘轮全 4 层完成：Domain ✅（30 处 CS8618 修零 + TWAE）；IDAL ✅（28 处修零 + TWAE）；DAL ✅（CS8766/8618/8625 修真问题，CS0618 file-level pragma 隔离有意 v1 兼容，+ TWAE）；BLL 棘轮带白名单 ✅（224 现存债登记可见，非白名单警告码 fail-build，特别 CS0168/CS1998 严守 P2 已修；CI ubuntu-24.04 SDK 多分析 CS8601 一处，已补白名单）。
 > - **P4 active**（VM 待运行）：WPF 死锁面提示词已就绪 `docs/superpowers/vm-prompts/2026-06-06-p4-wpf-deadlock-surface-vm-prompt.md` —— 18 处 `.ShowDialogAsync().Result` + 1 处 `async void` 精确清单 + 修复模式 + 验证步骤。VM 端 Claude 执行。
-> - **下一步**：等 P4 VM 证据回；之后 P5 T6 变异落地。
+> - **P5 partial(本 PR)**：T6 变异 —— 计划 §5 明确授权了 fallback "若工时不足显式标 Prototype"。本步**走中间路径**:① 在 BLL.Core 落地 `IMutantApplicator` 接口 + `UnifiedDiffMutantApplicator` 纯 C# 默认实现（7 测试覆盖 happy path 与所有 fail-loud 契约：empty diff / context mismatch / missing file / no recognized sections）;② `MutationCampaignService` XML doc + `MutationCampaignViewModel.StubCellRunner` 注释**显式标 Prototype**,运行 WPF 看到的杀死率明确标 `SIMULATED`。**剩余 deferred follow-up**:WPF 把 StubCellRunner 换成 launcher-backed 实现需 `LauncherOptions` 加 per-run SUT-root override;最小 MR 完备子集搜索完全独立。
+> - **下一步**：等 P4 VM 证据回；T6 deferred follow-up 作为单独 plan 跟进或维持 Prototype 标注（plan §5 明确允许）。
 
 ## 目标 & 验收总纲
 

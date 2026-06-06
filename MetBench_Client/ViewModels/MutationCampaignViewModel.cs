@@ -194,6 +194,15 @@ public sealed partial class MutationCampaignViewModel : ObservableObject, INavig
     [RelayCommand(CanExecute = nameof(CanCancel))]
     private void CancelCampaign() => _currentCts?.Cancel();
 
+    // PROTOTYPE — T6 mutation maturity is currently Prototype (see MutationCampaignService XML
+    // doc + docs/superpowers/specs/2026-06-06-metbench-maturity-assessment.md Top risk #4).
+    // This runner does NOT touch a real SUT or apply any mutant: outcomes are computed by a
+    // deterministic hash of (mutantId, bindingId) so the WPF page can exercise UI flows
+    // without a backend. Replacing this with a launcher-backed cellRunner that materializes
+    // a patched SUT via IMutantApplicator and calls ISystemMtLauncher.RunAsync is documented
+    // as deferred work in the remediation plan §5 (requires a per-run SUT-root override on
+    // LauncherOptions). Anyone reading kill-rate / detection-rate stats off this runner must
+    // treat them as simulated, not measured.
     private static async Task<MutationCellOutcome> StubCellRunner(MutationCellInput input, CancellationToken ct)
     {
         await Task.Delay(80, ct);
@@ -204,7 +213,7 @@ public sealed partial class MutationCampaignViewModel : ObservableObject, INavig
             Outcome: outcome,
             ObservedDelta: outcome == "detected" ? (double?)(0.01 * input.MutantId) : null,
             ExpectedDelta: outcome == "detected" ? (double?)0.0 : null,
-            Notes: null);
+            Notes: "SIMULATED (T6 Prototype StubCellRunner — see XML doc)");
     }
 
     private void LoadLastResults(Guid campaignId)
