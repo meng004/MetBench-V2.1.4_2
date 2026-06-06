@@ -576,9 +576,19 @@ rtk git commit -m "feat(systemmt): stage asset import export jobs"
 - Test: `MetBench_SystemMT.Tests/SystemMT/Jobs/ExecutionArtifactExportJobTests.cs`
 - Test: `MetBench_SystemMT.Tests/Architecture/ExecutionArtifactImportBoundaryTests.cs`
 
-- [ ] **Step 1: Confirm actual API signatures from Task 0**
+- [ ] **Step 1: Confirm actual API signatures from current code**
 
-Before writing tests, compare the snippets below to Task 0 discovery output. If repository/report method names differ, update this task in the plan first and commit the plan correction. Do not leave "adapt if needed" implementation work to the coding step.
+Before writing tests, compare the snippets below to current code. If repository/report method names differ, update this task in the plan first and commit the plan correction. Do not leave "adapt if needed" implementation work to the coding step.
+
+Current code discovery on 2026-06-05 found these binding facts:
+
+- `SystemMtJobModels.cs` does not exist; the operation DTOs live under `MetBench_BLL.Core/SystemMT/Jobs/` and `MetBench_BLL.Core/SystemMT/Jobs/Operations/`.
+- `ISystemMtResultRepository.GetAsync(string id, CancellationToken)` fetches `SystemMtResultRecord` by the legacy result record id string.
+- `IExecutionEvidenceRepository.GetByExecutionAsync(Guid executionId, CancellationToken)` fetches optional `ExecutionEvidence`; the interface also has `DeleteByExecutionIdAsync`.
+- `ISystemMtResultReportRenderer.Render(records, evidenceByExecutionId, context)` is the HTML report surface for `SystemMtResultRecord`.
+- `SystemMtReportService.GenerateExecution(Guid executionId, string contentPath)` is synchronous and depends on domain `IExecutionRepository`; it throws when the domain `Execution` row is missing.
+
+Therefore PR-3 must not claim Markdown report export unless a real `SystemMtReportService` is injected and the domain `Execution` row exists. If `IncludeMarkdown` is requested without that service, the exporter must fail with a clear diagnostic rather than silently omitting Markdown.
 
 - [ ] **Step 2: Write failing export tests**
 
@@ -588,7 +598,8 @@ Tests must assert:
 - export writes `manifest.json`;
 - export writes `execution-result.json`;
 - export writes `execution-evidence.json` only when evidence exists;
-- export writes at least HTML and Markdown report files through existing render/report services;
+- export writes an HTML report through the existing result renderer;
+- Markdown report export is fail-closed unless `SystemMtReportService` and a real domain `Execution` row are available;
 - result/evidence import APIs are not introduced, guarded by `ExecutionArtifactImportBoundaryTests`.
 
 Run:
@@ -618,7 +629,7 @@ public sealed record ExecutionArtifactExportManifest(
 
 - [ ] **Step 4: Implement exporter**
 
-Use structured JSON serialization and the exact interfaces discovered in Task 0. The code below reflects the current interface shape verified on 2026-06-05: `ISystemMtResultRepository.GetAsync(string, ...)`, `IExecutionEvidenceRepository.GetByExecutionAsync(Guid, ...)`, `ISystemMtResultReportRenderer.Render(records, evidenceMap, context)`, and `SystemMtReportService.GenerateExecution(Guid, string)`.
+Use structured JSON serialization and the exact interfaces discovered above. The code below is schematic only; the production implementation must use the current signatures: `ISystemMtResultRepository.GetAsync(string, ...)`, `IExecutionEvidenceRepository.GetByExecutionAsync(Guid, ...)`, `ISystemMtResultReportRenderer.Render(records, evidenceMap, context)`, and optional `SystemMtReportService.GenerateExecution(Guid, string)`.
 
 ```csharp
 public sealed class ExecutionArtifactExporter
@@ -626,7 +637,7 @@ public sealed class ExecutionArtifactExporter
     private readonly ISystemMtResultRepository _results;
     private readonly IExecutionEvidenceRepository? _evidence;
     private readonly ISystemMtResultReportRenderer _html;
-    private readonly SystemMtReportService _markdown;
+    private readonly SystemMtReportService? _markdown;
 
     public async Task<string> ExportAsync(
         ExecutionArtifactExportRequest request,
@@ -666,6 +677,8 @@ public sealed class ExecutionArtifactExporter
 
         if (request.IncludeMarkdown)
         {
+            if (_markdown is null)
+                throw new InvalidOperationException("Markdown execution report export requires SystemMtReportService.");
             var markdownFile = Path.Combine(request.ExportRoot, "report.md");
             _markdown.GenerateExecution(request.ExecutionId, markdownFile);
             files.Add("report.md");
@@ -692,7 +705,7 @@ The guard must read production `.cs` files and assert no forbidden symbol appear
 
 - [ ] **Step 6: Implement job handler**
 
-`ExportExecutionArtifactsJobOperationHandler` reads `record.ExecutionId` and `record.ExportRoot`, calls `ExecutionArtifactExporter.ExportAsync`, reports 20/80/100 progress, and returns `ArtifactPath = manifestFile`.
+`ExportExecutionArtifactsJobOperationHandler` reads `record.ExecutionId` and `record.ExportRoot`, calls `ExecutionArtifactExporter.ExportAsync`, reports non-terminal progress before returning, and returns `ArtifactPath = manifestFile`. Do not report terminal `Succeeded` progress before `SystemMtJobWorker.FinalizeAsync`; otherwise `ArtifactPath` can be dropped by the terminal-state guard.
 
 - [ ] **Step 7: Run focused tests**
 
