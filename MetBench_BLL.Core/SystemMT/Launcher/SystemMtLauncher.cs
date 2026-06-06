@@ -219,7 +219,9 @@ public sealed class SystemMtLauncher : ISystemMtLauncher, ISystemMtCatalogReader
         var runtimeEvidence = RuntimeEvidence.FromPreflightResult(runtimePreflight);
         if (!runtimePreflight.Passed)
         {
-            var blocked = _recorder.RecordBlockedPreflight(context, runtimePreflight, mrInstanceId: -1);
+            var blocked = await _recorder.RecordBlockedPreflightAsync(
+                context, runtimePreflight, mrInstanceId: -1, cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
             return new MrRunResult(
                 RecordId: blocked.ExecutionId.ToString(),
                 MrId: mrId,
@@ -261,7 +263,9 @@ public sealed class SystemMtLauncher : ISystemMtLauncher, ISystemMtCatalogReader
                 .ConfigureAwait(false);
         }
 
-        var recorded = _recorder.Record(context, outcome, mrInstanceId: -1, runtimeEvidence: runtimeEvidence);
+        var recorded = await _recorder.RecordAsync(
+            context, outcome, mrInstanceId: -1, runtimeEvidence: runtimeEvidence, cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
 
         await RecordAnomalyIfFailedAsync(blueprint.Mr.DisplayName, recorded.ResultId, outcome, cancellationToken)
             .ConfigureAwait(false);

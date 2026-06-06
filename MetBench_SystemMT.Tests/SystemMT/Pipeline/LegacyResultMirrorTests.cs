@@ -75,14 +75,14 @@ public sealed class LegacyResultMirrorTests
         FollowupExitCode: 0);
 
     [Fact]
-    public void Record_when_assertion_present_mirrors_to_legacy_result_repo_with_executionId_as_id()
+    public async Task Record_when_assertion_present_mirrors_to_legacy_result_repo_with_executionId_as_id()
     {
         var execRepo = new FakeExecRepo();
         var resRepo = new FakeResultRepo();
         var legacy = new InMemoryLegacyResultRepo();
 
         var recorder = new SystemMtExecutionRecorder(execRepo, resRepo, legacyResults: legacy);
-        var recorded = recorder.Record(CtxFor("openmoc-pincell-nu-sigma-f"), OkOutcome(), mrInstanceId: 1);
+        var recorded = await recorder.RecordAsync(CtxFor("openmoc-pincell-nu-sigma-f"), OkOutcome(), mrInstanceId: 1);
 
         var mirrored = Assert.Single(legacy.Records);
         Assert.Equal(recorded.ExecutionId, mirrored.Id);
@@ -103,7 +103,7 @@ public sealed class LegacyResultMirrorTests
     }
 
     [Fact]
-    public void Record_when_legacy_repo_is_null_preserves_pre_mirror_behavior()
+    public async Task Record_when_legacy_repo_is_null_preserves_pre_mirror_behavior()
     {
         // Backward-compat: every pre-existing recorder construction site passes
         // null legacy repo. Recorder must still write V2 schema and skip the
@@ -112,7 +112,7 @@ public sealed class LegacyResultMirrorTests
         var resRepo = new FakeResultRepo();
 
         var recorder = new SystemMtExecutionRecorder(execRepo, resRepo);
-        var recorded = recorder.Record(CtxFor("openmoc-pincell-nu-sigma-f"), OkOutcome(), mrInstanceId: 1);
+        var recorded = await recorder.RecordAsync(CtxFor("openmoc-pincell-nu-sigma-f"), OkOutcome(), mrInstanceId: 1);
 
         Assert.NotEqual(Guid.Empty, recorded.ExecutionId);
         Assert.NotNull(recorded.ResultId);
@@ -121,7 +121,7 @@ public sealed class LegacyResultMirrorTests
     }
 
     [Fact]
-    public void Record_when_outcome_has_no_AssertionResult_skips_legacy_mirror()
+    public async Task Record_when_outcome_has_no_AssertionResult_skips_legacy_mirror()
     {
         // For error / timeout / cancelled outcomes the V2 Result row is skipped;
         // legacy mirror must follow the same gate to keep the two collections
@@ -132,14 +132,14 @@ public sealed class LegacyResultMirrorTests
 
         var recorder = new SystemMtExecutionRecorder(execRepo, resRepo, legacyResults: legacy);
         var errored = OkOutcome() with { FinalStatus = "error", AssertionResult = null };
-        var recorded = recorder.Record(CtxFor("openmoc-pincell-nu-sigma-f"), errored, mrInstanceId: 1);
+        var recorded = await recorder.RecordAsync(CtxFor("openmoc-pincell-nu-sigma-f"), errored, mrInstanceId: 1);
 
         Assert.Null(recorded.ResultId);
         Assert.Empty(legacy.Records);
     }
 
     [Fact]
-    public void Record_when_assertion_fails_mirrors_failure_reason()
+    public async Task Record_when_assertion_fails_mirrors_failure_reason()
     {
         var execRepo = new FakeExecRepo();
         var resRepo = new FakeResultRepo();
@@ -158,7 +158,7 @@ public sealed class LegacyResultMirrorTests
         };
 
         var recorder = new SystemMtExecutionRecorder(execRepo, resRepo, legacyResults: legacy);
-        recorder.Record(CtxFor("openmoc-pincell-nu-sigma-f"), failedOutcome, mrInstanceId: 1);
+        await recorder.RecordAsync(CtxFor("openmoc-pincell-nu-sigma-f"), failedOutcome, mrInstanceId: 1);
 
         var mirrored = Assert.Single(legacy.Records);
         Assert.False(mirrored.Passed);

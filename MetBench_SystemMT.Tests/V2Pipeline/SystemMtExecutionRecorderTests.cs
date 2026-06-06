@@ -15,11 +15,28 @@ namespace MetBench_SystemMT.Tests.V2Pipeline;
 public sealed class SystemMtExecutionRecorderTests
 {
     [Fact]
-    public void Record_ok_outcome_inserts_execution_and_result()
+    public void Recorder_source_has_no_sync_over_async_persistence()
+    {
+        var dir = AppContext.BaseDirectory;
+        while (!string.IsNullOrEmpty(dir) && !File.Exists(Path.Combine(dir, "MetBench.sln")))
+            dir = Directory.GetParent(dir)?.FullName;
+        Assert.False(string.IsNullOrEmpty(dir), "Could not locate repository root.");
+
+        var recorderPath = Path.Combine(
+            dir!, "MetBench_BLL.Core", "SystemMT", "Pipeline", "SystemMtExecutionRecorder.cs");
+        Assert.True(File.Exists(recorderPath), $"Recorder source not found: {recorderPath}");
+
+        var source = File.ReadAllText(recorderPath);
+        Assert.DoesNotContain(".GetAwaiter().GetResult()", source, StringComparison.Ordinal);
+        Assert.DoesNotContain(".Wait()", source, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Record_ok_outcome_inserts_execution_and_result()
     {
         var (recorder, execs, results) = NewRecorder();
 
-        var recorded = recorder.Record(
+        var recorded = await recorder.RecordAsync(
             MakeContext(), MakeOutcome(PipelineStatus.Ok, sourceV: 1.0, followupV: 1.5), mrInstanceId: 7);
 
         var exec = Assert.Single(execs.Data);
@@ -33,11 +50,11 @@ public sealed class SystemMtExecutionRecorderTests
     }
 
     [Fact]
-    public void Record_anomaly_outcome_inserts_failed_result()
+    public async Task Record_anomaly_outcome_inserts_failed_result()
     {
         var (recorder, execs, results) = NewRecorder();
 
-        recorder.Record(
+        await recorder.RecordAsync(
             MakeContext(), MakeOutcome(PipelineStatus.Anomaly, sourceV: 1.0, followupV: 0.4), mrInstanceId: 1);
 
         Assert.Equal("anomaly", Assert.Single(execs.Data).Status);
@@ -47,11 +64,11 @@ public sealed class SystemMtExecutionRecorderTests
     }
 
     [Fact]
-    public void Record_error_outcome_inserts_execution_without_result()
+    public async Task Record_error_outcome_inserts_execution_without_result()
     {
         var (recorder, execs, results) = NewRecorder();
 
-        var recorded = recorder.Record(MakeContext(), MakeErrorOutcome("SUT crashed"), mrInstanceId: 1);
+        var recorded = await recorder.RecordAsync(MakeContext(), MakeErrorOutcome("SUT crashed"), mrInstanceId: 1);
 
         var exec = Assert.Single(execs.Data);
         Assert.Equal("error", exec.Status);
@@ -61,14 +78,14 @@ public sealed class SystemMtExecutionRecorderTests
     }
 
     [Fact]
-    public void Record_copies_version_snapshot_and_triggeredby_from_context()
+    public async Task Record_copies_version_snapshot_and_triggeredby_from_context()
     {
         var (recorder, execs, _) = NewRecorder();
         var ctx = MakeContext(
             catalogSha: "abc123", sutVersion: "openmoc@2026-05",
             metbenchVersion: "v2.2", triggeredBy: "limeng");
 
-        recorder.Record(ctx, MakeOutcome(PipelineStatus.Ok, 1.0, 1.0), mrInstanceId: 1);
+        await recorder.RecordAsync(ctx, MakeOutcome(PipelineStatus.Ok, 1.0, 1.0), mrInstanceId: 1);
 
         var exec = Assert.Single(execs.Data);
         Assert.Equal("abc123", exec.CatalogVersionSha);
@@ -78,11 +95,11 @@ public sealed class SystemMtExecutionRecorderTests
     }
 
     [Fact]
-    public void Record_maps_result_value_timing_and_assertion_fields()
+    public async Task Record_maps_result_value_timing_and_assertion_fields()
     {
         var (recorder, _, results) = NewRecorder();
 
-        recorder.Record(MakeContext(), MakeOutcome(PipelineStatus.Ok, sourceV: 2.0, followupV: 5.0), mrInstanceId: 1);
+        await recorder.RecordAsync(MakeContext(), MakeOutcome(PipelineStatus.Ok, sourceV: 2.0, followupV: 5.0), mrInstanceId: 1);
 
         var r = Assert.Single(results.Data);
         Assert.Equal(2.0, r.SourceValue);
@@ -94,14 +111,14 @@ public sealed class SystemMtExecutionRecorderTests
     }
 
     [Fact]
-    public void Record_null_arguments_throw()
+    public async Task Record_null_arguments_throw()
     {
         var (recorder, _, _) = NewRecorder();
 
-        Assert.Throws<ArgumentNullException>(() =>
-            recorder.Record(null!, MakeOutcome(PipelineStatus.Ok, 1.0, 1.0), mrInstanceId: 1));
-        Assert.Throws<ArgumentNullException>(() =>
-            recorder.Record(MakeContext(), null!, mrInstanceId: 1));
+        await Assert.ThrowsAsync<ArgumentNullException>(() =>
+            recorder.RecordAsync(null!, MakeOutcome(PipelineStatus.Ok, 1.0, 1.0), mrInstanceId: 1));
+        await Assert.ThrowsAsync<ArgumentNullException>(() =>
+            recorder.RecordAsync(MakeContext(), null!, mrInstanceId: 1));
     }
 
     // ===== fixtures =====
