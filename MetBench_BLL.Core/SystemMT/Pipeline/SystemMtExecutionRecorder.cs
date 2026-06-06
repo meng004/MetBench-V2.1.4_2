@@ -132,9 +132,10 @@ public sealed class SystemMtExecutionRecorder
             FollowupExitCode = outcome.FollowupExitCode,
         });
 
-        // Phase D (Task 6 step 2): write sample-level evidence alongside summary when both
-        // the evidence repo and the V3 MR repo are injected. Sample traces are left empty
-        // until Task 6 step 3 wires per-variable capture into SystemMtPipeline.
+        // Phase D (Task 6): write sample-level evidence alongside summary when the evidence
+        // repo (and, for typed projection, the V3 MR repo) are injected. BuildSampleTraces
+        // captures the declared target field plus every other input leaf the MR transformation
+        // changed (diffed from the source vs follow-up input JSON).
         if (_evidence is not null)
         {
             await WriteEvidenceAsync(
@@ -346,7 +347,7 @@ public sealed class SystemMtExecutionRecorder
             ? JsonSerializer.Serialize(metric)
             : string.Empty;
 
-        return new()
+        var traces = new List<ExecutionSampleTrace>
         {
             new ExecutionSampleTrace
             {
@@ -357,6 +358,113 @@ public sealed class SystemMtExecutionRecorder
                 OutputValueJson = outputValue,
             }
         };
+
+        // Task 6 granularity: beyond the single declared target field, capture an honest
+        // (source, transformed, output) triple for every other input leaf that the MR
+        // transformation actually changed — diffed directly from the source vs follow-up
+        // input JSON already on disk. The target field stays the first trace (above).
+        AppendChangedFieldTraces(traces, context, outcome);
+        return traces;
+    }
+
+    private static void AppendChangedFieldTraces(
+        List<ExecutionSampleTrace> traces, PipelineContext context, PipelineOutcome outcome)
+    {
+        var sourceLeaves = ReadJsonLeaves(context.SourceCasePath);
+        var followupLeaves = ReadJsonLeaves(outcome.FollowupInputPath);
+        if (sourceLeaves is null || followupLeaves is null)
+            return;
+
+        var targetPointer = context.TargetFieldPath ?? string.Empty;
+        var pointers = new SortedSet<string>(StringComparer.Ordinal);
+        pointers.UnionWith(sourceLeaves.Keys);
+        pointers.UnionWith(followupLeaves.Keys);
+
+        foreach (var pointer in pointers)
+        {
+            if (string.Equals(pointer, targetPointer, StringComparison.Ordinal))
+                continue;
+
+            sourceLeaves.TryGetValue(pointer, out var src);
+            followupLeaves.TryGetValue(pointer, out var followup);
+            if (string.Equals(src, followup, StringComparison.Ordinal))
+                continue;
+
+            var variableName = JsonPointerLastSegment(pointer);
+            var output = outcome.FollowupMetrics is not null
+                && outcome.FollowupMetrics.TryGetValue(variableName, out var metric)
+                ? JsonSerializer.Serialize(metric)
+                : string.Empty;
+
+            traces.Add(new ExecutionSampleTrace
+            {
+                VariableName = variableName,
+                Path = pointer,
+                SourceValueJson = src ?? string.Empty,
+                TransformedValueJson = followup ?? string.Empty,
+                OutputValueJson = output,
+            });
+        }
+    }
+
+    private static Dictionary<string, string>? ReadJsonLeaves(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+            return null;
+        try
+        {
+            using var document = JsonDocument.Parse(File.ReadAllText(path));
+            var sink = new Dictionary<string, string>(StringComparer.Ordinal);
+            EnumerateJsonLeaves(document.RootElement, string.Empty, sink);
+            return sink;
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
+    }
+
+    private static void EnumerateJsonLeaves(JsonElement element, string prefix, IDictionary<string, string> sink)
+    {
+        switch (element.ValueKind)
+        {
+            case JsonValueKind.Object:
+                var hasProperties = false;
+                foreach (var property in element.EnumerateObject())
+                {
+                    hasProperties = true;
+                    EnumerateJsonLeaves(
+                        property.Value,
+                        $"{prefix}/{property.Name.Replace("~", "~0").Replace("/", "~1")}",
+                        sink);
+                }
+                if (!hasProperties && prefix.Length > 0)
+                    sink[prefix] = element.GetRawText();
+                break;
+            case JsonValueKind.Array:
+                var index = 0;
+                var hasItems = false;
+                foreach (var item in element.EnumerateArray())
+                {
+                    hasItems = true;
+                    EnumerateJsonLeaves(item, $"{prefix}/{index}", sink);
+                    index++;
+                }
+                if (!hasItems && prefix.Length > 0)
+                    sink[prefix] = element.GetRawText();
+                break;
+            default:
+                if (prefix.Length > 0)
+                    sink[prefix] = element.GetRawText();
+                break;
+        }
+    }
+
+    private static string JsonPointerLastSegment(string pointer)
+    {
+        var index = pointer.LastIndexOf('/');
+        var segment = index >= 0 ? pointer[(index + 1)..] : pointer;
+        return segment.Replace("~1", "/").Replace("~0", "~");
     }
 
     private static bool TryReadJsonValue(string filePath, string jsonPointer, out string valueJson)
