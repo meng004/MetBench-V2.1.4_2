@@ -224,11 +224,11 @@ MT 检出的违例进入异常调查工作流（查询 / 过滤 / 状态机 / �
 | MVVM | **`CommunityToolkit.Mvvm`** | `ObservableObject`, `[ObservableProperty]`, `[RelayCommand]`, `[NotifyCanExecuteChangedFor(...)]`. Don't write manual `INotifyPropertyChanged`. |
 | DI / hosting | **`Microsoft.Extensions.Hosting`** generic host | Registered in `MetBench_Client/App.xaml.cs` via `Host.CreateDefaultBuilder().ConfigureServices(...)`. Service locator: `App.GetService<T>()`. |
 | Page-based navigation | `Wpf.Ui` `INavigationService` + `INavigableView<TViewModel>` | Pages implement `INavigableView<TViewModel>` from `Wpf.Ui.Controls`. ViewModels implement `INavigationAware` for nav lifecycle hooks (`OnNavigatedTo` / `OnNavigatedFrom`). |
-| Behaviors / event-to-command | **`HandyControl`** (legacy, in 6 files) | `xmlns:hc="https://handyorg.github.io/handycontrol"`, used as `hc:EventToCommand`, `hc:Pagination`. New code should prefer `Microsoft.Xaml.Behaviors.Wpf` when adding fresh views; HandyControl removal is tracked as a follow-up. |
+| Behaviors / event-to-command | **`Microsoft.Xaml.Behaviors.Wpf`** | HandyControl has been removed; its `hc:Pagination` was replaced by `MetBench_Client/Controls/SimplePagination.xaml`. New code should use `Microsoft.Xaml.Behaviors.Wpf`. |
 | Charts | `LiveChartsCore.SkiaSharpView.WPF` | Used for visualization on existing pages. |
 | HTML hosting in WPF | `Microsoft.Web.WebView2` | Available; suitable for embedding `HtmlSystemMtResultReportRenderer` output. |
 
-`Stylet` is referenced and used on `MTExecutionPage.xaml` only (action target binding `s:View.ActionTarget`). Do **not** introduce Stylet on new pages — match the simpler pattern used by `SettingsPage`.
+`Stylet` is currently used (`s:View.ActionTarget`) across 9 legacy XAML files: `ApplicationManagementPage.xaml`, `AutoDetectMRPage.xaml`, `DomainManagementPage.xaml`, `MRDisplayPage.xaml`, `MRManagementPage.xaml`, `MRRecommendationPage.xaml`, `MTExecutionPage.xaml`, `MTReportGeneratorPage.xaml`, and `Views/Windows/ApplicationProgramsWindow.xaml`. Convergence onto a single MVVM mechanism is a tracked follow-up (`docs/superpowers/plans/2026-06-06-metbench-maturity-remediation-plan.md`). Do **not** introduce Stylet on new pages — match the simpler pattern used by `SettingsPage`.
 
 ## 5. Page ↔ ViewModel pairing pattern
 

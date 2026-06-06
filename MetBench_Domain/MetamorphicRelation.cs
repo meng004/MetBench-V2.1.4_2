@@ -37,7 +37,7 @@ namespace MetBench_Domain
         public string Granularity { get; set; } //粒度
         public string Hierarchy { get; set; } //层次 这个是MR推荐的关键属性
         public string Operator { get; set; } // 运算符
-        public string Expression { get; set; } // 表达式 分为线性和非线性
+        public string Expression { get; set; } = string.Empty; // 表达式 分为线性和非线性
 
         // ===== v1 反模式（保留读取兼容，标 Obsolete；v2 由 MRBindings collection 取代） =====
         //Application的Name 作为外键
