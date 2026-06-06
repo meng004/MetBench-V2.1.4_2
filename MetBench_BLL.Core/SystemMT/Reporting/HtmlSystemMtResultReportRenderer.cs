@@ -268,7 +268,7 @@ public sealed class HtmlSystemMtResultReportRenderer : ISystemMtResultReportRend
                 sb.Append("<li><code>").Append(Esc(p.PredicateId)).Append("</code> (")
                   .Append(Esc(p.PredicateKind)).Append(") - status: <span class=\"badge typed-status-")
                   .Append(Esc((p.Status ?? string.Empty).ToLowerInvariant()))
-                  .Append("\">").Append(Esc(p.Status)).Append("</span>");
+                  .Append("\">").Append(Esc(p.Status ?? string.Empty)).Append("</span>");
                 if (p.Residual.HasValue)
                 {
                     sb.Append("; residual=<code>")

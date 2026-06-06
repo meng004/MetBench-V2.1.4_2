@@ -5,6 +5,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Platforms>AnyCPU;x86;x64</Platforms>
+    <!--
+      T0-T2 gap-fill C4: BLL.Core is the controlled core engine layer and builds
+      with 0 own warnings; this ratchet locks that gain so new nullable/obsolete
+      warnings fail the build instead of silently accumulating. It applies only to
+      this project's own compilation, not to referenced projects (Domain/IDAL) or
+      the legacy MetBench_BLL layer, which still carry warnings tracked as debt.
+    -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
