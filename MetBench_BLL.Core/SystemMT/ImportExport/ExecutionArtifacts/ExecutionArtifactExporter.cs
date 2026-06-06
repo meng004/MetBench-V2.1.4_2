@@ -101,12 +101,15 @@ public sealed class ExecutionArtifactExporter
             }
         }
 
+        // Build the single-entry evidence map once; all report renderers share it.
+        var evidenceMap = EvidenceMap(request.ExecutionId, evidence);
+
         if (request.IncludeHtml)
         {
             var htmlFile = Path.Combine(request.ExportRoot, "report.html");
             await File.WriteAllTextAsync(
                 htmlFile,
-                _html.Render(new[] { record }, EvidenceMap(request.ExecutionId, evidence)),
+                _html.Render(new[] { record }, evidenceMap),
                 cancellationToken);
             files.Add("report.html");
         }
@@ -115,7 +118,7 @@ public sealed class ExecutionArtifactExporter
         {
             await WriteBytesAsync(
                 Path.Combine(request.ExportRoot, "report.docx"),
-                _word!.Render(new[] { record }, EvidenceMap(request.ExecutionId, evidence)),
+                _word!.Render(new[] { record }, evidenceMap),
                 files,
                 cancellationToken);
         }
@@ -124,7 +127,7 @@ public sealed class ExecutionArtifactExporter
         {
             await WriteBytesAsync(
                 Path.Combine(request.ExportRoot, "report.xlsx"),
-                _excel!.Render(new[] { record }, EvidenceMap(request.ExecutionId, evidence)),
+                _excel!.Render(new[] { record }, evidenceMap),
                 files,
                 cancellationToken);
         }
@@ -133,7 +136,7 @@ public sealed class ExecutionArtifactExporter
         {
             await WriteBytesAsync(
                 Path.Combine(request.ExportRoot, "report.pdf"),
-                _pdf!.Render(new[] { record }, EvidenceMap(request.ExecutionId, evidence)),
+                _pdf!.Render(new[] { record }, evidenceMap),
                 files,
                 cancellationToken);
         }
