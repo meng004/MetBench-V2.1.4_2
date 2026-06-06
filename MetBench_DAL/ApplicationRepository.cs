@@ -1,4 +1,10 @@
-﻿using LiteDB;
+﻿// 本文件是 v1 legacy method-level MT 的应用程序仓库；意识地保留对 [Obsolete]
+// 字段 Application.DomainName / MetamorphicRelation.ApplicationName 的读兼容
+// （v2 schema 由 ApplicationDomains / MRBindings junction 表取代）。
+// 所有 CS0618 都是上述兼容路径所致；用 file-level pragma 隔离，不混入真警告。
+// 棘轮 (P3 step2 maturity remediation plan) 据此把 BLL.Core 之外的层归零。
+#pragma warning disable CS0618 // Type or member is obsolete — intentional v1 read-compat per attribute
+using LiteDB;
 using MetBench_Domain;
 using MetBench_IDAL;
 using System.Collections.ObjectModel;
@@ -13,10 +19,11 @@ namespace MetBench_DAL
         private string _conn;
         private DbConfig _dbConfig;
 
-        //映射实体集合
-        private ILiteCollection<MetamorphicRelation> MetamorphicRelations;
-        private ILiteCollection<Application> Applications;
-        private ILiteCollection<Domain> Domains;
+        // 映射实体集合：每个 LiteDB 操作方法在打开 db 后赋值（lazy per-method），
+        // 字段在 ctor 不初始化是有意为之；用 null! 抑制 CS8618 而保留 lazy 模式。
+        private ILiteCollection<MetamorphicRelation> MetamorphicRelations = null!;
+        private ILiteCollection<Application> Applications = null!;
+        private ILiteCollection<Domain> Domains = null!;
 
         public ApplicationRepository()
         {

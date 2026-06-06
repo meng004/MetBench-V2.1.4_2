@@ -1,4 +1,7 @@
-﻿using LiteDB;
+﻿// v1 legacy MR repo — intentional [Obsolete] field reads for v1 compat;
+// 见 ApplicationRepository.cs 文件头注释。
+#pragma warning disable CS0618 // Type or member is obsolete — intentional v1 read-compat per attribute
+using LiteDB;
 using MetBench_Domain;
 using MetBench_IDAL;
 using Microsoft.VisualBasic;
@@ -13,9 +16,10 @@ namespace MetBench_DAL
         //数据库连接字符串 
         private string _conn;
         private DbConfig _dbConfig;
-        //对象集合
-        private ILiteCollection<MetamorphicRelation> MetamorphicRelations;
-        private ILiteCollection<Application> Applications;
+        // 映射实体集合：每个 LiteDB 操作方法在打开 db 后赋值（lazy per-method），
+        // 字段在 ctor 不初始化是有意为之；用 null! 抑制 CS8618 而保留 lazy 模式。
+        private ILiteCollection<MetamorphicRelation> MetamorphicRelations = null!;
+        private ILiteCollection<Application> Applications = null!;
 
         public DatatoImage datatoImage { get ; set ; }
 
@@ -138,7 +142,7 @@ namespace MetBench_DAL
             }
         }
 
-        public ObservableCollection<MetamorphicRelations_QueryResultData> Get(MetamorphicRelation filterParams = null, string domainName = null)
+        public ObservableCollection<MetamorphicRelations_QueryResultData> Get(MetamorphicRelation? filterParams = null, string? domainName = null)
         {
             if (filterParams == null && string.IsNullOrEmpty(domainName))
             {

@@ -40,11 +40,20 @@ public abstract class LiteDbIntPkRepositoryBase<T> where T : class
         return new ObservableCollection<T>(col.FindAll());
     }
 
-    public virtual T? Get(int id)
+    /// <summary>
+    /// Legacy <see cref="IRepository{T}.Get(int)"/> contract returns non-nullable T:
+    /// callers (BLL legacy services + BLL.Core ReplayContextBuilder) assume the row
+    /// exists and access it directly. LiteDB <c>FindById</c> can return null at
+    /// runtime (deleted row, stale id) — that is treated as a caller bug and surfaces
+    /// as an NPE at the consumer, same as before this nullable annotation. Tightening
+    /// the contract to <c>T?</c> + <see cref="KeyNotFoundException"/> on miss is a
+    /// follow-up tracked by the maturity remediation plan.
+    /// </summary>
+    public virtual T Get(int id)
     {
         using var db = new LiteDatabase(_conn);
         var col = db.GetCollection<T>(CollectionKey);
-        return col.FindById(id);
+        return col.FindById(id)!;
     }
 
     public virtual ObservableCollection<T> Get(T template)
