@@ -235,6 +235,18 @@ WPF 的 `MetBench_Client/` 因 SDK targets 限制 **不在 Linux CI 编译**；�
 - inventory 口径以仓库 migration 资产与 gate 为准：当前主线事实是 **44 MR + 4 Property**，不要再沿用旧的“43 MR + 4 Property”汇总说法。
 - `.codegraph/` 是本地图谱索引产物，不属于仓库正式架构的一部分，也不应纳入结构文档或版本化事实源。
 
+## §9.1 异步作业操作面（T0-T2 async import/export，2026-06-05 closure）
+
+用户可见的长耗时操作统一走 `SystemMtJobService -> SystemMtJobWorker -> 操作 handler / `SystemMtAsyncPipeline` -> `ISystemMtLauncher`` 的异步 submit/poll/cancel 路径，详见设计 `docs/superpowers/specs/2026-06-05-t0-t2-async-import-export-release-closure-design.md`。
+
+- **作业种类（`SystemMtJobKind`）**：`RunMr` / `RunBatch` / `ImportAssets` / `ExportAssets` / `ExportExecutionArtifacts`；`ExportReport` 为预留种类，尚无 handler，提交即被 `SystemMtJobService` 以 `NotSupportedException` 拒绝。请求体 `SystemMtOperationJobRequest`；`SystemMtJobService.SubmitOperationAsync` 对每种 kind 做 fail-closed 字段校验，旧 `SubmitAsync(SystemMtJobRequest)` 映射为 `RunMr` 兼容路径。
+- **操作 handler（`SystemMT/Jobs/Operations/`）**：`RunBatchJobOperationHandler`、`ImportAssetsJobOperationHandler`、`ExportAssetsJobOperationHandler`、`ExportExecutionArtifactsJobOperationHandler`，经 `ISystemMtJobOperationDispatcher` 按 kind 分发；`RunMr` 仍由 worker 直接走 `SystemMtAsyncPipeline`。终态显式 `Succeeded` / `Failed` / `Cancelled`。
+- **批量终态语义**：逐条 MR 明细落 `SystemMtBatchJobItem`；MR 断言失败=检出异常（job 仍 `Succeeded`，归 T5 异常工作流），仅基础设施故障（`RuntimeEvidence.FailureKind` 或合成 `Run threw` 无记录结果）置 `Failed`，与单条 MR 运行语义一致（设计 §7）。
+- **资产 staging**：`ImportExport/Put/SutImportStagingService` 校验通过后在确定性 staging root 写出真实 `staging-manifest.json` + `sut-import-unit.json`，非“仅校验”。
+- **执行结果导出 bundle**：`ImportExport/ExecutionArtifacts/ExecutionArtifactExporter` 写 `manifest.json` + `execution-result.json` + `execution-evidence.json`（仅当证据存在）+ `report.html`；Markdown 报告缺 `SystemMtReportService` 时 fail-closed。
+- **单向边界**：结果 / 证据 **导入**显式排除（待信任模型），由 `Architecture/ExecutionArtifactImportBoundaryTests` 守卫（扫描 `ImportExport/ExecutionArtifacts/` 与 `Jobs/Operations/`，缺目录即失败而非静默放过）。
+- **WPF 操作面**：`MetBench_Client/Views/Pages/SystemMtAsyncJobPage.xaml` + `ViewModels/SystemMtAsyncJobViewModel.cs`，由 `Hosting/SystemMtJobWorkerHostedService` 驱动 worker；支持种类选择、提交、轮询、取消、终态/失败原因/artifact 路径展示。Windows VM 证据见 `docs/superpowers/specs/2026-06-05-t0-t2-async-import-export-vm-evidence/`。
+
 ## §10 接入新 SUT 的 checklist
 
 当要继续加新 SUT（如 SU2 / FEniCS / 新的 neutron solver），按 [F13 RFC](superpowers/plans/2026-05-17-f13-third-sut-rfc.md) §6 走，并以当前 manifest/provider 路径为准：
