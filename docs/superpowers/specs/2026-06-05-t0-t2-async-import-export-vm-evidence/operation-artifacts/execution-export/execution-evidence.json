@@ -1,6 +1,6 @@
 {
-  "IdEvidence": "654817e5-4127-4b3c-8c77-87be5bba70fd",
-  "ExecutionId": "990d9e76-ac53-41d8-a5e4-9735bc342708",
+  "IdEvidence": "aaab2518-7adf-4c55-a1d5-3472f0a32f47",
+  "ExecutionId": "50d51be1-826a-4efa-8dcf-cd2c2c83fc8b",
   "Metadata": {
     "MrId": "advection-amplitude-linearity",
     "V3MrIdRef": "00000000-0000-0000-0000-000000000000",
@@ -25,7 +25,7 @@
   "TransformationParameters": {
     "factor": "2"
   },
-  "RecordedAtUtc": "2026-06-05T22:38:07.826Z",
+  "RecordedAtUtc": "2026-06-06T00:19:50.569Z",
   "TypedVerification": {
     "SpecId": "advection-amplitude-linearity",
     "SpecKind": "MrSpec",
@@ -50,7 +50,7 @@
     "Passed": true,
     "FailureKind": "None",
     "FailureDetail": "Runtime preflight passed for runtime \u0027system\u0027 with 1 check(s).",
-    "CheckedAtUtc": "2026-06-05T22:38:06.83Z",
+    "CheckedAtUtc": "2026-06-06T00:19:49.799Z",
     "Diagnostics": [
       {
         "CheckKind": "startup",

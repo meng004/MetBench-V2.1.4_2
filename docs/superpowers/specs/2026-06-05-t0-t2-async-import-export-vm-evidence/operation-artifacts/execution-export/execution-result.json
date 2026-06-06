@@ -1,7 +1,7 @@
 {
-  "Id": "990d9e76-ac53-41d8-a5e4-9735bc342708",
+  "Id": "50d51be1-826a-4efa-8dcf-cd2c2c83fc8b",
   "MrName": "advection-amplitude-linearity",
-  "RunAt": "2026-06-05T22:38:07.826+00:00",
+  "RunAt": "2026-06-06T00:19:50.569+00:00",
   "AssertionName": "Greater",
   "ValueName": "peak_amplitude",
   "SourceValue": 0.7558586373766495,
@@ -10,8 +10,8 @@
   "FailureReason": null,
   "SourceCaseName": "source.in.json",
   "FollowUpCaseName": "followup.in.json",
-  "SourceElapsed": "00:00:00.1167936",
-  "FollowUpElapsed": "00:00:00.1181466",
+  "SourceElapsed": "00:00:00.1171062",
+  "FollowUpElapsed": "00:00:00.1298006",
   "SourceExitCode": 0,
   "FollowUpExitCode": 0,
   "SourceMetrics": {

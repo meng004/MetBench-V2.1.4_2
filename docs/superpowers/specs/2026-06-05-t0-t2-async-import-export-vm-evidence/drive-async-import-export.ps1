@@ -204,6 +204,30 @@ function Open-AsyncPage {
     }
 }
 
+function Assert-VisibleById($id) {
+    $el = Find-ById $script:win $id 2
+    if (-not $el) { throw "Expected visible element not found: $id" }
+    if ($el.Current.IsOffscreen) { throw "Expected visible element was offscreen: $id" }
+}
+
+function Assert-HiddenById($id) {
+    $el = Find-ById $script:win $id 1
+    if ($el -and -not $el.Current.IsOffscreen) {
+        throw "Expected hidden element was visible: $id"
+    }
+}
+
+function Capture-OperationVisibility($operation, $shot, $visibleIds, $hiddenIds) {
+    Select-ComboItem 'AsyncOperationCombo' $operation
+    foreach ($id in $visibleIds) {
+        Assert-VisibleById $id
+    }
+    foreach ($id in $hiddenIds) {
+        Assert-HiddenById $id
+    }
+    Shot $shot
+}
+
 function Wait-NewJob($oldJob, $timeoutSec = 8) {
     $deadline = (Get-Date).AddSeconds($timeoutSec)
     do {
@@ -357,6 +381,11 @@ try {
         '06-export-assets-terminal-artifact.png',
         '07-export-execution-artifacts-terminal-artifact.png',
         '08-failure-display.png',
+        '09-visibility-runmr.png',
+        '10-visibility-runbatch.png',
+        '11-visibility-import-assets.png',
+        '12-visibility-export-assets.png',
+        '13-visibility-export-execution-artifacts.png',
         'build-output.txt',
         'vm-summary.md')
     foreach ($name in $stale) {
@@ -375,6 +404,36 @@ try {
     Attach-MainWindow $script:proc
     Open-AsyncPage
     Shot '01-page-operation-selector-visible.png'
+
+    Capture-OperationVisibility `
+        'RunMr' `
+        '09-visibility-runmr.png' `
+        @('AsyncMrCombo') `
+        @('AsyncBatchMrIdsBox', 'AsyncPackageRootBox', 'AsyncStagingRootBox', 'AsyncExportRootBox', 'AsyncExecutionIdBox')
+
+    Capture-OperationVisibility `
+        'RunBatch' `
+        '10-visibility-runbatch.png' `
+        @('AsyncBatchMrIdsBox') `
+        @('AsyncMrCombo', 'AsyncPackageRootBox', 'AsyncStagingRootBox', 'AsyncExportRootBox', 'AsyncExecutionIdBox')
+
+    Capture-OperationVisibility `
+        'ImportAssets' `
+        '11-visibility-import-assets.png' `
+        @('AsyncPackageRootBox', 'AsyncStagingRootBox') `
+        @('AsyncMrCombo', 'AsyncBatchMrIdsBox', 'AsyncExportRootBox', 'AsyncExecutionIdBox')
+
+    Capture-OperationVisibility `
+        'ExportAssets' `
+        '12-visibility-export-assets.png' `
+        @('AsyncPackageRootBox', 'AsyncExportRootBox') `
+        @('AsyncMrCombo', 'AsyncBatchMrIdsBox', 'AsyncStagingRootBox', 'AsyncExecutionIdBox')
+
+    Capture-OperationVisibility `
+        'ExportExecutionArtifacts' `
+        '13-visibility-export-execution-artifacts.png' `
+        @('AsyncExportRootBox', 'AsyncExecutionIdBox') `
+        @('AsyncMrCombo', 'AsyncBatchMrIdsBox', 'AsyncPackageRootBox', 'AsyncStagingRootBox')
 
     Select-ComboItem 'AsyncOperationCombo' 'RunMr'
     Select-ComboItem 'AsyncMrCombo' 'advection-amplitude-linearity'
@@ -449,7 +508,12 @@ try {
         '05-import-assets-terminal-artifact.png',
         '06-export-assets-terminal-artifact.png',
         '07-export-execution-artifacts-terminal-artifact.png',
-        '08-failure-display.png')
+        '08-failure-display.png',
+        '09-visibility-runmr.png',
+        '10-visibility-runbatch.png',
+        '11-visibility-import-assets.png',
+        '12-visibility-export-assets.png',
+        '13-visibility-export-execution-artifacts.png')
 
     $lines = @(
         '# T0-T2 Async Import/Export PR4 WPF VM Summary',
