@@ -5,4 +5,7 @@ public sealed record ExecutionArtifactExportRequest(
     string ExportRoot,
     bool IncludeEvidence = true,
     bool IncludeHtml = true,
-    bool IncludeMarkdown = true);
+    bool IncludeMarkdown = true,
+    bool IncludeWord = false,
+    bool IncludeExcel = false,
+    bool IncludePdf = false);

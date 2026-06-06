@@ -37,7 +37,10 @@ public sealed class ExportExecutionArtifactsJobOperationHandler : ISystemMtJobOp
                 new ExecutionArtifactExportRequest(
                     record.ExecutionId.Value,
                     record.ExportRoot,
-                    IncludeMarkdown: false),
+                    IncludeMarkdown: false,
+                    IncludeWord: _exporter.HasWordRenderer,
+                    IncludeExcel: _exporter.HasExcelRenderer,
+                    IncludePdf: _exporter.HasPdfRenderer),
                 jobId,
                 cancellationToken);
 
