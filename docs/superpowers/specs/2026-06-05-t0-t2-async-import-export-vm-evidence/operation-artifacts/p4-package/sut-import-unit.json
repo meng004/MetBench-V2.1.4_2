@@ -1,0 +1,85 @@
+﻿{
+  "SchemaVersion": "put-import.v1",
+  "Sut": {
+    "SutId": "P4",
+    "Name": "Hamiltonian pendulum",
+    "EquationFamily": "Hamiltonian ODE / symplectic integration",
+    "ProgramKind": "NumericalSolver",
+    "Adapter": {
+      "AdapterId": "minimum-mr-subset-p4",
+      "Description": "Imported staging descriptor for p4_pendulum.py Hamiltonian pendulum fixture.",
+      "SourcePath": "experiments/puts/p4_pendulum.py",
+      "EntryPoints": [ "run_canonical" ]
+    },
+    "Observables": [
+      { "Name": "q", "Kind": "Series", "Unit": "rad", "Description": "Pendulum generalized coordinate" },
+      { "Name": "p", "Kind": "Series", "Unit": "rad/s", "Description": "Pendulum generalized momentum" },
+      { "Name": "energy", "Kind": "Series", "Unit": "relative", "Description": "Hamiltonian energy trajectory" }
+    ],
+    "Metadata": { "priority": "A" }
+  },
+  "Mrs": [
+    {
+      "MrId": "p4-energy-invariant",
+      "SutId": "P4",
+      "Name": "Hamiltonian energy-invariant imported MR",
+      "ObservableRefs": [ "q", "p", "energy" ],
+      "TransformBinding": {
+        "Status": "ImportedOnly",
+        "TransformKind": "ImportedOnly",
+        "Shape": null,
+        "Notes": "minimum-mr-subset fixture has no MetBench runtime transform binding yet."
+      },
+      "AssertionBinding": {
+        "Status": "ImportedOnly",
+        "PredicateKind": "ImportedOnly",
+        "Metric": "",
+        "Tolerance": null,
+        "Notes": "minimum-mr-subset fixture has no MetBench typed assertion binding yet."
+      },
+      "Metadata": { "source": "tests/puts/test_smoke.py" }
+    }
+  ],
+  "IoGroups": [
+    {
+      "IoGroupId": "p4-canonical",
+      "SutId": "P4",
+      "Name": "P4 canonical imported smoke IO",
+      "InputRefs": [ "canonical-input" ],
+      "OutputRefs": [ "canonical-output" ],
+      "Metadata": { "source": "run_canonical" }
+    }
+  ],
+  "Mutations": [
+    {
+      "MutationId": "p4-mut-integrator-drift",
+      "SutId": "P4",
+      "Name": "P4 integrator drift perturbation class",
+      "OperatorClass": "integrator-drift",
+      "RepresentationKind": "OperatorClassOnly",
+      "Metadata": { "representation": "research-imported" }
+    }
+  ],
+  "Detections": [
+    {
+      "DetectionId": "p4-detection-001",
+      "MrId": "p4-energy-invariant",
+      "MutationId": "p4-mut-integrator-drift",
+      "IoGroupId": "p4-canonical",
+      "Result": "Detected",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Detection row imported from minimum-mr-subset research fixture metadata; not re-executed by MetBench runtime."
+    }
+  ],
+  "Provenance": {
+    "RepositoryUrl": "https://github.com/meng004/Minimum-MR-SubSet.git",
+    "Commit": "b931b5f74d0f3f3cb704cd6fedbcb4f523cccd7f",
+    "SourcePaths": [ "experiments/puts/p4_pendulum.py", "tests/puts/test_smoke.py" ],
+    "CapturedBy": "codex-a-group-put-import",
+    "CapturedAtUtc": "2026-06-02T00:00:00+00:00"
+  },
+  "Compatibility": {
+    "OverallReadiness": "ImportedOnly",
+    "Findings": [ "Imported fixture is staged only until transform and assertion bindings are reviewed." ]
+  }
+}

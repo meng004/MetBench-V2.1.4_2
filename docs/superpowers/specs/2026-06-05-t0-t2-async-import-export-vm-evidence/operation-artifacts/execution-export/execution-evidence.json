@@ -1,0 +1,82 @@
+{
+  "IdEvidence": "aaab2518-7adf-4c55-a1d5-3472f0a32f47",
+  "ExecutionId": "50d51be1-826a-4efa-8dcf-cd2c2c83fc8b",
+  "Metadata": {
+    "MrId": "advection-amplitude-linearity",
+    "V3MrIdRef": "00000000-0000-0000-0000-000000000000",
+    "SutName": "advection-1d",
+    "Equation": null,
+    "ProgramType": null,
+    "MetaPattern": null,
+    "SourceLevel": null,
+    "FailureCorrelation": null,
+    "CatalogManifestPath": null,
+    "MetbenchVersion": null
+  },
+  "SampleTraces": [
+    {
+      "VariableName": "peak_amplitude",
+      "Path": "/initial/amplitude",
+      "SourceValueJson": "1.0",
+      "TransformedValueJson": "2",
+      "OutputValueJson": "1.511717274753299"
+    }
+  ],
+  "TransformationParameters": {
+    "factor": "2"
+  },
+  "RecordedAtUtc": "2026-06-06T00:19:50.569Z",
+  "TypedVerification": {
+    "SpecId": "advection-amplitude-linearity",
+    "SpecKind": "MrSpec",
+    "PredicateId": "peak_amplitude-greater",
+    "PredicateKind": "BinaryComparison",
+    "Status": "Passed",
+    "Passed": true,
+    "Diagnostic": {
+      "Expected": 0.7558586373766495,
+      "Actual": 1.511717274753299,
+      "Residual": 0.7558586373766495,
+      "Tolerance": 0
+    },
+    "SkipOrInvalidReason": null,
+    "PropertyPredicates": []
+  },
+  "RuntimeEvidence": {
+    "RuntimeKey": "system",
+    "RuntimeProfileDisplayName": "System Python",
+    "RuntimeKind": "LocalPython",
+    "ResolvedExecutablePath": "python",
+    "Passed": true,
+    "FailureKind": "None",
+    "FailureDetail": "Runtime preflight passed for runtime \u0027system\u0027 with 1 check(s).",
+    "CheckedAtUtc": "2026-06-06T00:19:49.799Z",
+    "Diagnostics": [
+      {
+        "CheckKind": "startup",
+        "Name": "System Python",
+        "Passed": true,
+        "FailureKind": "None",
+        "Detail": "System Python passed. stdout: Python 3.12.10",
+        "Blocking": true,
+        "ExitCode": 0,
+        "TimedOut": false,
+        "Stdout": "Python 3.12.10",
+        "Stderr": null
+      }
+    ]
+  },
+  "PairQuality": {
+    "PlannedPairs": 1,
+    "ExecutedPairs": 1,
+    "ValidPairs": 1,
+    "PassedPairs": 1,
+    "FailedPairs": 0,
+    "SkippedPairs": 0,
+    "InvalidSpecPairs": 0,
+    "PassRateValid": 1,
+    "PassRateAll": 1,
+    "SkipReasons": [],
+    "InvalidSpecReasons": []
+  }
+}

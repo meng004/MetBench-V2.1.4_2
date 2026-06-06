@@ -1,0 +1,34 @@
+{
+  "Id": "50d51be1-826a-4efa-8dcf-cd2c2c83fc8b",
+  "MrName": "advection-amplitude-linearity",
+  "RunAt": "2026-06-06T00:19:50.569+00:00",
+  "AssertionName": "Greater",
+  "ValueName": "peak_amplitude",
+  "SourceValue": 0.7558586373766495,
+  "FollowUpValue": 1.511717274753299,
+  "Passed": true,
+  "FailureReason": null,
+  "SourceCaseName": "source.in.json",
+  "FollowUpCaseName": "followup.in.json",
+  "SourceElapsed": "00:00:00.1171062",
+  "FollowUpElapsed": "00:00:00.1298006",
+  "SourceExitCode": 0,
+  "FollowUpExitCode": 0,
+  "SourceMetrics": {
+    "peak_amplitude": 0.7558586373766495,
+    "peak_location": 0.75,
+    "mass_integral": 0.12533138634818491
+  },
+  "FollowUpMetrics": {
+    "peak_amplitude": 1.511717274753299,
+    "peak_location": 0.75,
+    "mass_integral": 0.25066277269636983
+  },
+  "TransformationName": "ScaleField",
+  "TransformationParameters": {
+    "factor": "2"
+  },
+  "InputGenerationSucceeded": null,
+  "InputGenerationLog": null,
+  "InputSamples": []
+}
