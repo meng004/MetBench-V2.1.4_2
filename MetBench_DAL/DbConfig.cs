@@ -1,3 +1,6 @@
+// DbConfig 也读 [Obsolete] 字段以维持 v1 schema migration 路径;
+// 见 ApplicationRepository.cs 文件头注释。
+#pragma warning disable CS0618 // Type or member is obsolete — intentional v1 read-compat per attribute
 using LiteDB;
 using MetBench_Domain;
 using System.Configuration;

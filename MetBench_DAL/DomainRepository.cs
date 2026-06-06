@@ -1,4 +1,7 @@
-﻿using LiteDB;
+﻿// v1 legacy domain repo — intentional [Obsolete] field reads for v1 compat;
+// 见 ApplicationRepository.cs 文件头注释。
+#pragma warning disable CS0618 // Type or member is obsolete — intentional v1 read-compat per attribute
+using LiteDB;
 using MetBench_Domain;
 using MetBench_IDAL;
 using System.Collections.ObjectModel;
@@ -12,8 +15,10 @@ namespace MetBench_DAL
         private string _conn;
         private DbConfig _dbConfig;
 
-        private ILiteCollection<Application> Applications;
-        private ILiteCollection<Domain> Domains;
+        // 映射实体集合：每个 LiteDB 操作方法在打开 db 后赋值（lazy per-method），
+        // 字段在 ctor 不初始化是有意为之；用 null! 抑制 CS8618 而保留 lazy 模式。
+        private ILiteCollection<Application> Applications = null!;
+        private ILiteCollection<Domain> Domains = null!;
         public DomainRepository()
         {
             //获得DbConfig对象
