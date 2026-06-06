@@ -6,33 +6,33 @@ namespace MetBench_IDAL
     public class MetamorphicRelations_QueryResultData
     {
         public int IdMR { get; set; }
-        public string Description { get; set; }
-        public string Context { get; set; }
-        public string Constraint { get; set; }
-        public string OrderOfMR { get; set; }
+        public string Description { get; set; } = string.Empty;
+        public string Context { get; set; } = string.Empty;
+        public string Constraint { get; set; } = string.Empty;
+        public string OrderOfMR { get; set; } = string.Empty;
         //public HierarchyType HierarchyType { get; set; }
-        public string Granularity { get; set; }
-        public string Hierarchy { get; set; }
-        public string Operator { get; set; }
-        public string Expression { get; set; }
+        public string Granularity { get; set; } = string.Empty;
+        public string Hierarchy { get; set; } = string.Empty;
+        public string Operator { get; set; } = string.Empty;
+        public string Expression { get; set; } = string.Empty;
 
-        public string InputPattern { get; set; }
-        public string OutputPattern { get; set; }
-        public string DimensionOfInputPattern { get; set; }
-        public string DimensionOfOutputPattern { get; set; }
+        public string InputPattern { get; set; } = string.Empty;
+        public string OutputPattern { get; set; } = string.Empty;
+        public string DimensionOfInputPattern { get; set; } = string.Empty;
+        public string DimensionOfOutputPattern { get; set; } = string.Empty;
         #region
         //InputPatternimage属性
-        public byte[] InputPatternImageData { get; set; }
+        public byte[] InputPatternImageData { get; set; } = Array.Empty<byte>();
         //OutputPatternimage属性
-        public byte[] OutputPatternImageData { get; set; }
+        public byte[] OutputPatternImageData { get; set; } = Array.Empty<byte>();
         //InputPatternimagepath属性
-        public string InputPatternImagepath { get; set; }
+        public string InputPatternImagepath { get; set; } = string.Empty;
         //OutputPatternimagepath属性
-        public string OutputPatternImagepath { get; set; }
+        public string OutputPatternImagepath { get; set; } = string.Empty;
         #endregion
-        public string ApplicationName { get; set; }
-        public string CodeName { get; set; } //Code的Name
-        public string DomainName { get; set; }
+        public string ApplicationName { get; set; } = string.Empty;
+        public string CodeName { get; set; } = string.Empty; //Code的Name
+        public string DomainName { get; set; } = string.Empty;
 
         /// <summary>
         /// MRBinding-derived 状态聚合（F19 / PR-VM-6）。取值: active / deprecated / archived / experimental。

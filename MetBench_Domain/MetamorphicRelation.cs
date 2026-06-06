@@ -13,30 +13,30 @@ namespace MetBench_Domain
     {
         [BsonId]
         public int IdMR { get; set; }
-        public string Description { get; set; }
-        public string Context { get; set; }
-        public string Constraint { get; set; }
-        public string OrderOfMR { get; set; }
+        public string Description { get; set; } = string.Empty;
+        public string Context { get; set; } = string.Empty;
+        public string Constraint { get; set; } = string.Empty;
+        public string OrderOfMR { get; set; } = string.Empty;
         public RtType RepresentationType { get; set; }
-        public string InputPattern { get; set; }
-        public string OutputPattern { get; set; }
+        public string InputPattern { get; set; } = string.Empty;
+        public string OutputPattern { get; set; } = string.Empty;
 
         #region
         //Latex转sympy格式
-        public string InputPatterntosympy { get; set; }
-        public string OutputPatterntosympy { get; set; }
+        public string InputPatterntosympy { get; set; } = string.Empty;
+        public string OutputPatterntosympy { get; set; } = string.Empty;
         //InputPatternimage属性
-        public byte[] InputPatternImageData { get; set; }
+        public byte[] InputPatternImageData { get; set; } = Array.Empty<byte>();
         //OutputPatternimage属性
-        public byte[] OutputPatternImageData { get; set; }
+        public byte[] OutputPatternImageData { get; set; } = Array.Empty<byte>();
         #endregion
 
-        public string DimensionOfInputPattern { get; set; }
-        public string DimensionOfOutputPattern { get; set; }
+        public string DimensionOfInputPattern { get; set; } = string.Empty;
+        public string DimensionOfOutputPattern { get; set; } = string.Empty;
 
-        public string Granularity { get; set; } //粒度
-        public string Hierarchy { get; set; } //层次 这个是MR推荐的关键属性
-        public string Operator { get; set; } // 运算符
+        public string Granularity { get; set; } = string.Empty; //粒度
+        public string Hierarchy { get; set; } = string.Empty; //层次 这个是MR推荐的关键属性
+        public string Operator { get; set; } = string.Empty; // 运算符
         public string Expression { get; set; } = string.Empty; // 表达式 分为线性和非线性
 
         // ===== v1 反模式（保留读取兼容，标 Obsolete；v2 由 MRBindings collection 取代） =====

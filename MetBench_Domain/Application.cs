@@ -8,9 +8,9 @@ namespace MetBench_Domain
     {
         [BsonId]
         public int IdApplication { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string ProgrammingLanguage { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string ProgrammingLanguage { get; set; } = string.Empty;
         public int LinesOfCode { get; set; }//非空字段
 
         // 输入参数列表
@@ -19,15 +19,15 @@ namespace MetBench_Domain
         public List<ApplicationParameter> OutputParameters { get; set; } = new List<ApplicationParameter>();
 
         //程序源码或二进制文件 压缩包转换为字节数组
-        public byte[] Code { get; set; }
+        public byte[] Code { get; set; } = Array.Empty<byte>();
         #region
-        public string CodeName { get; set; }
+        public string CodeName { get; set; } = string.Empty;
         #endregion
         //测试用例
-        public byte[] SourceTestCase { get; set; }
-        public string SourceTestCaseName { get; set; }
-        public string DOI { get; set; }
-        public string Url { get; set; }
+        public byte[] SourceTestCase { get; set; } = Array.Empty<byte>();
+        public string SourceTestCaseName { get; set; } = string.Empty;
+        public string DOI { get; set; } = string.Empty;
+        public string Url { get; set; } = string.Empty;
 
         // ===== v1 反模式（保留读取兼容，标 Obsolete；v2 由 ApplicationDomains junction 取代） =====
         //Domain的Name 作为外键，DomainName 之间以:为分隔符
@@ -68,16 +68,16 @@ namespace MetBench_Domain
     public class ApplicationParameter
     {
         // 参数名称
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         // 参数类型（如 "float", "int", "string" 等）
-        public string Type { get; set; }
+        public string Type { get; set; } = string.Empty;
 
         // 参数描述
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
         // 参数约束或取值范围（如 ">0", "[0,100]","(0,20)" "A|B|C" 等）
-        public string Constraints { get; set; }
+        public string Constraints { get; set; } = string.Empty;
 
         // 是否必需参数
         public bool IsRequired { get; set; }=false;
