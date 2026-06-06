@@ -32,7 +32,7 @@
 | MetBench_DAL | 3550/33 | B- | ~132（多为有意 CS0618） | ❌ | 间接 | 废弃字段读兼容掩盖真警告；`DbConfig._conn` public 却下划线命名；双库隔离确认真实（`LiteDbSystemMtResultRepository.cs:30` 私有 `BsonMapper`） |
 | MetBench_Domain | 1770/40 | C+ | 31 | ❌ | 间接 | `MetamorphicRelation.Expression` CS8618 = LiteDB 反序列化真 NPE 风险 |
 | MetBench_IDAL | 719/30 | C+ | 62 | ❌ | 间接 | `DatatoImage.cs`（图表工具）放在契约项目=放错层（CS8603） |
-| MetBench_Client | 12378/102 | B- | 不可 Linux 编译 | ❌ | ❌ | **18+ 处 `.ShowDialogAsync().Result`**（8 VM，死锁面）；`MTReportGeneratorViewModel.cs:48` `async void`；遗留页非 partial+手写 `OnPropertyChanged`；**5 套 MVVM 框架并存** |
+| MetBench_Client | 12378/102 | B- | 不可 Linux 编译 | ❌ | ❌ | ~~18+ 处 `.ShowDialogAsync().Result`~~（**已修 P4 #330**）+ ~~`MTReportGeneratorViewModel.cs:48` `async void`~~（**同上**）；遗留页非 partial+手写 `OnPropertyChanged` 仍存（6 文件，渐进迁移由 MVVM 收敛 plan PR-4 处理）；**~~5 套 MVVM 框架并存~~ 修正 2026-06-06：实测为 3 套有效（CommunityToolkit.Mvvm 主力 / Stylet `s:Action` 用于 9 个 legacy XAML / `PropertyChanged.Fody` 全局 IL weave 0 显式标注）+ 1 套死引用（Prism.Wpf：仅 2 处 `using Prism.Common;` 无类型引用）+ HandyControl 已彻底移除。详见 `docs/superpowers/plans/2026-06-06-wpf-mvvm-convergence-plan.md` §0 据实分布表与 4 PR 收敛计划。** |
 | MetBench_SystemMT.Tests | 44581/290 | A- | 16–28 | ❌ | ✅必需 | test:prod≈1.24:1；无 Moq（全手写 fake）；3 parity+5 架构边界测试；缺 `LegacyResultRecordParityTests` |
 | MetBench_Analyzers | 296/2 | B | 0 | — | 随 Core | METBENCH001 仅 Info 级（advisory，不阻断） |
 | MetBench_Client.Tests | 548/5 | C+ | 0 | ❌ | 间接 | 仅 i18n，无 VM/command/nav 测试 |
