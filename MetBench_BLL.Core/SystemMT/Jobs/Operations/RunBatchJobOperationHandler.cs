@@ -4,10 +4,12 @@ using MetBench_BLL.SystemMT.Persistence;
 namespace MetBench_BLL.SystemMT.Jobs;
 
 /// <summary>Executes a durable RunBatch job through the existing launcher batch API.</summary>
-public sealed class RunBatchJobOperationHandler : ISystemMtJobOperationDispatcher
+public sealed class RunBatchJobOperationHandler : ISystemMtJobOperationHandler
 {
     private readonly ISystemMtLauncher _launcher;
     private readonly IExecutionEvidenceRepository? _evidenceRepository;
+
+    public SystemMtJobKind Kind => SystemMtJobKind.RunBatch;
 
     public RunBatchJobOperationHandler(
         ISystemMtLauncher launcher,

@@ -35,7 +35,10 @@ public sealed class WpfAsyncJobCancellationWiringTests
     {
         var hosted = ReadRepoFile("MetBench_Client", "Hosting", "SystemMtJobWorkerHostedService.cs");
 
+        Assert.Contains("new SystemMtJobOperationDispatcher", hosted);
         Assert.Contains("new RunBatchJobOperationHandler(launcher, evidenceRepository)", hosted);
+        Assert.Contains("new ImportAssetsJobOperationHandler(new SutImportStagingService())", hosted);
+        Assert.Contains("new ExportAssetsJobOperationHandler()", hosted);
         Assert.Contains("operationDispatcher: operationDispatcher", hosted);
     }
 
