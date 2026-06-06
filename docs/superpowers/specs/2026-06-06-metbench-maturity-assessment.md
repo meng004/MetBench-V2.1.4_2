@@ -21,7 +21,7 @@
 | T3 覆盖 | Functional→Hardened（catalog 治理 Hardened） | 38 MR / 21 SUT / 17 方程；反应堆物理 5 锚定方程全有真 Python SUT；catalog 计数+parity CI 强约束；typed v1.2：44 MR+4 Property；**15 个 `LauncherEndToEnd*Tests.cs` 覆盖 38/38 MR**（CI 内 32 真跑 / 8 env-gated 跳过 OpenMOC/OpenMC/scipy） | `CoverageService` 4 维仅 5 个 happy-path 测试；env-gated 测试本地需配 venv 才能跑 |
 | T4 MR 识别 | Functional | 三条路线都真实现：meta-pattern（跑真 python sidecar）、multi-LLM 共识（Cohen's κ）、SCG 语义因果图（真 `scg.json`，do-calculus 三模式）；`ILlmGateway` 真 HTTP；`ValidationService` 提升闭环。50+ 测试 | 生产 DI 未接真 LLM key / `EmpiricalRepoSampler` → 运行应用里 LLM 路线静默返回空 |
 | T5 异常 | Functional→Hardened | 真 CRUD+过滤+共性分析+状态机（代码强约束非法转移）+孤儿清扫+launcher 桥接。44+ 测试 5 个类 | 缺陷回放三元组（程序版本×MR×输入）未接通（`RCaseRepro` 独立未连）；状态机无真 LiteDB 集成测试 |
-| T6 变异 | **Prototype** | 战役编排引擎真+测试好（`MutationCampaignService`，8 实质测试，杀死率/覆盖率算对） | **无真实变异注入器**（`Mutant.AppliedDiff` 存了但无 `IMutantApplicator`）；WPF 用 hash `StubCellRunner` 假跑；**最小 MR 完备子集搜索完全缺失** |
+| T6 变异 | **Prototype**（applicator 接口与默认实现 2026-06-06 已落地；real cellRunner / 最小子集搜索仍待办） | 战役编排引擎真+测试好（`MutationCampaignService`，8 实质测试，杀死率/覆盖率算对）；**`IMutantApplicator` 接口 + `UnifiedDiffMutantApplicator` 默认实现已入 main**，7 测试覆盖 happy path / 多 hunk / 空 diff fail-loud / context mismatch fail-loud / 路径前缀 / 缺失 file fail-loud；`MutationCampaignService` 与 `StubCellRunner` 站点均显式标注 "Prototype"，运行 WPF 上看到的杀死率明确标 SIMULATED | **WPF 仍用 hash `StubCellRunner`** 假跑，真 launcher-backed cellRunner 需 `LauncherOptions` 加 per-run SUT-root override（**deferred follow-up**）；**最小 MR 完备子集搜索仍未实现** |
 
 ## 维度二：按解决方案下的 project（代码质量）
 

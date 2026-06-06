@@ -7,6 +7,20 @@ namespace MetBench_BLL.Mutation;
 /// MutationCampaign 编排器 —— 跑 (mutants × MRBindings × sample cases) 三维矩阵。
 /// </summary>
 /// <remarks>
+/// <para>
+/// <b>T6 maturity status (2026-06-06): Prototype.</b> The orchestration in this class is
+/// real and unit-tested, but the production <see cref="MutationCellRunner"/> wired in WPF
+/// (<c>MutationCampaignViewModel.StubCellRunner</c>) is a hash-based simulator that never
+/// touches a real SUT — meaning live kill-rate / detection-rate statistics produced by
+/// the running app are simulated, not measured. The minimum viable path to a Functional
+/// T6 is documented in
+/// <c>docs/superpowers/plans/2026-06-06-metbench-maturity-remediation-plan.md §5</c>:
+/// implement <see cref="IMutantApplicator"/> (in this PR), then a launcher-backed cellRunner
+/// that materializes a patched SUT via the applicator and calls
+/// <c>ISystemMtLauncher.RunAsync</c> against it (deferred follow-up — requires a per-run
+/// SUT-root override on <c>LauncherOptions</c>).
+/// </para>
+///
 /// 落库：
 /// <list type="bullet">
 ///   <item><c>MutationCampaign</c> 行（status: running → ok / failed）</item>
