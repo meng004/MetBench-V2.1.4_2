@@ -1,7 +1,9 @@
 ﻿# T0-T2 Async Import/Export PR4 WPF VM Summary
 
 branch=t0-t2-async-import-export-pr4-wpf
-head=007c1c156a446510e35c77c22c8b3dd76688de46
+validation_head=007c1c156a446510e35c77c22c8b3dd76688de46
+evidence_commit=08d7fedee99a6e2301370b3c91bb0b97aeade73d
+current_pr_head=resolve from GitHub before merge; do not copy this evidence note as a live PR-head source
 origin_main=22748408e3fa01b67aecedf57b0b4cdc23e6d328
 
 ## Precondition Raw Outputs
@@ -35,6 +37,13 @@ warning: unable to access 'C:\Users\codex/.config/git/ignore': Permission denied
 ```
 
 The untracked paths above pre-existed this PR4 review-fix validation and were not staged.
+This is a recorded precondition deviation, not a hidden clean-worktree claim:
+
+- `.claude/settings.local.json` is local agent configuration and is not referenced by the solution, WPF project, UIA driver, or evidence artifacts.
+- `_worktrees/` is a local workspace container and is not referenced by `MetBench.sln`, `MetBench_Client.csproj`, the focused test filters, or `drive-async-import-export.ps1`.
+- `tools/uia-verify-i18n.ps1` is an unrelated untracked helper script and was not invoked by this PR4 validation.
+
+The VM validation therefore did not run from a pristine worktree, but the dirty paths were untracked, not staged, and outside the executed PR4 build/test/UIA evidence path. If the merge policy requires a pristine VM status output rather than a documented non-impacting deviation, rerun this prompt from a clean VM checkout before merge.
 
 `git log --oneline -5`: exit 0:
 
