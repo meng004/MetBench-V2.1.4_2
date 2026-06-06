@@ -1,9 +1,14 @@
 # MetBench 成熟度修复计划（2026-06-06）
 
-> **状态：Planned（registered 2026-06-06）。** 依据 `docs/superpowers/specs/2026-06-06-metbench-maturity-assessment.md`
+> **状态：In progress（updated 2026-06-06）。** 依据 `docs/superpowers/specs/2026-06-06-metbench-maturity-assessment.md`
 > 的 Top 风险。按价值×可行性分 5 个 phase；每 phase 标 cloud/VM、TDD、验收。
 > 遵循 CLAUDE.md §11 计划工作流、§9 cloud/VM 分工、§12 PR 门禁。
 > **REQUIRED SUB-SKILL**：superpowers:executing-plans，逐 phase TDD-first。
+>
+> **Progress 2026-06-06：**
+> - **P0 done**（PR #322 已合并）：文档漂移、`LegacyResultRecordParityTests`（3 测试入 main）、Domain `Expression` CS8618、IDAL `DatatoImage` 3 处 CS8603 全修。
+> - **P1 descoped**：实施时核查发现原始风险"38 MR 仅 3 个 CI 真跑"是误读 V12 内部 fixture 计数当全覆盖。实测 `LauncherEndToEnd*Tests.cs` 15 个、38/38 MR 全有真 `RunAsync`/BDD 步骤、CI 内 32 pass / 8 env-gated skip。**P1 无真实缺口，本计划据此撤销该 phase**（CLAUDE.md §0 / §6：不在错误前提上做工）。
+> - **下一步**：P2 BLL §6/NPE 清理（仍有效）。
 
 ## 目标 & 验收总纲
 
@@ -30,18 +35,21 @@ WPF 项交 VM 提示词。**完成定义**：风险逐条要么修复并守护�
   - 先确认调用方；若仅 BLL/Client 用图表渲染，记录"应移至 BLL.Core/Reporting 或 BLL"为 follow-up（移动可能触发 WPF 引用→VM 验证），本 phase 只**修 3 处 CS8603**（加 `?? string.Empty` / 可空标注），不移动文件。
   - 验收：CS8603 消除；移动决策记入计划"不交付"。
 
-## Phase 1 — MR 运行时覆盖门（risk 1，最高价值，cloud）
+## Phase 1 — ~~MR 运行时覆盖门~~ **DESCOPED 2026-06-06**
 
-目标：消除"38 MR 仅 3 个真跑"的覆盖假象。
-
-- [ ] **1.1 stdlib MR 冒烟执行测试**：对所有**仅依赖系统 python3** 的 MR（heat/advection/diffusion/bateman/
-  fourier/burgers/lotka-volterra/damped-oscillator/decay-chain/subchannel/csv-roundtrip 等，排除 env-gated 的
-  openmoc/openmc），加一个数据驱动测试：每个 MR 经 `ISystemMtLauncher.RunAsync` 跑一次，断言**到达终态
-  Succeeded 或 Anomaly（即未崩溃/未 error/未 timeout）**，而非断言通过（MR 是否通过是科学问题，不在守护范围）。
-  - 实现为 `[Theory]` + MemberData 枚举 stdlib MR 集；env-gated 的继续 `Skip.IfNot`。
-  - TDD：先写测试（会暴露任何脚本腐坏），再修被暴露的脚本。
-  - 验收：stdlib MR 全部冒烟绿；CI `test` 覆盖之；coverage 盲区关闭。文档化"运行时覆盖 = stdlib 全量 + env-gated 跳过"。
-- [ ] **1.2（可选）`CoverageService` 4 维边界测试**：补 empty-bug-repo / zero-campaign / all-unbound-matrix 的边界用例。
+> **撤销原因（CLAUDE.md §0 / §6 据实记录）**：实施 P1 前调研发现原始风险陈述
+> "38 MR 仅 3 个 CI 真跑"是误读 —— 把 `V12CoverageGateTests.RunnableFixtureCount = 3`
+> （v1.2 typed-catalog 内 golden-fixture 计数）当成全 Launcher 覆盖率。
+> **实测**：`MetBench_SystemMT.Tests/SystemMT/Launcher/LauncherEndToEnd*Tests.cs` 共
+> 15 个文件，38/38 MR 全有 `RunAsync("<mr-id>")` 直接执行测试或 BDD `When/Then` 步骤；
+> 跑 `dotnet test --filter "FullyQualifiedName~LauncherEndToEnd"` = **32 passed / 8 skipped**
+> （8 个 env-gated：OpenMOC/OpenMC/scipy）。MR 运行时覆盖**已经是 Hardened 级**，不需要本 phase。
+>
+> **学到的教训**：未来在评估文档里写大颗粒结论前，必须 grep file:line 多重验证；
+> 单个指标（V12 = 3）跨语义解释（"全覆盖 = 3"）是评估失误。
+>
+> 唯一保留作 follow-up 的相关项：**P1.2 `CoverageService` 4 维边界测试**（empty-bug-repo /
+> zero-campaign / all-unbound-matrix）—— 这是真实的薄测试覆盖，但优先级低，未列入本计划主链。
 
 ## Phase 2 — BLL §6 违规与 NPE 清理（risk 2，cloud，TDD/最小修改）
 
