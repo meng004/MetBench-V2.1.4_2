@@ -4,17 +4,17 @@
     public class Applications_QueryResultData
     {
         public int IdApplication { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string ProgrammingLanguage { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string ProgrammingLanguage { get; set; } = string.Empty;
         public int LinesOfCode { get; set; }
         //程序源码或二进制文件
-        public byte[] Code { get; set; }
-        public string CodeName { get; set; }
+        public byte[] Code { get; set; } = Array.Empty<byte>();
+        public string CodeName { get; set; } = string.Empty;
         //测试用例
-        public byte[] SourceTestCase { get; set; }
-        public string DOI { get; set; }
-        public string Url { get; set; }
-        public string DomainName { get; set; }
+        public byte[] SourceTestCase { get; set; } = Array.Empty<byte>();
+        public string DOI { get; set; } = string.Empty;
+        public string Url { get; set; } = string.Empty;
+        public string DomainName { get; set; } = string.Empty;
     }
 }
