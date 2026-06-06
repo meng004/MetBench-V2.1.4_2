@@ -20,6 +20,14 @@ public sealed record SystemMtJobRecord
     public string? StagingRoot { get; init; }
     public string? ExportRoot { get; init; }
     public Guid? ExecutionId { get; init; }
+
+    /// <summary>
+    /// Batch execution-artifact export targets. When non-empty (and Kind is
+    /// <see cref="SystemMtJobKind.ExportExecutionArtifacts"/>) the handler exports each
+    /// execution to its own sub-directory plus a top-level batch manifest, instead of the
+    /// single-execution path keyed by <see cref="ExecutionId"/>.
+    /// </summary>
+    public IReadOnlyList<Guid>? ExecutionIds { get; init; }
     public string? ArtifactPath { get; init; }
     public IReadOnlyList<SystemMtBatchJobItem> BatchItems { get; init; } = Array.Empty<SystemMtBatchJobItem>();
     public string? BackendKind { get; init; }
@@ -34,5 +42,5 @@ public sealed record SystemMtJobRecord
         JobId, MrId, SutName, State, CurrentPhase, ProgressPercent,
         CreatedAtUtc, UpdatedAtUtc, FinishedAtUtc, FailureReason,
         BackendKind, BackendExternalId, LastPolledAtUtc, FailureKind,
-        PackageRoot, StagingRoot, ExportRoot, ExecutionId, ArtifactPath, BatchItems, Kind);
+        PackageRoot, StagingRoot, ExportRoot, ExecutionId, ArtifactPath, BatchItems, Kind, ExecutionIds);
 }

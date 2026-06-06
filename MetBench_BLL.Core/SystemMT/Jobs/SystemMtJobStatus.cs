@@ -24,4 +24,5 @@ public sealed record SystemMtJobStatus(
     Guid? ExecutionId = null,
     string? ArtifactPath = null,
     IReadOnlyList<SystemMtBatchJobItem>? BatchItems = null,
-    SystemMtJobKind Kind = SystemMtJobKind.RunMr);
+    SystemMtJobKind Kind = SystemMtJobKind.RunMr,
+    IReadOnlyList<Guid>? ExecutionIds = null);
