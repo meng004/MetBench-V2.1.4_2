@@ -284,7 +284,7 @@ namespace MetBench_Client.ViewModels
         }
 
         // 提示信息弹窗
-        public bool showMessage(string message, string title)
+        public async Task<bool> showMessageAsync(string message, string title)
         {
             var uiMessageBox = new Wpf.Ui.Controls.MessageBox
             {
@@ -294,7 +294,7 @@ namespace MetBench_Client.ViewModels
             uiMessageBox.CloseButtonAppearance = 0;
             uiMessageBox.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             uiMessageBox.CloseButtonText = "OK";
-            var messageResult = uiMessageBox.ShowDialogAsync().Result.ToString();
+            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
             //primary为第一个按钮
             return messageResult == "Primary" ? true : false;
         }
@@ -369,7 +369,7 @@ namespace MetBench_Client.ViewModels
             }
             catch (Exception ex)
             {
-                showMessage($"Failed to load data: {ex.Message}", "Tips");
+                _ = showMessageAsync($"Failed to load data: {ex.Message}", "Tips");
 
                 // 可选：清除错误缓存
                 _visualizationDataCache.Remove((filePath, plotType));
@@ -437,7 +437,7 @@ namespace MetBench_Client.ViewModels
                             message += validationResult.Errors[i].ErrorMessage;
                         }
                     }
-                    showMessage(message, "Tips");
+                    await showMessageAsync(message, "Tips");
                     return;
                 }
 
@@ -457,7 +457,7 @@ namespace MetBench_Client.ViewModels
                     }
                     catch (Exception ex)
                     {
-                        showMessage("MT执行失败！", "Tips");
+                        await showMessageAsync("MT执行失败！", "Tips");
                         return;
                     }
                     finally
@@ -505,11 +505,11 @@ namespace MetBench_Client.ViewModels
                     {
                         IsIndeterminate = true;
                         Visibility = Visibility.Visible;
-                        GenerateMTReport();
+                        await GenerateMTReportAsync();
                     }
                     catch (Exception ex)
                     {
-                        showMessage("生成报告失败！", "Tips");
+                        await showMessageAsync("生成报告失败！", "Tips");
                     }
                     finally
                     {
@@ -523,21 +523,21 @@ namespace MetBench_Client.ViewModels
                 {
                     // 如果分割失败，执行相应的逻辑，例如弹出提示框
                     var msg = "执行失败！";
-                    showMessage(msg, "Tips");
+                    await showMessageAsync(msg, "Tips");
                     return;
                 }
             }
             else
             {
                 var msg = "请选择被测程序！";
-                showMessage(msg, "Tips");
+                await showMessageAsync(msg, "Tips");
             }
 
             if (Data == null)
             {
 
                 var msg = "请选择蜕变关系！";
-                var res = showMessage(msg, "Tips");
+                var res = await showMessageAsync(msg, "Tips");
 
                 if (!res)
                 {
@@ -550,7 +550,7 @@ namespace MetBench_Client.ViewModels
         }
 
         // 生成MT报告
-        private void GenerateMTReport()
+        private async Task GenerateMTReportAsync()
         {
             List<string> list = new List<string>() { STCPath, FTCPath, CombinedPath };
             for (int i = 0; i < list.Count; i++)
@@ -560,7 +560,7 @@ namespace MetBench_Client.ViewModels
                 // 检查源文件是否存在
                 if (!File.Exists(filepath))
                 {
-                    showMessage("生成报告失败！", "Tips");
+                    await showMessageAsync("生成报告失败！", "Tips");
                     return;
                 }
             }
@@ -585,7 +585,7 @@ namespace MetBench_Client.ViewModels
 
             if (projectRoot == null)
             {
-                showMessage("生成报告失败！", "Tips");
+                await showMessageAsync("生成报告失败！", "Tips");
                 return;
             }
 
@@ -637,7 +637,7 @@ namespace MetBench_Client.ViewModels
             }
             catch (Exception ex)
             {
-                showMessage("生成报告失败！", "Tips");
+                await showMessageAsync("生成报告失败！", "Tips");
                 return;
             }
         }
@@ -705,7 +705,7 @@ namespace MetBench_Client.ViewModels
             catch (Exception ex)
             {
                 Debug.WriteLine($"图表切换失败: {ex.Message}");
-                showMessage($"图表切换失败: {ex.Message}", "错误");
+                _ = showMessageAsync($"图表切换失败: {ex.Message}", "错误");
             }
         }
 

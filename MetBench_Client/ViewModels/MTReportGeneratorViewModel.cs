@@ -6,6 +6,7 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using Wpf.Ui;
 using Wpf.Ui.Controls;
@@ -42,57 +43,63 @@ namespace MetBench_Client.ViewModels
 
                 _selectedValue = value;
                 OnPropertyChanged();
-                HandleSelectionChange(); // 提取处理逻辑到单独方法
+                _ = HandleSelectionChangeAsync(); // 提取处理逻辑到单独方法
             }
         }
-        private async void HandleSelectionChange()
+        private async Task HandleSelectionChangeAsync()
         {
-
-
-            var targetPageType = typeof(Views.Pages.MTReportGeneratorPage);
-            var page = _pageService.GetPage(targetPageType) as MTReportGeneratorPage;
-            var webView = page.webview2;
-            await webView.EnsureCoreWebView2Async();
-            switch (SelectedValue)
+            try
             {
-                case "Pdf":
-                    if (PdfReportPath == string.Empty)
-                    {
-                        showMessage("无目标文件！", "Tips");
+                var targetPageType = typeof(Views.Pages.MTReportGeneratorPage);
+                var page = _pageService.GetPage(targetPageType) as MTReportGeneratorPage;
+                var webView = page.webview2;
+                switch (SelectedValue)
+                {
+                    case "Pdf":
+                        if (PdfReportPath == string.Empty)
+                        {
+                            await showMessageAsync("无目标文件！", "Tips");
+                            break;
+                        }
+                        FilePath = PdfReportPath;
+                        await webView.EnsureCoreWebView2Async();
+                        webView.CoreWebView2.Navigate(PdfReportPath);
                         break;
-                    }
-                    FilePath = PdfReportPath;
-                    webView.CoreWebView2.Navigate(PdfReportPath);
-                    break;
-                case "Word":
-                    if (WrodReportPath == string.Empty)
-                    {
-                        showMessage("无目标文件！", "Tips");
+                    case "Word":
+                        if (WrodReportPath == string.Empty)
+                        {
+                            await showMessageAsync("无目标文件！", "Tips");
+                            break;
+                        }
+                        await showMessageAsync("暂不支持在线浏览Word文件！", "Tips");
+                        FilePath = WrodReportPath;
                         break;
-                    }
-                    showMessage("暂不支持在线浏览Word文件！", "Tips");
-                    FilePath = WrodReportPath;
-                    break;
-                case "Excel":
-                    if (ExcelReportPath == string.Empty)
-                    {
-                        showMessage("无目标文件！", "Tips");
+                    case "Excel":
+                        if (ExcelReportPath == string.Empty)
+                        {
+                            await showMessageAsync("无目标文件！", "Tips");
+                            break;
+                        }
+                        await showMessageAsync("暂不支持在线浏览Excel文件！", "Tips");
+                        FilePath = ExcelReportPath;
                         break;
-                    }
-                    showMessage("暂不支持在线浏览Excel文件！", "Tips");
-                    FilePath = ExcelReportPath;
-                    break;
-                case "Html":
-                    if (HtmlReportPath == string.Empty)
-                    {
-                        showMessage("无目标文件！", "Tips");
+                    case "Html":
+                        if (HtmlReportPath == string.Empty)
+                        {
+                            await showMessageAsync("无目标文件！", "Tips");
+                            break;
+                        }
+                        FilePath = HtmlReportPath;
+                        webView.Source = new Uri(HtmlReportPath);
                         break;
-                    }
-                    FilePath = HtmlReportPath;
-                    webView.Source = new Uri(HtmlReportPath);
-                    break;
+                }
+            }
+            catch
+            {
+                await showMessageAsync("报告预览失败！", "Tips");
             }
         }
+
 
         public string FilePath { get; set; } = string.Empty;
 
@@ -155,7 +162,7 @@ namespace MetBench_Client.ViewModels
         }
 
         // 提示信息弹窗
-        public bool showMessage(string message, string title)
+        public async Task<bool> showMessageAsync(string message, string title)
         {
             var uiMessageBox = new Wpf.Ui.Controls.MessageBox
             {
@@ -165,52 +172,51 @@ namespace MetBench_Client.ViewModels
             uiMessageBox.CloseButtonAppearance = 0;
             uiMessageBox.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             uiMessageBox.CloseButtonText = "OK";
-            var messageResult = uiMessageBox.ShowDialogAsync().Result.ToString();
+            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
 
             // primary为第一个按钮
             return messageResult == "Primary" ? true : false;
         }
 
-        public async void cmb_SelectionChanged()
+        public async Task cmb_SelectionChanged()
         {
-
             var targetPageType = typeof(Views.Pages.MTReportGeneratorPage);
             var page = _pageService.GetPage(targetPageType) as MTReportGeneratorPage;
             var webView = page.webview2;
-            await webView.EnsureCoreWebView2Async();
             switch (SelectedValue)
             {
                 case "Pdf":
                     if (PdfReportPath == string.Empty)
                     {
-                        showMessage("无目标文件！", "Tips");
+                        await showMessageAsync("无目标文件！", "Tips");
                         break;
                     }
                     FilePath = PdfReportPath;
+                    await webView.EnsureCoreWebView2Async();
                     webView.CoreWebView2.Navigate(PdfReportPath);
                     break;
                 case "Word":
                     if (WrodReportPath == string.Empty)
                     {
-                        showMessage("无目标文件！", "Tips");
+                        await showMessageAsync("无目标文件！", "Tips");
                         break;
                     }
-                    showMessage("暂不支持在线浏览Word文件！", "Tips");
+                    await showMessageAsync("暂不支持在线浏览Word文件！", "Tips");
                     FilePath = WrodReportPath;
                     break;
                 case "Excel":
                     if (ExcelReportPath == string.Empty)
                     {
-                        showMessage("无目标文件！", "Tips");
+                        await showMessageAsync("无目标文件！", "Tips");
                         break;
                     }
-                    showMessage("暂不支持在线浏览Excel文件！", "Tips");
+                    await showMessageAsync("暂不支持在线浏览Excel文件！", "Tips");
                     FilePath = ExcelReportPath;
                     break;
                 case "Html":
                     if (HtmlReportPath == string.Empty)
                     {
-                        showMessage("无目标文件！", "Tips");
+                        await showMessageAsync("无目标文件！", "Tips");
                         break;
                     }
                     FilePath = HtmlReportPath;
@@ -219,11 +225,11 @@ namespace MetBench_Client.ViewModels
             }
         }
 
-        public void btn_ExportReport()
+        public async Task btn_ExportReport()
         {
             if (FilePath == string.Empty)
             {
-                showMessage("指定的MT报告文件不存在！", "Tips");
+                await showMessageAsync("指定的MT报告文件不存在！", "Tips");
                 return;
             }
             var extend = Path.GetExtension(FilePath).TrimStart('.');
@@ -239,7 +245,7 @@ namespace MetBench_Client.ViewModels
             uiMessageBox.HorizontalAlignment = HorizontalAlignment.Center;
             uiMessageBox.PrimaryButtonText = "Yes";
 
-            var messageResult = uiMessageBox.ShowDialogAsync().Result.ToString();
+            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
             //primary为第一个按钮
             var confirmResult = messageResult == "Primary" ? true : false;
             if (!confirmResult)
@@ -290,11 +296,11 @@ namespace MetBench_Client.ViewModels
                 File.Copy(fileInfo.FullName, destFilePath, overwrite: true);
                 Console.WriteLine($"已复制文件到: {destFilePath}");
 
-                showMessage($"导出MT报告文件({extend})成功！", "Tips");
+                await showMessageAsync($"导出MT报告文件({extend})成功！", "Tips");
             }
             catch (Exception ex)
             {
-                showMessage($"导出MT报告文件({extend})失败！","Tips");
+                await showMessageAsync($"导出MT报告文件({extend})失败！","Tips");
             }
 
         }

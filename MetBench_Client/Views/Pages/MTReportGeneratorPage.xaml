@@ -31,7 +31,7 @@
             </Grid.ColumnDefinitions>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock Text="{Binding ViewModel.Localization[Report_ReportType]}" VerticalAlignment="Center" Margin="5 0 0 0"/>
-                <ComboBox Width="150" Margin="5 0 0 0" ItemsSource="{Binding ViewModel.ReportTypeList,UpdateSourceTrigger=PropertyChanged}" SelectedIndex="{Binding ViewModel.SelectedIndex,UpdateSourceTrigger=PropertyChanged}" SelectedValue="{Binding ViewModel.SelectedValue,UpdateSourceTrigger=PropertyChanged}"  s:View.ActionTarget="{Binding ViewModel}"   />
+                <ComboBox Width="150" Margin="5 0 0 0" AutomationProperties.AutomationId="ReportTypeComboBox" ItemsSource="{Binding ViewModel.ReportTypeList,UpdateSourceTrigger=PropertyChanged}" SelectedIndex="{Binding ViewModel.SelectedIndex,UpdateSourceTrigger=PropertyChanged}" SelectedValue="{Binding ViewModel.SelectedValue,UpdateSourceTrigger=PropertyChanged}"  s:View.ActionTarget="{Binding ViewModel}"   />
                 <ui:Button Appearance="Primary"  Content="{Binding ViewModel.Localization[ReportGenerator_Export]}"
                            Margin="5 0 0 0"
                            Icon="{ui:SymbolIcon DocumentArrowDown20}"

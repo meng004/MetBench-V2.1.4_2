@@ -8,6 +8,7 @@ using Stylet;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using Wpf.Ui;
 using Wpf.Ui.Controls;
@@ -120,7 +121,7 @@ namespace MetBench_Client.ViewModels
         }
 
         // 提示信息弹窗
-        public bool showMessage(string message, string title)
+        public async Task<bool> showMessageAsync(string message, string title)
         {
             var uiMessageBox = new Wpf.Ui.Controls.MessageBox
             {
@@ -131,12 +132,12 @@ namespace MetBench_Client.ViewModels
             uiMessageBox.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             uiMessageBox.HorizontalAlignment = System.Windows.HorizontalAlignment.Center;
             uiMessageBox.CloseButtonText = "OK";
-            var messageResult = uiMessageBox.ShowDialogAsync().Result.ToString();
+            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
             //primary为第一个按钮
             return messageResult == "Primary" ? true : false;
         }
 
-        public void btnAdd_Click()
+        public async Task btnAdd_Click()
         {
             var Domain = Create();
 
@@ -156,7 +157,7 @@ namespace MetBench_Client.ViewModels
                         message += validationResult.Errors[i].ErrorMessage;
                     }
                 }
-                showMessage(message, "Tips");
+                await showMessageAsync(message, "Tips");
                 return;
             }
 
@@ -164,12 +165,12 @@ namespace MetBench_Client.ViewModels
             if (result == 0)
             {
                 var message = "添加记录 失败！";
-                showMessage(message, "Tips");
+                await showMessageAsync(message, "Tips");
             }
             else if (result == 1)
             {
                 var message = "该应用领域已存在！";
-                showMessage(message, "Tips");
+                await showMessageAsync(message, "Tips");
             }
             else
             {
@@ -177,18 +178,18 @@ namespace MetBench_Client.ViewModels
                 DomainAddEvent domainAddEvent = new DomainAddEvent() { Name = domainName };
                 _eventAggregator.Publish(domainAddEvent);
                 var message = "添加记录 成功！";
-                showMessage(message, "Tips");
+                await showMessageAsync(message, "Tips");
             }
             reload_ItemsSource();
             btnCancel_Click();
         }
 
-        public void btnModify_Click()
+        public async Task btnModify_Click()
         {
             if (DataGridSelectedItem == null)
             {
                 var msg = "请选择要修改的领域！";
-                showMessage(msg, "Tips");
+                await showMessageAsync(msg, "Tips");
                 return;
             }
             var msg2 = "是否修改该记录?";
@@ -202,7 +203,7 @@ namespace MetBench_Client.ViewModels
             uiMessageBox.CloseButtonText = "No";
             uiMessageBox.IsPrimaryButtonEnabled = true;
             uiMessageBox.PrimaryButtonText = "Yes";
-            var messageResult = uiMessageBox.ShowDialogAsync().Result.ToString();
+            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
             var result = messageResult == "Primary" ? true : false;
 
             if(result)
@@ -251,19 +252,19 @@ namespace MetBench_Client.ViewModels
                 if (res == 0)
                 {
                     var message = "修改记录 失败！";
-                    showMessage(message, "Tips");
+                    await showMessageAsync(message, "Tips");
                 }
                 else if (res == 1)
                 {
                     var message = "该应用领域已存在！";
-                    showMessage(message, "Tips");
+                    await showMessageAsync(message, "Tips");
                 }
                 else
                 {
                     DomainModifyEvent domainModifyEvent = new DomainModifyEvent() { Name = domainName, newName = newdomainName };
                     _eventAggregator.Publish(domainModifyEvent);
                     var message = "修改记录 成功！";
-                    showMessage(message, "Tips");
+                    await showMessageAsync(message, "Tips");
                 }
                 //if (res)
                 //{
@@ -293,12 +294,12 @@ namespace MetBench_Client.ViewModels
             btnCancel_Click();
         }
 
-        public void btnDelect_Click()
+        public async Task btnDelect_Click()
         {
             if (DataGridSelectedItem == null)
             {
                 var msg = "请选择要删除的领域！";
-                showMessage(msg, "Tips");
+                await showMessageAsync(msg, "Tips");
                 return;
             }
             var msg2 = "是否修改该记录?";
@@ -312,7 +313,7 @@ namespace MetBench_Client.ViewModels
             uiMessageBox.CloseButtonText = "No";
             uiMessageBox.IsPrimaryButtonEnabled = true;
             uiMessageBox.PrimaryButtonText = "Yes";
-            var messageResult = uiMessageBox.ShowDialogAsync().Result.ToString();
+            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
             var result = messageResult == "Primary" ? true : false;
 
             if(result)
@@ -326,12 +327,12 @@ namespace MetBench_Client.ViewModels
                     DomainDeleteEvent domainDeleteEvent = new DomainDeleteEvent() { Name = domainName};
                     _eventAggregator.Publish(domainDeleteEvent);
                     var message = "删除记录 成功";
-                    showMessage(message, "Tips");
+                    await showMessageAsync(message, "Tips");
                 }
                 else
                 {
                     var message = "删除记录 成功";
-                    showMessage(message, "Tips");
+                    await showMessageAsync(message, "Tips");
                 }
             }
             reload_ItemsSource();
@@ -367,7 +368,7 @@ namespace MetBench_Client.ViewModels
             }
             else
             {
-                showMessage("请点击表格中的行数据！", "Tips");
+                _ = showMessageAsync("请点击表格中的行数据！", "Tips");
                 return false;
             }
         }

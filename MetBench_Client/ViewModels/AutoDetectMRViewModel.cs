@@ -154,7 +154,7 @@ namespace MetBench_Client.ViewModels
         }
 
         // 提示信息弹窗
-        public bool showMessage(string message, string title)
+        public async Task<bool> showMessageAsync(string message, string title)
         {
             var uiMessageBox = new Wpf.Ui.Controls.MessageBox
             {
@@ -165,13 +165,13 @@ namespace MetBench_Client.ViewModels
             uiMessageBox.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             uiMessageBox.HorizontalAlignment = System.Windows.HorizontalAlignment.Center;
             uiMessageBox.CloseButtonText = "OK";
-            var messageResult = uiMessageBox.ShowDialogAsync().Result.ToString();
+            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
             //primary为第一个按钮
             return messageResult == "Primary" ? true : false;
         }
 
         // 将目标程序复制粘贴到fuction文件夹
-        public void btnAddCode_Click()
+        public async Task btnAddCode_Click()
         {
             var uiMessageBox = new Wpf.Ui.Controls.MessageBox
             {
@@ -185,7 +185,7 @@ namespace MetBench_Client.ViewModels
             uiMessageBox.HorizontalAlignment = HorizontalAlignment.Center;
             uiMessageBox.PrimaryButtonText = "Yes";
 
-            var messageResult = uiMessageBox.ShowDialogAsync().Result.ToString();
+            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
             //primary为第一个按钮
             var confirmResult = messageResult == "Primary" ? true : false;
             if (!confirmResult)
@@ -194,7 +194,7 @@ namespace MetBench_Client.ViewModels
             }
 
             string recommand = "注意：目标程序需要定义一个main()函数作为程序执行的入口点！";
-            showMessage(recommand, "Tips");
+            await showMessageAsync(recommand, "Tips");
 
             OpenFileDialog openFileDialog = new OpenFileDialog();
 
@@ -229,7 +229,7 @@ namespace MetBench_Client.ViewModels
                     if (!fileExtension.Equals(".py"))
                     {
                         string msg = "目前仅支持Python语言程序！";
-                        showMessage(msg, "Tips");
+                        await showMessageAsync(msg, "Tips");
                         btn_Cancle();
                         return;
                     }
@@ -237,33 +237,33 @@ namespace MetBench_Client.ViewModels
 
                 // 简单验证目标程序代码是否包含main函数
                 var hasMain = HasMainFunction(filePath);
-                if (!hasMain) 
+                if (!hasMain)
                 {
                     string msg = "目标程序需要定义一个main()函数作为程序执行的入口点！";
-                    showMessage(msg, "Tips");
+                    await showMessageAsync(msg, "Tips");
                     btn_Cancle();
                     return;
                 }
 
                 programFilePath = filePath;
-                showMessage("文件上传成功！", "Tips");
+                await showMessageAsync("文件上传成功！", "Tips");
             }
         }
 
         // 撤回上传
-        public void btnBack_Click()
+        public async Task btnBack_Click()
         {
             programFilePath = string.Empty;
             CodeName = string.Empty;
-            showMessage("撤销上传成功", "Tips");
+            await showMessageAsync("撤销上传成功", "Tips");
         }
 
         // 简单判断Python函数脚本是否实现了main函数
         private bool HasMainFunction(string pythonFilePath)
         {
-            if (!File.Exists(pythonFilePath)) 
+            if (!File.Exists(pythonFilePath))
             {
-                showMessage("Python文件不存在", "Tips");
+                _ = showMessageAsync("Python文件不存在", "Tips");
                 return false;
             }
 
@@ -302,7 +302,7 @@ namespace MetBench_Client.ViewModels
             uiMessageBox.HorizontalAlignment = HorizontalAlignment.Center;
             uiMessageBox.PrimaryButtonText = "Yes";
 
-            var messageResult = uiMessageBox.ShowDialogAsync().Result.ToString();
+            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
             //primary为第一个按钮
             var confirmResult = messageResult == "Primary" ? true : false;
             if (!confirmResult)
@@ -349,20 +349,20 @@ namespace MetBench_Client.ViewModels
                         }
                     }
 
-                    showMessage("存储MR数据成功！","Tips");
+                    await showMessageAsync("存储MR数据成功！","Tips");
                 }
                 catch
                 {
-                    showMessage("存储MR数据失败！", "Tips");
+                    await showMessageAsync("存储MR数据失败！", "Tips");
                 }
             }
             else
             {
-                showMessage("存储MR数据失败，不存在识别到的MR数据！", "Tips");
+                await showMessageAsync("存储MR数据失败，不存在识别到的MR数据！", "Tips");
             }
         }
 
-        public void btn_ExportCsv() 
+        public async Task btn_ExportCsv()
         {
             var uiMessageBox = new Wpf.Ui.Controls.MessageBox
             {
@@ -376,7 +376,7 @@ namespace MetBench_Client.ViewModels
             uiMessageBox.HorizontalAlignment = HorizontalAlignment.Center;
             uiMessageBox.PrimaryButtonText = "Yes";
 
-            var messageResult = uiMessageBox.ShowDialogAsync().Result.ToString();
+            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
             //primary为第一个按钮
             var confirmResult = messageResult == "Primary" ? true : false;
             if (!confirmResult)
@@ -406,25 +406,25 @@ namespace MetBench_Client.ViewModels
                 var isExport = _detector.ExportMRResults(targetDirectory, mrCsvPath);
                 if (isExport)
                 {
-                    showMessage("MR数据文件导出成功！", "Tips");
+                    await showMessageAsync("MR数据文件导出成功！", "Tips");
                 }
                 else
                 {
-                    showMessage("MR数据文件导出失败！", "Tips");
+                    await showMessageAsync("MR数据文件导出失败！", "Tips");
                 }
             }
             else
             {
-                showMessage("不存在识别的MR数据文件！", "Tips");
+                await showMessageAsync("不存在识别的MR数据文件！", "Tips");
             }
         }
 
         // 执行MR识别
         public async Task btn_AutoDetectMR()
         {
-            if (!(programFilePath.Length>0)) 
+            if (!(programFilePath.Length>0))
             {
-                showMessage("请上传目标程序","Tips");
+                await showMessageAsync("请上传目标程序","Tips");
                 btn_Cancle();
                 return;
             }
@@ -446,7 +446,7 @@ namespace MetBench_Client.ViewModels
                         message += validationResult.Errors[i].ErrorMessage;
                     }
                 }
-                showMessage(message, "Tips");
+                await showMessageAsync(message, "Tips");
                 return;
             }
 
@@ -458,13 +458,13 @@ namespace MetBench_Client.ViewModels
                 var result = await _detector.Recognize(program);
                 if (result == null)
                 {
-                    showMessage("识别到MR失败", "Tips");
+                    await showMessageAsync("识别到MR失败", "Tips");
                     return;
                 }
 
                 if (result.MetamorphicRelations != null)
                 {
-                    showMessage($"识别并解析了{result.MetamorphicRelations.Count}条MR数据", "Tips");
+                    await showMessageAsync($"识别并解析了{result.MetamorphicRelations.Count}条MR数据", "Tips");
                     var resultParser = _detector.GetResultParser();
                     ParsedResult = result;
                     mrCsvPath = _detector.GetMRCsvPath();
