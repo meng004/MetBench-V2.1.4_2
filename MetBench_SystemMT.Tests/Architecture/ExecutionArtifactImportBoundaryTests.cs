@@ -16,22 +16,30 @@ public sealed class ExecutionArtifactImportBoundaryTests
     public void Production_execution_artifact_package_does_not_introduce_import_api()
     {
         var root = LocateRepoRoot();
-        var productionRoot = Path.Combine(
-            root,
-            "MetBench_BLL.Core",
-            "SystemMT",
-            "ImportExport",
-            "ExecutionArtifacts");
 
-        if (!Directory.Exists(productionRoot))
-            return;
-
-        foreach (var file in Directory.EnumerateFiles(productionRoot, "*.cs", SearchOption.AllDirectories))
+        // Scan every production surface where an execution-result / evidence import path
+        // could be introduced: the export package itself plus the job operation handlers
+        // that dispatch artifact work. A silent skip on a missing directory would let the
+        // guard pass vacuously, so each scanned root must exist.
+        var productionRoots = new[]
         {
-            var text = File.ReadAllText(file);
-            foreach (var forbidden in ForbiddenSymbols)
+            Path.Combine(root, "MetBench_BLL.Core", "SystemMT", "ImportExport", "ExecutionArtifacts"),
+            Path.Combine(root, "MetBench_BLL.Core", "SystemMT", "Jobs", "Operations"),
+        };
+
+        foreach (var productionRoot in productionRoots)
+        {
+            Assert.True(
+                Directory.Exists(productionRoot),
+                $"Guarded production root must exist: {productionRoot}");
+
+            foreach (var file in Directory.EnumerateFiles(productionRoot, "*.cs", SearchOption.AllDirectories))
             {
-                Assert.DoesNotContain(forbidden, text, StringComparison.Ordinal);
+                var text = File.ReadAllText(file);
+                foreach (var forbidden in ForbiddenSymbols)
+                {
+                    Assert.DoesNotContain(forbidden, text, StringComparison.Ordinal);
+                }
             }
         }
     }

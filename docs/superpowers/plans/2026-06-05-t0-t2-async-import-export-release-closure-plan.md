@@ -364,7 +364,8 @@ rtk git commit -m "feat(systemmt): generalize async job requests"
 Add tests for:
 
 - two MR ids both pass -> batch job `Succeeded`;
-- first MR pass, second MR fail -> batch job `Failed` with per-MR summary preserving both outcomes;
+- first MR pass, second MR assertion-fails (anomaly detected) -> batch job `Succeeded` with per-MR summary preserving both outcomes (the violated MR is recorded as a failed item for the T5 anomaly workflow; assertion failure is not a job failure — see design spec §7);
+- any MR infrastructure-fails (missing runtime / SUT crash) -> batch job `Failed`;
 - cancellation before second MR starts -> batch job `Cancelled`;
 - empty MR id list rejected by `SubmitOperationAsync`.
 
@@ -394,8 +395,8 @@ Add `IReadOnlyList<SystemMtBatchItemStatus> BatchItems` to `SystemMtJobRecord` a
 
 `RunBatchJobOperationHandler` must execute MR ids sequentially through the same run-MR path used by single-run jobs. It must report progress after each MR, preserve per-MR outcomes, and return:
 
-- `Succeeded` only when all required MR runs succeed;
-- `Failed` when any MR fails and cancellation was not requested;
+- `Succeeded` when every MR executed to completion (MR assertion failures are recorded per-item as anomaly detections, not job failures — consistent with single-MR run semantics; see design spec §7);
+- `Failed` when an infrastructure failure occurs (missing runtime / SUT crash via `RuntimeEvidence.FailureKind` or a synthesized `Run threw` result with no record) and cancellation was not requested;
 - `Cancelled` when cancellation is requested before or during the sequence.
 
 - [ ] **Step 4: Run focused tests**

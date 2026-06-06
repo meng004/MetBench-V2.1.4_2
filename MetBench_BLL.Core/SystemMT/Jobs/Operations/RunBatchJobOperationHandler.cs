@@ -80,6 +80,14 @@ public sealed class RunBatchJobOperationHandler : ISystemMtJobOperationHandler
                     items[index] = ToItem(result);
             }
 
+            // Design note (batch terminal-state semantics): a batch job is Succeeded when every
+            // MR executed to completion; an MR whose metamorphic relation is violated (assertion
+            // failed) is an *anomaly detection*, not a job failure, and is preserved per-item in
+            // BatchItems for the T5 anomaly workflow. Only an infrastructure failure (missing
+            // runtime / SUT crash, i.e. RuntimeEvidence.FailureKind or a synthesized "Run threw"
+            // result with no record) makes the batch job Failed. This keeps batch consistent with
+            // single-MR run semantics, where an assertion failure also yields a Succeeded job that
+            // carries the verdict. See design spec §7 (2026-06-05 closure) for the recorded choice.
             var runtimeFailureKind = await ResolveRuntimeFailureKindAsync(results, cancellationToken);
             var hasInfrastructureFailure =
                 runtimeFailureKind is not null ||
