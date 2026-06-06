@@ -75,6 +75,9 @@ public sealed class SystemMtJobService : ISystemMtJobService
             StagingRoot = request.StagingRoot,
             ExportRoot = request.ExportRoot,
             ExecutionId = request.ExecutionId,
+            ExecutionIds = request.ExecutionIds is { Count: > 0 }
+                ? request.ExecutionIds.ToList()
+                : null,
             BatchItems = request.Kind == SystemMtJobKind.RunBatch
                 ? request.MrIds!.Select(id => new SystemMtBatchJobItem(id, SystemMtBatchItemState.Pending)).ToList()
                 : Array.Empty<SystemMtBatchJobItem>(),
@@ -163,8 +166,7 @@ public sealed class SystemMtJobService : ISystemMtJobService
                 RequireNonBlank(request.ExportRoot, nameof(request.ExportRoot));
                 break;
             case SystemMtJobKind.ExportExecutionArtifacts:
-                if (request.ExecutionId is null || request.ExecutionId == Guid.Empty)
-                    throw new ArgumentException("ExecutionId must be a non-empty Guid.", nameof(request));
+                ValidateExecutionExportTargets(request);
                 RequireNonBlank(request.ExportRoot, nameof(request.ExportRoot));
                 break;
             case SystemMtJobKind.ExportReport:
@@ -189,6 +191,29 @@ public sealed class SystemMtJobService : ISystemMtJobService
     {
         if (string.IsNullOrWhiteSpace(value))
             throw new ArgumentException($"{name} must be non-blank.", name);
+    }
+
+    /// <summary>
+    /// Execution-artifact export accepts either a single <c>ExecutionId</c> or a non-empty
+    /// <c>ExecutionIds</c> batch (each id non-empty). Exactly one mode must be supplied; the
+    /// batch list takes precedence when both are present.
+    /// </summary>
+    private static void ValidateExecutionExportTargets(SystemMtOperationJobRequest request)
+    {
+        if (request.ExecutionIds is { Count: > 0 } ids)
+        {
+            for (var i = 0; i < ids.Count; i++)
+            {
+                if (ids[i] == Guid.Empty)
+                    throw new ArgumentException($"ExecutionIds[{i}] must be a non-empty Guid.", nameof(request));
+            }
+            return;
+        }
+
+        if (request.ExecutionId is null || request.ExecutionId == Guid.Empty)
+            throw new ArgumentException(
+                "Execution-artifact export requires a non-empty ExecutionId or a non-empty ExecutionIds batch.",
+                nameof(request));
     }
 
     private static Dictionary<string, string>? CopyOverrides(IReadOnlyDictionary<string, string>? overrides) =>

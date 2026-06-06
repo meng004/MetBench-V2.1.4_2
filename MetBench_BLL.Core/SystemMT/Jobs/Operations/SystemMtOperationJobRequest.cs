@@ -12,4 +12,5 @@ public sealed record SystemMtOperationJobRequest(
     string? PackageRoot = null,
     string? StagingRoot = null,
     string? ExportRoot = null,
-    Guid? ExecutionId = null);
+    Guid? ExecutionId = null,
+    IReadOnlyList<Guid>? ExecutionIds = null);

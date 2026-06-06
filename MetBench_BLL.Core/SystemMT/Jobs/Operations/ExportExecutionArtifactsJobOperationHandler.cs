@@ -19,13 +19,15 @@ public sealed class ExportExecutionArtifactsJobOperationHandler : ISystemMtJobOp
         IProgress<SystemMtJobProgress>? progress,
         CancellationToken cancellationToken)
     {
-        if (record.ExecutionId is null || record.ExecutionId == Guid.Empty || string.IsNullOrWhiteSpace(record.ExportRoot))
+        var isBatch = record.ExecutionIds is { Count: > 0 };
+        if (string.IsNullOrWhiteSpace(record.ExportRoot) ||
+            (!isBatch && (record.ExecutionId is null || record.ExecutionId == Guid.Empty)))
         {
             return new JobExecutionOutcome(
                 SystemMtJobState.Failed,
                 record.SutName,
                 Result: null,
-                FailureReason: "ExecutionId and ExportRoot are required for execution artifact export.");
+                FailureReason: "ExportRoot and either ExecutionId or a non-empty ExecutionIds batch are required for execution artifact export.");
         }
 
         try
@@ -33,9 +35,12 @@ public sealed class ExportExecutionArtifactsJobOperationHandler : ISystemMtJobOp
             cancellationToken.ThrowIfCancellationRequested();
             progress?.Report(new SystemMtJobProgress(SystemMtJobState.Preparing, "loading execution result", 20));
 
+            if (isBatch)
+                return await ExportBatchAsync(jobId, record, progress, cancellationToken);
+
             var manifestPath = await _exporter.ExportAsync(
                 new ExecutionArtifactExportRequest(
-                    record.ExecutionId.Value,
+                    record.ExecutionId!.Value,
                     record.ExportRoot,
                     IncludeMarkdown: false,
                     IncludeWord: _exporter.HasWordRenderer,
@@ -64,5 +69,40 @@ public sealed class ExportExecutionArtifactsJobOperationHandler : ISystemMtJobOp
                 Result: null,
                 FailureReason: ex.Message);
         }
+    }
+
+    private async Task<JobExecutionOutcome> ExportBatchAsync(
+        Guid jobId,
+        SystemMtJobRecord record,
+        IProgress<SystemMtJobProgress>? progress,
+        CancellationToken cancellationToken)
+    {
+        var batch = new ExecutionArtifactBatchExporter(_exporter);
+        var manifest = await batch.ExportBatchAsync(
+            record.ExecutionIds!,
+            record.ExportRoot!,
+            jobId,
+            includeEvidence: true,
+            includeMarkdown: false,
+            cancellationToken);
+
+        var manifestPath = Path.Combine(record.ExportRoot!, ExecutionArtifactBatchExporter.BatchManifestFileName);
+        progress?.Report(new SystemMtJobProgress(SystemMtJobState.ParsingOutputs, "batch execution artifacts exported", 95));
+
+        // Surface partial failure explicitly: the batch manifest records every item, but the
+        // job is Failed if any execution did not export, naming the failure count.
+        return manifest.AllSucceeded
+            ? new JobExecutionOutcome(
+                SystemMtJobState.Succeeded,
+                record.SutName,
+                Result: null,
+                FailureReason: null,
+                ArtifactPath: manifestPath)
+            : new JobExecutionOutcome(
+                SystemMtJobState.Failed,
+                record.SutName,
+                Result: null,
+                FailureReason: $"{manifest.FailureCount} of {manifest.Items.Count} executions failed to export; see batch-manifest.json.",
+                ArtifactPath: manifestPath);
     }
 }

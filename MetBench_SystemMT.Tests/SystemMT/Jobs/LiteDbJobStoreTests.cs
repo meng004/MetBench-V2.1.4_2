@@ -25,6 +25,11 @@ public class LiteDbJobStoreTests : IDisposable
             StagingRoot = "/tmp/stage",
             ExportRoot = "/tmp/export",
             ExecutionId = Guid.Parse("11111111-1111-1111-1111-111111111111"),
+            ExecutionIds = new[]
+            {
+                Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                Guid.Parse("33333333-3333-3333-3333-333333333333"),
+            },
             ArtifactPath = "/tmp/export/result.json",
             BatchItems = new[]
             {
@@ -50,6 +55,7 @@ public class LiteDbJobStoreTests : IDisposable
         Assert.Equal(record.StagingRoot, got.StagingRoot);
         Assert.Equal(record.ExportRoot, got.ExportRoot);
         Assert.Equal(record.ExecutionId, got.ExecutionId);
+        Assert.Equal(record.ExecutionIds, got.ExecutionIds);
         Assert.Equal(record.ArtifactPath, got.ArtifactPath);
         Assert.Equal(2, got.BatchItems.Count);
         Assert.Equal(SystemMtBatchItemState.Failed, got.BatchItems[1].State);
