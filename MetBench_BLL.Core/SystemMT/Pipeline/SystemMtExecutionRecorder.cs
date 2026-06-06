@@ -327,53 +327,58 @@ public sealed class SystemMtExecutionRecorder
 
     private static List<ExecutionSampleTrace> BuildSampleTraces(PipelineContext context, PipelineOutcome outcome)
     {
+        var traces = new List<ExecutionSampleTrace>();
+
         if (string.IsNullOrWhiteSpace(context.TargetFieldPath)
             || string.IsNullOrWhiteSpace(context.SourceCasePath)
             || string.IsNullOrWhiteSpace(outcome.FollowupInputPath)
             || !File.Exists(context.SourceCasePath)
             || !File.Exists(outcome.FollowupInputPath))
         {
-            return new();
+            return traces;
         }
 
-        if (!TryReadJsonValue(context.SourceCasePath, context.TargetFieldPath, out var sourceValue)
-            || !TryReadJsonValue(outcome.FollowupInputPath, context.TargetFieldPath, out var transformedValue))
+        // Parse each input file exactly once; the declared target field and the
+        // changed-field diff below both read from the same parsed documents.
+        using var sourceDoc = JsonDocument.Parse(File.ReadAllText(context.SourceCasePath));
+        using var followupDoc = JsonDocument.Parse(File.ReadAllText(outcome.FollowupInputPath));
+
+        if (!TryResolveJsonPointer(sourceDoc.RootElement, context.TargetFieldPath, out var sourceTarget)
+            || !TryResolveJsonPointer(followupDoc.RootElement, context.TargetFieldPath, out var followupTarget))
         {
-            return new();
+            return traces;
         }
 
-        var outputValue = outcome.FollowupMetrics is not null
-            && outcome.FollowupMetrics.TryGetValue(context.ValueName, out var metric)
-            ? JsonSerializer.Serialize(metric)
-            : string.Empty;
-
-        var traces = new List<ExecutionSampleTrace>
+        traces.Add(new ExecutionSampleTrace
         {
-            new ExecutionSampleTrace
-            {
-                VariableName = context.ValueName,
-                Path = context.TargetFieldPath,
-                SourceValueJson = sourceValue,
-                TransformedValueJson = transformedValue,
-                OutputValueJson = outputValue,
-            }
-        };
+            VariableName = context.ValueName,
+            Path = context.TargetFieldPath,
+            SourceValueJson = sourceTarget.GetRawText(),
+            TransformedValueJson = followupTarget.GetRawText(),
+            OutputValueJson = MetricJson(outcome, context.ValueName),
+        });
 
         // Task 6 granularity: beyond the single declared target field, capture an honest
         // (source, transformed, output) triple for every other input leaf that the MR
-        // transformation actually changed — diffed directly from the source vs follow-up
-        // input JSON already on disk. The target field stays the first trace (above).
-        AppendChangedFieldTraces(traces, context, outcome);
+        // transformation actually changed — diffed from the same parsed documents.
+        AppendChangedFieldTraces(traces, context, outcome, sourceDoc.RootElement, followupDoc.RootElement);
         return traces;
     }
 
+    private static string MetricJson(PipelineOutcome outcome, string variableName) =>
+        outcome.FollowupMetrics is not null && outcome.FollowupMetrics.TryGetValue(variableName, out var metric)
+            ? JsonSerializer.Serialize(metric)
+            : string.Empty;
+
     private static void AppendChangedFieldTraces(
-        List<ExecutionSampleTrace> traces, PipelineContext context, PipelineOutcome outcome)
+        List<ExecutionSampleTrace> traces,
+        PipelineContext context,
+        PipelineOutcome outcome,
+        JsonElement sourceRoot,
+        JsonElement followupRoot)
     {
-        var sourceLeaves = ReadJsonLeaves(context.SourceCasePath);
-        var followupLeaves = ReadJsonLeaves(outcome.FollowupInputPath);
-        if (sourceLeaves is null || followupLeaves is null)
-            return;
+        var sourceLeaves = EnumerateJsonLeaves(sourceRoot);
+        var followupLeaves = EnumerateJsonLeaves(followupRoot);
 
         var targetPointer = context.TargetFieldPath ?? string.Empty;
         var pointers = new SortedSet<string>(StringComparer.Ordinal);
@@ -391,37 +396,22 @@ public sealed class SystemMtExecutionRecorder
                 continue;
 
             var variableName = JsonPointerLastSegment(pointer);
-            var output = outcome.FollowupMetrics is not null
-                && outcome.FollowupMetrics.TryGetValue(variableName, out var metric)
-                ? JsonSerializer.Serialize(metric)
-                : string.Empty;
-
             traces.Add(new ExecutionSampleTrace
             {
                 VariableName = variableName,
                 Path = pointer,
                 SourceValueJson = src ?? string.Empty,
                 TransformedValueJson = followup ?? string.Empty,
-                OutputValueJson = output,
+                OutputValueJson = MetricJson(outcome, variableName),
             });
         }
     }
 
-    private static Dictionary<string, string>? ReadJsonLeaves(string? path)
+    private static Dictionary<string, string> EnumerateJsonLeaves(JsonElement root)
     {
-        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
-            return null;
-        try
-        {
-            using var document = JsonDocument.Parse(File.ReadAllText(path));
-            var sink = new Dictionary<string, string>(StringComparer.Ordinal);
-            EnumerateJsonLeaves(document.RootElement, string.Empty, sink);
-            return sink;
-        }
-        catch (JsonException)
-        {
-            return null;
-        }
+        var sink = new Dictionary<string, string>(StringComparer.Ordinal);
+        EnumerateJsonLeaves(root, string.Empty, sink);
+        return sink;
     }
 
     private static void EnumerateJsonLeaves(JsonElement element, string prefix, IDictionary<string, string> sink)
@@ -435,7 +425,7 @@ public sealed class SystemMtExecutionRecorder
                     hasProperties = true;
                     EnumerateJsonLeaves(
                         property.Value,
-                        $"{prefix}/{property.Name.Replace("~", "~0").Replace("/", "~1")}",
+                        $"{prefix}/{EncodePointerSegment(property.Name)}",
                         sink);
                 }
                 if (!hasProperties && prefix.Length > 0)
@@ -464,21 +454,13 @@ public sealed class SystemMtExecutionRecorder
     {
         var index = pointer.LastIndexOf('/');
         var segment = index >= 0 ? pointer[(index + 1)..] : pointer;
-        return segment.Replace("~1", "/").Replace("~0", "~");
+        return DecodePointerSegment(segment);
     }
 
-    private static bool TryReadJsonValue(string filePath, string jsonPointer, out string valueJson)
-    {
-        valueJson = string.Empty;
-        using var document = JsonDocument.Parse(File.ReadAllText(filePath));
-        if (!TryResolveJsonPointer(document.RootElement, jsonPointer, out var value))
-        {
-            return false;
-        }
+    // RFC 6901 JSON-pointer segment escaping: '~' -> '~0', '/' -> '~1' (encode) and back (decode).
+    private static string EncodePointerSegment(string raw) => raw.Replace("~", "~0").Replace("/", "~1");
 
-        valueJson = value.GetRawText();
-        return true;
-    }
+    private static string DecodePointerSegment(string raw) => raw.Replace("~1", "/").Replace("~0", "~");
 
     private static bool TryResolveJsonPointer(JsonElement root, string jsonPointer, out JsonElement value)
     {
@@ -495,7 +477,7 @@ public sealed class SystemMtExecutionRecorder
 
         foreach (var rawSegment in jsonPointer.Split('/', StringSplitOptions.RemoveEmptyEntries))
         {
-            var segment = rawSegment.Replace("~1", "/").Replace("~0", "~");
+            var segment = DecodePointerSegment(rawSegment);
             if (value.ValueKind == JsonValueKind.Object)
             {
                 if (!value.TryGetProperty(segment, out value))

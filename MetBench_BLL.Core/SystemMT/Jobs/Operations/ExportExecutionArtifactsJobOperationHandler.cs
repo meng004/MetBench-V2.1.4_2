@@ -5,10 +5,14 @@ namespace MetBench_BLL.SystemMT.Jobs;
 public sealed class ExportExecutionArtifactsJobOperationHandler : ISystemMtJobOperationHandler
 {
     private readonly ExecutionArtifactExporter _exporter;
+    private readonly ExecutionArtifactBatchExporter _batch;
 
-    public ExportExecutionArtifactsJobOperationHandler(ExecutionArtifactExporter exporter)
+    public ExportExecutionArtifactsJobOperationHandler(
+        ExecutionArtifactExporter exporter,
+        ExecutionArtifactBatchExporter? batch = null)
     {
         _exporter = exporter ?? throw new ArgumentNullException(nameof(exporter));
+        _batch = batch ?? new ExecutionArtifactBatchExporter(_exporter);
     }
 
     public SystemMtJobKind Kind => SystemMtJobKind.ExportExecutionArtifacts;
@@ -77,8 +81,7 @@ public sealed class ExportExecutionArtifactsJobOperationHandler : ISystemMtJobOp
         IProgress<SystemMtJobProgress>? progress,
         CancellationToken cancellationToken)
     {
-        var batch = new ExecutionArtifactBatchExporter(_exporter);
-        var manifest = await batch.ExportBatchAsync(
+        var manifest = await _batch.ExportBatchAsync(
             record.ExecutionIds!,
             record.ExportRoot!,
             jobId,
@@ -91,18 +94,13 @@ public sealed class ExportExecutionArtifactsJobOperationHandler : ISystemMtJobOp
 
         // Surface partial failure explicitly: the batch manifest records every item, but the
         // job is Failed if any execution did not export, naming the failure count.
-        return manifest.AllSucceeded
-            ? new JobExecutionOutcome(
-                SystemMtJobState.Succeeded,
-                record.SutName,
-                Result: null,
-                FailureReason: null,
-                ArtifactPath: manifestPath)
-            : new JobExecutionOutcome(
-                SystemMtJobState.Failed,
-                record.SutName,
-                Result: null,
-                FailureReason: $"{manifest.FailureCount} of {manifest.Items.Count} executions failed to export; see batch-manifest.json.",
-                ArtifactPath: manifestPath);
+        return new JobExecutionOutcome(
+            manifest.AllSucceeded ? SystemMtJobState.Succeeded : SystemMtJobState.Failed,
+            record.SutName,
+            Result: null,
+            FailureReason: manifest.AllSucceeded
+                ? null
+                : $"{manifest.FailureCount} of {manifest.Items.Count} executions failed to export; see batch-manifest.json.",
+            ArtifactPath: manifestPath);
     }
 }
