@@ -10,10 +10,10 @@ public enum SystemMtJobKind
     ExportExecutionArtifacts,
 
     /// <summary>
-    /// Reserved for a future standalone report-export operation. No operation handler is
-    /// wired yet; <see cref="SystemMtJobService"/> validates its fields and then rejects the
-    /// submission with <see cref="NotSupportedException"/>. Do not add a second report-export
-    /// kind — implement the handler against this member when the operation is built.
+    /// Exports only the rendered report files (HTML plus any available Word/Excel/PDF) for one
+    /// execution — no execution-result.json / execution-evidence.json data files. Handled by
+    /// <see cref="ExportReportJobOperationHandler"/>; the report-only counterpart to
+    /// <see cref="ExportExecutionArtifacts"/>.
     /// </summary>
     ExportReport,
 }

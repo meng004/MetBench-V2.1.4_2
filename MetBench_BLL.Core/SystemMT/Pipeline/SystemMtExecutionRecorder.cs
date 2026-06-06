@@ -420,5 +420,5 @@ public sealed class SystemMtExecutionRecorder
             : new Dictionary<string, double>(metrics);
 }
 
-/// <summary>一次 <see cref="SystemMtExecutionRecorder.Record"/> 写入的行 id。</summary>
+/// <summary>一次 <see cref="SystemMtExecutionRecorder.RecordAsync"/> 写入的行 id。</summary>
 public sealed record RecordedExecution(Guid ExecutionId, Guid? ResultId);
