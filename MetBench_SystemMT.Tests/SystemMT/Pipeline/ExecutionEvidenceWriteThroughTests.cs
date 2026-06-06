@@ -92,7 +92,7 @@ public sealed class ExecutionEvidenceWriteThroughTests
         });
 
         var recorder = new SystemMtExecutionRecorder(execRepo, resRepo, evRepo, v3Repo);
-        var recorded = recorder.Record(CtxFor("heat-equation-amplitude"), OkOutcome(), mrInstanceId: 1);
+        var recorded = await recorder.RecordAsync(CtxFor("heat-equation-amplitude"), OkOutcome(), mrInstanceId: 1);
 
         var evidence = await evRepo.GetByExecutionAsync(recorded.ExecutionId);
         Assert.NotNull(evidence);
@@ -117,7 +117,7 @@ public sealed class ExecutionEvidenceWriteThroughTests
         var v3Repo = new InMemoryV3Repo(); // empty
 
         var recorder = new SystemMtExecutionRecorder(execRepo, resRepo, evRepo, v3Repo);
-        var recorded = recorder.Record(CtxFor("unknown-mr"), OkOutcome(), mrInstanceId: 1);
+        var recorded = await recorder.RecordAsync(CtxFor("unknown-mr"), OkOutcome(), mrInstanceId: 1);
 
         var evidence = await evRepo.GetByExecutionAsync(recorded.ExecutionId);
         Assert.NotNull(evidence);
@@ -127,7 +127,7 @@ public sealed class ExecutionEvidenceWriteThroughTests
     }
 
     [Fact]
-    public void Record_without_evidence_repo_preserves_pre_Task6_behavior()
+    public async Task Record_without_evidence_repo_preserves_pre_Task6_behavior()
     {
         // Backward-compat: existing 9 ctor sites in tests do not pass evidence/V3 repos;
         // Recorder must still write Execution + Result and skip evidence cleanly.
@@ -135,7 +135,7 @@ public sealed class ExecutionEvidenceWriteThroughTests
         var resRepo = new FakeResultRepo();
         var recorder = new SystemMtExecutionRecorder(execRepo, resRepo);
 
-        var recorded = recorder.Record(CtxFor("heat-equation-amplitude"), OkOutcome(), mrInstanceId: 1);
+        var recorded = await recorder.RecordAsync(CtxFor("heat-equation-amplitude"), OkOutcome(), mrInstanceId: 1);
 
         Assert.NotEqual(Guid.Empty, recorded.ExecutionId);
         Assert.NotNull(recorded.ResultId);
@@ -155,7 +155,7 @@ public sealed class ExecutionEvidenceWriteThroughTests
 
         var recorder = new SystemMtExecutionRecorder(execRepo, resRepo, evRepo, v3Repo);
         var errored = OkOutcome() with { FinalStatus = "error", AssertionResult = null };
-        var recorded = recorder.Record(CtxFor("heat-equation-amplitude"), errored, mrInstanceId: 1);
+        var recorded = await recorder.RecordAsync(CtxFor("heat-equation-amplitude"), errored, mrInstanceId: 1);
 
         Assert.Null(recorded.ResultId);
         var evidence = await evRepo.GetByExecutionAsync(recorded.ExecutionId);
@@ -194,7 +194,7 @@ public sealed class ExecutionEvidenceWriteThroughTests
 
         var recorder = new SystemMtExecutionRecorder(execRepo, resRepo, evRepo, v3Repo);
         var errored = OkOutcome() with { FinalStatus = "error", AssertionResult = null };
-        var recorded = recorder.Record(
+        var recorded = await recorder.RecordAsync(
             CtxFor("heat-equation-amplitude"),
             errored,
             mrInstanceId: 1,
@@ -218,7 +218,7 @@ public sealed class ExecutionEvidenceWriteThroughTests
         var v3Repo = new InMemoryV3Repo();
 
         var recorder = new SystemMtExecutionRecorder(execRepo, resRepo, evRepo, v3Repo);
-        var recorded = recorder.Record(CtxFor("heat-equation-amplitude"), OkOutcome(), mrInstanceId: 1);
+        var recorded = await recorder.RecordAsync(CtxFor("heat-equation-amplitude"), OkOutcome(), mrInstanceId: 1);
 
         var evidence = await evRepo.GetByExecutionAsync(recorded.ExecutionId);
         Assert.NotNull(evidence);
@@ -243,7 +243,7 @@ public sealed class ExecutionEvidenceWriteThroughTests
         try
         {
             var recorder = new SystemMtExecutionRecorder(execRepo, resRepo, evRepo, v3Repo);
-            var recorded = recorder.Record(
+            var recorded = await recorder.RecordAsync(
                 CtxFor("heat-equation-amplitude") with { SourceCasePath = sourcePath },
                 OkOutcome() with
                 {
@@ -292,7 +292,7 @@ public sealed class ExecutionEvidenceWriteThroughTests
             new MetBench_BLL.SystemMT.Catalog.Typed.Runtime.VerificationDiagnostic(1.0, 2.0, 1.0, 0.0));
 
         var recorder = new SystemMtExecutionRecorder(execRepo, resRepo, evRepo, v3Repo);
-        var recorded = recorder.Record(
+        var recorded = await recorder.RecordAsync(
             CtxFor("heat-equation-amplitude"),
             OkOutcome(),
             mrInstanceId: 1,
@@ -338,7 +338,7 @@ public sealed class ExecutionEvidenceWriteThroughTests
             .SkippedMissingObservable("max_u missing from followup role");
 
         var recorder = new SystemMtExecutionRecorder(execRepo, resRepo, evRepo, v3Repo);
-        var recorded = recorder.Record(
+        var recorded = await recorder.RecordAsync(
             CtxFor("heat-equation-amplitude"),
             OkOutcome() with
             {
@@ -379,7 +379,7 @@ public sealed class ExecutionEvidenceWriteThroughTests
         var v3Repo = new InMemoryV3Repo();
 
         var recorder = new SystemMtExecutionRecorder(execRepo, resRepo, evRepo, v3Repo);
-        var recorded = recorder.Record(CtxFor("heat-equation-amplitude"), OkOutcome(), mrInstanceId: 1);
+        var recorded = await recorder.RecordAsync(CtxFor("heat-equation-amplitude"), OkOutcome(), mrInstanceId: 1);
 
         var evidence = await evRepo.GetByExecutionAsync(recorded.ExecutionId);
         Assert.NotNull(evidence);
@@ -486,7 +486,7 @@ public sealed class ExecutionEvidenceWriteThroughTests
             // Production call site (SystemMtLauncher.RunAsync line 188) passes
             // no typed args; the recorder must pick them up from the outcome.
             var recorder = new SystemMtExecutionRecorder(execRepo, resRepo, evRepo, v3Repo);
-            var recorded = recorder.Record(ctx, outcome, mrInstanceId: -1);
+            var recorded = await recorder.RecordAsync(ctx, outcome, mrInstanceId: -1);
 
             var evidence = await evRepo.GetByExecutionAsync(recorded.ExecutionId);
             Assert.NotNull(evidence);

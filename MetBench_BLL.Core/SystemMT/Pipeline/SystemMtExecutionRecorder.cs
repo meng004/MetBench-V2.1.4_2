@@ -62,7 +62,7 @@ public sealed class SystemMtExecutionRecorder
     /// <param name="outcome">pipeline 跑完返回的结果摘要。</param>
     /// <param name="mrInstanceId">→ MRInstances.IdInstance；无对应 instance 时调用方传哨兵值。</param>
     /// <param name="batchId">所属 Batch（单跑则 null）。</param>
-    public RecordedExecution Record(
+    public async Task<RecordedExecution> RecordAsync(
         PipelineContext context,
         PipelineOutcome outcome,
         int mrInstanceId,
@@ -72,7 +72,8 @@ public sealed class SystemMtExecutionRecorder
         MrSpec? typedSpec = null,
         PredicateSpec? typedPredicate = null,
         PropertySpec? typedPropertySpec = null,
-        RuntimeEvidence? runtimeEvidence = null)
+        RuntimeEvidence? runtimeEvidence = null,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(outcome);
@@ -100,11 +101,12 @@ public sealed class SystemMtExecutionRecorder
         {
             if (_evidence is not null && runtimeEvidence is not null)
             {
-                WriteEvidence(
+                await WriteEvidenceAsync(
                     executionId,
                     context,
                     outcome,
-                    runtimeEvidence: runtimeEvidence);
+                    runtimeEvidence: runtimeEvidence,
+                    cancellationToken: cancellationToken);
             }
 
             return new RecordedExecution(executionId, null);
@@ -135,7 +137,7 @@ public sealed class SystemMtExecutionRecorder
         // until Task 6 step 3 wires per-variable capture into SystemMtPipeline.
         if (_evidence is not null)
         {
-            WriteEvidence(
+            await WriteEvidenceAsync(
                 executionId,
                 context,
                 outcome,
@@ -144,7 +146,8 @@ public sealed class SystemMtExecutionRecorder
                 typedSpec,
                 typedPredicate,
                 typedPropertySpec,
-                runtimeEvidence);
+                runtimeEvidence,
+                cancellationToken);
         }
 
         // Legacy SystemMtResults mirror — populates the collection
@@ -176,17 +179,18 @@ public sealed class SystemMtExecutionRecorder
                 TransformationName = context.TransformationName,
                 TransformationParameters = new Dictionary<string, string>(context.Parameters),
             };
-            _legacyResults.SaveAsync(legacyRecord).GetAwaiter().GetResult();
+            await _legacyResults.SaveAsync(legacyRecord, cancellationToken);
         }
 
         return new RecordedExecution(executionId, resultId);
     }
 
-    public RecordedExecution RecordBlockedPreflight(
+    public async Task<RecordedExecution> RecordBlockedPreflightAsync(
         PipelineContext context,
         RuntimePreflightResult preflight,
         int mrInstanceId,
-        Guid? batchId = null)
+        Guid? batchId = null,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(preflight);
@@ -234,17 +238,18 @@ public sealed class SystemMtExecutionRecorder
                 SourceExitCode: 0,
                 FollowupExitCode: 0);
 
-            WriteEvidence(
+            await WriteEvidenceAsync(
                 executionId,
                 context,
                 outcome,
-                runtimeEvidence: RuntimeEvidence.FromPreflightResult(preflight));
+                runtimeEvidence: RuntimeEvidence.FromPreflightResult(preflight),
+                cancellationToken: cancellationToken);
         }
 
         return new RecordedExecution(executionId, null);
     }
 
-    private void WriteEvidence(
+    private async Task WriteEvidenceAsync(
         Guid executionId,
         PipelineContext context,
         PipelineOutcome outcome,
@@ -253,7 +258,8 @@ public sealed class SystemMtExecutionRecorder
         MrSpec? typedSpec = null,
         PredicateSpec? typedPredicate = null,
         PropertySpec? typedPropertySpec = null,
-        RuntimeEvidence? runtimeEvidence = null)
+        RuntimeEvidence? runtimeEvidence = null,
+        CancellationToken cancellationToken = default)
     {
         var v3 = _v3?.GetByCode(context.MrCode);
         var snapshot = new ExecutionMetadataSnapshot
@@ -305,8 +311,7 @@ public sealed class SystemMtExecutionRecorder
                 .FromPropertyResult(typedPropertySpec, typedProperty);
         }
 
-        // Recorder is sync; evidence write also runs sync (LiteDB).
-        _evidence!.SaveAsync(evidence).GetAwaiter().GetResult();
+        await _evidence!.SaveAsync(evidence, cancellationToken);
     }
 
     private static bool RoleOutputsProduced(PipelineOutcome outcome)
