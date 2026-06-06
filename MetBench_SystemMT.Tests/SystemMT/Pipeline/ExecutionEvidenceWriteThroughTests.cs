@@ -267,6 +267,56 @@ public sealed class ExecutionEvidenceWriteThroughTests
         }
     }
 
+    [Fact]
+    public async Task Record_writes_sample_trace_per_changed_input_field_not_only_target()
+    {
+        var execRepo = new FakeExecRepo();
+        var resRepo = new FakeResultRepo();
+        var evRepo = new InMemoryEvidenceRepo();
+        var v3Repo = new InMemoryV3Repo();
+        var tempDir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "metbench-evidence-tests", Guid.NewGuid().ToString("N"));
+        System.IO.Directory.CreateDirectory(tempDir);
+        var sourcePath = System.IO.Path.Combine(tempDir, "source.json");
+        var followupPath = System.IO.Path.Combine(tempDir, "followup.json");
+        // Two fields change under the transform: the declared target /initial/amplitude
+        // AND /extra/k. A field that does NOT change (/extra/fixed) must not produce a trace.
+        await System.IO.File.WriteAllTextAsync(sourcePath, """{"initial":{"amplitude":1.0},"extra":{"k":5.0,"fixed":7.0}}""");
+        await System.IO.File.WriteAllTextAsync(followupPath, """{"initial":{"amplitude":2.0},"extra":{"k":9.0,"fixed":7.0}}""");
+
+        try
+        {
+            var recorder = new SystemMtExecutionRecorder(execRepo, resRepo, evRepo, v3Repo);
+            var recorded = await recorder.RecordAsync(
+                CtxFor("heat-equation-amplitude") with { SourceCasePath = sourcePath },
+                OkOutcome() with
+                {
+                    FollowupInputPath = followupPath,
+                    FollowupMetrics = new Dictionary<string, double> { ["max_u"] = 3.5, ["k"] = 9.0 },
+                },
+                mrInstanceId: 1);
+
+            var evidence = await evRepo.GetByExecutionAsync(recorded.ExecutionId);
+            Assert.NotNull(evidence);
+            // Target field first, then the other changed field. The unchanged field is absent.
+            Assert.Equal(2, evidence!.SampleTraces.Count);
+
+            var target = evidence.SampleTraces[0];
+            Assert.Equal("max_u", target.VariableName);
+            Assert.Equal("/initial/amplitude", target.Path);
+
+            var extra = Assert.Single(evidence.SampleTraces, t => t.Path == "/extra/k");
+            Assert.Equal("k", extra.VariableName);
+            Assert.Equal("5.0", extra.SourceValueJson);
+            Assert.Equal("9.0", extra.TransformedValueJson);
+            Assert.Equal("9", extra.OutputValueJson);
+            Assert.DoesNotContain(evidence.SampleTraces, t => t.Path == "/extra/fixed");
+        }
+        finally
+        {
+            try { System.IO.Directory.Delete(tempDir, recursive: true); } catch { }
+        }
+    }
+
     // ---- ExecutionEvidence v2 (PR-C0) additions ----
 
     [Fact]
