@@ -163,7 +163,7 @@ The same PR chain must update:
 - Polling status reaches terminal state and result is visible.
 - Synchronous launcher API remains available and covered by existing tests.
 - Async tests prove the real path uses `SystemMtJobService -> SystemMtJobWorker -> SystemMtAsyncPipeline -> ISystemMtLauncher`.
-- Batch execution must include per-MR summary, partial-failure semantics, and cancellation semantics; otherwise batch must be removed from the release scope before implementation starts.
+- Batch execution must include a per-MR summary, partial-failure semantics (per-item outcomes preserved; an MR assertion failure is an anomaly detection that keeps the job `Succeeded`, while an infrastructure failure makes the job `Failed` — see §7), and cancellation semantics; otherwise batch must be removed from the release scope before implementation starts.
 
 ### T1 Closure
 
@@ -195,7 +195,7 @@ The same PR chain must update:
 | Result/evidence import pollutes local truth. | Do not implement result/evidence import in this closure. Export only. |
 | Import/export package schema grows without evidence. | Add only fields required by failing tests; keep current `SutImportUnit` model as default. |
 | WPF tests cannot run on cloud. | Cloud PRs include source guards and core tests; Windows VM prompt captures build/UI evidence. |
-| Batch execution hides per-MR failures. | Batch status must include per-MR summary and terminal state must be failed if any required MR fails unless explicitly configured otherwise. |
+| Batch execution hides per-MR failures. | Batch status must include a per-MR summary that records each MR's outcome (succeeded / failed / cancelled). The batch job terminal state is `Succeeded` when every MR executed to completion: an MR whose metamorphic relation is violated (assertion failure) is an *anomaly detection* preserved per-item for the T5 anomaly workflow, not a job failure. The batch job terminal state is `Failed` only for an infrastructure failure (missing runtime / SUT crash, surfaced via `RuntimeEvidence.FailureKind` or a synthesized `Run threw` result with no record). This is consistent with single-MR run semantics, where an assertion failure also yields a `Succeeded` job that carries the verdict. (Decision recorded 2026-06-06; supersedes the earlier "terminal state must be failed if any required MR fails" wording.) |
 | Runtime/environment failures get misclassified as MR failures. | Preserve `RuntimeEvidence.FailureKind` through job status; never parse strings when structured evidence exists. |
 
 ## 8. Open Questions Locked for Later

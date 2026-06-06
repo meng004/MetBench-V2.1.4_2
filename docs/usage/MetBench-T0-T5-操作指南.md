@@ -159,6 +159,52 @@ T1 提供围绕 T0 的数据维护入口。所有目录页统一交互：左侧�
 
 ---
 
+## §7. 异步操作：运行 / 资产导入导出 / 结果导出
+
+**目标**：用户可见的长耗时操作（MR 运行、资产包导入导出、执行结果导出）不再阻塞 UI 线程。每个操作创建一个作业（job），立即返回 job id，并通过轮询更新状态；终态显式为 **成功（Succeeded）/ 失败（Failed）/ 已取消（Cancelled）**。
+
+**入口**：导航栏 → **System-MT 异步作业**（`SystemMtAsyncJobPage`）。页面顶部选择操作种类，填写对应字段后提交，下方实时显示轮询日志、进度、终态、失败原因与 artifact 路径，并可取消正在运行的作业。
+
+![异步操作种类选择](images/t7-async-operation-selector-zh.png)
+
+### 7.1 异步运行单条 MR / 批量 MR
+
+1. 操作种类选 **RunMr**（单条）或 **RunBatch**（批量），填入 MR id（批量为多个 id）。
+2. 点 **提交**，页面显示 job id 并进入 排队 → 运行 → 终态 的轮询。
+3. 终态 **Succeeded** 表示该作业的全部 MR 都执行完成。**注意**：某条 MR 的蜕变关系被违反（断言失败）属于**检出异常**，会在逐条明细中记录为该 MR 失败并进入 T5 异常工作流，但**不会**把作业整体置为失败；只有基础设施故障（缺运行时 / SUT 崩溃）才使作业 **Failed**。这与单条 MR 运行语义一致。
+
+![异步单条 MR 运行成功](images/t7-async-runmr-succeeded-zh.png)
+
+![异步批量 MR 终态与逐条明细](images/t7-async-runbatch-terminal-zh.png)
+
+### 7.2 导入 / 导出 SUT/MR/样例/变异体资产包
+
+1. 操作种类选 **ImportAssets**，填 **包根目录（PackageRoot）** 与 **暂存根目录（StagingRoot）**。提交后作业校验包，校验通过则在确定性暂存目录写出真实的 `staging-manifest.json` 与 `sut-import-unit.json`，artifact 路径显示在页面上。校验失败则作业 **Failed** 并给出明确诊断。
+2. 操作种类选 **ExportAssets**，填 **包根目录** 与 **导出根目录（ExportRoot）**。提交后作业先校验再写出 `sut-import-unit.json` 到导出目录。
+
+![异步资产导入终态与 artifact](images/t7-async-import-assets-zh.png)
+
+![异步资产导出终态与 artifact](images/t7-async-export-assets-zh.png)
+
+### 7.3 导出执行结果、证据和报告
+
+1. 操作种类选 **ExportExecutionArtifacts**，填 **执行 id（ExecutionId）** 与 **导出根目录**。
+2. 提交后作业导出 bundle：`manifest.json` + `execution-result.json` + `execution-evidence.json`（仅当该执行存在证据行）+ `report.html`。
+3. 该执行不存在时作业 **Failed**。**说明**：此版本仅支持结果/证据/报告的**导出**；把外部结果/证据**导入**本地数据库尚未开放（需先有信任 / 溯源模型）。
+
+![异步执行结果导出终态与 artifact](images/t7-async-export-execution-zh.png)
+
+### 7.4 查看 job 状态、失败原因、artifact 路径与取消任务
+
+- 提交后页面持续轮询并展示当前阶段、进度百分比、终态、失败原因（如有）与生成的 artifact 路径；job id 可复制。
+- 对正在运行的作业点 **取消**，作业进入 **Cancelled** 终态；批量运行中尚未开始的 MR 标记为已取消。
+
+![异步操作失败原因展示](images/t7-async-failure-display-zh.png)
+
+> Windows VM 可见性证据（构建 0 错误、各操作终态截图、artifact 路径、UI 不阻塞）见 `docs/superpowers/specs/2026-06-05-t0-t2-async-import-export-vm-evidence/vm-summary.md`。
+
+---
+
 ## 附录 A：T0–T5 与测试切片对照（发布冒烟）
 
 | 层 | 操作要点 | 代表切片（SUT / MR / 元模式 / 度量） |
