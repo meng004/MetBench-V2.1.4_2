@@ -1,0 +1,9 @@
+﻿root=C:\Users\codex\AppData\Local\Temp\metbench-gapfill\exec-export
+name	bytes
+execution-evidence.json	2706
+execution-result.json	1015
+manifest.json	325
+report.docx	10713
+report.html	4297
+report.pdf	12366
+report.xlsx	18236

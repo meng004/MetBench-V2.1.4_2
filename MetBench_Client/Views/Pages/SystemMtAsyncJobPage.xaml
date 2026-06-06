@@ -143,14 +143,14 @@
                        VerticalAlignment="Center"
                        FontWeight="SemiBold"
                        Text="Execution id"
-                       Visibility="{Binding ViewModel.IsExportExecutionArtifactsSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                       Visibility="{Binding ViewModel.IsExecutionIdSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBox Grid.Row="3"
                      Grid.Column="3"
                      Grid.ColumnSpan="4"
                      AutomationProperties.AutomationId="AsyncExecutionIdBox"
                      Margin="0,4,0,0"
                      Text="{Binding ViewModel.ExecutionIdText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                     Visibility="{Binding ViewModel.IsExportExecutionArtifactsSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                     Visibility="{Binding ViewModel.IsExecutionIdSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
         </Grid>
 
         <Grid Grid.Row="1" Margin="0,16,0,0">
