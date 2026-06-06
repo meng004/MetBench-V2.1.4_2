@@ -235,18 +235,20 @@ namespace MetBench_BLL
         }
 
         // 将候选程序传输到候选文件目录
-        private async Task<bool> CopyCandidateProgrmsToDestination(Application application)
+        // 注：调用方走 RunSync(Task<bool>) 包装，需保留 Task<bool> 返回类型；
+        // 本方法体内无 await，故移除 async 关键字（修 CS1998 假异步）。
+        private Task<bool> CopyCandidateProgrmsToDestination(Application application)
         {
             if (application == null || application.Code == null)
             {
-                return false;
+                return Task.FromResult(false);
             }
 
             string projectRoot = FindSolutionRoot();
             if (projectRoot == null)
             {
                 Console.WriteLine("无法找到项目根目录！");
-                return false;
+                return Task.FromResult(false);
             }
             //Console.WriteLine($"找到项目根目录: {projectRoot}");
 
@@ -260,7 +262,7 @@ namespace MetBench_BLL
                 );
 
             var isExtract = ExtractApplicationZip(application, destinationDirectory);
-            return isExtract;
+            return Task.FromResult(isExtract);
         }
 
         private bool ExtractApplicationZip(Application application, string destinationDirectory)
@@ -367,6 +369,9 @@ namespace MetBench_BLL
             }
             catch (Exception ex)
             {
+                // CLAUDE.md §6 显式报错：从 ExtractApplicationZip 失败必须留下可见痕迹，
+                // 不得静默吞掉（旧实现 declared-but-unused ex 触发 CS0168）。
+                Debug.WriteLine($"ExtractApplicationZip failed: {ex.Message}");
                 return false;
             }
 

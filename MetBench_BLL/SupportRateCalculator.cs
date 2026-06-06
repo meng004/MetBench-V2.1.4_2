@@ -287,11 +287,14 @@ namespace MetBench_BLL
                     passRate = passRateDecimal;
                 }
 
-                return passRate; // 返回输出结果  
+                return passRate; // 返回输出结果
             }
             catch (Exception ex)
             {
-                return 0.00m; // 返回空字符串表示发生异常  
+                // CLAUDE.md §6 显式报错：解析 pass-rate 失败必须留下可见痕迹，
+                // 不得静默吞掉（旧实现 declared-but-unused ex 触发 CS0168）。
+                Debug.WriteLine($"SupportRateCalculator pass-rate parse failed: {ex.Message}");
+                return 0.00m;
             }
             finally
             {
