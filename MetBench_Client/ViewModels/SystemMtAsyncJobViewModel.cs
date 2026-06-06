@@ -31,6 +31,8 @@ public sealed partial class SystemMtAsyncJobViewModel : ObservableObject, INavig
     [NotifyPropertyChangedFor(nameof(IsExportRootSelected))]
     [NotifyPropertyChangedFor(nameof(IsExportAssetsSelected))]
     [NotifyPropertyChangedFor(nameof(IsExportExecutionArtifactsSelected))]
+    [NotifyPropertyChangedFor(nameof(IsExportReportSelected))]
+    [NotifyPropertyChangedFor(nameof(IsExecutionIdSelected))]
     [NotifyCanExecuteChangedFor(nameof(SubmitCommand))]
     private SystemMtJobKind _selectedOperationKind = SystemMtJobKind.RunMr;
 
@@ -43,6 +45,7 @@ public sealed partial class SystemMtAsyncJobViewModel : ObservableObject, INavig
             SystemMtJobKind.ImportAssets,
             SystemMtJobKind.ExportAssets,
             SystemMtJobKind.ExportExecutionArtifacts,
+            SystemMtJobKind.ExportReport,
         });
 
     [ObservableProperty]
@@ -120,11 +123,15 @@ public sealed partial class SystemMtAsyncJobViewModel : ObservableObject, INavig
 
     public bool IsImportAssetsSelected => SelectedOperationKind == SystemMtJobKind.ImportAssets;
 
-    public bool IsExportRootSelected => IsExportAssetsSelected || IsExportExecutionArtifactsSelected;
+    public bool IsExportRootSelected => IsExportAssetsSelected || IsExportExecutionArtifactsSelected || IsExportReportSelected;
 
     public bool IsExportAssetsSelected => SelectedOperationKind == SystemMtJobKind.ExportAssets;
 
     public bool IsExportExecutionArtifactsSelected => SelectedOperationKind == SystemMtJobKind.ExportExecutionArtifacts;
+
+    public bool IsExportReportSelected => SelectedOperationKind == SystemMtJobKind.ExportReport;
+
+    public bool IsExecutionIdSelected => IsExportExecutionArtifactsSelected || IsExportReportSelected;
 
     public SystemMtAsyncJobViewModel(ISystemMtJobService jobs, ISystemMtLauncher launcher)
     {
@@ -202,6 +209,9 @@ public sealed partial class SystemMtAsyncJobViewModel : ObservableObject, INavig
             SystemMtJobKind.ExportAssets => !string.IsNullOrWhiteSpace(PackageRoot)
                 && !string.IsNullOrWhiteSpace(ExportRoot),
             SystemMtJobKind.ExportExecutionArtifacts => Guid.TryParse(ExecutionIdText, out var id)
+                && id != Guid.Empty
+                && !string.IsNullOrWhiteSpace(ExportRoot),
+            SystemMtJobKind.ExportReport => Guid.TryParse(ExecutionIdText, out var id)
                 && id != Guid.Empty
                 && !string.IsNullOrWhiteSpace(ExportRoot),
             _ => false,
@@ -391,6 +401,10 @@ public sealed partial class SystemMtAsyncJobViewModel : ObservableObject, INavig
                 ExportRoot: ExportRoot.Trim()),
             SystemMtJobKind.ExportExecutionArtifacts => new SystemMtOperationJobRequest(
                 SystemMtJobKind.ExportExecutionArtifacts,
+                ExportRoot: ExportRoot.Trim(),
+                ExecutionId: Guid.Parse(ExecutionIdText.Trim())),
+            SystemMtJobKind.ExportReport => new SystemMtOperationJobRequest(
+                SystemMtJobKind.ExportReport,
                 ExportRoot: ExportRoot.Trim(),
                 ExecutionId: Guid.Parse(ExecutionIdText.Trim())),
             _ => throw new InvalidOperationException($"Unsupported async operation: {SelectedOperationKind}"),

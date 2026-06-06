@@ -1,0 +1,7 @@
+﻿root=C:\Users\codex\AppData\Local\Temp\metbench-gapfill\report-only
+name	bytes
+manifest.json	263
+report.docx	10592
+report.html	3456
+report.pdf	11929
+report.xlsx	17237

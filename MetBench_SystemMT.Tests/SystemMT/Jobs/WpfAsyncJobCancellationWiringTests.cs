@@ -39,7 +39,12 @@ public sealed class WpfAsyncJobCancellationWiringTests
         Assert.Contains("new RunBatchJobOperationHandler(launcher, evidenceRepository)", hosted);
         Assert.Contains("new ImportAssetsJobOperationHandler(new SutImportStagingService())", hosted);
         Assert.Contains("new ExportAssetsJobOperationHandler()", hosted);
-        Assert.Contains("new ExportExecutionArtifactsJobOperationHandler(new ExecutionArtifactExporter", hosted);
+        Assert.Contains("var artifactExporter = new ExecutionArtifactExporter", hosted);
+        Assert.Contains("new ExportExecutionArtifactsJobOperationHandler(artifactExporter)", hosted);
+        Assert.Contains("new WordSystemMtResultReportRenderer(chartRenderer)", hosted);
+        Assert.Contains("new ExcelSystemMtResultReportRenderer(chartRenderer)", hosted);
+        Assert.Contains("new PdfSystemMtResultReportRenderer(chartRenderer)", hosted);
+        Assert.Contains("new ExportReportJobOperationHandler(artifactExporter)", hosted);
         Assert.Contains("GetRequiredService<ISystemMtResultRepository>()", hosted);
         Assert.Contains("GetRequiredService<ISystemMtResultReportRenderer>()", hosted);
         Assert.Contains("operationDispatcher: operationDispatcher", hosted);
@@ -89,6 +94,8 @@ public sealed class WpfAsyncJobCancellationWiringTests
         Assert.Contains("SystemMtJobKind.ImportAssets", viewModel);
         Assert.Contains("SystemMtJobKind.ExportAssets", viewModel);
         Assert.Contains("SystemMtJobKind.ExportExecutionArtifacts", viewModel);
+        Assert.Contains("SystemMtJobKind.ExportReport", viewModel);
+        Assert.Contains("IsExecutionIdSelected", viewModel);
         Assert.Contains("ArtifactPathDisplay", viewModel);
         Assert.Contains("status.ArtifactPath", viewModel);
     }
@@ -106,6 +113,7 @@ public sealed class WpfAsyncJobCancellationWiringTests
         Assert.Contains("AsyncExportRootBox", xaml);
         Assert.Contains("AsyncExecutionIdBox", xaml);
         Assert.Contains("AsyncArtifactPath", xaml);
+        Assert.Contains("ViewModel.IsExecutionIdSelected", xaml);
     }
 
     [Fact]
@@ -118,7 +126,7 @@ public sealed class WpfAsyncJobCancellationWiringTests
         Assert.Contains("ViewModel.IsPackageRootSelected, Converter={StaticResource BooleanToVisibilityConverter}", xaml);
         Assert.Contains("ViewModel.IsImportAssetsSelected, Converter={StaticResource BooleanToVisibilityConverter}", xaml);
         Assert.Contains("ViewModel.IsExportRootSelected, Converter={StaticResource BooleanToVisibilityConverter}", xaml);
-        Assert.Contains("ViewModel.IsExportExecutionArtifactsSelected, Converter={StaticResource BooleanToVisibilityConverter}", xaml);
+        Assert.Contains("ViewModel.IsExecutionIdSelected, Converter={StaticResource BooleanToVisibilityConverter}", xaml);
     }
 
     private static string ReadRepoFile(params string[] parts)

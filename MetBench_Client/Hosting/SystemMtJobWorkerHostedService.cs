@@ -2,6 +2,8 @@ using MetBench_BLL.SystemMT.Jobs;
 using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Persistence;
 using MetBench_BLL.SystemMT.Reporting;
+using MetBench_BLL.Reporting.SystemMt;
+using MetBench_BLL.Reporting.SystemMt.Charts.Rendering;
 using MetBench_BLL.Core.SystemMT.ImportExport.ExecutionArtifacts;
 using MetBench_BLL.Core.SystemMT.ImportExport.Put;
 using Microsoft.Extensions.DependencyInjection;
@@ -60,15 +62,25 @@ public sealed class SystemMtJobWorkerHostedService : BackgroundService
                 var reportRenderer = scope.ServiceProvider.GetRequiredService<ISystemMtResultReportRenderer>();
                 var evidenceRepository = scope.ServiceProvider.GetService<IExecutionEvidenceRepository>();
                 var pipeline = new SystemMtAsyncPipeline(launcher, evidenceRepository);
+                var chartRenderer = new SkiaChartRenderer();
+                var wordRenderer = new WordSystemMtResultReportRenderer(chartRenderer);
+                var excelRenderer = new ExcelSystemMtResultReportRenderer(chartRenderer);
+                var pdfRenderer = new PdfSystemMtResultReportRenderer(chartRenderer);
+                var artifactExporter = new ExecutionArtifactExporter(
+                    resultRepository,
+                    evidenceRepository,
+                    reportRenderer,
+                    markdown: null,
+                    word: wordRenderer,
+                    excel: excelRenderer,
+                    pdf: pdfRenderer);
                 var operationDispatcher = new SystemMtJobOperationDispatcher(new ISystemMtJobOperationHandler[]
                 {
                     new RunBatchJobOperationHandler(launcher, evidenceRepository),
                     new ImportAssetsJobOperationHandler(new SutImportStagingService()),
                     new ExportAssetsJobOperationHandler(),
-                    new ExportExecutionArtifactsJobOperationHandler(new ExecutionArtifactExporter(
-                        resultRepository,
-                        evidenceRepository,
-                        reportRenderer)),
+                    new ExportExecutionArtifactsJobOperationHandler(artifactExporter),
+                    new ExportReportJobOperationHandler(artifactExporter),
                 });
                 var worker = new SystemMtJobWorker(
                     _store,
