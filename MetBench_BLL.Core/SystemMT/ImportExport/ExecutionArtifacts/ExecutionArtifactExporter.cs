@@ -78,11 +78,14 @@ public sealed class ExecutionArtifactExporter
         Directory.CreateDirectory(request.ExportRoot);
         var files = new List<string>();
 
-        await WriteJsonAsync(
-            Path.Combine(request.ExportRoot, "execution-result.json"),
-            record,
-            files,
-            cancellationToken);
+        if (request.IncludeResultJson)
+        {
+            await WriteJsonAsync(
+                Path.Combine(request.ExportRoot, "execution-result.json"),
+                record,
+                files,
+                cancellationToken);
+        }
 
         ExecutionEvidence? evidence = null;
         if (request.IncludeEvidence && _evidence is not null)

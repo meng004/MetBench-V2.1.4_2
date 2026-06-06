@@ -171,7 +171,7 @@ public sealed class SystemMtJobService : ISystemMtJobService
                 if (request.ExecutionId is null || request.ExecutionId == Guid.Empty)
                     throw new ArgumentException("ExecutionId must be a non-empty Guid.", nameof(request));
                 RequireNonBlank(request.ExportRoot, nameof(request.ExportRoot));
-                throw UnsupportedUntilHandlerExists(request.Kind);
+                break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(request), request.Kind, "Unsupported job kind.");
         }
@@ -193,9 +193,6 @@ public sealed class SystemMtJobService : ISystemMtJobService
 
     private static Dictionary<string, string>? CopyOverrides(IReadOnlyDictionary<string, string>? overrides) =>
         overrides is null ? null : new Dictionary<string, string>(overrides, StringComparer.Ordinal);
-
-    private static NotSupportedException UnsupportedUntilHandlerExists(SystemMtJobKind kind) =>
-        new($"{kind} async jobs are not supported until a matching operation handler is registered.");
 
     private static IReadOnlyList<SystemMtBatchJobItem> CancelPendingBatchItems(
         IReadOnlyList<SystemMtBatchJobItem> items)
