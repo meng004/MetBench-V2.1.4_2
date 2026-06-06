@@ -1,5 +1,7 @@
 # T0-T2 Async Import/Export Release Closure Implementation Plan
 
+> **Status:** Done — Controlled. The chain executed as PR-1..PR-4 (#298 / #302 / #300 / #301) plus the chain-end cleanup + docs-projection closure PR #305, merged at `origin/main` `926db40` with required checks `test` + `governance` green. The §12.4 R2 chain-end holistic review ran (no Critical findings; 3 findings resolved in #305). The status ledger Stage-8 row and the active plan index record this closure as Controlled. The task checkboxes below are retained as the implementation record.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Close T0, T1, and T2 for release by making System-MT user-visible long-running operations asynchronous and by adding async import/export for assets plus export for results/evidence/reports.
