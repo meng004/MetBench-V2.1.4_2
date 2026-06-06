@@ -5,19 +5,23 @@
 > **P2 deliberate boundaries (result/evidence import, asset live-promotion) are
 > explicitly OUT of scope** and remain as-is until a separate trust-model plan.
 >
-> **Progress:** P0 **A1** (#308 four-end async export), **A2** (#309 recorder
-> async / no sync-over-async), **A3** (#310 ExportReport handler) and **C4**
-> (#311 BLL.Core TreatWarningsAsErrors) are merged to `origin/main`. A fresh
-> §12.4 R2 chain-end holistic review of #308–#311 found **no Critical/Important**
-> issues; its 2 minor stale-doc findings (ExportReport enum doc, RecordedExecution
-> cref) are fixed in the closure PR. **Remaining:** P1 **C1** (batch/range export —
-> needs a new job kind + R1 parity on request/record/status + WPF wiring) and
-> **C2** (richer SampleTraces — a `SystemMtPipeline` per-variable-capture feature,
-> tracked in the status ledger as 未闭环) are deferred as their own focused PRs.
-> P3 **C3** (UI-only MR CRUD) plus the A1/A3 WPF renderer/handler wiring are
-> captured in `docs/superpowers/vm-prompts/2026-06-06-t0-t2-gap-fill-a1-a3-wpf-wiring-vm-prompt.md`
-> and await a VM run. This row is **not Controlled** until C1/C2 land (or are
-> explicitly descoped) and the C3/A1/A3 VM evidence is captured.
+> **Progress — all cloud scope done:** P0 **A1** (#308 four-end async export),
+> **A2** (#309 recorder async / no sync-over-async), **A3** (#310 ExportReport
+> handler), **C4** (#311 BLL.Core TreatWarningsAsErrors), **C1** (#313 batch/range
+> export — `ExecutionIds` on request/record/status with R1 parity roundtrip;
+> continue-on-error batch manifest) and **C2** (#314 richer SampleTraces — honest
+> per-changed-input-field diff, not metric-stuffing) are merged to `origin/main`.
+> Two fresh §12.4 R2 chain-end holistic reviews ran: #308–#311 (no Critical/Important;
+> 2 minor stale-doc findings fixed in #312) and C1+C2 #313/#314 (no Critical/Important;
+> all batch-cancellation / R1-parity / pointer-escaping / no-fabrication concerns
+> verified correct). Full suite progressed 1784 → 1800 pass / 0 fail / 19 env-gated
+> skips. **P2 boundary items remain explicitly OUT of scope.**
+>
+> **Remaining = VM only:** P3 **C3** (UI-only MR CRUD) plus the A1/A3 WPF
+> renderer/handler wiring (so the running WPF app emits Word/Excel/PDF and dispatches
+> ExportReport) are captured in
+> `docs/superpowers/vm-prompts/2026-06-06-t0-t2-gap-fill-a1-a3-wpf-wiring-vm-prompt.md`
+> and await a VM run. This row is **not Controlled** until that VM evidence is captured.
 >
 > **REQUIRED SUB-SKILL:** use superpowers:subagent-driven-development or
 > superpowers:executing-plans, task-by-task, TDD-first.
