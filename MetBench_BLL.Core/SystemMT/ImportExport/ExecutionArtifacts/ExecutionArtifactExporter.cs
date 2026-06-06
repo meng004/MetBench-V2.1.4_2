@@ -18,6 +18,9 @@ public sealed class ExecutionArtifactExporter
     private readonly IExecutionEvidenceRepository? _evidence;
     private readonly ISystemMtResultReportRenderer _html;
     private readonly SystemMtReportService? _markdown;
+    private readonly IWordSystemMtResultReportRenderer? _word;
+    private readonly IExcelSystemMtResultReportRenderer? _excel;
+    private readonly IPdfSystemMtResultReportRenderer? _pdf;
     private readonly Func<DateTime> _utcNow;
 
     public ExecutionArtifactExporter(
@@ -25,14 +28,29 @@ public sealed class ExecutionArtifactExporter
         IExecutionEvidenceRepository? evidence,
         ISystemMtResultReportRenderer html,
         SystemMtReportService? markdown = null,
+        IWordSystemMtResultReportRenderer? word = null,
+        IExcelSystemMtResultReportRenderer? excel = null,
+        IPdfSystemMtResultReportRenderer? pdf = null,
         Func<DateTime>? utcNow = null)
     {
         _results = results ?? throw new ArgumentNullException(nameof(results));
         _evidence = evidence;
         _html = html ?? throw new ArgumentNullException(nameof(html));
         _markdown = markdown;
+        _word = word;
+        _excel = excel;
+        _pdf = pdf;
         _utcNow = utcNow ?? (() => DateTime.UtcNow);
     }
+
+    /// <summary>True when a Word (<c>.docx</c>) renderer is available for export.</summary>
+    public bool HasWordRenderer => _word is not null;
+
+    /// <summary>True when an Excel (<c>.xlsx</c>) renderer is available for export.</summary>
+    public bool HasExcelRenderer => _excel is not null;
+
+    /// <summary>True when a PDF renderer is available for export.</summary>
+    public bool HasPdfRenderer => _pdf is not null;
 
     public async Task<string> ExportAsync(
         ExecutionArtifactExportRequest request,
@@ -47,6 +65,12 @@ public sealed class ExecutionArtifactExporter
             throw new ArgumentException("ExportRoot must be non-blank.", nameof(request));
         if (request.IncludeMarkdown && _markdown is null)
             throw new InvalidOperationException("Markdown execution report export requires SystemMtReportService.");
+        if (request.IncludeWord && _word is null)
+            throw new InvalidOperationException("Word execution report export requires IWordSystemMtResultReportRenderer.");
+        if (request.IncludeExcel && _excel is null)
+            throw new InvalidOperationException("Excel execution report export requires IExcelSystemMtResultReportRenderer.");
+        if (request.IncludePdf && _pdf is null)
+            throw new InvalidOperationException("PDF execution report export requires IPdfSystemMtResultReportRenderer.");
 
         var record = await _results.GetAsync(request.ExecutionId.ToString(), cancellationToken)
             ?? throw new InvalidOperationException($"Execution result '{request.ExecutionId}' was not found.");
@@ -76,15 +100,39 @@ public sealed class ExecutionArtifactExporter
 
         if (request.IncludeHtml)
         {
-            var evidenceMap = evidence is null
-                ? null
-                : new Dictionary<Guid, ExecutionEvidence> { [request.ExecutionId] = evidence };
             var htmlFile = Path.Combine(request.ExportRoot, "report.html");
             await File.WriteAllTextAsync(
                 htmlFile,
-                _html.Render(new[] { record }, evidenceMap),
+                _html.Render(new[] { record }, EvidenceMap(request.ExecutionId, evidence)),
                 cancellationToken);
             files.Add("report.html");
+        }
+
+        if (request.IncludeWord)
+        {
+            await WriteBytesAsync(
+                Path.Combine(request.ExportRoot, "report.docx"),
+                _word!.Render(new[] { record }, EvidenceMap(request.ExecutionId, evidence)),
+                files,
+                cancellationToken);
+        }
+
+        if (request.IncludeExcel)
+        {
+            await WriteBytesAsync(
+                Path.Combine(request.ExportRoot, "report.xlsx"),
+                _excel!.Render(new[] { record }, EvidenceMap(request.ExecutionId, evidence)),
+                files,
+                cancellationToken);
+        }
+
+        if (request.IncludePdf)
+        {
+            await WriteBytesAsync(
+                Path.Combine(request.ExportRoot, "report.pdf"),
+                _pdf!.Render(new[] { record }, EvidenceMap(request.ExecutionId, evidence)),
+                files,
+                cancellationToken);
         }
 
         if (request.IncludeMarkdown)
@@ -116,4 +164,21 @@ public sealed class ExecutionArtifactExporter
         await File.WriteAllTextAsync(path, JsonSerializer.Serialize(value, JsonOptions), cancellationToken);
         files.Add(Path.GetFileName(path));
     }
+
+    private static async Task WriteBytesAsync(
+        string path,
+        byte[] bytes,
+        ICollection<string> files,
+        CancellationToken cancellationToken)
+    {
+        await File.WriteAllBytesAsync(path, bytes, cancellationToken);
+        files.Add(Path.GetFileName(path));
+    }
+
+    private static IReadOnlyDictionary<Guid, ExecutionEvidence>? EvidenceMap(
+        Guid executionId,
+        ExecutionEvidence? evidence) =>
+        evidence is null
+            ? null
+            : new Dictionary<Guid, ExecutionEvidence> { [executionId] = evidence };
 }

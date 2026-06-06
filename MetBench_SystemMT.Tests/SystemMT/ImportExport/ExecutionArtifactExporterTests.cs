@@ -101,6 +101,81 @@ public sealed class ExecutionArtifactExporterTests
         Assert.False(File.Exists(Path.Combine(temp.Root, "manifest.json")));
     }
 
+    [Fact]
+    public async Task ExportAsync_writes_word_excel_pdf_reports_when_renderers_present()
+    {
+        using var temp = TempDirectory.Create();
+        var executionId = Guid.NewGuid();
+        var renderer = new FakeBinaryReportRenderer();
+        var exporter = new ExecutionArtifactExporter(
+            new FakeResultRepository(MakeRecord(executionId)),
+            new FakeEvidenceRepository(MakeEvidence(executionId)),
+            new HtmlSystemMtResultReportRenderer(),
+            markdown: null,
+            word: renderer,
+            excel: renderer,
+            pdf: renderer);
+
+        Assert.True(exporter.HasWordRenderer);
+        Assert.True(exporter.HasExcelRenderer);
+        Assert.True(exporter.HasPdfRenderer);
+
+        var manifestPath = await exporter.ExportAsync(
+            new ExecutionArtifactExportRequest(
+                executionId,
+                temp.Root,
+                IncludeMarkdown: false,
+                IncludeWord: true,
+                IncludeExcel: true,
+                IncludePdf: true),
+            Guid.NewGuid());
+
+        Assert.True(File.Exists(Path.Combine(temp.Root, "report.docx")));
+        Assert.True(File.Exists(Path.Combine(temp.Root, "report.xlsx")));
+        Assert.True(File.Exists(Path.Combine(temp.Root, "report.pdf")));
+
+        var manifest = JsonSerializer.Deserialize<ExecutionArtifactExportManifest>(
+            File.ReadAllText(manifestPath),
+            ExecutionArtifactExporter.JsonOptions);
+        Assert.Contains("report.docx", manifest!.Files);
+        Assert.Contains("report.xlsx", manifest.Files);
+        Assert.Contains("report.pdf", manifest.Files);
+        Assert.Equal(new byte[] { 1, 2, 3, 4 }, File.ReadAllBytes(Path.Combine(temp.Root, "report.docx")));
+    }
+
+    [Theory]
+    [InlineData("Word", true, false, false)]
+    [InlineData("Excel", false, true, false)]
+    [InlineData("PDF", false, false, true)]
+    public async Task ExportAsync_format_requested_without_renderer_fails_closed(
+        string label, bool word, bool excel, bool pdf)
+    {
+        using var temp = TempDirectory.Create();
+        var executionId = Guid.NewGuid();
+        var exporter = new ExecutionArtifactExporter(
+            new FakeResultRepository(MakeRecord(executionId)),
+            new FakeEvidenceRepository(),
+            new HtmlSystemMtResultReportRenderer());
+
+        Assert.False(exporter.HasWordRenderer);
+        Assert.False(exporter.HasExcelRenderer);
+        Assert.False(exporter.HasPdfRenderer);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            exporter.ExportAsync(
+                new ExecutionArtifactExportRequest(
+                    executionId,
+                    temp.Root,
+                    IncludeMarkdown: false,
+                    IncludeWord: word,
+                    IncludeExcel: excel,
+                    IncludePdf: pdf),
+                Guid.NewGuid()));
+
+        Assert.Contains(label, ex.Message, StringComparison.Ordinal);
+        Assert.False(File.Exists(Path.Combine(temp.Root, "manifest.json")));
+    }
+
     private static SystemMtResultRecord MakeRecord(Guid executionId) => new()
     {
         Id = executionId,
@@ -186,6 +261,19 @@ public sealed class ExecutionArtifactExporterTests
 
         public Task<bool> DeleteByExecutionIdAsync(Guid executionId, CancellationToken cancellationToken = default) =>
             throw new NotSupportedException();
+    }
+
+    private sealed class FakeBinaryReportRenderer
+        : IWordSystemMtResultReportRenderer, IExcelSystemMtResultReportRenderer, IPdfSystemMtResultReportRenderer
+    {
+        public byte[] Render(IEnumerable<SystemMtResultRecord> records, ReportContext? context = null)
+            => new byte[] { 1, 2, 3, 4 };
+
+        public byte[] Render(
+            IEnumerable<SystemMtResultRecord> records,
+            IReadOnlyDictionary<Guid, ExecutionEvidence>? evidenceByExecutionId,
+            ReportContext? context = null)
+            => new byte[] { 1, 2, 3, 4 };
     }
 
     private sealed class TempDirectory : IDisposable
