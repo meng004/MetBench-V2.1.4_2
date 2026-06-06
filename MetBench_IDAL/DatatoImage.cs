@@ -26,12 +26,12 @@ namespace MetBench_IDAL
             if (!(imageData is byte[]))
             {
                 Console.WriteLine("图片数据不是字节数组。");
-                return null;
+                return string.Empty;
             }
             if (imageData == null || imageData.Length == 0)
             {
                 Console.WriteLine("图片数据为空。");
-                return null;
+                return string.Empty;
             }
 
             // 为图片创建一个唯一的文件名
@@ -60,7 +60,7 @@ namespace MetBench_IDAL
             catch (Exception ex)
             {
                 Console.WriteLine("保存图片时出错： " + ex.Message);
-                return null;
+                return string.Empty;
             }
         }
     }
