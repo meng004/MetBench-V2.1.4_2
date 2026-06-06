@@ -1,9 +1,23 @@
 # T0-T2 Gap-Fill Implementation Plan
 
-> **Status:** Planned (registered 2026-06-06). Scope confirmed in conversation:
+> **Status:** In progress (updated 2026-06-06). Scope confirmed in conversation:
 > P0 (three true gaps) + P1 (cloud enhancements) + P3 (VM/quality debt).
 > **P2 deliberate boundaries (result/evidence import, asset live-promotion) are
 > explicitly OUT of scope** and remain as-is until a separate trust-model plan.
+>
+> **Progress:** P0 **A1** (#308 four-end async export), **A2** (#309 recorder
+> async / no sync-over-async), **A3** (#310 ExportReport handler) and **C4**
+> (#311 BLL.Core TreatWarningsAsErrors) are merged to `origin/main`. A fresh
+> §12.4 R2 chain-end holistic review of #308–#311 found **no Critical/Important**
+> issues; its 2 minor stale-doc findings (ExportReport enum doc, RecordedExecution
+> cref) are fixed in the closure PR. **Remaining:** P1 **C1** (batch/range export —
+> needs a new job kind + R1 parity on request/record/status + WPF wiring) and
+> **C2** (richer SampleTraces — a `SystemMtPipeline` per-variable-capture feature,
+> tracked in the status ledger as 未闭环) are deferred as their own focused PRs.
+> P3 **C3** (UI-only MR CRUD) plus the A1/A3 WPF renderer/handler wiring are
+> captured in `docs/superpowers/vm-prompts/2026-06-06-t0-t2-gap-fill-a1-a3-wpf-wiring-vm-prompt.md`
+> and await a VM run. This row is **not Controlled** until C1/C2 land (or are
+> explicitly descoped) and the C3/A1/A3 VM evidence is captured.
 >
 > **REQUIRED SUB-SKILL:** use superpowers:subagent-driven-development or
 > superpowers:executing-plans, task-by-task, TDD-first.

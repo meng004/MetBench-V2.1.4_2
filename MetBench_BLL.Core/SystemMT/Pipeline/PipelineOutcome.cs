@@ -28,7 +28,7 @@ public sealed record PipelineOutcome(
     /// <summary>
     /// Typed Semantic Catalog spec used at runtime, captured for downstream
     /// evidence projection. PR-123 wires `SystemMtPipeline.ExecuteAsync` to
-    /// populate this so `SystemMtExecutionRecorder.Record` can project the
+    /// populate this so `SystemMtExecutionRecorder.RecordAsync` can project the
     /// typed verification into `ExecutionEvidence.TypedVerification` without
     /// each caller re-passing the triple. Init-only so the positional ctor
     /// surface stays unchanged.
