@@ -1,7 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using MetBench_BLL;
+using CommunityToolkit.Mvvm.Input;
 using MetBench_Client.Helpers;
 using MetBench_Client.Models;
+using MetBench_Client.Services;
 using MetBench_Client.Util;
 using MetBench_Client.Views.Pages;
 using MetBench_Client.Views.Windows;
@@ -9,7 +11,6 @@ using MetBench_Domain;
 using MetBench_UI.Localization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
-using Stylet;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -25,7 +26,7 @@ using ValidationResult = FluentValidation.Results.ValidationResult;
 
 namespace MetBench_Client.ViewModels
 {
-    public class ApplicationManagementViewModel : ObservableObject, INavigationAware, IHandle<DomainAddEvent>, IHandle<DomainModifyEvent>, IHandle<DomainDeleteEvent>
+    public partial class ApplicationManagementViewModel : ObservableObject, INavigationAware, IHandle<DomainAddEvent>, IHandle<DomainModifyEvent>, IHandle<DomainDeleteEvent>
     {
         public LocalizedTextProvider Localization { get; }
 
@@ -238,6 +239,51 @@ namespace MetBench_Client.ViewModels
             //ApplicationNameBoxText = string.Empty;
             //Data = datas;
         }
+
+        [RelayCommand]
+        private void ReloadItemsSource() => reload_ItemsSource();
+
+        [RelayCommand]
+        private void ShowSelected() => show();
+
+        [RelayCommand]
+        private Task AddApplicationAsync() => btnAdd_Click();
+
+        [RelayCommand]
+        private Task ModifyApplicationAsync() => btnModify_Click();
+
+        [RelayCommand]
+        private Task DeleteApplicationAsync() => btnDelect_Click();
+
+        [RelayCommand]
+        private void CancelApplication() => btnCancel_Click();
+
+        [RelayCommand]
+        private Task BackUploadAsync() => btnBack_Click();
+
+        [RelayCommand]
+        private void AddCode() => btnAddCode_Click();
+
+        [RelayCommand]
+        private Task ExtractCodeAsync() => btnExtractCode_Click();
+
+        [RelayCommand]
+        private Task SourceTestCaseBackAsync() => btnSourceTestCaseBack_Click();
+
+        [RelayCommand]
+        private void AddSourceTestCase() => btnAddSourceTestCase_Click();
+
+        [RelayCommand]
+        private void InputParams() => btnInputParams_Click();
+
+        [RelayCommand]
+        private void OutputParams() => btnOutputParams_Click();
+
+        [RelayCommand]
+        private void WindowOk() => WindowbtnOK_Click();
+
+        [RelayCommand]
+        private void WindowCancel() => WindowbtnCancel_Click();
 
         // 创建应用程序实体
         private Application Create()

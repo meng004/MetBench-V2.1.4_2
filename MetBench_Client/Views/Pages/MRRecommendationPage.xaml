@@ -4,7 +4,6 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:MetBench_Client.Views.Pages"
-      xmlns:s="https://github.com/canton7/Stylet"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:models="clr-namespace:MetBench_Domain;assembly=MetBench_Domain"
       xmlns:models1="clr-namespace:MetBench_Client.Models"
@@ -35,8 +34,6 @@
             <StackPanel>
 
                 <ui:DataGrid  LoadingRow="dataGrid_LoadingRow" BorderBrush="LightGray"  BorderThickness="2" MaxHeight="320" Margin="10 0 10 10"  FontSize="15" HeadersVisibility="Column"  SelectedItem="{Binding ViewModel.DataGridSelectItem,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" x:Name="datagrid"  ItemsSource="{Binding ViewModel.Data,UpdateSourceTrigger=PropertyChanged}"  AutoGenerateColumns="False" CanUserAddRows="False" AutomationProperties.AutomationId="DataGrid_MR"
-                    s:View.ActionTarget="{Binding ViewModel}"
-                    MouseDoubleClick="{s:Action show}"
                   >
                     <!--进行datagrid的TextColumn 进行居中-->
                     <DataGrid.Resources>
@@ -109,7 +106,7 @@
                                     <ui:Button  Width="100" Height="50" FontSize="14" Content="{Binding Data.ViewModel.Localization[Recommend_View], Source={StaticResource LocalizationProxy}}" HorizontalAlignment="Center" AutomationProperties.AutomationId="Button_MT"
                                      Appearance="Primary"
                                      Icon="{ui:SymbolIcon CalculatorArrowClockwise24}"
-                                     Command="{s:Action btn_EditSelectedMR}"
+                                     Command="{Binding Data.ViewModel.EditRecommendedMrCommand, Source={StaticResource LocalizationProxy}}"
                                      CommandParameter="{Binding MetamorphicRelation.IdMR}" 
                                      />
                                 </DataTemplate>
@@ -124,7 +121,7 @@
                                     <ui:Button  Width="100" Height="50" FontSize="14" Content="{Binding Data.ViewModel.Localization[Recommend_View], Source={StaticResource LocalizationProxy}}" HorizontalAlignment="Center" AutomationProperties.AutomationId="Button_MT"
                                                 Appearance="Primary"
                                                 Icon="{ui:SymbolIcon CalculatorArrowClockwise24}"
-                                                Command="{s:Action btn_EditSelectedApplication}"
+                                                Command="{Binding Data.ViewModel.EditRecommendedApplicationCommand, Source={StaticResource LocalizationProxy}}"
                                                 CommandParameter="{Binding Application.IdApplication}" 
                                                 />
                                 </DataTemplate>
@@ -164,23 +161,20 @@
                             ItemsSource="{Binding ViewModel.RecommendTypeList,UpdateSourceTrigger=PropertyChanged}"
                             />
                 <ui:Button Appearance="Primary" Content="{Binding ViewModel.Localization[Recommend_Recommend]}" Margin="5 0 0 0"
-                           s:View.ActionTarget="{Binding ViewModel}"
-                           Command="{s:Action btnRecommend_Click}"
+                           Command="{Binding ViewModel.RecommendCommand}"
                            Icon="{ui:SymbolIcon ZoomIn24}"
                            />
             </StackPanel>
             <StackPanel  Grid.Row="1" Orientation="Horizontal"  HorizontalAlignment="Left" VerticalAlignment="Center"  Margin="0 3 0 5">
                 <TextBlock Text="{Binding ViewModel.Localization[Recommend_Application]}" Margin="80 0 0 0" VerticalAlignment="Center" />
-                <TextBox Text="{Binding ViewModel.CodeName,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" s:View.ActionTarget="{Binding ViewModel}" Margin="10 0 0 0" Width="150" />
+                <TextBox Text="{Binding ViewModel.CodeName,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Margin="10 0 0 0" Width="150" />
                 <ui:Button Appearance="Info" Content="{Binding ViewModel.Localization[Recommend_Clear]}"
                            Margin="5 0 0 0 "
-                           s:View.ActionTarget="{Binding ViewModel}"
-                           Command="{s:Action btnBack_Click}" 
+                           Command="{Binding ViewModel.BackUploadCommand}"
                   />
                 <ui:Button Appearance="Primary" Content="{Binding ViewModel.Localization[Recommend_Upload]}"
                            Margin="5 0 0 0"
-                           s:View.ActionTarget="{Binding ViewModel}"
-                           Command="{s:Action btnAddCode_Click}"
+                           Command="{Binding ViewModel.AddCodeCommand}"
                            Icon="{ui:SymbolIcon ArrowUpload24}"
                   />
                
@@ -195,8 +189,7 @@
              />
                 <ui:Button Appearance="Primary"  Content="{Binding ViewModel.Localization[Recommend_Reset]}" Margin="3 0 0 0"
                 Icon="{ui:SymbolIcon TextBulletListSquareSettings20}"
-                s:View.ActionTarget="{Binding ViewModel}"
-                Command="{s:Action btn_Cancle}"
+                Command="{Binding ViewModel.CancelRecommendationCommand}"
                />
             </StackPanel>
             <StackPanel  Grid.Row="3" x:Name="stackpanel3" Orientation="Horizontal" VerticalAlignment="Center">

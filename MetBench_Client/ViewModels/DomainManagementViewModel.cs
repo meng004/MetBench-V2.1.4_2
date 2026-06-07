@@ -1,10 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using MetBench_BLL;
+using CommunityToolkit.Mvvm.Input;
 using MetBench_Client.Helpers;
+using MetBench_Client.Services;
 using MetBench_Client.Util;
 using MetBench_Domain;
 using MetBench_UI.Localization;
-using Stylet;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -16,7 +17,7 @@ using ValidationResult = FluentValidation.Results.ValidationResult;
 
 namespace MetBench_Client.ViewModels
 {
-    public class DomainManagementViewModel : ObservableObject, INavigationAware
+    public partial class DomainManagementViewModel : ObservableObject, INavigationAware
     {
         public LocalizedTextProvider Localization { get; }
 
@@ -107,6 +108,24 @@ namespace MetBench_Client.ViewModels
             // 查完后将搜索框的内容清空
             DomainNameBoxText = string.Empty;
         }
+
+        [RelayCommand]
+        private void ReloadItemsSource() => reload_ItemsSource();
+
+        [RelayCommand]
+        private void ShowSelected() => show();
+
+        [RelayCommand]
+        private Task AddDomainAsync() => btnAdd_Click();
+
+        [RelayCommand]
+        private Task ModifyDomainAsync() => btnModify_Click();
+
+        [RelayCommand]
+        private Task DeleteDomainAsync() => btnDelect_Click();
+
+        [RelayCommand]
+        private void CancelDomain() => btnCancel_Click();
 
         // 创建应用领域实体
         private Domain Create()

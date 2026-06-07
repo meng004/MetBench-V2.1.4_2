@@ -4,7 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:MetBench_Client.Views.Pages"
-      xmlns:s="https://github.com/canton7/Stylet"
+      xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:models="clr-namespace:MetBench_Domain;assembly=MetBench_Domain"
       xmlns:models1="clr-namespace:MetBench_Client.Models"
@@ -35,9 +35,9 @@
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0 3 0 5">
                     <TextBlock Text="{Binding ViewModel.Localization[MrMgmt_ApplicationName]}" VerticalAlignment="Center" Margin="15 0 0 0"/>
-                    <ui:TextBox TextWrapping="Wrap" Text="{Binding ViewModel.ApplicationNameBoxText,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" s:View.ActionTarget="{Binding ViewModel}" Margin="10 0 0 0" Width="150" />
-                    <ui:Button Appearance="Info" Content="{Binding ViewModel.Localization[Legacy_Query]}" Margin="5 0 0 0" s:View.ActionTarget="{Binding ViewModel}"
-                    Command="{s:Action reload_ItemsSource}"/>
+                    <ui:TextBox TextWrapping="Wrap" Text="{Binding ViewModel.ApplicationNameBoxText,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Margin="10 0 0 0" Width="150" />
+                    <ui:Button Appearance="Info" Content="{Binding ViewModel.Localization[Legacy_Query]}" Margin="5 0 0 0"
+                    Command="{Binding ViewModel.ReloadItemsSourceCommand}"/>
 
                     <!-- PR-VM-6 / F19: Status filter dropdown — default "active" hides deprecated/archived rows -->
                     <TextBlock Text="{Binding ViewModel.Localization[MrMgmt_StatusFilterLabel]}" VerticalAlignment="Center" Margin="20 0 0 0"/>
@@ -48,9 +48,12 @@
                 </StackPanel>
 
                 <ui:DataGrid  LoadingRow="dataGrid_LoadingRow" BorderBrush="LightGray"  BorderThickness="2" MaxHeight="320" Margin="10 0 10 10"  FontSize="15" HeadersVisibility="Column"  SelectedItem="{Binding ViewModel.DataGridSelectItem,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" x:Name="datagrid"  ItemsSource="{Binding ViewModel.Data,UpdateSourceTrigger=PropertyChanged}"  AutoGenerateColumns="False" CanUserAddRows="False" AutomationProperties.AutomationId="DataGrid_MR"
-                    s:View.ActionTarget="{Binding ViewModel}"
-                    MouseLeftButtonUp="{s:Action show}"
                   >
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseLeftButtonUp">
+                            <i:InvokeCommandAction Command="{Binding ViewModel.ShowSelectedCommand}" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
                     <!--进行datagrid的TextColumn 进行居中-->
                     <DataGrid.Resources>
                         <Style x:Key="CenteredTextBlockStyle" TargetType="{x:Type TextBlock}">
@@ -153,7 +156,7 @@
                                     <ui:Button  Width="100" Height="50" FontSize="14" Content="{Binding Data.ViewModel.Localization[MrMgmt_ExecuteMT], Source={StaticResource LocalizationProxy}}" HorizontalAlignment="Center" AutomationProperties.AutomationId="Button_MT"
                                      Appearance="Primary"
                                      Icon="{ui:SymbolIcon CalculatorArrowClockwise24}"
-                                     Command="{s:Action btn_MTExcute}"
+                                     Command="{Binding Data.ViewModel.ExecuteMtCommand, Source={StaticResource LocalizationProxy}}"
                                      CommandParameter="{Binding IdMR}" 
                                      />
                                 </DataTemplate>
@@ -291,7 +294,6 @@
                     <TextBlock Text="{Binding ViewModel.Localization[MrMgmt_ApplicationName]}" Margin="5 0 0 0" VerticalAlignment="Center" />
                     <ComboBox  Margin="5 0 0 0" MaxWidth="140"  Text="{Binding ViewModel.SelectedText,UpdateSourceTrigger=PropertyChanged}" IsEditable="True" ItemsSource="{Binding ViewModel.ApplicationExs,UpdateSourceTrigger=PropertyChanged}"
                                ScrollViewer.VerticalScrollBarVisibility="Visible"
-                               s:View.ActionTarget="{Binding ViewModel}"
                                >
                         <ComboBox.ItemTemplate>
                             <DataTemplate DataType="{x:Type models1:ApplicationEx}">
@@ -347,23 +349,19 @@ SelectedValue="{Binding ViewModel.ExpressionValue,UpdateSourceTrigger=PropertyCh
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
                 <ui:Button Grid.Column="0" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Add]}" Width="100" Height="40"
-           s:View.ActionTarget="{Binding ViewModel}"
-           Command="{s:Action btnAdd_Click}"
+           Command="{Binding ViewModel.AddMrCommand}"
            Icon="{ui:SymbolIcon GuestAdd24}"
            />
                 <ui:Button Grid.Column="1" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Modify]}" Width="100" Height="40"
-           s:View.ActionTarget="{Binding ViewModel}"
-           Command="{s:Action btnModify_Click}"
+           Command="{Binding ViewModel.ModifyMrCommand}"
            Icon="{ui:SymbolIcon CalendarEdit24}"
            />
                 <ui:Button Grid.Column="2" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Delete]}" Width="100" Height="40"
-           s:View.ActionTarget="{Binding ViewModel}"
-           Command="{s:Action btnDelect_Click}"
+           Command="{Binding ViewModel.DeleteMrCommand}"
            Icon="{ui:SymbolIcon DeleteDismiss24}"
            />
                 <ui:Button Grid.Column="3" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Cancel]}" Width="100" Height="40"
-           s:View.ActionTarget="{Binding ViewModel}"
-           Command="{s:Action btnCancel_Click}"
+           Command="{Binding ViewModel.CancelMrCommand}"
            Icon="{ui:SymbolIcon TextBulletListSquareSettings20}"
            />
             </Grid>
@@ -371,23 +369,19 @@ SelectedValue="{Binding ViewModel.ExpressionValue,UpdateSourceTrigger=PropertyCh
                 <ProgressBar IsIndeterminate="{Binding ViewModel.IsIndeterminate,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Visibility="{Binding ViewModel.Visibility, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"    Height="15"  BorderThickness="2" />
             </Grid>
             <!--<ui:Button Grid.Column="0" Margin="70,0,0,0" Appearance="Primary" Content="Add" Width="100" Height="40"
-                       s:View.ActionTarget="{Binding ViewModel}"
-                       Command="{s:Action btnAdd_Click}"
+                       Command="{Binding ViewModel.AddMrCommand}"
                        Icon="{ui:SymbolIcon GuestAdd24}"
                        />
             <ui:Button Grid.Column="1" Margin="70,0,0,0" Appearance="Primary" Content="Edit" Width="100" Height="40"
-                       s:View.ActionTarget="{Binding ViewModel}"
-                       Command="{s:Action btnModify_Click}"
+                       Command="{Binding ViewModel.ModifyMrCommand}"
                        Icon="{ui:SymbolIcon CalendarEdit24}"
                        />
             <ui:Button Grid.Column="2" Margin="70,0,0,0" Appearance="Primary" Content="Del" Width="100" Height="40"
-                       s:View.ActionTarget="{Binding ViewModel}"
-                       Command="{s:Action btnDelect_Click}"
+                       Command="{Binding ViewModel.DeleteMrCommand}"
                        Icon="{ui:SymbolIcon DeleteDismiss24}"
                        />
             <ui:Button Grid.Column="3" Margin="70,0,0,0" Appearance="Primary" Content="Reset" Width="100" Height="40"
-                       s:View.ActionTarget="{Binding ViewModel}"
-                       Command="{s:Action btnCancel_Click}"
+                       Command="{Binding ViewModel.CancelMrCommand}"
                        Icon="{ui:SymbolIcon TextBulletListSquareSettings20}"
                        />-->
         </Grid>

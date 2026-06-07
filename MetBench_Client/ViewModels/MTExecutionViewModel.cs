@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using LiveChartsCore;
+using CommunityToolkit.Mvvm.Input;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using LiveChartsCore.SkiaSharpView.VisualElements;
@@ -25,7 +26,7 @@ using ValidationResult = FluentValidation.Results.ValidationResult;
 
 namespace MetBench_Client.ViewModels
 {
-    public class MTExecutionViewModel : ObservableObject, INavigationAware
+    public partial class MTExecutionViewModel : ObservableObject, INavigationAware
     {
         // 导航服务 用于页面切换
         private INavigationService _navigationService;
@@ -708,6 +709,18 @@ namespace MetBench_Client.ViewModels
                 _ = showMessageAsync($"图表切换失败: {ex.Message}", "错误");
             }
         }
+
+        [RelayCommand]
+        private Task AutoMr2Async() => btn_AutoMR2();
+
+        [RelayCommand]
+        private void CancelExecution() => btn_Cancle();
+
+        [RelayCommand]
+        private void OpenMtReport() => btn_MTReport();
+
+        [RelayCommand]
+        private void PlotTypeSelectionChanged() => com_SelectionChanged();
 
         public AutoRunMR_Await AutoRunMR_Await
         {

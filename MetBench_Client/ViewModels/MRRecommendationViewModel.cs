@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using MetBench_BLL;
+using CommunityToolkit.Mvvm.Input;
 using MetBench_Client.Helpers;
 using MetBench_Client.Views.Pages;
 using MetBench_UI.Localization;
@@ -17,7 +18,7 @@ using ValidationResult = FluentValidation.Results.ValidationResult;
 
 namespace MetBench_Client.ViewModels
 {
-    public class MRRecommendationViewModel : ObservableObject, INavigationAware
+    public partial class MRRecommendationViewModel : ObservableObject, INavigationAware
     {
         // 导航服务 用于页面切换
         private INavigationService _navigationService;
@@ -132,6 +133,24 @@ namespace MetBench_Client.ViewModels
             var paged = mrs.Skip((index - 1) * DataCountPerPage).Take(DataCountPerPage).ToList();
             Data = new ObservableCollection<MRRecommendationVIsualResult>(booksPaged);
         }
+
+        [RelayCommand]
+        private Task BackUploadAsync() => btnBack_Click();
+
+        [RelayCommand]
+        private Task AddCodeAsync() => btnAddCode_Click();
+
+        [RelayCommand]
+        private Task RecommendAsync() => btnRecommend_Click();
+
+        [RelayCommand]
+        private void CancelRecommendation() => btn_Cancle();
+
+        [RelayCommand]
+        private void EditRecommendedMr(int id) => btn_EditSelectedMR(id);
+
+        [RelayCommand]
+        private void EditRecommendedApplication(int id) => btn_EditSelectedApplication(id);
 
         private TargetProgram Create()
         {

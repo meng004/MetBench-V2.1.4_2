@@ -5,11 +5,10 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:MetBench_Client.Views.Pages"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-      xmlns:s="https://github.com/canton7/Stylet"
       xmlns:viewmodels="clr-namespace:MetBench_Client.ViewModels"
       xmlns:controls="clr-namespace:MetBench_Client.Controls"
       xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
-      xmlns:i="clr-namespace:Microsoft.VisualBasic;assembly=Microsoft.VisualBasic"
+      xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
       mc:Ignorable="d"
       d:DesignHeight="800"
       d:DesignWidth="1000"
@@ -33,17 +32,20 @@
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0 3 0 5">
                     <TextBlock Text="{Binding ViewModel.Localization[DomainMgmt_DomainName]}" VerticalAlignment="Center" Margin="15 0 0 0"/>
-                    <TextBox Text="{Binding ViewModel.DomainNameBoxText,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" s:View.ActionTarget="{Binding ViewModel}" Margin="10 0 0 0" Width="150" />
-                    <ui:Button Appearance="Info" Content="{Binding ViewModel.Localization[Legacy_Query]}" Margin="5 0 0 0" s:View.ActionTarget="{Binding ViewModel}"
-         Command="{s:Action reload_ItemsSource}"/>
+                    <TextBox Text="{Binding ViewModel.DomainNameBoxText,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Margin="10 0 0 0" Width="150" />
+                    <ui:Button Appearance="Info" Content="{Binding ViewModel.Localization[Legacy_Query]}" Margin="5 0 0 0"
+         Command="{Binding ViewModel.ReloadItemsSourceCommand}"/>
                 </StackPanel>
                 <ui:DataGrid Grid.Row="0"  MaxHeight="350" BorderThickness="2" BorderBrush="LightGray" Margin="10 0 10 10" LoadingRow="dataGrid_LoadingRow" FontSize="15" HeadersVisibility="Column"  
 AutoGenerateColumns="False" CanUserAddRows="False" AutomationProperties.AutomationId="DataGrid_Domain"
-                  s:View.ActionTarget="{Binding ViewModel}"
-                   MouseLeftButtonUp ="{s:Action show}"
                  SelectedItem="{Binding ViewModel.DataGridSelectedItem,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"  ItemsSource="{Binding ViewModel.Data,UpdateSourceTrigger=PropertyChanged}"
-                    
+
                     >
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseLeftButtonUp">
+                            <i:InvokeCommandAction Command="{Binding ViewModel.ShowSelectedCommand}" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
                     <!--进行datagrid的TextColumn 进行居中-->
                     <DataGrid.Resources>
                         <Style x:Key="CenteredTextBlockStyle" TargetType="{x:Type TextBlock}">
@@ -138,23 +140,19 @@ AutoGenerateColumns="False" CanUserAddRows="False" AutomationProperties.Automati
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <ui:Button Grid.Column="0" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Add]}" Width="100" Height="40"
-                       s:View.ActionTarget="{Binding ViewModel}"
-                       Command="{s:Action btnAdd_Click}"
+                       Command="{Binding ViewModel.AddDomainCommand}"
                        Icon="{ui:SymbolIcon GuestAdd24}"
                        />
             <ui:Button Grid.Column="1" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Modify]}" Width="100" Height="40"
-                       s:View.ActionTarget="{Binding ViewModel}"
-                       Command="{s:Action btnModify_Click}"
+                       Command="{Binding ViewModel.ModifyDomainCommand}"
                        Icon="{ui:SymbolIcon CalendarEdit24}"
                        />
             <ui:Button Grid.Column="2" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Delete]}" Width="100" Height="40"
-                       s:View.ActionTarget="{Binding ViewModel}"
-                       Command="{s:Action btnDelect_Click}"
+                       Command="{Binding ViewModel.DeleteDomainCommand}"
                        Icon="{ui:SymbolIcon DeleteDismiss24}"
                        />
             <ui:Button Grid.Column="3" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Cancel]}" Width="100" Height="40"
-                       s:View.ActionTarget="{Binding ViewModel}"
-                       Command="{s:Action btnCancel_Click}"
+                       Command="{Binding ViewModel.CancelDomainCommand}"
                        Icon="{ui:SymbolIcon TextBulletListSquareSettings20}"
                        />
         </Grid>

@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:MetBench_Client.Views.Pages"
       xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
       xmlns:models="clr-namespace:MetBench_Domain;assembly=MetBench_Domain"
-      xmlns:s="https://github.com/canton7/Stylet"
+      xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:viewmodels="clr-namespace:MetBench_Client.ViewModels" 
       xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
@@ -30,7 +30,6 @@
         </Grid.RowDefinitions>
         <!--<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="0" >-->
         <ui:DataGrid Grid.Row="0"  VerticalAlignment="Top" BorderThickness="2" BorderBrush="LightGray" Margin="10 0 10 10" HorizontalAlignment="Center"  AutoGenerateColumns="False"    ItemsSource="{Binding ViewModel.Data,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"  CanUserAddRows="False" SelectedItem="{Binding ViewModel.DataGridSelectedItem,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" x:Name="datagrid"   AutomationProperties.AutomationId="DataGrid_MRSelectedItem"
-                 s:View.ActionTarget="{Binding ViewModel}"
                   >
             <DataGrid.Columns>
                 <DataGridTemplateColumn>
@@ -91,14 +90,12 @@
                               ItemsSource="{Binding ViewModel.CodeNameOptions,UpdateSourceTrigger=PropertyChanged}"
                               SelectedIndex="{Binding ViewModel.SelectedIndex,UpdateSourceTrigger=PropertyChanged}"
                               SelectedValue="{Binding ViewModel.SelectedValue,UpdateSourceTrigger=PropertyChanged}"
-                              s:View.ActionTarget="{Binding ViewModel}"
                         >
                     </ComboBox>
 
                     <ui:Button Appearance="Primary" Content="{Binding ViewModel.Localization[MtExec_ExecuteMt]}" Margin="3 0 0 0"
                                Icon="{ui:SymbolIcon CalendarEdit24}"
-                               s:View.ActionTarget="{Binding ViewModel}"
-                               Command="{s:Action btn_AutoMR2}"
+                               Command="{Binding ViewModel.AutoMr2Command}"
                                />
                 </StackPanel>
                 <StackPanel  Grid.Row="1" x:Name="stackpanel2" Orientation="Horizontal" VerticalAlignment="Center">
@@ -109,8 +106,7 @@
                              />
                     <ui:Button Appearance="Primary"  Content="{Binding ViewModel.Localization[MtExec_Reset]}" Margin="3 0 0 0"
                                 Icon="{ui:SymbolIcon TextBulletListSquareSettings20}"
-                                s:View.ActionTarget="{Binding ViewModel}"
-                                Command="{s:Action btn_Cancle}"
+                                Command="{Binding ViewModel.CancelExecutionCommand}"
                                />
                 </StackPanel>
                 <StackPanel  Grid.Row="2" x:Name="stackpanel3" Orientation="Horizontal" VerticalAlignment="Center">
@@ -144,8 +140,7 @@
                                Margin="5 0 0 0"
                                Width="150"
                                Icon="{ui:SymbolIcon DocumentTable24}"
-                               s:View.ActionTarget="{Binding ViewModel}"
-                               Command="{s:Action btn_MTReport}"
+                               Command="{Binding ViewModel.OpenMtReportCommand}"
                                />
                 </StackPanel>
             </Grid>
@@ -181,10 +176,14 @@
 SelectedIndex="{Binding ViewModel.PlotTypeComboBoxSelectedIndex,UpdateSourceTrigger=PropertyChanged}"
 SelectedValue="{Binding ViewModel.PlotTypeComboBoxSelectedValue,UpdateSourceTrigger=PropertyChanged}"
 ItemsSource="{Binding ViewModel.PlotTypeList,UpdateSourceTrigger=PropertyChanged}"
-                                    s:View.ActionTarget="{Binding ViewModel}"
-                                   SelectionChanged="{s:Action com_SelectionChanged}"
-                                   
-/>
+
+>
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="SelectionChanged">
+                                    <i:InvokeCommandAction Command="{Binding ViewModel.PlotTypeSelectionChangedCommand}" />
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        </ComboBox>
                     </StackPanel>
                 </Grid>
 

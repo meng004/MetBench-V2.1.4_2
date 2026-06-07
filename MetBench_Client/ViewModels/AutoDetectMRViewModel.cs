@@ -1,10 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using MetBench_BLL;
+using CommunityToolkit.Mvvm.Input;
 using MetBench_Client.Helpers;
+using MetBench_Client.Services;
 using MetBench_Client.Util;
 using MetBench_UI.Localization;
 using Microsoft.Win32;
-using Stylet;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -17,7 +18,7 @@ using ValidationResult = FluentValidation.Results.ValidationResult;
 
 namespace MetBench_Client.ViewModels
 {
-    public class AutoDetectMRViewModel : ObservableObject, INavigationAware, IHandle<ApplicationAddEvent>, IHandle<MetamorphicRelationOperationEvent>
+    public partial class AutoDetectMRViewModel : ObservableObject, INavigationAware, IHandle<ApplicationAddEvent>, IHandle<MetamorphicRelationOperationEvent>
     {
         // 导航服务 用于页面切换
         private INavigationService _navigationService;
@@ -116,6 +117,24 @@ namespace MetBench_Client.ViewModels
             var paged = mrs.Skip((index - 1) * DataCountPerPage).Take(DataCountPerPage).ToList();
             Data = new ObservableCollection<MRDetectorCollection>(booksPaged);
         }
+
+        [RelayCommand]
+        private Task BackUploadAsync() => btnBack_Click();
+
+        [RelayCommand]
+        private Task AddCodeAsync() => btnAddCode_Click();
+
+        [RelayCommand]
+        private void CancelDetection() => btn_Cancle();
+
+        [RelayCommand]
+        private Task AutoDetectAsync() => btn_AutoDetectMR();
+
+        [RelayCommand]
+        private Task StoreMrAsync() => btn_StoreMR();
+
+        [RelayCommand]
+        private Task ExportCsvAsync() => btn_ExportCsv();
 
         // 构造函数订阅事件
         // 构造函数

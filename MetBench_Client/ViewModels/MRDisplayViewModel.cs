@@ -1,11 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using MetBench_BLL;
+using CommunityToolkit.Mvvm.Input;
+using MetBench_Client.Services;
 using MetBench_Client.Util;
 using MetBench_Client.Views.Pages;
 using MetBench_Domain;
 using MetBench_IDAL;
 using MetBench_UI.Localization;
-using Stylet;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,7 +16,7 @@ using Wpf.Ui.Controls;
 
 namespace MetBench_Client.ViewModels
 {
-    public class MRDisplayViewModel : ObservableObject, INavigationAware, IHandle<ApplicationAddEvent>, IHandle<ApplicationMoidfyEvent>, IHandle<ApplicationDeleteEvent>, IHandle<DomainAddEvent>, IHandle<DomainModifyEvent>, IHandle<DomainDeleteEvent>, IHandle<MetamorphicRelationOperationEvent>
+    public partial class MRDisplayViewModel : ObservableObject, INavigationAware, IHandle<ApplicationAddEvent>, IHandle<ApplicationMoidfyEvent>, IHandle<ApplicationDeleteEvent>, IHandle<DomainAddEvent>, IHandle<DomainModifyEvent>, IHandle<DomainDeleteEvent>, IHandle<MetamorphicRelationOperationEvent>
     {
         public LocalizedTextProvider Localization { get; }
 
@@ -176,6 +177,12 @@ namespace MetBench_Client.ViewModels
 
             //Data = datas;
         }
+
+        [RelayCommand]
+        private void QueryMr() => btnQuery_Click();
+
+        [RelayCommand]
+        private void EditSelectedMr(int id) => EditSelectedMR(id);
 
         // 查询MR的交互逻辑
         public void btnQuery_Click()

@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MetBench_Client.Views.Windows"
-        xmlns:s="https://github.com/canton7/Stylet"
         xmlns:viewmodels="clr-namespace:MetBench_Client.ViewModels"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         d:DataContext="{d:DesignInstance viewmodels:ApplicationManagementViewModel}"
@@ -62,14 +61,12 @@
         <!-- 按钮区 -->
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="2">
             <ui:Button Appearance="Primary" Content="OK" Width="100"
-            s:View.ActionTarget="{Binding ViewModel}"
-            Command="{s:Action WindowbtnOK_Click}"
+            Command="{Binding ViewModel.WindowOkCommand}"
             />
 
             <ui:Button Appearance="Primary" Content="Cancel" Width="100"
                        Margin="10 0 0 0"
-                       s:View.ActionTarget="{Binding ViewModel}"
-                       Command="{s:Action WindowbtnCancel_Click}"
+                       Command="{Binding ViewModel.WindowCancelCommand}"
              />
         </StackPanel>
     </Grid>

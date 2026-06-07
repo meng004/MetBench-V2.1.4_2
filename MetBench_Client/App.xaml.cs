@@ -33,7 +33,6 @@ using MetBench_BLL.Coverage;
 using MetBench_UI.Localization;
 using Wpf.Ui.Controls;
 using Wpf.Ui;
-using Stylet;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiteDB;

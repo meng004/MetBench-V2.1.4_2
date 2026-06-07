@@ -6,7 +6,6 @@
       xmlns:local="clr-namespace:MetBench_Client.Views.Pages"
       xmlns:viewmodels="clr-namespace:MetBench_Client.ViewModels"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-      xmlns:s="https://github.com/canton7/Stylet"
       xmlns:models="clr-namespace:MetBench_Client.Models"
       xmlns:controls="clr-namespace:MetBench_Client.Controls"
       xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
@@ -29,7 +28,6 @@
         </Grid.RowDefinitions>
 
         <ui:DataGrid Grid.Row="0"  LoadingRow="dataGrid_LoadingRow" BorderBrush="LightGray" BorderThickness="2" FontSize="15"  HeadersVisibility="Column" Margin="10 0 10 10"  MaxHeight="350"  SelectedItem="{Binding ViewModel.DataGridSelectItem,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" ItemsSource="{Binding ViewModel.Data,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"  Name="dataGrid"  AutoGenerateColumns="False" CanUserAddRows="False" AutomationProperties.AutomationId="DataGrid_MR"
-                  s:View.ActionTarget="{Binding ViewModel}"
                   >
             <!--进行datagrid的TextColumn 进行居中-->
             <DataGrid.Resources>
@@ -131,7 +129,7 @@
                         <DataTemplate>
                             <ui:Button Appearance="Primary"  Width="100" Height="50" FontSize="14"  Content="{Binding Data.ViewModel.Localization[Legacy_Modify], Source={StaticResource LocalizationProxy}}" HorizontalAlignment="Center" AutomationProperties.AutomationId="Button_Modify"
                                      Icon="{ui:SymbolIcon CalendarEdit24}"
-                                     Command="{s:Action EditSelectedMR}"
+                                     Command="{Binding Data.ViewModel.EditSelectedMrCommand, Source={StaticResource LocalizationProxy}}"
                                      CommandParameter="{Binding IdMR}" 
                                      />
                         </DataTemplate>
@@ -199,8 +197,7 @@
             </StackPanel>
             <StackPanel  Grid.Row="2" Grid.Column="2" x:Name="stackpanel7" Orientation="Horizontal" VerticalAlignment="Center">
                 <ui:Button Appearance="Primary" x:Name="btnQuery" Content="{Binding ViewModel.Localization[Legacy_Query]}" Margin="140 0 0 0" VerticalContentAlignment="Center" Width="100" Height="40"
-                           s:View.ActionTarget="{Binding ViewModel}"
-                           Click="{s:Action btnQuery_Click}"
+                           Command="{Binding ViewModel.QueryMrCommand}"
                            Icon="{ui:SymbolIcon DatabaseSearch24}"
                            />
 
