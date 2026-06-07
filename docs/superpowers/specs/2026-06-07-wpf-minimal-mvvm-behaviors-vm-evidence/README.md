@@ -69,8 +69,10 @@ Full output is tracked in build-and-test.log.
 - `dotnet restore MetBench.sln`: exit 0; existing OpenTK/SkiaSharp compatibility warnings remain.
 - `dotnet build MetBench.sln --no-restore -v:minimal`: exit 0; 0 errors; existing warnings remain.
 - `dotnet test MetBench_Client.Tests\MetBench_Client.Tests.csproj --no-build --logger "console;verbosity=minimal"`: exit 0; 22 passed.
-- `dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj --no-build --logger "console;verbosity=minimal"`: exit 1; 6 failed, 1813 passed, 12 skipped.
-- SystemMT full-suite failures are outside this WPF dependency-governance surface: `ErrorMonotonicLauncherBranchingTests` has 4 launcher-branching failures, and `MinimumMrSubsetBGroupExternalSourceSmokeTests` has 2 external-source failures caused by Python/NumPy 2.x removing `np.trapz`.
+- `dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj --no-build --filter FullyQualifiedName~ErrorMonotonicLauncherBranchingTests --logger "console;verbosity=minimal"`: exit 0; 4 passed.
+- `dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj --no-build --filter FullyQualifiedName~MinimumMrSubsetBGroupExternalSourceSmokeTests --logger "console;verbosity=minimal"`: exit 0; 3 passed; 0 skipped. This run uses a temporary Python `sitecustomize.py` shim so external Minimum-MR-SubSet code that still calls removed NumPy `np.trapz` runs on NumPy 2.x by mapping it to `np.trapezoid`.
+- `dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj --no-build --logger "console;verbosity=minimal"`: exit 0; 1819 passed, 12 skipped, 0 failed.
+- The remaining 12 full-suite skips are existing OpenMOC/OpenMC environment-gated tests; the NumPy compatibility path no longer skips.
 - `git diff --check`: exit 0.
 
 ## Screenshots
@@ -83,5 +85,5 @@ Full output is tracked in build-and-test.log.
 
 - This branch does not remove Wpf.Ui, LiveCharts, SkiaSharp, or WebView2. They remain intentionally present for staged follow-up PRs.
 - Stylet.Start, Prism.Wpf, PropertyChanged.Fody, and WPF-UI.Tray are removed and guarded in this branch.
-- Full `MetBench_SystemMT.Tests` is not green in this VM run. The failing tests are recorded above and in build-and-test.log; they are not caused by WPF client file changes, but they remain a full-suite blocker if the PR gate requires the unfiltered SystemMT suite to be green.
+- Full `MetBench_SystemMT.Tests` is green in this VM run with the repository's existing environment-gated OpenMOC/OpenMC skips. The external Minimum-MR-SubSet B-group tests now run and pass rather than skipping on NumPy 2.x.
 - CLAUDE.md still advertises the older WPF stack. The design document records this as governance target overrides older convention; a later sync PR is required after phased evidence is collected.

@@ -8,6 +8,7 @@ using MetBench_BLL.SystemMT.Catalog;
 using MetBench_BLL.SystemMT.Catalog.Typed.Specs;
 using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Pipeline;
+using MetBench_BLL.SystemMT.Runtime;
 using MetBench_SystemMT.Tests.V2Anomaly;
 using MetBench_SystemMT.Tests.V2Pipeline;
 using Xunit;
@@ -99,6 +100,14 @@ public sealed class ErrorMonotonicLauncherBranchingTests : IDisposable
         public IReadOnlyList<MrCatalogEntry> Load() => _entries;
     }
 
+    private sealed class PassingRuntimePreflightService : IRuntimePreflightService
+    {
+        public Task<RuntimePreflightResult> CheckAsync(
+            RuntimeProfile profile,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult(RuntimePreflightResult.Pass(profile, "test preflight bypass"));
+    }
+
     private MrCatalogEntry SingleSideEntry() => new(
         Mr: new MrSummary(
             Id: "mr-single", DisplayName: "single", SutName: "fake",
@@ -152,7 +161,10 @@ public sealed class ErrorMonotonicLauncherBranchingTests : IDisposable
             pipeline: pipeline,
             recorder: new SystemMtExecutionRecorder(new FakeExecRepo(), new FakeResultRepo()),
             anomalyService: new RecordingAnomalyService(),
-            catalogProvider: new FakeProvider(entries));
+            catalogProvider: new FakeProvider(entries),
+            severityThresholds: null,
+            runtimeProfileProvider: null,
+            runtimePreflightService: new PassingRuntimePreflightService());
 
     [Fact]
     public async Task RunAsync_routes_2_side_MR_to_ExecuteAsync_only()
