@@ -7,7 +7,7 @@ Windows classification: VM evidence collected
 
 - Branch: codex/wpf-minimal-mvvm-behaviors
 - Base commit: c01de218404546d3379ebe03d8358374e768eabb
-- Head commit at latest full-test evidence collection: pending PR-2h commit after this receipt update.
+- Head commit at latest full-test evidence collection: fcf81997e51371754384a95cb4b4c1316ad5b111.
 - Worktree state at latest full-test evidence collection: dirty only with PR-2h Settings page lifecycle repair and refreshed evidence before commit.
 
 ## Modified Files
