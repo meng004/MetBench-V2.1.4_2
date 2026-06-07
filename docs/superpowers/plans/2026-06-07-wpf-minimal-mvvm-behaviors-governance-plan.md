@@ -1,7 +1,7 @@
 # WPF Minimal MVVM and Behaviors Governance Plan
 
 Date: 2026-06-07
-Status: Active scoped plan; current branch includes PR-0, PR-1, and PR-2a evidence
+Status: Active scoped plan; current branch includes PR-0, PR-1, PR-2a, and PR-2b evidence
 Design: docs/superpowers/specs/2026-06-07-wpf-minimal-mvvm-behaviors-governance-design.md
 
 ## Goal
@@ -123,6 +123,36 @@ Expected output:
 - Client WPF build has 0 errors.
 - Client governance tests pass.
 - `rg "s:Action|s:View.ActionTarget|Stylet|Prism|PropertyChanged.Fody|WPF-UI.Tray" MetBench_Client` has no production hits except documented plan/design text outside runtime sources.
+
+## Task 3c: PR-2b Wpf.Ui Dialog Surface Slice
+
+Files:
+
+- MetBench_Client/Services/UiDialog.cs
+- MetBench_Client/Helpers/FileCompressionAndStorageUtility.cs
+- MetBench_Client/ViewModels/ApplicationManagementViewModel.cs
+- MetBench_Client/ViewModels/AutoDetectMRViewModel.cs
+- MetBench_Client/ViewModels/DomainManagementViewModel.cs
+- MetBench_Client/ViewModels/MRManagementViewModel.cs
+- MetBench_Client/ViewModels/MRRecommendationViewModel.cs
+- MetBench_Client/ViewModels/MTExecutionViewModel.cs
+- MetBench_Client/ViewModels/MTReportGeneratorViewModel.cs
+- MetBench_Client.Tests/Architecture/WpfDependencyGovernanceTests.cs
+
+Steps:
+
+1. Add a client-owned `UiDialog` helper backed by native WPF `MessageBox`.
+2. Replace direct `Wpf.Ui.Controls.MessageBox` construction with `UiDialog.ShowMessageAsync` or `UiDialog.ConfirmAsync`.
+3. Remove the remaining `.ShowDialogAsync()` Wpf.Ui dialog calls from client sources.
+4. Add an architecture guard that prevents direct Wpf.Ui message-box usage from returning.
+5. Keep Wpf.Ui navigation, shell controls, themes, and icons in scope for later PR-2 slices.
+
+Expected output:
+
+- Client WPF build has 0 errors.
+- Client governance tests pass and include the dialog guard.
+- `rg "Wpf\\.Ui\\.Controls\\.MessageBox|ShowDialogAsync" MetBench_Client` has no matches.
+- No MetBench_BLL.Core, MetBench_DAL, or MetBench_BLL runtime semantics change.
 
 ## Task 4: Build And Test Evidence
 

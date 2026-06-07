@@ -429,19 +429,7 @@ namespace MetBench_Client.ViewModels
         // 提示信息弹窗
         public async Task<bool> showMessageAsync(string message, string title)
         {
-            var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-            {
-                Title = title,
-                Content = message,
-            };
-            uiMessageBox.CloseButtonAppearance = 0;
-            uiMessageBox.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            uiMessageBox.HorizontalAlignment = System.Windows.HorizontalAlignment.Center;
-            uiMessageBox.CloseButtonText = "OK";
-            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
-
-            // primary为第一个按钮
-            return messageResult == "Primary" ? true : false;
+            return await UiDialog.ShowMessageAsync(message, title);
         }
 
         // 增加蜕变关系
@@ -522,18 +510,7 @@ namespace MetBench_Client.ViewModels
                 return;
             }
             var msg2 = "是否修改该记录?";
-            var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-            {
-                Title = "Tips",
-                Content = msg2,
-            };
-            uiMessageBox.CloseButtonAppearance = 0;
-            uiMessageBox.HorizontalAlignment = System.Windows.HorizontalAlignment.Center;
-            uiMessageBox.CloseButtonText = "No";
-            uiMessageBox.IsPrimaryButtonEnabled = true;
-            uiMessageBox.PrimaryButtonText = "Yes";
-            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
-            var result = messageResult == "Primary" ? true : false;
+            var result = await UiDialog.ConfirmAsync(msg2, "Tips");
             MetamorphicRelation metamorphicRelation = null;
             //使用异步方式，将Latex转换为Sympy，Latex渲染图片
             IsIndeterminate = true;
@@ -615,18 +592,7 @@ namespace MetBench_Client.ViewModels
 
             var metamorphicRelation = Create();
             var message1 = "是否删除该记录?";
-            var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-            {
-                Title = "Tips",
-                Content = message1,
-            };
-            uiMessageBox.CloseButtonAppearance = 0;
-            uiMessageBox.HorizontalAlignment = System.Windows.HorizontalAlignment.Center;
-            uiMessageBox.CloseButtonText = "No";
-            uiMessageBox.IsPrimaryButtonEnabled = true;
-            uiMessageBox.PrimaryButtonText = "Yes";
-            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
-            var result = messageResult == "Primary" ? true : false;
+            var result = await UiDialog.ConfirmAsync(message1, "Tips");
 
             if (result)
             {

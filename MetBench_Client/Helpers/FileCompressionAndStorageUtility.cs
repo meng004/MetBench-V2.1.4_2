@@ -1,10 +1,10 @@
 ﻿//using LiteDB;
 using MetBench_BLL;
+using MetBench_Client.Services;
 using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Windows;
 
 namespace MetBench_Client.Helpers
 {
@@ -30,21 +30,7 @@ namespace MetBench_Client.Helpers
         {
             // 创建确认对话框并显示给用户
             //var confirmResult = MessageBox.Show("确认上传文件吗？", "确认上传", MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
-            var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-            {
-                Title = "Tips",
-                Content = "确认上传文件吗？",
-            };
-            uiMessageBox.CloseButtonAppearance = 0;
-            uiMessageBox.CloseButtonText = "No";
-            uiMessageBox.IsPrimaryButtonEnabled = true;
-            uiMessageBox.PrimaryButtonAppearance = 0;
-            uiMessageBox.HorizontalAlignment = HorizontalAlignment.Center;
-            uiMessageBox.PrimaryButtonText = "Yes";
-
-            var messageResult = uiMessageBox.ShowDialogAsync().Result.ToString();
-            //primary为第一个按钮
-            var confirmResult = messageResult == "Primary" ? true : false;
+            var confirmResult = UiDialog.Confirm("确认上传文件吗？", "Tips");
 
             //if (confirmResult == MessageBoxResult.Yes)
             if(confirmResult)
@@ -282,16 +268,7 @@ namespace MetBench_Client.Helpers
         // 提示信息弹窗
         public bool showMessage(string message, string title)
         {
-            var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-            {
-                Title = title,
-                Content = message,
-            };
-            uiMessageBox.CloseButtonAppearance = 0;
-            uiMessageBox.CloseButtonText = "OK";
-            var messageResult = uiMessageBox.ShowDialogAsync().ToString();
-            //primary为第一个按钮
-            return messageResult == "Primary" ? true : false;
+            return UiDialog.ShowMessage(message, title);
         }
     }
 

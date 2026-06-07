@@ -1,122 +1,96 @@
-﻿MetBench WPF dependency governance full verification - 2026-06-07 refreshed after SystemMT fixes and NumPy trapz compatibility
+﻿PS> dotnet restore MetBench.sln
+  姝ｅ湪纭畾瑕佽繕鍘熺殑椤圭洰鈥?
+C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 宸蹭娇鐢ㄢ€?NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1鈥濊€屼笉鏄」鐩洰鏍囨鏋垛€渘et8.0-windows7.0鈥濊繕鍘熷寘鈥淥penTK 3.3.1鈥濄€傛鍖呭彲鑳戒笌椤圭洰涓嶅畬鍏ㄥ吋瀹广€?[C:\MetBench-V2.1.4_2\MetBench.sln]
+C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 宸蹭娇鐢ㄢ€?NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1鈥濊€屼笉鏄」鐩洰鏍囨鏋垛€渘et8.0-windows7.0鈥濊繕鍘熷寘鈥淥penTK 3.3.1鈥濄€傛鍖呭彲鑳戒笌椤圭洰涓嶅畬鍏ㄥ吋瀹广€?[C:\MetBench-V2.1.4_2\MetBench.sln]
+C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 宸蹭娇鐢ㄢ€?NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1鈥濊€屼笉鏄」鐩洰鏍囨鏋垛€渘et8.0-windows7.0鈥濊繕鍘熷寘鈥淥penTK.GLWpfControl 3.3.0鈥濄€傛鍖呭彲鑳戒笌椤圭洰涓嶅畬鍏ㄥ吋瀹广€?[C:\MetBench-V2.1.4_2\MetBench.sln]
+C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 宸蹭娇鐢ㄢ€?NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1鈥濊€屼笉鏄」鐩洰鏍囨鏋垛€渘et8.0-windows7.0鈥濊繕鍘熷寘鈥淥penTK.GLWpfControl 3.3.0鈥濄€傛鍖呭彲鑳戒笌椤圭洰涓嶅畬鍏ㄥ吋瀹广€?[C:\MetBench-V2.1.4_2\MetBench.sln]
+C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 宸蹭娇鐢ㄢ€?NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1鈥濊€屼笉鏄」鐩洰鏍囨鏋垛€渘et8.0-windows7.0鈥濊繕鍘熷寘鈥淪kiaSharp.Views.WPF 3.116.1鈥濄€傛鍖呭彲鑳戒笌椤圭洰涓嶅畬鍏ㄥ吋瀹广€?[C:\MetBench-V2.1.4_2\MetBench.sln]
+C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 宸蹭娇鐢ㄢ€?NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1鈥濊€屼笉鏄」鐩洰鏍囨鏋垛€渘et8.0-windows7.0鈥濊繕鍘熷寘鈥淪kiaSharp.Views.WPF 3.116.1鈥濄€傛鍖呭彲鑳戒笌椤圭洰涓嶅畬鍏ㄥ吋瀹广€?[C:\MetBench-V2.1.4_2\MetBench.sln]
+  鎵€鏈夐」鐩潎鏄渶鏂扮殑锛屾棤娉曡繕鍘熴€?
+exit code: 0
 
-===== restore =====
-Command: dotnet restore MetBench.sln
-  正在确定要还原的项目…
-C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK 3.3.1”。此包可能与项目不完全兼容。 [C:\MetBench-V2.1.4_2\MetBench.sln]
-C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK 3.3.1”。此包可能与项目不完全兼容。 [C:\MetBench-V2.1.4_2\MetBench.sln]
-C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK.GLWpfControl 3.3.0”。此包可能与项目不完全兼容。 [C:\MetBench-V2.1.4_2\MetBench.sln]
-C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK.GLWpfControl 3.3.0”。此包可能与项目不完全兼容。 [C:\MetBench-V2.1.4_2\MetBench.sln]
-C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“SkiaSharp.Views.WPF 3.116.1”。此包可能与项目不完全兼容。 [C:\MetBench-V2.1.4_2\MetBench.sln]
-C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“SkiaSharp.Views.WPF 3.116.1”。此包可能与项目不完全兼容。 [C:\MetBench-V2.1.4_2\MetBench.sln]
-  所有项目均是最新的，无法还原。
-ExitCode: 0
-
-===== build =====
-Command: dotnet build MetBench.sln --no-restore -v:minimal
+PS> dotnet build MetBench.sln --no-restore -v:minimal
   MetBench_Domain -> C:\MetBench-V2.1.4_2\MetBench_Domain\bin\Debug\net8.0\MetBench_Domain.dll
   MetBench_Analyzers -> C:\MetBench-V2.1.4_2\MetBench_Analyzers\bin\Debug\netstandard2.0\MetBench_Analyzers.dll
   MetBench_UI.Localization -> C:\MetBench-V2.1.4_2\MetBench_UI.Localization\bin\Debug\net8.0\MetBench_UI.Localization.dll
-C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK 3.3.1”。此包可能与项目不完全兼容。
-C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK.GLWpfControl 3.3.0”。此包可能与项目不完全兼容。
-C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“SkiaSharp.Views.WPF 3.116.1”。此包可能与项目不完全兼容。
+C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 宸蹭娇鐢ㄢ€?NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1鈥濊€屼笉鏄」鐩洰鏍囨鏋垛€渘et8.0-windows7.0鈥濊繕鍘熷寘鈥淥penTK 3.3.1鈥濄€傛鍖呭彲鑳戒笌椤圭洰涓嶅畬鍏ㄥ吋瀹广€?
+C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 宸蹭娇鐢ㄢ€?NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1鈥濊€屼笉鏄」鐩洰鏍囨鏋垛€渘et8.0-windows7.0鈥濊繕鍘熷寘鈥淥penTK.GLWpfControl 3.3.0鈥濄€傛鍖呭彲鑳戒笌椤圭洰涓嶅畬鍏ㄥ吋瀹广€?
+C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 宸蹭娇鐢ㄢ€?NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1鈥濊€屼笉鏄」鐩洰鏍囨鏋垛€渘et8.0-windows7.0鈥濊繕鍘熷寘鈥淪kiaSharp.Views.WPF 3.116.1鈥濄€傛鍖呭彲鑳戒笌椤圭洰涓嶅畬鍏ㄥ吋瀹广€?
   MetBench_IDAL -> C:\MetBench-V2.1.4_2\MetBench_IDAL\bin\Debug\net8.0\MetBench_IDAL.dll
   MetBench_BLL.Core -> C:\MetBench-V2.1.4_2\MetBench_BLL.Core\bin\Debug\net8.0\MetBench_BLL.Core.dll
+C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 宸蹭娇鐢ㄢ€?NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1鈥濊€屼笉鏄」鐩洰鏍囨鏋垛€渘et8.0-windows7.0鈥濊繕鍘熷寘鈥淥penTK 3.3.1鈥濄€傛鍖呭彲鑳戒笌椤圭洰涓嶅畬鍏ㄥ吋瀹广€?
+C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 宸蹭娇鐢ㄢ€?NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1鈥濊€屼笉鏄」鐩洰鏍囨鏋垛€渘et8.0-windows7.0鈥濊繕鍘熷寘鈥淥penTK.GLWpfControl 3.3.0鈥濄€傛鍖呭彲鑳戒笌椤圭洰涓嶅畬鍏ㄥ吋瀹广€?
+C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 宸蹭娇鐢ㄢ€?NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1鈥濊€屼笉鏄」鐩洰鏍囨鏋垛€渘et8.0-windows7.0鈥濊繕鍘熷寘鈥淪kiaSharp.Views.WPF 3.116.1鈥濄€傛鍖呭彲鑳戒笌椤圭洰涓嶅畬鍏ㄥ吋瀹广€?
   MetBench_DAL -> C:\MetBench-V2.1.4_2\MetBench_DAL\bin\Debug\net8.0\MetBench_DAL.dll
-C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK 3.3.1”。此包可能与项目不完全兼容。
-C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK.GLWpfControl 3.3.0”。此包可能与项目不完全兼容。
-C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“SkiaSharp.Views.WPF 3.116.1”。此包可能与项目不完全兼容。
   MetBench_BLL -> C:\MetBench-V2.1.4_2\MetBench_BLL\bin\Debug\net8.0\MetBench_BLL.dll
   MetBench_SystemMT.Tests -> C:\MetBench-V2.1.4_2\MetBench_SystemMT.Tests\bin\Debug\net8.0\MetBench_SystemMT.Tests.dll
   MetBench_Client -> C:\MetBench-V2.1.4_2\MetBench_Client\bin\Debug\net8.0-windows7.0\MetBench_Client.dll
   MetBench_Client.Tests -> C:\MetBench-V2.1.4_2\MetBench_Client.Tests\bin\Debug\net8.0-windows7.0\MetBench_Client.Tests.dll
 
-已成功生成。
+宸叉垚鍔熺敓鎴愩€?
 
-C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK 3.3.1”。此包可能与项目不完全兼容。
-C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK.GLWpfControl 3.3.0”。此包可能与项目不完全兼容。
-C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“SkiaSharp.Views.WPF 3.116.1”。此包可能与项目不完全兼容。
-C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK 3.3.1”。此包可能与项目不完全兼容。
-C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK.GLWpfControl 3.3.0”。此包可能与项目不完全兼容。
-C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“SkiaSharp.Views.WPF 3.116.1”。此包可能与项目不完全兼容。
-    6 个警告
-    0 个错误
+C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 宸蹭娇鐢ㄢ€?NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1鈥濊€屼笉鏄」鐩洰鏍囨鏋垛€渘et8.0-windows7.0鈥濊繕鍘熷寘鈥淥penTK 3.3.1鈥濄€傛鍖呭彲鑳戒笌椤圭洰涓嶅畬鍏ㄥ吋瀹广€?
+C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 宸蹭娇鐢ㄢ€?NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1鈥濊€屼笉鏄」鐩洰鏍囨鏋垛€渘et8.0-windows7.0鈥濊繕鍘熷寘鈥淥penTK.GLWpfControl 3.3.0鈥濄€傛鍖呭彲鑳戒笌椤圭洰涓嶅畬鍏ㄥ吋瀹广€?
+C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 宸蹭娇鐢ㄢ€?NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1鈥濊€屼笉鏄」鐩洰鏍囨鏋垛€渘et8.0-windows7.0鈥濊繕鍘熷寘鈥淪kiaSharp.Views.WPF 3.116.1鈥濄€傛鍖呭彲鑳戒笌椤圭洰涓嶅畬鍏ㄥ吋瀹广€?
+C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 宸蹭娇鐢ㄢ€?NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1鈥濊€屼笉鏄」鐩洰鏍囨鏋垛€渘et8.0-windows7.0鈥濊繕鍘熷寘鈥淥penTK 3.3.1鈥濄€傛鍖呭彲鑳戒笌椤圭洰涓嶅畬鍏ㄥ吋瀹广€?
+C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 宸蹭娇鐢ㄢ€?NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1鈥濊€屼笉鏄」鐩洰鏍囨鏋垛€渘et8.0-windows7.0鈥濊繕鍘熷寘鈥淥penTK.GLWpfControl 3.3.0鈥濄€傛鍖呭彲鑳戒笌椤圭洰涓嶅畬鍏ㄥ吋瀹广€?
+C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 宸蹭娇鐢ㄢ€?NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1鈥濊€屼笉鏄」鐩洰鏍囨鏋垛€渘et8.0-windows7.0鈥濊繕鍘熷寘鈥淪kiaSharp.Views.WPF 3.116.1鈥濄€傛鍖呭彲鑳戒笌椤圭洰涓嶅畬鍏ㄥ吋瀹广€?
+    6 涓鍛?
+    0 涓敊璇?
 
-已用时间 00:00:01.53
-ExitCode: 0
+宸茬敤鏃堕棿 00:00:02.31
+exit code: 0
 
-===== client tests full =====
-Command: dotnet test MetBench_Client.Tests\MetBench_Client.Tests.csproj --no-build --logger "console;verbosity=minimal"
-C:\MetBench-V2.1.4_2\MetBench_Client.Tests\bin\Debug\net8.0-windows7.0\MetBench_Client.Tests.dll (.NETCoreApp,Version=v8.0)的测试运行
-VSTest 版本 17.14.1 (arm64)
+PS> dotnet test MetBench_Client.Tests\MetBench_Client.Tests.csproj --no-build -v:minimal
+C:\MetBench-V2.1.4_2\MetBench_Client.Tests\bin\Debug\net8.0-windows7.0\MetBench_Client.Tests.dll (.NETCoreApp,Version=v8.0)鐨勬祴璇曡繍琛?
+VSTest 鐗堟湰 17.14.1 (arm64)
 
-正在启动测试执行，请稍候...
-总共 1 个测试文件与指定模式相匹配。
+姝ｅ湪鍚姩娴嬭瘯鎵ц锛岃绋嶅€?..
+鎬诲叡 1 涓祴璇曟枃浠朵笌鎸囧畾妯″紡鐩稿尮閰嶃€?
 
-已通过! - 失败:     0，通过:    22，已跳过:     0，总计:    22，持续时间: 367 ms - MetBench_Client.Tests.dll (net8.0)
-ExitCode: 0
+宸查€氳繃! - 澶辫触:     0锛岄€氳繃:    23锛屽凡璺宠繃:     0锛屾€昏:    23锛屾寔缁椂闂? 540 ms - MetBench_Client.Tests.dll (net8.0)
+exit code: 0
 
-===== error monotonic focused =====
-Command: dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj --no-build --filter FullyQualifiedName~ErrorMonotonicLauncherBranchingTests --logger "console;verbosity=minimal"
-C:\MetBench-V2.1.4_2\MetBench_SystemMT.Tests\bin\Debug\net8.0\MetBench_SystemMT.Tests.dll (.NETCoreApp,Version=v8.0)的测试运行
-VSTest 版本 17.14.1 (arm64)
+PS> dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj --no-build --filter "ClientI18n|SystemMtExplanation|SystemMtPairQuality" -v:minimal
+C:\MetBench-V2.1.4_2\MetBench_SystemMT.Tests\bin\Debug\net8.0\MetBench_SystemMT.Tests.dll (.NETCoreApp,Version=v8.0)鐨勬祴璇曡繍琛?
+VSTest 鐗堟湰 17.14.1 (arm64)
 
-正在启动测试执行，请稍候...
-总共 1 个测试文件与指定模式相匹配。
+姝ｅ湪鍚姩娴嬭瘯鎵ц锛岃绋嶅€?..
+鎬诲叡 1 涓祴璇曟枃浠朵笌鎸囧畾妯″紡鐩稿尮閰嶃€?
 
-已通过! - 失败:     0，通过:     4，已跳过:     0，总计:     4，持续时间: 119 ms - MetBench_SystemMT.Tests.dll (net8.0)
-ExitCode: 0
+宸查€氳繃! - 澶辫触:     0锛岄€氳繃:    18锛屽凡璺宠繃:     0锛屾€昏:    18锛屾寔缁椂闂? 122 ms - MetBench_SystemMT.Tests.dll (net8.0)
+exit code: 0
 
-===== minimum mr subset b-group external focused =====
-Command: dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj --no-build --filter FullyQualifiedName~MinimumMrSubsetBGroupExternalSourceSmokeTests --logger "console;verbosity=minimal"
-C:\MetBench-V2.1.4_2\MetBench_SystemMT.Tests\bin\Debug\net8.0\MetBench_SystemMT.Tests.dll (.NETCoreApp,Version=v8.0)的测试运行
-VSTest 版本 17.14.1 (arm64)
+PS> dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj --no-build -v:minimal
+C:\MetBench-V2.1.4_2\MetBench_SystemMT.Tests\bin\Debug\net8.0\MetBench_SystemMT.Tests.dll (.NETCoreApp,Version=v8.0)鐨勬祴璇曡繍琛?
+VSTest 鐗堟湰 17.14.1 (arm64)
 
-正在启动测试执行，请稍候...
-总共 1 个测试文件与指定模式相匹配。
+姝ｅ湪鍚姩娴嬭瘯鎵ц锛岃绋嶅€?..
+鎬诲叡 1 涓祴璇曟枃浠朵笌鎸囧畾妯″紡鐩稿尮閰嶃€?
+[xUnit.net 00:00:02.46]     ScaleNuSigmaF increases k_eff regardless of solver(solver: "openmoc", sut: "openmoc", __pickleIndex: "0", exampleTags: []) [SKIP]
+  宸茶烦杩?ScaleNuSigmaF increases k_eff regardless of solver(solver: "openmoc", sut: "openmoc", __pickleIndex: "0", exampleTags: []) [1 ms]
+[xUnit.net 00:00:02.85]     ScaleNuSigmaF increases k_eff regardless of solver(solver: "openmc", sut: "openmc", __pickleIndex: "1", exampleTags: []) [SKIP]
+  宸茶烦杩?ScaleNuSigmaF increases k_eff regardless of solver(solver: "openmc", sut: "openmc", __pickleIndex: "1", exampleTags: []) [1 ms]
+[xUnit.net 00:00:04.13]     ScaleFuelSigmaA decreases k_eff regardless of solver(solver: "openmoc", sut: "openmoc", __pickleIndex: "2", exampleTags: []) [SKIP]
+  宸茶烦杩?ScaleFuelSigmaA decreases k_eff regardless of solver(solver: "openmoc", sut: "openmoc", __pickleIndex: "2", exampleTags: []) [1 ms]
+[xUnit.net 00:00:04.39]     ScaleFuelSigmaA decreases k_eff regardless of solver(solver: "openmc", sut: "openmc", __pickleIndex: "3", exampleTags: []) [SKIP]
+  宸茶烦杩?ScaleFuelSigmaA decreases k_eff regardless of solver(solver: "openmc", sut: "openmc", __pickleIndex: "3", exampleTags: []) [1 ms]
+[xUnit.net 00:00:10.67]     Follow-up k_eff exceeds source k_eff after scaling fuel nu*sigma_f [SKIP]
+  宸茶烦杩?Follow-up k_eff exceeds source k_eff after scaling fuel nu*sigma_f [1 ms]
+[xUnit.net 00:00:23.17]     MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMocRayTrackConvergenceTests.RunAsync_ray_track_convergence_passes_end_to_end_with_default_phases [SKIP]
+  宸茶烦杩?MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMocRayTrackConvergenceTests.RunAsync_ray_track_convergence_passes_end_to_end_with_default_phases [1 ms]
+[xUnit.net 00:00:23.37]     MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMocRayTrackConvergenceTests.RunAsync_ray_track_convergence_writes_calibrated_phase_inputs [SKIP]
+  宸茶烦杩?MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMocRayTrackConvergenceTests.RunAsync_ray_track_convergence_writes_calibrated_phase_inputs [1 ms]
+[xUnit.net 00:00:23.75]     MetBench_SystemMT.Tests.SystemMT.OpenMocRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json [SKIP]
+  宸茶烦杩?MetBench_SystemMT.Tests.SystemMT.OpenMocRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json [1 ms]
+[xUnit.net 00:00:35.00]     Follow-up k_eff is less than source k_eff after scaling fuel sigma_a [SKIP]
+  宸茶烦杩?Follow-up k_eff is less than source k_eff after scaling fuel sigma_a [1 ms]
+[xUnit.net 00:00:38.85]     MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMcParticleCountConvergenceTests.RunAsync_particle_count_convergence_passes_end_to_end_with_default_factor [SKIP]
+[xUnit.net 00:00:39.23]     MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMcParticleCountConvergenceTests.RunAsync_particle_count_convergence_observed_followup_stderr_is_smaller_than_source [SKIP]
+  宸茶烦杩?MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMcParticleCountConvergenceTests.RunAsync_particle_count_convergence_passes_end_to_end_with_default_factor [1 ms]
+  宸茶烦杩?MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMcParticleCountConvergenceTests.RunAsync_particle_count_convergence_observed_followup_stderr_is_smaller_than_source [1 ms]
+[xUnit.net 00:01:00.39]     MetBench_SystemMT.Tests.SystemMT.OpenMcRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json [SKIP]
+  宸茶烦杩?MetBench_SystemMT.Tests.SystemMT.OpenMcRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json [1 ms]
 
-已通过! - 失败:     0，通过:     3，已跳过:     0，总计:     3，持续时间: 3 s - MetBench_SystemMT.Tests.dll (net8.0)
-ExitCode: 0
-
-===== system mt tests full =====
-Command: dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj --no-build --logger "console;verbosity=minimal"
-C:\MetBench-V2.1.4_2\MetBench_SystemMT.Tests\bin\Debug\net8.0\MetBench_SystemMT.Tests.dll (.NETCoreApp,Version=v8.0)的测试运行
-VSTest 版本 17.14.1 (arm64)
-
-正在启动测试执行，请稍候...
-总共 1 个测试文件与指定模式相匹配。
-[xUnit.net 00:00:02.44]     MetBench_SystemMT.Tests.SystemMT.OpenMcRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json [SKIP]
-  已跳过 MetBench_SystemMT.Tests.SystemMT.OpenMcRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json [1 ms]
-[xUnit.net 00:00:06.60]     MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMcParticleCountConvergenceTests.RunAsync_particle_count_convergence_passes_end_to_end_with_default_factor [SKIP]
-[xUnit.net 00:00:06.68]     MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMcParticleCountConvergenceTests.RunAsync_particle_count_convergence_observed_followup_stderr_is_smaller_than_source [SKIP]
-  已跳过 MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMcParticleCountConvergenceTests.RunAsync_particle_count_convergence_passes_end_to_end_with_default_factor [1 ms]
-  已跳过 MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMcParticleCountConvergenceTests.RunAsync_particle_count_convergence_observed_followup_stderr_is_smaller_than_source [1 ms]
-[xUnit.net 00:00:08.06]     ScaleNuSigmaF increases k_eff regardless of solver(solver: "openmoc", sut: "openmoc", __pickleIndex: "0", exampleTags: []) [SKIP]
-[xUnit.net 00:00:08.13]     ScaleNuSigmaF increases k_eff regardless of solver(solver: "openmc", sut: "openmc", __pickleIndex: "1", exampleTags: []) [SKIP]
-[xUnit.net 00:00:08.19]     ScaleFuelSigmaA decreases k_eff regardless of solver(solver: "openmoc", sut: "openmoc", __pickleIndex: "2", exampleTags: []) [SKIP]
-[xUnit.net 00:00:08.39]     ScaleFuelSigmaA decreases k_eff regardless of solver(solver: "openmc", sut: "openmc", __pickleIndex: "3", exampleTags: []) [SKIP]
-  已跳过 ScaleNuSigmaF increases k_eff regardless of solver(solver: "openmoc", sut: "openmoc", __pickleIndex: "0", exampleTags: []) [1 ms]
-  已跳过 ScaleNuSigmaF increases k_eff regardless of solver(solver: "openmc", sut: "openmc", __pickleIndex: "1", exampleTags: []) [1 ms]
-  已跳过 ScaleFuelSigmaA decreases k_eff regardless of solver(solver: "openmoc", sut: "openmoc", __pickleIndex: "2", exampleTags: []) [1 ms]
-  已跳过 ScaleFuelSigmaA decreases k_eff regardless of solver(solver: "openmc", sut: "openmc", __pickleIndex: "3", exampleTags: []) [1 ms]
-[xUnit.net 00:00:22.74]     MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMocRayTrackConvergenceTests.RunAsync_ray_track_convergence_passes_end_to_end_with_default_phases [SKIP]
-[xUnit.net 00:00:22.91]     MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMocRayTrackConvergenceTests.RunAsync_ray_track_convergence_writes_calibrated_phase_inputs [SKIP]
-  已跳过 MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMocRayTrackConvergenceTests.RunAsync_ray_track_convergence_passes_end_to_end_with_default_phases [1 ms]
-  已跳过 MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMocRayTrackConvergenceTests.RunAsync_ray_track_convergence_writes_calibrated_phase_inputs [1 ms]
-[xUnit.net 00:00:23.35]     Follow-up k_eff is less than source k_eff after scaling fuel sigma_a [SKIP]
-  已跳过 Follow-up k_eff is less than source k_eff after scaling fuel sigma_a [1 ms]
-[xUnit.net 00:00:26.94]     Follow-up k_eff exceeds source k_eff after scaling fuel nu*sigma_f [SKIP]
-  已跳过 Follow-up k_eff exceeds source k_eff after scaling fuel nu*sigma_f [1 ms]
-[xUnit.net 00:00:28.65]     MetBench_SystemMT.Tests.SystemMT.OpenMocRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json [SKIP]
-  已跳过 MetBench_SystemMT.Tests.SystemMT.OpenMocRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json [1 ms]
-
-已通过! - 失败:     0，通过:  1819，已跳过:    12，总计:  1831，持续时间: 48 s - MetBench_SystemMT.Tests.dll (net8.0)
-ExitCode: 0
-
-===== diff check =====
-Command: git diff --check
-warning: in the working copy of 'MetBench_SystemMT.Tests/SystemMT/ImportExport/MinimumMrSubsetBGroupExternalSourceSmokeTests.cs', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'MetBench_SystemMT.Tests/SystemMT/ImportExport/MinimumMrSubsetExternalTestPaths.cs', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'MetBench_SystemMT.Tests/SystemMT/Launcher/ErrorMonotonicLauncherBranchingTests.cs', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'docs/superpowers/specs/2026-06-07-wpf-minimal-mvvm-behaviors-vm-evidence/build-and-test.log', LF will be replaced by CRLF the next time Git touches it
-ExitCode: 0
+宸查€氳繃! - 澶辫触:     0锛岄€氳繃:  1819锛屽凡璺宠繃:    12锛屾€昏:  1831锛屾寔缁椂闂? 1 m 28 s - MetBench_SystemMT.Tests.dll (net8.0)
+exit code: 0

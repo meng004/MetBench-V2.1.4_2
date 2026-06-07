@@ -6,6 +6,7 @@ using LiveChartsCore.SkiaSharpView.Painting;
 using LiveChartsCore.SkiaSharpView.VisualElements;
 using MetBench_BLL;
 using MetBench_Client.Helpers;
+using MetBench_Client.Services;
 using MetBench_Client.Views.Pages;
 using MetBench_Domain;
 using MetBench_IDAL;
@@ -287,17 +288,7 @@ namespace MetBench_Client.ViewModels
         // 提示信息弹窗
         public async Task<bool> showMessageAsync(string message, string title)
         {
-            var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-            {
-                Title = title,
-                Content = message,
-            };
-            uiMessageBox.CloseButtonAppearance = 0;
-            uiMessageBox.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            uiMessageBox.CloseButtonText = "OK";
-            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
-            //primary为第一个按钮
-            return messageResult == "Primary" ? true : false;
+            return await UiDialog.ShowMessageAsync(message, title);
         }
 
         public void LoadAndRenderData(PlotType plotType)

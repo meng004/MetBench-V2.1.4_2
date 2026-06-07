@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MetBench_BLL;
+using MetBench_Client.Services;
 using MetBench_Client.Views.Pages;
 using MetBench_UI.Localization;
 using Microsoft.Win32;
@@ -165,18 +166,7 @@ namespace MetBench_Client.ViewModels
         // 提示信息弹窗
         public async Task<bool> showMessageAsync(string message, string title)
         {
-            var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-            {
-                Title = title,
-                Content = message,
-            };
-            uiMessageBox.CloseButtonAppearance = 0;
-            uiMessageBox.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            uiMessageBox.CloseButtonText = "OK";
-            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
-
-            // primary为第一个按钮
-            return messageResult == "Primary" ? true : false;
+            return await UiDialog.ShowMessageAsync(message, title);
         }
 
         public async Task cmb_SelectionChanged()
@@ -240,21 +230,7 @@ namespace MetBench_Client.ViewModels
                 return;
             }
             var extend = Path.GetExtension(FilePath).TrimStart('.');
-            var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-            {
-                Title = "Tips",
-                Content = $"确认导出MT报告文件({extend})吗？",
-            };
-            uiMessageBox.CloseButtonAppearance = 0;
-            uiMessageBox.CloseButtonText = "No";
-            uiMessageBox.IsPrimaryButtonEnabled = true;
-            uiMessageBox.PrimaryButtonAppearance = 0;
-            uiMessageBox.HorizontalAlignment = HorizontalAlignment.Center;
-            uiMessageBox.PrimaryButtonText = "Yes";
-
-            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
-            //primary为第一个按钮
-            var confirmResult = messageResult == "Primary" ? true : false;
+            var confirmResult = await UiDialog.ConfirmAsync($"确认导出MT报告文件({extend})吗？", "Tips");
             if (!confirmResult)
             {
                 return;

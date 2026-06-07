@@ -119,6 +119,28 @@ public sealed class WpfDependencyGovernanceTests
         Assert.True(matches.Length == 0, "Unexpected WPF-UI tray usage: " + string.Join(", ", matches));
     }
 
+    [Fact]
+    public void Client_sources_do_not_use_wpf_ui_message_box_dialogs()
+    {
+        var repoRoot = FindRepositoryRoot();
+        var clientRoot = Path.Combine(repoRoot, "MetBench_Client");
+        var forbiddenTerms = new[]
+        {
+            "Wpf.Ui.Controls.MessageBox",
+            "ShowDialogAsync",
+        };
+
+        var matches = EnumerateClientFiles(clientRoot, "*.cs")
+            .Select(path => new { Path = path, Text = File.ReadAllText(path) })
+            .SelectMany(file => forbiddenTerms
+                .Where(term => file.Text.Contains(term, StringComparison.Ordinal))
+                .Select(term => $"{Path.GetRelativePath(repoRoot, file.Path)} contains {term}"))
+            .OrderBy(match => match)
+            .ToArray();
+
+        Assert.True(matches.Length == 0, "Unexpected WPF-UI dialog usage: " + string.Join(", ", matches));
+    }
+
     private static IEnumerable<string> EnumerateClientFiles(string clientRoot, string searchPattern)
     {
         return Directory.EnumerateFiles(clientRoot, searchPattern, SearchOption.AllDirectories)

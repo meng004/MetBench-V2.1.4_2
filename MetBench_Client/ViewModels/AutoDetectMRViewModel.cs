@@ -175,38 +175,13 @@ namespace MetBench_Client.ViewModels
         // 提示信息弹窗
         public async Task<bool> showMessageAsync(string message, string title)
         {
-            var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-            {
-                Title = title,
-                Content = message,
-            };
-            uiMessageBox.CloseButtonAppearance = 0;
-            uiMessageBox.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            uiMessageBox.HorizontalAlignment = System.Windows.HorizontalAlignment.Center;
-            uiMessageBox.CloseButtonText = "OK";
-            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
-            //primary为第一个按钮
-            return messageResult == "Primary" ? true : false;
+            return await UiDialog.ShowMessageAsync(message, title);
         }
 
         // 将目标程序复制粘贴到fuction文件夹
         public async Task btnAddCode_Click()
         {
-            var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-            {
-                Title = "Tips",
-                Content = "确认上传文件吗？",
-            };
-            uiMessageBox.CloseButtonAppearance = 0;
-            uiMessageBox.CloseButtonText = "No";
-            uiMessageBox.IsPrimaryButtonEnabled = true;
-            uiMessageBox.PrimaryButtonAppearance = 0;
-            uiMessageBox.HorizontalAlignment = HorizontalAlignment.Center;
-            uiMessageBox.PrimaryButtonText = "Yes";
-
-            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
-            //primary为第一个按钮
-            var confirmResult = messageResult == "Primary" ? true : false;
+            var confirmResult = await UiDialog.ConfirmAsync("确认上传文件吗？", "Tips");
             if (!confirmResult)
             {
                 return;
@@ -309,21 +284,7 @@ namespace MetBench_Client.ViewModels
         // 存储识别到的MR
         public async Task btn_StoreMR()
         {
-            var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-            {
-                Title = "Tips",
-                Content = "确认存储MR数据吗？",
-            };
-            uiMessageBox.CloseButtonAppearance = 0;
-            uiMessageBox.CloseButtonText = "No";
-            uiMessageBox.IsPrimaryButtonEnabled = true;
-            uiMessageBox.PrimaryButtonAppearance = 0;
-            uiMessageBox.HorizontalAlignment = HorizontalAlignment.Center;
-            uiMessageBox.PrimaryButtonText = "Yes";
-
-            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
-            //primary为第一个按钮
-            var confirmResult = messageResult == "Primary" ? true : false;
+            var confirmResult = await UiDialog.ConfirmAsync("确认存储MR数据吗？", "Tips");
             if (!confirmResult)
             {
                 return;
@@ -383,21 +344,7 @@ namespace MetBench_Client.ViewModels
 
         public async Task btn_ExportCsv()
         {
-            var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-            {
-                Title = "Tips",
-                Content = "确认导出MR数据文件吗？",
-            };
-            uiMessageBox.CloseButtonAppearance = 0;
-            uiMessageBox.CloseButtonText = "No";
-            uiMessageBox.IsPrimaryButtonEnabled = true;
-            uiMessageBox.PrimaryButtonAppearance = 0;
-            uiMessageBox.HorizontalAlignment = HorizontalAlignment.Center;
-            uiMessageBox.PrimaryButtonText = "Yes";
-
-            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
-            //primary为第一个按钮
-            var confirmResult = messageResult == "Primary" ? true : false;
+            var confirmResult = await UiDialog.ConfirmAsync("确认导出MR数据文件吗？", "Tips");
             if (!confirmResult)
             {
                 return;
