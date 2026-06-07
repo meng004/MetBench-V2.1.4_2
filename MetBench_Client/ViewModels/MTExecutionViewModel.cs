@@ -527,17 +527,13 @@ namespace MetBench_Client.ViewModels
 
             if (Data == null)
             {
-
                 var msg = "请选择蜕变关系！";
-                var res = await showMessageAsync(msg, "Tips");
+                await showMessageAsync(msg, "Tips");
 
-                if (!res)
-                {
-                    // 进行页面跳转 跳转到MRManagement页面
-                    var targetPageType = typeof(Views.Pages.MRManagementPage);
-                    var page = _pageService.GetPage(targetPageType) as MRManagementPage;
-                    _navigationService.Navigate(targetPageType);
-                }
+                // 进行页面跳转 跳转到MRManagement页面
+                var targetPageType = typeof(Views.Pages.MRManagementPage);
+                var page = _pageService.GetPage(targetPageType) as MRManagementPage;
+                _navigationService.Navigate(targetPageType);
             }
         }
 

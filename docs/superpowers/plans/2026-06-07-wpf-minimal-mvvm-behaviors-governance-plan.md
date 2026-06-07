@@ -145,13 +145,15 @@ Steps:
 2. Replace direct `Wpf.Ui.Controls.MessageBox` construction with `UiDialog.ShowMessageAsync` or `UiDialog.ConfirmAsync`.
 3. Remove the remaining `.ShowDialogAsync()` Wpf.Ui dialog calls from client sources.
 4. Add an architecture guard that prevents direct Wpf.Ui message-box usage from returning.
-5. Keep Wpf.Ui navigation, shell controls, themes, and icons in scope for later PR-2 slices.
+5. Remove and guard the remaining branch dependency on informational `showMessageAsync` return values.
+6. Keep Wpf.Ui navigation, shell controls, themes, and icons in scope for later PR-2 slices.
 
 Expected output:
 
 - Client WPF build has 0 errors.
 - Client governance tests pass and include the dialog guard.
 - `rg "Wpf\\.Ui\\.Controls\\.MessageBox|ShowDialogAsync" MetBench_Client` has no matches.
+- `rg "\\b(?:var|bool)\\s+\\w+\\s*=\\s*await\\s+showMessageAsync\\s*\\(" MetBench_Client` has no matches.
 - No MetBench_BLL.Core, MetBench_DAL, or MetBench_BLL runtime semantics change.
 
 ## Task 4: Build And Test Evidence

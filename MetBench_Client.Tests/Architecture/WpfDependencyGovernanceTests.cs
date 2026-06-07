@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Xunit;
 
 namespace MetBench_Client.Tests.Architecture;
@@ -139,6 +140,23 @@ public sealed class WpfDependencyGovernanceTests
             .ToArray();
 
         Assert.True(matches.Length == 0, "Unexpected WPF-UI dialog usage: " + string.Join(", ", matches));
+    }
+
+    [Fact]
+    public void Informational_dialog_results_are_not_used_for_branching()
+    {
+        var repoRoot = FindRepositoryRoot();
+        var clientRoot = Path.Combine(repoRoot, "MetBench_Client");
+        var assignmentPattern = new Regex(@"\b(?:var|bool)\s+\w+\s*=\s*await\s+showMessageAsync\s*\(", RegexOptions.Compiled);
+
+        var matches = EnumerateClientFiles(clientRoot, "*.cs")
+            .Select(path => new { Path = path, Text = File.ReadAllText(path) })
+            .Where(file => assignmentPattern.IsMatch(file.Text))
+            .Select(file => Path.GetRelativePath(repoRoot, file.Path))
+            .OrderBy(path => path)
+            .ToArray();
+
+        Assert.True(matches.Length == 0, "Unexpected informational dialog result branching: " + string.Join(", ", matches));
     }
 
     private static IEnumerable<string> EnumerateClientFiles(string clientRoot, string searchPattern)
