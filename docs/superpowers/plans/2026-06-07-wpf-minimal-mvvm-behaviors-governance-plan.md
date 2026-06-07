@@ -1,7 +1,7 @@
 # WPF Minimal MVVM and Behaviors Governance Plan
 
 Date: 2026-06-07
-Status: Active scoped plan; current branch includes PR-0, PR-1, PR-2a, PR-2b, PR-2c, and PR-2d evidence
+Status: Active scoped plan; current branch includes PR-0, PR-1, PR-2a, PR-2b, PR-2c, PR-2d, and PR-2e evidence
 Design: docs/superpowers/specs/2026-06-07-wpf-minimal-mvvm-behaviors-governance-design.md
 
 ## Goal
@@ -206,6 +206,30 @@ Expected output:
 - `rg "Wpf.Ui.Appearance|using Wpf.Ui.Appearance" MetBench_Client\ViewModels MetBench_Client\Helpers` has no matches.
 - `rg "ThemeToIndexConverter|IThemeService|ThemeService|ui:ThemeResource" MetBench_Client` has no matches.
 - Wpf.Ui `ApplicationThemeManager` remains isolated in `MetBench_Client/Services/ClientThemeController.cs` for a later final theme-removal slice.
+- No MetBench_BLL.Core, MetBench_DAL, or MetBench_BLL runtime semantics change.
+
+## Task 3f: PR-2e Settings Page Wpf.Ui XAML Removal Slice
+
+Files:
+
+- MetBench_Client/Views/Pages/SettingsPage.xaml
+- MetBench_Client/Views/Pages/SettingsPage.xaml.cs
+- MetBench_Client.Tests/Architecture/WpfDependencyGovernanceTests.cs
+
+Steps:
+
+1. Remove the Wpf.Ui XAML namespace and `ui:Design.*` design-time attributes from SettingsPage.
+2. Replace `ui:TextBlock`, `ui:Anchor`, and `ui:SymbolIcon` usage with WPF-native `TextBlock` / `Hyperlink`.
+3. Remove stale commented Wpf.Ui Settings card markup.
+4. Remove the `INavigableView<T>` interface from SettingsPage code-behind while preserving `DataContext` assignment.
+5. Add a SettingsPage-specific architecture guard preventing Wpf.Ui namespace or `ui:` markup from returning.
+
+Expected output:
+
+- Client WPF build has 0 errors.
+- Client governance and i18n tests pass.
+- `rg "http://schemas.lepo.co/wpfui/2022/xaml|Wpf\\.Ui|ui:" MetBench_Client\Views\Pages\SettingsPage.xaml MetBench_Client\Views\Pages\SettingsPage.xaml.cs` has no matches.
+- The source-code link still opens through WPF `Hyperlink.RequestNavigate`.
 - No MetBench_BLL.Core, MetBench_DAL, or MetBench_BLL runtime semantics change.
 
 ## Task 4: Build And Test Evidence

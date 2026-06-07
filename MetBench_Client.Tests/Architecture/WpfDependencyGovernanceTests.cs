@@ -217,6 +217,33 @@ public sealed class WpfDependencyGovernanceTests
         Assert.True(matches.Length == 0, "Unexpected WPF-UI appearance dependency in view-model/helper code: " + string.Join(", ", matches));
     }
 
+    [Fact]
+    public void Settings_page_no_longer_uses_wpf_ui_controls_or_namespaces()
+    {
+        var repoRoot = FindRepositoryRoot();
+        var settingsFiles = new[]
+        {
+            Path.Combine(repoRoot, "MetBench_Client", "Views", "Pages", "SettingsPage.xaml"),
+            Path.Combine(repoRoot, "MetBench_Client", "Views", "Pages", "SettingsPage.xaml.cs"),
+        };
+        var forbiddenTerms = new[]
+        {
+            "http://schemas.lepo.co/wpfui/2022/xaml",
+            "Wpf.Ui",
+            "ui:",
+        };
+
+        var matches = settingsFiles
+            .Select(path => new { Path = path, Text = File.ReadAllText(path) })
+            .SelectMany(file => forbiddenTerms
+                .Where(term => file.Text.Contains(term, StringComparison.Ordinal))
+                .Select(term => $"{Path.GetRelativePath(repoRoot, file.Path)} contains {term}"))
+            .OrderBy(match => match)
+            .ToArray();
+
+        Assert.True(matches.Length == 0, "Unexpected WPF-UI Settings page usage: " + string.Join(", ", matches));
+    }
+
     private static IEnumerable<string> EnumerateClientFiles(string clientRoot, string searchPattern)
     {
         return Directory.EnumerateFiles(clientRoot, searchPattern, SearchOption.AllDirectories)
