@@ -7,7 +7,7 @@ Windows classification: VM evidence collected
 
 - Branch: codex/wpf-minimal-mvvm-behaviors
 - Base commit: c01de218404546d3379ebe03d8358374e768eabb
-- Head commit at latest full-test evidence collection: pending PR-2f commit after this receipt update.
+- Head commit at latest full-test evidence collection: 82ea6ef2f6b70a3c505aab4730656369b764c575.
 - Worktree state at latest full-test evidence collection: dirty only with PR-2f ProgressWindow Wpf.Ui control removal changes and refreshed evidence before commit.
 
 ## Modified Files
