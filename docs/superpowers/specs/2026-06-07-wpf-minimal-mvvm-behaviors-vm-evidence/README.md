@@ -7,8 +7,8 @@ Windows classification: VM evidence collected
 
 - Branch: codex/wpf-minimal-mvvm-behaviors
 - Base commit: c01de218404546d3379ebe03d8358374e768eabb
-- Head commit at latest full-test evidence collection: 7d92b5d946133fa6b130efe790e579139760019f.
-- Worktree state at latest full-test evidence collection: dirty only with PR-2g paging controls Wpf.Ui control removal changes and refreshed evidence before commit.
+- Head commit at latest full-test evidence collection: pending PR-2h commit after this receipt update.
+- Worktree state at latest full-test evidence collection: dirty only with PR-2h Settings page lifecycle repair and refreshed evidence before commit.
 
 ## Modified Files
 
@@ -71,6 +71,7 @@ Windows classification: VM evidence collected
 - Settings page Wpf.Ui XAML removal: PR-2e removes the Wpf.Ui namespace, Wpf.Ui markup, and `INavigableView<T>` usage from SettingsPage while preserving the source-code link through WPF `Hyperlink`.
 - ProgressWindow Wpf.Ui control removal: PR-2f replaces the Wpf.Ui `ProgressRing` with a WPF-native indeterminate `ProgressBar` and guards the window against Wpf.Ui markup reintroduction.
 - Paging controls Wpf.Ui control removal: PR-2g replaces Wpf.Ui paging buttons and `SymbolIcon` markup with WPF-native buttons in SimplePagination and PagingBar, then guards both controls against Wpf.Ui markup reintroduction.
+- Settings page lifecycle repair: PR-2h restores explicit page `DataContext` and forwards WPF-native Loaded/Unloaded events to SettingsViewModel navigation lifecycle without reintroducing Wpf.Ui `INavigableView<T>`.
 - WPF-UI.Tray: removed from the client project and guarded against reintroduction.
 - Stylet.Start: removed from the client project after page command binding migration.
 - Prism.Wpf: removed from the client project after dead-using cleanup.
@@ -85,7 +86,7 @@ Full output is tracked in build-and-test.log.
 
 - `dotnet restore MetBench.sln -v:minimal`: exit 0 with network permission for NuGet access; existing OpenTK/SkiaSharp compatibility warnings remain.
 - `dotnet build MetBench.sln --no-restore -v:minimal`: exit 0; 0 errors; existing warnings remain.
-- `dotnet test MetBench_Client.Tests\MetBench_Client.Tests.csproj --no-build -v:minimal`: exit 0; 31 passed.
+- `dotnet test MetBench_Client.Tests\MetBench_Client.Tests.csproj --no-build -v:minimal`: exit 0; 32 passed.
 - `dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj --no-build --filter "ClientI18n|SystemMtExplanation|SystemMtPairQuality" -v:minimal`: exit 0; 18 passed.
 - `dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj --no-build -v:minimal`: exit 0; 1819 passed, 12 skipped, 0 failed.
 - The remaining 12 full-suite skips are existing OpenMOC/OpenMC environment-gated tests; the NumPy compatibility path no longer skips.
@@ -114,5 +115,6 @@ Full output is tracked in build-and-test.log.
 - SettingsPage no longer uses Wpf.Ui XAML or Wpf.Ui code-behind APIs after PR-2e; the wider navigation shell and other pages still use Wpf.Ui.
 - ProgressWindow no longer uses Wpf.Ui XAML after PR-2f; the wider navigation shell and other windows/pages still use Wpf.Ui.
 - SimplePagination and PagingBar no longer use Wpf.Ui XAML after PR-2g; the wider navigation shell and other windows/pages still use Wpf.Ui.
+- SettingsPage now uses WPF-native Loaded/Unloaded lifecycle forwarding after PR-2h so SettingsViewModel initialization still runs without Wpf.Ui `INavigableView<T>`.
 - Full `MetBench_SystemMT.Tests` is green in this VM run with the repository's existing environment-gated OpenMOC/OpenMC skips. The external Minimum-MR-SubSet B-group tests now run and pass rather than skipping on NumPy 2.x.
 - CLAUDE.md still advertises the older WPF stack. The design document records this as governance target overrides older convention; a later sync PR is required after phased evidence is collected.

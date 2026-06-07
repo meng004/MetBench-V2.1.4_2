@@ -1,8 +1,10 @@
 using System.Globalization;
 using System.Linq;
+using System.Windows;
 using MetBench_Client.Services;
 using MetBench_UI.Localization;
 using MetBench_Client.ViewModels;
+using MetBench_Client.Views.Pages;
 using Wpf.Ui;
 using Xunit;
 
@@ -61,6 +63,26 @@ public sealed class SettingsLanguageTests
 
         Assert.Equal(ClientTheme.Dark, vm.CurrentApplicationTheme);
         Assert.Equal(ClientTheme.Dark, themeController.LastAppliedTheme);
+    }
+
+    [WpfFact]
+    public void Settings_page_loaded_initializes_view_model_without_wpf_ui_navigable_view()
+    {
+        var localization = new AppLocalizationService();
+        var themeController = new FakeThemeController(ClientTheme.Light);
+        var vm = CreateViewModel(localization, themeController);
+        var page = new SettingsPage(vm);
+
+        Assert.Same(page, page.DataContext);
+        Assert.Empty(vm.AvailableCultures);
+        Assert.Equal(ClientTheme.Unknown, vm.CurrentApplicationTheme);
+
+        page.RaiseEvent(new RoutedEventArgs(FrameworkElement.LoadedEvent));
+
+        Assert.Contains(vm.AvailableCultures, c => c.Culture.Name == "en-US");
+        Assert.Contains(vm.AvailableCultures, c => c.Culture.Name == "zh-CN");
+        Assert.Equal(ClientTheme.Light, vm.CurrentApplicationTheme);
+        Assert.StartsWith("MetBench: A Numerical Expression Metamorphic Relations Benchmark Dataset - ", vm.AppVersion);
     }
 
     private static SettingsViewModel CreateViewModel(

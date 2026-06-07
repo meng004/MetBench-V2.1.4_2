@@ -1,7 +1,7 @@
 # WPF Minimal MVVM and Behaviors Governance Plan
 
 Date: 2026-06-07
-Status: Active scoped plan; current branch includes PR-0, PR-1, PR-2a, PR-2b, PR-2c, PR-2d, PR-2e, PR-2f, and PR-2g evidence
+Status: Active scoped plan; current branch includes PR-0, PR-1, PR-2a, PR-2b, PR-2c, PR-2d, PR-2e, PR-2f, PR-2g, and PR-2h evidence
 Design: docs/superpowers/specs/2026-06-07-wpf-minimal-mvvm-behaviors-governance-design.md
 
 ## Goal
@@ -273,6 +273,27 @@ Expected output:
 - Client governance tests pass.
 - `rg "http://schemas.lepo.co/wpfui/2022/xaml|Wpf\\.Ui|ui:" MetBench_Client\Controls\SimplePagination.xaml MetBench_Client\Views\Controls\PagingBar.xaml` has no matches.
 - No MetBench_BLL.Core, MetBench_DAL, or MetBench_BLL runtime semantics change.
+
+## Task 3i: PR-2h Settings Page Lifecycle Repair
+
+Files:
+
+- MetBench_Client/Views/Pages/SettingsPage.xaml.cs
+- MetBench_Client.Tests/ClientI18n/SettingsLanguageTests.cs
+
+Steps:
+
+1. Keep SettingsPage free of Wpf.Ui `INavigableView<T>`.
+2. Restore explicit `DataContext = this` after the PR-2e code-behind cleanup.
+3. Forward WPF-native `Loaded` / `Unloaded` events to `SettingsViewModel.OnNavigatedTo` / `OnNavigatedFrom`.
+4. Add a WPF test proving SettingsPage `Loaded` initializes cultures, theme, and app version without Wpf.Ui navigation lifecycle.
+
+Expected output:
+
+- SettingsPage bindings keep their page-based `ViewModel.*` source.
+- SettingsViewModel initialization runs when the page is loaded.
+- Client tests pass with the lifecycle regression covered.
+- No Wpf.Ui API is reintroduced into SettingsPage.
 
 ## Task 4: Build And Test Evidence
 
