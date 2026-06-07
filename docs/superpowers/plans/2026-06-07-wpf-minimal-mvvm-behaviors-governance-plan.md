@@ -1,7 +1,7 @@
 # WPF Minimal MVVM and Behaviors Governance Plan
 
 Date: 2026-06-07
-Status: Active scoped plan; current branch includes PR-0, PR-1, PR-2a, PR-2b, PR-2c, PR-2d, and PR-2e evidence
+Status: Active scoped plan; current branch includes PR-0, PR-1, PR-2a, PR-2b, PR-2c, PR-2d, PR-2e, and PR-2f evidence
 Design: docs/superpowers/specs/2026-06-07-wpf-minimal-mvvm-behaviors-governance-design.md
 
 ## Goal
@@ -230,6 +230,26 @@ Expected output:
 - Client governance and i18n tests pass.
 - `rg "http://schemas.lepo.co/wpfui/2022/xaml|Wpf\\.Ui|ui:" MetBench_Client\Views\Pages\SettingsPage.xaml MetBench_Client\Views\Pages\SettingsPage.xaml.cs` has no matches.
 - The source-code link still opens through WPF `Hyperlink.RequestNavigate`.
+- No MetBench_BLL.Core, MetBench_DAL, or MetBench_BLL runtime semantics change.
+
+## Task 3g: PR-2f Progress Window Wpf.Ui Control Removal Slice
+
+Files:
+
+- MetBench_Client/Views/Windows/ProgressWindow.xaml
+- MetBench_Client.Tests/Architecture/WpfDependencyGovernanceTests.cs
+
+Steps:
+
+1. Replace the Wpf.Ui `ProgressRing` with a WPF-native indeterminate `ProgressBar`.
+2. Remove the Wpf.Ui XAML namespace from ProgressWindow.
+3. Add a ProgressWindow-specific architecture guard preventing Wpf.Ui namespace or `ui:` markup from returning.
+
+Expected output:
+
+- Client WPF build has 0 errors.
+- Client governance tests pass.
+- `rg "http://schemas.lepo.co/wpfui/2022/xaml|Wpf\\.Ui|ui:" MetBench_Client\Views\Windows\ProgressWindow.xaml` has no matches.
 - No MetBench_BLL.Core, MetBench_DAL, or MetBench_BLL runtime semantics change.
 
 ## Task 4: Build And Test Evidence

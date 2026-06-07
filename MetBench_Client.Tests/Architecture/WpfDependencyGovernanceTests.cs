@@ -244,6 +244,27 @@ public sealed class WpfDependencyGovernanceTests
         Assert.True(matches.Length == 0, "Unexpected WPF-UI Settings page usage: " + string.Join(", ", matches));
     }
 
+    [Fact]
+    public void Progress_window_no_longer_uses_wpf_ui_controls_or_namespaces()
+    {
+        var repoRoot = FindRepositoryRoot();
+        var progressWindowFile = Path.Combine(repoRoot, "MetBench_Client", "Views", "Windows", "ProgressWindow.xaml");
+        var progressWindowText = File.ReadAllText(progressWindowFile);
+        var forbiddenTerms = new[]
+        {
+            "http://schemas.lepo.co/wpfui/2022/xaml",
+            "Wpf.Ui",
+            "ui:",
+        };
+
+        var matches = forbiddenTerms
+            .Where(term => progressWindowText.Contains(term, StringComparison.Ordinal))
+            .OrderBy(term => term)
+            .ToArray();
+
+        Assert.True(matches.Length == 0, "Unexpected WPF-UI ProgressWindow usage: " + string.Join(", ", matches));
+    }
+
     private static IEnumerable<string> EnumerateClientFiles(string clientRoot, string searchPattern)
     {
         return Directory.EnumerateFiles(clientRoot, searchPattern, SearchOption.AllDirectories)
