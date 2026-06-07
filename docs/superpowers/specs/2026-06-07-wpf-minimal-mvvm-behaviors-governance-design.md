@@ -164,6 +164,10 @@ Rollback:
 
 ## PR-0 Spike Boundary
 
-The PR-0 spike changes only the MT Report Generator export button. It keeps Stylet installed because many pages still depend on it. It also keeps Wpf.Ui, WebView2, LiveCharts, and SkiaSharp installed because this phase is not a full removal PR.
+The original PR-0 spike changed only the MT Report Generator export button and proved that a WPF page can use the target event-binding stack without changing BLL/Core/DAL semantics.
 
-The spike proves that a WPF page can use the target event-binding stack without changing BLL/Core/DAL semantics.
+This branch now also contains the follow-up PR-1 / PR-2a convergence slice:
+
+- Stylet.Start, Prism.Wpf, PropertyChanged.Fody, and WPF-UI.Tray are removed from the client project.
+- Legacy Stylet action bindings are migrated to CommunityToolkit.Mvvm RelayCommand plus Microsoft.Xaml.Behaviors.Wpf where event binding is required.
+- Wpf.Ui, WebView2, LiveChartsCore.*, and SkiaSharp.* remain intentionally present for later, separately verified PRs.

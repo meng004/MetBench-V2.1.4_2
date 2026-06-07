@@ -7,14 +7,39 @@ Windows classification: VM evidence collected
 
 - Branch: codex/wpf-minimal-mvvm-behaviors
 - Base commit: c01de218404546d3379ebe03d8358374e768eabb
-- Head commit at evidence collection: c01de218404546d3379ebe03d8358374e768eabb
-- Worktree state at evidence collection: dirty with PR-0 governance docs, one minimal WPF Behaviors spike, and evidence files.
+- Head commit at latest full-test evidence collection: a0461afa2680c2b9526cbf0662f1dddb34be7e2d
+- Worktree state at latest full-test evidence collection: dirty only with refreshed evidence documentation/log before committing this evidence update.
 
 ## Modified Files
 
 - MetBench_Client/MetBench_Client.csproj
+- MetBench_Client/App.xaml.cs
+- MetBench_Client/Services/EventAggregator.cs
+- MetBench_Client/FodyWeavers.xml
+- MetBench_Client/FodyWeavers.xsd
+- MetBench_Client/ViewModels/ApplicationManagementViewModel.cs
+- MetBench_Client/ViewModels/AutoDetectMRViewModel.cs
+- MetBench_Client/ViewModels/DomainManagementViewModel.cs
+- MetBench_Client/ViewModels/MainWindowViewModel.cs
+- MetBench_Client/ViewModels/MRDisplayViewModel.cs
+- MetBench_Client/ViewModels/MRManagementViewModel.cs
+- MetBench_Client/ViewModels/MRRecommendationViewModel.cs
+- MetBench_Client/ViewModels/MTExecutionViewModel.cs
 - MetBench_Client/ViewModels/MTReportGeneratorViewModel.cs
+- MetBench_Client/Views/Pages/ApplicationManagementPage.xaml
+- MetBench_Client/Views/Pages/AutoDetectMRPage.xaml
+- MetBench_Client/Views/Pages/DashboardPage.xaml
+- MetBench_Client/Views/Pages/DomainManagementPage.xaml
+- MetBench_Client/Views/Pages/MRDisplayPage.xaml
+- MetBench_Client/Views/Pages/MRManagementPage.xaml
+- MetBench_Client/Views/Pages/MRManagementPage.xaml.cs
+- MetBench_Client/Views/Pages/MRRecommendationPage.xaml
+- MetBench_Client/Views/Pages/MRRecommendationPage.xaml.cs
+- MetBench_Client/Views/Pages/MTExecutionPage.xaml
 - MetBench_Client/Views/Pages/MTReportGeneratorPage.xaml
+- MetBench_Client/Views/Windows/ApplicationProgramsWindow.xaml
+- MetBench_Client/Views/Windows/MainWindow.xaml
+- MetBench_Client.Tests/Architecture/WpfDependencyGovernanceTests.cs
 - docs/superpowers/specs/2026-06-07-wpf-minimal-mvvm-behaviors-governance-design.md
 - docs/superpowers/plans/2026-06-07-wpf-minimal-mvvm-behaviors-governance-plan.md
 - docs/superpowers/specs/2026-06-07-wpf-minimal-mvvm-behaviors-vm-evidence/build-and-test.log
@@ -27,24 +52,25 @@ Windows classification: VM evidence collected
 ## Dependency Inventory Summary
 
 - CommunityToolkit.Mvvm: already present and kept as the target MVVM stack.
-- Microsoft.Xaml.Behaviors.Wpf: absent before PR-0, added in this spike.
-- Wpf.Ui / WPF-UI / WPF-UI.Tray: still present by design; recorded for phased removal.
-- Stylet.Start: still present by design; only MT Report Generator export action was migrated.
-- Prism.Wpf: still present; recorded for early removal after dead-using cleanup.
-- PropertyChanged.Fody: still present; recorded for view-model property migration.
+- Microsoft.Xaml.Behaviors.Wpf: added and now used for migrated event-to-command bindings.
+- Wpf.Ui / WPF-UI: still present by design; recorded for phased removal.
+- WPF-UI.Tray: removed from the client project and guarded against reintroduction.
+- Stylet.Start: removed from the client project after page command binding migration.
+- Prism.Wpf: removed from the client project after dead-using cleanup.
+- PropertyChanged.Fody: removed from the client project after explicit ObservableObject/RelayCommand migration.
 - LiveChartsCore.* and SkiaSharp.*: still present; recorded for display replacement.
 - Microsoft.Web.WebView2: still present; recorded for report preview replacement.
 - HandyControl: no current use found.
 
 ## Build And Test Results
 
-Full output is in build-and-test.log.
+Full output is tracked in build-and-test.log.
 
-- Initial sandboxed `dotnet restore MetBench.sln`: failed with NU1301 because api.nuget.org socket access was blocked by sandbox permissions.
-- Escalated `dotnet restore MetBench.sln`: exit 0.
-- `dotnet build MetBench.sln --no-restore`: exit 0; 0 errors; existing warnings remain.
-- `dotnet test MetBench_Client.Tests --no-build`: exit 0; 16 passed.
-- `dotnet test MetBench_SystemMT.Tests --no-build --filter "ClientI18n|SystemMtExplanation|SystemMtPairQuality"`: exit 0; 18 passed.
+- `dotnet restore MetBench.sln`: exit 0; existing OpenTK/SkiaSharp compatibility warnings remain.
+- `dotnet build MetBench.sln --no-restore -v:minimal`: exit 0; 0 errors; existing warnings remain.
+- `dotnet test MetBench_Client.Tests\MetBench_Client.Tests.csproj --no-build --logger "console;verbosity=minimal"`: exit 0; 22 passed.
+- `dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj --no-build --logger "console;verbosity=minimal"`: exit 1; 6 failed, 1813 passed, 12 skipped.
+- SystemMT full-suite failures are outside this WPF dependency-governance surface: `ErrorMonotonicLauncherBranchingTests` has 4 launcher-branching failures, and `MinimumMrSubsetBGroupExternalSourceSmokeTests` has 2 external-source failures caused by Python/NumPy 2.x removing `np.trapz`.
 - `git diff --check`: exit 0.
 
 ## Screenshots
@@ -55,6 +81,7 @@ Full output is in build-and-test.log.
 
 ## Incomplete Items And Blockers
 
-- PR-0 does not remove Wpf.Ui, Stylet, Prism, Fody, LiveCharts, SkiaSharp, or WebView2. They remain intentionally present for staged follow-up PRs.
-- No blocker for the PR-0 design and minimal Behaviors spike.
+- This branch does not remove Wpf.Ui, LiveCharts, SkiaSharp, or WebView2. They remain intentionally present for staged follow-up PRs.
+- Stylet.Start, Prism.Wpf, PropertyChanged.Fody, and WPF-UI.Tray are removed and guarded in this branch.
+- Full `MetBench_SystemMT.Tests` is not green in this VM run. The failing tests are recorded above and in build-and-test.log; they are not caused by WPF client file changes, but they remain a full-suite blocker if the PR gate requires the unfiltered SystemMT suite to be green.
 - CLAUDE.md still advertises the older WPF stack. The design document records this as governance target overrides older convention; a later sync PR is required after phased evidence is collected.

@@ -1,0 +1,535 @@
+﻿MetBench WPF dependency governance full verification - 2026-06-07
+
+===== restore =====
+Command: dotnet restore MetBench.sln
+  正在确定要还原的项目…
+C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK 3.3.1”。此包可能与项目不完全兼容。 [C:\MetBench-V2.1.4_2\MetBench.sln]
+C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK 3.3.1”。此包可能与项目不完全兼容。 [C:\MetBench-V2.1.4_2\MetBench.sln]
+C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK.GLWpfControl 3.3.0”。此包可能与项目不完全兼容。 [C:\MetBench-V2.1.4_2\MetBench.sln]
+C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“SkiaSharp.Views.WPF 3.116.1”。此包可能与项目不完全兼容。 [C:\MetBench-V2.1.4_2\MetBench.sln]
+C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK.GLWpfControl 3.3.0”。此包可能与项目不完全兼容。 [C:\MetBench-V2.1.4_2\MetBench.sln]
+C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“SkiaSharp.Views.WPF 3.116.1”。此包可能与项目不完全兼容。 [C:\MetBench-V2.1.4_2\MetBench.sln]
+  所有项目均是最新的，无法还原。
+ExitCode: 0
+
+===== build =====
+Command: dotnet build MetBench.sln --no-restore -v:minimal
+  MetBench_Domain -> C:\MetBench-V2.1.4_2\MetBench_Domain\bin\Debug\net8.0\MetBench_Domain.dll
+  MetBench_Analyzers -> C:\MetBench-V2.1.4_2\MetBench_Analyzers\bin\Debug\netstandard2.0\MetBench_Analyzers.dll
+  MetBench_UI.Localization -> C:\MetBench-V2.1.4_2\MetBench_UI.Localization\bin\Debug\net8.0\MetBench_UI.Localization.dll
+C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK 3.3.1”。此包可能与项目不完全兼容。
+C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK.GLWpfControl 3.3.0”。此包可能与项目不完全兼容。
+C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“SkiaSharp.Views.WPF 3.116.1”。此包可能与项目不完全兼容。
+  MetBench_IDAL -> C:\MetBench-V2.1.4_2\MetBench_IDAL\bin\Debug\net8.0\MetBench_IDAL.dll
+  MetBench_BLL.Core -> C:\MetBench-V2.1.4_2\MetBench_BLL.Core\bin\Debug\net8.0\MetBench_BLL.Core.dll
+C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK 3.3.1”。此包可能与项目不完全兼容。
+C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK.GLWpfControl 3.3.0”。此包可能与项目不完全兼容。
+C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“SkiaSharp.Views.WPF 3.116.1”。此包可能与项目不完全兼容。
+  MetBench_DAL -> C:\MetBench-V2.1.4_2\MetBench_DAL\bin\Debug\net8.0\MetBench_DAL.dll
+  MetBench_BLL -> C:\MetBench-V2.1.4_2\MetBench_BLL\bin\Debug\net8.0\MetBench_BLL.dll
+  MetBench_SystemMT.Tests -> C:\MetBench-V2.1.4_2\MetBench_SystemMT.Tests\bin\Debug\net8.0\MetBench_SystemMT.Tests.dll
+  MetBench_Client -> C:\MetBench-V2.1.4_2\MetBench_Client\bin\Debug\net8.0-windows7.0\MetBench_Client.dll
+  MetBench_Client.Tests -> C:\MetBench-V2.1.4_2\MetBench_Client.Tests\bin\Debug\net8.0-windows7.0\MetBench_Client.Tests.dll
+
+已成功生成。
+
+C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK 3.3.1”。此包可能与项目不完全兼容。
+C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK.GLWpfControl 3.3.0”。此包可能与项目不完全兼容。
+C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“SkiaSharp.Views.WPF 3.116.1”。此包可能与项目不完全兼容。
+C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK 3.3.1”。此包可能与项目不完全兼容。
+C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK.GLWpfControl 3.3.0”。此包可能与项目不完全兼容。
+C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“SkiaSharp.Views.WPF 3.116.1”。此包可能与项目不完全兼容。
+    6 个警告
+    0 个错误
+
+已用时间 00:00:01.79
+ExitCode: 0
+
+===== client tests full =====
+Command: dotnet test MetBench_Client.Tests\MetBench_Client.Tests.csproj --no-build --logger "console;verbosity=minimal"
+C:\MetBench-V2.1.4_2\MetBench_Client.Tests\bin\Debug\net8.0-windows7.0\MetBench_Client.Tests.dll (.NETCoreApp,Version=v8.0)的测试运行
+VSTest 版本 17.14.1 (arm64)
+
+正在启动测试执行，请稍候...
+总共 1 个测试文件与指定模式相匹配。
+
+已通过! - 失败:     0，通过:    22，已跳过:     0，总计:    22，持续时间: 336 ms - MetBench_Client.Tests.dll (net8.0)
+ExitCode: 0
+
+===== system mt tests full =====
+Command: dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj --no-build --logger "console;verbosity=minimal"
+C:\MetBench-V2.1.4_2\MetBench_SystemMT.Tests\bin\Debug\net8.0\MetBench_SystemMT.Tests.dll (.NETCoreApp,Version=v8.0)的测试运行
+VSTest 版本 17.14.1 (arm64)
+
+正在启动测试执行，请稍候...
+总共 1 个测试文件与指定模式相匹配。
+[xUnit.net 00:00:09.27]     Follow-up k_eff exceeds source k_eff after scaling fuel nu*sigma_f [SKIP]
+  已跳过 Follow-up k_eff exceeds source k_eff after scaling fuel nu*sigma_f [1 ms]
+[xUnit.net 00:00:10.56]     MetBench_SystemMT.Tests.SystemMT.OpenMcRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json [SKIP]
+  已跳过 MetBench_SystemMT.Tests.SystemMT.OpenMcRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json [1 ms]
+[xUnit.net 00:00:11.65]     MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMocRayTrackConvergenceTests.RunAsync_ray_track_convergence_passes_end_to_end_with_default_phases [SKIP]
+  已跳过 MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMocRayTrackConvergenceTests.RunAsync_ray_track_convergence_passes_end_to_end_with_default_phases [1 ms]
+[xUnit.net 00:00:11.71]     MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMocRayTrackConvergenceTests.RunAsync_ray_track_convergence_writes_calibrated_phase_inputs [SKIP]
+  已跳过 MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMocRayTrackConvergenceTests.RunAsync_ray_track_convergence_writes_calibrated_phase_inputs [1 ms]
+[xUnit.net 00:00:15.66]     MetBench_SystemMT.Tests.SystemMT.OpenMocRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json [SKIP]
+  已跳过 MetBench_SystemMT.Tests.SystemMT.OpenMocRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json [1 ms]
+[xUnit.net 00:00:19.84]     MetBench_SystemMT.Tests.SystemMT.Launcher.ErrorMonotonicLauncherBranchingTests.RunAsync_multi_phase_injects_ErrorMonotonicPredicate_typed_spec [FAIL]
+[xUnit.net 00:00:20.05]     MetBench_SystemMT.Tests.SystemMT.Launcher.ErrorMonotonicLauncherBranchingTests.RunAsync_routes_multi_phase_MR_to_ExecuteMultiPhaseAsync_only [FAIL]
+[xUnit.net 00:00:20.31]     MetBench_SystemMT.Tests.SystemMT.Launcher.ErrorMonotonicLauncherBranchingTests.RunAsync_multi_phase_uses_last_phase_as_reference_role_convention [FAIL]
+[xUnit.net 00:00:20.66]     MetBench_SystemMT.Tests.SystemMT.Launcher.ErrorMonotonicLauncherBranchingTests.RunAsync_routes_2_side_MR_to_ExecuteAsync_only [FAIL]
+  失败 MetBench_SystemMT.Tests.SystemMT.Launcher.ErrorMonotonicLauncherBranchingTests.RunAsync_multi_phase_injects_ErrorMonotonicPredicate_typed_spec [258 ms]
+  错误消息:
+   System.NullReferenceException : Object reference not set to an instance of an object.
+  堆栈跟踪:
+     at MetBench_SystemMT.Tests.SystemMT.Launcher.ErrorMonotonicLauncherBranchingTests.RunAsync_multi_phase_injects_ErrorMonotonicPredicate_typed_spec() in C:\MetBench-V2.1.4_2\MetBench_SystemMT.Tests\SystemMT\Launcher\ErrorMonotonicLauncherBranchingTests.cs:line 189
+--- End of stack trace from previous location ---
+  失败 MetBench_SystemMT.Tests.SystemMT.Launcher.ErrorMonotonicLauncherBranchingTests.RunAsync_routes_multi_phase_MR_to_ExecuteMultiPhaseAsync_only [208 ms]
+  错误消息:
+   Assert.Equal() Failure: Values differ
+Expected: 1
+Actual:   0
+  堆栈跟踪:
+     at MetBench_SystemMT.Tests.SystemMT.Launcher.ErrorMonotonicLauncherBranchingTests.RunAsync_routes_multi_phase_MR_to_ExecuteMultiPhaseAsync_only() in C:\MetBench-V2.1.4_2\MetBench_SystemMT.Tests\SystemMT\Launcher\ErrorMonotonicLauncherBranchingTests.cs:line 178
+--- End of stack trace from previous location ---
+  失败 MetBench_SystemMT.Tests.SystemMT.Launcher.ErrorMonotonicLauncherBranchingTests.RunAsync_multi_phase_uses_last_phase_as_reference_role_convention [248 ms]
+  错误消息:
+   System.NullReferenceException : Object reference not set to an instance of an object.
+  堆栈跟踪:
+     at MetBench_SystemMT.Tests.SystemMT.Launcher.ErrorMonotonicLauncherBranchingTests.RunAsync_multi_phase_uses_last_phase_as_reference_role_convention() in C:\MetBench-V2.1.4_2\MetBench_SystemMT.Tests\SystemMT\Launcher\ErrorMonotonicLauncherBranchingTests.cs:line 205
+--- End of stack trace from previous location ---
+  失败 MetBench_SystemMT.Tests.SystemMT.Launcher.ErrorMonotonicLauncherBranchingTests.RunAsync_routes_2_side_MR_to_ExecuteAsync_only [340 ms]
+  错误消息:
+   Assert.Equal() Failure: Values differ
+Expected: 1
+Actual:   0
+  堆栈跟踪:
+     at MetBench_SystemMT.Tests.SystemMT.Launcher.ErrorMonotonicLauncherBranchingTests.RunAsync_routes_2_side_MR_to_ExecuteAsync_only() in C:\MetBench-V2.1.4_2\MetBench_SystemMT.Tests\SystemMT\Launcher\ErrorMonotonicLauncherBranchingTests.cs:line 165
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:20.77]     MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMcParticleCountConvergenceTests.RunAsync_particle_count_convergence_passes_end_to_end_with_default_factor [SKIP]
+  已跳过 MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMcParticleCountConvergenceTests.RunAsync_particle_count_convergence_passes_end_to_end_with_default_factor [1 ms]
+[xUnit.net 00:00:20.87]     MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMcParticleCountConvergenceTests.RunAsync_particle_count_convergence_observed_followup_stderr_is_smaller_than_source [SKIP]
+  已跳过 MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMcParticleCountConvergenceTests.RunAsync_particle_count_convergence_observed_followup_stderr_is_smaller_than_source [1 ms]
+[xUnit.net 00:00:22.02]     ScaleNuSigmaF increases k_eff regardless of solver(solver: "openmoc", sut: "openmoc", __pickleIndex: "0", exampleTags: []) [SKIP]
+[xUnit.net 00:00:22.08]     ScaleNuSigmaF increases k_eff regardless of solver(solver: "openmc", sut: "openmc", __pickleIndex: "1", exampleTags: []) [SKIP]
+[xUnit.net 00:00:22.16]     ScaleFuelSigmaA decreases k_eff regardless of solver(solver: "openmoc", sut: "openmoc", __pickleIndex: "2", exampleTags: []) [SKIP]
+[xUnit.net 00:00:22.23]     ScaleFuelSigmaA decreases k_eff regardless of solver(solver: "openmc", sut: "openmc", __pickleIndex: "3", exampleTags: []) [SKIP]
+  已跳过 ScaleNuSigmaF increases k_eff regardless of solver(solver: "openmoc", sut: "openmoc", __pickleIndex: "0", exampleTags: []) [1 ms]
+  已跳过 ScaleNuSigmaF increases k_eff regardless of solver(solver: "openmc", sut: "openmc", __pickleIndex: "1", exampleTags: []) [1 ms]
+  已跳过 ScaleFuelSigmaA decreases k_eff regardless of solver(solver: "openmoc", sut: "openmoc", __pickleIndex: "2", exampleTags: []) [1 ms]
+  已跳过 ScaleFuelSigmaA decreases k_eff regardless of solver(solver: "openmc", sut: "openmc", __pickleIndex: "3", exampleTags: []) [1 ms]
+[xUnit.net 00:00:24.07]     Follow-up k_eff is less than source k_eff after scaling fuel sigma_a [SKIP]
+  已跳过 Follow-up k_eff is less than source k_eff after scaling fuel sigma_a [1 ms]
+[xUnit.net 00:00:26.17]     MetBench_SystemMT.Tests.SystemMT.ImportExport.MinimumMrSubsetBGroupExternalSourceSmokeTests.External_P3_P8_run_canonical_outputs_expected_observables [FAIL]
+  失败 MetBench_SystemMT.Tests.SystemMT.ImportExport.MinimumMrSubsetBGroupExternalSourceSmokeTests.External_P3_P8_run_canonical_outputs_expected_observables [1 s]
+  错误消息:
+   Command failed: python -c "
+import importlib
+import numpy as np
+
+expected = {
+    'experiments.puts.p3_lorenz': ('P3', ('t', 'trajectory', 'centroid')),
+    'experiments.puts.p8_schrodinger': ('P8', ('x', 'probability_density', 'norm')),
+}
+
+for module_name, (put_id, names) in expected.items():
+    result = importlib.import_module(module_name).run_canonical()
+    assert result['put_id'] == put_id, result
+    observables = result['observables']
+    for name in names:
+        value = observables[name]
+        arr = np.asarray(value)
+        assert arr.size > 0, (put_id, name, arr.shape)
+        assert np.all(np.isfinite(arr)), (put_id, name)
+
+print('P3/P8 canonical observables verified')
+"
+STDOUT:
+
+STDERR:
+Traceback (most recent call last):
+  File "<string>", line 11, in <module>
+  File "C:\tmp\Minimum-MR-SubSet\experiments\puts\p8_schrodinger.py", line 23, in run_canonical
+    x, psi, norms = solve_schrodinger()
+                    ^^^^^^^^^^^^^^^^^^^
+  File "C:\tmp\Minimum-MR-SubSet\experiments\puts\p8_schrodinger.py", line 13, in solve_schrodinger
+    psi /= np.sqrt(np.trapz(np.abs(psi) ** 2, x))
+                   ^^^^^^^^
+  File "C:\Users\codex\AppData\Local\Programs\Python\Python312-arm64\Lib\site-packages\numpy\__init__.py", line 805, in __getattr__
+    raise AttributeError(f"module {__name__!r} has no attribute {attr!r}")
+AttributeError: module 'numpy' has no attribute 'trapz'. Did you mean: 'trace'?
+
+  堆栈跟踪:
+     at MetBench_SystemMT.Tests.SystemMT.ImportExport.MinimumMrSubsetBGroupExternalSourceSmokeTests.External_P3_P8_run_canonical_outputs_expected_observables() in C:\MetBench-V2.1.4_2\MetBench_SystemMT.Tests\SystemMT\ImportExport\MinimumMrSubsetBGroupExternalSourceSmokeTests.cs:line 79
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+[xUnit.net 00:00:28.89]     MetBench_SystemMT.Tests.SystemMT.ImportExport.MinimumMrSubsetBGroupExternalSourceSmokeTests.External_pytest_put_smoke_runs_after_prerequisites_are_available [FAIL]
+  失败 MetBench_SystemMT.Tests.SystemMT.ImportExport.MinimumMrSubsetBGroupExternalSourceSmokeTests.External_pytest_put_smoke_runs_after_prerequisites_are_available [2 s]
+  错误消息:
+   Command failed: python -m pytest tests/puts/test_smoke.py -q
+STDOUT:
+.F...F.F..                                                               [100%]
+================================== FAILURES ===================================
+______________________ test_put_canonical_smoke[p2_wave] ______________________
+
+module_name = 'p2_wave'
+
+    @pytest.mark.parametrize("module_name", PUT_MODULES)
+    def test_put_canonical_smoke(module_name: str) -> None:
+        module = importlib.import_module(f"experiments.puts.{module_name}")
+
+        start = time.perf_counter()
+>       result = module.run_canonical()
+                 ^^^^^^^^^^^^^^^^^^^^^^
+
+tests\puts\test_smoke.py:31:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+experiments\puts\p2_wave.py:28: in run_canonical
+    x, u, energy = solve_wave()
+                   ^^^^^^^^^^^^
+experiments\puts\p2_wave.py:22: in solve_wave
+    energies.append(float(np.trapz(velocity**2 + c * c * slope**2, x)))
+                          ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+attr = 'trapz'
+
+    def __getattr__(attr):
+        # Warn for expired attributes
+        import warnings
+
+        if attr == "linalg":
+            import numpy.linalg as linalg
+            return linalg
+        elif attr == "fft":
+            import numpy.fft as fft
+            return fft
+        elif attr == "dtypes":
+            import numpy.dtypes as dtypes
+            return dtypes
+        elif attr == "random":
+            import numpy.random as random
+            return random
+        elif attr == "polynomial":
+            import numpy.polynomial as polynomial
+            return polynomial
+        elif attr == "ma":
+            import numpy.ma as ma
+            return ma
+        elif attr == "ctypeslib":
+            import numpy.ctypeslib as ctypeslib
+            return ctypeslib
+        elif attr == "exceptions":
+            import numpy.exceptions as exceptions
+            return exceptions
+        elif attr == "testing":
+            import numpy.testing as testing
+            return testing
+        elif attr == "matlib":
+            import numpy.matlib as matlib
+            return matlib
+        elif attr == "f2py":
+            import numpy.f2py as f2py
+            return f2py
+        elif attr == "typing":
+            import numpy.typing as typing
+            return typing
+        elif attr == "rec":
+            import numpy.rec as rec
+            return rec
+        elif attr == "char":
+            import numpy.char as char
+            return char
+        elif attr == "array_api":
+            raise AttributeError("`numpy.array_api` is not available from "
+                                 "numpy 2.0 onwards", name=None)
+        elif attr == "core":
+            import numpy.core as core
+            return core
+        elif attr == "strings":
+            import numpy.strings as strings
+            return strings
+        elif attr == "distutils":
+            if 'distutils' in __numpy_submodules__:
+                import numpy.distutils as distutils
+                return distutils
+            else:
+                raise AttributeError("`numpy.distutils` is not available from "
+                                     "Python 3.12 onwards", name=None)
+
+        if attr in __future_scalars__:
+            # And future warnings for those that will change, but also give
+            # the AttributeError
+            warnings.warn(
+                f"In the future `np.{attr}` will be defined as the "
+                "corresponding NumPy scalar.", FutureWarning, stacklevel=2)
+
+        if attr in __former_attrs__:
+            raise AttributeError(__former_attrs__[attr], name=None)
+
+        if attr in __expired_attributes__:
+            raise AttributeError(
+                f"`np.{attr}` was removed in the NumPy 2.0 release. "
+                f"{__expired_attributes__[attr]}",
+                name=None
+            )
+
+        if attr == "chararray":
+            warnings.warn(
+                "`np.chararray` is deprecated and will be removed from "
+                "the main namespace in the future. Use an array with a string "
+                "or bytes dtype instead.", DeprecationWarning, stacklevel=2)
+            import numpy.char as char
+            return char.chararray
+
+>       raise AttributeError(f"module {__name__!r} has no attribute {attr!r}")
+E       AttributeError: module 'numpy' has no attribute 'trapz'. Did you mean: 'trace'?
+
+C:\Users\codex\AppData\Local\Programs\Python\Python312-arm64\Lib\site-packages\numpy\__init__.py:805: AttributeError
+____________________ test_put_canonical_smoke[p6_poisson] _____________________
+
+module_name = 'p6_poisson'
+
+    @pytest.mark.parametrize("module_name", PUT_MODULES)
+    def test_put_canonical_smoke(module_name: str) -> None:
+        module = importlib.import_module(f"experiments.puts.{module_name}")
+
+        start = time.perf_counter()
+>       result = module.run_canonical()
+                 ^^^^^^^^^^^^^^^^^^^^^^
+
+tests\puts\test_smoke.py:31:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+experiments\puts\p6_poisson.py:26: in run_canonical
+    "integral_u": [float(np.trapz(u, x))],
+                         ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+attr = 'trapz'
+
+    def __getattr__(attr):
+        # Warn for expired attributes
+        import warnings
+
+        if attr == "linalg":
+            import numpy.linalg as linalg
+            return linalg
+        elif attr == "fft":
+            import numpy.fft as fft
+            return fft
+        elif attr == "dtypes":
+            import numpy.dtypes as dtypes
+            return dtypes
+        elif attr == "random":
+            import numpy.random as random
+            return random
+        elif attr == "polynomial":
+            import numpy.polynomial as polynomial
+            return polynomial
+        elif attr == "ma":
+            import numpy.ma as ma
+            return ma
+        elif attr == "ctypeslib":
+            import numpy.ctypeslib as ctypeslib
+            return ctypeslib
+        elif attr == "exceptions":
+            import numpy.exceptions as exceptions
+            return exceptions
+        elif attr == "testing":
+            import numpy.testing as testing
+            return testing
+        elif attr == "matlib":
+            import numpy.matlib as matlib
+            return matlib
+        elif attr == "f2py":
+            import numpy.f2py as f2py
+            return f2py
+        elif attr == "typing":
+            import numpy.typing as typing
+            return typing
+        elif attr == "rec":
+            import numpy.rec as rec
+            return rec
+        elif attr == "char":
+            import numpy.char as char
+            return char
+        elif attr == "array_api":
+            raise AttributeError("`numpy.array_api` is not available from "
+                                 "numpy 2.0 onwards", name=None)
+        elif attr == "core":
+            import numpy.core as core
+            return core
+        elif attr == "strings":
+            import numpy.strings as strings
+            return strings
+        elif attr == "distutils":
+            if 'distutils' in __numpy_submodules__:
+                import numpy.distutils as distutils
+                return distutils
+            else:
+                raise AttributeError("`numpy.distutils` is not available from "
+                                     "Python 3.12 onwards", name=None)
+
+        if attr in __future_scalars__:
+            # And future warnings for those that will change, but also give
+            # the AttributeError
+            warnings.warn(
+                f"In the future `np.{attr}` will be defined as the "
+                "corresponding NumPy scalar.", FutureWarning, stacklevel=2)
+
+        if attr in __former_attrs__:
+            raise AttributeError(__former_attrs__[attr], name=None)
+
+        if attr in __expired_attributes__:
+            raise AttributeError(
+                f"`np.{attr}` was removed in the NumPy 2.0 release. "
+                f"{__expired_attributes__[attr]}",
+                name=None
+            )
+
+        if attr == "chararray":
+            warnings.warn(
+                "`np.chararray` is deprecated and will be removed from "
+                "the main namespace in the future. Use an array with a string "
+                "or bytes dtype instead.", DeprecationWarning, stacklevel=2)
+            import numpy.char as char
+            return char.chararray
+
+>       raise AttributeError(f"module {__name__!r} has no attribute {attr!r}")
+E       AttributeError: module 'numpy' has no attribute 'trapz'. Did you mean: 'trace'?
+
+C:\Users\codex\AppData\Local\Programs\Python\Python312-arm64\Lib\site-packages\numpy\__init__.py:805: AttributeError
+__________________ test_put_canonical_smoke[p8_schrodinger] ___________________
+
+module_name = 'p8_schrodinger'
+
+    @pytest.mark.parametrize("module_name", PUT_MODULES)
+    def test_put_canonical_smoke(module_name: str) -> None:
+        module = importlib.import_module(f"experiments.puts.{module_name}")
+
+        start = time.perf_counter()
+>       result = module.run_canonical()
+                 ^^^^^^^^^^^^^^^^^^^^^^
+
+tests\puts\test_smoke.py:31:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+experiments\puts\p8_schrodinger.py:23: in run_canonical
+    x, psi, norms = solve_schrodinger()
+                    ^^^^^^^^^^^^^^^^^^^
+experiments\puts\p8_schrodinger.py:13: in solve_schrodinger
+    psi /= np.sqrt(np.trapz(np.abs(psi) ** 2, x))
+                   ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+attr = 'trapz'
+
+    def __getattr__(attr):
+        # Warn for expired attributes
+        import warnings
+
+        if attr == "linalg":
+            import numpy.linalg as linalg
+            return linalg
+        elif attr == "fft":
+            import numpy.fft as fft
+            return fft
+        elif attr == "dtypes":
+            import numpy.dtypes as dtypes
+            return dtypes
+        elif attr == "random":
+            import numpy.random as random
+            return random
+        elif attr == "polynomial":
+            import numpy.polynomial as polynomial
+            return polynomial
+        elif attr == "ma":
+            import numpy.ma as ma
+            return ma
+        elif attr == "ctypeslib":
+            import numpy.ctypeslib as ctypeslib
+            return ctypeslib
+        elif attr == "exceptions":
+            import numpy.exceptions as exceptions
+            return exceptions
+        elif attr == "testing":
+            import numpy.testing as testing
+            return testing
+        elif attr == "matlib":
+            import numpy.matlib as matlib
+            return matlib
+        elif attr == "f2py":
+            import numpy.f2py as f2py
+            return f2py
+        elif attr == "typing":
+            import numpy.typing as typing
+            return typing
+        elif attr == "rec":
+            import numpy.rec as rec
+            return rec
+        elif attr == "char":
+            import numpy.char as char
+            return char
+        elif attr == "array_api":
+            raise AttributeError("`numpy.array_api` is not available from "
+                                 "numpy 2.0 onwards", name=None)
+        elif attr == "core":
+            import numpy.core as core
+            return core
+        elif attr == "strings":
+            import numpy.strings as strings
+            return strings
+        elif attr == "distutils":
+            if 'distutils' in __numpy_submodules__:
+                import numpy.distutils as distutils
+                return distutils
+            else:
+                raise AttributeError("`numpy.distutils` is not available from "
+                                     "Python 3.12 onwards", name=None)
+
+        if attr in __future_scalars__:
+            # And future warnings for those that will change, but also give
+            # the AttributeError
+            warnings.warn(
+                f"In the future `np.{attr}` will be defined as the "
+                "corresponding NumPy scalar.", FutureWarning, stacklevel=2)
+
+        if attr in __former_attrs__:
+            raise AttributeError(__former_attrs__[attr], name=None)
+
+        if attr in __expired_attributes__:
+            raise AttributeError(
+                f"`np.{attr}` was removed in the NumPy 2.0 release. "
+                f"{__expired_attributes__[attr]}",
+                name=None
+            )
+
+        if attr == "chararray":
+            warnings.warn(
+                "`np.chararray` is deprecated and will be removed from "
+                "the main namespace in the future. Use an array with a string "
+                "or bytes dtype instead.", DeprecationWarning, stacklevel=2)
+            import numpy.char as char
+            return char.chararray
+
+>       raise AttributeError(f"module {__name__!r} has no attribute {attr!r}")
+E       AttributeError: module 'numpy' has no attribute 'trapz'. Did you mean: 'trace'?
+
+C:\Users\codex\AppData\Local\Programs\Python\Python312-arm64\Lib\site-packages\numpy\__init__.py:805: AttributeError
+=========================== short test summary info ===========================
+FAILED tests/puts/test_smoke.py::test_put_canonical_smoke[p2_wave] - Attribut...
+FAILED tests/puts/test_smoke.py::test_put_canonical_smoke[p6_poisson] - Attri...
+FAILED tests/puts/test_smoke.py::test_put_canonical_smoke[p8_schrodinger] - A...
+3 failed, 7 passed in 1.34s
+
+STDERR:
+
+  堆栈跟踪:
+     at MetBench_SystemMT.Tests.SystemMT.ImportExport.MinimumMrSubsetBGroupExternalSourceSmokeTests.External_pytest_put_smoke_runs_after_prerequisites_are_available() in C:\MetBench-V2.1.4_2\MetBench_SystemMT.Tests\SystemMT\ImportExport\MinimumMrSubsetBGroupExternalSourceSmokeTests.cs:line 41
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+失败!  - 失败:     6，通过:  1813，已跳过:    12，总计:  1831，持续时间: 28 s - MetBench_SystemMT.Tests.dll (net8.0)
+ExitCode: 1
+
+===== diff check =====
+Command: git diff --check
+ExitCode: 0

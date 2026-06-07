@@ -1,7 +1,7 @@
 # WPF Minimal MVVM and Behaviors Governance Plan
 
 Date: 2026-06-07
-Status: Active scoped plan for PR-0 and staged follow-ups
+Status: Active scoped plan; current branch includes PR-0, PR-1, and PR-2a evidence
 Design: docs/superpowers/specs/2026-06-07-wpf-minimal-mvvm-behaviors-governance-design.md
 
 ## Goal
@@ -98,6 +98,32 @@ Expected output:
 - Clicking the export button still reaches the existing export behavior.
 - No MetBench_BLL.Core, MetBench_DAL, or MetBench_BLL runtime semantics change.
 
+## Task 3b: PR-1 / PR-2a Completed Slice
+
+Files:
+
+- MetBench_Client/MetBench_Client.csproj
+- MetBench_Client/App.xaml.cs
+- MetBench_Client/Services/EventAggregator.cs
+- MetBench_Client/ViewModels/*.cs legacy WPF pages
+- MetBench_Client/Views/Pages/*.xaml legacy WPF pages
+- MetBench_Client/Views/Windows/*.xaml affected shell/window files
+- MetBench_Client.Tests/Architecture/WpfDependencyGovernanceTests.cs
+
+Steps:
+
+1. Remove Prism.Wpf, Stylet.Start, PropertyChanged.Fody, and WPF-UI.Tray package references.
+2. Delete Fody weaver files.
+3. Replace Stylet event/action bindings with RelayCommand and Microsoft.Xaml.Behaviors.Wpf where event binding is required.
+4. Add architecture guards preventing Prism, Stylet, Fody, and WPF-UI.Tray reintroduction.
+5. Keep Wpf.Ui, WebView2, LiveChartsCore.*, and SkiaSharp.* for later PR slices.
+
+Expected output:
+
+- Client WPF build has 0 errors.
+- Client governance tests pass.
+- `rg "s:Action|s:View.ActionTarget|Stylet|Prism|PropertyChanged.Fody|WPF-UI.Tray" MetBench_Client` has no production hits except documented plan/design text outside runtime sources.
+
 ## Task 4: Build And Test Evidence
 
 Evidence file:
@@ -185,6 +211,7 @@ git diff --check
 
 Expected output:
 
-- Only PR-0 design, spike, and VM evidence files are modified.
+- Only WPF dependency-governance design, migration, guard, and VM evidence files are modified.
 - Existing unrelated untracked local files are not committed.
-- PR body states that Wpf.Ui, Stylet, LiveCharts, SkiaSharp, WebView2, Prism, and Fody are still present after PR-0 by design.
+- PR body states that Wpf.Ui, LiveCharts, SkiaSharp, and WebView2 remain present by design for later slices.
+- PR body states that Stylet.Start, Prism.Wpf, PropertyChanged.Fody, and WPF-UI.Tray were removed in the current branch.
