@@ -7,7 +7,7 @@ Windows classification: VM evidence collected
 
 - Branch: codex/wpf-minimal-mvvm-behaviors
 - Base commit: c01de218404546d3379ebe03d8358374e768eabb
-- Head commit at latest full-test evidence collection: 3b7ef9ca42c94511cf2a93c5afd8c29b61ad31d9.
+- Head commit at latest full-test evidence collection: b6e644656f85f76e3a3759b12294e74b2f2b5c73.
 - Worktree state at latest full-test evidence collection: dirty only with PR-2c theme-surface changes and refreshed evidence before commit.
 
 ## Modified Files
