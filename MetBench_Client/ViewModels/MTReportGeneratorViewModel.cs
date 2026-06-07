@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using MetBench_BLL;
 using MetBench_Client.Views.Pages;
 using MetBench_UI.Localization;
@@ -13,7 +14,7 @@ using Wpf.Ui.Controls;
 
 namespace MetBench_Client.ViewModels
 {
-    public class MTReportGeneratorViewModel : ObservableObject, INavigationAware
+    public partial class MTReportGeneratorViewModel : ObservableObject, INavigationAware
     {
         // 导航服务 用于页面切换
         private INavigationService _navigationService;
@@ -223,6 +224,12 @@ namespace MetBench_Client.ViewModels
                     webView.Source = new Uri(HtmlReportPath);
                     break;
             }
+        }
+
+        [RelayCommand]
+        private Task ExportReportAsync()
+        {
+            return btn_ExportReport();
         }
 
         public async Task btn_ExportReport()
