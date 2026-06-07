@@ -1,4 +1,4 @@
-﻿PR-2f build/test evidence - 2026-06-07T22:51:38.6428657+08:00
+﻿PR-2g build/test evidence - 2026-06-07T23:02:01.6843689+08:00
 
 > dotnet restore MetBench.sln -v:minimal
   正在确定要还原的项目…
@@ -13,17 +13,17 @@ exit=0
 
 > dotnet build MetBench.sln --no-restore -v:minimal
   MetBench_Domain -> C:\MetBench-V2.1.4_2\MetBench_Domain\bin\Debug\net8.0\MetBench_Domain.dll
+  MetBench_UI.Localization -> C:\MetBench-V2.1.4_2\MetBench_UI.Localization\bin\Debug\net8.0\MetBench_UI.Localization.dll
   MetBench_Analyzers -> C:\MetBench-V2.1.4_2\MetBench_Analyzers\bin\Debug\netstandard2.0\MetBench_Analyzers.dll
 C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK 3.3.1”。此包可能与项目不完全兼容。
 C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK.GLWpfControl 3.3.0”。此包可能与项目不完全兼容。
 C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“SkiaSharp.Views.WPF 3.116.1”。此包可能与项目不完全兼容。
-  MetBench_UI.Localization -> C:\MetBench-V2.1.4_2\MetBench_UI.Localization\bin\Debug\net8.0\MetBench_UI.Localization.dll
   MetBench_IDAL -> C:\MetBench-V2.1.4_2\MetBench_IDAL\bin\Debug\net8.0\MetBench_IDAL.dll
   MetBench_BLL.Core -> C:\MetBench-V2.1.4_2\MetBench_BLL.Core\bin\Debug\net8.0\MetBench_BLL.Core.dll
-  MetBench_DAL -> C:\MetBench-V2.1.4_2\MetBench_DAL\bin\Debug\net8.0\MetBench_DAL.dll
 C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK 3.3.1”。此包可能与项目不完全兼容。
 C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK.GLWpfControl 3.3.0”。此包可能与项目不完全兼容。
 C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“SkiaSharp.Views.WPF 3.116.1”。此包可能与项目不完全兼容。
+  MetBench_DAL -> C:\MetBench-V2.1.4_2\MetBench_DAL\bin\Debug\net8.0\MetBench_DAL.dll
   MetBench_BLL -> C:\MetBench-V2.1.4_2\MetBench_BLL\bin\Debug\net8.0\MetBench_BLL.dll
   MetBench_SystemMT.Tests -> C:\MetBench-V2.1.4_2\MetBench_SystemMT.Tests\bin\Debug\net8.0\MetBench_SystemMT.Tests.dll
   MetBench_Client -> C:\MetBench-V2.1.4_2\MetBench_Client\bin\Debug\net8.0-windows7.0\MetBench_Client.dll
@@ -40,7 +40,7 @@ C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: �
     6 个警告
     0 个错误
 
-已用时间 00:00:02.13
+已用时间 00:00:01.48
 exit=0
 
 > dotnet test MetBench_Client.Tests\MetBench_Client.Tests.csproj --no-build -v:minimal
@@ -50,7 +50,7 @@ VSTest 版本 17.14.1 (arm64)
 正在启动测试执行，请稍候...
 总共 1 个测试文件与指定模式相匹配。
 
-已通过! - 失败:     0，通过:    30，已跳过:     0，总计:    30，持续时间: 300 ms - MetBench_Client.Tests.dll (net8.0)
+已通过! - 失败:     0，通过:    31，已跳过:     0，总计:    31，持续时间: 215 ms - MetBench_Client.Tests.dll (net8.0)
 exit=0
 
 > dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj --no-build --filter ClientI18n|SystemMtExplanation|SystemMtPairQuality -v:minimal
@@ -60,7 +60,7 @@ VSTest 版本 17.14.1 (arm64)
 正在启动测试执行，请稍候...
 总共 1 个测试文件与指定模式相匹配。
 
-已通过! - 失败:     0，通过:    18，已跳过:     0，总计:    18，持续时间: 299 ms - MetBench_SystemMT.Tests.dll (net8.0)
+已通过! - 失败:     0，通过:    18，已跳过:     0，总计:    18，持续时间: 127 ms - MetBench_SystemMT.Tests.dll (net8.0)
 exit=0
 
 > dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj --no-build -v:minimal
@@ -69,44 +69,47 @@ VSTest 版本 17.14.1 (arm64)
 
 正在启动测试执行，请稍候...
 总共 1 个测试文件与指定模式相匹配。
-[xUnit.net 00:00:10.11]     MetBench_SystemMT.Tests.SystemMT.OpenMcRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json [SKIP]
-  已跳过 MetBench_SystemMT.Tests.SystemMT.OpenMcRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json [1 ms]
-[xUnit.net 00:00:10.97]     Follow-up k_eff exceeds source k_eff after scaling fuel nu*sigma_f [SKIP]
+[xUnit.net 00:00:02.63]     MetBench_SystemMT.Tests.SystemMT.OpenMocRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json [SKIP]
+  已跳过 MetBench_SystemMT.Tests.SystemMT.OpenMocRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json [1 ms]
+[xUnit.net 00:00:03.79]     Follow-up k_eff exceeds source k_eff after scaling fuel nu*sigma_f [SKIP]
   已跳过 Follow-up k_eff exceeds source k_eff after scaling fuel nu*sigma_f [1 ms]
-[xUnit.net 00:00:14.91]     ScaleNuSigmaF increases k_eff regardless of solver(solver: "openmoc", sut: "openmoc", __pickleIndex: "0", exampleTags: []) [SKIP]
-[xUnit.net 00:00:14.99]     ScaleNuSigmaF increases k_eff regardless of solver(solver: "openmc", sut: "openmc", __pickleIndex: "1", exampleTags: []) [SKIP]
-[xUnit.net 00:00:15.06]     ScaleFuelSigmaA decreases k_eff regardless of solver(solver: "openmoc", sut: "openmoc", __pickleIndex: "2", exampleTags: []) [SKIP]
-[xUnit.net 00:00:15.15]     ScaleFuelSigmaA decreases k_eff regardless of solver(solver: "openmc", sut: "openmc", __pickleIndex: "3", exampleTags: []) [SKIP]
+[xUnit.net 00:00:23.31]     ScaleNuSigmaF increases k_eff regardless of solver(solver: "openmoc", sut: "openmoc", __pickleIndex: "0", exampleTags: []) [SKIP]
+[xUnit.net 00:00:23.47]     ScaleNuSigmaF increases k_eff regardless of solver(solver: "openmc", sut: "openmc", __pickleIndex: "1", exampleTags: []) [SKIP]
   已跳过 ScaleNuSigmaF increases k_eff regardless of solver(solver: "openmoc", sut: "openmoc", __pickleIndex: "0", exampleTags: []) [1 ms]
   已跳过 ScaleNuSigmaF increases k_eff regardless of solver(solver: "openmc", sut: "openmc", __pickleIndex: "1", exampleTags: []) [1 ms]
+[xUnit.net 00:00:24.68]     ScaleFuelSigmaA decreases k_eff regardless of solver(solver: "openmoc", sut: "openmoc", __pickleIndex: "2", exampleTags: []) [SKIP]
+[xUnit.net 00:00:25.21]     ScaleFuelSigmaA decreases k_eff regardless of solver(solver: "openmc", sut: "openmc", __pickleIndex: "3", exampleTags: []) [SKIP]
+[xUnit.net 00:00:25.39]     MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMcParticleCountConvergenceTests.RunAsync_particle_count_convergence_passes_end_to_end_with_default_factor [SKIP]
+[xUnit.net 00:00:25.58]     MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMcParticleCountConvergenceTests.RunAsync_particle_count_convergence_observed_followup_stderr_is_smaller_than_source [SKIP]
   已跳过 ScaleFuelSigmaA decreases k_eff regardless of solver(solver: "openmoc", sut: "openmoc", __pickleIndex: "2", exampleTags: []) [1 ms]
   已跳过 ScaleFuelSigmaA decreases k_eff regardless of solver(solver: "openmc", sut: "openmc", __pickleIndex: "3", exampleTags: []) [1 ms]
-[xUnit.net 00:00:20.48]     MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMcParticleCountConvergenceTests.RunAsync_particle_count_convergence_passes_end_to_end_with_default_factor [SKIP]
   已跳过 MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMcParticleCountConvergenceTests.RunAsync_particle_count_convergence_passes_end_to_end_with_default_factor [1 ms]
-[xUnit.net 00:00:20.58]     MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMcParticleCountConvergenceTests.RunAsync_particle_count_convergence_observed_followup_stderr_is_smaller_than_source [SKIP]
   已跳过 MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMcParticleCountConvergenceTests.RunAsync_particle_count_convergence_observed_followup_stderr_is_smaller_than_source [1 ms]
-[xUnit.net 00:00:51.06]     Follow-up k_eff is less than source k_eff after scaling fuel sigma_a [SKIP]
-  已跳过 Follow-up k_eff is less than source k_eff after scaling fuel sigma_a [1 ms]
-[xUnit.net 00:01:05.94]     MetBench_SystemMT.Tests.SystemMT.OpenMocRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json [SKIP]
-[xUnit.net 00:01:06.32]     MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMocRayTrackConvergenceTests.RunAsync_ray_track_convergence_passes_end_to_end_with_default_phases [SKIP]
-  已跳过 MetBench_SystemMT.Tests.SystemMT.OpenMocRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json [1 ms]
+[xUnit.net 00:00:39.48]     MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMocRayTrackConvergenceTests.RunAsync_ray_track_convergence_passes_end_to_end_with_default_phases [SKIP]
+[xUnit.net 00:00:39.67]     MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMocRayTrackConvergenceTests.RunAsync_ray_track_convergence_writes_calibrated_phase_inputs [SKIP]
   已跳过 MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMocRayTrackConvergenceTests.RunAsync_ray_track_convergence_passes_end_to_end_with_default_phases [1 ms]
-[xUnit.net 00:01:06.52]     MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMocRayTrackConvergenceTests.RunAsync_ray_track_convergence_writes_calibrated_phase_inputs [SKIP]
   已跳过 MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMocRayTrackConvergenceTests.RunAsync_ray_track_convergence_writes_calibrated_phase_inputs [1 ms]
+[xUnit.net 00:01:02.61]     MetBench_SystemMT.Tests.SystemMT.OpenMcRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json [SKIP]
+  已跳过 MetBench_SystemMT.Tests.SystemMT.OpenMcRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json [1 ms]
+[xUnit.net 00:01:09.99]     Follow-up k_eff is less than source k_eff after scaling fuel sigma_a [SKIP]
+  已跳过 Follow-up k_eff is less than source k_eff after scaling fuel sigma_a [1 ms]
 
-已通过! - 失败:     0，通过:  1819，已跳过:    12，总计:  1831，持续时间: 1 m 35 s - MetBench_SystemMT.Tests.dll (net8.0)
+已通过! - 失败:     0，通过:  1819，已跳过:    12，总计:  1831，持续时间: 1 m 19 s - MetBench_SystemMT.Tests.dll (net8.0)
 exit=0
 
 > git diff --check
-
-> git diff --check
 warning: in the working copy of 'MetBench_Client.Tests/Architecture/WpfDependencyGovernanceTests.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Controls/SimplePagination.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Controls/PagingBar.xaml', LF will be replaced by CRLF the next time Git touches it
 exit=0
 
 > rg -n http://schemas.lepo.co/wpfui/2022/xaml|Wpf\.Ui|ui: MetBench_Client\Views\Pages\SettingsPage.xaml MetBench_Client\Views\Pages\SettingsPage.xaml.cs
 exit=1
 
 > rg -n http://schemas.lepo.co/wpfui/2022/xaml|Wpf\.Ui|ui: MetBench_Client\Views\Windows\ProgressWindow.xaml
+exit=1
+
+> rg -n http://schemas.lepo.co/wpfui/2022/xaml|Wpf\.Ui|ui: MetBench_Client\Controls\SimplePagination.xaml MetBench_Client\Views\Controls\PagingBar.xaml
 exit=1
 
 > rg -n Wpf.Ui.Appearance|using Wpf.Ui.Appearance MetBench_Client\ViewModels MetBench_Client\Helpers

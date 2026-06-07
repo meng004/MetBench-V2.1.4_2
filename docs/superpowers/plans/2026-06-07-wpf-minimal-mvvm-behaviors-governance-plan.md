@@ -1,7 +1,7 @@
 # WPF Minimal MVVM and Behaviors Governance Plan
 
 Date: 2026-06-07
-Status: Active scoped plan; current branch includes PR-0, PR-1, PR-2a, PR-2b, PR-2c, PR-2d, PR-2e, and PR-2f evidence
+Status: Active scoped plan; current branch includes PR-0, PR-1, PR-2a, PR-2b, PR-2c, PR-2d, PR-2e, PR-2f, and PR-2g evidence
 Design: docs/superpowers/specs/2026-06-07-wpf-minimal-mvvm-behaviors-governance-design.md
 
 ## Goal
@@ -250,6 +250,28 @@ Expected output:
 - Client WPF build has 0 errors.
 - Client governance tests pass.
 - `rg "http://schemas.lepo.co/wpfui/2022/xaml|Wpf\\.Ui|ui:" MetBench_Client\Views\Windows\ProgressWindow.xaml` has no matches.
+- No MetBench_BLL.Core, MetBench_DAL, or MetBench_BLL runtime semantics change.
+
+## Task 3h: PR-2g Paging Controls Wpf.Ui Control Removal Slice
+
+Files:
+
+- MetBench_Client/Controls/SimplePagination.xaml
+- MetBench_Client/Views/Controls/PagingBar.xaml
+- MetBench_Client.Tests/Architecture/WpfDependencyGovernanceTests.cs
+
+Steps:
+
+1. Replace Wpf.Ui paging buttons with WPF-native `Button`.
+2. Replace Wpf.Ui `SymbolIcon` markup with stable text button content for the small paging toolbar.
+3. Remove Wpf.Ui XAML namespaces from both paging controls.
+4. Add a paging-controls architecture guard preventing Wpf.Ui namespace or `ui:` markup from returning.
+
+Expected output:
+
+- Client WPF build has 0 errors.
+- Client governance tests pass.
+- `rg "http://schemas.lepo.co/wpfui/2022/xaml|Wpf\\.Ui|ui:" MetBench_Client\Controls\SimplePagination.xaml MetBench_Client\Views\Controls\PagingBar.xaml` has no matches.
 - No MetBench_BLL.Core, MetBench_DAL, or MetBench_BLL runtime semantics change.
 
 ## Task 4: Build And Test Evidence

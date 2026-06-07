@@ -265,6 +265,33 @@ public sealed class WpfDependencyGovernanceTests
         Assert.True(matches.Length == 0, "Unexpected WPF-UI ProgressWindow usage: " + string.Join(", ", matches));
     }
 
+    [Fact]
+    public void Paging_controls_no_longer_use_wpf_ui_controls_or_namespaces()
+    {
+        var repoRoot = FindRepositoryRoot();
+        var pagingFiles = new[]
+        {
+            Path.Combine(repoRoot, "MetBench_Client", "Controls", "SimplePagination.xaml"),
+            Path.Combine(repoRoot, "MetBench_Client", "Views", "Controls", "PagingBar.xaml"),
+        };
+        var forbiddenTerms = new[]
+        {
+            "http://schemas.lepo.co/wpfui/2022/xaml",
+            "Wpf.Ui",
+            "ui:",
+        };
+
+        var matches = pagingFiles
+            .Select(path => new { Path = path, Text = File.ReadAllText(path) })
+            .SelectMany(file => forbiddenTerms
+                .Where(term => file.Text.Contains(term, StringComparison.Ordinal))
+                .Select(term => $"{Path.GetRelativePath(repoRoot, file.Path)} contains {term}"))
+            .OrderBy(match => match)
+            .ToArray();
+
+        Assert.True(matches.Length == 0, "Unexpected WPF-UI paging control usage: " + string.Join(", ", matches));
+    }
+
     private static IEnumerable<string> EnumerateClientFiles(string clientRoot, string searchPattern)
     {
         return Directory.EnumerateFiles(clientRoot, searchPattern, SearchOption.AllDirectories)
