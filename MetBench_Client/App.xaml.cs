@@ -33,7 +33,6 @@ using MetBench_BLL.Coverage;
 using MetBench_UI.Localization;
 using Wpf.Ui.Controls;
 using Wpf.Ui;
-using Stylet;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiteDB;
@@ -67,15 +66,10 @@ namespace MetBench_Client
                 // UI-neutral localization (MetBench_UI.Localization)
                 services.AddSingleton<IAppLocalizationService, AppLocalizationService>();
                 services.AddSingleton<LocalizedTextProvider>();
+                services.AddSingleton<IClientThemeController, WpfUiClientThemeController>();
 
                 // Page resolver service 注入服务提供程序
                 services.AddSingleton<IPageService, PageService>();
-
-                // Theme manipulation
-                services.AddSingleton<IThemeService, ThemeService>();
-
-                // TaskBar manipulation
-                services.AddSingleton<ITaskBarService, TaskBarService>();
 
                 // Service containing navigation, same as INavigationWindow... but without window
                 services.AddSingleton<INavigationService, NavigationService>();

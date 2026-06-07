@@ -1,10 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using LiveChartsCore;
+using CommunityToolkit.Mvvm.Input;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using LiveChartsCore.SkiaSharpView.VisualElements;
 using MetBench_BLL;
 using MetBench_Client.Helpers;
+using MetBench_Client.Services;
 using MetBench_Client.Views.Pages;
 using MetBench_Domain;
 using MetBench_IDAL;
@@ -25,7 +27,7 @@ using ValidationResult = FluentValidation.Results.ValidationResult;
 
 namespace MetBench_Client.ViewModels
 {
-    public class MTExecutionViewModel : ObservableObject, INavigationAware
+    public partial class MTExecutionViewModel : ObservableObject, INavigationAware
     {
         // 导航服务 用于页面切换
         private INavigationService _navigationService;
@@ -286,17 +288,7 @@ namespace MetBench_Client.ViewModels
         // 提示信息弹窗
         public async Task<bool> showMessageAsync(string message, string title)
         {
-            var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-            {
-                Title = title,
-                Content = message,
-            };
-            uiMessageBox.CloseButtonAppearance = 0;
-            uiMessageBox.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            uiMessageBox.CloseButtonText = "OK";
-            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
-            //primary为第一个按钮
-            return messageResult == "Primary" ? true : false;
+            return await UiDialog.ShowMessageAsync(message, title);
         }
 
         public void LoadAndRenderData(PlotType plotType)
@@ -535,17 +527,13 @@ namespace MetBench_Client.ViewModels
 
             if (Data == null)
             {
-
                 var msg = "请选择蜕变关系！";
-                var res = await showMessageAsync(msg, "Tips");
+                await showMessageAsync(msg, "Tips");
 
-                if (!res)
-                {
-                    // 进行页面跳转 跳转到MRManagement页面
-                    var targetPageType = typeof(Views.Pages.MRManagementPage);
-                    var page = _pageService.GetPage(targetPageType) as MRManagementPage;
-                    _navigationService.Navigate(targetPageType);
-                }
+                // 进行页面跳转 跳转到MRManagement页面
+                var targetPageType = typeof(Views.Pages.MRManagementPage);
+                var page = _pageService.GetPage(targetPageType) as MRManagementPage;
+                _navigationService.Navigate(targetPageType);
             }
         }
 
@@ -708,6 +696,18 @@ namespace MetBench_Client.ViewModels
                 _ = showMessageAsync($"图表切换失败: {ex.Message}", "错误");
             }
         }
+
+        [RelayCommand]
+        private Task AutoMr2Async() => btn_AutoMR2();
+
+        [RelayCommand]
+        private void CancelExecution() => btn_Cancle();
+
+        [RelayCommand]
+        private void OpenMtReport() => btn_MTReport();
+
+        [RelayCommand]
+        private void PlotTypeSelectionChanged() => com_SelectionChanged();
 
         public AutoRunMR_Await AutoRunMR_Await
         {

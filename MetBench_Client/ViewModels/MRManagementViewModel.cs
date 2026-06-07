@@ -1,13 +1,14 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using MetBench_BLL;
+using CommunityToolkit.Mvvm.Input;
 using MetBench_Client.Helpers;
 using MetBench_Client.Models;
+using MetBench_Client.Services;
 using MetBench_Client.Util;
 using MetBench_Client.Views.Pages;
 using MetBench_Domain;
 using MetBench_IDAL;
 using MetBench_UI.Localization;
-using Stylet;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -24,7 +25,7 @@ using ValidationResult = FluentValidation.Results.ValidationResult;
 namespace MetBench_Client.ViewModels
 {
 
-    public class MRManagementViewModel : ObservableObject, INavigationAware, IHandle<ApplicationAddEvent>, IHandle<ApplicationMoidfyEvent>, IHandle<ApplicationDeleteEvent>, IHandle<DomainAddEvent>, IHandle<DomainModifyEvent>, IHandle<DomainDeleteEvent>, IHandle<MetamorphicRelationOperationEvent>
+    public partial class MRManagementViewModel : ObservableObject, INavigationAware, IHandle<ApplicationAddEvent>, IHandle<ApplicationMoidfyEvent>, IHandle<ApplicationDeleteEvent>, IHandle<DomainAddEvent>, IHandle<DomainModifyEvent>, IHandle<DomainDeleteEvent>, IHandle<MetamorphicRelationOperationEvent>
     {
         public LocalizedTextProvider Localization { get; }
 
@@ -128,9 +129,21 @@ namespace MetBench_Client.ViewModels
         // PR-VM-6 / F19: Status filter dropdown for MRBinding-derived Status.
         // 默认 "active" — 隐藏 deprecated / archived rows. "all" 不过滤.
         public List<string> StatusFilterList { get; } = new() { "active", "deprecated", "archived", "experimental", "all" };
-        public string StatusFilter { get; set; } = "active";
+        private string _statusFilter = "active";
 
-        // Filter change handler — Fody emits On{Property}Changed plumbing; this method name is reflected on.
+        public string StatusFilter
+        {
+            get => _statusFilter;
+            set
+            {
+                if (SetProperty(ref _statusFilter, value))
+                {
+                    OnStatusFilterChanged();
+                }
+            }
+        }
+
+        // Filter change handler kept explicit after removing the property-change weaver.
         public void OnStatusFilterChanged() => reload_ItemsSource();
 
         // 初始化标志
@@ -271,6 +284,27 @@ namespace MetBench_Client.ViewModels
             //ApplicationNameBoxText = string.Empty;
         }
 
+        [RelayCommand]
+        private void ReloadItemsSource() => reload_ItemsSource();
+
+        [RelayCommand]
+        private void ShowSelected() => show();
+
+        [RelayCommand]
+        private Task AddMrAsync() => btnAdd_Click();
+
+        [RelayCommand]
+        private Task ModifyMrAsync() => btnModify_Click();
+
+        [RelayCommand]
+        private Task DeleteMrAsync() => btnDelect_Click();
+
+        [RelayCommand]
+        private void CancelMr() => btnCancel_Click();
+
+        [RelayCommand]
+        private void ExecuteMt(int id) => btn_MTExcute(id);
+
         /// <summary>
         /// PR-VM-6 / F19: 对一条 MR (IdMR=mrId) 查它的所有 MRBinding，按规则聚合 Status:
         ///   • 任一 binding active → "active"
@@ -395,19 +429,7 @@ namespace MetBench_Client.ViewModels
         // 提示信息弹窗
         public async Task<bool> showMessageAsync(string message, string title)
         {
-            var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-            {
-                Title = title,
-                Content = message,
-            };
-            uiMessageBox.CloseButtonAppearance = 0;
-            uiMessageBox.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            uiMessageBox.HorizontalAlignment = System.Windows.HorizontalAlignment.Center;
-            uiMessageBox.CloseButtonText = "OK";
-            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
-
-            // primary为第一个按钮
-            return messageResult == "Primary" ? true : false;
+            return await UiDialog.ShowMessageAsync(message, title);
         }
 
         // 增加蜕变关系
@@ -488,18 +510,7 @@ namespace MetBench_Client.ViewModels
                 return;
             }
             var msg2 = "是否修改该记录?";
-            var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-            {
-                Title = "Tips",
-                Content = msg2,
-            };
-            uiMessageBox.CloseButtonAppearance = 0;
-            uiMessageBox.HorizontalAlignment = System.Windows.HorizontalAlignment.Center;
-            uiMessageBox.CloseButtonText = "No";
-            uiMessageBox.IsPrimaryButtonEnabled = true;
-            uiMessageBox.PrimaryButtonText = "Yes";
-            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
-            var result = messageResult == "Primary" ? true : false;
+            var result = await UiDialog.ConfirmAsync(msg2, "Tips");
             MetamorphicRelation metamorphicRelation = null;
             //使用异步方式，将Latex转换为Sympy，Latex渲染图片
             IsIndeterminate = true;
@@ -581,18 +592,7 @@ namespace MetBench_Client.ViewModels
 
             var metamorphicRelation = Create();
             var message1 = "是否删除该记录?";
-            var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-            {
-                Title = "Tips",
-                Content = message1,
-            };
-            uiMessageBox.CloseButtonAppearance = 0;
-            uiMessageBox.HorizontalAlignment = System.Windows.HorizontalAlignment.Center;
-            uiMessageBox.CloseButtonText = "No";
-            uiMessageBox.IsPrimaryButtonEnabled = true;
-            uiMessageBox.PrimaryButtonText = "Yes";
-            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
-            var result = messageResult == "Primary" ? true : false;
+            var result = await UiDialog.ConfirmAsync(message1, "Tips");
 
             if (result)
             {

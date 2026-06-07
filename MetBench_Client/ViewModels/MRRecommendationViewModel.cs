@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using MetBench_BLL;
+using CommunityToolkit.Mvvm.Input;
 using MetBench_Client.Helpers;
+using MetBench_Client.Services;
 using MetBench_Client.Views.Pages;
 using MetBench_UI.Localization;
 using Microsoft.Win32;
@@ -17,7 +19,7 @@ using ValidationResult = FluentValidation.Results.ValidationResult;
 
 namespace MetBench_Client.ViewModels
 {
-    public class MRRecommendationViewModel : ObservableObject, INavigationAware
+    public partial class MRRecommendationViewModel : ObservableObject, INavigationAware
     {
         // 导航服务 用于页面切换
         private INavigationService _navigationService;
@@ -133,6 +135,24 @@ namespace MetBench_Client.ViewModels
             Data = new ObservableCollection<MRRecommendationVIsualResult>(booksPaged);
         }
 
+        [RelayCommand]
+        private Task BackUploadAsync() => btnBack_Click();
+
+        [RelayCommand]
+        private Task AddCodeAsync() => btnAddCode_Click();
+
+        [RelayCommand]
+        private Task RecommendAsync() => btnRecommend_Click();
+
+        [RelayCommand]
+        private void CancelRecommendation() => btn_Cancle();
+
+        [RelayCommand]
+        private void EditRecommendedMr(int id) => btn_EditSelectedMR(id);
+
+        [RelayCommand]
+        private void EditRecommendedApplication(int id) => btn_EditSelectedApplication(id);
+
         private TargetProgram Create()
         {
             // 参数个数默认为1
@@ -153,18 +173,7 @@ namespace MetBench_Client.ViewModels
         // 提示信息弹窗
         public async Task<bool> showMessageAsync(string message, string title)
         {
-            var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-            {
-                Title = title,
-                Content = message,
-            };
-            uiMessageBox.CloseButtonAppearance = 0;
-            uiMessageBox.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            uiMessageBox.HorizontalAlignment = System.Windows.HorizontalAlignment.Center;
-            uiMessageBox.CloseButtonText = "OK";
-            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
-            //primary为第一个按钮
-            return messageResult == "Primary" ? true : false;
+            return await UiDialog.ShowMessageAsync(message, title);
         }
 
         // 撤回上传
@@ -178,21 +187,7 @@ namespace MetBench_Client.ViewModels
         // 将目标程序复制粘贴到fuction文件夹
         public async Task btnAddCode_Click()
         {
-            var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-            {
-                Title = "Tips",
-                Content = "确认上传文件吗？",
-            };
-            uiMessageBox.CloseButtonAppearance = 0;
-            uiMessageBox.CloseButtonText = "No";
-            uiMessageBox.IsPrimaryButtonEnabled = true;
-            uiMessageBox.PrimaryButtonAppearance = 0;
-            uiMessageBox.HorizontalAlignment = HorizontalAlignment.Center;
-            uiMessageBox.PrimaryButtonText = "Yes";
-
-            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
-            //primary为第一个按钮
-            var confirmResult = messageResult == "Primary" ? true : false;
+            var confirmResult = await UiDialog.ConfirmAsync("确认上传文件吗？", "Tips");
             if (!confirmResult)
             {
                 return;

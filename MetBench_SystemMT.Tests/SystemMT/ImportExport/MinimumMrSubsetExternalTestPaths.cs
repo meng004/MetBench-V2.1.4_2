@@ -142,11 +142,54 @@ internal static class MinimumMrSubsetExternalTestPaths
             timeout);
     }
 
+    public static MinimumMrSubsetCommandResult RunPythonWithNumpyTrapzCompatibility(
+        string workingDirectory,
+        MinimumMrSubsetPythonCommand python,
+        IReadOnlyList<string> arguments,
+        TimeSpan timeout)
+    {
+        var shimRoot = Path.Combine(
+            Path.GetTempPath(),
+            "MetBenchMinimumMrSubsetPythonCompat",
+            Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(shimRoot);
+
+        File.WriteAllText(
+            Path.Combine(shimRoot, "sitecustomize.py"),
+            """
+            import numpy as _np
+
+            if not hasattr(_np, "trapz") and hasattr(_np, "trapezoid"):
+                _np.trapz = _np.trapezoid
+            """,
+            Encoding.UTF8);
+
+        try
+        {
+            var existingPythonPath = Environment.GetEnvironmentVariable("PYTHONPATH");
+            var pythonPath = string.IsNullOrWhiteSpace(existingPythonPath)
+                ? shimRoot
+                : shimRoot + Path.PathSeparator + existingPythonPath;
+
+            return RunProcess(
+                python.FileName,
+                [.. python.PrefixArguments, .. arguments],
+                workingDirectory,
+                timeout,
+                new Dictionary<string, string> { ["PYTHONPATH"] = pythonPath });
+        }
+        finally
+        {
+            try { Directory.Delete(shimRoot, recursive: true); } catch { /* best-effort cleanup */ }
+        }
+    }
+
     private static MinimumMrSubsetCommandResult RunProcess(
         string fileName,
         IReadOnlyList<string> arguments,
         string workingDirectory,
-        TimeSpan timeout)
+        TimeSpan timeout,
+        IReadOnlyDictionary<string, string>? environment = null)
     {
         var commandLine = FormatCommandLine(fileName, arguments);
         try
@@ -165,6 +208,14 @@ internal static class MinimumMrSubsetExternalTestPaths
             foreach (var argument in arguments)
             {
                 process.StartInfo.ArgumentList.Add(argument);
+            }
+
+            if (environment is not null)
+            {
+                foreach (var (key, value) in environment)
+                {
+                    process.StartInfo.Environment[key] = value;
+                }
             }
 
             process.Start();

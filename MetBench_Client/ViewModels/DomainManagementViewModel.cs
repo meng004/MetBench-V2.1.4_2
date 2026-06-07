@@ -1,10 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using MetBench_BLL;
+using CommunityToolkit.Mvvm.Input;
 using MetBench_Client.Helpers;
+using MetBench_Client.Services;
 using MetBench_Client.Util;
 using MetBench_Domain;
 using MetBench_UI.Localization;
-using Stylet;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -16,7 +17,7 @@ using ValidationResult = FluentValidation.Results.ValidationResult;
 
 namespace MetBench_Client.ViewModels
 {
-    public class DomainManagementViewModel : ObservableObject, INavigationAware
+    public partial class DomainManagementViewModel : ObservableObject, INavigationAware
     {
         public LocalizedTextProvider Localization { get; }
 
@@ -108,6 +109,24 @@ namespace MetBench_Client.ViewModels
             DomainNameBoxText = string.Empty;
         }
 
+        [RelayCommand]
+        private void ReloadItemsSource() => reload_ItemsSource();
+
+        [RelayCommand]
+        private void ShowSelected() => show();
+
+        [RelayCommand]
+        private Task AddDomainAsync() => btnAdd_Click();
+
+        [RelayCommand]
+        private Task ModifyDomainAsync() => btnModify_Click();
+
+        [RelayCommand]
+        private Task DeleteDomainAsync() => btnDelect_Click();
+
+        [RelayCommand]
+        private void CancelDomain() => btnCancel_Click();
+
         // 创建应用领域实体
         private Domain Create()
         {
@@ -123,18 +142,7 @@ namespace MetBench_Client.ViewModels
         // 提示信息弹窗
         public async Task<bool> showMessageAsync(string message, string title)
         {
-            var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-            {
-                Title = title,
-                Content = message,
-            };
-            uiMessageBox.CloseButtonAppearance = 0;
-            uiMessageBox.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            uiMessageBox.HorizontalAlignment = System.Windows.HorizontalAlignment.Center;
-            uiMessageBox.CloseButtonText = "OK";
-            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
-            //primary为第一个按钮
-            return messageResult == "Primary" ? true : false;
+            return await UiDialog.ShowMessageAsync(message, title);
         }
 
         public async Task btnAdd_Click()
@@ -193,18 +201,7 @@ namespace MetBench_Client.ViewModels
                 return;
             }
             var msg2 = "是否修改该记录?";
-            var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-            {
-                Title = "Tips",
-                Content = msg2,
-            };
-            uiMessageBox.CloseButtonAppearance = 0;
-            uiMessageBox.HorizontalAlignment = System.Windows.HorizontalAlignment.Center;
-            uiMessageBox.CloseButtonText = "No";
-            uiMessageBox.IsPrimaryButtonEnabled = true;
-            uiMessageBox.PrimaryButtonText = "Yes";
-            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
-            var result = messageResult == "Primary" ? true : false;
+            var result = await UiDialog.ConfirmAsync(msg2, "Tips");
 
             if(result)
             {
@@ -303,18 +300,7 @@ namespace MetBench_Client.ViewModels
                 return;
             }
             var msg2 = "是否修改该记录?";
-            var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-            {
-                Title = "Tips",
-                Content = msg2,
-            };
-            uiMessageBox.CloseButtonAppearance = 0;
-            uiMessageBox.HorizontalAlignment = System.Windows.HorizontalAlignment.Center;
-            uiMessageBox.CloseButtonText = "No";
-            uiMessageBox.IsPrimaryButtonEnabled = true;
-            uiMessageBox.PrimaryButtonText = "Yes";
-            var messageResult = (await uiMessageBox.ShowDialogAsync()).ToString();
-            var result = messageResult == "Primary" ? true : false;
+            var result = await UiDialog.ConfirmAsync(msg2, "Tips");
 
             if(result)
             {

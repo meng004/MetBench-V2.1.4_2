@@ -3,10 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:MetBench_Client.Views.Windows" xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         mc:Ignorable="d"
         Title="ProgressWindow" Height="200" Width="200">
     <Grid>
-        <ui:ProgressRing IsIndeterminate="True" VerticalAlignment="Center"/>
+        <ProgressBar
+            Width="120"
+            Height="10"
+            VerticalAlignment="Center"
+            IsIndeterminate="True" />
     </Grid>
 </Window>

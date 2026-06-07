@@ -3,7 +3,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-      xmlns:s="https://github.com/canton7/Stylet"
+      xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
       xmlns:viewmodels="clr-namespace:MetBench_Client.ViewModels"
       xmlns:local="clr-namespace:MetBench_Client.Views.Pages"
       xmlns:models1="clr-namespace:MetBench_Client.Models"
@@ -31,13 +31,17 @@
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0 3 0 5">
                 <TextBlock Text="{Binding ViewModel.Localization[AppMgmt_ApplicationName]}" VerticalAlignment="Center" Margin="15 0 0 0"/>
-                    <ui:TextBox  TextWrapping="Wrap" ClearButtonEnabled="True"  Text="{Binding ViewModel.ApplicationNameBoxText,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" s:View.ActionTarget="{Binding ViewModel}"  Margin="10 0 0 0" Width="150" />
-                <ui:Button Appearance="Info" Content="{Binding ViewModel.Localization[Legacy_Query]}" Margin="5 0 0 0" s:View.ActionTarget="{Binding ViewModel}"
-     Command="{s:Action reload_ItemsSource}"/>
+                    <ui:TextBox  TextWrapping="Wrap" ClearButtonEnabled="True"  Text="{Binding ViewModel.ApplicationNameBoxText,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"  Margin="10 0 0 0" Width="150" />
+                <ui:Button Appearance="Info" Content="{Binding ViewModel.Localization[Legacy_Query]}" Margin="5 0 0 0"
+     Command="{Binding ViewModel.ReloadItemsSourceCommand}"/>
             </StackPanel>
             <ui:DataGrid x:Name="datagrid" MaxHeight="320"  BorderThickness="2" BorderBrush="LightGray" Margin="10 0 10 10" FontSize="15" LoadingRow="dataGrid_LoadingRow" HeadersVisibility="Column" 
-           s:View.ActionTarget="{Binding ViewModel}"
-           MouseLeftButtonUp="{s:Action show}"  SelectedItem="{Binding ViewModel.DataGridSelectedItem,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" ItemsSource="{Binding ViewModel.Data,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"  AutoGenerateColumns="False" CanUserAddRows="False" AutomationProperties.AutomationId="DataGrid_Application">
+           SelectedItem="{Binding ViewModel.DataGridSelectedItem,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" ItemsSource="{Binding ViewModel.Data,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"  AutoGenerateColumns="False" CanUserAddRows="False" AutomationProperties.AutomationId="DataGrid_Application">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseLeftButtonUp">
+                            <i:InvokeCommandAction Command="{Binding ViewModel.ShowSelectedCommand}" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
                 <!--进行datagrid的TextColumn 进行居中-->
                 <DataGrid.Resources>
                     <Style x:Key="CenteredTextBlockStyle" TargetType="{x:Type TextBlock}">
@@ -187,17 +191,14 @@
                             />
                 <ui:Button Appearance="Info" Content="{Binding ViewModel.Localization[AppMgmt_ClearSelection]}"
                            Margin="5 0 0 0"
-                           s:View.ActionTarget="{Binding ViewModel}"
-                           Command="{s:Action btnBack_Click}"
+                           Command="{Binding ViewModel.BackUploadCommand}"
                            />
                 <ui:Button Appearance="Primary" Content="{Binding ViewModel.Localization[AppMgmt_Upload]}" Margin="5 0 0 0"
-                           s:View.ActionTarget="{Binding ViewModel}"
-                           Command="{s:Action btnAddCode_Click}"
+                           Command="{Binding ViewModel.AddCodeCommand}"
                            Icon="{ui:SymbolIcon ArrowUpload24}"
                            />
                 <ui:Button Appearance="Primary" Content="{Binding ViewModel.Localization[AppMgmt_Unzip]}" Margin="5 0 0 0"
-                           s:View.ActionTarget="{Binding ViewModel}" 
-                           Command="{s:Action btnExtractCode_Click}"
+                           Command="{Binding ViewModel.ExtractCodeCommand}"
                            Icon="{ui:SymbolIcon FolderZip24}"
                            />
                 <TextBlock Text="*" Foreground="Red" Margin="5 0 0 0" VerticalAlignment="Center" />
@@ -210,12 +211,10 @@
                          />
                 <ui:Button Appearance="Info" Content="{Binding ViewModel.Localization[AppMgmt_ClearSelection]}"
                            Margin="5 0 0 0"
-                           s:View.ActionTarget="{Binding ViewModel}"
-                           Command="{s:Action btnSourceTestCaseBack_Click}"
+                           Command="{Binding ViewModel.SourceTestCaseBackCommand}"
                            />
                 <ui:Button Appearance="Primary" Content="{Binding ViewModel.Localization[AppMgmt_Upload]}"  Margin="5 0 0 0"
-                           s:View.ActionTarget="{Binding ViewModel}"
-                           Command="{s:Action btnAddSourceTestCase_Click}"
+                           Command="{Binding ViewModel.AddSourceTestCaseCommand}"
                            />
             </StackPanel>
             <StackPanel  Grid.Row="3" Grid.Column="1" x:Name="stackpanel8" Orientation="Horizontal" VerticalAlignment="Center">
@@ -252,15 +251,13 @@
             <StackPanel  Grid.Row="2" Grid.Column="2" x:Name="stackpanel11" Orientation="Horizontal" VerticalAlignment="Center">
 
                 <ui:Button Appearance="Primary" Content="{Binding ViewModel.Localization[AppMgmt_InputParams]}" Margin="105 0 0 0"
-           s:View.ActionTarget="{Binding ViewModel}"
-           Command="{s:Action btnInputParams_Click}"
+           Command="{Binding ViewModel.InputParamsCommand}"
            Icon="{ui:SymbolIcon CalendarEdit24}"
            />
             </StackPanel>
             <StackPanel  Grid.Row="3" Grid.Column="2" x:Name="stackpanel12" Orientation="Horizontal" VerticalAlignment="Center">
                 <ui:Button Appearance="Primary" Content="{Binding ViewModel.Localization[AppMgmt_OutputParams]}" Margin="105 0 0 0"
-           s:View.ActionTarget="{Binding ViewModel}"
-           Command="{s:Action btnOutputParams_Click}"
+           Command="{Binding ViewModel.OutputParamsCommand}"
            Icon="{ui:SymbolIcon CalendarEdit24}"
            />
             </StackPanel>
@@ -273,23 +270,19 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <ui:Button Grid.Column="0" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Add]}" Width="100" Height="40"
-                       s:View.ActionTarget="{Binding ViewModel}"
-                       Command="{s:Action btnAdd_Click}"
+                       Command="{Binding ViewModel.AddApplicationCommand}"
                        Icon="{ui:SymbolIcon GuestAdd24}"
                        />
             <ui:Button Grid.Column="1" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Modify]}" Width="100" Height="40"
-                       s:View.ActionTarget="{Binding ViewModel}"
-                       Command="{s:Action btnModify_Click}"
+                       Command="{Binding ViewModel.ModifyApplicationCommand}"
                        Icon="{ui:SymbolIcon CalendarEdit24}"
                        />
             <ui:Button Grid.Column="2" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Delete]}" Width="100" Height="40"
-                       s:View.ActionTarget="{Binding ViewModel}"
-                       Command="{s:Action btnDelect_Click}"
+                       Command="{Binding ViewModel.DeleteApplicationCommand}"
                        Icon="{ui:SymbolIcon DeleteDismiss24}"
                        />
             <ui:Button Grid.Column="3" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Cancel]}" Width="100" Height="40"
-                       s:View.ActionTarget="{Binding ViewModel}"
-                       Command="{s:Action btnCancel_Click}"
+                       Command="{Binding ViewModel.CancelApplicationCommand}"
                        Icon="{ui:SymbolIcon TextBulletListSquareSettings20}"
                        />
         </Grid>

@@ -32,7 +32,7 @@ public sealed class MinimumMrSubsetBGroupExternalSourceSmokeTests
     {
         var prerequisites = RequirePrerequisites();
 
-        var result = MinimumMrSubsetExternalTestPaths.RunPython(
+        var result = MinimumMrSubsetExternalTestPaths.RunPythonWithNumpyTrapzCompatibility(
             prerequisites.Root,
             prerequisites.Python,
             ["-m", "pytest", "tests/puts/test_smoke.py", "-q"],
@@ -70,7 +70,7 @@ for module_name, (put_id, names) in expected.items():
 print('P3/P8 canonical observables verified')
 ";
 
-        var result = MinimumMrSubsetExternalTestPaths.RunPython(
+        var result = MinimumMrSubsetExternalTestPaths.RunPythonWithNumpyTrapzCompatibility(
             prerequisites.Root,
             prerequisites.Python,
             ["-c", script],

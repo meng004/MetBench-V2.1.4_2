@@ -26,9 +26,6 @@ namespace MetBench_Client.ViewModels
         [ObservableProperty]
         private ObservableCollection<object> _navigationFooter = new();
 
-        [ObservableProperty]
-        private ObservableCollection<MenuItem> _trayMenuItems = new();
-
         public string _headerString = string.Empty;
 
         public LocalizedTextProvider Localization { get; }
@@ -56,9 +53,6 @@ namespace MetBench_Client.ViewModels
                 pair.Item.Content = _localization.GetString(pair.Key);
             foreach (var pair in _localizedFooter)
                 pair.Item.Content = _localization.GetString(pair.Key);
-            foreach (var item in TrayMenuItems)
-                if (Equals(item.Tag, "tray_home"))
-                    item.Header = _localization.GetString("Tray_Home");
         }
 
         private NavigationViewItem LocalizedNav(string key, SymbolRegular symbol, System.Type targetPageType, List<(NavigationViewItem Item, string Key)> registry)
@@ -108,15 +102,6 @@ namespace MetBench_Client.ViewModels
             NavigationFooter = new ObservableCollection<object>
             {
                 LocalizedNav("Nav_Settings", SymbolRegular.Settings24, typeof(Views.Pages.SettingsPage), _localizedFooter)
-            };
-
-            TrayMenuItems = new ObservableCollection<MenuItem>()
-            {
-                new MenuItem()
-                {
-                    Header = _localization.GetString("Tray_Home"),
-                    Tag = "tray_home"
-                }
             };
 
             _isInitialized = true;
