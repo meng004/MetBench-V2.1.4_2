@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Linq;
+using MetBench_Client.Services;
 using MetBench_UI.Localization;
 using MetBench_Client.ViewModels;
 using Wpf.Ui;
@@ -13,7 +14,7 @@ public sealed class SettingsLanguageTests
     public void Settings_exposes_english_and_chinese_options()
     {
         var localization = new AppLocalizationService();
-        var vm = new SettingsViewModel(localization, new LocalizedTextProvider(localization));
+        var vm = CreateViewModel(localization);
 
         vm.OnNavigatedTo();
 
@@ -25,7 +26,7 @@ public sealed class SettingsLanguageTests
     public void Changing_selected_culture_updates_localization_service()
     {
         var localization = new AppLocalizationService();
-        var vm = new SettingsViewModel(localization, new LocalizedTextProvider(localization));
+        var vm = CreateViewModel(localization);
 
         vm.ChangeCultureCommand.Execute("zh-CN");
 
@@ -40,9 +41,57 @@ public sealed class SettingsLanguageTests
     public void ChangeCulture_with_null_or_blank_does_not_throw()
     {
         var localization = new AppLocalizationService();
-        var vm = new SettingsViewModel(localization, new LocalizedTextProvider(localization));
+        var vm = CreateViewModel(localization);
         vm.ChangeCultureCommand.Execute(null);
         vm.ChangeCultureCommand.Execute("");
         Assert.Equal("en-US", localization.CurrentCulture.Name); // unchanged
+    }
+
+    [WpfFact]
+    public void ChangeTheme_uses_client_theme_controller()
+    {
+        var localization = new AppLocalizationService();
+        var themeController = new FakeThemeController(ClientTheme.Light);
+        var vm = CreateViewModel(localization, themeController);
+
+        vm.OnNavigatedTo();
+        Assert.Equal(ClientTheme.Light, vm.CurrentApplicationTheme);
+
+        vm.ChangeThemeCommand.Execute("theme_dark");
+
+        Assert.Equal(ClientTheme.Dark, vm.CurrentApplicationTheme);
+        Assert.Equal(ClientTheme.Dark, themeController.LastAppliedTheme);
+    }
+
+    private static SettingsViewModel CreateViewModel(
+        AppLocalizationService localization,
+        IClientThemeController? themeController = null)
+    {
+        return new SettingsViewModel(
+            localization,
+            new LocalizedTextProvider(localization),
+            themeController ?? new FakeThemeController(ClientTheme.Light));
+    }
+
+    private sealed class FakeThemeController : IClientThemeController
+    {
+        private readonly ClientTheme _currentTheme;
+
+        public FakeThemeController(ClientTheme currentTheme)
+        {
+            _currentTheme = currentTheme;
+        }
+
+        public ClientTheme? LastAppliedTheme { get; private set; }
+
+        public ClientTheme GetCurrentTheme()
+        {
+            return _currentTheme;
+        }
+
+        public void Apply(ClientTheme theme)
+        {
+            LastAppliedTheme = theme;
+        }
     }
 }

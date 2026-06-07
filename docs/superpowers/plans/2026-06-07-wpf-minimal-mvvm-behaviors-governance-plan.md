@@ -1,7 +1,7 @@
 # WPF Minimal MVVM and Behaviors Governance Plan
 
 Date: 2026-06-07
-Status: Active scoped plan; current branch includes PR-0, PR-1, PR-2a, PR-2b, and PR-2c evidence
+Status: Active scoped plan; current branch includes PR-0, PR-1, PR-2a, PR-2b, PR-2c, and PR-2d evidence
 Design: docs/superpowers/specs/2026-06-07-wpf-minimal-mvvm-behaviors-governance-design.md
 
 ## Goal
@@ -176,6 +176,36 @@ Expected output:
 - Client WPF build has 0 errors.
 - Client governance tests pass and include the theme-surface guards.
 - `rg "ui:ThemeResource|IThemeService|ThemeService" MetBench_Client` has no matches.
+- No MetBench_BLL.Core, MetBench_DAL, or MetBench_BLL runtime semantics change.
+
+## Task 3e: PR-2d Settings Theme API Isolation Slice
+
+Files:
+
+- MetBench_Client/App.xaml.cs
+- MetBench_Client/Helpers/EnumToBooleanConverter.cs
+- MetBench_Client/Helpers/ThemeToIndexConverter.cs
+- MetBench_Client/Services/ClientThemeController.cs
+- MetBench_Client/ViewModels/SettingsViewModel.cs
+- MetBench_Client.Tests/Architecture/WpfDependencyGovernanceTests.cs
+- MetBench_Client.Tests/ClientI18n/SettingsLanguageTests.cs
+
+Steps:
+
+1. Add a client-owned `ClientTheme` enum and `IClientThemeController` abstraction.
+2. Move direct Wpf.Ui `ApplicationThemeManager` usage behind a WPF-client service adapter.
+3. Make `SettingsViewModel` depend on `IClientThemeController` and `ClientTheme` instead of Wpf.Ui appearance types.
+4. Make `EnumToBooleanConverter` work with ordinary enum values rather than Wpf.Ui appearance types.
+5. Delete the unused `ThemeToIndexConverter`.
+6. Add architecture and unit-test coverage proving ViewModels/Helpers no longer depend on `Wpf.Ui.Appearance` and Settings theme commands still call the theme controller.
+
+Expected output:
+
+- Client WPF build has 0 errors.
+- Client governance and i18n tests pass.
+- `rg "Wpf.Ui.Appearance|using Wpf.Ui.Appearance" MetBench_Client\ViewModels MetBench_Client\Helpers` has no matches.
+- `rg "ThemeToIndexConverter|IThemeService|ThemeService|ui:ThemeResource" MetBench_Client` has no matches.
+- Wpf.Ui `ApplicationThemeManager` remains isolated in `MetBench_Client/Services/ClientThemeController.cs` for a later final theme-removal slice.
 - No MetBench_BLL.Core, MetBench_DAL, or MetBench_BLL runtime semantics change.
 
 ## Task 4: Build And Test Evidence

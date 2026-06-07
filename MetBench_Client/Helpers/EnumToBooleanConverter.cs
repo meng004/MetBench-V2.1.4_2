@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Windows.Data;
 
-namespace  MetBench_Client.Helpers
+namespace MetBench_Client.Helpers
 {
     internal class EnumToBooleanConverter : IValueConverter
     {
@@ -10,26 +10,6 @@ namespace  MetBench_Client.Helpers
         {
         }
 
-        //public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        //{
-        //    if (parameter is not String enumString)
-        //        throw new ArgumentException("ExceptionEnumToBooleanConverterParameterMustBeAnEnumName");
-
-        //    if (!Enum.IsDefined(typeof(Wpf.Ui.Appearance.ThemeType), value))
-        //        throw new ArgumentException("ExceptionEnumToBooleanConverterValueMustBeAnEnum");
-
-        //    var enumValue = Enum.Parse(typeof(Wpf.Ui.Appearance.ThemeType), enumString);
-
-        //    return enumValue.Equals(value);
-        //}
-
-        //public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        //{
-        //    if (parameter is not String enumString)
-        //        throw new ArgumentException("ExceptionEnumToBooleanConverterParameterMustBeAnEnumName");
-
-        //    return Enum.Parse(typeof(Wpf.Ui.Appearance.ThemeType), enumString);
-        //}
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (parameter is not string enumString)
@@ -37,14 +17,13 @@ namespace  MetBench_Client.Helpers
                 throw new ArgumentException("ExceptionEnumToBooleanConverterParameterMustBeAnEnumName");
             }
 
-            if (!Enum.IsDefined(typeof(Wpf.Ui.Appearance.ApplicationTheme), value))
+            if (value is not Enum enumValue || !Enum.IsDefined(value.GetType(), value))
             {
                 throw new ArgumentException("ExceptionEnumToBooleanConverterValueMustBeAnEnum");
             }
 
-            var enumValue = Enum.Parse(typeof(Wpf.Ui.Appearance.ApplicationTheme), enumString);
-
-            return enumValue.Equals(value);
+            var expectedValue = Enum.Parse(value.GetType(), enumString);
+            return expectedValue.Equals(enumValue);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -54,7 +33,13 @@ namespace  MetBench_Client.Helpers
                 throw new ArgumentException("ExceptionEnumToBooleanConverterParameterMustBeAnEnumName");
             }
 
-            return Enum.Parse(typeof(Wpf.Ui.Appearance.ApplicationTheme), enumString);
+            var enumType = Nullable.GetUnderlyingType(targetType) ?? targetType;
+            if (!enumType.IsEnum)
+            {
+                throw new ArgumentException("ExceptionEnumToBooleanConverterTargetTypeMustBeAnEnum");
+            }
+
+            return Enum.Parse(enumType, enumString);
         }
     }
 }

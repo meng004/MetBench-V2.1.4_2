@@ -66,6 +66,7 @@ namespace MetBench_Client
                 // UI-neutral localization (MetBench_UI.Localization)
                 services.AddSingleton<IAppLocalizationService, AppLocalizationService>();
                 services.AddSingleton<LocalizedTextProvider>();
+                services.AddSingleton<IClientThemeController, WpfUiClientThemeController>();
 
                 // Page resolver service 注入服务提供程序
                 services.AddSingleton<IPageService, PageService>();
