@@ -70,9 +70,6 @@ namespace MetBench_Client
                 // Page resolver service 注入服务提供程序
                 services.AddSingleton<IPageService, PageService>();
 
-                // Theme manipulation
-                services.AddSingleton<IThemeService, ThemeService>();
-
                 // Service containing navigation, same as INavigationWindow... but without window
                 services.AddSingleton<INavigationService, NavigationService>();
 

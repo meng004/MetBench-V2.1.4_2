@@ -1,7 +1,7 @@
 # WPF Minimal MVVM and Behaviors Governance Plan
 
 Date: 2026-06-07
-Status: Active scoped plan; current branch includes PR-0, PR-1, PR-2a, and PR-2b evidence
+Status: Active scoped plan; current branch includes PR-0, PR-1, PR-2a, PR-2b, and PR-2c evidence
 Design: docs/superpowers/specs/2026-06-07-wpf-minimal-mvvm-behaviors-governance-design.md
 
 ## Goal
@@ -154,6 +154,28 @@ Expected output:
 - Client governance tests pass and include the dialog guard.
 - `rg "Wpf\\.Ui\\.Controls\\.MessageBox|ShowDialogAsync" MetBench_Client` has no matches.
 - `rg "\\b(?:var|bool)\\s+\\w+\\s*=\\s*await\\s+showMessageAsync\\s*\\(" MetBench_Client` has no matches.
+- No MetBench_BLL.Core, MetBench_DAL, or MetBench_BLL runtime semantics change.
+
+## Task 3d: PR-2c Wpf.Ui ThemeResource And ThemeService Surface Slice
+
+Files:
+
+- MetBench_Client/App.xaml.cs
+- MetBench_Client/Views/Pages/SettingsPage.xaml
+- MetBench_Client.Tests/Architecture/WpfDependencyGovernanceTests.cs
+
+Steps:
+
+1. Remove the unused Wpf.Ui `IThemeService` / `ThemeService` registration from WPF app DI.
+2. Replace `ui:ThemeResource` markup-extension usage with WPF-native `DynamicResource` on the Settings page.
+3. Add architecture guards preventing `ui:ThemeResource` and Wpf.Ui theme service registration from returning.
+4. Keep Wpf.Ui resource dictionaries, navigation shell, controls, icons, and `ApplicationThemeManager` for later PR-2 slices because they still have broad live use.
+
+Expected output:
+
+- Client WPF build has 0 errors.
+- Client governance tests pass and include the theme-surface guards.
+- `rg "ui:ThemeResource|IThemeService|ThemeService" MetBench_Client` has no matches.
 - No MetBench_BLL.Core, MetBench_DAL, or MetBench_BLL runtime semantics change.
 
 ## Task 4: Build And Test Evidence

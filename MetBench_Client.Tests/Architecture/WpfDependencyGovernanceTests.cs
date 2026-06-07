@@ -159,6 +159,41 @@ public sealed class WpfDependencyGovernanceTests
         Assert.True(matches.Length == 0, "Unexpected informational dialog result branching: " + string.Join(", ", matches));
     }
 
+    [Fact]
+    public void Xaml_no_longer_uses_wpf_ui_theme_resource_extension()
+    {
+        var repoRoot = FindRepositoryRoot();
+        var clientRoot = Path.Combine(repoRoot, "MetBench_Client");
+
+        var matches = EnumerateClientFiles(clientRoot, "*.xaml")
+            .Select(path => new { Path = path, Text = File.ReadAllText(path) })
+            .Where(file => file.Text.Contains("ui:ThemeResource", StringComparison.Ordinal))
+            .Select(file => Path.GetRelativePath(repoRoot, file.Path))
+            .OrderBy(path => path)
+            .ToArray();
+
+        Assert.True(matches.Length == 0, "Unexpected WPF-UI ThemeResource extension usage: " + string.Join(", ", matches));
+    }
+
+    [Fact]
+    public void Client_app_does_not_register_wpf_ui_theme_service()
+    {
+        var repoRoot = FindRepositoryRoot();
+        var appFile = Path.Combine(repoRoot, "MetBench_Client", "App.xaml.cs");
+        var appText = File.ReadAllText(appFile);
+        var forbiddenTerms = new[]
+        {
+            "IThemeService",
+            "ThemeService",
+        };
+
+        var matches = forbiddenTerms
+            .Where(term => appText.Contains(term, StringComparison.Ordinal))
+            .ToArray();
+
+        Assert.True(matches.Length == 0, "Unexpected WPF-UI ThemeService registration terms: " + string.Join(", ", matches));
+    }
+
     private static IEnumerable<string> EnumerateClientFiles(string clientRoot, string searchPattern)
     {
         return Directory.EnumerateFiles(clientRoot, searchPattern, SearchOption.AllDirectories)
