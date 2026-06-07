@@ -73,9 +73,6 @@ namespace MetBench_Client
                 // Theme manipulation
                 services.AddSingleton<IThemeService, ThemeService>();
 
-                // TaskBar manipulation
-                services.AddSingleton<ITaskBarService, TaskBarService>();
-
                 // Service containing navigation, same as INavigationWindow... but without window
                 services.AddSingleton<INavigationService, NavigationService>();
 

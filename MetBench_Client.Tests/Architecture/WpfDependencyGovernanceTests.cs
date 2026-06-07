@@ -89,6 +89,36 @@ public sealed class WpfDependencyGovernanceTests
         Assert.False(File.Exists(Path.Combine(repoRoot, "MetBench_Client", "FodyWeavers.xsd")));
     }
 
+    [Fact]
+    public void Wpf_ui_tray_is_not_referenced_by_client_project_or_sources()
+    {
+        var repoRoot = FindRepositoryRoot();
+        var projectFile = Path.Combine(repoRoot, "MetBench_Client", "MetBench_Client.csproj");
+        var projectXml = File.ReadAllText(projectFile);
+
+        Assert.DoesNotContain("WPF-UI.Tray", projectXml, StringComparison.OrdinalIgnoreCase);
+
+        var clientRoot = Path.Combine(repoRoot, "MetBench_Client");
+        var forbiddenTerms = new[]
+        {
+            "NotifyIcon",
+            "TitleBar.Tray",
+            "ITaskBarService",
+            "TaskBarService",
+        };
+
+        var matches = EnumerateClientFiles(clientRoot, "*.cs")
+            .Concat(EnumerateClientFiles(clientRoot, "*.xaml"))
+            .Select(path => new { Path = path, Text = File.ReadAllText(path) })
+            .SelectMany(file => forbiddenTerms
+                .Where(term => file.Text.Contains(term, StringComparison.Ordinal))
+                .Select(term => $"{Path.GetRelativePath(repoRoot, file.Path)} contains {term}"))
+            .OrderBy(match => match)
+            .ToArray();
+
+        Assert.True(matches.Length == 0, "Unexpected WPF-UI tray usage: " + string.Join(", ", matches));
+    }
+
     private static IEnumerable<string> EnumerateClientFiles(string clientRoot, string searchPattern)
     {
         return Directory.EnumerateFiles(clientRoot, searchPattern, SearchOption.AllDirectories)
