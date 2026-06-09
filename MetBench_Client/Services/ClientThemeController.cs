@@ -49,6 +49,7 @@ public sealed class NativeClientThemeController : IClientThemeController
             resources["TextFillColorDisabledBrush"] = Brush("#64748B");
             resources["ControlStrokeColorDefaultBrush"] = Brush("#334155");
             resources["SubtleFillColorSecondaryBrush"] = Brush("#1F2937");
+            resources["SubtleFillColorTertiaryBrush"] = Brush("#273244");
             resources["SystemFillColorCriticalBrush"] = Brush("#F97316");
             return;
         }
@@ -59,6 +60,7 @@ public sealed class NativeClientThemeController : IClientThemeController
         resources["TextFillColorDisabledBrush"] = Brush("#9AA4B2");
         resources["ControlStrokeColorDefaultBrush"] = Brush("#D7DEE8");
         resources["SubtleFillColorSecondaryBrush"] = Brush("#EEF2F7");
+        resources["SubtleFillColorTertiaryBrush"] = Brush("#E4EAF2");
         resources["SystemFillColorCriticalBrush"] = Brush("#C2410C");
     }
 

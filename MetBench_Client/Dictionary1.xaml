@@ -6,6 +6,7 @@
     <SolidColorBrush x:Key="TextFillColorDisabledBrush" Color="#9AA4B2"/>
     <SolidColorBrush x:Key="ControlStrokeColorDefaultBrush" Color="#D7DEE8"/>
     <SolidColorBrush x:Key="SubtleFillColorSecondaryBrush" Color="#EEF2F7"/>
+    <SolidColorBrush x:Key="SubtleFillColorTertiaryBrush" Color="#E4EAF2"/>
     <SolidColorBrush x:Key="SystemFillColorCriticalBrush" Color="#C2410C"/>
 
     <Style x:Key="StackPanelStyle" TargetType="StackPanel">

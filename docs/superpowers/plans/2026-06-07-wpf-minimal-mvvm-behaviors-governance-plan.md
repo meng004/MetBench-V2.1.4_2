@@ -427,22 +427,22 @@ Evidence directory:
 Screenshot files:
 
 - 01-main-window-startup.png
-- 02-mt-report-generator-behavior-page.png
-- 03-export-command-empty-file-dialog.png
+- 02-mt-execution-native-page.png
+- 03-system-mt-equation-catalog-native-page.png
+- 04-settings-native-page.png
 
 Steps:
 
 1. Launch MetBench_Client from the built output.
-2. Capture the main window after startup.
-3. Navigate to MT Report Generator.
-4. Capture the page containing the migrated export button.
-5. Click the export button with no target report file selected.
-6. Capture the visible message proving the migrated command reached the existing export handler.
+2. Capture the native main window after startup.
+3. Navigate to MT Execution through the WPF-native navigation list and capture the page.
+4. Navigate to System MT Equation Catalog through the WPF-native navigation list and capture the page.
+5. Navigate to Settings through the WPF-native footer navigation list and capture the page.
 
 Expected output:
 
 - Screenshots exist and show real WPF UI, not mocked content.
-- The third screenshot shows the user-visible state after command execution.
+- Screenshots show the native shell and real page activation after Wpf.Ui removal.
 
 ## Task 6: VM Receipt
 
