@@ -1,16 +1,15 @@
-﻿<Page x:Class="MetBench_Client.Views.Pages.MTReportGeneratorPage"
+<Page x:Class="MetBench_Client.Views.Pages.MTReportGeneratorPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="clr-namespace:MetBench_Client.Views.Pages"
       xmlns:models="clr-namespace:MetBench_Domain;assembly=MetBench_Domain"
       xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:webview2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
-      xmlns:viewmodels="clr-namespace:MetBench_Client.ViewModels" 
-      xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF" 
-      mc:Ignorable="d" 
+      xmlns:viewmodels="clr-namespace:MetBench_Client.ViewModels"
+      xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+      mc:Ignorable="d"
       d:DesignHeight="800"
       d:DesignWidth="1000"
       d:DataContext="{d:DesignInstance viewmodels:MTReportGeneratorViewModel}"
@@ -32,15 +31,14 @@
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock Text="{Binding ViewModel.Localization[Report_ReportType]}" VerticalAlignment="Center" Margin="5 0 0 0"/>
                 <ComboBox Width="150" Margin="5 0 0 0" AutomationProperties.AutomationId="ReportTypeComboBox" ItemsSource="{Binding ViewModel.ReportTypeList,UpdateSourceTrigger=PropertyChanged}" SelectedIndex="{Binding ViewModel.SelectedIndex,UpdateSourceTrigger=PropertyChanged}" SelectedValue="{Binding ViewModel.SelectedValue,UpdateSourceTrigger=PropertyChanged}" />
-                <ui:Button Appearance="Primary"  Content="{Binding ViewModel.Localization[ReportGenerator_Export]}"
-                           Margin="5 0 0 0"
-                           Icon="{ui:SymbolIcon DocumentArrowDown20}">
+                <Button  Content="{Binding ViewModel.Localization[ReportGenerator_Export]}"
+                           Margin="5 0 0 0">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="Click">
                             <i:InvokeCommandAction Command="{Binding ViewModel.ExportReportCommand}" />
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
-                </ui:Button>
+                </Button>
             </StackPanel>
         </Grid>
         <Grid Grid.Row="1">

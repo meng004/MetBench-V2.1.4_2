@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using LiveChartsCore;
 using CommunityToolkit.Mvvm.Input;
 using LiveChartsCore.SkiaSharpView;
@@ -21,8 +21,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
-using Wpf.Ui;
-using Wpf.Ui.Controls;
 using ValidationResult = FluentValidation.Results.ValidationResult;
 
 namespace MetBench_Client.ViewModels

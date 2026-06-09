@@ -1,11 +1,10 @@
-﻿<Page x:Class="MetBench_Client.Views.Pages.MRManagementPage"
+<Page x:Class="MetBench_Client.Views.Pages.MRManagementPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="clr-namespace:MetBench_Client.Views.Pages"
       xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:models="clr-namespace:MetBench_Domain;assembly=MetBench_Domain"
       xmlns:models1="clr-namespace:MetBench_Client.Models"
       xmlns:viewmodels="clr-namespace:MetBench_Client.ViewModels"
@@ -35,8 +34,8 @@
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0 3 0 5">
                     <TextBlock Text="{Binding ViewModel.Localization[MrMgmt_ApplicationName]}" VerticalAlignment="Center" Margin="15 0 0 0"/>
-                    <ui:TextBox TextWrapping="Wrap" Text="{Binding ViewModel.ApplicationNameBoxText,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Margin="10 0 0 0" Width="150" />
-                    <ui:Button Appearance="Info" Content="{Binding ViewModel.Localization[Legacy_Query]}" Margin="5 0 0 0"
+                    <TextBox TextWrapping="Wrap" Text="{Binding ViewModel.ApplicationNameBoxText,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Margin="10 0 0 0" Width="150" />
+                    <Button Content="{Binding ViewModel.Localization[Legacy_Query]}" Margin="5 0 0 0"
                     Command="{Binding ViewModel.ReloadItemsSourceCommand}"/>
 
                     <!-- PR-VM-6 / F19: Status filter dropdown — default "active" hides deprecated/archived rows -->
@@ -47,7 +46,7 @@
                               ToolTip="{Binding ViewModel.Localization[MrMgmt_StatusFilterTooltip]}"/>
                 </StackPanel>
 
-                <ui:DataGrid  LoadingRow="dataGrid_LoadingRow" BorderBrush="LightGray"  BorderThickness="2" MaxHeight="320" Margin="10 0 10 10"  FontSize="15" HeadersVisibility="Column"  SelectedItem="{Binding ViewModel.DataGridSelectItem,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" x:Name="datagrid"  ItemsSource="{Binding ViewModel.Data,UpdateSourceTrigger=PropertyChanged}"  AutoGenerateColumns="False" CanUserAddRows="False" AutomationProperties.AutomationId="DataGrid_MR"
+                <DataGrid  LoadingRow="dataGrid_LoadingRow" BorderBrush="LightGray"  BorderThickness="2" MaxHeight="320" Margin="10 0 10 10"  FontSize="15" HeadersVisibility="Column"  SelectedItem="{Binding ViewModel.DataGridSelectItem,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" x:Name="datagrid"  ItemsSource="{Binding ViewModel.Data,UpdateSourceTrigger=PropertyChanged}"  AutoGenerateColumns="False" CanUserAddRows="False" AutomationProperties.AutomationId="DataGrid_MR"
                   >
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="MouseLeftButtonUp">
@@ -153,21 +152,19 @@
                             </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <ui:Button  Width="100" Height="50" FontSize="14" Content="{Binding Data.ViewModel.Localization[MrMgmt_ExecuteMT], Source={StaticResource LocalizationProxy}}" HorizontalAlignment="Center" AutomationProperties.AutomationId="Button_MT"
-                                     Appearance="Primary"
-                                     Icon="{ui:SymbolIcon CalculatorArrowClockwise24}"
+                                    <Button  Width="100" Height="50" FontSize="14" Content="{Binding Data.ViewModel.Localization[MrMgmt_ExecuteMT], Source={StaticResource LocalizationProxy}}" HorizontalAlignment="Center" AutomationProperties.AutomationId="Button_MT"
                                      Command="{Binding Data.ViewModel.ExecuteMtCommand, Source={StaticResource LocalizationProxy}}"
-                                     CommandParameter="{Binding IdMR}" 
+                                     CommandParameter="{Binding IdMR}"
                                      />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
                     </DataGrid.Columns>
-                </ui:DataGrid>
+                </DataGrid>
 
             </StackPanel>
-            
+
         </Grid>
         <Grid Grid.Row="1">
             <controls:SimplePagination x:Name="pagination" Margin="0 2 5 0" Height="30"
@@ -191,15 +188,14 @@
                 </Grid.RowDefinitions>
                 <StackPanel  Grid.Row="0" x:Name="stackpanel1" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock  Text="{Binding ViewModel.Localization[MrMgmt_IdMR]}" Margin="50 0 0 0" VerticalAlignment="Center" />
-                    <ui:TextBox  x:Name="txbIdMR" Margin="5 0 0 0"  VerticalContentAlignment="Center" Width="250"
-             ClearButtonEnabled="False"
+                    <TextBox  x:Name="txbIdMR" Margin="5 0 0 0"  VerticalContentAlignment="Center" Width="250"
              IsReadOnly="True"
-             Text="{Binding ViewModel.IdMR,UpdateSourceTrigger=PropertyChanged}"   
+             Text="{Binding ViewModel.IdMR,UpdateSourceTrigger=PropertyChanged}"
              />
                 </StackPanel>
                 <!--<StackPanel  Grid.Row="2" x:Name="stackpanel2" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock  Text="Description" Margin="10 0 0 0" VerticalAlignment="Center" />
-                    <ui:TextBox  x:Name="rtxbDescription" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="250" 
+                    <TextBox  x:Name="rtxbDescription" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="250"
                 TextWrapping="Wrap"
                 Text="{Binding ViewModel.Description,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                 GotFocus="textBox_GotFocus"
@@ -210,7 +206,7 @@
                     <TextBlock  Text="{Binding ViewModel.Localization[MrMgmt_Granularity]}" Margin="20
                                 0 0 0" VerticalAlignment="Center" />
                     <ComboBox Margin="5 0 0 0" Width="150" ItemsSource="{Binding ViewModel.GranularityList,UpdateSourceTrigger=PropertyChanged}" SelectedValue="{Binding ViewModel.GranularityValue,UpdateSourceTrigger=PropertyChanged}"/>
-                    <!--<ui:TextBox  x:Name="rtxbDescription" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="250" 
+                    <!--<TextBox  x:Name="rtxbDescription" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="250"
                 TextWrapping="Wrap"
                 Text="{Binding ViewModel.Description,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                 GotFocus="textBox_GotFocus"
@@ -219,7 +215,7 @@
                 </StackPanel>
                 <StackPanel  Grid.Row="1" x:Name="stackpanel3" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock  Text="{Binding ViewModel.Localization[MrMgmt_Context]}" Margin="35 0 0 0" VerticalAlignment="Center" />
-                    <ui:TextBox  x:Name="txbContext" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="250" 
+                    <TextBox  x:Name="txbContext" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="250"
                 TextWrapping="Wrap"
                 Text="{Binding ViewModel.Context,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                 GotFocus="textBox_GotFocus"
@@ -228,7 +224,7 @@
                 </StackPanel>
                 <StackPanel  Grid.Row="3" x:Name="stackpanel4" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock  Text="{Binding ViewModel.Localization[MrMgmt_Hierarchy]}" Margin="30 0 0 0" VerticalAlignment="Center" />
-                    <!--<ui:TextBox  x:Name="txbConstraint" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="250" 
+                    <!--<TextBox  x:Name="txbConstraint" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="250"
                 TextWrapping="Wrap"
                 Text="{Binding ViewModel.Constraint,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                 GotFocus="textBox_GotFocus"
@@ -246,7 +242,7 @@
                 </Grid.RowDefinitions>
                 <StackPanel  Grid.Row="0" Grid.Column="1" x:Name="stackpanel5" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock  Text="{Binding ViewModel.Localization[MrMgmt_InputPattern]}" Margin="50 0 0 0" VerticalAlignment="Center" />
-                    <ui:TextBox  x:Name="txbInputPattern" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="200"
+                    <TextBox  x:Name="txbInputPattern" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="200"
              TextWrapping="Wrap"
              Text="{Binding ViewModel.InputPattern,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
              GotFocus="textBox_GotFocus"
@@ -256,7 +252,7 @@
                 </StackPanel>
                 <StackPanel  Grid.Row="1" Grid.Column="1" x:Name="stackpanel6" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock  Text="{Binding ViewModel.Localization[MrMgmt_OutputPattern]}" Margin="40 0 0 0" VerticalAlignment="Center" />
-                    <ui:TextBox  x:Name="txbOutputPattern" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="200"
+                    <TextBox  x:Name="txbOutputPattern" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="200"
                 TextWrapping="Wrap"
                 Text="{Binding ViewModel.OutputPattern,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                 GotFocus="textBox_GotFocus"
@@ -266,7 +262,7 @@
                 </StackPanel>
                 <StackPanel  Grid.Row="2" Grid.Column="1" x:Name="stackpanel7" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock  Text="{Binding ViewModel.Localization[MrMgmt_DimensionOfInputPattern]}" Margin="15 0 0 0" VerticalAlignment="Center" />
-                    <ui:TextBox  x:Name="txbDimensionOfInputPattern" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="150"
+                    <TextBox  x:Name="txbDimensionOfInputPattern" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="150"
                 Text="{Binding ViewModel.DimensionOfInputPattern,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                 GotFocus="textBox_GotFocus"
                 LostFocus="textBox_LostFocus"
@@ -275,7 +271,7 @@
                 </StackPanel>
                 <StackPanel  Grid.Row="3" Grid.Column="1" x:Name="stackpanel8" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock  Text="{Binding ViewModel.Localization[MrMgmt_DimensionOfOutputPattern]}" Margin="5 0 0 0" VerticalAlignment="Center" />
-                    <ui:TextBox  x:Name="txbDimensionOfOutputPattern" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="150"
+                    <TextBox  x:Name="txbDimensionOfOutputPattern" Margin="5 0 0 0" VerticalContentAlignment="Center" Width="150"
              Text="{Binding ViewModel.DimensionOfOutputPattern,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
              GotFocus="textBox_GotFocus"
              LostFocus="textBox_LostFocus"
@@ -348,41 +344,33 @@ SelectedValue="{Binding ViewModel.ExpressionValue,UpdateSourceTrigger=PropertyCh
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <ui:Button Grid.Column="0" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Add]}" Width="100" Height="40"
+                <Button Grid.Column="0" Margin="70,0,0,0" Content="{Binding ViewModel.Localization[Legacy_Add]}" Width="100" Height="40"
            Command="{Binding ViewModel.AddMrCommand}"
-           Icon="{ui:SymbolIcon GuestAdd24}"
            />
-                <ui:Button Grid.Column="1" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Modify]}" Width="100" Height="40"
+                <Button Grid.Column="1" Margin="70,0,0,0" Content="{Binding ViewModel.Localization[Legacy_Modify]}" Width="100" Height="40"
            Command="{Binding ViewModel.ModifyMrCommand}"
-           Icon="{ui:SymbolIcon CalendarEdit24}"
            />
-                <ui:Button Grid.Column="2" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Delete]}" Width="100" Height="40"
+                <Button Grid.Column="2" Margin="70,0,0,0" Content="{Binding ViewModel.Localization[Legacy_Delete]}" Width="100" Height="40"
            Command="{Binding ViewModel.DeleteMrCommand}"
-           Icon="{ui:SymbolIcon DeleteDismiss24}"
            />
-                <ui:Button Grid.Column="3" Margin="70,0,0,0" Appearance="Primary" Content="{Binding ViewModel.Localization[Legacy_Cancel]}" Width="100" Height="40"
+                <Button Grid.Column="3" Margin="70,0,0,0" Content="{Binding ViewModel.Localization[Legacy_Cancel]}" Width="100" Height="40"
            Command="{Binding ViewModel.CancelMrCommand}"
-           Icon="{ui:SymbolIcon TextBulletListSquareSettings20}"
            />
             </Grid>
             <Grid Grid.Row="1">
                 <ProgressBar IsIndeterminate="{Binding ViewModel.IsIndeterminate,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Visibility="{Binding ViewModel.Visibility, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"    Height="15"  BorderThickness="2" />
             </Grid>
-            <!--<ui:Button Grid.Column="0" Margin="70,0,0,0" Appearance="Primary" Content="Add" Width="100" Height="40"
+            <!--<Button Grid.Column="0" Margin="70,0,0,0" Content="Add" Width="100" Height="40"
                        Command="{Binding ViewModel.AddMrCommand}"
-                       Icon="{ui:SymbolIcon GuestAdd24}"
                        />
-            <ui:Button Grid.Column="1" Margin="70,0,0,0" Appearance="Primary" Content="Edit" Width="100" Height="40"
+            <Button Grid.Column="1" Margin="70,0,0,0" Content="Edit" Width="100" Height="40"
                        Command="{Binding ViewModel.ModifyMrCommand}"
-                       Icon="{ui:SymbolIcon CalendarEdit24}"
                        />
-            <ui:Button Grid.Column="2" Margin="70,0,0,0" Appearance="Primary" Content="Del" Width="100" Height="40"
+            <Button Grid.Column="2" Margin="70,0,0,0" Content="Del" Width="100" Height="40"
                        Command="{Binding ViewModel.DeleteMrCommand}"
-                       Icon="{ui:SymbolIcon DeleteDismiss24}"
                        />
-            <ui:Button Grid.Column="3" Margin="70,0,0,0" Appearance="Primary" Content="Reset" Width="100" Height="40"
+            <Button Grid.Column="3" Margin="70,0,0,0" Content="Reset" Width="100" Height="40"
                        Command="{Binding ViewModel.CancelMrCommand}"
-                       Icon="{ui:SymbolIcon TextBulletListSquareSettings20}"
                        />-->
         </Grid>
     </Grid>

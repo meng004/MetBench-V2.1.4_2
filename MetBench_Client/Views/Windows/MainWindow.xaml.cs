@@ -1,92 +1,70 @@
-﻿using MetBench_Client.Services;
-using MetBench_Client.Views.Pages;
+using MetBench_Client.Models;
+using MetBench_Client.Services;
 using System;
 using System.Windows;
-using Wpf.Ui;
-using Wpf.Ui.Controls;
+using System.Windows.Controls;
+
 namespace MetBench_Client.Views.Windows
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for MainWindow.xaml.
     /// </summary>
-    public partial class MainWindow : INavigationWindow
+    public partial class MainWindow : Window, IClientNavigationWindow
     {
-        public ViewModels.MainWindowViewModel ViewModel { get; }
-        private bool _isUserClosedPane;
-        private bool _isPaneOpenedOrClosedFromCode;
+        private readonly INavigationService _navigationService;
 
-        public MainWindow(ViewModels.MainWindowViewModel viewModel, IPageService pageService, INavigationService navigationService)
+        public MainWindow(ViewModels.MainWindowViewModel viewModel, INavigationService navigationService)
         {
             ViewModel = viewModel;
+            _navigationService = navigationService;
             DataContext = this;
-
-            Wpf.Ui.Appearance.SystemThemeWatcher.Watch(this);
-            //TransParamsService.mainWindow = this;
             InitializeComponent();
-            SetPageService(pageService);
-
-            navigationService.SetNavigationControl(RootNavigation);
+            _navigationService.SetNavigationFrame(ContentFrame);
         }
 
-        public INavigationView GetNavigation() => RootNavigation;
+        public ViewModels.MainWindowViewModel ViewModel
+        {
+            get;
+        }
 
-        public bool Navigate(Type pageType) => RootNavigation.Navigate(pageType);
+        public bool Navigate(Type pageType)
+        {
+            return _navigationService.Navigate(pageType);
+        }
 
-        public void SetPageService(IPageService pageService) => RootNavigation.SetPageService(pageService);
+        public void ShowWindow()
+        {
+            Show();
+        }
 
-        public void ShowWindow() => Show();
+        public void CloseWindow()
+        {
+            Close();
+        }
 
-        public void CloseWindow() => Close();
-
-        /// <summary>
-        /// Raises the closed event.
-        /// </summary>
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
-
-            // Make sure that closing this window will begin the process of closing the application.
             Application.Current.Shutdown();
         }
 
-        INavigationView INavigationWindow.GetNavigation()
+        private void NavigationList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            throw new NotImplementedException();
-        }
-
-        public void SetServiceProvider(IServiceProvider serviceProvider)
-        {
-            throw new NotImplementedException();
-        }
-        private void MainWindow_OnSizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            if (_isUserClosedPane)
+            if (sender is not ListBox listBox || listBox.SelectedItem is not NavigationItem item)
             {
                 return;
             }
 
-            _isPaneOpenedOrClosedFromCode = true;
-            RootNavigation.SetCurrentValue(NavigationView.IsPaneOpenProperty, e.NewSize.Width > 1200);
-            _isPaneOpenedOrClosedFromCode = false;
-        }
-        private void NavigationView_OnPaneOpened(NavigationView sender, RoutedEventArgs args)
-        {
-            if (_isPaneOpenedOrClosedFromCode)
+            if (ReferenceEquals(listBox, NavigationList))
             {
-                return;
+                FooterNavigationList.SelectedItem = null;
+            }
+            else
+            {
+                NavigationList.SelectedItem = null;
             }
 
-            _isUserClosedPane = false;
-        }
-
-        private void NavigationView_OnPaneClosed(NavigationView sender, RoutedEventArgs args)
-        {
-            if (_isPaneOpenedOrClosedFromCode)
-            {
-                return;
-            }
-
-            _isUserClosedPane = true;
+            Navigate(item.TargetPageType);
         }
     }
 }

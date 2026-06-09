@@ -121,6 +121,48 @@ public sealed class WpfDependencyGovernanceTests
     }
 
     [Fact]
+    public void Wpf_ui_package_is_not_referenced_by_client_project()
+    {
+        var repoRoot = FindRepositoryRoot();
+        var projectFile = Path.Combine(repoRoot, "MetBench_Client", "MetBench_Client.csproj");
+        var projectXml = File.ReadAllText(projectFile);
+
+        Assert.DoesNotContain("WPF-UI", projectXml, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Wpf.Ui", projectXml, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Client_sources_and_xaml_do_not_reference_wpf_ui()
+    {
+        var repoRoot = FindRepositoryRoot();
+        var clientRoot = Path.Combine(repoRoot, "MetBench_Client");
+        var forbiddenTerms = new[]
+        {
+            "http://schemas.lepo.co/wpfui/2022/xaml",
+            "Wpf.Ui",
+            "ui:",
+            "NavigationView",
+            "INavigationWindow",
+            "FluentWindow",
+            "SymbolIcon",
+            "ApplicationThemeManager",
+            "SystemThemeWatcher",
+        };
+
+        var matches = EnumerateClientFiles(clientRoot, "*.cs")
+            .Concat(EnumerateClientFiles(clientRoot, "*.xaml"))
+            .Concat(EnumerateClientFiles(clientRoot, "*.csproj"))
+            .Select(path => new { Path = path, Text = File.ReadAllText(path) })
+            .SelectMany(file => forbiddenTerms
+                .Where(term => file.Text.Contains(term, StringComparison.Ordinal))
+                .Select(term => $"{Path.GetRelativePath(repoRoot, file.Path)} contains {term}"))
+            .OrderBy(match => match)
+            .ToArray();
+
+        Assert.True(matches.Length == 0, "Unexpected WPF-UI dependency usage: " + string.Join(", ", matches));
+    }
+
+    [Fact]
     public void Client_sources_do_not_use_wpf_ui_message_box_dialogs()
     {
         var repoRoot = FindRepositoryRoot();
@@ -290,6 +332,58 @@ public sealed class WpfDependencyGovernanceTests
             .ToArray();
 
         Assert.True(matches.Length == 0, "Unexpected WPF-UI paging control usage: " + string.Join(", ", matches));
+    }
+
+    [Fact]
+    public void Application_programs_window_no_longer_uses_wpf_ui_controls_or_namespaces()
+    {
+        var repoRoot = FindRepositoryRoot();
+        var windowFiles = new[]
+        {
+            Path.Combine(repoRoot, "MetBench_Client", "Views", "Windows", "ApplicationProgramsWindow.xaml"),
+            Path.Combine(repoRoot, "MetBench_Client", "Views", "Windows", "ApplicationProgramsWindow.xaml.cs"),
+        };
+        var forbiddenTerms = new[]
+        {
+            "http://schemas.lepo.co/wpfui/2022/xaml",
+            "Wpf.Ui",
+            "ui:",
+            "INavigationWindow",
+            "INavigableView",
+        };
+
+        var matches = windowFiles
+            .Select(path => new { Path = path, Text = File.ReadAllText(path) })
+            .SelectMany(file => forbiddenTerms
+                .Where(term => file.Text.Contains(term, StringComparison.Ordinal))
+                .Select(term => $"{Path.GetRelativePath(repoRoot, file.Path)} contains {term}"))
+            .OrderBy(match => match)
+            .ToArray();
+
+        Assert.True(matches.Length == 0, "Unexpected WPF-UI ApplicationProgramsWindow usage: " + string.Join(", ", matches));
+    }
+
+    [Fact]
+    public void Client_helpers_do_not_reference_wpf_ui_controls_or_gallery_namespaces()
+    {
+        var repoRoot = FindRepositoryRoot();
+        var helpersRoot = Path.Combine(repoRoot, "MetBench_Client", "Helpers");
+        var forbiddenTerms = new[]
+        {
+            "Wpf.Ui.Controls",
+            "Wpf.Ui.Gallery",
+            "NavigationViewPaneDisplayMode",
+        };
+
+        var matches = EnumerateClientFiles(helpersRoot, "*.cs")
+            .Select(path => new { Path = path, Text = File.ReadAllText(path) })
+            .SelectMany(file => forbiddenTerms
+                .Where(term => file.Text.Contains(term, StringComparison.Ordinal))
+                .Select(term => $"{Path.GetRelativePath(repoRoot, file.Path)} contains {term}"))
+            .OrderBy(match => match)
+            .ToArray();
+
+        Assert.True(matches.Length == 0, "Unexpected WPF-UI helper dependency: " + string.Join(", ", matches));
     }
 
     private static IEnumerable<string> EnumerateClientFiles(string clientRoot, string searchPattern)

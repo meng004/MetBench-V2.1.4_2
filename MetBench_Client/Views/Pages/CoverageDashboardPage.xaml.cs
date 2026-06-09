@@ -1,8 +1,7 @@
-using Wpf.Ui.Controls;
 
 namespace MetBench_Client.Views.Pages
 {
-    public partial class CoverageDashboardPage : INavigableView<ViewModels.CoverageDashboardViewModel>
+    public partial class CoverageDashboardPage
     {
         public ViewModels.CoverageDashboardViewModel ViewModel { get; }
 

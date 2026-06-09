@@ -1,8 +1,7 @@
-using Wpf.Ui.Controls;
 
 namespace MetBench_Client.Views.Pages
 {
-    public partial class MetaPatternsPage : INavigableView<ViewModels.MetaPatternsViewModel>
+    public partial class MetaPatternsPage
     {
         public ViewModels.MetaPatternsViewModel ViewModel { get; }
 

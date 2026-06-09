@@ -6,13 +6,10 @@
     xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
     xmlns:local="clr-namespace:MetBench_Client.Views.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="SystemMtSutCatalogPage"
     d:DataContext="{d:DesignInstance local:SystemMtSutCatalogPage, IsDesignTimeCreatable=False}"
     d:DesignHeight="720"
     d:DesignWidth="1180"
-    ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
-    ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     AutomationProperties.AutomationId="SystemMtSutCatalogPage"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     mc:Ignorable="d">
@@ -44,11 +41,11 @@
             BorderThickness="1"
             CornerRadius="4">
             <StackPanel Orientation="Horizontal">
-                <ui:Button
+                <Button
                     Margin="0,0,8,0"
                     Command="{Binding ViewModel.RefreshSutsCommand, Mode=OneWay}"
                     Content="{Binding ViewModel.Localization[Catalog_Reload]}"/>
-                <ui:Button
+                <Button
                     x:Name="Button_NewSutDraft"
                     Margin="0,0,16,0"
                     AutomationProperties.AutomationId="Button_NewSutDraft"
@@ -76,19 +73,19 @@
                 BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
                 BorderThickness="1"
                 CornerRadius="4">
-                <ui:DataGrid
+                <DataGrid
                     x:Name="DataGrid_SystemMtSuts"
                     AutomationProperties.AutomationId="DataGrid_SystemMtSuts"
                     AutoGenerateColumns="False"
                     IsReadOnly="True"
                     ItemsSource="{Binding ViewModel.Suts, Mode=OneWay}"
                     SelectedItem="{Binding ViewModel.SelectedSut, Mode=TwoWay}">
-                    <ui:DataGrid.Columns>
+                    <DataGrid.Columns>
                         <DataGridTextColumn Width="140" Binding="{Binding SutId}" Header="{Binding Data.ViewModel.Localization[Catalog_SutId], Source={StaticResource LocalizationProxy}}"/>
                         <DataGridTextColumn Width="120" Binding="{Binding Equation}" Header="{Binding Data.ViewModel.Localization[Catalog_Equation], Source={StaticResource LocalizationProxy}}"/>
                         <DataGridTextColumn Width="*" Binding="{Binding ProgramName}" Header="{Binding Data.ViewModel.Localization[Catalog_Program], Source={StaticResource LocalizationProxy}}"/>
-                    </ui:DataGrid.Columns>
-                </ui:DataGrid>
+                    </DataGrid.Columns>
+                </DataGrid>
             </Border>
 
             <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
@@ -168,7 +165,7 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="{Binding ViewModel.Localization[Catalog_SutName]}"/>
-                        <ui:TextBox
+                        <TextBox
                             x:Name="TextBox_SutName"
                             Grid.Row="0"
                             Grid.Column="1"
@@ -177,7 +174,7 @@
                             Text="{Binding ViewModel.Draft.SutName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="{Binding ViewModel.Localization[Catalog_ProgramName]}"/>
-                        <ui:TextBox
+                        <TextBox
                             x:Name="TextBox_ProgramName"
                             Grid.Row="1"
                             Grid.Column="1"
@@ -186,7 +183,7 @@
                             Text="{Binding ViewModel.Draft.ProgramName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="{Binding ViewModel.Localization[Catalog_Equation]}"/>
-                        <ui:TextBox
+                        <TextBox
                             x:Name="TextBox_Equation"
                             Grid.Row="2"
                             Grid.Column="1"
@@ -195,7 +192,7 @@
                             Text="{Binding ViewModel.Draft.Equation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="{Binding ViewModel.Localization[Catalog_EquationKey]}"/>
-                        <ui:TextBox
+                        <TextBox
                             x:Name="TextBox_EquationKey"
                             Grid.Row="3"
                             Grid.Column="1"
@@ -204,7 +201,7 @@
                             Text="{Binding ViewModel.Draft.EquationKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="{Binding ViewModel.Localization[Catalog_ProgramType]}"/>
-                        <ui:TextBox
+                        <TextBox
                             x:Name="TextBox_ProgramType"
                             Grid.Row="4"
                             Grid.Column="1"
@@ -213,7 +210,7 @@
                             Text="{Binding ViewModel.Draft.ProgramType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="{Binding ViewModel.Localization[Catalog_PythonRuntimeKind]}"/>
-                        <ui:TextBox
+                        <TextBox
                             x:Name="TextBox_PythonExecutableKind"
                             Grid.Row="5"
                             Grid.Column="1"
@@ -222,7 +219,7 @@
                             Text="{Binding ViewModel.Draft.PythonExecutableKind, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <TextBlock Grid.Row="6" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="{Binding ViewModel.Localization[Catalog_RunnerScript]}"/>
-                        <ui:TextBox
+                        <TextBox
                             x:Name="TextBox_RunnerScriptRelativePath"
                             Grid.Row="6"
                             Grid.Column="1"
@@ -231,44 +228,43 @@
                             Text="{Binding ViewModel.Draft.RunnerScriptRelativePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <TextBlock Grid.Row="7" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="{Binding ViewModel.Localization[Catalog_InputParserScript]}"/>
-                        <ui:TextBox
+                        <TextBox
                             Grid.Row="7"
                             Grid.Column="1"
                             Margin="0,0,0,8"
                             Text="{Binding ViewModel.Draft.InputParserScriptRelativePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <TextBlock Grid.Row="8" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="{Binding ViewModel.Localization[Catalog_OutputParserScript]}"/>
-                        <ui:TextBox
+                        <TextBox
                             Grid.Row="8"
                             Grid.Column="1"
                             Margin="0,0,0,8"
                             Text="{Binding ViewModel.Draft.OutputParserScriptRelativePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <TextBlock Grid.Row="9" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="{Binding ViewModel.Localization[Catalog_InputAdapterScript]}"/>
-                        <ui:TextBox
+                        <TextBox
                             Grid.Row="9"
                             Grid.Column="1"
                             Margin="0,0,0,8"
                             Text="{Binding ViewModel.Draft.InputAdapterScriptRelativePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <TextBlock Grid.Row="10" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="{Binding ViewModel.Localization[Catalog_OutputAdapterScript]}"/>
-                        <ui:TextBox
+                        <TextBox
                             Grid.Row="10"
                             Grid.Column="1"
                             Margin="0,0,0,8"
                             Text="{Binding ViewModel.Draft.OutputAdapterScriptRelativePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <StackPanel Grid.Row="11" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right" Orientation="Horizontal">
-                            <ui:Button
+                            <Button
                                 x:Name="Button_ValidateSutDraft"
                                 Margin="0,12,8,0"
                                 AutomationProperties.AutomationId="Button_ValidateSutDraft"
                                 Command="{Binding ViewModel.ValidateSutDraftCommand, Mode=OneWay}"
                                 Content="{Binding ViewModel.Localization[Catalog_Validate]}"/>
-                            <ui:Button
+                            <Button
                                 x:Name="Button_SaveSutDraft"
                                 Margin="0,12,0,0"
-                                Appearance="Primary"
                                 AutomationProperties.AutomationId="Button_SaveSutDraft"
                                 Command="{Binding ViewModel.SaveSutDraftCommand, Mode=OneWay}"
                                 Content="{Binding ViewModel.Localization[Legacy_Save]}"/>

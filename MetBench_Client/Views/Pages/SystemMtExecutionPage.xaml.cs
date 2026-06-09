@@ -1,8 +1,7 @@
-using Wpf.Ui.Controls;
 
 namespace MetBench_Client.Views.Pages
 {
-    public partial class SystemMtExecutionPage : INavigableView<ViewModels.SystemMtExecutionViewModel>
+    public partial class SystemMtExecutionPage
     {
         public ViewModels.SystemMtExecutionViewModel ViewModel { get; }
 

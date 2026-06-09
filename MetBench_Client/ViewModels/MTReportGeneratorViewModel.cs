@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MetBench_BLL;
 using MetBench_Client.Services;
@@ -10,8 +10,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
-using Wpf.Ui;
-using Wpf.Ui.Controls;
 
 namespace MetBench_Client.ViewModels
 {

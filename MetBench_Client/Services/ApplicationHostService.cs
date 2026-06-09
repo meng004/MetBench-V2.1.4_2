@@ -1,10 +1,9 @@
-﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using Wpf.Ui;
 
 namespace MetBench_Client.Services
 {
@@ -15,7 +14,7 @@ namespace MetBench_Client.Services
     public class ApplicationHostService : IHostedService
     {
         private readonly IServiceProvider _serviceProvider;// 用于访问依赖注入的服务提供程序
-        private INavigationWindow _navigationWindow;// 导航窗口实例
+        private IClientNavigationWindow? _navigationWindow;// 导航窗口实例
 
         public ApplicationHostService(IServiceProvider serviceProvider)
         {
@@ -51,7 +50,7 @@ namespace MetBench_Client.Services
 
             if (!Application.Current.Windows.OfType<Views.Windows.MainWindow>().Any())
             { // 获取导航窗口实例，并显示窗口
-                _navigationWindow = (_serviceProvider.GetService(typeof(INavigationWindow)) as INavigationWindow)!;
+                _navigationWindow = (_serviceProvider.GetService(typeof(IClientNavigationWindow)) as IClientNavigationWindow)!;
                 _navigationWindow!.ShowWindow();
                 // 导航到 DashboardPage 页面
                 _navigationWindow.Navigate(typeof(Views.Pages.MRDisplayPage));

@@ -1,9 +1,8 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using MetBench_Client.Models;
 using System;
 using System.Collections.Generic;
 using System.Windows.Media;
-using Wpf.Ui.Controls;
 
 namespace MetBench_Client.ViewModels
 {

@@ -9,7 +9,6 @@ using CommunityToolkit.Mvvm.Input;
 using MetBench_BLL.SystemMT.Persistence;
 using MetBench_BLL.SystemMT.Reporting.Charts;
 using MetBench_Client.Services.Plotting.SystemMt;
-using Wpf.Ui.Controls;
 
 namespace MetBench_Client.ViewModels;
 

@@ -9,7 +9,6 @@ using MetBench_BLL.Mutation;
 using MetBench_Domain;
 using MetBench_IDAL;
 using MetBench_UI.Localization;
-using Wpf.Ui.Controls;
 
 namespace MetBench_Client.ViewModels;
 

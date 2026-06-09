@@ -8,7 +8,6 @@ using CommunityToolkit.Mvvm.Input;
 using MetBench_BLL.SystemMT.Jobs;
 using MetBench_BLL.SystemMT.Launcher;
 using System.Windows.Threading;
-using Wpf.Ui.Controls;
 
 namespace MetBench_Client.ViewModels;
 

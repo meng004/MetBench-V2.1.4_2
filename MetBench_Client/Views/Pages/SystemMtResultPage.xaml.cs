@@ -7,7 +7,7 @@ using MetBench_Client.ViewModels;
 
 namespace MetBench_Client.Views.Pages;
 
-public partial class SystemMtResultPage : Wpf.Ui.Controls.INavigableView<SystemMtResultViewModel>
+public partial class SystemMtResultPage
 {
     public SystemMtResultViewModel ViewModel { get; }
 

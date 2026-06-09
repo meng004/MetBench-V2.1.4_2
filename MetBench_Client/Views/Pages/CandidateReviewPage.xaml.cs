@@ -1,8 +1,7 @@
-using Wpf.Ui.Controls;
 
 namespace MetBench_Client.Views.Pages
 {
-    public partial class CandidateReviewPage : INavigableView<ViewModels.CandidateReviewViewModel>
+    public partial class CandidateReviewPage
     {
         public ViewModels.CandidateReviewViewModel ViewModel { get; }
 

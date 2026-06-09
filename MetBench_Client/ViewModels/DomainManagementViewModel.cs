@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using MetBench_BLL;
 using CommunityToolkit.Mvvm.Input;
 using MetBench_Client.Helpers;
@@ -11,8 +11,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using Wpf.Ui;
-using Wpf.Ui.Controls;
 using ValidationResult = FluentValidation.Results.ValidationResult;
 
 namespace MetBench_Client.ViewModels
@@ -265,13 +263,13 @@ namespace MetBench_Client.ViewModels
                 }
                 //if (res)
                 //{
-                   
+
 
                 //    if (_domainSerive.GetDomain(Domain.IdDomain) !=null )
                 //    {
                 //        domainName = _domainSerive.GetDomain(Domain.IdDomain).Name;
                 //    }
-                //    else 
+                //    else
                 //    {
                 //        domainName = Domain.Name;
                 //    }

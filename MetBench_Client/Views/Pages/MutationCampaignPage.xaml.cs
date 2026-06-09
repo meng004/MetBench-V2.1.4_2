@@ -1,8 +1,7 @@
-using Wpf.Ui.Controls;
 
 namespace MetBench_Client.Views.Pages
 {
-    public partial class MutationCampaignPage : INavigableView<ViewModels.MutationCampaignViewModel>
+    public partial class MutationCampaignPage
     {
         public ViewModels.MutationCampaignViewModel ViewModel { get; }
 

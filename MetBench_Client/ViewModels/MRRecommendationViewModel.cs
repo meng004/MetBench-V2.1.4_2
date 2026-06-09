@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using MetBench_BLL;
 using CommunityToolkit.Mvvm.Input;
 using MetBench_Client.Helpers;
@@ -13,8 +13,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using Wpf.Ui;
-using Wpf.Ui.Controls;
 using ValidationResult = FluentValidation.Results.ValidationResult;
 
 namespace MetBench_Client.ViewModels
@@ -81,11 +79,11 @@ namespace MetBench_Client.ViewModels
         // 中间数据集
         private ObservableCollection<MRRecommendationVIsualResult> datas = new ObservableCollection<MRRecommendationVIsualResult>();
 
-        // 进度条属性 IsIndeterminate 
+        // 进度条属性 IsIndeterminate
         public bool IsIndeterminate { get; set; }=false;
 
         // 进度条属性 Visibility
-        public Visibility Visibility { get; set; }=Visibility.Hidden;    
+        public Visibility Visibility { get; set; }=Visibility.Hidden;
 
         // 实现接口 INavigationAware
         public void OnNavigatedTo()
@@ -276,7 +274,7 @@ namespace MetBench_Client.ViewModels
                 var candidatePrograms = _applicationSerive.GetApplications();
 
                 // 语法相似推荐
-                if (RecommendType_ComboBoxSelectedIndex==0) 
+                if (RecommendType_ComboBoxSelectedIndex==0)
                 {
                     mrRecommendationResults = await _mrRecommendationSerive.SyntaxMRRRecommend(program, candidatePrograms);
                     if (mrRecommendationResults == null)
@@ -311,13 +309,13 @@ namespace MetBench_Client.ViewModels
             {
                 // 结束时将进度条状态更新为不可见和确定状态
                 IsIndeterminate = false;
-                Visibility = Visibility.Collapsed; 
+                Visibility = Visibility.Collapsed;
             }
         }
 
-        private async Task<ObservableCollection<MRRecommendationVIsualResult>> convertCollection(ObservableCollection<MRRecommendationResult> mRRecommendationResults ) 
+        private async Task<ObservableCollection<MRRecommendationVIsualResult>> convertCollection(ObservableCollection<MRRecommendationResult> mRRecommendationResults )
         {
-            if (mRRecommendationResults == null) 
+            if (mRRecommendationResults == null)
             {
                 return new ObservableCollection<MRRecommendationVIsualResult>();
             }
@@ -325,7 +323,7 @@ namespace MetBench_Client.ViewModels
             var mRRecommendationResultsList = mRRecommendationResults.ToList();
             var results = new ObservableCollection<MRRecommendationVIsualResult>();
             var latextosympy = new Latextosympy_Await();
-            foreach (var mRRecommendationResult in mRRecommendationResultsList) 
+            foreach (var mRRecommendationResult in mRRecommendationResultsList)
             {
                 var targetProgram = mRRecommendationResult.TargetProgram;
                 var application  = mRRecommendationResult.Application;
@@ -377,7 +375,7 @@ namespace MetBench_Client.ViewModels
         }
 
         // 查看推荐的蜕变关系详细信息
-        public void btn_EditSelectedMR(int id) 
+        public void btn_EditSelectedMR(int id)
         {
             var idMR = id;
             var mixResults = _metamorphicRelationSerive.showMultTwoTableResult();

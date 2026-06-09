@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -6,7 +6,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MetBench_Client.Services;
 using MetBench_UI.Localization;
-using Wpf.Ui.Controls;
 
 namespace MetBench_Client.ViewModels
 {

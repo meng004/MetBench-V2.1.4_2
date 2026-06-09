@@ -6,7 +6,6 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
-using Wpf.Ui.Controls;
 
 namespace MetBench_Client.ViewModels
 {

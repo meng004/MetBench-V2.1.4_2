@@ -1,70 +1,35 @@
-﻿using MetBench_Client.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using MetBench_Client.Services;
+using MetBench_Client.ViewModels;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using Wpf.Ui;
-using Wpf.Ui.Controls;
 
 namespace MetBench_Client.Views.Windows
 {
     /// <summary>
-    /// ApplicationProgramsWindow.xaml 的交互逻辑
+    /// ApplicationProgramsWindow.xaml interaction logic.
     /// </summary>
-    public partial class ApplicationProgramsWindow : INavigationWindow, INavigableView<ViewModels.ApplicationManagementViewModel>
+    public partial class ApplicationProgramsWindow : Window, IClientWindow
     {
+        public ApplicationProgramsWindow(ApplicationManagementViewModel viewModel)
+        {
+            ViewModel = viewModel;
+            DataContext = this;
+            InitializeComponent();
+        }
+
         public ApplicationManagementViewModel ViewModel
         {
             get;
         }
 
-        public ApplicationProgramsWindow(ViewModels.ApplicationManagementViewModel viewModel)
-        {
-            ViewModel = viewModel;
-            //数据上下文初始化赋值
-            DataContext = this;
-            InitializeComponent();
-        }
-
-        public INavigationView GetNavigation()
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Navigate(Type pageType)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetServiceProvider(IServiceProvider serviceProvider)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetPageService(IPageService pageService)
-        {
-            throw new NotImplementedException();
-        }
-
         public void ShowWindow()
         {
-            this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            WindowStartupLocation = WindowStartupLocation.CenterScreen;
             Show();
         }
 
         public void CloseWindow()
         {
-            // 将窗口隐藏
-            this.Hide();
-        } /*=> Close();*/
+            Hide();
+        }
     }
 }

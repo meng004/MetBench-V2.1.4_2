@@ -1,120 +1,90 @@
 # WPF Minimal MVVM Behaviors VM Evidence
 
-Date: 2026-06-07
+Date: 2026-06-09
 Windows classification: VM evidence collected
 
 ## Branch
 
-- Branch: codex/wpf-minimal-mvvm-behaviors
-- Base commit: c01de218404546d3379ebe03d8358374e768eabb
-- Head commit at latest full-test evidence collection: fcf81997e51371754384a95cb4b4c1316ad5b111.
-- Worktree state at latest full-test evidence collection: dirty only with PR-2h Settings page lifecycle repair and refreshed evidence before commit.
+- Branch: codex/wpf-pr2-native-shell
+- Base commit: eb62fc0343a6b65d073f46295674c4460a090492
+- Head commit at evidence collection: eb62fc0343a6b65d073f46295674c4460a090492
+- Worktree state at evidence collection: dirty with uncommitted PR-2 WPF governance changes and unrelated local untracked files excluded from the PR scope.
 
-## Modified Files
+## Modified File Groups
 
 - MetBench_Client/MetBench_Client.csproj
+- MetBench_Client/App.xaml
 - MetBench_Client/App.xaml.cs
-- MetBench_Client/Controls/SimplePagination.xaml
-- MetBench_Client/Services/EventAggregator.cs
+- MetBench_Client/Dictionary1.xaml
+- MetBench_Client/GlobalUsings.cs
+- MetBench_Client/Models/NavigationItem.cs
+- MetBench_Client/Services/IClientNavigationWindow.cs
+- MetBench_Client/Services/IClientWindow.cs
+- MetBench_Client/Services/INavigationAware.cs
+- MetBench_Client/Services/INavigationService.cs
+- MetBench_Client/Services/IPageService.cs
+- MetBench_Client/Services/NavigationService.cs
+- MetBench_Client/Services/ApplicationHostService.cs
 - MetBench_Client/Services/ClientThemeController.cs
-- MetBench_Client/Services/UiDialog.cs
-- MetBench_Client/FodyWeavers.xml
-- MetBench_Client/FodyWeavers.xsd
-- MetBench_Client/Helpers/EnumToBooleanConverter.cs
-- MetBench_Client/Helpers/ThemeToIndexConverter.cs
-- MetBench_Client/ViewModels/ApplicationManagementViewModel.cs
-- MetBench_Client/ViewModels/AutoDetectMRViewModel.cs
-- MetBench_Client/ViewModels/DomainManagementViewModel.cs
-- MetBench_Client/ViewModels/MainWindowViewModel.cs
-- MetBench_Client/ViewModels/MRDisplayViewModel.cs
-- MetBench_Client/ViewModels/MRManagementViewModel.cs
-- MetBench_Client/ViewModels/MRRecommendationViewModel.cs
-- MetBench_Client/ViewModels/MTExecutionViewModel.cs
-- MetBench_Client/ViewModels/MTReportGeneratorViewModel.cs
-- MetBench_Client/Views/Pages/ApplicationManagementPage.xaml
-- MetBench_Client/Views/Pages/AutoDetectMRPage.xaml
-- MetBench_Client/Views/Pages/DashboardPage.xaml
-- MetBench_Client/Views/Pages/DomainManagementPage.xaml
-- MetBench_Client/Views/Pages/MRDisplayPage.xaml
-- MetBench_Client/Views/Pages/MRManagementPage.xaml
-- MetBench_Client/Views/Pages/MRManagementPage.xaml.cs
-- MetBench_Client/Views/Pages/MRRecommendationPage.xaml
-- MetBench_Client/Views/Pages/MRRecommendationPage.xaml.cs
-- MetBench_Client/Views/Pages/MTExecutionPage.xaml
-- MetBench_Client/Views/Pages/MTReportGeneratorPage.xaml
-- MetBench_Client/Views/Pages/SettingsPage.xaml
-- MetBench_Client/Views/Pages/SettingsPage.xaml.cs
-- MetBench_Client/Views/Controls/PagingBar.xaml
-- MetBench_Client/Views/Windows/ApplicationProgramsWindow.xaml
-- MetBench_Client/Views/Windows/MainWindow.xaml
-- MetBench_Client/Views/Windows/ProgressWindow.xaml
+- MetBench_Client/Services/PageService.cs
+- MetBench_Client/ViewModels/*.cs WPF view-model binding cleanup
+- MetBench_Client/Views/Pages/*.xaml and *.xaml.cs Wpf.Ui-free page conversion
+- MetBench_Client/Views/Windows/MainWindow.xaml and MainWindow.xaml.cs
+- MetBench_Client/Views/Windows/ApplicationProgramsWindow.xaml and ApplicationProgramsWindow.xaml.cs
 - MetBench_Client.Tests/Architecture/WpfDependencyGovernanceTests.cs
+- MetBench_Client.Tests/ClientI18n/MainWindowLocalizationTests.cs
 - MetBench_Client.Tests/ClientI18n/SettingsLanguageTests.cs
-- docs/superpowers/specs/2026-06-07-wpf-minimal-mvvm-behaviors-governance-design.md
 - docs/superpowers/plans/2026-06-07-wpf-minimal-mvvm-behaviors-governance-plan.md
+- docs/superpowers/specs/2026-06-07-wpf-minimal-mvvm-behaviors-governance-design.md
 - docs/superpowers/specs/2026-06-07-wpf-minimal-mvvm-behaviors-vm-evidence/build-and-test.log
-- docs/superpowers/specs/2026-06-07-wpf-minimal-mvvm-behaviors-vm-evidence/drive-wpf-minimal-mvvm-behaviors.ps1
+- docs/superpowers/specs/2026-06-07-wpf-minimal-mvvm-behaviors-vm-evidence/drive-wpf-pr2-native-shell.ps1
 - docs/superpowers/specs/2026-06-07-wpf-minimal-mvvm-behaviors-vm-evidence/01-main-window-startup.png
-- docs/superpowers/specs/2026-06-07-wpf-minimal-mvvm-behaviors-vm-evidence/02-mt-report-generator-behavior-page.png
-- docs/superpowers/specs/2026-06-07-wpf-minimal-mvvm-behaviors-vm-evidence/03-export-command-empty-file-dialog.png
+- docs/superpowers/specs/2026-06-07-wpf-minimal-mvvm-behaviors-vm-evidence/02-mt-execution-native-page.png
+- docs/superpowers/specs/2026-06-07-wpf-minimal-mvvm-behaviors-vm-evidence/03-system-mt-equation-catalog-native-page.png
+- docs/superpowers/specs/2026-06-07-wpf-minimal-mvvm-behaviors-vm-evidence/04-settings-native-page.png
 - docs/superpowers/specs/2026-06-07-wpf-minimal-mvvm-behaviors-vm-evidence/README.md
+
+Deleted Wpf.Ui helper files:
+
+- MetBench_Client/Helpers/NameToPageTypeConverter.cs
+- MetBench_Client/Helpers/PaneDisplayModeToIndexConverter.cs
 
 ## Dependency Inventory Summary
 
-- CommunityToolkit.Mvvm: already present and kept as the target MVVM stack.
-- Microsoft.Xaml.Behaviors.Wpf: added and now used for migrated event-to-command bindings.
-- Wpf.Ui / WPF-UI: still present by design; recorded for phased removal.
-- Wpf.Ui message boxes: direct `Wpf.Ui.Controls.MessageBox` / `ShowDialogAsync` usage removed in PR-2b and guarded against reintroduction.
-- Informational dialog results: PR-2b review fix removes the remaining branch dependency on `showMessageAsync` return values and guards against reintroduction.
-- Wpf.Ui theme service DI and `ui:ThemeResource`: PR-2c removes the unused `IThemeService` / `ThemeService` app registration, replaces Settings-page `ui:ThemeResource` with WPF `DynamicResource`, and guards both surfaces against reintroduction.
-- Settings theme API isolation: PR-2d moves Settings ViewModel and helper converter code off direct `Wpf.Ui.Appearance` references. A client-owned theme controller isolates the remaining Wpf.Ui `ApplicationThemeManager` call in `MetBench_Client/Services/ClientThemeController.cs`.
-- Settings page Wpf.Ui XAML removal: PR-2e removes the Wpf.Ui namespace, Wpf.Ui markup, and `INavigableView<T>` usage from SettingsPage while preserving the source-code link through WPF `Hyperlink`.
-- ProgressWindow Wpf.Ui control removal: PR-2f replaces the Wpf.Ui `ProgressRing` with a WPF-native indeterminate `ProgressBar` and guards the window against Wpf.Ui markup reintroduction.
-- Paging controls Wpf.Ui control removal: PR-2g replaces Wpf.Ui paging buttons and `SymbolIcon` markup with WPF-native buttons in SimplePagination and PagingBar, then guards both controls against Wpf.Ui markup reintroduction.
-- Settings page lifecycle repair: PR-2h restores explicit page `DataContext` and forwards WPF-native Loaded/Unloaded events to SettingsViewModel navigation lifecycle without reintroducing Wpf.Ui `INavigableView<T>`.
+- CommunityToolkit.Mvvm: kept as the target MVVM stack.
+- Microsoft.Xaml.Behaviors.Wpf: kept as the target XAML event-to-command stack.
+- Wpf.Ui / WPF-UI: PR-2 removes the production package reference, XAML namespace, controls, navigation interfaces, shell usage, theme manager usage, and theme watcher usage from MetBench_Client.
 - WPF-UI.Tray: removed from the client project and guarded against reintroduction.
 - Stylet.Start: removed from the client project after page command binding migration.
-- Prism.Wpf: removed from the client project after dead-using cleanup.
+- Prism.Wpf: removed from the client project after dead using cleanup.
 - PropertyChanged.Fody: removed from the client project after explicit ObservableObject/RelayCommand migration.
-- LiveChartsCore.* and SkiaSharp.*: still present; recorded for display replacement.
-- Microsoft.Web.WebView2: still present; recorded for report preview replacement.
+- LiveChartsCore.* and SkiaSharp.*: still present; assigned to PR-3 display replacement.
+- Microsoft.Web.WebView2: still present; assigned to PR-3 report preview replacement.
 - HandyControl: no current use found.
 
 ## Build And Test Results
 
-Full output is tracked in build-and-test.log.
+Full command output is tracked in build-and-test.log.
 
-- `dotnet restore MetBench.sln -v:minimal`: exit 0 with network permission for NuGet access; existing OpenTK/SkiaSharp compatibility warnings remain.
-- `dotnet build MetBench.sln --no-restore -v:minimal`: exit 0; 0 errors; existing warnings remain.
-- `dotnet test MetBench_Client.Tests\MetBench_Client.Tests.csproj --no-build -v:minimal`: exit 0; 32 passed.
-- `dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj --no-build --filter "ClientI18n|SystemMtExplanation|SystemMtPairQuality" -v:minimal`: exit 0; 18 passed.
-- `dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj --no-build -v:minimal`: exit 0; 1819 passed, 12 skipped, 0 failed.
-- The remaining 12 full-suite skips are existing OpenMOC/OpenMC environment-gated tests; the NumPy compatibility path no longer skips.
-- `rg -n "Wpf.Ui.Appearance|using Wpf.Ui.Appearance" MetBench_Client\ViewModels MetBench_Client\Helpers`: exit 1 with no matches.
-- `rg -n "ThemeToIndexConverter|IThemeService|ThemeService|ui:ThemeResource" MetBench_Client`: exit 1 with no matches.
-- `rg -n "http://schemas.lepo.co/wpfui/2022/xaml|Wpf\.Ui|ui:" MetBench_Client\Views\Pages\SettingsPage.xaml MetBench_Client\Views\Pages\SettingsPage.xaml.cs`: exit 1 with no matches.
-- `rg -n "http://schemas.lepo.co/wpfui/2022/xaml|Wpf\.Ui|ui:" MetBench_Client\Views\Windows\ProgressWindow.xaml`: exit 1 with no matches.
-- `rg -n "http://schemas.lepo.co/wpfui/2022/xaml|Wpf\.Ui|ui:" MetBench_Client\Controls\SimplePagination.xaml MetBench_Client\Views\Controls\PagingBar.xaml`: exit 1 with no matches.
-- `rg -n "ui:ThemeResource|IThemeService|ThemeService" MetBench_Client`: exit 1 with no matches.
-- `rg -n "Wpf\.Ui\.Controls\.MessageBox|ShowDialogAsync" MetBench_Client`: exit 1 with no matches.
-- `rg -n "\b(?:var|bool)\s+\w+\s*=\s*await\s+showMessageAsync\s*\(" MetBench_Client`: exit 1 with no matches.
-- `git diff --check`: exit 0.
+- `dotnet restore MetBench.sln -v:minimal`: exit 0; existing OpenTK/SkiaSharp compatibility warnings remain.
+- `dotnet build MetBench.sln --no-restore -v:minimal`: exit 0; 0 errors, 6 warnings in the final minimal log.
+- `dotnet test MetBench_Client.Tests\MetBench_Client.Tests.csproj --no-build -v:minimal`: exit 0; 36 passed, 0 skipped, 0 failed.
+- `dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj --no-build --filter "ClientI18n|SystemMtExplanation|SystemMtPairQuality" -v:minimal`: exit 0; 18 passed, 0 skipped, 0 failed.
+- `rg -n "Wpf\.Ui|WPF-UI|xmlns:ui|ui:|INavigableView|INavigationWindow|NavigationView|FluentWindow|SymbolIcon|ApplicationThemeManager|SystemThemeWatcher" MetBench_Client`: exit 1, no matches.
+- `rg -n "�|锟|\?{3,}|瀵|鐨|鏈|鏁|铚|搴|椤|潰" MetBench_Client -g "*.cs" -g "*.xaml"`: exit 1, no matches.
+- `git diff --check`: exit 0. Git reported CRLF normalization warnings only.
+- `powershell -NoProfile -ExecutionPolicy Bypass -File docs\superpowers\specs\2026-06-07-wpf-minimal-mvvm-behaviors-vm-evidence\drive-wpf-pr2-native-shell.ps1`: exit 0.
 
 ## Screenshots
 
-- 01-main-window-startup.png: WPF main window launched from built output.
-- 02-mt-report-generator-behavior-page.png: MT Report Generator page with the migrated Export button visible.
-- 03-export-command-empty-file-dialog.png: result after clicking the migrated Export command, showing the existing empty-file validation dialog.
+- 01-main-window-startup.png: WPF main window launched from the current PR-2 build output.
+- 02-mt-execution-native-page.png: native shell navigation to MT Execution.
+- 03-system-mt-equation-catalog-native-page.png: native shell navigation to System MT Equation Catalog.
+- 04-settings-native-page.png: native shell navigation to Settings after Wpf.Ui-free settings migration.
 
 ## Incomplete Items And Blockers
 
-- This branch does not remove Wpf.Ui, LiveCharts, SkiaSharp, or WebView2. Wpf.Ui resource dictionaries, navigation shell, controls, icons, `SystemThemeWatcher`, and the `ApplicationThemeManager` adapter remain intentionally present for staged follow-up PRs.
-- Stylet.Start, Prism.Wpf, PropertyChanged.Fody, WPF-UI.Tray, direct Wpf.Ui dialog usage, and informational-dialog-result branching are removed and guarded in this branch.
-- Wpf.Ui `IThemeService` / `ThemeService` DI and `ui:ThemeResource` markup-extension usage are removed and guarded in PR-2c.
-- Settings ViewModel and helper converter code no longer directly reference Wpf.Ui appearance APIs after PR-2d; the remaining theme runtime bridge is isolated in Services.
-- SettingsPage no longer uses Wpf.Ui XAML or Wpf.Ui code-behind APIs after PR-2e; the wider navigation shell and other pages still use Wpf.Ui.
-- ProgressWindow no longer uses Wpf.Ui XAML after PR-2f; the wider navigation shell and other windows/pages still use Wpf.Ui.
-- SimplePagination and PagingBar no longer use Wpf.Ui XAML after PR-2g; the wider navigation shell and other windows/pages still use Wpf.Ui.
-- SettingsPage now uses WPF-native Loaded/Unloaded lifecycle forwarding after PR-2h so SettingsViewModel initialization still runs without Wpf.Ui `INavigableView<T>`.
-- Full `MetBench_SystemMT.Tests` is green in this VM run with the repository's existing environment-gated OpenMOC/OpenMC skips. The external Minimum-MR-SubSet B-group tests now run and pass rather than skipping on NumPy 2.x.
-- CLAUDE.md still advertises the older WPF stack. The design document records this as governance target overrides older convention; a later sync PR is required after phased evidence is collected.
+- PR-2 has no remaining Wpf.Ui/WPF-UI production dependency blocker in MetBench_Client based on the current guard.
+- LiveChartsCore.*, SkiaSharp.*, and Microsoft.Web.WebView2 remain intentionally present for PR-3 display and preview replacement.
+- CLAUDE.md still advertises the older WPF stack. The design document records this as governance target overrides older convention; a later synchronization PR remains required after PR-3 evidence exists.
+- Unrelated local untracked files are present in the worktree and must not be committed as part of this PR: `.claude/settings.local.json`, `_worktrees/`, and `tools/uia-verify-i18n.ps1`.

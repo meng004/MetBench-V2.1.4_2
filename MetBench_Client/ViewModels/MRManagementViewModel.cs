@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using MetBench_BLL;
 using CommunityToolkit.Mvvm.Input;
 using MetBench_Client.Helpers;
@@ -17,8 +17,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using Wpf.Ui;
-using Wpf.Ui.Controls;
 using ValidationResult = FluentValidation.Results.ValidationResult;
 
 
@@ -155,7 +153,7 @@ namespace MetBench_Client.ViewModels
         // 实现接口 INavigationAware
         public void OnNavigatedTo()
         {
-            if (!_isNavigate) 
+            if (!_isNavigate)
             {
                 return;
             }
@@ -488,7 +486,7 @@ namespace MetBench_Client.ViewModels
             }
             finally
             {
-                // 结束时将进度条状态更新为不可见和确定状态  
+                // 结束时将进度条状态更新为不可见和确定状态
                 IsIndeterminate = false;
                 Visibility = Visibility.Collapsed;
 
@@ -568,7 +566,7 @@ namespace MetBench_Client.ViewModels
             }
             finally
             {
-                // 结束时将进度条状态更新为不可见和确定状态  
+                // 结束时将进度条状态更新为不可见和确定状态
                 IsIndeterminate = false;
                 Visibility = Visibility.Collapsed;
                 // 刷新数据
@@ -649,7 +647,7 @@ namespace MetBench_Client.ViewModels
                 GranularityValue = DataGridSelectItem.Granularity;
                 HierarchyValue = DataGridSelectItem.Hierarchy;
                 OperatorValue  = DataGridSelectItem.Operator;
-                ExpressionValue = DataGridSelectItem.Expression; 
+                ExpressionValue = DataGridSelectItem.Expression;
 
                 var idmr = DataGridSelectItem.IdMR;
                 var metamorphicRelation = _metamorphicRelationSerive.GetMRById(idmr);
@@ -832,7 +830,7 @@ namespace MetBench_Client.ViewModels
             var applicationName = message.Name;
             var application = new MetBench_Domain.Application() { Name = applicationName };
             var applicationEx = new ApplicationEx(application);
-            // 插入到倒数第二项  
+            // 插入到倒数第二项
             if (ApplicationExs.Count > 1)
             {
                 ApplicationExs.Insert(ApplicationExs.Count - 1, applicationEx);

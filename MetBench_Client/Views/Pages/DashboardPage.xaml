@@ -1,10 +1,9 @@
-﻿<!--<ui:UiPage x:Class="MetBench_Client.Views.Pages.DashboardPage"
+<!--<Page x:Class="MetBench_Client.Views.Pages.DashboardPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:MetBench_Client.Views.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="DashboardPage"
     d:DataContext="{d:DesignInstance local:DashboardPage, IsDesignTimeCreatable=False}"
     d:DesignHeight="450"
@@ -19,17 +18,16 @@
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <ui:Button Grid.Column="0" Command="{Binding ViewModel.CounterIncrementCommand, Mode=OneWay}" Content="Click me!" Icon="Fluent24" />
+        <Button Grid.Column="0" Command="{Binding ViewModel.CounterIncrementCommand, Mode=OneWay}" Content="Click me!" />
         <TextBlock Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding ViewModel.Counter, Mode=OneWay}" />
     </Grid>
-</ui:UiPage>-->
+</Page>-->
 <Page x:Class="MetBench_Client.Views.Pages.DashboardPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:MetBench_Client.Views.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="DashboardPage"
     d:DataContext="{d:DesignInstance local:DashboardPage, IsDesignTimeCreatable=False}"
     d:DesignHeight="800"
@@ -44,9 +42,9 @@
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <!--<ui:Button Grid.Column="0" Command="{Binding ViewModel.CounterIncrementCommand, Mode=OneWay}" Content="Click me!" Icon="Fluent24" />-->
-        <ui:Button Grid.Column="0"
-                   Command="{Binding ViewModel.CounterIncrementCommand, Mode=OneWay}" Content="{Binding ViewModel.Localization[Dashboard_ClickMe]}" Icon="Fluent24" />
+        <!--<Button Grid.Column="0" Command="{Binding ViewModel.CounterIncrementCommand, Mode=OneWay}" Content="Click me!" />-->
+        <Button Grid.Column="0"
+                   Command="{Binding ViewModel.CounterIncrementCommand, Mode=OneWay}" Content="{Binding ViewModel.Localization[Dashboard_ClickMe]}" />
 
         <TextBlock Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding ViewModel.Counter, Mode=OneWay}" />
     </Grid>

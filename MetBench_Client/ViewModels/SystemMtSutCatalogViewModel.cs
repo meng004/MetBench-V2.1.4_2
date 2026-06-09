@@ -5,7 +5,6 @@ using MetBench_UI.Localization;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Wpf.Ui.Controls;
 
 namespace MetBench_Client.ViewModels
 {

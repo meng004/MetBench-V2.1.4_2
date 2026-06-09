@@ -1,4 +1,4 @@
-﻿using MetBench_Client.ViewModels;
+using MetBench_Client.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,14 +7,13 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using Wpf.Ui.Controls;
 
 namespace MetBench_Client.Views.Pages
 {
     /// <summary>
     /// MTExecutionPage.xaml 的交互逻辑
     /// </summary>
-    public partial class MTReportGeneratorPage : Page,INavigableView<ViewModels.MTReportGeneratorViewModel>
+    public partial class MTReportGeneratorPage : Page
     {
         public MTReportGeneratorViewModel ViewModel
         {
@@ -30,7 +29,7 @@ namespace MetBench_Client.Views.Pages
         //TextBox获得焦点的行为
         private void textBox_GotFocus(object sender, RoutedEventArgs e)
         {
-            Wpf.Ui.Controls.TextBox textBox = (Wpf.Ui.Controls.TextBox)sender;
+            TextBox textBox = (TextBox)sender;
 
             textBox.TextWrapping = TextWrapping.Wrap;
             textBox.Height = double.NaN; // Set the height to auto-expand
@@ -39,7 +38,7 @@ namespace MetBench_Client.Views.Pages
         //TextBox失去焦点的行为
         private void textBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            Wpf.Ui.Controls.TextBox textBox = (Wpf.Ui.Controls.TextBox)sender;
+            TextBox textBox = (TextBox)sender;
 
             textBox.TextWrapping = TextWrapping.NoWrap; // Restore original text wrapping
             textBox.Height = double.NaN; // Set the height back to auto

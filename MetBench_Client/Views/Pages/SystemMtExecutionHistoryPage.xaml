@@ -6,13 +6,10 @@
     xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
     xmlns:local="clr-namespace:MetBench_Client.Views.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="SystemMtExecutionHistoryPage"
     d:DataContext="{d:DesignInstance local:SystemMtExecutionHistoryPage, IsDesignTimeCreatable=False}"
     d:DesignHeight="720"
     d:DesignWidth="1180"
-    ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
-    ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     AutomationProperties.AutomationId="SystemMtExecutionHistoryPage"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     mc:Ignorable="d">
@@ -54,7 +51,7 @@
 
                 <StackPanel Grid.Column="0">
                     <TextBlock FontWeight="SemiBold" Text="{Binding ViewModel.Localization[History_FilterByMrName]}"/>
-                    <ui:TextBox
+                    <TextBox
                         x:Name="TextBox_MrNameFilter"
                         Margin="0,4,0,0"
                         AutomationProperties.AutomationId="TextBox_MrNameFilter"
@@ -62,16 +59,15 @@
                 </StackPanel>
 
                 <StackPanel Grid.Column="1" Margin="12,22,0,0" Orientation="Horizontal">
-                    <ui:Button
+                    <Button
                         x:Name="Button_RefreshSystemMtExecutionHistory"
                         Margin="0,0,8,0"
                         AutomationProperties.AutomationId="Button_RefreshSystemMtExecutionHistory"
                         Command="{Binding ViewModel.RefreshCommand, Mode=OneWay}"
                         Content="{Binding ViewModel.Localization[History_Refresh]}"/>
-                    <ui:Button
+                    <Button
                         x:Name="Button_DeleteSelectedExecutions"
                         Margin="0,0,8,0"
-                        Appearance="Danger"
                         AutomationProperties.AutomationId="Button_DeleteSelectedExecutions"
                         Command="{Binding ViewModel.DeleteSelectedCommand, Mode=OneWay}"
                         Content="{Binding ViewModel.Localization[History_DeleteSelected]}"/>
@@ -93,7 +89,7 @@
             BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
             BorderThickness="1"
             CornerRadius="4">
-            <ui:DataGrid
+            <DataGrid
                 x:Name="DataGrid_SystemMtExecutionHistory"
                 AutomationProperties.AutomationId="DataGrid_SystemMtExecutionHistory"
                 AutoGenerateColumns="False"
@@ -101,15 +97,15 @@
                 ItemsSource="{Binding ViewModel.Records, Mode=OneWay}"
                 SelectedItem="{Binding ViewModel.SelectedRecord, Mode=TwoWay}"
                 SelectionMode="Extended">
-                <ui:DataGrid.Columns>
+                <DataGrid.Columns>
                     <DataGridTextColumn Width="160" Binding="{Binding RunAt, StringFormat=u}" Header="{Binding Data.ViewModel.Localization[History_Column_RunAt], Source={StaticResource LocalizationProxy}}"/>
                     <DataGridTextColumn Width="220" Binding="{Binding MrName}" Header="{Binding Data.ViewModel.Localization[History_Column_Mr], Source={StaticResource LocalizationProxy}}"/>
                     <DataGridTextColumn Width="140" Binding="{Binding AssertionName}" Header="{Binding Data.ViewModel.Localization[History_Column_Assertion], Source={StaticResource LocalizationProxy}}"/>
                     <DataGridTextColumn Width="100" Binding="{Binding ValueName}" Header="{Binding Data.ViewModel.Localization[History_Column_Value], Source={StaticResource LocalizationProxy}}"/>
                     <DataGridTextColumn Width="90" Binding="{Binding Passed}" Header="{Binding Data.ViewModel.Localization[History_Column_Passed], Source={StaticResource LocalizationProxy}}"/>
                     <DataGridTextColumn Width="*" Binding="{Binding FailureReason}" Header="{Binding Data.ViewModel.Localization[History_Column_FailureReason], Source={StaticResource LocalizationProxy}}"/>
-                </ui:DataGrid.Columns>
-            </ui:DataGrid>
+                </DataGrid.Columns>
+            </DataGrid>
         </Border>
 
         <Border
@@ -124,11 +120,11 @@
                     Margin="0,6,16,0"
                     Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                     Text="{Binding ViewModel.PaginationSummary, Mode=OneWay}"/>
-                <ui:Button
+                <Button
                     Margin="0,0,8,0"
                     Command="{Binding ViewModel.PreviousPageCommand, Mode=OneWay}"
                     Content="{Binding ViewModel.Localization[History_PreviousPage]}"/>
-                <ui:Button
+                <Button
                     Command="{Binding ViewModel.NextPageCommand, Mode=OneWay}"
                     Content="{Binding ViewModel.Localization[History_NextPage]}"/>
             </StackPanel>

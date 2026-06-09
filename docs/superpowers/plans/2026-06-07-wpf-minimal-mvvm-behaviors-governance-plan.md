@@ -1,7 +1,7 @@
 # WPF Minimal MVVM and Behaviors Governance Plan
 
 Date: 2026-06-07
-Status: Active scoped plan; current branch includes PR-0, PR-1, PR-2a, PR-2b, PR-2c, PR-2d, PR-2e, PR-2f, PR-2g, and PR-2h evidence
+Status: Active scoped plan; current branch includes PR-0, PR-1, and PR-2 evidence through final Wpf.Ui/WPF-UI production dependency removal. PR-3 remains active for LiveChartsCore.*, SkiaSharp.*, and Microsoft.Web.WebView2 display replacement.
 Design: docs/superpowers/specs/2026-06-07-wpf-minimal-mvvm-behaviors-governance-design.md
 
 ## Goal
@@ -116,7 +116,7 @@ Steps:
 2. Delete Fody weaver files.
 3. Replace Stylet event/action bindings with RelayCommand and Microsoft.Xaml.Behaviors.Wpf where event binding is required.
 4. Add architecture guards preventing Prism, Stylet, Fody, and WPF-UI.Tray reintroduction.
-5. Keep Wpf.Ui, WebView2, LiveChartsCore.*, and SkiaSharp.* for later PR slices.
+5. At this slice boundary, keep Wpf.Ui, WebView2, LiveChartsCore.*, and SkiaSharp.* for later slices; Wpf.Ui is subsequently removed by Task 3l.
 
 Expected output:
 
@@ -146,7 +146,7 @@ Steps:
 3. Remove the remaining `.ShowDialogAsync()` Wpf.Ui dialog calls from client sources.
 4. Add an architecture guard that prevents direct Wpf.Ui message-box usage from returning.
 5. Remove and guard the remaining branch dependency on informational `showMessageAsync` return values.
-6. Keep Wpf.Ui navigation, shell controls, themes, and icons in scope for later PR-2 slices.
+6. At this slice boundary, keep Wpf.Ui navigation, shell controls, themes, and icons in scope for later PR-2 slices; those surfaces are subsequently removed by Task 3l.
 
 Expected output:
 
@@ -169,7 +169,7 @@ Steps:
 1. Remove the unused Wpf.Ui `IThemeService` / `ThemeService` registration from WPF app DI.
 2. Replace `ui:ThemeResource` markup-extension usage with WPF-native `DynamicResource` on the Settings page.
 3. Add architecture guards preventing `ui:ThemeResource` and Wpf.Ui theme service registration from returning.
-4. Keep Wpf.Ui resource dictionaries, navigation shell, controls, icons, and `ApplicationThemeManager` for later PR-2 slices because they still have broad live use.
+4. At this slice boundary, keep Wpf.Ui resource dictionaries, navigation shell, controls, icons, and `ApplicationThemeManager` for later PR-2 slices because they still have broad live use; those surfaces are subsequently removed by Task 3l.
 
 Expected output:
 
@@ -205,7 +205,7 @@ Expected output:
 - Client governance and i18n tests pass.
 - `rg "Wpf.Ui.Appearance|using Wpf.Ui.Appearance" MetBench_Client\ViewModels MetBench_Client\Helpers` has no matches.
 - `rg "ThemeToIndexConverter|IThemeService|ThemeService|ui:ThemeResource" MetBench_Client` has no matches.
-- Wpf.Ui `ApplicationThemeManager` remains isolated in `MetBench_Client/Services/ClientThemeController.cs` for a later final theme-removal slice.
+- At this slice boundary, Wpf.Ui `ApplicationThemeManager` remains isolated in `MetBench_Client/Services/ClientThemeController.cs`; it is subsequently removed by Task 3l.
 - No MetBench_BLL.Core, MetBench_DAL, or MetBench_BLL runtime semantics change.
 
 ## Task 3f: PR-2e Settings Page Wpf.Ui XAML Removal Slice
@@ -295,6 +295,97 @@ Expected output:
 - Client tests pass with the lifecycle regression covered.
 - No Wpf.Ui API is reintroduced into SettingsPage.
 
+## Task 3j: PR-2i Application Programs Window Wpf.Ui Removal Slice
+
+Files:
+
+- MetBench_Client/Services/IClientWindow.cs
+- MetBench_Client/ViewModels/ApplicationManagementViewModel.cs
+- MetBench_Client/Views/Windows/ApplicationProgramsWindow.xaml
+- MetBench_Client/Views/Windows/ApplicationProgramsWindow.xaml.cs
+- MetBench_Client.Tests/Architecture/WpfDependencyGovernanceTests.cs
+
+Steps:
+
+1. Add a client-owned `IClientWindow` abstraction for simple show/hide parameter windows.
+2. Replace `ApplicationProgramsWindow` `ui:FluentWindow`, `ui:TitleBar`, `ui:DataGrid`, and `ui:Button` usage with WPF `Window`, `Border`, `TextBlock`, `DataGrid`, and `Button`.
+3. Remove Wpf.Ui `INavigationWindow` / `INavigableView<T>` from the parameter window code-behind.
+4. Make `ApplicationManagementViewModel` use `IClientWindow` for this parameter popup instead of casting it to Wpf.Ui `INavigationWindow`.
+5. Add an architecture guard preventing Wpf.Ui namespace, `ui:` markup, `INavigationWindow`, and `INavigableView` from returning to this window.
+
+Expected output:
+
+- Client WPF build has 0 errors.
+- Client governance tests pass and include the ApplicationProgramsWindow guard.
+- `rg "http://schemas.lepo.co/wpfui/2022/xaml|Wpf\\.Ui|ui:|INavigationWindow|INavigableView" MetBench_Client\Views\Windows\ApplicationProgramsWindow.xaml MetBench_Client\Views\Windows\ApplicationProgramsWindow.xaml.cs` has no matches.
+- No MetBench_BLL.Core, MetBench_DAL, or MetBench_BLL runtime semantics change.
+
+## Task 3k: PR-2j Dead Wpf.Ui Helper Removal Slice
+
+Files:
+
+- MetBench_Client/Helpers/NameToPageTypeConverter.cs
+- MetBench_Client/Helpers/PaneDisplayModeToIndexConverter.cs
+- MetBench_Client.Tests/Architecture/WpfDependencyGovernanceTests.cs
+
+Steps:
+
+1. Confirm both helpers have no production call sites beyond their own definitions.
+2. Delete the unused Wpf.Ui Gallery name-to-page converter.
+3. Delete the unused Wpf.Ui `NavigationViewPaneDisplayMode` converter.
+4. Add an architecture guard preventing Wpf.Ui controls/gallery helper dependencies from returning.
+
+Expected output:
+
+- Client WPF build has 0 errors.
+- Client governance tests pass and include the helper guard.
+- `rg "PaneDisplayModeToIndexConverter|NameToPageTypeConverter" MetBench_Client` has no production matches.
+- No MetBench_BLL.Core, MetBench_DAL, or MetBench_BLL runtime semantics change.
+
+## Task 3l: PR-2 Final Native Shell And Wpf.Ui Package Removal
+
+Files:
+
+- MetBench_Client/MetBench_Client.csproj
+- MetBench_Client/App.xaml
+- MetBench_Client/App.xaml.cs
+- MetBench_Client/Dictionary1.xaml
+- MetBench_Client/GlobalUsings.cs
+- MetBench_Client/Models/NavigationItem.cs
+- MetBench_Client/Services/IClientNavigationWindow.cs
+- MetBench_Client/Services/INavigationAware.cs
+- MetBench_Client/Services/INavigationService.cs
+- MetBench_Client/Services/IPageService.cs
+- MetBench_Client/Services/NavigationService.cs
+- MetBench_Client/Services/ApplicationHostService.cs
+- MetBench_Client/Services/ClientThemeController.cs
+- MetBench_Client/Services/PageService.cs
+- MetBench_Client/ViewModels/MainWindowViewModel.cs
+- MetBench_Client/Views/Windows/MainWindow.xaml
+- MetBench_Client/Views/Windows/MainWindow.xaml.cs
+- MetBench_Client/Views/Pages/*.xaml
+- MetBench_Client/Views/Pages/*.xaml.cs
+- MetBench_Client.Tests/Architecture/WpfDependencyGovernanceTests.cs
+- MetBench_Client.Tests/ClientI18n/MainWindowLocalizationTests.cs
+- MetBench_Client.Tests/ClientI18n/SettingsLanguageTests.cs
+
+Steps:
+
+1. Remove the `WPF-UI` package reference from the client project.
+2. Replace the Wpf.Ui shell with WPF `Window`, `ListBox`, and `Frame`.
+3. Add a project-owned navigation service for WPF `Page` activation and `INavigationAware` lifecycle forwarding.
+4. Replace Wpf.Ui theme manager usage with a WPF resource-based `NativeClientThemeController`.
+5. Convert remaining Wpf.Ui page/control XAML to WPF-native `Page`, `Button`, `TextBox`, `DataGrid`, and `ItemsControl`.
+6. Remove Wpf.Ui page/window interfaces from code-behind.
+7. Add a production residual guard blocking Wpf.Ui, WPF-UI, Wpf.Ui XAML namespaces, Wpf.Ui navigation interfaces, shell controls, icons, and theme watcher APIs from returning.
+
+Expected output:
+
+- Client WPF build has 0 errors.
+- Client governance and i18n tests pass.
+- `rg "Wpf\\.Ui|WPF-UI|xmlns:ui|ui:|INavigableView|INavigationWindow|NavigationView|FluentWindow|SymbolIcon|ApplicationThemeManager|SystemThemeWatcher" MetBench_Client` has no matches.
+- No MetBench_BLL.Core, MetBench_DAL, or MetBench_BLL runtime semantics change.
+
 ## Task 4: Build And Test Evidence
 
 Evidence file:
@@ -308,6 +399,8 @@ dotnet restore MetBench.sln
 dotnet build MetBench.sln --no-restore
 dotnet test MetBench_Client.Tests --no-build
 dotnet test MetBench_SystemMT.Tests --no-build --filter "ClientI18n|SystemMtExplanation|SystemMtPairQuality"
+rg -n "Wpf\.Ui|WPF-UI|xmlns:ui|ui:|INavigableView|INavigationWindow|NavigationView|FluentWindow|SymbolIcon|ApplicationThemeManager|SystemThemeWatcher" MetBench_Client
+rg -n "�|锟|\?{3,}|瀵|鐨|鏈|鏁|铚|搴|椤|潰" MetBench_Client -g "*.cs" -g "*.xaml"
 git diff --check
 ```
 
@@ -316,6 +409,8 @@ Expected output:
 - Restore succeeds.
 - Solution build has 0 errors.
 - Focused client and System MT tests pass.
+- Wpf.Ui production residual guard has no matches.
+- Mojibake guard has no matches after the large XAML/code-behind conversion.
 - Diff whitespace check exits 0.
 
 Failure action:
@@ -384,5 +479,6 @@ Expected output:
 
 - Only WPF dependency-governance design, migration, guard, and VM evidence files are modified.
 - Existing unrelated untracked local files are not committed.
-- PR body states that Wpf.Ui, LiveCharts, SkiaSharp, and WebView2 remain present by design for later slices.
-- PR body states that Stylet.Start, Prism.Wpf, PropertyChanged.Fody, and WPF-UI.Tray were removed in the current branch.
+- PR body states that Wpf.Ui/WPF-UI production package and runtime surfaces were removed in PR-2 and guarded against reintroduction.
+- PR body states that Stylet.Start, Prism.Wpf, PropertyChanged.Fody, and WPF-UI.Tray were removed in PR-1/PR-2 convergence.
+- PR body states that LiveChartsCore.*, SkiaSharp.*, and WebView2 remain for PR-3 display replacement.

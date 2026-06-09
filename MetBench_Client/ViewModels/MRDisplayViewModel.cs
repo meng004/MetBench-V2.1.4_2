@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using MetBench_BLL;
 using CommunityToolkit.Mvvm.Input;
 using MetBench_Client.Services;
@@ -11,8 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Wpf.Ui;
-using Wpf.Ui.Controls;
 
 namespace MetBench_Client.ViewModels
 {
@@ -115,12 +113,12 @@ namespace MetBench_Client.ViewModels
         {
             var datas = new ObservableCollection<MetamorphicRelations_QueryResultData>();
 
-            if (!_isInitialized) 
+            if (!_isInitialized)
             {
                 datas = _metamorphicRelationSerive.showMultTwoTableResult();
             }
 
-            if ( QueryTempData.Count>0) 
+            if ( QueryTempData.Count>0)
             {
                 datas = QueryTempData;
             }
@@ -271,7 +269,7 @@ namespace MetBench_Client.ViewModels
         }
 
         // 对选中的蜕变关系进行页面跳转与传参
-        public void EditSelectedMR(int id) 
+        public void EditSelectedMR(int id)
         {
             var idMR = id;
             var selectedItem = Data.FirstOrDefault(x => x.IdMR == idMR);

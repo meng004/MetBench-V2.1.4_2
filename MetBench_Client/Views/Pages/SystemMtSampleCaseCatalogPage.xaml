@@ -6,13 +6,10 @@
     xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
     xmlns:local="clr-namespace:MetBench_Client.Views.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="SystemMtSampleCaseCatalogPage"
     d:DataContext="{d:DesignInstance local:SystemMtSampleCaseCatalogPage, IsDesignTimeCreatable=False}"
     d:DesignHeight="720"
     d:DesignWidth="1180"
-    ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
-    ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     AutomationProperties.AutomationId="SystemMtSampleCaseCatalogPage"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     mc:Ignorable="d">
@@ -62,11 +59,11 @@
                 </StackPanel>
 
                 <StackPanel Grid.Column="1" Margin="12,22,0,0" Orientation="Horizontal">
-                    <ui:Button
+                    <Button
                         Margin="0,0,8,0"
                         Command="{Binding ViewModel.RefreshCommand, Mode=OneWay}"
                         Content="{Binding ViewModel.Localization[Catalog_Reload]}"/>
-                    <ui:Button
+                    <Button
                         x:Name="Button_NewSampleDraft"
                         AutomationProperties.AutomationId="Button_NewSampleDraft"
                         Command="{Binding ViewModel.NewSampleDraftCommand, Mode=OneWay}"
@@ -96,17 +93,17 @@
                 BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
                 BorderThickness="1"
                 CornerRadius="4">
-                <ui:DataGrid
+                <DataGrid
                     x:Name="DataGrid_SystemMtSampleCases"
                     AutomationProperties.AutomationId="DataGrid_SystemMtSampleCases"
                     AutoGenerateColumns="False"
                     IsReadOnly="True"
                     ItemsSource="{Binding ViewModel.Samples, Mode=OneWay}"
                     SelectedItem="{Binding ViewModel.SelectedSample, Mode=TwoWay}">
-                    <ui:DataGrid.Columns>
+                    <DataGrid.Columns>
                         <DataGridTextColumn Width="*" Binding="{Binding FileName}" Header="{Binding Data.ViewModel.Localization[Catalog_FileName], Source={StaticResource LocalizationProxy}}"/>
-                    </ui:DataGrid.Columns>
-                </ui:DataGrid>
+                    </DataGrid.Columns>
+                </DataGrid>
             </Border>
 
             <Grid Grid.Column="2">
@@ -122,7 +119,7 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding ViewModel.Localization[Catalog_FileName]}"/>
-                    <ui:TextBox
+                    <TextBox
                         x:Name="TextBox_SampleFileName"
                         Grid.Column="1"
                         AutomationProperties.AutomationId="TextBox_SampleFileName"
@@ -150,22 +147,20 @@
                 </Border>
 
                 <StackPanel Grid.Row="2" HorizontalAlignment="Right" Margin="0,12,0,0" Orientation="Horizontal">
-                    <ui:Button
+                    <Button
                         x:Name="Button_ValidateSample"
                         Margin="0,0,8,0"
                         AutomationProperties.AutomationId="Button_ValidateSample"
                         Command="{Binding ViewModel.ValidateSampleCommand, Mode=OneWay}"
                         Content="{Binding ViewModel.Localization[Catalog_Validate]}"/>
-                    <ui:Button
+                    <Button
                         x:Name="Button_SaveSample"
                         Margin="0,0,8,0"
-                        Appearance="Primary"
                         AutomationProperties.AutomationId="Button_SaveSample"
                         Command="{Binding ViewModel.SaveSampleCommand, Mode=OneWay}"
                         Content="{Binding ViewModel.Localization[Legacy_Save]}"/>
-                    <ui:Button
+                    <Button
                         x:Name="Button_DeleteSample"
-                        Appearance="Danger"
                         AutomationProperties.AutomationId="Button_DeleteSample"
                         Command="{Binding ViewModel.DeleteSampleCommand, Mode=OneWay}"
                         Content="{Binding ViewModel.Localization[Legacy_Delete]}"/>

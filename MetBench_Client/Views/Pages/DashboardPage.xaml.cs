@@ -1,11 +1,10 @@
-﻿using Wpf.Ui.Controls;
 
 namespace MetBench_Client.Views.Pages
 {
     /// <summary>
     /// Interaction logic for DashboardPage.xaml
     /// </summary>
-    public partial class DashboardPage : INavigableView<ViewModels.DashboardViewModel>
+    public partial class DashboardPage
     {
         public ViewModels.DashboardViewModel ViewModel
         {

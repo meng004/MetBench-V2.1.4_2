@@ -1,13 +1,11 @@
 <Page x:Class="MetBench_Client.Views.Pages.CandidateReviewPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
       Title="CandidateReviewPage"
       d:DesignHeight="750" d:DesignWidth="1100"
-      ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
       mc:Ignorable="d">
 
@@ -88,9 +86,8 @@
                     <CheckBox Content="{Binding ViewModel.Localization[Candidate_TheoreticalLlm]}"
                               IsChecked="{Binding ViewModel.UseTheoreticalLlm, Mode=TwoWay}"
                               Margin="0,0,16,0" VerticalAlignment="Center" />
-                    <ui:Button Appearance="Primary"
+                    <Button
                                Content="{Binding ViewModel.Localization[Candidate_ValidateSelected]}"
-                               Icon="{ui:SymbolIcon CheckmarkCircle24}"
                                Command="{Binding ViewModel.ValidateSelectedCommand}" />
 
                     <ProgressBar IsIndeterminate="True" Width="100" Height="4"
@@ -120,7 +117,7 @@
         </Border>
 
         <!-- Row 2: validation history DataGrid -->
-        <ui:DataGrid Grid.Row="2"
+        <DataGrid Grid.Row="2"
                      ItemsSource="{Binding ViewModel.ValidationHistory}"
                      AutoGenerateColumns="False"
                      IsReadOnly="True"
@@ -128,12 +125,12 @@
                      CanUserAddRows="False"
                      BorderThickness="1"
                      BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}">
-            <ui:DataGrid.Columns>
+            <DataGrid.Columns>
                 <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Candidate_ColValidator], Source={StaticResource LocalizationProxy}}"   Binding="{Binding ValidatorName}"              Width="160" />
                 <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Candidate_ColPassed], Source={StaticResource LocalizationProxy}}"      Binding="{Binding Passed}"                     Width="70" />
                 <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Candidate_ColRunAt], Source={StaticResource LocalizationProxy}}"      Binding="{Binding RunAt, StringFormat=yyyy-MM-dd HH:mm:ss}" Width="150" />
                 <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Candidate_ColDetails], Source={StaticResource LocalizationProxy}}"     Binding="{Binding DetailsJson}"                Width="*" />
-            </ui:DataGrid.Columns>
-        </ui:DataGrid>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Page>

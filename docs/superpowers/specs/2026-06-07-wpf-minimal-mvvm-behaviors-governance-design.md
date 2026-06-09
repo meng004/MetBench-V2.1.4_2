@@ -1,12 +1,12 @@
 # WPF Minimal MVVM and Behaviors Governance Design
 
 Date: 2026-06-07
-Branch: codex/wpf-minimal-mvvm-behaviors
-Base: origin/main c01de218404546d3379ebe03d8358374e768eabb
+Branch: codex/wpf-pr2-native-shell
+Base: origin/main eb62fc0343a6b65d073f46295674c4460a090492
 
 ## Scope
 
-This first phase defines the final-state governance architecture for the MetBench WPF client and validates one small VM slice. It does not rewrite the WPF shell, remove all packages, or change MetBench_BLL.Core, MetBench_DAL, or MetBench_BLL runtime semantics.
+This first phase defines the final-state governance architecture for the MetBench WPF client and validates the staged VM slices that remove the first dependency group. It changes only WPF client architecture and does not change MetBench_BLL.Core, MetBench_DAL, or MetBench_BLL runtime semantics.
 
 The requested final state intentionally supersedes the older WPF stack convention in CLAUDE.md. That file still lists Wpf.Ui, LiveChartsCore.SkiaSharpView.WPF, and Microsoft.Web.WebView2 as accepted WPF stack elements. This governance target therefore records: governance target overrides older convention. A later synchronization PR must update CLAUDE.md and AGENTS.md after the phased migration has concrete evidence.
 
@@ -28,7 +28,7 @@ rg -n "xmlns:(ui|s|hc|i)=|SymbolIcon|INavigationService|INavigableView|Navigatio
 |---|---:|---|---|---|
 | CommunityToolkit.Mvvm | 30 files | ObservableObject and existing command/property source generators | Keep as the only MVVM stack | Low |
 | Microsoft.Xaml.Behaviors.Wpf | 0 files before this spike | Missing final event-binding stack | Keep as the only XAML event-to-command stack | Low |
-| Wpf.Ui / WPF-UI / WPF-UI.Tray | Wpf.Ui: 64 files; WPF-UI packages in csproj | Shell, navigation controls, theme helpers, icons, message boxes, pages, tray | Native WPF Frame/Page, ResourceDictionary, built-in controls, own DialogService, optional own tray adapter only if required | High |
+| Wpf.Ui / WPF-UI / WPF-UI.Tray | Initial scan: Wpf.Ui 64 files and WPF-UI packages in csproj. PR-2 current scan: no production `MetBench_Client` matches for Wpf.Ui surfaces; package refs removed. | Former shell, navigation controls, theme helpers, icons, message boxes, pages, tray | Native WPF Frame/Page, ResourceDictionary, built-in controls, own DialogService, optional own tray adapter only if required | High |
 | Stylet.Start | 17 files | Legacy action binding and action target routing | CommunityToolkit RelayCommand plus Microsoft.Xaml.Behaviors InvokeCommandAction | Medium |
 | Prism.Wpf | 3 files | Package plus dead Prism.Common usings in page code-behind | Remove after dead using check | Low |
 | PropertyChanged.Fody | Package ref plus FodyWeavers.xml PropertyChanged | Compile-time property notification weaving | Explicit ObservableObject/SetProperty or generated observable properties | Medium |
@@ -166,8 +166,10 @@ Rollback:
 
 The original PR-0 spike changed only the MT Report Generator export button and proved that a WPF page can use the target event-binding stack without changing BLL/Core/DAL semantics.
 
-This branch now also contains the follow-up PR-1 / PR-2a convergence slice:
+This branch now also contains the follow-up PR-1 / PR-2 convergence slices:
 
 - Stylet.Start, Prism.Wpf, PropertyChanged.Fody, and WPF-UI.Tray are removed from the client project.
 - Legacy Stylet action bindings are migrated to CommunityToolkit.Mvvm RelayCommand plus Microsoft.Xaml.Behaviors.Wpf where event binding is required.
-- Wpf.Ui, WebView2, LiveChartsCore.*, and SkiaSharp.* remain intentionally present for later, separately verified PRs.
+- Wpf.Ui dialogs, theme-service/theme-resource use, page/window controls, helper converters, shell/navigation, theme adapter, App resource dictionaries, `INavigableView<T>`, `INavigationWindow`, `NavigationView`, `SymbolIcon`, and the WPF-UI package reference are removed from production client code.
+- PR-2 verification uses a production residual guard over `MetBench_Client` for `Wpf.Ui`, `WPF-UI`, `xmlns:ui`, `ui:`, `INavigableView`, `INavigationWindow`, `NavigationView`, `FluentWindow`, `SymbolIcon`, `ApplicationThemeManager`, and `SystemThemeWatcher`; the expected result is no matches.
+- WebView2, LiveChartsCore.*, and SkiaSharp.* remain intentionally present for PR-3 display replacement. CLAUDE.md and AGENTS.md synchronization remains assigned to the final dependency convergence PR after PR-3 evidence exists.

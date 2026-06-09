@@ -1,8 +1,7 @@
-using Wpf.Ui.Controls;
 
 namespace MetBench_Client.Views.Pages
 {
-    public partial class DiscoveryPage : INavigableView<ViewModels.DiscoveryViewModel>
+    public partial class DiscoveryPage
     {
         public ViewModels.DiscoveryViewModel ViewModel { get; }
 

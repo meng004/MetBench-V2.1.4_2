@@ -7,7 +7,6 @@ using LiveChartsCore.SkiaSharpView.Painting;
 using MetBench_BLL.Coverage;
 using MetBench_UI.Localization;
 using SkiaSharp;
-using Wpf.Ui.Controls;
 
 namespace MetBench_Client.ViewModels;
 

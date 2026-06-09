@@ -6,13 +6,10 @@
     xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
     xmlns:local="clr-namespace:MetBench_Client.Views.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="SystemMtExecutionPage"
     d:DataContext="{d:DesignInstance local:SystemMtExecutionPage, IsDesignTimeCreatable=False}"
     d:DesignHeight="650"
     d:DesignWidth="1000"
-    ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
-    ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     mc:Ignorable="d">
 
@@ -62,20 +59,18 @@
                         SelectedItem="{Binding ViewModel.SelectedMr, Mode=TwoWay}"/>
 
                     <TextBlock Margin="0,12,0,0" FontWeight="SemiBold" Text="{Binding ViewModel.Localization[SystemMt_FactorParameter]}"/>
-                    <ui:TextBox
+                    <TextBox
                         Margin="0,4,0,0"
-                        PlaceholderText="{Binding ViewModel.Localization[SystemMt_FactorParameterPlaceholder]}"
                         Text="{Binding ViewModel.FactorOverride, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                     <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
-                        <ui:Button
+                        <Button
                             x:Name="Button_RunSystemMt"
-                            Appearance="Primary"
                             AutomationProperties.AutomationId="Button_RunSystemMt"
                             Command="{Binding ViewModel.RunCommand, Mode=OneWay}"
                             Content="{Binding ViewModel.Localization[SystemMt_Run]}"
                             />
-                        <ui:Button
+                        <Button
                             Margin="8,0,0,0"
                             Command="{Binding ViewModel.RefreshRecentCommand, Mode=OneWay}"
                             Content="{Binding ViewModel.Localization[SystemMt_RefreshRecent]}"
@@ -113,11 +108,11 @@
             BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
             BorderThickness="1"
             CornerRadius="4">
-            <ui:DataGrid
+            <DataGrid
                 AutoGenerateColumns="False"
                 IsReadOnly="True"
                 ItemsSource="{Binding ViewModel.RecentRuns, Mode=OneWay}">
-                <ui:DataGrid.Columns>
+                <DataGrid.Columns>
                     <DataGridTextColumn
                         Width="180"
                         Binding="{Binding RunAt, StringFormat=u}"
@@ -146,8 +141,8 @@
                         Width="80"
                         Binding="{Binding Passed}"
                         Header="{Binding Data.ViewModel.Localization[SystemMt_Passed], Source={StaticResource LocalizationProxy}}"/>
-                </ui:DataGrid.Columns>
-            </ui:DataGrid>
+                </DataGrid.Columns>
+            </DataGrid>
         </Border>
 
         <!--  Footer  -->
@@ -156,7 +151,7 @@
             Margin="0,12,0,0"
             HorizontalAlignment="Right"
             Orientation="Horizontal">
-            <ui:Button
+            <Button
                 Command="{Binding ViewModel.ExportReportCommand, Mode=OneWay}"
                 Content="{Binding ViewModel.Localization[SystemMt_ExportHtmlReport]}"
                 />

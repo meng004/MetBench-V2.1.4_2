@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using MetBench_BLL;
 using CommunityToolkit.Mvvm.Input;
 using MetBench_Client.Helpers;
@@ -12,8 +12,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using Wpf.Ui;
-using Wpf.Ui.Controls;
 using ValidationResult = FluentValidation.Results.ValidationResult;
 
 namespace MetBench_Client.ViewModels
@@ -56,7 +54,7 @@ namespace MetBench_Client.ViewModels
         // datagrid的数据源
         public ObservableCollection<MRDetectorCollection> Data { get; set; }= new ObservableCollection<MRDetectorCollection>();
 
-        // 进度条属性 IsIndeterminate 
+        // 进度条属性 IsIndeterminate
         public bool IsIndeterminate { get; set; }
 
         // 进度条属性 Visibility
@@ -272,7 +270,7 @@ namespace MetBench_Client.ViewModels
                 }
 
                 // 检查是否包含"def main("
-                if (trimmed.StartsWith("def main(", StringComparison.Ordinal)) 
+                if (trimmed.StartsWith("def main(", StringComparison.Ordinal))
                 {
                       return true;
                 }
@@ -353,7 +351,7 @@ namespace MetBench_Client.ViewModels
             if (mrCsvPath != string.Empty)
             {
                 var targetDirectory = string.Empty;
-             
+
                 var folderDialog = new OpenFolderDialog()
                 {
                     Title = "选择文件夹",
@@ -367,7 +365,7 @@ namespace MetBench_Client.ViewModels
                     string filePath = folderDialog.FolderName;
                     targetDirectory = filePath;
                 }
-               
+
 
                 var isExport = _detector.ExportMRResults(targetDirectory, mrCsvPath);
                 if (isExport)
@@ -439,7 +437,7 @@ namespace MetBench_Client.ViewModels
                     return;
                 }
             }
-            finally 
+            finally
             {
                 // 结束时将进度条状态更新为不可见和确定状态
                 IsIndeterminate = false;

@@ -1,9 +1,7 @@
 using System.Globalization;
 using System.Linq;
-using MetBench_UI.Localization;
 using MetBench_Client.ViewModels;
-using Wpf.Ui;
-using Wpf.Ui.Controls;
+using MetBench_UI.Localization;
 using Xunit;
 
 namespace MetBench_Client.Tests.ClientI18n;
@@ -21,9 +19,9 @@ public sealed class MainWindowLocalizationTests
         localization.SetCulture(new CultureInfo("zh-CN"));
         vm.RefreshLocalizedText();
 
-        var systemMt = vm.NavigationItems.OfType<NavigationViewItem>()
+        var systemMt = vm.NavigationItems
             .Single(item => item.TargetPageType == typeof(MetBench_Client.Views.Pages.SystemMtExecutionPage));
-        var settings = vm.NavigationFooter.OfType<NavigationViewItem>().Single();
+        var settings = vm.NavigationFooter.Single();
 
         Assert.Equal("系统级蜕变测试", systemMt.Content);
         Assert.Equal("设置", settings.Content);

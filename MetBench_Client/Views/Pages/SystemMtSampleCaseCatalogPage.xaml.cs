@@ -1,8 +1,7 @@
-using Wpf.Ui.Controls;
 
 namespace MetBench_Client.Views.Pages
 {
-    public partial class SystemMtSampleCaseCatalogPage : INavigableView<ViewModels.SystemMtSampleCaseCatalogViewModel>
+    public partial class SystemMtSampleCaseCatalogPage
     {
         public ViewModels.SystemMtSampleCaseCatalogViewModel ViewModel { get; }
 

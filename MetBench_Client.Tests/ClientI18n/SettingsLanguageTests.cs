@@ -5,7 +5,6 @@ using MetBench_Client.Services;
 using MetBench_UI.Localization;
 using MetBench_Client.ViewModels;
 using MetBench_Client.Views.Pages;
-using Wpf.Ui;
 using Xunit;
 
 namespace MetBench_Client.Tests.ClientI18n;

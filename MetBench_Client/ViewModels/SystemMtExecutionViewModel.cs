@@ -11,7 +11,6 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
-using Wpf.Ui.Controls;
 
 namespace MetBench_Client.ViewModels
 {

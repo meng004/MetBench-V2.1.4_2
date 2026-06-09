@@ -1,9 +1,7 @@
 <Page x:Class="MetBench_Client.Views.Pages.SystemMtAsyncJobPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       AutomationProperties.AutomationId="SystemMtAsyncJobPage"
-      ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
       Foreground="{DynamicResource TextFillColorPrimaryBrush}">
     <Page.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
@@ -60,20 +58,20 @@
                       ItemsSource="{Binding ViewModel.AvailableMrIds}"
                       SelectedItem="{Binding ViewModel.SelectedMrId, Mode=TwoWay}"
                       Visibility="{Binding ViewModel.IsRunMrSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
-            <ui:Button Grid.Row="0"
+            <Button Grid.Row="0"
                        Grid.Column="4"
                        AutomationProperties.AutomationId="AsyncSubmitButton"
                        Margin="12,0,0,0"
                        Content="Submit"
                        Command="{Binding ViewModel.SubmitCommand}"
                        IsEnabled="{Binding ViewModel.IsNotRunning}" />
-            <ui:Button Grid.Row="0"
+            <Button Grid.Row="0"
                        Grid.Column="5"
                        AutomationProperties.AutomationId="AsyncRefreshButton"
                        Margin="12,0,0,0"
                        Content="Refresh"
                        Command="{Binding ViewModel.RefreshCommand}" />
-            <ui:Button Grid.Row="0"
+            <Button Grid.Row="0"
                        Grid.Column="6"
                        AutomationProperties.AutomationId="AsyncCancelButton"
                        Margin="12,0,0,0"

@@ -1,4 +1,4 @@
-﻿using MetBench_Client.ViewModels;
+using MetBench_Client.ViewModels;
 using MetBench_Domain;
 using MetBench_IDAL;
 using System;
@@ -12,15 +12,13 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Markup;
-using Wpf.Ui;
-using Wpf.Ui.Controls;
 
 namespace MetBench_Client.Views.Pages
 {
     /// <summary>
     /// MRDisplayPage.xaml 的交互逻辑
     /// </summary>
-    public partial class MRDisplayPage : Page, INavigableView<ViewModels.MRDisplayViewModel>
+    public partial class MRDisplayPage : Page
     {
         private INavigationService _navigationService;
         private IPageService _pageService;
@@ -61,14 +59,14 @@ namespace MetBench_Client.Views.Pages
         //public void EditSelectedMR(int id)
         //{
         //    //var idMR = id;
-        //    ////var s = 
+        //    ////var s =
         //    //var selectedItem = new ObservableCollection<MetamorphicRelations_QueryResultDatadataGrid>() { dataGrid.ItemsSource } ;
         //    ////var selectedItem = datagrid.FirstOrDefault(x => x.IdMR == idMR);
         //    var targetPageType = typeof(Views.Pages.MRManagementPage);
         //    var page = _pageService.GetPage(targetPageType) as MRManagementPage;
         //    //page.datagrid.SelectedItem = selectedItem;
-        //    //var dataGridField = page.GetType().GetField("datagrid"); // 获取datagrid字段  
-        //    //var dataGrid = (System.Windows.Controls.DataGrid)dataGridField.GetValue(page); // 获取datagrid控件实例  
+        //    //var dataGridField = page.GetType().GetField("datagrid"); // 获取datagrid字段
+        //    //var dataGrid = (System.Windows.Controls.DataGrid)dataGridField.GetValue(page); // 获取datagrid控件实例
         //    //dataGrid.SelectedItem = selectedItem;
         //    _navigationService.Navigate(targetPageType);
         //}

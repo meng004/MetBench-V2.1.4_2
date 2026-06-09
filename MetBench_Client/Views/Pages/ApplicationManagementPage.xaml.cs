@@ -1,6 +1,5 @@
-﻿ using System.Windows;
+ using System.Windows;
 using System.Windows.Controls;
-using Wpf.Ui.Controls;
 using MetBench_Client.ViewModels;
 
 namespace MetBench_Client.Views.Pages
@@ -8,7 +7,7 @@ namespace MetBench_Client.Views.Pages
     /// <summary>
     /// ApplicationManagementPage.xaml 的交互逻辑
     /// </summary>
-    public partial class ApplicationManagementPage : Page, INavigableView<ViewModels.ApplicationManagementViewModel>
+    public partial class ApplicationManagementPage : Page
     {
         public ApplicationManagementViewModel ViewModel
         {
@@ -32,7 +31,7 @@ namespace MetBench_Client.Views.Pages
         //TextBox获得焦点的行为
         private void textBox_GotFocus(object sender, RoutedEventArgs e)
         {
-            Wpf.Ui.Controls.TextBox textBox = (Wpf.Ui.Controls.TextBox)sender;
+            TextBox textBox = (TextBox)sender;
 
             textBox.TextWrapping = TextWrapping.Wrap;
             textBox.Height = double.NaN; // Set the height to auto-expand
@@ -41,7 +40,7 @@ namespace MetBench_Client.Views.Pages
         //TextBox失去焦点的行为
         private void textBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            Wpf.Ui.Controls.TextBox textBox = (Wpf.Ui.Controls.TextBox)sender;
+            TextBox textBox = (TextBox)sender;
 
             textBox.TextWrapping = TextWrapping.NoWrap; // Restore original text wrapping
             textBox.Height = double.NaN; // Set the height back to auto

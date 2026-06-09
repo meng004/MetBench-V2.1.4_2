@@ -1,13 +1,11 @@
 <Page x:Class="MetBench_Client.Views.Pages.ReplayResultPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:pipeline="clr-namespace:MetBench_BLL.SystemMT.Pipeline;assembly=MetBench_BLL.Core"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       Title="ReplayResultPage"
       d:DesignHeight="800" d:DesignWidth="1100"
-      ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
       mc:Ignorable="d">
 
@@ -165,18 +163,16 @@
 
         <!-- Row 3: replay controls — real path + simulate fallback -->
         <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,12,0,0">
-            <ui:Button Appearance="Primary"
+            <Button
                        Content="{Binding ViewModel.Localization[Replay_RunRealReplay]}"
-                       Icon="{ui:SymbolIcon Play24}"
                        Command="{Binding ViewModel.RunRealReplayCommand}"
                        Margin="0,0,16,0" />
             <TextBlock Text="{Binding ViewModel.Localization[Replay_SimulateClassification]}" VerticalAlignment="Center" Margin="0,0,8,0" />
             <ComboBox ItemsSource="{Binding Source={StaticResource ClassificationValues}}"
                       SelectedValue="{Binding ViewModel.DemoClassification, Mode=TwoWay}"
                       Width="220" Margin="0,0,8,0" />
-            <ui:Button Appearance="Secondary"
+            <Button
                        Content="{Binding ViewModel.Localization[Replay_SimulateReplay]}"
-                       Icon="{ui:SymbolIcon ArrowCounterclockwise24}"
                        Command="{Binding ViewModel.SimulateReplayCommand}" />
             <ProgressBar IsIndeterminate="True" Width="120" Height="4"
                          Margin="12,0,0,0" VerticalAlignment="Center">

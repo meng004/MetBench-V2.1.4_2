@@ -1,9 +1,8 @@
 using MetBench_Client.ViewModels;
-using Wpf.Ui.Controls;
 
 namespace MetBench_Client.Views.Pages;
 
-public partial class SystemMtAsyncJobPage : INavigableView<SystemMtAsyncJobViewModel>
+public partial class SystemMtAsyncJobPage
 {
     public SystemMtAsyncJobViewModel ViewModel { get; }
 

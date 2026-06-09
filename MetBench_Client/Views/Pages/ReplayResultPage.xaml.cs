@@ -1,11 +1,10 @@
-using Wpf.Ui.Controls;
 
 namespace MetBench_Client.Views.Pages
 {
     /// <summary>
     /// Interaction logic for ReplayResultPage.xaml
     /// </summary>
-    public partial class ReplayResultPage : INavigableView<ViewModels.ReplayResultViewModel>
+    public partial class ReplayResultPage
     {
         public ViewModels.ReplayResultViewModel ViewModel { get; }
 

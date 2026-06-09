@@ -1,7 +1,6 @@
 <Page x:Class="MetBench_Client.Views.Pages.AnomalyListPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:controls="clr-namespace:MetBench_Client.Views.Controls"
       xmlns:conv="clr-namespace:MetBench_Client.Converters"
       xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
@@ -9,7 +8,6 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       Title="AnomalyListPage"
       d:DesignHeight="700" d:DesignWidth="1100"
-      ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
       mc:Ignorable="d">
     <Page.Resources>
@@ -51,16 +49,14 @@
                 <ComboBoxItem Content="fixed-upstream" />
             </ComboBox>
 
-            <ui:Button Appearance="Primary"
+            <Button
                        Content="{Binding ViewModel.Localization[Anomaly_AnalyzeCommonality]}"
                        Margin="12,0,0,0"
-                       Icon="{ui:SymbolIcon ChartMultiple24}"
                        Command="{Binding ViewModel.AnalyzeCommonalityCommand}" />
 
-            <ui:Button Appearance="Secondary"
+            <Button
                        Content="{Binding ViewModel.Localization[Anomaly_SweepOrphans]}"
                        Margin="12,0,0,0"
-                       Icon="{ui:SymbolIcon Delete24}"
                        ToolTip="{Binding ViewModel.Localization[Anomaly_SweepOrphansTooltip]}"
                        Command="{Binding ViewModel.SweepOrphansCommand}" />
 
@@ -71,7 +67,7 @@
         </StackPanel>
 
         <!-- Row 1: data grid -->
-        <ui:DataGrid Grid.Row="1"
+        <DataGrid Grid.Row="1"
                      ItemsSource="{Binding ViewModel.Items}"
                      SelectedItem="{Binding ViewModel.SelectedAnomaly, Mode=TwoWay}"
                      AutoGenerateColumns="False"
@@ -80,7 +76,7 @@
                      CanUserAddRows="False"
                      BorderThickness="1"
                      BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}">
-            <ui:DataGrid.Columns>
+            <DataGrid.Columns>
                 <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Anomaly_ColumnId], Source={StaticResource LocalizationProxy}}"           Binding="{Binding IdAnomaly}"      Width="240" />
                 <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Anomaly_ColumnSeverity], Source={StaticResource LocalizationProxy}}"     Binding="{Binding Severity}"       Width="80" />
                 <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Anomaly_ColumnStatus], Source={StaticResource LocalizationProxy}}"       Binding="{Binding Status, Converter={StaticResource AnomalyStatusKebabConverter}}" Width="120" />
@@ -89,8 +85,8 @@
                 <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Anomaly_ColumnLinkedBug], Source={StaticResource LocalizationProxy}}"   Binding="{Binding LinkedKnownBugId}" Width="100" />
                 <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Anomaly_ColumnReplayCount], Source={StaticResource LocalizationProxy}}"     Binding="{Binding ReplayCount}"    Width="80" />
                 <DataGridTextColumn Header="{Binding Data.ViewModel.Localization[Anomaly_ColumnNotes], Source={StaticResource LocalizationProxy}}"        Binding="{Binding Notes}"          Width="*" />
-            </ui:DataGrid.Columns>
-        </ui:DataGrid>
+            </DataGrid.Columns>
+        </DataGrid>
 
         <!-- Row 2: paging bar -->
         <controls:PagingBar Grid.Row="2" Margin="0,8,0,0"
@@ -108,14 +104,12 @@
                 <ComboBoxItem Content="false-positive" />
                 <ComboBoxItem Content="fixed-upstream" />
             </ComboBox>
-            <ui:Button Appearance="Primary"
+            <Button
                        Content="{Binding ViewModel.Localization[Anomaly_ApplyTransition]}"
-                       Icon="{ui:SymbolIcon ArrowSwap24}"
                        Command="{Binding ViewModel.TransitionCommand}" />
-            <ui:Button Appearance="Secondary"
+            <Button
                        Margin="12,0,0,0"
                        Content="{Binding ViewModel.Localization[Anomaly_ReplayThisAnomaly]}"
-                       Icon="{ui:SymbolIcon ArrowCounterclockwise24}"
                        Command="{Binding ViewModel.ReplayCommand}" />
             <TextBlock Text="{Binding ViewModel.ErrorMessage}"
                        Foreground="OrangeRed"

@@ -1,11 +1,10 @@
-﻿<Page x:Class="MetBench_Client.Views.Pages.MRDisplayPage"
+<Page x:Class="MetBench_Client.Views.Pages.MRDisplayPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="clr-namespace:MetBench_Client.Views.Pages"
       xmlns:viewmodels="clr-namespace:MetBench_Client.ViewModels"
-      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:models="clr-namespace:MetBench_Client.Models"
       xmlns:controls="clr-namespace:MetBench_Client.Controls"
       xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
@@ -27,7 +26,7 @@
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
 
-        <ui:DataGrid Grid.Row="0"  LoadingRow="dataGrid_LoadingRow" BorderBrush="LightGray" BorderThickness="2" FontSize="15"  HeadersVisibility="Column" Margin="10 0 10 10"  MaxHeight="350"  SelectedItem="{Binding ViewModel.DataGridSelectItem,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" ItemsSource="{Binding ViewModel.Data,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"  Name="dataGrid"  AutoGenerateColumns="False" CanUserAddRows="False" AutomationProperties.AutomationId="DataGrid_MR"
+        <DataGrid Grid.Row="0"  LoadingRow="dataGrid_LoadingRow" BorderBrush="LightGray" BorderThickness="2" FontSize="15"  HeadersVisibility="Column" Margin="10 0 10 10"  MaxHeight="350"  SelectedItem="{Binding ViewModel.DataGridSelectItem,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" ItemsSource="{Binding ViewModel.Data,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"  Name="dataGrid"  AutoGenerateColumns="False" CanUserAddRows="False" AutomationProperties.AutomationId="DataGrid_MR"
                   >
             <!--进行datagrid的TextColumn 进行居中-->
             <DataGrid.Resources>
@@ -127,16 +126,15 @@
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <ui:Button Appearance="Primary"  Width="100" Height="50" FontSize="14"  Content="{Binding Data.ViewModel.Localization[Legacy_Modify], Source={StaticResource LocalizationProxy}}" HorizontalAlignment="Center" AutomationProperties.AutomationId="Button_Modify"
-                                     Icon="{ui:SymbolIcon CalendarEdit24}"
+                            <Button  Width="100" Height="50" FontSize="14"  Content="{Binding Data.ViewModel.Localization[Legacy_Modify], Source={StaticResource LocalizationProxy}}" HorizontalAlignment="Center" AutomationProperties.AutomationId="Button_Modify"
                                      Command="{Binding Data.ViewModel.EditSelectedMrCommand, Source={StaticResource LocalizationProxy}}"
-                                     CommandParameter="{Binding IdMR}" 
+                                     CommandParameter="{Binding IdMR}"
                                      />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
-        </ui:DataGrid>
+        </DataGrid>
         <Grid Grid.Row="1">
             <controls:SimplePagination x:Name="pagination" Margin="0 2 5 0" Height="30"
                 HorizontalAlignment="Right" VerticalAlignment="Center"
@@ -173,32 +171,31 @@
             </StackPanel>-->
             <StackPanel  Grid.Row="0" Grid.Column="1" x:Name="stackpanel3" Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock Text="{Binding ViewModel.Localization[MrDisplay_FilterDimensionOfInputPattern]}"  Margin="13 0 0 0" VerticalAlignment="Center" />
-                <ui:TextBox x:Name="txbDimensionOfInputPattern"  Margin="10 0 0 0" VerticalContentAlignment="Center" Width="120"
+                <TextBox x:Name="txbDimensionOfInputPattern"  Margin="10 0 0 0" VerticalContentAlignment="Center" Width="120"
                          Text="{Binding ViewModel.DimensionOfInputPattern,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                          />
             </StackPanel>
             <StackPanel  Grid.Row="1" Grid.Column="1" x:Name="stackpanel4" Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock Text="{Binding ViewModel.Localization[MrDisplay_FilterDimensionOfOutputPattern]}"  Margin="6 0 0 0" VerticalAlignment="Center" />
-                <ui:TextBox x:Name="txbDimensionOfOutputPattern"  Margin="5 0 0 0" VerticalContentAlignment="Center" Width="120"
+                <TextBox x:Name="txbDimensionOfOutputPattern"  Margin="5 0 0 0" VerticalContentAlignment="Center" Width="120"
                          Text="{Binding ViewModel.DimensionOfOutputPattern,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                          />
             </StackPanel>
             <StackPanel  Grid.Row="0" Grid.Column="2" x:Name="stackpanel5" Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock Text="{Binding ViewModel.Localization[MrDisplay_FilterApplicationName]}"  Margin="6 0 0 0" VerticalAlignment="Center" />
-                <ui:TextBox x:Name="txbApplicationName"  Margin="5 0 0 0" VerticalContentAlignment="Center" Width="120"
+                <TextBox x:Name="txbApplicationName"  Margin="5 0 0 0" VerticalContentAlignment="Center" Width="120"
                          Text="{Binding ViewModel.ApplicationName,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                          />
             </StackPanel>
             <StackPanel  Grid.Row="1" Grid.Column="2" x:Name="stackpanel6" Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock Text="{Binding ViewModel.Localization[MrDisplay_FilterDomainName]}"  Margin="30 0 0 0" VerticalAlignment="Center" />
-                <ui:TextBox x:Name="txbDomainName"  Margin="5 0 0 0" VerticalContentAlignment="Center" Width="120"
+                <TextBox x:Name="txbDomainName"  Margin="5 0 0 0" VerticalContentAlignment="Center" Width="120"
                          Text="{Binding ViewModel.DomainName,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
                          />
             </StackPanel>
             <StackPanel  Grid.Row="2" Grid.Column="2" x:Name="stackpanel7" Orientation="Horizontal" VerticalAlignment="Center">
-                <ui:Button Appearance="Primary" x:Name="btnQuery" Content="{Binding ViewModel.Localization[Legacy_Query]}" Margin="140 0 0 0" VerticalContentAlignment="Center" Width="100" Height="40"
+                <Button x:Name="btnQuery" Content="{Binding ViewModel.Localization[Legacy_Query]}" Margin="140 0 0 0" VerticalContentAlignment="Center" Width="100" Height="40"
                            Command="{Binding ViewModel.QueryMrCommand}"
-                           Icon="{ui:SymbolIcon DatabaseSearch24}"
                            />
 
 

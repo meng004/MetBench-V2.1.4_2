@@ -1,4 +1,4 @@
-﻿using MetBench_Client.Models;
+using MetBench_Client.Models;
 using MetBench_Client.Hosting;
 using MetBench_Client.Services;
 using Microsoft.Extensions.Configuration;
@@ -31,8 +31,6 @@ using MetBench_BLL.Discovery.Validators;
 using MetBench_BLL.Mutation;
 using MetBench_BLL.Coverage;
 using MetBench_UI.Localization;
-using Wpf.Ui.Controls;
-using Wpf.Ui;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiteDB;
@@ -58,7 +56,7 @@ namespace MetBench_Client
                 c.AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: false);
             })
             .ConfigureServices((context, services) =>
-            {  
+            {
                 //添加各种服务和页面
                 // App Host
                 services.AddHostedService<ApplicationHostService>();
@@ -66,16 +64,16 @@ namespace MetBench_Client
                 // UI-neutral localization (MetBench_UI.Localization)
                 services.AddSingleton<IAppLocalizationService, AppLocalizationService>();
                 services.AddSingleton<LocalizedTextProvider>();
-                services.AddSingleton<IClientThemeController, WpfUiClientThemeController>();
+                services.AddSingleton<IClientThemeController, NativeClientThemeController>();
 
                 // Page resolver service 注入服务提供程序
                 services.AddSingleton<IPageService, PageService>();
 
-                // Service containing navigation, same as INavigationWindow... but without window
-                services.AddSingleton<INavigationService, NavigationService>();
+                // Project-owned WPF Frame navigation.
+                services.AddSingleton<INavigationService, ClientNavigationService>();
 
                 // Main window with navigation
-                services.AddScoped<INavigationWindow, Views.Windows.MainWindow>();
+                services.AddScoped<IClientNavigationWindow, Views.Windows.MainWindow>();
                 services.AddScoped< Views.Windows.ApplicationProgramsWindow>();
                 services.AddScoped<ViewModels.MainWindowViewModel>();
 

@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using System.Windows;
-using Wpf.Ui;
 
 
 namespace MetBench_Client.Services

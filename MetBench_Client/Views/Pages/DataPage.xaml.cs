@@ -1,11 +1,10 @@
-﻿using Wpf.Ui.Controls;
 
 namespace MetBench_Client.Views.Pages
 {
     /// <summary>
     /// Interaction logic for DataView.xaml
     /// </summary>
-    public partial class DataPage : INavigableView<ViewModels.DataViewModel>
+    public partial class DataPage
     {
         public ViewModels.DataViewModel ViewModel
         {

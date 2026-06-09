@@ -6,13 +6,10 @@
     xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
     xmlns:local="clr-namespace:MetBench_Client.Views.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="SystemMtEquationCatalogPage"
     d:DataContext="{d:DesignInstance local:SystemMtEquationCatalogPage, IsDesignTimeCreatable=False}"
     d:DesignHeight="720"
     d:DesignWidth="1180"
-    ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
-    ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     AutomationProperties.AutomationId="SystemMtEquationCatalogPage"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     mc:Ignorable="d">
@@ -44,11 +41,11 @@
             BorderThickness="1"
             CornerRadius="4">
             <StackPanel Orientation="Horizontal">
-                <ui:Button
+                <Button
                     Margin="0,0,8,0"
                     Command="{Binding ViewModel.RefreshEquationsCommand, Mode=OneWay}"
                     Content="{Binding ViewModel.Localization[Catalog_Reload]}"/>
-                <ui:Button
+                <Button
                     x:Name="Button_NewEquationDraft"
                     Margin="0,0,16,0"
                     AutomationProperties.AutomationId="Button_NewEquationDraft"
@@ -76,20 +73,20 @@
                 BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
                 BorderThickness="1"
                 CornerRadius="4">
-                <ui:DataGrid
+                <DataGrid
                     x:Name="DataGrid_SystemMtEquations"
                     AutomationProperties.AutomationId="DataGrid_SystemMtEquations"
                     AutoGenerateColumns="False"
                     IsReadOnly="True"
                     ItemsSource="{Binding ViewModel.Equations, Mode=OneWay}"
                     SelectedItem="{Binding ViewModel.SelectedEquation, Mode=TwoWay}">
-                    <ui:DataGrid.Columns>
+                    <DataGrid.Columns>
                         <DataGridTextColumn Width="140" Binding="{Binding EquationKey}" Header="{Binding Data.ViewModel.Localization[Catalog_Key], Source={StaticResource LocalizationProxy}}"/>
                         <DataGridTextColumn Width="200" Binding="{Binding Name}" Header="{Binding Data.ViewModel.Localization[Legacy_Name], Source={StaticResource LocalizationProxy}}"/>
                         <DataGridTextColumn Width="*" Binding="{Binding CanonicalForm}" Header="{Binding Data.ViewModel.Localization[Catalog_CanonicalForm], Source={StaticResource LocalizationProxy}}"/>
                         <DataGridTextColumn Width="80" Binding="{Binding Source}" Header="{Binding Data.ViewModel.Localization[Catalog_Source], Source={StaticResource LocalizationProxy}}"/>
-                    </ui:DataGrid.Columns>
-                </ui:DataGrid>
+                    </DataGrid.Columns>
+                </DataGrid>
             </Border>
 
             <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
@@ -114,7 +111,7 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="{Binding ViewModel.Localization[Catalog_EquationKey]}"/>
-                        <ui:TextBox
+                        <TextBox
                             x:Name="TextBox_EquationKey"
                             Grid.Row="0"
                             Grid.Column="1"
@@ -124,7 +121,7 @@
                             Text="{Binding ViewModel.Draft.EquationKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="{Binding ViewModel.Localization[Legacy_Name]}"/>
-                        <ui:TextBox
+                        <TextBox
                             x:Name="TextBox_EquationName"
                             Grid.Row="1"
                             Grid.Column="1"
@@ -134,7 +131,7 @@
                             Text="{Binding ViewModel.Draft.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Top" Text="{Binding ViewModel.Localization[Catalog_CanonicalForm]}"/>
-                        <ui:TextBox
+                        <TextBox
                             Grid.Row="2"
                             Grid.Column="1"
                             Margin="0,0,0,8"
@@ -146,7 +143,7 @@
                             TextWrapping="Wrap"/>
 
                         <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Top" Text="{Binding ViewModel.Localization[Catalog_SymbolSystem]}"/>
-                        <ui:TextBox
+                        <TextBox
                             Grid.Row="3"
                             Grid.Column="1"
                             Margin="0,0,0,8"
@@ -157,23 +154,21 @@
                             TextWrapping="Wrap"/>
 
                         <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right" Orientation="Horizontal">
-                            <ui:Button
+                            <Button
                                 x:Name="Button_ValidateEquationDraft"
                                 Margin="0,12,8,0"
                                 AutomationProperties.AutomationId="Button_ValidateEquationDraft"
                                 Command="{Binding ViewModel.ValidateEquationDraftCommand, Mode=OneWay}"
                                 Content="{Binding ViewModel.Localization[Catalog_Validate]}"/>
-                            <ui:Button
+                            <Button
                                 x:Name="Button_SaveEquationDraft"
                                 Margin="0,12,8,0"
-                                Appearance="Primary"
                                 AutomationProperties.AutomationId="Button_SaveEquationDraft"
                                 Command="{Binding ViewModel.SaveEquationDraftCommand, Mode=OneWay}"
                                 Content="{Binding ViewModel.Localization[Legacy_Save]}"/>
-                            <ui:Button
+                            <Button
                                 x:Name="Button_DeleteEquation"
                                 Margin="0,12,0,0"
-                                Appearance="Danger"
                                 AutomationProperties.AutomationId="Button_DeleteEquation"
                                 Command="{Binding ViewModel.DeleteEquationCommand, Mode=OneWay}"
                                 Content="{Binding ViewModel.Localization[Legacy_Delete]}"/>

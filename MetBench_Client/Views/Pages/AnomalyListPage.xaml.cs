@@ -1,11 +1,10 @@
-using Wpf.Ui.Controls;
 
 namespace MetBench_Client.Views.Pages
 {
     /// <summary>
     /// Interaction logic for AnomalyListPage.xaml
     /// </summary>
-    public partial class AnomalyListPage : INavigableView<ViewModels.AnomalyListViewModel>
+    public partial class AnomalyListPage
     {
         public ViewModels.AnomalyListViewModel ViewModel { get; }
 

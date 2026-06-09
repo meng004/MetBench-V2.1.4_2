@@ -1,17 +1,23 @@
-﻿PR-2h build/test evidence - 2026-06-07T23:27:45.8344744+08:00
+﻿WPF minimal MVVM/Behaviors PR-2 verification log
+Branch: codex/wpf-pr2-native-shell
+Base origin/main: eb62fc0343a6b65d073f46295674c4460a090492
+Timestamp: 2026-06-09T20:43:18.9002843+08:00
+
 
 > dotnet restore MetBench.sln -v:minimal
-  正在确定要还原的项目…
+$ dotnet restore MetBench.sln -v:minimal
+  Determining projects to restore...
 C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK 3.3.1”。此包可能与项目不完全兼容。 [C:\MetBench-V2.1.4_2\MetBench.sln]
 C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK 3.3.1”。此包可能与项目不完全兼容。 [C:\MetBench-V2.1.4_2\MetBench.sln]
 C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK.GLWpfControl 3.3.0”。此包可能与项目不完全兼容。 [C:\MetBench-V2.1.4_2\MetBench.sln]
-C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK.GLWpfControl 3.3.0”。此包可能与项目不完全兼容。 [C:\MetBench-V2.1.4_2\MetBench.sln]
 C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“SkiaSharp.Views.WPF 3.116.1”。此包可能与项目不完全兼容。 [C:\MetBench-V2.1.4_2\MetBench.sln]
+C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK.GLWpfControl 3.3.0”。此包可能与项目不完全兼容。 [C:\MetBench-V2.1.4_2\MetBench.sln]
 C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“SkiaSharp.Views.WPF 3.116.1”。此包可能与项目不完全兼容。 [C:\MetBench-V2.1.4_2\MetBench.sln]
-  所有项目均是最新的，无法还原。
-exit=0
+  All projects are up-to-date for restore.
+exit code: 0
 
 > dotnet build MetBench.sln --no-restore -v:minimal
+$ dotnet build MetBench.sln --no-restore -v:minimal
   MetBench_Domain -> C:\MetBench-V2.1.4_2\MetBench_Domain\bin\Debug\net8.0\MetBench_Domain.dll
   MetBench_Analyzers -> C:\MetBench-V2.1.4_2\MetBench_Analyzers\bin\Debug\netstandard2.0\MetBench_Analyzers.dll
   MetBench_UI.Localization -> C:\MetBench-V2.1.4_2\MetBench_UI.Localization\bin\Debug\net8.0\MetBench_UI.Localization.dll
@@ -19,17 +25,17 @@ C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warnin
 C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK.GLWpfControl 3.3.0”。此包可能与项目不完全兼容。
 C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“SkiaSharp.Views.WPF 3.116.1”。此包可能与项目不完全兼容。
   MetBench_IDAL -> C:\MetBench-V2.1.4_2\MetBench_IDAL\bin\Debug\net8.0\MetBench_IDAL.dll
+  MetBench_BLL.Core -> C:\MetBench-V2.1.4_2\MetBench_BLL.Core\bin\Debug\net8.0\MetBench_BLL.Core.dll
+  MetBench_DAL -> C:\MetBench-V2.1.4_2\MetBench_DAL\bin\Debug\net8.0\MetBench_DAL.dll
 C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK 3.3.1”。此包可能与项目不完全兼容。
 C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK.GLWpfControl 3.3.0”。此包可能与项目不完全兼容。
 C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“SkiaSharp.Views.WPF 3.116.1”。此包可能与项目不完全兼容。
-  MetBench_BLL.Core -> C:\MetBench-V2.1.4_2\MetBench_BLL.Core\bin\Debug\net8.0\MetBench_BLL.Core.dll
-  MetBench_DAL -> C:\MetBench-V2.1.4_2\MetBench_DAL\bin\Debug\net8.0\MetBench_DAL.dll
   MetBench_BLL -> C:\MetBench-V2.1.4_2\MetBench_BLL\bin\Debug\net8.0\MetBench_BLL.dll
   MetBench_SystemMT.Tests -> C:\MetBench-V2.1.4_2\MetBench_SystemMT.Tests\bin\Debug\net8.0\MetBench_SystemMT.Tests.dll
   MetBench_Client -> C:\MetBench-V2.1.4_2\MetBench_Client\bin\Debug\net8.0-windows7.0\MetBench_Client.dll
   MetBench_Client.Tests -> C:\MetBench-V2.1.4_2\MetBench_Client.Tests\bin\Debug\net8.0-windows7.0\MetBench_Client.Tests.dll
 
-已成功生成。
+Build succeeded.
 
 C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK 3.3.1”。此包可能与项目不完全兼容。
 C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK.GLWpfControl 3.3.0”。此包可能与项目不完全兼容。
@@ -37,88 +43,147 @@ C:\MetBench-V2.1.4_2\MetBench_Client.Tests\MetBench_Client.Tests.csproj : warnin
 C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK 3.3.1”。此包可能与项目不完全兼容。
 C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“OpenTK.GLWpfControl 3.3.0”。此包可能与项目不完全兼容。
 C:\MetBench-V2.1.4_2\MetBench_Client\MetBench_Client.csproj : warning NU1701: 已使用“.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1”而不是项目目标框架“net8.0-windows7.0”还原包“SkiaSharp.Views.WPF 3.116.1”。此包可能与项目不完全兼容。
-    6 个警告
-    0 个错误
+    6 Warning(s)
+    0 Error(s)
 
-已用时间 00:00:02.85
-exit=0
+Time Elapsed 00:00:01.17
+exit code: 0
 
-> dotnet test MetBench_Client.Tests\MetBench_Client.Tests.csproj --no-build -v:minimal
-C:\MetBench-V2.1.4_2\MetBench_Client.Tests\bin\Debug\net8.0-windows7.0\MetBench_Client.Tests.dll (.NETCoreApp,Version=v8.0)的测试运行
-VSTest 版本 17.14.1 (arm64)
+> dotnet test MetBench_Client.Tests --no-build -v:minimal
+$ dotnet test MetBench_Client.Tests\MetBench_Client.Tests.csproj --no-build -v:minimal
+Test run for C:\MetBench-V2.1.4_2\MetBench_Client.Tests\bin\Debug\net8.0-windows7.0\MetBench_Client.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 17.14.1 (arm64)
 
-正在启动测试执行，请稍候...
-总共 1 个测试文件与指定模式相匹配。
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
 
-已通过! - 失败:     0，通过:    32，已跳过:     0，总计:    32，持续时间: 410 ms - MetBench_Client.Tests.dll (net8.0)
-exit=0
+Passed!  - Failed:     0, Passed:    36, Skipped:     0, Total:    36, Duration: 398 ms - MetBench_Client.Tests.dll (net8.0)
+exit code: 0
 
-> dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj --no-build --filter ClientI18n|SystemMtExplanation|SystemMtPairQuality -v:minimal
-C:\MetBench-V2.1.4_2\MetBench_SystemMT.Tests\bin\Debug\net8.0\MetBench_SystemMT.Tests.dll (.NETCoreApp,Version=v8.0)的测试运行
-VSTest 版本 17.14.1 (arm64)
+> dotnet test MetBench_SystemMT.Tests focused --no-build -v:minimal
+$ dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj --no-build --filter ClientI18n|SystemMtExplanation|SystemMtPairQuality -v:minimal
+Test run for C:\MetBench-V2.1.4_2\MetBench_SystemMT.Tests\bin\Debug\net8.0\MetBench_SystemMT.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 17.14.1 (arm64)
 
-正在启动测试执行，请稍候...
-总共 1 个测试文件与指定模式相匹配。
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
 
-已通过! - 失败:     0，通过:    18，已跳过:     0，总计:    18，持续时间: 144 ms - MetBench_SystemMT.Tests.dll (net8.0)
-exit=0
+Passed!  - Failed:     0, Passed:    18, Skipped:     0, Total:    18, Duration: 57 ms - MetBench_SystemMT.Tests.dll (net8.0)
+exit code: 0
 
-> dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj --no-build -v:minimal
-C:\MetBench-V2.1.4_2\MetBench_SystemMT.Tests\bin\Debug\net8.0\MetBench_SystemMT.Tests.dll (.NETCoreApp,Version=v8.0)的测试运行
-VSTest 版本 17.14.1 (arm64)
+> Wpf.Ui production residual guard (exit 1 means no matches)
+$ rg -n Wpf\.Ui|WPF-UI|xmlns:ui|ui:|INavigableView|INavigationWindow|NavigationView|FluentWindow|SymbolIcon|ApplicationThemeManager|SystemThemeWatcher MetBench_Client
+exit code: 1
 
-正在启动测试执行，请稍候...
-总共 1 个测试文件与指定模式相匹配。
-[xUnit.net 00:00:05.94]     MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMocRayTrackConvergenceTests.RunAsync_ray_track_convergence_passes_end_to_end_with_default_phases [SKIP]
-[xUnit.net 00:00:06.04]     MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMocRayTrackConvergenceTests.RunAsync_ray_track_convergence_writes_calibrated_phase_inputs [SKIP]
-  已跳过 MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMocRayTrackConvergenceTests.RunAsync_ray_track_convergence_passes_end_to_end_with_default_phases [1 ms]
-  已跳过 MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMocRayTrackConvergenceTests.RunAsync_ray_track_convergence_writes_calibrated_phase_inputs [1 ms]
-[xUnit.net 00:00:12.79]     Follow-up k_eff exceeds source k_eff after scaling fuel nu*sigma_f [SKIP]
-  已跳过 Follow-up k_eff exceeds source k_eff after scaling fuel nu*sigma_f [1 ms]
-[xUnit.net 00:00:18.27]     ScaleNuSigmaF increases k_eff regardless of solver(solver: "openmoc", sut: "openmoc", __pickleIndex: "0", exampleTags: []) [SKIP]
-[xUnit.net 00:00:18.42]     ScaleNuSigmaF increases k_eff regardless of solver(solver: "openmc", sut: "openmc", __pickleIndex: "1", exampleTags: []) [SKIP]
-  已跳过 ScaleNuSigmaF increases k_eff regardless of solver(solver: "openmoc", sut: "openmoc", __pickleIndex: "0", exampleTags: []) [1 ms]
-  已跳过 ScaleNuSigmaF increases k_eff regardless of solver(solver: "openmc", sut: "openmc", __pickleIndex: "1", exampleTags: []) [1 ms]
-[xUnit.net 00:00:18.51]     ScaleFuelSigmaA decreases k_eff regardless of solver(solver: "openmoc", sut: "openmoc", __pickleIndex: "2", exampleTags: []) [SKIP]
-[xUnit.net 00:00:18.61]     ScaleFuelSigmaA decreases k_eff regardless of solver(solver: "openmc", sut: "openmc", __pickleIndex: "3", exampleTags: []) [SKIP]
-  已跳过 ScaleFuelSigmaA decreases k_eff regardless of solver(solver: "openmoc", sut: "openmoc", __pickleIndex: "2", exampleTags: []) [1 ms]
-  已跳过 ScaleFuelSigmaA decreases k_eff regardless of solver(solver: "openmc", sut: "openmc", __pickleIndex: "3", exampleTags: []) [1 ms]
-[xUnit.net 00:00:34.91]     MetBench_SystemMT.Tests.SystemMT.OpenMocRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json [SKIP]
-  已跳过 MetBench_SystemMT.Tests.SystemMT.OpenMocRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json [1 ms]
-[xUnit.net 00:00:42.14]     MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMcParticleCountConvergenceTests.RunAsync_particle_count_convergence_passes_end_to_end_with_default_factor [SKIP]
-[xUnit.net 00:00:42.32]     MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMcParticleCountConvergenceTests.RunAsync_particle_count_convergence_observed_followup_stderr_is_smaller_than_source [SKIP]
-  已跳过 MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMcParticleCountConvergenceTests.RunAsync_particle_count_convergence_passes_end_to_end_with_default_factor [1 ms]
-  已跳过 MetBench_SystemMT.Tests.SystemMT.Launcher.LauncherEndToEndOpenMcParticleCountConvergenceTests.RunAsync_particle_count_convergence_observed_followup_stderr_is_smaller_than_source [1 ms]
-[xUnit.net 00:00:52.59]     Follow-up k_eff is less than source k_eff after scaling fuel sigma_a [SKIP]
-  已跳过 Follow-up k_eff is less than source k_eff after scaling fuel sigma_a [1 ms]
-[xUnit.net 00:00:54.02]     MetBench_SystemMT.Tests.SystemMT.OpenMcRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json [SKIP]
-  已跳过 MetBench_SystemMT.Tests.SystemMT.OpenMcRunnerSmokeTests.Runner_solves_sample_pincell_and_writes_keff_json [1 ms]
-
-已通过! - 失败:     0，通过:  1819，已跳过:    12，总计:  1831，持续时间: 58 s - MetBench_SystemMT.Tests.dll (net8.0)
-exit=0
+> mojibake guard (exit 1 means no matches)
+$ rg -n �|锟|\?{3,}|瀵|鐨|鏈|鏁|铚|搴|椤|潰 MetBench_Client -g *.cs -g *.xaml
+exit code: 1
 
 > git diff --check
+$ git diff --check
+warning: in the working copy of 'MetBench_Client.Tests/Architecture/WpfDependencyGovernanceTests.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client.Tests/ClientI18n/MainWindowLocalizationTests.cs', LF will be replaced by CRLF the next time Git touches it
 warning: in the working copy of 'MetBench_Client.Tests/ClientI18n/SettingsLanguageTests.cs', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'MetBench_Client/Views/Pages/SettingsPage.xaml.cs', LF will be replaced by CRLF the next time Git touches it
-exit=0
+warning: in the working copy of 'MetBench_Client/App.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/App.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Dictionary1.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/MetBench_Client.csproj', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Services/ApplicationHostService.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Services/ClientThemeController.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Services/PageService.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/ViewModels/AnomalyListViewModel.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/ViewModels/ApplicationManagementViewModel.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/ViewModels/AutoDetectMRViewModel.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/ViewModels/CandidateReviewViewModel.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/ViewModels/CoverageDashboardViewModel.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/ViewModels/DataViewModel.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/ViewModels/DiscoveryViewModel.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/ViewModels/DomainManagementViewModel.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/ViewModels/MRDisplayViewModel.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/ViewModels/MRManagementViewModel.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/ViewModels/MRRecommendationViewModel.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/ViewModels/MTExecutionViewModel.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/ViewModels/MTReportGeneratorViewModel.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/ViewModels/MainWindowViewModel.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/ViewModels/MetaPatternsViewModel.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/ViewModels/MutationCampaignViewModel.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/ViewModels/ReplayResultViewModel.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/ViewModels/SettingsViewModel.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/ViewModels/SystemMtAsyncJobViewModel.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/ViewModels/SystemMtEquationCatalogViewModel.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/ViewModels/SystemMtExecutionHistoryViewModel.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/ViewModels/SystemMtExecutionViewModel.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/ViewModels/SystemMtMrCatalogViewModel.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/ViewModels/SystemMtResultViewModel.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/ViewModels/SystemMtSampleCaseCatalogViewModel.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/ViewModels/SystemMtSutCatalogViewModel.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/AnomalyListPage.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/AnomalyListPage.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/ApplicationManagementPage.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/ApplicationManagementPage.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/AutoDetectMRPage.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/AutoDetectMRPage.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/CandidateReviewPage.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/CandidateReviewPage.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/CoverageDashboardPage.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/CoverageDashboardPage.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/DashboardPage.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/DashboardPage.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/DataPage.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/DataPage.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/DiscoveryPage.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/DiscoveryPage.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/DomainManagementPage.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/DomainManagementPage.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/MRDisplayPage.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/MRDisplayPage.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/MRManagementPage.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/MRManagementPage.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/MRRecommendationPage.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/MRRecommendationPage.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/MTExecutionPage.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/MTExecutionPage.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/MTReportGeneratorPage.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/MTReportGeneratorPage.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/MetaPatternsPage.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/MetaPatternsPage.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/MutationCampaignPage.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/MutationCampaignPage.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/ReplayResultPage.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/ReplayResultPage.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/SystemMtAsyncJobPage.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/SystemMtAsyncJobPage.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/SystemMtEquationCatalogPage.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/SystemMtEquationCatalogPage.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/SystemMtExecutionHistoryPage.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/SystemMtExecutionHistoryPage.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/SystemMtExecutionPage.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/SystemMtExecutionPage.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/SystemMtMrCatalogPage.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/SystemMtMrCatalogPage.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/SystemMtResultPage.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/SystemMtSampleCaseCatalogPage.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/SystemMtSampleCaseCatalogPage.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/SystemMtSutCatalogPage.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Pages/SystemMtSutCatalogPage.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Windows/ApplicationProgramsWindow.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Windows/ApplicationProgramsWindow.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Windows/MainWindow.xaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'MetBench_Client/Views/Windows/MainWindow.xaml.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/superpowers/plans/2026-06-07-wpf-minimal-mvvm-behaviors-governance-plan.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/superpowers/specs/2026-06-07-wpf-minimal-mvvm-behaviors-governance-design.md', LF will be replaced by CRLF the next time Git touches it
+exit code: 0
 
-> rg -n http://schemas.lepo.co/wpfui/2022/xaml|Wpf\.Ui|ui: MetBench_Client\Views\Pages\SettingsPage.xaml MetBench_Client\Views\Pages\SettingsPage.xaml.cs
-exit=1
-
-> rg -n http://schemas.lepo.co/wpfui/2022/xaml|Wpf\.Ui|ui: MetBench_Client\Views\Windows\ProgressWindow.xaml
-exit=1
-
-> rg -n http://schemas.lepo.co/wpfui/2022/xaml|Wpf\.Ui|ui: MetBench_Client\Controls\SimplePagination.xaml MetBench_Client\Views\Controls\PagingBar.xaml
-exit=1
-
-> rg -n Wpf.Ui.Appearance|using Wpf.Ui.Appearance MetBench_Client\ViewModels MetBench_Client\Helpers
-exit=1
-
-> rg -n ThemeToIndexConverter|IThemeService|ThemeService|ui:ThemeResource MetBench_Client
-exit=1
-
-> rg -n Wpf\.Ui\.Controls\.MessageBox|ShowDialogAsync MetBench_Client
-exit=1
-
-> rg -n \b(?:var|bool)\s+\w+\s*=\s*await\s+showMessageAsync\s*\( MetBench_Client
-exit=1
+> PR-2 native shell screenshot evidence
+$ powershell -NoProfile -ExecutionPolicy Bypass -File docs\superpowers\specs\2026-06-07-wpf-minimal-mvvm-behaviors-vm-evidence\drive-wpf-pr2-native-shell.ps1
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Production
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\MetBench-V2.1.4_2\MetBench_Client\bin\Debug\net8.0-windows7.0
+[shot] 01-main-window-startup.png
+[shot] 02-mt-execution-native-page.png
+[shot] 03-system-mt-equation-catalog-native-page.png
+[shot] 04-settings-native-page.png
+exit code: 0

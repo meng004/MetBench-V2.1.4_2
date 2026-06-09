@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using MetBench_BLL;
 using CommunityToolkit.Mvvm.Input;
 using MetBench_Client.Helpers;
@@ -20,8 +20,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 //using System.Windows;
-using Wpf.Ui;
-using Wpf.Ui.Controls;
 using ValidationResult = FluentValidation.Results.ValidationResult;
 
 namespace MetBench_Client.ViewModels
@@ -84,7 +82,7 @@ namespace MetBench_Client.ViewModels
         //绑定Code的数据绑定属性
         public byte[] Code { get; set; }
 
-        // 绑定ApplicationParams窗口的DataGrid的参数集合 
+        // 绑定ApplicationParams窗口的DataGrid的参数集合
         public ObservableCollection<ApplicationParameter> Params { get; set; } = new ObservableCollection<ApplicationParameter>();
 
         // 输入参数集合
@@ -97,7 +95,7 @@ namespace MetBench_Client.ViewModels
         private int ParamIndex { get; set; } = 0;
 
         // 参数窗口
-        private INavigationWindow _navigationWindow;
+        private IClientWindow _parameterWindow;
 
         // DataGrid控件的数据源
         public ObservableCollection<Application> Data { get; set; }
@@ -485,7 +483,7 @@ namespace MetBench_Client.ViewModels
 
             var newapplicationName = application.Name;
 
-            //if (_applicationSerive.GetApplication(application.IdApplication) == null) 
+            //if (_applicationSerive.GetApplication(application.IdApplication) == null)
             //{
             //    var iddomain = _applicationSerive.GetApplicationId(application.Name);
             //    if (iddomain > 0)
@@ -497,7 +495,7 @@ namespace MetBench_Client.ViewModels
             //}
             //else
             //{
-            //    //将旧的Name赋值给applicationName 
+            //    //将旧的Name赋值给applicationName
             //    applictionName = _applicationSerive.GetApplication(application.IdApplication).Name;
             //    if (applictionName != newapplicationName)
             //    {
@@ -781,8 +779,8 @@ namespace MetBench_Client.ViewModels
 
             // 显示到窗口的DataGrid上
             Params = InputParameters;
-            _navigationWindow = (_serviceProvider.GetService(typeof(ApplicationProgramsWindow)) as INavigationWindow)!;
-            _navigationWindow.ShowWindow();
+            _parameterWindow = (_serviceProvider.GetService(typeof(ApplicationProgramsWindow)) as IClientWindow)!;
+            _parameterWindow.ShowWindow();
         }
 
         public void btnOutputParams_Click()
@@ -792,8 +790,8 @@ namespace MetBench_Client.ViewModels
 
             // 绑定数据到窗口的DataGrid上
             Params = OutputParameters;
-            _navigationWindow = (_serviceProvider.GetService(typeof(ApplicationProgramsWindow)) as INavigationWindow)!;
-            _navigationWindow.ShowWindow();
+            _parameterWindow = (_serviceProvider.GetService(typeof(ApplicationProgramsWindow)) as IClientWindow)!;
+            _parameterWindow.ShowWindow();
         }
 
         // 参数窗口的OK点击事件
@@ -808,13 +806,13 @@ namespace MetBench_Client.ViewModels
                 OutputParameters = Params;
             }
             Params.Clear();
-            _navigationWindow.CloseWindow();
+            _parameterWindow.CloseWindow();
         }
 
         public void WindowbtnCancel_Click()
         {
             Params.Clear();
-            _navigationWindow.CloseWindow();
+            _parameterWindow.CloseWindow();
         }
 
         // 进行页面跳转
@@ -958,7 +956,7 @@ namespace MetBench_Client.ViewModels
             var domainName = message.Name;
             var domain = new Domain() { Name = domainName };
             var domainEx = new DomainEx(domain);
-            // 插入到倒数第二项  
+            // 插入到倒数第二项
             if (DomainExs.Count > 1)
             {
                 DomainExs.Insert(DomainExs.Count - 1, domainEx);

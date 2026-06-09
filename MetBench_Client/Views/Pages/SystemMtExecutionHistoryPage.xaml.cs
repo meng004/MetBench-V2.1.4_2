@@ -1,9 +1,8 @@
 using System.Windows.Controls;
-using Wpf.Ui.Controls;
 
 namespace MetBench_Client.Views.Pages
 {
-    public partial class SystemMtExecutionHistoryPage : INavigableView<ViewModels.SystemMtExecutionHistoryViewModel>
+    public partial class SystemMtExecutionHistoryPage
     {
         public ViewModels.SystemMtExecutionHistoryViewModel ViewModel { get; }
 
