@@ -1,6 +1,6 @@
 # WPF MVVM Convergence Plan（2026-06-06）
 
-> **状态：PR-1/PR-2/PR-3 依赖移除已合并（#333 `eb62fc0`），PR-3 source-guard 已补；PR-4 仍 Pending。**
+> **状态：PR-1/PR-2/PR-3 依赖移除已合并（#333 `eb62fc0`），PR-3 source-guard 已补；PR-4 云端代码迁移完成 + 7 条 source-guard 全绿，WPF build 验证待 VM。**
 > 从成熟度评估的"5 套 MVVM 框架并存"派生的独立 follow-up（**不在**成熟度修复计划主干内）。
 > 主体目标：让 WPF 实际只用 1 套 MVVM 机制（CommunityToolkit.Mvvm），把死引用、幽灵 weave、legacy XAML action 路径逐步收敛。
 > **REQUIRED SUB-SKILL**：superpowers:executing-plans，逐 PR TDD-first，cloud/VM 分工严格。
@@ -73,13 +73,14 @@ PR-0 的 docs 投影会据实把评估那行 "5 套" 改成上面这张表的概
 | 风险 | **较大**：每个 XAML 都要改 + 测；method 名称大小写一致性敏感 |
 | 提示词 | `docs/superpowers/vm-prompts/2026-06-06-wpf-stylet-to-behaviors-vm-prompt.md`（PR-3 写） |
 
-### PR-4（云端/VM 渐进）— 6 个手写 `INotifyPropertyChanged` 文件迁移到 `ObservableObject`
+### PR-4（云端代码迁移完成；WPF build 验证待 VM）— 手写 `OnPropertyChanged` 调用迁移到 `[ObservableProperty]` / `SetProperty`
 
 | 项 | 内容 |
 |---|---|
-| Scope | 6 文件逐一改 `: ObservableObject`；私有字段 + `[ObservableProperty]` 自动生成属性 + 旧手写 `OnPropertyChanged("X")` 调用全部删除；分批进 PR-4a/4b/4c（每批 2 文件以便复审） |
-| 验收 | source-guard 断言 `MetBench_Client/ViewModels` 下手写 `OnPropertyChanged(` 调用计数下降到 0；功能 UI 不变 |
-| 风险 | **小**（单文件渐进，触一个测一个） |
+| Scope | **实测形态比计划假设小**：6 个目标文件早已继承 `ObservableObject`，并非"手写 INotify"，只剩共 6 处遗留的手动 `OnPropertyChanged(...)` 调用。迁移手法分三类：(a) 4 个 ViewModel —— `SystemMtResultViewModel`（派生属性 `IsBinaryView` 改用源字段 `_isHistoricalView` 上的 `[NotifyPropertyChangedFor(nameof(IsBinaryView))]`，删 partial 方法里的手动 raise）、`MTReportGeneratorViewModel.SelectedValue`（setter 改 `SetProperty(ref _selectedValue, value)` + 仅变化时触发副作用 `HandleSelectionChangeAsync`）、`ApplicationManagementViewModel.SelectedText` / `MRManagementViewModel.SelectedText`（自定义 getter 保留，setter 改 `SetProperty(ref _selectedText, value)`）；(b) 2 个 Model `ApplicationEx` / `DomainEx` —— `IsChecked` 改 `partial class` + 字段 `[ObservableProperty]`（生成属性名不变，外部 `.IsChecked` 引用不破）。 |
+| 验收 | source-guard `No_ViewModel_calls_OnPropertyChanged_manually` 断言 `MetBench_Client/ViewModels/**/*.cs` 手动 `OnPropertyChanged(` 调用计数=0（**已绿**，7/7）；全套 1823/0/15。功能 UI 不变属 **VM build + 冒烟验证**范围（云端无法编译 WPF，§9）。 |
+| 风险 | **小**（机械迁移，生成属性名与外部引用不变；唯一需 VM 确认的是 `SetProperty`/`[NotifyPropertyChangedFor]` 编译通过 + 绑定刷新行为一致）。 |
+| 待办 | VM 端 `dotnet build MetBench.sln` 0 errors + 对四个改动属性（两个多选 ComboBox `SelectedText`、报告类型 `SelectedValue`、结果视图 `IsBinaryView` 切换）做一次绑定刷新冒烟，回填 build 证据后该计划方可标 Controlled / 到期。 |
 
 ## 3. Source-guards（贯穿全 plan）
 
@@ -93,7 +94,7 @@ PR-0 的 docs 投影会据实把评估那行 "5 套" 改成上面这张表的概
 | no_fody_weavers | `MetBench_Client/FodyWeavers.xml` 不存在 或 不含 `<PropertyChanged` | PR-2 | ✅ 已落地（`No_FodyWeavers_PropertyChanged_directive_present`） |
 | csproj_no_stylet | `MetBench_Client.csproj` 不含 `Stylet.Start` | PR-3 | ✅ 已落地（`Client_csproj_does_not_reference_Stylet`） |
 | no_stylet_actions | `MetBench_Client/Views/**/*.xaml` 不含 `s:View.ActionTarget` 或 `s:Action` | PR-3 | ✅ 已落地（`No_Xaml_uses_Stylet_action_routing`） |
-| no_manual_inotify_in_vm | `MetBench_Client/ViewModels/**/*.cs` 中手写 `OnPropertyChanged(` 调用计数为 0 | PR-4（最后） | ⏳ 未加（PR-4 未实施，仍有 4 文件命中；加了会失败） |
+| no_manual_inotify_in_vm | `MetBench_Client/ViewModels/**/*.cs` 中手写 `OnPropertyChanged(` 调用计数为 0 | PR-4（最后） | ✅ 已落地（`No_ViewModel_calls_OnPropertyChanged_manually`，7/7 绿；WPF build 验证待 VM） |
 
 ## 4. Cloud / VM 分工
 

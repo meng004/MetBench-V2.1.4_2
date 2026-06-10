@@ -729,12 +729,7 @@ namespace MetBench_Client.ViewModels
                 // 首先，它会检查传入的值（value）是否与当前 _selectedText 相同，避免不必要的更新。
                 // 如果新值与当前值不同，则将 _selectedText 更新为新值。
                 // 更新 _selectedText 的同时，会调用 RaisePropertyChanged("SelectedText") 方法，通知 UI 该属性的值已发生变化。
-                if (_selectedText != value)
-                {
-                    _selectedText = value;
-
-                    OnPropertyChanged("SelectedText");
-                }
+                SetProperty(ref _selectedText, value);
             }
         }
 
