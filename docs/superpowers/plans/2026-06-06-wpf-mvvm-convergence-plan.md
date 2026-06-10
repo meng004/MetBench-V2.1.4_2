@@ -1,8 +1,22 @@
 # WPF MVVM Convergence Plan（2026-06-06）
 
-> **状态：Planned。** 从成熟度评估的"5 套 MVVM 框架并存"派生的独立 follow-up（**不在**成熟度修复计划主干内）。
+> **状态：PR-1/PR-2/PR-3 依赖移除已合并（#333 `eb62fc0`），PR-3 source-guard 已补；PR-4 仍 Pending。**
+> 从成熟度评估的"5 套 MVVM 框架并存"派生的独立 follow-up（**不在**成熟度修复计划主干内）。
 > 主体目标：让 WPF 实际只用 1 套 MVVM 机制（CommunityToolkit.Mvvm），把死引用、幽灵 weave、legacy XAML action 路径逐步收敛。
 > **REQUIRED SUB-SKILL**：superpowers:executing-plans，逐 PR TDD-first，cloud/VM 分工严格。
+>
+> **实施偏离记录（2026-06-07，CLAUDE.md §0.5 据实）：** PR #333「converge WPF MVVM
+> dependencies」是一个 squash 合并，**一次性**完成了 PR-1（删 Prism 死引用）、PR-2
+> （删 PropertyChanged.Fody 全局 weave + 删 `FodyWeavers.xml`）、PR-3（9 个 legacy XAML
+> `s:Action`/`s:View.ActionTarget` → `Microsoft.Xaml.Behaviors`，含 `MTExecutionPage.xaml`
+> 的 `i:Interaction.Triggers`/`i:InvokeCommandAction`），并附带删除了计划外的 Wpf.Ui
+> dialog/theme/tray/paging 表面。**它跳过了本计划 §3 逐 PR 加 source-guard 防回潮的核心
+> 约束。** 该缺口已由 follow-up 补齐：新增
+> `MetBench_SystemMT.Tests/SystemMT/Architecture/WpfMvvmConvergenceGuardTests.cs`（6 条
+> 云端 source-scan facts，全绿；全套 1822/0/15）。**PR-4（6 个手写 INotify → ObservableObject）
+> 仍未实施**——实测 `MetBench_Client/ViewModels/` 下仍有 4 个文件含手写 `OnPropertyChanged(`
+> （`ApplicationManagementViewModel` / `MRManagementViewModel` / `MTReportGeneratorViewModel`
+> / `SystemMtResultViewModel`），故 §3 的 `no_manual_inotify_in_vm` guard **故意不加**（加了会失败）。
 
 ## 0. 据实修正评估（先承认夸大）
 
@@ -71,15 +85,15 @@ PR-0 的 docs 投影会据实把评估那行 "5 套" 改成上面这张表的概
 
 每个 PR 都加 / 加强 `WpfMvvmConvergenceGuardTests`（云端 source-scan，不编译 WPF）：
 
-| Guard | 断言 | 引入 PR |
-|---|---|---|
-| no_prism_using | `MetBench_Client/**/*.cs` 不含 `using Prism` | PR-1 |
-| csproj_no_prism | `MetBench_Client.csproj` 不含 `Prism.Wpf` PackageReference | PR-1 |
-| csproj_no_fody | `MetBench_Client.csproj` 不含 `PropertyChanged.Fody` | PR-2 |
-| no_fody_weavers | `MetBench_Client/FodyWeavers.xml` 不存在 或 不含 `<PropertyChanged` | PR-2 |
-| csproj_no_stylet | `MetBench_Client.csproj` 不含 `Stylet.Start` | PR-3 |
-| no_stylet_actions | `MetBench_Client/Views/**/*.xaml` 不含 `s:View.ActionTarget` 或 `s:Action` | PR-3 |
-| no_manual_inotify_in_vm | `MetBench_Client/ViewModels/**/*.cs` 中手写 `OnPropertyChanged(` 调用计数为 0 | PR-4（最后） |
+| Guard | 断言 | 引入 PR | 现状 |
+|---|---|---|---|
+| no_prism_using | `MetBench_Client/**/*.cs` 不含 `using Prism` | PR-1 | ✅ 已落地（`No_Client_source_uses_Prism`） |
+| csproj_no_prism | `MetBench_Client.csproj` 不含 `Prism.Wpf` PackageReference | PR-1 | ✅ 已落地（`Client_csproj_does_not_reference_Prism`） |
+| csproj_no_fody | `MetBench_Client.csproj` 不含 `PropertyChanged.Fody` | PR-2 | ✅ 已落地（`Client_csproj_does_not_reference_PropertyChanged_Fody`） |
+| no_fody_weavers | `MetBench_Client/FodyWeavers.xml` 不存在 或 不含 `<PropertyChanged` | PR-2 | ✅ 已落地（`No_FodyWeavers_PropertyChanged_directive_present`） |
+| csproj_no_stylet | `MetBench_Client.csproj` 不含 `Stylet.Start` | PR-3 | ✅ 已落地（`Client_csproj_does_not_reference_Stylet`） |
+| no_stylet_actions | `MetBench_Client/Views/**/*.xaml` 不含 `s:View.ActionTarget` 或 `s:Action` | PR-3 | ✅ 已落地（`No_Xaml_uses_Stylet_action_routing`） |
+| no_manual_inotify_in_vm | `MetBench_Client/ViewModels/**/*.cs` 中手写 `OnPropertyChanged(` 调用计数为 0 | PR-4（最后） | ⏳ 未加（PR-4 未实施，仍有 4 文件命中；加了会失败） |
 
 ## 4. Cloud / VM 分工
 
