@@ -41,11 +41,10 @@ namespace MetBench_Client.ViewModels
             get => _selectedValue;
             set
             {
-                if (_selectedValue == value) return; // 值未变化时不处理
-
-                _selectedValue = value;
-                OnPropertyChanged();
-                _ = HandleSelectionChangeAsync(); // 提取处理逻辑到单独方法
+                if (SetProperty(ref _selectedValue, value)) // 值未变化时不处理
+                {
+                    _ = HandleSelectionChangeAsync(); // 提取处理逻辑到单独方法
+                }
             }
         }
         private async Task HandleSelectionChangeAsync()
