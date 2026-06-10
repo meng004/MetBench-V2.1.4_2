@@ -13,10 +13,11 @@ namespace MetBench_SystemMT.Tests.SystemMT.Architecture;
 /// compile the WPF project, so this fact-scans <c>MetBench_Client</c> sources directly
 /// to fail loud if any of the three removed mechanisms returns.</para>
 ///
-/// <para>Scope is exactly the PR-1/PR-2/PR-3 guards (6 assertions). The PR-4 guard
-/// (<c>no_manual_inotify_in_vm</c>) is intentionally NOT added here: 4 ViewModels still
-/// carry hand-written <c>OnPropertyChanged(</c> calls because PR-4 (migrate to
-/// <c>ObservableObject</c>) has not run. Adding it now would fail by design.</para>
+/// <para>Scope covers the full PR-1/PR-2/PR-3/PR-4 guard set (7 assertions). PR-4
+/// (migrate the last hand-written <c>OnPropertyChanged(</c> call sites to
+/// <c>[ObservableProperty]</c> / <c>[NotifyPropertyChangedFor]</c> / <c>SetProperty</c>)
+/// is now complete, so <c>No_ViewModel_calls_OnPropertyChanged_manually</c> pins the
+/// gain — only the CommunityToolkit generated/protected notification surface remains.</para>
 /// </summary>
 public sealed class WpfMvvmConvergenceGuardTests
 {
@@ -120,6 +121,35 @@ public sealed class WpfMvvmConvergenceGuardTests
             + string.Join("\n  - ", violations));
     }
 
+    // ---- PR-4: hand-written OnPropertyChanged( call sites removed from ViewModels ----
+
+    [Fact]
+    public void No_ViewModel_calls_OnPropertyChanged_manually()
+    {
+        var violations = new List<string>();
+        foreach (var file in ClientViewModelFiles())
+        {
+            var lineIndex = 0;
+            foreach (var line in File.ReadAllLines(file))
+            {
+                lineIndex++;
+                if (IsCommentLine(line)) continue;
+                // Match the invocation 'OnPropertyChanged(' only. Generated/override
+                // partial method declarations are named 'On<Name>Changed(' and do not
+                // contain this substring, so they are not flagged.
+                if (line.Contains("OnPropertyChanged(", StringComparison.Ordinal))
+                    violations.Add($"{RelativeToClient(file)}:{lineIndex}: {line.Trim()}");
+            }
+        }
+
+        Assert.True(
+            violations.Count == 0,
+            "Hand-written 'OnPropertyChanged(' re-introduced in WPF ViewModels (PR-4 regression). "
+            + "Use [ObservableProperty] (with [NotifyPropertyChangedFor] for derived props) or "
+            + "SetProperty(ref field, value) instead. Offenders:\n  - "
+            + string.Join("\n  - ", violations));
+    }
+
     // ---- locators (walk up to the repo's MetBench_Client tree, mirroring
     //      WpfAsyncCorrectnessGuardTests) ----
 
@@ -156,6 +186,14 @@ public sealed class WpfMvvmConvergenceGuardTests
 
     private static IEnumerable<string> ClientXamlFiles()
         => Directory.GetFiles(ClientRoot(), "*.xaml", SearchOption.AllDirectories);
+
+    private static IEnumerable<string> ClientViewModelFiles()
+    {
+        var dir = Path.Combine(ClientRoot(), "ViewModels");
+        if (!Directory.Exists(dir))
+            throw new DirectoryNotFoundException($"MetBench_Client/ViewModels not found at {dir}.");
+        return Directory.GetFiles(dir, "*.cs", SearchOption.AllDirectories);
+    }
 
     private static string RelativeToClient(string file)
         => Path.GetRelativePath(Path.GetDirectoryName(ClientRoot())!, file);

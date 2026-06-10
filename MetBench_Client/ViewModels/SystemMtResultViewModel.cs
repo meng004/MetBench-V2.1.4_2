@@ -42,6 +42,7 @@ public partial class SystemMtResultViewModel : ObservableObject, INavigationAwar
     private ChartViewMode _viewMode = ChartViewMode.Binary;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsBinaryView))]
     private bool _isHistoricalView;
 
     [ObservableProperty]
@@ -137,7 +138,6 @@ public partial class SystemMtResultViewModel : ObservableObject, INavigationAwar
 
     partial void OnIsHistoricalViewChanged(bool value)
     {
-        OnPropertyChanged(nameof(IsBinaryView));
         ViewMode = value ? ChartViewMode.Historical : ChartViewMode.Binary;
     }
 

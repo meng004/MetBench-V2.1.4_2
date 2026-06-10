@@ -3,29 +3,12 @@ using MetBench_Domain;
 
 namespace MetBench_Client.Models
 {
-    public class ApplicationEx : ObservableObject
+    public partial class ApplicationEx : ObservableObject
     {
         public Application Application { get; private set; }
 
+        [ObservableProperty]
         private bool _isChecked;
-
-        public bool IsChecked
-        {
-            get
-            {
-                return _isChecked;
-            }
-
-            set
-            {
-                if (_isChecked != value)
-                {
-                    _isChecked = value;
-
-                    OnPropertyChanged("IsChecked");
-                }
-            }
-        }
 
         public ApplicationEx(Application application)
         {
