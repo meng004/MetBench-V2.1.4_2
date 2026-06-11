@@ -6,4 +6,5 @@ namespace MetBench_BLL.SystemMT.Jobs;
 /// </summary>
 public sealed record SystemMtJobRequest(
     string MrId,
-    IReadOnlyDictionary<string, string>? ParameterOverrides = null);
+    IReadOnlyDictionary<string, string>? ParameterOverrides = null,
+    string? RuntimeBackendKey = null);

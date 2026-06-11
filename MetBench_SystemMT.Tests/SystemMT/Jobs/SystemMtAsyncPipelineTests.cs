@@ -98,6 +98,24 @@ public class SystemMtAsyncPipelineTests
         Assert.Equal("4", seen!["factor"]);
     }
 
+    [Fact]
+    public async Task ExecuteJobAsync_with_backend_key_fails_closed_without_docker_or_ssh_executor()
+    {
+        var launcher = new StubLauncher(Summary("mr", "mgn"), id => Result(id, passed: true));
+        var pipeline = new SystemMtAsyncPipeline(launcher);
+
+        var outcome = await pipeline.ExecuteJobAsync(
+            Guid.NewGuid(),
+            new SystemMtJobRequest("mr", RuntimeBackendKey: "sciml-mgn-docker"),
+            null,
+            default);
+
+        Assert.Equal(SystemMtJobState.Failed, outcome.FinalState);
+        Assert.Equal("MiddlewareUnavailable", outcome.FailureKind);
+        Assert.Contains("backend executor", outcome.FailureReason, StringComparison.OrdinalIgnoreCase);
+        Assert.Null(launcher.LastMrId);
+    }
+
     private sealed class ParamCapturingLauncher : ISystemMtLauncher
     {
         private readonly MrSummary _summary;

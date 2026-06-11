@@ -1,4 +1,5 @@
 using MetBench_BLL.SystemMT.Launcher;
+using MetBench_BLL.SystemMT.Runtime;
 
 namespace MetBench_BLL.SystemMT.Jobs;
 
@@ -13,17 +14,20 @@ public sealed class SystemMtJobService : ISystemMtJobService
     private readonly IJobStore _store;
     private readonly IJobQueue _queue;
     private readonly IJobCancellationRegistry? _cancellation;
+    private readonly IRuntimeBackendConfigurationProvider? _backendConfigurations;
     private readonly Func<DateTime> _utcNow;
 
     public SystemMtJobService(
         IJobStore store,
         IJobQueue queue,
         IJobCancellationRegistry? cancellation = null,
-        Func<DateTime>? utcNow = null)
+        Func<DateTime>? utcNow = null,
+        IRuntimeBackendConfigurationProvider? backendConfigurations = null)
     {
         _store = store;
         _queue = queue;
         _cancellation = cancellation;
+        _backendConfigurations = backendConfigurations;
         _utcNow = utcNow ?? (() => DateTime.UtcNow);
     }
 
@@ -35,12 +39,15 @@ public sealed class SystemMtJobService : ISystemMtJobService
 
         var now = _utcNow();
         var id = Guid.NewGuid();
+        var backendConfiguration = ResolveBackendConfiguration(request.RuntimeBackendKey);
         var record = new SystemMtJobRecord
         {
             JobId = id,
             Kind = SystemMtJobKind.RunMr,
             MrId = request.MrId,
             ParameterOverrides = CopyOverrides(request.ParameterOverrides),
+            BackendKind = BackendKindDisplay(backendConfiguration),
+            BackendExternalId = backendConfiguration?.BackendKey,
             SutName = string.Empty,   // worker 解析 MR → SUT 后回填（MrSummary.SutName）
             State = SystemMtJobState.Queued,
             CurrentPhase = "queued",
@@ -50,6 +57,27 @@ public sealed class SystemMtJobService : ISystemMtJobService
         };
         return await CreateAndEnqueueAsync(record, now, cancellationToken);
     }
+
+    private RuntimeBackendConfiguration? ResolveBackendConfiguration(string? backendKey)
+    {
+        if (string.IsNullOrWhiteSpace(backendKey))
+            return null;
+        if (_backendConfigurations is null)
+        {
+            throw new RuntimeBackendConfigurationException(
+                $"Runtime backend configuration '{backendKey.Trim()}' was requested, but no configuration provider is registered.");
+        }
+
+        return _backendConfigurations.Resolve(backendKey);
+    }
+
+    private static string? BackendKindDisplay(RuntimeBackendConfiguration? configuration) =>
+        configuration?.Kind switch
+        {
+            RuntimeBackendKind.Docker => "docker",
+            RuntimeBackendKind.SshRemote => "ssh",
+            _ => null
+        };
 
     public async Task<SystemMtJobHandle> SubmitOperationAsync(
         SystemMtOperationJobRequest request,

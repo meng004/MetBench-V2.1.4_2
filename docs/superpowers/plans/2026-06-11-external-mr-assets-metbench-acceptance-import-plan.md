@@ -138,9 +138,11 @@ Cloud verification:
 ## 0.3 Batch E Runtime Contract / Imported-Only Status (2026-06-11)
 
 Batch E now has a MetBench import package and explicit Docker/SSH runtime
-contracts, but it is not promoted to executable runtime status. The current
-implementation records how the real MeshGraphNets assets must be staged and
-keeps execution fail-closed until production Docker or SSH executors exist.
+contracts plus a typed backend-configuration layer, but it is not promoted to
+executable runtime status. The current implementation records how the real
+MeshGraphNets assets must be staged, validates named Docker/SSH backend
+configuration before queueing, and keeps execution fail-closed until production
+Docker or SSH executors exist.
 
 Implemented package:
 
@@ -153,8 +155,15 @@ Implemented package:
 Implemented files:
 
 - `MetBench_BLL.Core/SystemMT/Runtime/RuntimeBackendContract.cs`
+- `MetBench_BLL.Core/SystemMT/Runtime/RuntimeBackendConfiguration.cs`
+- `MetBench_BLL.Core/SystemMT/Jobs/SystemMtJobRequest.cs`
+- `MetBench_BLL.Core/SystemMT/Jobs/SystemMtJobService.cs`
+- `MetBench_BLL.Core/SystemMT/Jobs/SystemMtAsyncPipeline.cs`
 - `MetBench_BLL.Core/SystemMT/ImportExport/Put/ExternalMrAcceptancePutFixtures.cs`
 - `MetBench_SystemMT.Tests/SystemMT/Runtime/RuntimeBackendContractTests.cs`
+- `MetBench_SystemMT.Tests/SystemMT/Runtime/RuntimeBackendConfigurationTests.cs`
+- `MetBench_SystemMT.Tests/SystemMT/Jobs/SystemMtJobServiceTests.cs`
+- `MetBench_SystemMT.Tests/SystemMT/Jobs/SystemMtAsyncPipelineTests.cs`
 - `MetBench_SystemMT.Tests/SystemMT/ImportExport/ExternalMrAcceptanceBatchImportTests.cs`
 
 Cloud verification:
@@ -165,15 +174,29 @@ Cloud verification:
 - Green phase: `dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj
   --no-restore --filter "FullyQualifiedName~RuntimeBackendContractTests|FullyQualifiedName~ExternalMrAcceptanceBatchImportTests"`
   passed `21/21`.
+- Red phase: the focused backend-configuration test filter failed with `CS0246`
+  and `CS0103` because `RuntimeBackendConfiguration`,
+  `DockerBackendConfiguration`, `SshBackendConfiguration`, and
+  `IRuntimeBackendConfigurationProvider` did not exist.
+- Green phase: `dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj
+  --no-restore --filter "FullyQualifiedName~RuntimeBackendConfigurationTests|FullyQualifiedName~SystemMtJobServiceTests|FullyQualifiedName~SystemMtAsyncPipelineTests"`
+  passed `35/35`.
+- Wider Runtime/Jobs check: `dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj
+  --no-restore --filter "FullyQualifiedName~SystemMT.Runtime|FullyQualifiedName~SystemMT.Jobs"`
+  passed `146/146`.
 
 Execution boundary:
 
 - Docker and SSH contract projection is complete for import/export and
   preflight-facing metadata.
+- Typed Docker/SSH configuration validation is complete for required fields,
+  path traversal guards, sanitized diagnostic projection, pre-queue backend-key
+  resolution, and async fail-closed behavior when a configured backend key is
+  submitted without a production executor.
 - Real Docker/SSH SUT execution remains blocked, not failed, until MetBench has
-  production executors with typed Docker/SSH parameter configuration, artifact
-  staging, and result collection evidence. The required executor-configuration
-  fields are tracked in
+  production executors, operator configuration binding, protected secret
+  resolution, artifact staging, artifact retrieval, and result collection
+  evidence. The required executor-configuration fields are tracked in
   `docs/superpowers/specs/2026-06-03-systemmt-async-execution-polling-design.md`.
 
 ## 2. Source Repositories
@@ -393,9 +416,10 @@ Acceptance:
 - **Cloud import complete:** real checkpoint/dataset paths, seeded-fault ledger
   provenance, runtime mutation classes, and imported-only MR cards are preserved.
 - **Runtime blocked:** MetBench Docker or SSH runtime executor support is still
-  required before claiming end-to-end MetBench execution; this includes typed
-  Docker/SSH parameter configuration, secret-reference handling, artifact
-  staging, and artifact retrieval.
+  required before claiming end-to-end MetBench execution; the typed
+  Docker/SSH parameter configuration model now exists, but production operator
+  configuration binding, protected secret resolution, artifact staging, and
+  artifact retrieval still remain required.
 
 ## 5. Acceptance Test Cases
 
@@ -468,8 +492,9 @@ Allowed conclusion examples:
   reports/export artifacts exist.
 - Batch D evidence import passed when imported ledgers are visible and retain
   their one-SUT / one-checkpoint limitations.
-- Batch E remains blocked, not failed, if Docker/SSH executor support or the
-  required Docker/SSH parameter configuration layer is absent.
+- Batch E remains blocked, not failed, while Docker/SSH executor support,
+  operator configuration binding, protected secret resolution, artifact staging,
+  or artifact retrieval is absent.
 
 Forbidden conclusion examples:
 
@@ -490,10 +515,10 @@ Forbidden conclusion examples:
 7. Reconcile existing P3/P4/P5/P8/P9 metadata with Minimum-MR-SubSet provenance.
 8. Add Batch D import-only package builder for MR cards and seeded-fault ledgers.
 9. Add dashboard/report tests that display imported evidence limitations.
-10. Add Docker/SSH runtime executor contracts for Batch E while keeping real
-    execution `ImportedOnly` until production executor support, typed
-    parameter configuration, secret-reference handling, artifact staging, and
-    artifact retrieval are implemented.
+10. Add Docker/SSH runtime executor contracts and typed backend configuration
+    for Batch E while keeping real execution `ImportedOnly` until production
+    executor support, operator configuration binding, protected secret
+    resolution, artifact staging, and artifact retrieval are implemented.
 
 ## 9. Verification Commands
 

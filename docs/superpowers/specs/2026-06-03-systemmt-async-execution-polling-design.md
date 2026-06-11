@@ -255,6 +255,22 @@ wrong backend kind, blank required setting, path traversal in artifact mappings,
 and unsupported secret reference all fail closed before `ISutExecutionBackend`
 submission.
 
+Implementation note (2026-06-11):
+
+- `MetBench_BLL.Core/SystemMT/Runtime/RuntimeBackendConfiguration.cs`
+  implements the typed Docker/SSH configuration model, in-memory provider,
+  required-field validation, path traversal guard, and sanitized diagnostic
+  projection.
+- `SystemMtJobService` resolves `RuntimeBackendKey` before creating or queueing
+  a job. Missing providers or unknown backend keys fail closed before queueing.
+- `SystemMtAsyncPipeline` fails closed with `MiddlewareUnavailable` when a
+  configured Docker/SSH backend key reaches the current build, because
+  production Docker/SSH executors are still not implemented.
+- This note does not promote Batch E to executable runtime status. Remaining
+  executor work still includes production configuration binding, protected
+  secret resolution, artifact staging/retrieval, cancellation/status polling,
+  and integration evidence.
+
 ### 9.1 Docker Parameters
 
 `DockerBackendConfiguration` must cover the executable surface, not only the

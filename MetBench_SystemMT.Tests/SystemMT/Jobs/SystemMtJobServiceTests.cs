@@ -1,4 +1,5 @@
 using MetBench_BLL.SystemMT.Jobs;
+using MetBench_BLL.SystemMT.Runtime;
 using Xunit;
 
 namespace MetBench_SystemMT.Tests.SystemMT.Jobs;
@@ -6,6 +7,12 @@ namespace MetBench_SystemMT.Tests.SystemMT.Jobs;
 public class SystemMtJobServiceTests
 {
     private static SystemMtJobService Build(IJobStore store, IJobQueue queue) => new(store, queue);
+
+    private static SystemMtJobService Build(
+        IJobStore store,
+        IJobQueue queue,
+        IRuntimeBackendConfigurationProvider backendConfigurations) =>
+        new(store, queue, backendConfigurations: backendConfigurations);
 
     [Fact]
     public async Task CancelAsync_signals_cancellation_registry_and_marks_store()
@@ -54,6 +61,63 @@ public class SystemMtJobServiceTests
         Assert.Equal(SystemMtJobKind.RunMr, record!.Kind);
         Assert.Equal(SystemMtJobKind.RunMr, status!.Kind);
         Assert.Equal("openmc-q-value", status.MrId);
+    }
+
+    [Fact]
+    public async Task SubmitAsync_with_backend_key_requires_configuration_provider_before_queueing()
+    {
+        var store = new CapturingJobStore();
+        var queue = new CapturingQueue();
+        var svc = Build(store, queue);
+
+        await Assert.ThrowsAsync<RuntimeBackendConfigurationException>(() =>
+            svc.SubmitAsync(new SystemMtJobRequest("mr", RuntimeBackendKey: "sciml-mgn-docker"), default));
+
+        Assert.Equal(0, store.CreateCount);
+        Assert.Null(queue.Captured);
+    }
+
+    [Fact]
+    public async Task SubmitAsync_with_unknown_backend_key_fails_before_queueing()
+    {
+        var store = new CapturingJobStore();
+        var queue = new CapturingQueue();
+        var provider = new InMemoryRuntimeBackendConfigurationProvider(Array.Empty<RuntimeBackendConfiguration>());
+        var svc = Build(store, queue, provider);
+
+        await Assert.ThrowsAsync<RuntimeBackendConfigurationException>(() =>
+            svc.SubmitAsync(new SystemMtJobRequest("mr", RuntimeBackendKey: "missing-backend"), default));
+
+        Assert.Equal(0, store.CreateCount);
+        Assert.Null(queue.Captured);
+    }
+
+    [Fact]
+    public async Task SubmitAsync_with_valid_backend_key_records_sanitized_backend_display_only()
+    {
+        var store = new InMemoryJobStore();
+        var queue = new ChannelJobQueue();
+        var provider = new InMemoryRuntimeBackendConfigurationProvider(new[]
+        {
+            RuntimeBackendConfiguration.Docker(
+                "sciml-mgn-docker",
+                new DockerBackendConfiguration(
+                    image: "metbench/sciml-mgn:cpu",
+                    commandTemplate: "python run.py",
+                    workDirectory: "/workspace",
+                    environment: new Dictionary<string, string> { ["TOKEN"] = "raw-secret-value" },
+                    secretReferences: new Dictionary<string, RuntimeSecretReference> { ["TOKEN"] = new("env:MGN_TOKEN") },
+                    inputMounts: new[] { RuntimePathMapping.Create("/host/in", "/workspace/in") },
+                    outputMounts: new[] { RuntimePathMapping.Create("/host/out", "/workspace/out") }))
+        });
+        var svc = Build(store, queue, provider);
+
+        var handle = await svc.SubmitAsync(new SystemMtJobRequest("mr", RuntimeBackendKey: "SCIML-MGN-DOCKER"), default);
+
+        var record = await store.GetAsync(handle.JobId, default);
+        Assert.Equal("docker", record!.BackendKind);
+        Assert.Equal("sciml-mgn-docker", record.BackendExternalId);
+        Assert.DoesNotContain("raw-secret-value", record.ToString(), StringComparison.Ordinal);
     }
 
     [Fact]
@@ -207,6 +271,43 @@ public class SystemMtJobServiceTests
         }
         public ValueTask<Guid> DequeueAsync(CancellationToken cancellationToken)
             => throw new NotSupportedException();
+    }
+
+    private sealed class CapturingQueue : IJobQueue
+    {
+        public Guid? Captured;
+
+        public ValueTask EnqueueAsync(Guid jobId, CancellationToken cancellationToken)
+        {
+            Captured = jobId;
+            return ValueTask.CompletedTask;
+        }
+
+        public ValueTask<Guid> DequeueAsync(CancellationToken cancellationToken)
+            => throw new NotSupportedException();
+    }
+
+    private sealed class CapturingJobStore : IJobStore
+    {
+        public int CreateCount { get; private set; }
+
+        public Task CreateAsync(SystemMtJobRecord record, CancellationToken cancellationToken)
+        {
+            CreateCount++;
+            return Task.CompletedTask;
+        }
+
+        public Task UpdateStatusAsync(SystemMtJobRecord record, CancellationToken cancellationToken)
+            => Task.CompletedTask;
+
+        public Task<SystemMtJobRecord?> GetAsync(Guid jobId, CancellationToken cancellationToken)
+            => Task.FromResult<SystemMtJobRecord?>(null);
+
+        public Task SaveResultAsync(Guid jobId, MetBench_BLL.SystemMT.Launcher.MrRunResult result, CancellationToken cancellationToken)
+            => Task.CompletedTask;
+
+        public Task<MetBench_BLL.SystemMT.Launcher.MrRunResult?> GetResultAsync(Guid jobId, CancellationToken cancellationToken)
+            => Task.FromResult<MetBench_BLL.SystemMT.Launcher.MrRunResult?>(null);
     }
 
     [Fact]

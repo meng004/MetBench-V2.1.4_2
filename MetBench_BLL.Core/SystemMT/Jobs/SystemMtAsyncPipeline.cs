@@ -42,6 +42,16 @@ public sealed class SystemMtAsyncPipeline : ISystemMtAsyncPipeline
     {
         progress?.Report(new SystemMtJobProgress(SystemMtJobState.Preparing, "preparing", 10));
 
+        if (!string.IsNullOrWhiteSpace(request.RuntimeBackendKey))
+        {
+            return new JobExecutionOutcome(
+                SystemMtJobState.Failed,
+                SutName: string.Empty,
+                Result: null,
+                FailureReason: $"Runtime backend executor '{request.RuntimeBackendKey.Trim()}' is not implemented in this MetBench build.",
+                FailureKind: "MiddlewareUnavailable");
+        }
+
         var sutName = await ResolveSutNameAsync(request.MrId, cancellationToken);
 
         progress?.Report(new SystemMtJobProgress(SystemMtJobState.RunningSource, "running-source", 40));
