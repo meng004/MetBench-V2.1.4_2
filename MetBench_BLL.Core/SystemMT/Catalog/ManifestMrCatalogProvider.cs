@@ -37,6 +37,24 @@ public sealed class ManifestMrCatalogProvider : IMrCatalogProvider
         _manifestFilePaths = manifestFilePaths ?? DiscoverManifests(options.SutRoot);
     }
 
+    public static ManifestMrCatalogProvider FromDiscoveredAndAdditional(
+        LauncherOptions options,
+        IEnumerable<string>? additionalManifestFilePaths)
+    {
+        if (options is null)
+            throw new ArgumentNullException(nameof(options));
+
+        var manifests = DiscoverManifests(options.SutRoot)
+            .Concat(additionalManifestFilePaths ?? Array.Empty<string>())
+            .Where(path => !string.IsNullOrWhiteSpace(path))
+            .Select(Path.GetFullPath)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(path => path, StringComparer.Ordinal)
+            .ToList();
+
+        return new ManifestMrCatalogProvider(options, manifests);
+    }
+
     private static IReadOnlyList<string> DiscoverManifests(string sutRoot)
     {
         if (string.IsNullOrWhiteSpace(sutRoot) || !Directory.Exists(sutRoot))

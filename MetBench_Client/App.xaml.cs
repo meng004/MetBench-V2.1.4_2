@@ -4,9 +4,11 @@ using MetBench_Client.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Threading;
@@ -168,8 +170,9 @@ namespace MetBench_Client
                 // IResultRepository / ISystemMtPipeline 一致。
                 services.AddScoped<SystemMtExecutionRecorder>();
                 services.AddSingleton<IMrCatalogProvider>(provider =>
-                    new ManifestMrCatalogProvider(
-                        provider.GetRequiredService<LauncherOptions>()));
+                    ManifestMrCatalogProvider.FromDiscoveredAndAdditional(
+                        provider.GetRequiredService<LauncherOptions>(),
+                        ResolveExtraMrManifestPaths()));
                 services.AddSingleton<ISystemMtManifestCatalogEditor>(provider =>
                     new SystemMtManifestCatalogEditor(
                         provider.GetRequiredService<LauncherOptions>().SutRoot));
@@ -332,6 +335,19 @@ namespace MetBench_Client
                 services.AddSingleton<IEventAggregator, EventAggregator>();
 
             }).Build();
+
+        private static IReadOnlyList<string> ResolveExtraMrManifestPaths()
+        {
+            var value = Environment.GetEnvironmentVariable("METBENCH_EXTRA_MR_MANIFESTS");
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return Array.Empty<string>();
+            }
+
+            return value
+                .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .ToList();
+        }
 
         /// <summary>
         /// Gets registered service.

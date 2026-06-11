@@ -1,11 +1,11 @@
 # External MR Assets MetBench Acceptance Import Plan (2026-06-11)
 
 > **Status:** Batch A/D cloud acceptance path implemented; Windows/WPF UI
-> acceptance evidence still requires the VM prompt registered in this plan.
+> acceptance evidence completed in VM on 2026-06-11.
 > Cloud evidence:
 > `docs/superpowers/specs/2026-06-11-external-mr-assets-batch-a-d-cloud-evidence.md`.
-> VM evidence template:
-> `docs/superpowers/specs/2026-06-11-external-mr-assets-batch-a-d-vm-evidence-template.md`.
+> VM evidence:
+> `docs/superpowers/specs/2026-06-11-external-mr-assets-batch-a-d-vm-evidence/vm-summary.md`.
 > **Scope:** Classify and batch-import experiment assets from
 > `meng004/Minimum-MR-SubSet` and
 > `meng004/Domain-Validity-Gated-MR-for-SciML` into MetBench acceptance testing
@@ -115,6 +115,38 @@ The cloud evidence report is registered at
 The expected VM回执 file shape is registered at
 `docs/superpowers/specs/2026-06-11-external-mr-assets-batch-a-d-vm-evidence-template.md`.
 
+## 0.2 Batch A/D Windows/WPF VM Completion Status (2026-06-11)
+
+VM execution completed on branch `codex/external-mr-asset-acceptance-plan` at
+head `39ebb4efd1ad824fa02e23e4e817cf467bb4c47c` before the VM evidence commit.
+
+VM verification:
+
+- `dotnet build MetBench_Client\MetBench_Client.csproj --no-restore
+  -v:minimal`: exit `0`, build errors `0`.
+- `drive-batch-a-d-vm.ps1`: exit `0`.
+- WPF `ImportAssets` succeeded for Batch A toy, Batch A P1 heat, and Batch D
+  SciML packages; each staged artifact contains `staging-manifest.json` and
+  `sut-import-unit.json`.
+- WPF `RunBatch` succeeded for 4 Batch A runtime MRs:
+  `minmr-toy-sort-permutation`, `minmr-p1-heat-alpha-monotonic`,
+  `minmr-p1-heat-timestep-convergence`, and
+  `minmr-p1-heat-mesh-convergence`; result summary was
+  `total=4; passed=4; failed=0; cancelled=0; pending=0`.
+- WPF `ExportAssets` round-tripped the staged Batch A toy, Batch A P1, and
+  Batch D SciML packages to valid `sut-import-unit.json` files.
+- WPF `ExportReport` generated `report.html` for the latest Batch A `minmr-*`
+  execution.
+- WPF result, coverage, and anomaly pages were opened and captured after the
+  Batch A/D jobs.
+
+The VM evidence directory is
+`docs/superpowers/specs/2026-06-11-external-mr-assets-batch-a-d-vm-evidence/`.
+It contains the reusable driver script, `vm-summary.md`, screenshots, and
+import/export JSON packages needed to audit the run. Batch D remains
+imported-only by design: the VM check verifies UI import/export visibility and
+evidence preservation, not live MGN replay.
+
 ## 2. Source Repositories
 
 ### 2.1 Minimum-MR-SubSet
@@ -222,9 +254,9 @@ Acceptance:
   candidates with imported-evidence limitations.
 - **Cloud complete:** Batch A execution records render through HTML / Word /
   Excel / PDF reports and binary run-point chart DTOs.
-- **VM pending:** WPF ImportAssets / RunBatch / ExportAssets / report /
-  dashboard / anomaly views require the registered VM prompt before UI evidence
-  can be claimed.
+- **VM complete:** WPF ImportAssets / RunBatch / ExportAssets completed in the
+  VM; result, coverage, and anomaly views were opened and captured in
+  `docs/superpowers/specs/2026-06-11-external-mr-assets-batch-a-d-vm-evidence/`.
 
 ### Batch B - Existing Minimum-MR Runtime Reconciliation
 
@@ -305,8 +337,9 @@ Acceptance:
   and anomaly candidates with the original one-SUT / one-checkpoint limitation.
 - **Cloud complete:** discrete divergence is displayed as deferred/diagnostic,
   not as a pass/fail absolute conservation MR.
-- **VM pending:** visual confirmation in WPF report/dashboard/anomaly views
-  requires the registered VM prompt.
+- **VM complete:** WPF ImportAssets / ExportAssets preserved the SciML package,
+  and result / coverage / anomaly views were opened and captured in the VM
+  evidence directory. Live MGN replay remains outside Batch D scope.
 
 ### Batch E - Real SUT Runtime Extension
 
@@ -415,9 +448,8 @@ Forbidden conclusion examples:
 
 ## 8. Implementation Steps
 
-Batch A/D cloud status: steps 1-6, 8, and the cloud-report part of step 9 are
-complete. Windows/WPF visual confirmation for step 9 still requires the VM
-prompt回执. Step 10 is a future Batch E prerequisite and is not required for
+Batch A/D status: steps 1-6, 8, and 9 are complete across cloud and VM
+evidence. Step 10 is a future Batch E prerequisite and is not required for
 Batch A/D completion.
 
 1. Add package builders for Batch A using `SutImportUnit` and

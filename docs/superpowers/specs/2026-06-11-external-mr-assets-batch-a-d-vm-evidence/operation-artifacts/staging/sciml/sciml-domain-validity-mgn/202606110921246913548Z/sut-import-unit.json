@@ -1,0 +1,564 @@
+{
+  "SchemaVersion": "put-import.v1",
+  "Sut": {
+    "SutId": "sciml-domain-validity-mgn",
+    "Name": "Domain-validity gated MGN SciML fixture",
+    "EquationFamily": "mesh graph neural surrogate / domain validity",
+    "ProgramKind": "Surrogate",
+    "Adapter": {
+      "AdapterId": "domain-validity-mgn",
+      "Description": "Imported SciML domain-validity evidence package. Runtime replay requires the original MGN environment and is not bound in Batch D.",
+      "SourcePath": "domain_validity_gated_mr/evidence/mr_cards",
+      "EntryPoints": [
+        "node_permutation_fixture",
+        "seeded_fault_metric_ledger"
+      ]
+    },
+    "Observables": [
+      {
+        "Name": "node_prediction",
+        "Kind": "Vector",
+        "Unit": "state",
+        "Description": "Per-node predicted physical state"
+      },
+      {
+        "Name": "edge_index",
+        "Kind": "Vector",
+        "Unit": "graph",
+        "Description": "Graph connectivity"
+      },
+      {
+        "Name": "mirror_y_prediction",
+        "Kind": "Vector",
+        "Unit": "state",
+        "Description": "Mirrored-y prediction field"
+      },
+      {
+        "Name": "discrete_divergence",
+        "Kind": "Scalar",
+        "Unit": "residual",
+        "Description": "Discrete divergence diagnostic"
+      },
+      {
+        "Name": "seeded_fault_metric",
+        "Kind": "Summary",
+        "Unit": "rate",
+        "Description": "Seeded-fault detection metric"
+      }
+    ],
+    "Metadata": {
+      "batch": "D",
+      "package_id": "metbench-import-sciml-domain-validity-fixture-v1"
+    }
+  },
+  "Mrs": [
+    {
+      "MrId": "mgn-node-permutation-equivariance",
+      "SutId": "sciml-domain-validity-mgn",
+      "Name": "MGN node permutation equivariance",
+      "ObservableRefs": [
+        "node_prediction",
+        "edge_index",
+        "seeded_fault_metric"
+      ],
+      "TransformBinding": {
+        "Status": "RequiresAdapter",
+        "TransformKind": "NodePermutationTransform",
+        "Shape": {
+          "Kind": "scalar-series"
+        },
+        "Notes": "Requires MGN graph fixture and tensor adapter."
+      },
+      "AssertionBinding": {
+        "Status": "MappedSupported",
+        "PredicateKind": "RelativeL2LessOrEqualPredicate",
+        "Metric": "permutation_relative_l2_error",
+        "Tolerance": {
+          "Kind": "relative",
+          "Value": 1E-06
+        },
+        "Notes": ""
+      },
+      "Metadata": {
+        "status": "design-time-retained",
+        "evidence": "mr_card"
+      }
+    },
+    {
+      "MrId": "mgn-mirror-y-equivariance",
+      "SutId": "sciml-domain-validity-mgn",
+      "Name": "MGN mirror-y equivariance",
+      "ObservableRefs": [
+        "mirror_y_prediction",
+        "seeded_fault_metric"
+      ],
+      "TransformBinding": {
+        "Status": "RequiresAdapter",
+        "TransformKind": "MirrorYTransform",
+        "Shape": {
+          "Kind": "scalar-series"
+        },
+        "Notes": "Requires geometry-aware MGN fixture."
+      },
+      "AssertionBinding": {
+        "Status": "MappedSupported",
+        "PredicateKind": "RelativeL2LessOrEqualPredicate",
+        "Metric": "mirror_y_relative_l2_error",
+        "Tolerance": {
+          "Kind": "relative",
+          "Value": 1E-06
+        },
+        "Notes": ""
+      },
+      "Metadata": {
+        "status": "design-time-retained-ood-stress",
+        "evidence": "mr_card"
+      }
+    },
+    {
+      "MrId": "mgn-discrete-divergence-boundedness",
+      "SutId": "sciml-domain-validity-mgn",
+      "Name": "MGN discrete divergence boundedness",
+      "ObservableRefs": [
+        "discrete_divergence",
+        "seeded_fault_metric"
+      ],
+      "TransformBinding": {
+        "Status": "ImportedOnly",
+        "TransformKind": "ImportedOnly",
+        "Shape": null,
+        "Notes": "Deferred by upstream: threshold is blocked until calibration."
+      },
+      "AssertionBinding": {
+        "Status": "ImportedOnly",
+        "PredicateKind": "ImportedOnly",
+        "Metric": "",
+        "Tolerance": null,
+        "Notes": "Allowed verdicts are skip, out-of-relation-domain, or inconclusive; this is diagnostic evidence only."
+      },
+      "Metadata": {
+        "status": "design-time-deferred",
+        "allowed_verdicts": "skip;out-of-relation-domain;inconclusive",
+        "threshold": "blocked_until_calibrated"
+      }
+    }
+  ],
+  "IoGroups": [
+    {
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "SutId": "sciml-domain-validity-mgn",
+      "Name": "Node permutation and seeded-fault evidence fixture",
+      "InputRefs": [
+        "fixtures/node_permutation/source_graph"
+      ],
+      "OutputRefs": [
+        "fixtures/node_permutation/followup_graph",
+        "reports/seeded_fault_metric_ledger"
+      ],
+      "Metadata": {
+        "source": "domain-validity evidence fixture"
+      }
+    }
+  ],
+  "Mutations": [
+    {
+      "MutationId": "BC_zero_inflow",
+      "SutId": "sciml-domain-validity-mgn",
+      "Name": "BC zero inflow",
+      "OperatorClass": "boundary_condition_fault",
+      "RepresentationKind": "OperatorClassOnly",
+      "Metadata": {
+        "source": "seeded_fault_metric_ledger",
+        "representation": "seeded-fault"
+      }
+    },
+    {
+      "MutationId": "BC_nonzero_wall",
+      "SutId": "sciml-domain-validity-mgn",
+      "Name": "BC nonzero wall",
+      "OperatorClass": "boundary_condition_fault",
+      "RepresentationKind": "OperatorClassOnly",
+      "Metadata": {
+        "source": "seeded_fault_metric_ledger",
+        "representation": "seeded-fault"
+      }
+    },
+    {
+      "MutationId": "MA_drop_edges",
+      "SutId": "sciml-domain-validity-mgn",
+      "Name": "MA drop edges",
+      "OperatorClass": "mesh_adjacency_fault",
+      "RepresentationKind": "OperatorClassOnly",
+      "Metadata": {
+        "source": "seeded_fault_metric_ledger",
+        "representation": "seeded-fault"
+      }
+    },
+    {
+      "MutationId": "MA_permute_edges",
+      "SutId": "sciml-domain-validity-mgn",
+      "Name": "MA permute edges",
+      "OperatorClass": "mesh_adjacency_fault",
+      "RepresentationKind": "OperatorClassOnly",
+      "Metadata": {
+        "source": "seeded_fault_metric_ledger",
+        "representation": "seeded-fault"
+      }
+    },
+    {
+      "MutationId": "NS_skip_denorm",
+      "SutId": "sciml-domain-validity-mgn",
+      "Name": "NS skip denorm",
+      "OperatorClass": "normalization_scale_fault",
+      "RepresentationKind": "OperatorClassOnly",
+      "Metadata": {
+        "source": "seeded_fault_metric_ledger",
+        "representation": "seeded-fault"
+      }
+    },
+    {
+      "MutationId": "NS_double_scale",
+      "SutId": "sciml-domain-validity-mgn",
+      "Name": "NS double scale",
+      "OperatorClass": "normalization_scale_fault",
+      "RepresentationKind": "OperatorClassOnly",
+      "Metadata": {
+        "source": "seeded_fault_metric_ledger",
+        "representation": "seeded-fault"
+      }
+    },
+    {
+      "MutationId": "TR_sign_flip",
+      "SutId": "sciml-domain-validity-mgn",
+      "Name": "TR sign flip",
+      "OperatorClass": "time_reversal_fault",
+      "RepresentationKind": "OperatorClassOnly",
+      "Metadata": {
+        "source": "seeded_fault_metric_ledger",
+        "representation": "seeded-fault"
+      }
+    },
+    {
+      "MutationId": "TR_double_step",
+      "SutId": "sciml-domain-validity-mgn",
+      "Name": "TR double step",
+      "OperatorClass": "time_reversal_fault",
+      "RepresentationKind": "OperatorClassOnly",
+      "Metadata": {
+        "source": "seeded_fault_metric_ledger",
+        "representation": "seeded-fault"
+      }
+    },
+    {
+      "MutationId": "PC_swap_xy",
+      "SutId": "sciml-domain-validity-mgn",
+      "Name": "PC swap xy",
+      "OperatorClass": "physical_channel_fault",
+      "RepresentationKind": "OperatorClassOnly",
+      "Metadata": {
+        "source": "seeded_fault_metric_ledger",
+        "representation": "seeded-fault"
+      }
+    },
+    {
+      "MutationId": "PC_zero_vy",
+      "SutId": "sciml-domain-validity-mgn",
+      "Name": "PC zero vy",
+      "OperatorClass": "physical_channel_fault",
+      "RepresentationKind": "OperatorClassOnly",
+      "Metadata": {
+        "source": "seeded_fault_metric_ledger",
+        "representation": "seeded-fault"
+      }
+    }
+  ],
+  "Detections": [
+    {
+      "DetectionId": "sciml-mgn-node-permutation-equivariance-BC_zero_inflow",
+      "MrId": "mgn-node-permutation-equivariance",
+      "MutationId": "BC_zero_inflow",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-node-permutation-equivariance vs BC_zero_inflow =\u003E Survived."
+    },
+    {
+      "DetectionId": "sciml-mgn-node-permutation-equivariance-BC_nonzero_wall",
+      "MrId": "mgn-node-permutation-equivariance",
+      "MutationId": "BC_nonzero_wall",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-node-permutation-equivariance vs BC_nonzero_wall =\u003E Survived."
+    },
+    {
+      "DetectionId": "sciml-mgn-node-permutation-equivariance-MA_drop_edges",
+      "MrId": "mgn-node-permutation-equivariance",
+      "MutationId": "MA_drop_edges",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-node-permutation-equivariance vs MA_drop_edges =\u003E Survived."
+    },
+    {
+      "DetectionId": "sciml-mgn-node-permutation-equivariance-MA_permute_edges",
+      "MrId": "mgn-node-permutation-equivariance",
+      "MutationId": "MA_permute_edges",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-node-permutation-equivariance vs MA_permute_edges =\u003E Survived."
+    },
+    {
+      "DetectionId": "sciml-mgn-node-permutation-equivariance-NS_skip_denorm",
+      "MrId": "mgn-node-permutation-equivariance",
+      "MutationId": "NS_skip_denorm",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-node-permutation-equivariance vs NS_skip_denorm =\u003E Survived."
+    },
+    {
+      "DetectionId": "sciml-mgn-node-permutation-equivariance-NS_double_scale",
+      "MrId": "mgn-node-permutation-equivariance",
+      "MutationId": "NS_double_scale",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-node-permutation-equivariance vs NS_double_scale =\u003E Survived."
+    },
+    {
+      "DetectionId": "sciml-mgn-node-permutation-equivariance-TR_sign_flip",
+      "MrId": "mgn-node-permutation-equivariance",
+      "MutationId": "TR_sign_flip",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-node-permutation-equivariance vs TR_sign_flip =\u003E Survived."
+    },
+    {
+      "DetectionId": "sciml-mgn-node-permutation-equivariance-TR_double_step",
+      "MrId": "mgn-node-permutation-equivariance",
+      "MutationId": "TR_double_step",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-node-permutation-equivariance vs TR_double_step =\u003E Survived."
+    },
+    {
+      "DetectionId": "sciml-mgn-node-permutation-equivariance-PC_swap_xy",
+      "MrId": "mgn-node-permutation-equivariance",
+      "MutationId": "PC_swap_xy",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-node-permutation-equivariance vs PC_swap_xy =\u003E Survived."
+    },
+    {
+      "DetectionId": "sciml-mgn-node-permutation-equivariance-PC_zero_vy",
+      "MrId": "mgn-node-permutation-equivariance",
+      "MutationId": "PC_zero_vy",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-node-permutation-equivariance vs PC_zero_vy =\u003E Survived."
+    },
+    {
+      "DetectionId": "sciml-mgn-mirror-y-equivariance-BC_zero_inflow",
+      "MrId": "mgn-mirror-y-equivariance",
+      "MutationId": "BC_zero_inflow",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-mirror-y-equivariance vs BC_zero_inflow =\u003E Survived."
+    },
+    {
+      "DetectionId": "sciml-mgn-mirror-y-equivariance-BC_nonzero_wall",
+      "MrId": "mgn-mirror-y-equivariance",
+      "MutationId": "BC_nonzero_wall",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-mirror-y-equivariance vs BC_nonzero_wall =\u003E Survived."
+    },
+    {
+      "DetectionId": "sciml-mgn-mirror-y-equivariance-MA_drop_edges",
+      "MrId": "mgn-mirror-y-equivariance",
+      "MutationId": "MA_drop_edges",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Detected",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-mirror-y-equivariance vs MA_drop_edges =\u003E Detected."
+    },
+    {
+      "DetectionId": "sciml-mgn-mirror-y-equivariance-MA_permute_edges",
+      "MrId": "mgn-mirror-y-equivariance",
+      "MutationId": "MA_permute_edges",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-mirror-y-equivariance vs MA_permute_edges =\u003E Survived."
+    },
+    {
+      "DetectionId": "sciml-mgn-mirror-y-equivariance-NS_skip_denorm",
+      "MrId": "mgn-mirror-y-equivariance",
+      "MutationId": "NS_skip_denorm",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-mirror-y-equivariance vs NS_skip_denorm =\u003E Survived."
+    },
+    {
+      "DetectionId": "sciml-mgn-mirror-y-equivariance-NS_double_scale",
+      "MrId": "mgn-mirror-y-equivariance",
+      "MutationId": "NS_double_scale",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-mirror-y-equivariance vs NS_double_scale =\u003E Survived."
+    },
+    {
+      "DetectionId": "sciml-mgn-mirror-y-equivariance-TR_sign_flip",
+      "MrId": "mgn-mirror-y-equivariance",
+      "MutationId": "TR_sign_flip",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-mirror-y-equivariance vs TR_sign_flip =\u003E Survived."
+    },
+    {
+      "DetectionId": "sciml-mgn-mirror-y-equivariance-TR_double_step",
+      "MrId": "mgn-mirror-y-equivariance",
+      "MutationId": "TR_double_step",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-mirror-y-equivariance vs TR_double_step =\u003E Survived."
+    },
+    {
+      "DetectionId": "sciml-mgn-mirror-y-equivariance-PC_swap_xy",
+      "MrId": "mgn-mirror-y-equivariance",
+      "MutationId": "PC_swap_xy",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Detected",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-mirror-y-equivariance vs PC_swap_xy =\u003E Detected."
+    },
+    {
+      "DetectionId": "sciml-mgn-mirror-y-equivariance-PC_zero_vy",
+      "MrId": "mgn-mirror-y-equivariance",
+      "MutationId": "PC_zero_vy",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-mirror-y-equivariance vs PC_zero_vy =\u003E Survived."
+    },
+    {
+      "DetectionId": "sciml-mgn-discrete-divergence-boundedness-BC_zero_inflow",
+      "MrId": "mgn-discrete-divergence-boundedness",
+      "MutationId": "BC_zero_inflow",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Detected",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-discrete-divergence-boundedness vs BC_zero_inflow =\u003E Detected."
+    },
+    {
+      "DetectionId": "sciml-mgn-discrete-divergence-boundedness-BC_nonzero_wall",
+      "MrId": "mgn-discrete-divergence-boundedness",
+      "MutationId": "BC_nonzero_wall",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Detected",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-discrete-divergence-boundedness vs BC_nonzero_wall =\u003E Detected."
+    },
+    {
+      "DetectionId": "sciml-mgn-discrete-divergence-boundedness-MA_drop_edges",
+      "MrId": "mgn-discrete-divergence-boundedness",
+      "MutationId": "MA_drop_edges",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-discrete-divergence-boundedness vs MA_drop_edges =\u003E Survived."
+    },
+    {
+      "DetectionId": "sciml-mgn-discrete-divergence-boundedness-MA_permute_edges",
+      "MrId": "mgn-discrete-divergence-boundedness",
+      "MutationId": "MA_permute_edges",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-discrete-divergence-boundedness vs MA_permute_edges =\u003E Survived."
+    },
+    {
+      "DetectionId": "sciml-mgn-discrete-divergence-boundedness-NS_skip_denorm",
+      "MrId": "mgn-discrete-divergence-boundedness",
+      "MutationId": "NS_skip_denorm",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Detected",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-discrete-divergence-boundedness vs NS_skip_denorm =\u003E Detected."
+    },
+    {
+      "DetectionId": "sciml-mgn-discrete-divergence-boundedness-NS_double_scale",
+      "MrId": "mgn-discrete-divergence-boundedness",
+      "MutationId": "NS_double_scale",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-discrete-divergence-boundedness vs NS_double_scale =\u003E Survived."
+    },
+    {
+      "DetectionId": "sciml-mgn-discrete-divergence-boundedness-TR_sign_flip",
+      "MrId": "mgn-discrete-divergence-boundedness",
+      "MutationId": "TR_sign_flip",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-discrete-divergence-boundedness vs TR_sign_flip =\u003E Survived."
+    },
+    {
+      "DetectionId": "sciml-mgn-discrete-divergence-boundedness-TR_double_step",
+      "MrId": "mgn-discrete-divergence-boundedness",
+      "MutationId": "TR_double_step",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-discrete-divergence-boundedness vs TR_double_step =\u003E Survived."
+    },
+    {
+      "DetectionId": "sciml-mgn-discrete-divergence-boundedness-PC_swap_xy",
+      "MrId": "mgn-discrete-divergence-boundedness",
+      "MutationId": "PC_swap_xy",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-discrete-divergence-boundedness vs PC_swap_xy =\u003E Survived."
+    },
+    {
+      "DetectionId": "sciml-mgn-discrete-divergence-boundedness-PC_zero_vy",
+      "MrId": "mgn-discrete-divergence-boundedness",
+      "MutationId": "PC_zero_vy",
+      "IoGroupId": "sciml-mgn-node-permutation-fixture",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported seeded-fault metric ledger row: mgn-discrete-divergence-boundedness vs PC_zero_vy =\u003E Survived."
+    }
+  ],
+  "Provenance": {
+    "RepositoryUrl": "https://github.com/meng004/Domain-Validity-Gated-MR-for-SciML.git",
+    "Commit": "c2956e8eb42b81b216a4cf31720c98e1e035f2e8",
+    "SourcePaths": [
+      "README.md",
+      "reports/seeded_fault_metric_ledger.json",
+      "mr_cards"
+    ],
+    "CapturedBy": "codex-batch-d-sciml-domain-validity",
+    "CapturedAtUtc": "2026-06-11T00:00:00+00:00"
+  },
+  "Compatibility": {
+    "OverallReadiness": "ImportedOnly",
+    "Findings": [
+      "Batch D preserves domain-validity evidence; graph/tensor adapters and calibrated divergence threshold are required before runtime promotion."
+    ]
+  }
+}

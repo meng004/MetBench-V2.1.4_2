@@ -1,0 +1,943 @@
+{
+  "SchemaVersion": "put-import.v1",
+  "Sut": {
+    "SutId": "minimum-mr-subset-p1-heat",
+    "Name": "Minimum-MR-SubSet P1 heat equation",
+    "EquationFamily": "parabolic PDE / finite difference heat solver",
+    "ProgramKind": "NumericalSolver",
+    "Adapter": {
+      "AdapterId": "minimum-mr-subset-p1-heat",
+      "Description": "Imported descriptor for p1_heat.py and its MR/detection matrix; runtime execution awaits launcher adapter binding.",
+      "SourcePath": "experiments/puts/p1_heat.py",
+      "EntryPoints": [
+        "solve_heat"
+      ]
+    },
+    "Observables": [
+      {
+        "Name": "x",
+        "Kind": "Vector",
+        "Unit": "position",
+        "Description": "Spatial grid"
+      },
+      {
+        "Name": "u",
+        "Kind": "Vector",
+        "Unit": "temperature",
+        "Description": "Final temperature field"
+      },
+      {
+        "Name": "l2_norm",
+        "Kind": "Scalar",
+        "Unit": "temperature",
+        "Description": "L2 norm of the final field"
+      },
+      {
+        "Name": "extrema",
+        "Kind": "Summary",
+        "Unit": "temperature",
+        "Description": "Minimum and maximum field values"
+      },
+      {
+        "Name": "mass",
+        "Kind": "Scalar",
+        "Unit": "temperature",
+        "Description": "Discrete mass summary"
+      }
+    ],
+    "Metadata": {
+      "batch": "A",
+      "package_id": "metbench-import-minmr-p1-heat-v1",
+      "external_family": "P1"
+    }
+  },
+  "Mrs": [
+    {
+      "MrId": "p1-heat-MR01",
+      "SutId": "minimum-mr-subset-p1-heat",
+      "Name": "Alpha scale invariance",
+      "ObservableRefs": [
+        "x",
+        "u",
+        "l2_norm",
+        "extrema",
+        "mass"
+      ],
+      "TransformBinding": {
+        "Status": "RequiresAdapter",
+        "TransformKind": "ScaleAlphaTransform",
+        "Shape": {
+          "Kind": "scalar-series"
+        },
+        "Notes": "Mapped from external MR1; MetBench launcher adapter is not bound yet."
+      },
+      "AssertionBinding": {
+        "Status": "MappedSupported",
+        "PredicateKind": "ScaledEqualityPredicate",
+        "Metric": "u",
+        "Tolerance": {
+          "Kind": "relative",
+          "Value": 1E-06
+        },
+        "Notes": "Mapped from external MR1."
+      },
+      "Metadata": {
+        "external_mr_id": "MR1",
+        "detected_operator_class": "mut_C",
+        "source": "data/raw/p1_heat/mrs.json"
+      }
+    },
+    {
+      "MrId": "p1-heat-MR02",
+      "SutId": "minimum-mr-subset-p1-heat",
+      "Name": "Time-step doubling relation",
+      "ObservableRefs": [
+        "x",
+        "u",
+        "l2_norm",
+        "extrema",
+        "mass"
+      ],
+      "TransformBinding": {
+        "Status": "RequiresAdapter",
+        "TransformKind": "DoubleTimeStepTransform",
+        "Shape": {
+          "Kind": "scalar-series"
+        },
+        "Notes": "Mapped from external MR2; MetBench launcher adapter is not bound yet."
+      },
+      "AssertionBinding": {
+        "Status": "MappedSupported",
+        "PredicateKind": "AllClosePredicate",
+        "Metric": "u",
+        "Tolerance": {
+          "Kind": "relative",
+          "Value": 1E-06
+        },
+        "Notes": "Mapped from external MR2."
+      },
+      "Metadata": {
+        "external_mr_id": "MR2",
+        "detected_operator_class": "mut_T",
+        "source": "data/raw/p1_heat/mrs.json"
+      }
+    },
+    {
+      "MrId": "p1-heat-MR03",
+      "SutId": "minimum-mr-subset-p1-heat",
+      "Name": "Grid refinement convergence",
+      "ObservableRefs": [
+        "x",
+        "u",
+        "l2_norm",
+        "extrema",
+        "mass"
+      ],
+      "TransformBinding": {
+        "Status": "RequiresAdapter",
+        "TransformKind": "GridRefinementTransform",
+        "Shape": {
+          "Kind": "scalar-series"
+        },
+        "Notes": "Mapped from external MR3; MetBench launcher adapter is not bound yet."
+      },
+      "AssertionBinding": {
+        "Status": "MappedSupported",
+        "PredicateKind": "ConvergencePredicate",
+        "Metric": "l2_norm",
+        "Tolerance": {
+          "Kind": "relative",
+          "Value": 1E-06
+        },
+        "Notes": "Mapped from external MR3."
+      },
+      "Metadata": {
+        "external_mr_id": "MR3",
+        "detected_operator_class": "mut_G",
+        "source": "data/raw/p1_heat/mrs.json"
+      }
+    },
+    {
+      "MrId": "p1-heat-MR04",
+      "SutId": "minimum-mr-subset-p1-heat",
+      "Name": "Additional steps eigenvalue scaling",
+      "ObservableRefs": [
+        "x",
+        "u",
+        "l2_norm",
+        "extrema",
+        "mass"
+      ],
+      "TransformBinding": {
+        "Status": "RequiresAdapter",
+        "TransformKind": "AdditionalStepsTransform",
+        "Shape": {
+          "Kind": "scalar-series"
+        },
+        "Notes": "Mapped from external MR4; MetBench launcher adapter is not bound yet."
+      },
+      "AssertionBinding": {
+        "Status": "MappedSupported",
+        "PredicateKind": "ScaledEqualityPredicate",
+        "Metric": "u",
+        "Tolerance": {
+          "Kind": "relative",
+          "Value": 1E-06
+        },
+        "Notes": "Mapped from external MR4."
+      },
+      "Metadata": {
+        "external_mr_id": "MR4",
+        "detected_operator_class": "mut_T",
+        "source": "data/raw/p1_heat/mrs.json"
+      }
+    },
+    {
+      "MrId": "p1-heat-MR05",
+      "SutId": "minimum-mr-subset-p1-heat",
+      "Name": "Refinement exact-solution convergence",
+      "ObservableRefs": [
+        "x",
+        "u",
+        "l2_norm",
+        "extrema",
+        "mass"
+      ],
+      "TransformBinding": {
+        "Status": "RequiresAdapter",
+        "TransformKind": "GridRefinementTransform",
+        "Shape": {
+          "Kind": "scalar-series"
+        },
+        "Notes": "Mapped from external MR5; MetBench launcher adapter is not bound yet."
+      },
+      "AssertionBinding": {
+        "Status": "MappedSupported",
+        "PredicateKind": "ConvergencePredicate",
+        "Metric": "l2_norm",
+        "Tolerance": {
+          "Kind": "relative",
+          "Value": 1E-06
+        },
+        "Notes": "Mapped from external MR5."
+      },
+      "Metadata": {
+        "external_mr_id": "MR5",
+        "detected_operator_class": "mut_G",
+        "source": "data/raw/p1_heat/mrs.json"
+      }
+    },
+    {
+      "MrId": "p1-heat-MR06",
+      "SutId": "minimum-mr-subset-p1-heat",
+      "Name": "Alternative alpha invariance",
+      "ObservableRefs": [
+        "x",
+        "u",
+        "l2_norm",
+        "extrema",
+        "mass"
+      ],
+      "TransformBinding": {
+        "Status": "RequiresAdapter",
+        "TransformKind": "ScaleAlphaPrimeTransform",
+        "Shape": {
+          "Kind": "scalar-series"
+        },
+        "Notes": "Mapped from external MR6; MetBench launcher adapter is not bound yet."
+      },
+      "AssertionBinding": {
+        "Status": "MappedSupported",
+        "PredicateKind": "ScaledEqualityPredicate",
+        "Metric": "u",
+        "Tolerance": {
+          "Kind": "relative",
+          "Value": 1E-06
+        },
+        "Notes": "Mapped from external MR6."
+      },
+      "Metadata": {
+        "external_mr_id": "MR6",
+        "detected_operator_class": "mut_F",
+        "source": "data/raw/p1_heat/mrs.json"
+      }
+    },
+    {
+      "MrId": "p1-heat-MR07",
+      "SutId": "minimum-mr-subset-p1-heat",
+      "Name": "Additional steps q-power allclose",
+      "ObservableRefs": [
+        "x",
+        "u",
+        "l2_norm",
+        "extrema",
+        "mass"
+      ],
+      "TransformBinding": {
+        "Status": "RequiresAdapter",
+        "TransformKind": "AdditionalStepsTransform",
+        "Shape": {
+          "Kind": "scalar-series"
+        },
+        "Notes": "Mapped from external MR7; MetBench launcher adapter is not bound yet."
+      },
+      "AssertionBinding": {
+        "Status": "MappedSupported",
+        "PredicateKind": "AllClosePredicate",
+        "Metric": "u",
+        "Tolerance": {
+          "Kind": "relative",
+          "Value": 1E-06
+        },
+        "Notes": "Mapped from external MR7."
+      },
+      "Metadata": {
+        "external_mr_id": "MR7",
+        "detected_operator_class": "mut_T",
+        "source": "data/raw/p1_heat/mrs.json"
+      }
+    },
+    {
+      "MrId": "p1-heat-MR08",
+      "SutId": "minimum-mr-subset-p1-heat",
+      "Name": "Refinement norm relation",
+      "ObservableRefs": [
+        "x",
+        "u",
+        "l2_norm",
+        "extrema",
+        "mass"
+      ],
+      "TransformBinding": {
+        "Status": "RequiresAdapter",
+        "TransformKind": "GridRefinementTransform",
+        "Shape": {
+          "Kind": "scalar-series"
+        },
+        "Notes": "Mapped from external MR8; MetBench launcher adapter is not bound yet."
+      },
+      "AssertionBinding": {
+        "Status": "MappedSupported",
+        "PredicateKind": "ConvergencePredicate",
+        "Metric": "l2_norm",
+        "Tolerance": {
+          "Kind": "relative",
+          "Value": 1E-06
+        },
+        "Notes": "Mapped from external MR8."
+      },
+      "Metadata": {
+        "external_mr_id": "MR8",
+        "detected_operator_class": "mut_G",
+        "source": "data/raw/p1_heat/mrs.json"
+      }
+    },
+    {
+      "MrId": "p1-heat-MR09",
+      "SutId": "minimum-mr-subset-p1-heat",
+      "Name": "Discrete mass balance",
+      "ObservableRefs": [
+        "x",
+        "u",
+        "l2_norm",
+        "extrema",
+        "mass"
+      ],
+      "TransformBinding": {
+        "Status": "RequiresAdapter",
+        "TransformKind": "MassBalanceTransform",
+        "Shape": {
+          "Kind": "scalar-series"
+        },
+        "Notes": "Mapped from external MR9; MetBench launcher adapter is not bound yet."
+      },
+      "AssertionBinding": {
+        "Status": "MappedSupported",
+        "PredicateKind": "MassBalancePredicate",
+        "Metric": "mass",
+        "Tolerance": {
+          "Kind": "relative",
+          "Value": 1E-06
+        },
+        "Notes": "Mapped from external MR9."
+      },
+      "Metadata": {
+        "external_mr_id": "MR9",
+        "detected_operator_class": "mut_C",
+        "source": "data/raw/p1_heat/mrs.json"
+      }
+    },
+    {
+      "MrId": "p1-heat-MR10",
+      "SutId": "minimum-mr-subset-p1-heat",
+      "Name": "Monotone diffusion",
+      "ObservableRefs": [
+        "x",
+        "u",
+        "l2_norm",
+        "extrema",
+        "mass"
+      ],
+      "TransformBinding": {
+        "Status": "RequiresAdapter",
+        "TransformKind": "MonotoneDiffusionTransform",
+        "Shape": {
+          "Kind": "scalar-series"
+        },
+        "Notes": "Mapped from external MR10; MetBench launcher adapter is not bound yet."
+      },
+      "AssertionBinding": {
+        "Status": "MappedSupported",
+        "PredicateKind": "MonotonePredicate",
+        "Metric": "extrema",
+        "Tolerance": {
+          "Kind": "relative",
+          "Value": 1E-06
+        },
+        "Notes": "Mapped from external MR10."
+      },
+      "Metadata": {
+        "external_mr_id": "MR10",
+        "detected_operator_class": "mut_M",
+        "source": "data/raw/p1_heat/mrs.json"
+      }
+    }
+  ],
+  "IoGroups": [
+    {
+      "IoGroupId": "p1-heat-detection-matrix",
+      "SutId": "minimum-mr-subset-p1-heat",
+      "Name": "P1 heat source/follow-up cases from detection_matrix.csv",
+      "InputRefs": [
+        "data/raw/p1_heat/source"
+      ],
+      "OutputRefs": [
+        "data/raw/p1_heat/followup"
+      ],
+      "Metadata": {
+        "source": "data/raw/p1_heat/detection_matrix.csv"
+      }
+    }
+  ],
+  "Mutations": [
+    {
+      "MutationId": "p1-heat-mut_C",
+      "SutId": "minimum-mr-subset-p1-heat",
+      "Name": "P1 heat coefficient perturbation",
+      "OperatorClass": "mut_C",
+      "RepresentationKind": "OperatorClassOnly",
+      "Metadata": {
+        "source": "data/raw/p1_heat/detection_matrix.csv"
+      }
+    },
+    {
+      "MutationId": "p1-heat-mut_F",
+      "SutId": "minimum-mr-subset-p1-heat",
+      "Name": "P1 heat forcing perturbation",
+      "OperatorClass": "mut_F",
+      "RepresentationKind": "OperatorClassOnly",
+      "Metadata": {
+        "source": "data/raw/p1_heat/detection_matrix.csv"
+      }
+    },
+    {
+      "MutationId": "p1-heat-mut_G",
+      "SutId": "minimum-mr-subset-p1-heat",
+      "Name": "P1 heat grid perturbation",
+      "OperatorClass": "mut_G",
+      "RepresentationKind": "OperatorClassOnly",
+      "Metadata": {
+        "source": "data/raw/p1_heat/detection_matrix.csv"
+      }
+    },
+    {
+      "MutationId": "p1-heat-mut_M",
+      "SutId": "minimum-mr-subset-p1-heat",
+      "Name": "P1 heat mass/update perturbation",
+      "OperatorClass": "mut_M",
+      "RepresentationKind": "OperatorClassOnly",
+      "Metadata": {
+        "source": "data/raw/p1_heat/detection_matrix.csv"
+      }
+    },
+    {
+      "MutationId": "p1-heat-mut_T",
+      "SutId": "minimum-mr-subset-p1-heat",
+      "Name": "P1 heat time-step perturbation",
+      "OperatorClass": "mut_T",
+      "RepresentationKind": "OperatorClassOnly",
+      "Metadata": {
+        "source": "data/raw/p1_heat/detection_matrix.csv"
+      }
+    }
+  ],
+  "Detections": [
+    {
+      "DetectionId": "p1-MR1-mut_C",
+      "MrId": "p1-heat-MR01",
+      "MutationId": "p1-heat-mut_C",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Detected",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR1 vs mut_C =\u003E Detected."
+    },
+    {
+      "DetectionId": "p1-MR1-mut_F",
+      "MrId": "p1-heat-MR01",
+      "MutationId": "p1-heat-mut_F",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR1 vs mut_F =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR1-mut_G",
+      "MrId": "p1-heat-MR01",
+      "MutationId": "p1-heat-mut_G",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR1 vs mut_G =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR1-mut_M",
+      "MrId": "p1-heat-MR01",
+      "MutationId": "p1-heat-mut_M",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR1 vs mut_M =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR1-mut_T",
+      "MrId": "p1-heat-MR01",
+      "MutationId": "p1-heat-mut_T",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR1 vs mut_T =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR2-mut_C",
+      "MrId": "p1-heat-MR02",
+      "MutationId": "p1-heat-mut_C",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR2 vs mut_C =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR2-mut_F",
+      "MrId": "p1-heat-MR02",
+      "MutationId": "p1-heat-mut_F",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR2 vs mut_F =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR2-mut_G",
+      "MrId": "p1-heat-MR02",
+      "MutationId": "p1-heat-mut_G",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR2 vs mut_G =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR2-mut_M",
+      "MrId": "p1-heat-MR02",
+      "MutationId": "p1-heat-mut_M",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR2 vs mut_M =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR2-mut_T",
+      "MrId": "p1-heat-MR02",
+      "MutationId": "p1-heat-mut_T",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Detected",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR2 vs mut_T =\u003E Detected."
+    },
+    {
+      "DetectionId": "p1-MR3-mut_C",
+      "MrId": "p1-heat-MR03",
+      "MutationId": "p1-heat-mut_C",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR3 vs mut_C =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR3-mut_F",
+      "MrId": "p1-heat-MR03",
+      "MutationId": "p1-heat-mut_F",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR3 vs mut_F =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR3-mut_G",
+      "MrId": "p1-heat-MR03",
+      "MutationId": "p1-heat-mut_G",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Detected",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR3 vs mut_G =\u003E Detected."
+    },
+    {
+      "DetectionId": "p1-MR3-mut_M",
+      "MrId": "p1-heat-MR03",
+      "MutationId": "p1-heat-mut_M",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR3 vs mut_M =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR3-mut_T",
+      "MrId": "p1-heat-MR03",
+      "MutationId": "p1-heat-mut_T",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR3 vs mut_T =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR4-mut_C",
+      "MrId": "p1-heat-MR04",
+      "MutationId": "p1-heat-mut_C",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR4 vs mut_C =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR4-mut_F",
+      "MrId": "p1-heat-MR04",
+      "MutationId": "p1-heat-mut_F",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR4 vs mut_F =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR4-mut_G",
+      "MrId": "p1-heat-MR04",
+      "MutationId": "p1-heat-mut_G",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR4 vs mut_G =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR4-mut_M",
+      "MrId": "p1-heat-MR04",
+      "MutationId": "p1-heat-mut_M",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR4 vs mut_M =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR4-mut_T",
+      "MrId": "p1-heat-MR04",
+      "MutationId": "p1-heat-mut_T",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Detected",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR4 vs mut_T =\u003E Detected."
+    },
+    {
+      "DetectionId": "p1-MR5-mut_C",
+      "MrId": "p1-heat-MR05",
+      "MutationId": "p1-heat-mut_C",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR5 vs mut_C =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR5-mut_F",
+      "MrId": "p1-heat-MR05",
+      "MutationId": "p1-heat-mut_F",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR5 vs mut_F =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR5-mut_G",
+      "MrId": "p1-heat-MR05",
+      "MutationId": "p1-heat-mut_G",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Detected",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR5 vs mut_G =\u003E Detected."
+    },
+    {
+      "DetectionId": "p1-MR5-mut_M",
+      "MrId": "p1-heat-MR05",
+      "MutationId": "p1-heat-mut_M",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR5 vs mut_M =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR5-mut_T",
+      "MrId": "p1-heat-MR05",
+      "MutationId": "p1-heat-mut_T",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR5 vs mut_T =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR6-mut_C",
+      "MrId": "p1-heat-MR06",
+      "MutationId": "p1-heat-mut_C",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR6 vs mut_C =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR6-mut_F",
+      "MrId": "p1-heat-MR06",
+      "MutationId": "p1-heat-mut_F",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Detected",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR6 vs mut_F =\u003E Detected."
+    },
+    {
+      "DetectionId": "p1-MR6-mut_G",
+      "MrId": "p1-heat-MR06",
+      "MutationId": "p1-heat-mut_G",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR6 vs mut_G =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR6-mut_M",
+      "MrId": "p1-heat-MR06",
+      "MutationId": "p1-heat-mut_M",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR6 vs mut_M =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR6-mut_T",
+      "MrId": "p1-heat-MR06",
+      "MutationId": "p1-heat-mut_T",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR6 vs mut_T =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR7-mut_C",
+      "MrId": "p1-heat-MR07",
+      "MutationId": "p1-heat-mut_C",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR7 vs mut_C =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR7-mut_F",
+      "MrId": "p1-heat-MR07",
+      "MutationId": "p1-heat-mut_F",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR7 vs mut_F =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR7-mut_G",
+      "MrId": "p1-heat-MR07",
+      "MutationId": "p1-heat-mut_G",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR7 vs mut_G =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR7-mut_M",
+      "MrId": "p1-heat-MR07",
+      "MutationId": "p1-heat-mut_M",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR7 vs mut_M =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR7-mut_T",
+      "MrId": "p1-heat-MR07",
+      "MutationId": "p1-heat-mut_T",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Detected",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR7 vs mut_T =\u003E Detected."
+    },
+    {
+      "DetectionId": "p1-MR8-mut_C",
+      "MrId": "p1-heat-MR08",
+      "MutationId": "p1-heat-mut_C",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR8 vs mut_C =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR8-mut_F",
+      "MrId": "p1-heat-MR08",
+      "MutationId": "p1-heat-mut_F",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR8 vs mut_F =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR8-mut_G",
+      "MrId": "p1-heat-MR08",
+      "MutationId": "p1-heat-mut_G",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Detected",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR8 vs mut_G =\u003E Detected."
+    },
+    {
+      "DetectionId": "p1-MR8-mut_M",
+      "MrId": "p1-heat-MR08",
+      "MutationId": "p1-heat-mut_M",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR8 vs mut_M =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR8-mut_T",
+      "MrId": "p1-heat-MR08",
+      "MutationId": "p1-heat-mut_T",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR8 vs mut_T =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR9-mut_C",
+      "MrId": "p1-heat-MR09",
+      "MutationId": "p1-heat-mut_C",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Detected",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR9 vs mut_C =\u003E Detected."
+    },
+    {
+      "DetectionId": "p1-MR9-mut_F",
+      "MrId": "p1-heat-MR09",
+      "MutationId": "p1-heat-mut_F",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR9 vs mut_F =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR9-mut_G",
+      "MrId": "p1-heat-MR09",
+      "MutationId": "p1-heat-mut_G",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR9 vs mut_G =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR9-mut_M",
+      "MrId": "p1-heat-MR09",
+      "MutationId": "p1-heat-mut_M",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR9 vs mut_M =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR9-mut_T",
+      "MrId": "p1-heat-MR09",
+      "MutationId": "p1-heat-mut_T",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR9 vs mut_T =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR10-mut_C",
+      "MrId": "p1-heat-MR10",
+      "MutationId": "p1-heat-mut_C",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR10 vs mut_C =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR10-mut_F",
+      "MrId": "p1-heat-MR10",
+      "MutationId": "p1-heat-mut_F",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR10 vs mut_F =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR10-mut_G",
+      "MrId": "p1-heat-MR10",
+      "MutationId": "p1-heat-mut_G",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR10 vs mut_G =\u003E Survived."
+    },
+    {
+      "DetectionId": "p1-MR10-mut_M",
+      "MrId": "p1-heat-MR10",
+      "MutationId": "p1-heat-mut_M",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Detected",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR10 vs mut_M =\u003E Detected."
+    },
+    {
+      "DetectionId": "p1-MR10-mut_T",
+      "MrId": "p1-heat-MR10",
+      "MutationId": "p1-heat-mut_T",
+      "IoGroupId": "p1-heat-detection-matrix",
+      "Result": "Survived",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Imported from P1 heat detection_matrix.csv: MR10 vs mut_T =\u003E Survived."
+    }
+  ],
+  "Provenance": {
+    "RepositoryUrl": "https://github.com/meng004/Minimum-MR-SubSet.git",
+    "Commit": "8944822054e18a1d80ec8c90f56a1214a8fd1665",
+    "SourcePaths": [
+      "experiments/puts/p1_heat.py",
+      "data/raw/p1_heat/mrs.json",
+      "data/raw/p1_heat/detection_matrix.csv"
+    ],
+    "CapturedBy": "codex-batch-a-p1-heat",
+    "CapturedAtUtc": "2026-06-11T00:00:00+00:00"
+  },
+  "Compatibility": {
+    "OverallReadiness": "ImportedOnly",
+    "Findings": [
+      "P1 heat evidence matrix is imported; runtime adapter binding is still pending."
+    ]
+  }
+}

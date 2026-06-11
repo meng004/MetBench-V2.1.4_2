@@ -431,6 +431,25 @@ public sealed class ManifestMrCatalogProviderTests : System.IDisposable
         Assert.Equal("test-mr-1", entries[0].Mr.Id);
     }
 
+    [Fact]
+    public void FromDiscoveredAndAdditional_loads_default_catalogs_plus_extra_manifest_paths()
+    {
+        var discovered = WriteManifest("sut_one", ValidSingleMrManifest);
+        var extraDir = Path.Combine(_tmpRoot, "extra_acceptance");
+        Directory.CreateDirectory(extraDir);
+        var extra = Path.Combine(extraDir, "acceptance-catalog.json");
+        File.WriteAllText(extra, ValidSingleMrManifest.Replace("test-mr-1", "test-mr-extra"));
+
+        var entries = ManifestMrCatalogProvider
+            .FromDiscoveredAndAdditional(Opts(), new[] { extra })
+            .Load()
+            .OrderBy(e => e.Mr.Id, StringComparer.Ordinal)
+            .ToList();
+
+        Assert.Equal(new[] { "test-mr-1", "test-mr-extra" }, entries.Select(e => e.Mr.Id));
+        Assert.True(File.Exists(discovered));
+    }
+
     // ---- PR-1 T1 manifest-driven runtime environments ------------------------------------
     // New manifest python_executable_kind values must resolve through
     // LauncherOptions.RuntimePythons without growing per-runtime fields. Unknown non-system

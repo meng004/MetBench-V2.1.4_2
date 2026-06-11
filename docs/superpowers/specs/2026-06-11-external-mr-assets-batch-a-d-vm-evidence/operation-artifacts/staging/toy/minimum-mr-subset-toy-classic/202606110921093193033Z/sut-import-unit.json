@@ -1,0 +1,384 @@
+{
+  "SchemaVersion": "put-import.v1",
+  "Sut": {
+    "SutId": "minimum-mr-subset-toy-classic",
+    "Name": "Minimum-MR-SubSet classic toy PUTs",
+    "EquationFamily": "sorting / matrix multiplication / quadratic roots",
+    "ProgramKind": "NumericalSolver",
+    "Adapter": {
+      "AdapterId": "minimum-mr-subset-toy-classic",
+      "Description": "Imported descriptor for classic toy PUT MR catalog; no live MetBench adapter is bound in Batch A.",
+      "SourcePath": "experiments/toy_put/classic_mt_catalog.json",
+      "EntryPoints": [
+        "sorting",
+        "matmul",
+        "quadratic"
+      ]
+    },
+    "Observables": [
+      {
+        "Name": "sorted_output",
+        "Kind": "Vector",
+        "Unit": "value",
+        "Description": "Sorting output sequence"
+      },
+      {
+        "Name": "matrix_product",
+        "Kind": "Vector",
+        "Unit": "value",
+        "Description": "Matrix multiplication output"
+      },
+      {
+        "Name": "quadratic_roots",
+        "Kind": "Vector",
+        "Unit": "value",
+        "Description": "Quadratic root pair"
+      },
+      {
+        "Name": "residual",
+        "Kind": "Summary",
+        "Unit": "value",
+        "Description": "Program-specific residual summary"
+      }
+    ],
+    "Metadata": {
+      "batch": "A",
+      "package_id": "metbench-import-minmr-toy-classic-v1"
+    }
+  },
+  "Mrs": [
+    {
+      "MrId": "sort_MR1_permute",
+      "SutId": "minimum-mr-subset-toy-classic",
+      "Name": "Sorting permutation invariance",
+      "ObservableRefs": [
+        "sorted_output"
+      ],
+      "TransformBinding": {
+        "Status": "ImportedOnly",
+        "TransformKind": "ImportedOnly",
+        "Shape": null,
+        "Notes": "Classic toy catalog transform is imported but not bound to a MetBench runtime adapter."
+      },
+      "AssertionBinding": {
+        "Status": "ImportedOnly",
+        "PredicateKind": "ImportedOnly",
+        "Metric": "",
+        "Tolerance": null,
+        "Notes": "Classic toy catalog assertion is imported but not bound to a typed predicate."
+      },
+      "Metadata": {
+        "program": "sorting",
+        "source": "classic_mt_catalog.json"
+      }
+    },
+    {
+      "MrId": "sort_MR2_concat_dup",
+      "SutId": "minimum-mr-subset-toy-classic",
+      "Name": "Sorting duplicate concatenation relation",
+      "ObservableRefs": [
+        "sorted_output"
+      ],
+      "TransformBinding": {
+        "Status": "ImportedOnly",
+        "TransformKind": "ImportedOnly",
+        "Shape": null,
+        "Notes": "Classic toy catalog transform is imported but not bound to a MetBench runtime adapter."
+      },
+      "AssertionBinding": {
+        "Status": "ImportedOnly",
+        "PredicateKind": "ImportedOnly",
+        "Metric": "",
+        "Tolerance": null,
+        "Notes": "Classic toy catalog assertion is imported but not bound to a typed predicate."
+      },
+      "Metadata": {
+        "program": "sorting",
+        "source": "classic_mt_catalog.json"
+      }
+    },
+    {
+      "MrId": "sort_MR3_remove_max",
+      "SutId": "minimum-mr-subset-toy-classic",
+      "Name": "Sorting remove-maximum relation",
+      "ObservableRefs": [
+        "sorted_output"
+      ],
+      "TransformBinding": {
+        "Status": "ImportedOnly",
+        "TransformKind": "ImportedOnly",
+        "Shape": null,
+        "Notes": "Classic toy catalog transform is imported but not bound to a MetBench runtime adapter."
+      },
+      "AssertionBinding": {
+        "Status": "ImportedOnly",
+        "PredicateKind": "ImportedOnly",
+        "Metric": "",
+        "Tolerance": null,
+        "Notes": "Classic toy catalog assertion is imported but not bound to a typed predicate."
+      },
+      "Metadata": {
+        "program": "sorting",
+        "source": "classic_mt_catalog.json"
+      }
+    },
+    {
+      "MrId": "matmul_MR1_transpose",
+      "SutId": "minimum-mr-subset-toy-classic",
+      "Name": "Matrix multiplication transpose relation",
+      "ObservableRefs": [
+        "matrix_product"
+      ],
+      "TransformBinding": {
+        "Status": "ImportedOnly",
+        "TransformKind": "ImportedOnly",
+        "Shape": null,
+        "Notes": "Classic toy catalog transform is imported but not bound to a MetBench runtime adapter."
+      },
+      "AssertionBinding": {
+        "Status": "ImportedOnly",
+        "PredicateKind": "ImportedOnly",
+        "Metric": "",
+        "Tolerance": null,
+        "Notes": "Classic toy catalog assertion is imported but not bound to a typed predicate."
+      },
+      "Metadata": {
+        "program": "matmul",
+        "source": "classic_mt_catalog.json"
+      }
+    },
+    {
+      "MrId": "matmul_MR2_scalar",
+      "SutId": "minimum-mr-subset-toy-classic",
+      "Name": "Matrix multiplication scalar relation",
+      "ObservableRefs": [
+        "matrix_product"
+      ],
+      "TransformBinding": {
+        "Status": "ImportedOnly",
+        "TransformKind": "ImportedOnly",
+        "Shape": null,
+        "Notes": "Classic toy catalog transform is imported but not bound to a MetBench runtime adapter."
+      },
+      "AssertionBinding": {
+        "Status": "ImportedOnly",
+        "PredicateKind": "ImportedOnly",
+        "Metric": "",
+        "Tolerance": null,
+        "Notes": "Classic toy catalog assertion is imported but not bound to a typed predicate."
+      },
+      "Metadata": {
+        "program": "matmul",
+        "source": "classic_mt_catalog.json"
+      }
+    },
+    {
+      "MrId": "quad_MR1_swap_roots",
+      "SutId": "minimum-mr-subset-toy-classic",
+      "Name": "Quadratic root swap relation",
+      "ObservableRefs": [
+        "quadratic_roots",
+        "residual"
+      ],
+      "TransformBinding": {
+        "Status": "ImportedOnly",
+        "TransformKind": "ImportedOnly",
+        "Shape": null,
+        "Notes": "Classic toy catalog transform is imported but not bound to a MetBench runtime adapter."
+      },
+      "AssertionBinding": {
+        "Status": "ImportedOnly",
+        "PredicateKind": "ImportedOnly",
+        "Metric": "",
+        "Tolerance": null,
+        "Notes": "Classic toy catalog assertion is imported but not bound to a typed predicate."
+      },
+      "Metadata": {
+        "program": "quadratic",
+        "source": "classic_mt_catalog.json"
+      }
+    },
+    {
+      "MrId": "quad_MR2_scale",
+      "SutId": "minimum-mr-subset-toy-classic",
+      "Name": "Quadratic coefficient scaling relation",
+      "ObservableRefs": [
+        "quadratic_roots",
+        "residual"
+      ],
+      "TransformBinding": {
+        "Status": "ImportedOnly",
+        "TransformKind": "ImportedOnly",
+        "Shape": null,
+        "Notes": "Classic toy catalog transform is imported but not bound to a MetBench runtime adapter."
+      },
+      "AssertionBinding": {
+        "Status": "ImportedOnly",
+        "PredicateKind": "ImportedOnly",
+        "Metric": "",
+        "Tolerance": null,
+        "Notes": "Classic toy catalog assertion is imported but not bound to a typed predicate."
+      },
+      "Metadata": {
+        "program": "quadratic",
+        "source": "classic_mt_catalog.json"
+      }
+    }
+  ],
+  "IoGroups": [
+    {
+      "IoGroupId": "toy-sorting-catalog",
+      "SutId": "minimum-mr-subset-toy-classic",
+      "Name": "Sorting toy catalog cases",
+      "InputRefs": [
+        "sorting-source"
+      ],
+      "OutputRefs": [
+        "sorting-followup"
+      ],
+      "Metadata": {
+        "program": "sorting"
+      }
+    },
+    {
+      "IoGroupId": "toy-matmul-catalog",
+      "SutId": "minimum-mr-subset-toy-classic",
+      "Name": "Matrix multiplication toy catalog cases",
+      "InputRefs": [
+        "matmul-source"
+      ],
+      "OutputRefs": [
+        "matmul-followup"
+      ],
+      "Metadata": {
+        "program": "matmul"
+      }
+    },
+    {
+      "IoGroupId": "toy-quadratic-catalog",
+      "SutId": "minimum-mr-subset-toy-classic",
+      "Name": "Quadratic toy catalog cases",
+      "InputRefs": [
+        "quadratic-source"
+      ],
+      "OutputRefs": [
+        "quadratic-followup"
+      ],
+      "Metadata": {
+        "program": "quadratic"
+      }
+    }
+  ],
+  "Mutations": [
+    {
+      "MutationId": "toy-mut-sorting",
+      "SutId": "minimum-mr-subset-toy-classic",
+      "Name": "Sorting toy operator faults",
+      "OperatorClass": "toy-sorting",
+      "RepresentationKind": "OperatorClassOnly",
+      "Metadata": {
+        "program": "sorting"
+      }
+    },
+    {
+      "MutationId": "toy-mut-matmul",
+      "SutId": "minimum-mr-subset-toy-classic",
+      "Name": "Matrix multiplication toy operator faults",
+      "OperatorClass": "toy-matmul",
+      "RepresentationKind": "OperatorClassOnly",
+      "Metadata": {
+        "program": "matmul"
+      }
+    },
+    {
+      "MutationId": "toy-mut-quadratic",
+      "SutId": "minimum-mr-subset-toy-classic",
+      "Name": "Quadratic toy operator faults",
+      "OperatorClass": "toy-quadratic",
+      "RepresentationKind": "OperatorClassOnly",
+      "Metadata": {
+        "program": "quadratic"
+      }
+    }
+  ],
+  "Detections": [
+    {
+      "DetectionId": "toy-detection-01",
+      "MrId": "sort_MR1_permute",
+      "MutationId": "toy-mut-sorting",
+      "IoGroupId": "toy-sorting-catalog",
+      "Result": "Inconclusive",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Classic toy catalog imported for acceptance-package coverage; detection execution is not replayed in Batch A."
+    },
+    {
+      "DetectionId": "toy-detection-02",
+      "MrId": "sort_MR2_concat_dup",
+      "MutationId": "toy-mut-sorting",
+      "IoGroupId": "toy-sorting-catalog",
+      "Result": "Inconclusive",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Classic toy catalog imported for acceptance-package coverage; detection execution is not replayed in Batch A."
+    },
+    {
+      "DetectionId": "toy-detection-03",
+      "MrId": "sort_MR3_remove_max",
+      "MutationId": "toy-mut-sorting",
+      "IoGroupId": "toy-sorting-catalog",
+      "Result": "Inconclusive",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Classic toy catalog imported for acceptance-package coverage; detection execution is not replayed in Batch A."
+    },
+    {
+      "DetectionId": "toy-detection-04",
+      "MrId": "matmul_MR1_transpose",
+      "MutationId": "toy-mut-matmul",
+      "IoGroupId": "toy-matmul-catalog",
+      "Result": "Inconclusive",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Classic toy catalog imported for acceptance-package coverage; detection execution is not replayed in Batch A."
+    },
+    {
+      "DetectionId": "toy-detection-05",
+      "MrId": "matmul_MR2_scalar",
+      "MutationId": "toy-mut-matmul",
+      "IoGroupId": "toy-matmul-catalog",
+      "Result": "Inconclusive",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Classic toy catalog imported for acceptance-package coverage; detection execution is not replayed in Batch A."
+    },
+    {
+      "DetectionId": "toy-detection-06",
+      "MrId": "quad_MR1_swap_roots",
+      "MutationId": "toy-mut-quadratic",
+      "IoGroupId": "toy-quadratic-catalog",
+      "Result": "Inconclusive",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Classic toy catalog imported for acceptance-package coverage; detection execution is not replayed in Batch A."
+    },
+    {
+      "DetectionId": "toy-detection-07",
+      "MrId": "quad_MR2_scale",
+      "MutationId": "toy-mut-quadratic",
+      "IoGroupId": "toy-quadratic-catalog",
+      "Result": "Inconclusive",
+      "EvidenceKind": "ImportedResearchEvidence",
+      "Notes": "Classic toy catalog imported for acceptance-package coverage; detection execution is not replayed in Batch A."
+    }
+  ],
+  "Provenance": {
+    "RepositoryUrl": "https://github.com/meng004/Minimum-MR-SubSet.git",
+    "Commit": "8944822054e18a1d80ec8c90f56a1214a8fd1665",
+    "SourcePaths": [
+      "experiments/toy_put/classic_mt_catalog.json"
+    ],
+    "CapturedBy": "codex-batch-a-toy-classic",
+    "CapturedAtUtc": "2026-06-11T00:00:00+00:00"
+  },
+  "Compatibility": {
+    "OverallReadiness": "ImportedOnly",
+    "Findings": [
+      "Classic toy MRs are imported catalog evidence until runtime adapters are bound."
+    ]
+  }
+}

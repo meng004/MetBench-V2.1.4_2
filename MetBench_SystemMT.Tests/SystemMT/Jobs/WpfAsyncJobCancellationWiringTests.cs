@@ -61,6 +61,16 @@ public sealed class WpfAsyncJobCancellationWiringTests
     }
 
     [Fact]
+    public void App_di_allows_vm_acceptance_to_append_extra_mr_manifests_without_replacing_default_catalogs()
+    {
+        var app = ReadRepoFile("MetBench_Client", "App.xaml.cs");
+
+        Assert.Contains("METBENCH_EXTRA_MR_MANIFESTS", app);
+        Assert.Contains("ResolveExtraMrManifestPaths()", app);
+        Assert.Contains("ManifestMrCatalogProvider.FromDiscoveredAndAdditional", app);
+    }
+
+    [Fact]
     public void Async_job_view_model_projects_batch_items_from_polling_status()
     {
         var viewModel = ReadRepoFile("MetBench_Client", "ViewModels", "SystemMtAsyncJobViewModel.cs");
