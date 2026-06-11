@@ -171,7 +171,10 @@ Execution boundary:
 - Docker and SSH contract projection is complete for import/export and
   preflight-facing metadata.
 - Real Docker/SSH SUT execution remains blocked, not failed, until MetBench has
-  production executors with artifact staging and result collection evidence.
+  production executors with typed Docker/SSH parameter configuration, artifact
+  staging, and result collection evidence. The required executor-configuration
+  fields are tracked in
+  `docs/superpowers/specs/2026-06-03-systemmt-async-execution-polling-design.md`.
 
 ## 2. Source Repositories
 
@@ -390,7 +393,9 @@ Acceptance:
 - **Cloud import complete:** real checkpoint/dataset paths, seeded-fault ledger
   provenance, runtime mutation classes, and imported-only MR cards are preserved.
 - **Runtime blocked:** MetBench Docker or SSH runtime executor support is still
-  required before claiming end-to-end MetBench execution.
+  required before claiming end-to-end MetBench execution; this includes typed
+  Docker/SSH parameter configuration, secret-reference handling, artifact
+  staging, and artifact retrieval.
 
 ## 5. Acceptance Test Cases
 
@@ -463,14 +468,15 @@ Allowed conclusion examples:
   reports/export artifacts exist.
 - Batch D evidence import passed when imported ledgers are visible and retain
   their one-SUT / one-checkpoint limitations.
-- Batch E remains blocked, not failed, if Docker/SSH executor support is absent.
+- Batch E remains blocked, not failed, if Docker/SSH executor support or the
+  required Docker/SSH parameter configuration layer is absent.
 
 Forbidden conclusion examples:
 
 - Do not claim general SUT reliability.
 - Do not claim cross-SUT or geometry-independent rates from single-SUT evidence.
 - Do not claim MetBench executed Docker/SSH real SUTs until the corresponding
-  executor evidence exists.
+  executor and parameter-configuration evidence exists.
 
 ## 8. Implementation Steps
 
@@ -485,7 +491,9 @@ Forbidden conclusion examples:
 8. Add Batch D import-only package builder for MR cards and seeded-fault ledgers.
 9. Add dashboard/report tests that display imported evidence limitations.
 10. Add Docker/SSH runtime executor contracts for Batch E while keeping real
-    execution `ImportedOnly` until production executor support is implemented.
+    execution `ImportedOnly` until production executor support, typed
+    parameter configuration, secret-reference handling, artifact staging, and
+    artifact retrieval are implemented.
 
 ## 9. Verification Commands
 

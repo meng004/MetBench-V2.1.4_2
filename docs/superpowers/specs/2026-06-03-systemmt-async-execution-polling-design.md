@@ -38,6 +38,12 @@ The current `SystemMtLauncher.RunAsync()` remains the compatibility path for sho
 
 Status polling reads only the job store. It must not inspect local processes, Docker containers, remote servers, or queue systems directly. Backends are responsible for translating their native status into MetBench job states.
 
+Runtime backend selection is not enough by itself. Docker and SSH backends also
+need operator-supplied parameters before they can become executable. Import
+packages may carry non-secret defaults and provenance hints, but production
+execution must resolve a named backend configuration from a trusted runtime
+configuration source and fail closed when required fields are missing.
+
 ## 5. Class Diagram
 
 ```mermaid
@@ -213,7 +219,131 @@ Candidate backend sequence:
 3. `RemoteServerBackend`: submits via an external service or SSH-style wrapper.
 4. `HpcQueueBackend`: maps queue states such as pending/running/completed/failed to MetBench states.
 
-## 9. Manifest Extension
+## 9. Backend Configuration
+
+The executor plan must include a typed backend-configuration layer before Docker
+or SSH can be treated as executable. A catalog or import package references a
+`backend_key`; it must not be the only source of operator-specific values.
+
+Recommended configuration sources, in precedence order:
+
+1. Per-run override supplied by an explicit job request or future UI flow.
+2. Operator/runtime configuration such as `appsettings`, environment variables,
+   or a protected local profile.
+3. Non-secret import-package defaults such as image name, expected remote root,
+   artifact paths, and resource hints.
+
+Required model:
+
+```csharp
+public interface IRuntimeBackendConfigurationProvider
+{
+    RuntimeBackendConfiguration Resolve(string backendKey);
+}
+
+public sealed record RuntimeBackendConfiguration(
+    string BackendKey,
+    RuntimeBackendKind Kind,
+    DockerBackendConfiguration? Docker,
+    SshBackendConfiguration? Ssh,
+    RuntimeResourceHints ResourceHints,
+    RuntimeArtifactPolicy ArtifactPolicy);
+```
+
+The provider validates all required fields before queueing. Unknown backend key,
+wrong backend kind, blank required setting, path traversal in artifact mappings,
+and unsupported secret reference all fail closed before `ISutExecutionBackend`
+submission.
+
+### 9.1 Docker Parameters
+
+`DockerBackendConfiguration` must cover the executable surface, not only the
+image name:
+
+- `image` and optional immutable digest;
+- `pull_policy` (`never`, `if-missing`, `always`);
+- `entrypoint`, command template, and argument template;
+- container `workdir`;
+- environment variables and secret references;
+- input mounts, output mounts, and artifact collection paths;
+- network mode;
+- user / UID-GID policy when needed for mounted files;
+- CPU, memory, and optional GPU/device requests;
+- per-run timeout and graceful/force-kill timeout;
+- optional image/platform pin, for example `linux/amd64`.
+
+Acceptance for Docker configuration:
+
+- missing `image` fails before queueing;
+- missing required artifact mount fails before queueing;
+- secret values are never written to import/export artifacts, job records, logs,
+  or reports; only secret reference names may be persisted;
+- generated `docker run` or Docker SDK request is deterministic from the typed
+  config and job request;
+- fetched artifacts are copied back into the normal MetBench execution artifact
+  layout before output parsing.
+
+### 9.2 SSH Parameters
+
+`SshBackendConfiguration` must cover connection, staging, execution, and
+artifact retrieval:
+
+- `host`, `port`, `user`;
+- authentication method via secret reference, such as key-file reference,
+  ssh-agent identity, or password reference;
+- `remote_root` and per-job remote work directory template;
+- upload strategy (`scp`, `sftp`, `rsync`, or operator-provided wrapper);
+- remote command template and argument template;
+- remote environment variables and secret references;
+- input staging paths and output artifact paths;
+- download strategy and local artifact layout;
+- keep/delete remote work directory policy;
+- connection timeout, command timeout, status-poll timeout, and cancellation
+  behavior;
+- optional jump-host / proxy command reference if required by the deployment.
+
+Acceptance for SSH configuration:
+
+- missing `host`, `user`, `remote_root`, auth reference, command template, or
+  artifact policy fails before queueing;
+- remote paths are normalized and must stay under `remote_root`;
+- cancellation attempts remote process termination and records the native
+  outcome;
+- status polling stores only durable MetBench state, plus safe backend display
+  fields such as backend kind, external id, last poll time, and sanitized host;
+- fetched artifacts are available locally before the job can transition to
+  `ParsingOutputs`.
+
+### 9.3 Secret Boundary
+
+Secrets are configuration references, not import/export data. The executor
+design must keep these rules:
+
+- import packages may contain placeholders such as `configured-by-operator`, but
+  not private keys, tokens, or passwords;
+- job records and reports may persist secret reference names only when useful for
+  diagnostics, never resolved secret values;
+- local developer configuration may use environment variables, but production
+  integrations should allow a protected secret provider abstraction;
+- failed validation messages must name the missing field or reference without
+  echoing secret material.
+
+### 9.4 Batch E Minimum Configuration
+
+Batch E cannot be promoted from `ImportedOnly` until at least one configured
+Docker or SSH backend satisfies these minimums:
+
+- Docker: image, command template, workdir, input/output mounts,
+  checkpoint/dataset mount, artifact policy, timeout, and CPU/memory resource
+  hints.
+- SSH: host, user, auth reference, remote root, remote command template,
+  upload/download strategy, artifact policy, timeout, and CPU/GPU/memory
+  resource hints.
+- Both: source/follow-up artifact staging, output retrieval, sanitized runtime
+  evidence, and a focused integration test that is skipped cleanly unless the
+  operator explicitly enables the backend.
+
+## 10. Manifest Extension
 
 Do not change existing `python_executable_kind` semantics. Add optional execution metadata only when async execution is used:
 
@@ -231,22 +361,33 @@ Do not change existing `python_executable_kind` semantics. Add optional executio
 
 If `execution` is missing, current synchronous behavior remains unchanged.
 
-## 10. Error Handling
+The manifest references backend identity and job policy. Detailed Docker/SSH
+connection values are resolved through `IRuntimeBackendConfigurationProvider`.
+This keeps reusable SUT/MR assets separate from machine-specific credentials and
+paths.
+
+## 11. Error Handling
 
 - Unknown backend key: fail closed before queueing.
+- Backend key exists but required Docker/SSH configuration is incomplete: fail
+  closed before queueing.
 - Backend cannot submit: `Failed`, with submit diagnostic.
 - Backend stops reporting status: keep last known state and fail after backend status timeout.
 - Backend says completed but output missing: `ArtifactMissing`, not `Succeeded`.
 - User cancellation: call backend `CancelAsync`; if backend cannot cancel, mark failure reason explicitly.
 - Assertion failure remains an MR result/anomaly path, not an infrastructure failure.
 
-## 11. Testing Strategy
+## 12. Testing Strategy
 
 First implementation should be TDD and cloud-safe:
 
 - fake backend that moves through Queued/Running/Succeeded deterministically
 - fake backend that times out
 - fake backend that completes with missing artifact
+- configuration provider tests for required Docker fields
+- configuration provider tests for required SSH fields
+- secret-redaction tests for job records, logs, and reports
+- artifact path traversal rejection tests
 - job store persistence round trip
 - polling returns last durable state without touching backend
 - existing `SystemMtLauncher.RunAsync()` and current end-to-end tests remain green
@@ -254,7 +395,7 @@ First implementation should be TDD and cloud-safe:
 
 Docker/remote/HPC tests should be integration-gated and skipped cleanly unless explicitly configured.
 
-## 12. Scope Boundaries
+## 13. Scope Boundaries
 
 In scope for the first implementation plan:
 
@@ -262,17 +403,21 @@ In scope for the first implementation plan:
 - durable job state
 - polling status API
 - local/fake backend
+- typed backend configuration provider
+- Docker and SSH parameter validation
+- secret-reference redaction rules
 - compatibility with current synchronous launcher
 
 Out of scope for v1:
 
 - WPF UI changes
 - webhook/hook callbacks
-- remote credentials management
+- secret storage and rotation implementation; the executor only consumes
+  references supplied by a secret provider or environment configuration
 - HPC scheduler-specific implementation
 - changing typed semantic catalog predicates
 - changing OpenMC scientific model or MR definitions
 
-## 13. Recommendation
+## 14. Recommendation
 
 Implement the async layer as a small, additive System MT job subsystem. Polling should be the only v1 status mechanism because it is deterministic, easy to test, and works for local process, Docker, remote server, and HPC queue backends. Hook/webhook support should remain a later optimization, and even then hooks should only trigger an immediate status refresh; the durable job store and fetched artifacts must remain the source of truth.
