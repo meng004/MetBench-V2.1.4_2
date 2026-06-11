@@ -1,6 +1,6 @@
 # WPF MVVM Convergence Plan（2026-06-06）
 
-> **状态：PR-1/PR-2/PR-3 依赖移除已合并（#333 `eb62fc0`），PR-3 source-guard 已补；PR-4 云端代码迁移完成 + 7 条 source-guard 全绿，WPF build 验证待 VM。**
+> **状态：Controlled —— 4 PR 全部完成 + 8 条 source-guard 全绿 + VM 运行时证据齐 + chain-end holistic review done。** PR-1/PR-2/PR-3 依赖移除（#333 `eb62fc0`）+ PR-3 source-guard（#346）+ PR-4 代码迁移（#348 `2977af6`）+ VM 运行时验证证据（#350 `580e718`）均已入 main；R2 chain-end review 见 [`docs/superpowers/specs/2026-06-11-wpf-mvvm-convergence-chain-post-merge-review.md`](../specs/2026-06-11-wpf-mvvm-convergence-chain-post-merge-review.md)（3 findings：F3 转为第 8 条 guard `No_Model_calls_OnPropertyChanged_manually`，F1/F2 dispositioned）。最终态：仅 `CommunityToolkit.Mvvm` + `Microsoft.Xaml.Behaviors.Wpf`。
 > 从成熟度评估的"5 套 MVVM 框架并存"派生的独立 follow-up（**不在**成熟度修复计划主干内）。
 > 主体目标：让 WPF 实际只用 1 套 MVVM 机制（CommunityToolkit.Mvvm），把死引用、幽灵 weave、legacy XAML action 路径逐步收敛。
 > **REQUIRED SUB-SKILL**：superpowers:executing-plans，逐 PR TDD-first，cloud/VM 分工严格。

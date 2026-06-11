@@ -13,11 +13,16 @@ namespace MetBench_SystemMT.Tests.SystemMT.Architecture;
 /// compile the WPF project, so this fact-scans <c>MetBench_Client</c> sources directly
 /// to fail loud if any of the three removed mechanisms returns.</para>
 ///
-/// <para>Scope covers the full PR-1/PR-2/PR-3/PR-4 guard set (7 assertions). PR-4
+/// <para>Scope covers the full PR-1/PR-2/PR-3/PR-4 guard set (8 assertions). PR-4
 /// (migrate the last hand-written <c>OnPropertyChanged(</c> call sites to
 /// <c>[ObservableProperty]</c> / <c>[NotifyPropertyChangedFor]</c> / <c>SetProperty</c>)
-/// is now complete, so <c>No_ViewModel_calls_OnPropertyChanged_manually</c> pins the
-/// gain — only the CommunityToolkit generated/protected notification surface remains.</para>
+/// is now complete, so <c>No_ViewModel_calls_OnPropertyChanged_manually</c> plus its
+/// <c>Models/</c> companion <c>No_Model_calls_OnPropertyChanged_manually</c> pin the
+/// gain — only the CommunityToolkit generated/protected notification surface remains.
+/// The <c>Models/</c> companion closes the chain-end-review gap (the PR-4 migration also
+/// touched <c>ApplicationEx.IsChecked</c> / <c>DomainEx.IsChecked</c> under <c>Models/</c>,
+/// which the ViewModel-scoped guard never inspected) — see
+/// <c>docs/superpowers/specs/2026-06-11-wpf-mvvm-convergence-chain-post-merge-review.md</c>.</para>
 /// </summary>
 public sealed class WpfMvvmConvergenceGuardTests
 {
@@ -150,6 +155,34 @@ public sealed class WpfMvvmConvergenceGuardTests
             + string.Join("\n  - ", violations));
     }
 
+    [Fact]
+    public void No_Model_calls_OnPropertyChanged_manually()
+    {
+        // Chain-end-review companion to the ViewModel guard: the PR-4 migration also
+        // converted ApplicationEx.IsChecked / DomainEx.IsChecked under Models/ to
+        // [ObservableProperty]. The ViewModel-scoped guard never inspected Models/, so a
+        // re-introduced manual raise there would pass silently. This pins that surface too.
+        var violations = new List<string>();
+        foreach (var file in ClientModelFiles())
+        {
+            var lineIndex = 0;
+            foreach (var line in File.ReadAllLines(file))
+            {
+                lineIndex++;
+                if (IsCommentLine(line)) continue;
+                if (line.Contains("OnPropertyChanged(", StringComparison.Ordinal))
+                    violations.Add($"{RelativeToClient(file)}:{lineIndex}: {line.Trim()}");
+            }
+        }
+
+        Assert.True(
+            violations.Count == 0,
+            "Hand-written 'OnPropertyChanged(' re-introduced in WPF Models (PR-4 regression). "
+            + "Use [ObservableProperty] (with [NotifyPropertyChangedFor] for derived props) or "
+            + "SetProperty(ref field, value) instead. Offenders:\n  - "
+            + string.Join("\n  - ", violations));
+    }
+
     // ---- locators (walk up to the repo's MetBench_Client tree, mirroring
     //      WpfAsyncCorrectnessGuardTests) ----
 
@@ -192,6 +225,14 @@ public sealed class WpfMvvmConvergenceGuardTests
         var dir = Path.Combine(ClientRoot(), "ViewModels");
         if (!Directory.Exists(dir))
             throw new DirectoryNotFoundException($"MetBench_Client/ViewModels not found at {dir}.");
+        return Directory.GetFiles(dir, "*.cs", SearchOption.AllDirectories);
+    }
+
+    private static IEnumerable<string> ClientModelFiles()
+    {
+        var dir = Path.Combine(ClientRoot(), "Models");
+        if (!Directory.Exists(dir))
+            throw new DirectoryNotFoundException($"MetBench_Client/Models not found at {dir}.");
         return Directory.GetFiles(dir, "*.cs", SearchOption.AllDirectories);
     }
 
