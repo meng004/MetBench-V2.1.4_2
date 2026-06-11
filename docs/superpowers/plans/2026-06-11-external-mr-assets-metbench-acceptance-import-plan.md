@@ -2,6 +2,10 @@
 
 > **Status:** Batch A/D cloud acceptance path implemented; Windows/WPF UI
 > acceptance evidence still requires the VM prompt registered in this plan.
+> Cloud evidence:
+> `docs/superpowers/specs/2026-06-11-external-mr-assets-batch-a-d-cloud-evidence.md`.
+> VM evidence template:
+> `docs/superpowers/specs/2026-06-11-external-mr-assets-batch-a-d-vm-evidence-template.md`.
 > **Scope:** Classify and batch-import experiment assets from
 > `meng004/Minimum-MR-SubSet` and
 > `meng004/Domain-Validity-Gated-MR-for-SciML` into MetBench acceptance testing
@@ -106,6 +110,10 @@ Cloud verification:
 Windows/WPF UI acceptance remains separate evidence, not cloud evidence. The
 VM task prompt is registered at
 `docs/superpowers/vm-prompts/2026-06-11-batch-a-d-external-mr-assets-ui-acceptance-vm-prompt.md`.
+The cloud evidence report is registered at
+`docs/superpowers/specs/2026-06-11-external-mr-assets-batch-a-d-cloud-evidence.md`.
+The expected VM回执 file shape is registered at
+`docs/superpowers/specs/2026-06-11-external-mr-assets-batch-a-d-vm-evidence-template.md`.
 
 ## 2. Source Repositories
 
@@ -407,6 +415,11 @@ Forbidden conclusion examples:
 
 ## 8. Implementation Steps
 
+Batch A/D cloud status: steps 1-6, 8, and the cloud-report part of step 9 are
+complete. Windows/WPF visual confirmation for step 9 still requires the VM
+prompt回执. Step 10 is a future Batch E prerequisite and is not required for
+Batch A/D completion.
+
 1. Add package builders for Batch A using `SutImportUnit` and
    `SutImportPackageExporter`.
 2. Add focused tests for Batch A import/export round-trip and validator failures.
@@ -458,3 +471,7 @@ Collect UIA or screenshot evidence for:
 - Acceptance test cases and fixtures in `MetBench_SystemMT.Tests`.
 - Test data manifests with provenance and commit IDs.
 - Batch-level test conclusion reports.
+- Cloud evidence report:
+  `docs/superpowers/specs/2026-06-11-external-mr-assets-batch-a-d-cloud-evidence.md`.
+- Windows/WPF VM回执 target:
+  `docs/superpowers/specs/2026-06-11-external-mr-assets-batch-a-d-vm-evidence-template.md`.
