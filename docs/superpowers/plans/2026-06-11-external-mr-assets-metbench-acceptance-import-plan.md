@@ -1,6 +1,6 @@
 # External MR Assets MetBench Acceptance Import Plan (2026-06-11)
 
-> **Status:** Proposed
+> **Status:** Batch A/D cloud import fixtures implemented; VM UI acceptance still pending.
 > **Scope:** Classify and batch-import experiment assets from
 > `meng004/Minimum-MR-SubSet` and
 > `meng004/Domain-Validity-Gated-MR-for-SciML` into MetBench acceptance testing
@@ -28,6 +28,37 @@ repositories. The final deliverables are:
 The acceptance focus is MetBench as a platform, not broad scientific claims
 about the imported programs. Claims about imported research results must retain
 their original scope limits.
+
+## 0. Batch A/D Execution Status (2026-06-11)
+
+Cloud-side Batch A and D import-package fixtures are implemented in
+`MetBench_BLL.Core/SystemMT/ImportExport/Put/ExternalMrAcceptancePutFixtures.cs`
+with focused TDD coverage in
+`MetBench_SystemMT.Tests/SystemMT/ImportExport/ExternalMrAcceptanceBatchImportTests.cs`.
+
+Implemented packages:
+
+- `metbench-import-minmr-toy-classic-v1`: 7 classic toy MRs over sorting,
+  matrix multiplication, and quadratic roots. Runtime status remains
+  imported-only until toy adapters and typed predicates are bound.
+- `metbench-import-minmr-p1-heat-v1`: 10 P1 heat MRs, 5 mutation operator
+  classes, and the full 50-row detection matrix. The fixture stays imported-only
+  because Batch A has not yet bound the external P1 solver through the MetBench
+  launcher/runtime adapter path.
+- `metbench-import-sciml-domain-validity-fixture-v1`: 3 SciML domain-validity
+  MR cards, 10 seeded-fault mutants, and a 30-row seeded-fault evidence matrix.
+  Discrete divergence stays imported-only/deferred and may only appear as
+  diagnostic evidence until an upstream calibrated threshold exists.
+
+Evidence collected:
+
+- Red phase: `dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj
+  --no-restore --filter FullyQualifiedName~ExternalMrAcceptanceBatchImportTests`
+  failed with `CS0103` because `ExternalMrAcceptancePutFixtures` did not exist.
+- Green phase: same command passed `7/7`.
+- Regression: `dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj
+  --no-restore --filter FullyQualifiedName~SystemMT.ImportExport` passed
+  `52/52`, skipped `3` external-source prerequisite-gated tests.
 
 ## 2. Source Repositories
 
@@ -370,4 +401,3 @@ Collect UIA or screenshot evidence for:
 - Acceptance test cases and fixtures in `MetBench_SystemMT.Tests`.
 - Test data manifests with provenance and commit IDs.
 - Batch-level test conclusion reports.
-
