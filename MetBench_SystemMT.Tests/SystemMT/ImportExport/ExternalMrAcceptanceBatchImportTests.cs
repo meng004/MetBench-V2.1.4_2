@@ -1,4 +1,6 @@
 using MetBench_BLL.Core.SystemMT.ImportExport.Put;
+using MetBench_SystemMT.Tests.SystemMT;
+using System.Text.Json;
 using Xunit;
 
 namespace MetBench_SystemMT.Tests.SystemMT.ImportExport;
@@ -104,6 +106,38 @@ public sealed class ExternalMrAcceptanceBatchImportTests
             && m.Metadata["compatibility_risk"].Contains("np.trapz", StringComparison.Ordinal));
         Assert.Equal(RuntimeReadiness.RuntimeCandidate, profile.OverallReadiness);
         Assert.All(unit.Detections, d => Assert.Equal(EvidenceKind.ImportedResearchEvidence, d.EvidenceKind));
+    }
+
+    [Fact]
+    public void Batch_B_existing_runtime_reconcile_bindings_match_existing_catalog_assets()
+    {
+        var unit = ExternalMrAcceptancePutFixtures.CreateBatchBExistingRuntimeReconcile();
+
+        foreach (var mr in unit.Mrs)
+        {
+            var io = Assert.Single(unit.IoGroups, g => g.Metadata["existing_sut_id"] == mr.Metadata["existing_sut_id"]);
+            var sutDir = io.Metadata["existing_sut_directory"];
+            var catalogPath = Path.Combine(TestAssetPaths.AssetRoot(), sutDir, "catalog.json");
+            var sourcePath = Assert.Single(io.InputRefs);
+            var sourceUnderAssets = sourcePath.StartsWith("SUT/", StringComparison.Ordinal)
+                ? sourcePath["SUT/".Length..]
+                : sourcePath;
+
+            Assert.True(File.Exists(catalogPath), $"Missing existing catalog for {mr.MrId}: {catalogPath}");
+            Assert.True(
+                File.Exists(Path.Combine(TestAssetPaths.AssetRoot(), sourceUnderAssets.Replace('/', Path.DirectorySeparatorChar))),
+                $"Missing existing sample for {mr.MrId}: {sourcePath}");
+
+            using var doc = JsonDocument.Parse(File.ReadAllText(catalogPath));
+            var existingMr = doc.RootElement
+                .GetProperty("mrs")
+                .EnumerateArray()
+                .Single(e => e.GetProperty("mr_id").GetString() == mr.MrId);
+
+            Assert.Equal(existingMr.GetProperty("value_name").GetString(), mr.AssertionBinding.Metric);
+            Assert.Equal(existingMr.GetProperty("assertion_type_code").GetString(), mr.AssertionBinding.PredicateKind);
+            Assert.Equal(existingMr.GetProperty("transformation_name").GetString(), mr.TransformBinding.TransformKind);
+        }
     }
 
     [Fact]

@@ -24,9 +24,14 @@ public sealed class ManifestMrCatalogProviderTests : System.IDisposable
 
     private string WriteManifest(string sutDir, string json)
     {
+        return WriteManifest(sutDir, "catalog.json", json);
+    }
+
+    private string WriteManifest(string sutDir, string fileName, string json)
+    {
         var dir = Path.Combine(_tmpRoot, sutDir);
         Directory.CreateDirectory(dir);
-        var path = Path.Combine(dir, "catalog.json");
+        var path = Path.Combine(dir, fileName);
         File.WriteAllText(path, json);
         return path;
     }

@@ -156,31 +156,32 @@ public static class ExternalMrAcceptancePutFixtures
                 new[] { "p3_lorenz", "p4_pendulum", "p5_pke", "p8_schrodinger", "p9_openmc_surrogate" }),
             new[]
             {
-                new ObservableSpec("trajectory_separation", ObservableKind.Scalar, "state", "P3 Lorenz trajectory separation"),
+                new ObservableSpec("separation", ObservableKind.Scalar, "state", "P3 Lorenz trajectory separation"),
                 new ObservableSpec("energy_drift", ObservableKind.Scalar, "energy", "P4 pendulum energy drift"),
                 new ObservableSpec("max_power", ObservableKind.Scalar, "power", "P5 point kinetics power response"),
                 new ObservableSpec("norm_drift", ObservableKind.Scalar, "probability", "P8 Schrodinger norm drift"),
-                new ObservableSpec("k_eff", ObservableKind.Scalar, "criticality", "P9 OpenMC surrogate k-effective")
+                new ObservableSpec("sigma_k", ObservableKind.Scalar, "uncertainty", "P9 OpenMC surrogate k-effective standard error")
             },
             Metadata("batch", "B", "package_id", "metbench-import-minmr-existing-runtime-reconcile-v1", "mode", "reconcile-existing-runtime-suts"));
 
         var mrs = new[]
         {
-            ReconcileMr("p3-trajectory-sensitivity", "minimum-mr-subset-p3", "P3", "Lorenz trajectory sensitivity", "trajectory_separation", "ScaleField", "GreaterThan", "greater", "pure-stdlib runtime; dependency gate remains explicit in existing catalog"),
+            ReconcileMr("p3-trajectory-sensitivity", "minimum-mr-subset-p3", "P3", "Lorenz trajectory sensitivity", "separation", "ScaleField", "GreaterThan", "greater", "pure-stdlib runtime; dependency gate remains explicit in existing catalog"),
             ReconcileMr("p4-energy-invariant", "minimum-mr-subset-p4", "P4", "Pendulum energy invariant", "energy_drift", "ScaleField", "LessThan", "less", "pure-stdlib runtime"),
             ReconcileMr("p5-power-response", "minimum-mr-subset-p5", "P5", "Point kinetics power response", "max_power", "ScaleField", "GreaterThan", "greater", "pure-stdlib runtime"),
             ReconcileMr("p8-norm-conservation", "minimum-mr-subset-p8", "P8", "Schrodinger norm conservation", "norm_drift", "ScaleField", "LessThan", "less", "dependency gate explicit; external np.trapz compatibility risk is recorded"),
-            ReconcileMr("p9-k-eff-noise-aware", "minimum-mr-subset-p9-surrogate", "P9", "OpenMC surrogate k-effective noise-aware relation", "k_eff", "ScaleField", "ApproxEqual", "approx", "deterministic OpenMC surrogate; not a real OpenMC execution")
+            ReconcileMr("p9-k-eff-noise-aware", "minimum-mr-subset-p9-surrogate", "P9", "OpenMC surrogate k-effective noise-aware relation", "sigma_k", "ScaleField", "VarianceRatio", "variance-ratio", "deterministic OpenMC surrogate; not a real OpenMC execution")
         };
         var ioGroups = mrs.Select(m => new IoGroup(
             $"{m.Metadata["external_family"].ToLowerInvariant()}-existing-runtime-sample",
             sut.SutId,
             $"{m.Metadata["external_family"]} existing runtime sample",
-            new[] { $"SUT/{m.Metadata["existing_sut_id"]}/sample/standard.json" },
-            new[] { $"SUT/{m.Metadata["existing_sut_id"]}/runtime-output" },
+            new[] { $"SUT/{ExistingSutDirectory(m.Metadata["existing_sut_id"])}/sample/standard.json" },
+            new[] { $"SUT/{ExistingSutDirectory(m.Metadata["existing_sut_id"])}/runtime-output" },
             Metadata(
                 "existing_sut_id", m.Metadata["existing_sut_id"],
-                "sample_case_relative_path", $"SUT/{m.Metadata["existing_sut_id"]}/sample/standard.json")))
+                "existing_sut_directory", ExistingSutDirectory(m.Metadata["existing_sut_id"]),
+                "sample_case_relative_path", $"SUT/{ExistingSutDirectory(m.Metadata["existing_sut_id"])}/sample/standard.json")))
             .ToArray();
         var mutations = mrs.Select(m => new MutationAsset(
             $"{m.Metadata["external_family"].ToLowerInvariant()}-operator-class",
@@ -419,6 +420,8 @@ public static class ExternalMrAcceptancePutFixtures
                 "source", $"experiments/puts/{externalFamily.ToLowerInvariant()}_*",
                 "compatibility_risk", compatibilityRisk));
     }
+
+    private static string ExistingSutDirectory(string existingSutId) => existingSutId.Replace('-', '_');
 
     private static MrAsset LocalRemainingMr(
         string mrId,

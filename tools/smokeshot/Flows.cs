@@ -14,15 +14,202 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Automation;
+using MetBench_BLL.Core.SystemMT.ImportExport.Put;
 using MetBench_UI.Localization;
 
 namespace Smokeshot;
 
 public static class Flows
 {
+    public static int ExternalMrBatchAD(IntPtr hwnd, AutomationElement app, string outDir)
+    {
+        Console.WriteLine("External MR Batch A-D WPF flow: ImportAssets + RunBatch + ExportAssets.");
+        var workRoot = Path.Combine(Path.GetTempPath(), "MetBenchExternalMrBatchAD", DateTime.UtcNow.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture));
+        var packageRoot = Path.Combine(workRoot, "packages");
+        var stagingRoot = Path.Combine(workRoot, "staging");
+        var exportRoot = Path.Combine(workRoot, "exports");
+        Directory.CreateDirectory(packageRoot);
+        Directory.CreateDirectory(stagingRoot);
+        Directory.CreateDirectory(exportRoot);
+        Directory.CreateDirectory(outDir);
+
+        var packages = new[]
+        {
+            ("batch-a-toy", ExternalMrAcceptancePutFixtures.CreateBatchAToyClassic(), "01-import-assets-batch-a-toy-succeeded.png"),
+            ("batch-a-p1", ExternalMrAcceptancePutFixtures.CreateBatchAP1Heat(), "02-import-assets-batch-a-p1-succeeded.png"),
+            ("batch-b-existing-runtime", ExternalMrAcceptancePutFixtures.CreateBatchBExistingRuntimeReconcile(), "03-import-assets-batch-b-succeeded.png"),
+            ("batch-c-local-remaining", ExternalMrAcceptancePutFixtures.CreateBatchCLocalRemaining(), "04-import-assets-batch-c-succeeded.png"),
+            ("batch-d-sciml", ExternalMrAcceptancePutFixtures.CreateBatchDScimlDomainValidity(), "05-import-assets-batch-d-sciml-succeeded.png"),
+        };
+
+        var transcript = Path.Combine(outDir, "batch-a-d-vm-transcript.txt");
+        File.WriteAllText(transcript, $"workRoot={workRoot}{Environment.NewLine}");
+
+        try
+        {
+            UiaHelpers.FocusAndAttach(hwnd);
+            UiaHelpers.MaximizeWindow(hwnd);
+            UiaHelpers.NavigateTo(app, "System MT Async Execution", settleMs: 2500);
+            UiaHelpers.SaveScreenshot(hwnd, Path.Combine(outDir, "00-system-mt-async-page.png"));
+
+            foreach (var (name, unit, screenshot) in packages)
+            {
+                var currentPackageRoot = Path.Combine(packageRoot, name);
+                var currentStagingRoot = Path.Combine(stagingRoot, name);
+                SutImportPackageExporter.Export(unit, currentPackageRoot);
+                AppendLine(transcript, $"package {name}: {currentPackageRoot}");
+
+                SubmitAsyncOperation(
+                    hwnd,
+                    app,
+                    "ImportAssets",
+                    package: currentPackageRoot,
+                    staging: currentStagingRoot,
+                    export: null,
+                    batchMrs: null,
+                    screenshot: Path.Combine(outDir, screenshot),
+                    transcript: transcript);
+
+                var manifest = Directory.GetFiles(currentStagingRoot, "staging-manifest.json", SearchOption.AllDirectories).FirstOrDefault();
+                var stagedUnit = Directory.GetFiles(currentStagingRoot, "sut-import-unit.json", SearchOption.AllDirectories).FirstOrDefault();
+                if (manifest is null || stagedUnit is null)
+                    throw new InvalidOperationException($"ImportAssets for {name} did not write staging-manifest.json and sut-import-unit.json under {currentStagingRoot}.");
+                AppendLine(transcript, $"import {name}: manifest={manifest}; unit={stagedUnit}");
+            }
+
+            SubmitAsyncOperation(
+                hwnd,
+                app,
+                "RunBatch",
+                package: null,
+                staging: null,
+                export: null,
+                batchMrs: "minmr-toy-sort-permutation, minmr-p1-heat-alpha-monotonic, minmr-p1-heat-timestep-convergence, minmr-p1-heat-mesh-convergence",
+                screenshot: Path.Combine(outDir, "06-runbatch-batch-a-four-mrs-succeeded.png"),
+                transcript: transcript);
+
+            SubmitAsyncOperation(
+                hwnd,
+                app,
+                "RunBatch",
+                package: null,
+                staging: null,
+                export: null,
+                batchMrs: "minmr-p2-wave-amplitude-linearity, minmr-p6-poisson-source-linearity, minmr-p7-burgers-viscosity-damping, minmr-p10-pinn-hnn-loss-smoke",
+                screenshot: Path.Combine(outDir, "07-runbatch-batch-c-four-mrs-succeeded.png"),
+                transcript: transcript);
+
+            foreach (var (name, _, _) in packages)
+            {
+                var stagedUnit = Directory.GetFiles(Path.Combine(stagingRoot, name), "sut-import-unit.json", SearchOption.AllDirectories).Single();
+                var stagingUnitDir = Path.GetDirectoryName(stagedUnit)!;
+                var currentExportRoot = Path.Combine(exportRoot, name);
+                SubmitAsyncOperation(
+                    hwnd,
+                    app,
+                    "ExportAssets",
+                    package: stagingUnitDir,
+                    staging: null,
+                    export: currentExportRoot,
+                    batchMrs: null,
+                    screenshot: Path.Combine(outDir, $"08-export-assets-{name}-succeeded.png"),
+                    transcript: transcript);
+
+                var exportedUnit = Path.Combine(currentExportRoot, "sut-import-unit.json");
+                if (!File.Exists(exportedUnit))
+                    throw new InvalidOperationException($"ExportAssets for {name} did not write {exportedUnit}.");
+                AppendLine(transcript, $"export {name}: {exportedUnit}");
+            }
+
+            TryEvidencePages(hwnd, app, outDir, transcript);
+            AppendLine(transcript, "External MR Batch A-D WPF flow PASS.");
+            Console.WriteLine($"Transcript: {transcript}");
+            return 0;
+        }
+        catch (Exception ex)
+        {
+            AppendLine(transcript, $"FAIL: {ex.GetType().Name}: {ex.Message}");
+            Console.WriteLine($"  FAIL: {ex}");
+            try { UiaHelpers.SaveScreenshot(hwnd, Path.Combine(outDir, "99-failure.png")); } catch { }
+            return 1;
+        }
+    }
+
+    private static void SubmitAsyncOperation(
+        IntPtr hwnd,
+        AutomationElement app,
+        string operation,
+        string? package,
+        string? staging,
+        string? export,
+        string? batchMrs,
+        string screenshot,
+        string transcript)
+    {
+        Console.WriteLine($"Submitting {operation}...");
+        if (!UiaHelpers.SelectComboBoxItemByAutomationId(app, "AsyncOperationCombo", operation, settleMs: 1000))
+            throw new InvalidOperationException($"Could not select async operation '{operation}'.");
+
+        if (package is not null)
+            UiaHelpers.SetValueByAutomationId(app, "AsyncPackageRootBox", package);
+        if (staging is not null)
+            UiaHelpers.SetValueByAutomationId(app, "AsyncStagingRootBox", staging);
+        if (export is not null)
+            UiaHelpers.SetValueByAutomationId(app, "AsyncExportRootBox", export);
+        if (batchMrs is not null)
+            UiaHelpers.SetValueByAutomationId(app, "AsyncBatchMrIdsBox", batchMrs);
+
+        UiaHelpers.ClickByAutomationId(app, "AsyncSubmitButton", settleMs: 1200);
+        var terminal = UiaHelpers.WaitFor(
+            () =>
+            {
+                var state = UiaHelpers.TextByAutomationId(app, "AsyncState");
+                return state is "Succeeded" or "Failed" or "Cancelled";
+            },
+            TimeSpan.FromSeconds(operation == "RunBatch" ? 90 : 45),
+            TimeSpan.FromMilliseconds(500));
+
+        UiaHelpers.ClickByAutomationId(app, "AsyncRefreshButton", settleMs: 600);
+        var finalState = UiaHelpers.TextByAutomationId(app, "AsyncState");
+        var artifact = UiaHelpers.TextByAutomationId(app, "AsyncArtifactPath");
+        var summary = UiaHelpers.TextByAutomationId(app, "AsyncResultSummary");
+        AppendLine(transcript, $"{operation}: terminal={terminal}; state={finalState}; artifact={artifact}");
+        AppendLine(transcript, $"{operation} summary: {summary.Replace(Environment.NewLine, " | ")}");
+
+        UiaHelpers.SaveScreenshot(hwnd, screenshot);
+        if (!terminal || finalState != "Succeeded")
+            throw new InvalidOperationException($"{operation} ended as '{finalState}'.");
+    }
+
+    private static void TryEvidencePages(IntPtr hwnd, AutomationElement app, string outDir, string transcript)
+    {
+        foreach (var (page, shot) in new[]
+        {
+            ("MR ReportGenerator", "09-report-batch-a-d-evidence.png"),
+            ("Coverage", "10-dashboard-batch-a-d-counts.png"),
+            ("Anomalies", "11-anomaly-imported-evidence-limitations.png"),
+        })
+        {
+            try
+            {
+                UiaHelpers.NavigateTo(app, page, settleMs: 2000);
+                UiaHelpers.SaveScreenshot(hwnd, Path.Combine(outDir, shot));
+                AppendLine(transcript, $"page {page}: screenshot={shot}");
+            }
+            catch (Exception ex)
+            {
+                AppendLine(transcript, $"page {page}: screenshot skipped: {ex.Message}");
+            }
+        }
+    }
+
+    private static void AppendLine(string path, string line)
+        => File.AppendAllText(path, line + Environment.NewLine);
+
     // =====================================================================
     // Original behavior preserved — 5-nav screenshot loop. PR #29 used this.
     // =====================================================================

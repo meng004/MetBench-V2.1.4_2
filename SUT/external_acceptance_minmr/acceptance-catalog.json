@@ -14,9 +14,9 @@
   },
   "profile": {
     "program_type": "Num",
-    "solver_method": "Pure-stdlib acceptance fixtures for Minimum-MR-SubSet toy and P1 heat slices",
+    "solver_method": "Pure-stdlib acceptance fixtures for Minimum-MR-SubSet toy, P1 heat, P2 wave, P6 Poisson, P7 Burgers, and P10 PINN/HNN smoke slices",
     "runtime_key": "system",
-    "input_contract": "JSON cases with kind=toy_sort or kind=p1_heat.",
+    "input_contract": "JSON cases with kind=toy_sort, p1_heat, p2_wave, p6_poisson, p7_burgers, or p10_pinn_hnn.",
     "output_contract": "JSON scalar metrics used by imported acceptance MRs.",
     "adapter": "Pure-stdlib Python runner and JSON parser under SUT/external_acceptance_minmr/.",
     "dependency_risk": "pure-stdlib"
