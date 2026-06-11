@@ -62,5 +62,5 @@
 
 - `CLAUDE.md §12.4` — Third-Layer Discipline (cross-PR consistency rules)
 - `CLAUDE.md §12.5` — Fourth-Layer Discipline (guard-test compilation)
-- `docs/superpowers/specs/2026-05-26-pr-soft-review-via-claude-code-action.md` — what AI review at PR-time can / cannot catch
+- `docs/superpowers/specs/2026-05-26-pr-soft-review-via-claude-code-action.md` — what AI review at PR-time can / cannot catch (**spec retired ~2026-05-27, dual AI review removed per CLAUDE.md §12; historical context only**)
 - Example chain-end review session: [PR #195](https://github.com/meng004/MetBench-V2.1.4_2/pull/195) + [PR #199](https://github.com/meng004/MetBench-V2.1.4_2/pull/199) — the cleanup PRs that closed the T2/T3 6-phase chain's 11-finding post-merge review
