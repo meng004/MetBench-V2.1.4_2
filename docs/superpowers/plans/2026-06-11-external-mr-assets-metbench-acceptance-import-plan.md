@@ -193,6 +193,12 @@ Execution boundary:
   path traversal guards, sanitized diagnostic projection, pre-queue backend-key
   resolution, and async fail-closed behavior when a configured backend key is
   submitted without a production executor.
+- A dependency-light Docker acceptance sample now exists as
+  `docker-acceptance-python-stdlib` (`python:3.12-slim`) and is pinned by
+  `DockerAcceptanceSampleTests`. It validates configuration, queue record,
+  secret redaction, and the current `MiddlewareUnavailable` fail-closed boundary.
+  Evidence is recorded in
+  `docs/superpowers/specs/2026-06-12-docker-acceptance-sample-vm-evidence.md`.
 - Real Docker/SSH SUT execution remains blocked, not failed, until MetBench has
   production executors, operator configuration binding, protected secret
   resolution, artifact staging, artifact retrieval, and result collection
@@ -436,7 +442,7 @@ Acceptance:
 | AT-09 | Visualization | Open dashboard after Batch A runs | Pass/fail/anomaly counts and MR coverage are visible |
 | AT-10 | Runtime | Run local preflight for Batch A | Required Python dependencies pass; missing dependency fails closed |
 | AT-11 | Evidence | Import SciML seeded-fault ledger | 10 mutants and 5/10 union detections are displayed with limitations |
-| AT-12 | Docker | Validate Docker runtime contract for Batch E | Contract imports and projects to a non-executable placeholder; real execution is blocked until Docker executor exists |
+| AT-12 | Docker | Validate Docker runtime contract and stdlib acceptance sample for Batch E | Contract imports and projects to a non-executable placeholder; `docker-acceptance-python-stdlib` validates typed config, queue record, secret redaction, and fail-closed execution boundary; real execution is blocked until Docker executor exists and Docker CLI is available |
 | AT-13 | SSH | Validate SSH runtime contract for Batch E | Contract imports and projects to a non-executable placeholder; real execution is blocked until SSH executor exists |
 
 ## 6. Test Data Inventory
