@@ -84,6 +84,39 @@ public sealed class ExternalMrAcceptanceBatchImportTests
     }
 
     [Fact]
+    public void Batch_E_sciml_mgn_runtime_package_is_imported_only_until_docker_or_ssh_executor_exists()
+    {
+        var unit = ExternalMrAcceptancePutFixtures.CreateBatchEScimlMgnRuntime();
+
+        var validation = SutImportValidator.Validate(unit);
+        var profile = CompatibilityProfileBuilder.Build(unit);
+
+        Assert.True(validation.IsValid, string.Join(Environment.NewLine, validation.Errors));
+        Assert.Equal("sciml-mgn-runtime", unit.Sut.SutId);
+        Assert.Equal("metbench-import-sciml-mgn-runtime-v1", unit.Sut.Metadata["package_id"]);
+        Assert.Equal(RuntimeReadiness.ImportedOnly, profile.OverallReadiness);
+        Assert.Contains(unit.Compatibility.Findings, f => f.Contains("Docker", StringComparison.Ordinal));
+        Assert.Contains(unit.Compatibility.Findings, f => f.Contains("SSH", StringComparison.Ordinal));
+        Assert.All(unit.Mrs, mr => Assert.Equal(CompatibilityStatus.ImportedOnly, mr.TransformBinding.Status));
+        Assert.All(unit.Mrs, mr => Assert.Equal(CompatibilityStatus.ImportedOnly, mr.AssertionBinding.Status));
+    }
+
+    [Fact]
+    public void Batch_E_sciml_mgn_runtime_package_preserves_real_sut_artifact_boundaries()
+    {
+        var unit = ExternalMrAcceptancePutFixtures.CreateBatchEScimlMgnRuntime();
+
+        Assert.Contains(unit.Provenance.SourcePaths, p => p.Contains("real-sut-node-permutation-pilot", StringComparison.Ordinal));
+        Assert.Contains(unit.Provenance.SourcePaths, p => p.Contains("mirror-y", StringComparison.Ordinal));
+        Assert.Contains(unit.Provenance.SourcePaths, p => p.Contains("conservation-diagnostic", StringComparison.Ordinal));
+        Assert.Contains(unit.Provenance.SourcePaths, p => p.Contains("seeded-fault-detection", StringComparison.Ordinal));
+        Assert.Contains(unit.IoGroups, g => g.InputRefs.Any(r => r.Contains("checkpoint", StringComparison.OrdinalIgnoreCase)));
+        Assert.Contains(unit.IoGroups, g => g.InputRefs.Any(r => r.Contains("dataset", StringComparison.OrdinalIgnoreCase)));
+        Assert.Contains("docker", unit.Sut.Metadata["runtime_backends"], StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("ssh", unit.Sut.Metadata["runtime_backends"], StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void Batch_B_existing_runtime_reconcile_package_preserves_stable_runtime_sut_ids()
     {
         var unit = ExternalMrAcceptancePutFixtures.CreateBatchBExistingRuntimeReconcile();
@@ -164,6 +197,7 @@ public sealed class ExternalMrAcceptanceBatchImportTests
     [InlineData("sciml")]
     [InlineData("batch-b")]
     [InlineData("batch-c")]
+    [InlineData("batch-e")]
     public void Batch_external_acceptance_packages_export_and_import_without_losing_evidence(string package)
     {
         var unit = package switch
@@ -173,6 +207,7 @@ public sealed class ExternalMrAcceptanceBatchImportTests
             "sciml" => ExternalMrAcceptancePutFixtures.CreateBatchDScimlDomainValidity(),
             "batch-b" => ExternalMrAcceptancePutFixtures.CreateBatchBExistingRuntimeReconcile(),
             "batch-c" => ExternalMrAcceptancePutFixtures.CreateBatchCLocalRemaining(),
+            "batch-e" => ExternalMrAcceptancePutFixtures.CreateBatchEScimlMgnRuntime(),
             _ => throw new ArgumentOutOfRangeException(nameof(package), package, null)
         };
         var root = Path.Combine(Path.GetTempPath(), "MetBenchExternalMrBatchRoundTrip", Guid.NewGuid().ToString("N"));

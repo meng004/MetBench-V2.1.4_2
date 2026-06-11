@@ -1,3 +1,5 @@
+using MetBench_BLL.SystemMT.Runtime;
+
 namespace MetBench_BLL.Core.SystemMT.ImportExport.Put;
 
 public static class ExternalMrAcceptancePutFixtures
@@ -396,6 +398,150 @@ public static class ExternalMrAcceptancePutFixtures
                 new[] { "Batch D preserves domain-validity evidence; graph/tensor adapters and calibrated divergence threshold are required before runtime promotion." }));
     }
 
+    public static SutImportUnit CreateBatchEScimlMgnRuntime()
+    {
+        var docker = RuntimeBackendContract.Docker(
+            "sciml-mgn-docker",
+            "metbench/sciml-mgn:cpu",
+            runtimeKey: "docker-sciml-mgn",
+            displayName: "SciML MGN Docker runtime",
+            resourceHints: new RuntimeResourceHints(CpuCores: 8, MemoryMegabytes: 32768));
+        var ssh = RuntimeBackendContract.SshRemote(
+            "sciml-mgn-ssh",
+            "configured-by-operator",
+            "/path/to/mgn/cylinder-flow",
+            runtimeKey: "ssh-sciml-mgn",
+            displayName: "SciML MGN SSH runtime",
+            resourceHints: new RuntimeResourceHints(CpuCores: 16, MemoryMegabytes: 65536, RequiresGpu: true));
+
+        var sut = new SutAsset(
+            "sciml-mgn-runtime",
+            "Domain-validity gated MGN SciML real-runtime package",
+            "mesh graph neural surrogate / cylinder-flow runtime pilots",
+            ProgramKind.Surrogate,
+            new AdapterSpec(
+                "domain-validity-mgn-runtime",
+                "Imported runtime extension descriptor for MGN real-SUT pilots. Docker/SSH execution is blocked until MetBench runtime executors are implemented.",
+                "research_assets/runs",
+                new[] { "docker-runtime-contract", "ssh-runtime-contract", "mgn_cylinder_flow_pilots" }),
+            new[]
+            {
+                new ObservableSpec("node_prediction", ObservableKind.Vector, "state", "Per-node predicted physical state"),
+                new ObservableSpec("mirror_y_prediction", ObservableKind.Vector, "state", "Mirrored-y prediction field"),
+                new ObservableSpec("discrete_divergence", ObservableKind.Scalar, "residual", "Discrete divergence diagnostic"),
+                new ObservableSpec("checkpoint_id", ObservableKind.Summary, "checkpoint", "MGN checkpoint identity"),
+                new ObservableSpec("seeded_fault_metric", ObservableKind.Summary, "rate", "Seeded-fault detection metric")
+            },
+            Metadata(
+                "batch", "E",
+                "package_id", "metbench-import-sciml-mgn-runtime-v1",
+                "runtime_backends", $"{docker.BackendKey};{ssh.BackendKey}",
+                "docker_image", docker.Settings["image"],
+                "ssh_host", ssh.Settings["host"],
+                "ssh_remote_root", ssh.Settings["remote_root"]));
+
+        var mrs = new[]
+        {
+            MgnRuntimeMr(
+                "mgn-runtime-node-permutation-real-pilot",
+                sut.SutId,
+                "MGN node permutation real-SUT pilot",
+                new[] { "node_prediction", "checkpoint_id", "seeded_fault_metric" },
+                "research_assets/runs/real-sut-node-permutation-pilot/manifest.yml"),
+            MgnRuntimeMr(
+                "mgn-runtime-mirror-y-rate-upgrade",
+                sut.SutId,
+                "MGN mirror-y rate-upgrade pilot",
+                new[] { "mirror_y_prediction", "checkpoint_id", "seeded_fault_metric" },
+                "research_assets/runs/mirror-y-rate-upgrade/manifest.yml"),
+            MgnRuntimeMr(
+                "mgn-runtime-mirror-y-symmetric-mesh",
+                sut.SutId,
+                "MGN mirror-y synthetic symmetric-mesh pilot",
+                new[] { "mirror_y_prediction", "checkpoint_id" },
+                "research_assets/runs/mirror-y-symmetric-mesh/manifest.yml"),
+            MgnRuntimeMr(
+                "mgn-runtime-conservation-diagnostic",
+                sut.SutId,
+                "MGN conservation diagnostic pilot",
+                new[] { "discrete_divergence", "checkpoint_id" },
+                "research_assets/runs/conservation-diagnostic-pilot/manifest.yml"),
+            MgnRuntimeMr(
+                "mgn-runtime-seeded-fault-detection",
+                sut.SutId,
+                "MGN seeded-fault multicheckpoint detection run",
+                new[] { "seeded_fault_metric", "checkpoint_id" },
+                "research_assets/runs/seeded-fault-detection/manifest.yml")
+        };
+        var ioGroups = new[]
+        {
+            new IoGroup(
+                "sciml-mgn-runtime-real-sut-artifacts",
+                sut.SutId,
+                "MGN real-SUT checkpoint and dataset artifacts",
+                new[] { "runtime/checkpoint/cylinder-flow.pt", "runtime/dataset/cylinder-flow" },
+                new[] { "runtime/outputs/node-permutation", "runtime/outputs/mirror-y", "runtime/outputs/conservation" },
+                Metadata(
+                    "docker_backend", docker.BackendKey,
+                    "ssh_backend", ssh.BackendKey,
+                    "runtime_status", "blocked-until-executor")),
+            new IoGroup(
+                "sciml-mgn-runtime-seeded-fault-ledger",
+                sut.SutId,
+                "MGN seeded-fault multicheckpoint ledger",
+                new[] { "research_assets/runs/seeded-fault-detection/raw/metric_ledger.json" },
+                new[] { "runtime/reports/seeded-fault-detection" },
+                Metadata("runtime_status", "imported-external-evidence"))
+        };
+        var mutations = new[]
+        {
+            ScimlMutation(sut.SutId, "runtime_BC_zero_inflow", "boundary_condition_fault"),
+            ScimlMutation(sut.SutId, "runtime_MA_drop_edges", "mesh_adjacency_fault"),
+            ScimlMutation(sut.SutId, "runtime_NS_skip_denorm", "normalization_scale_fault"),
+            ScimlMutation(sut.SutId, "runtime_TR_sign_flip", "time_reversal_fault"),
+            ScimlMutation(sut.SutId, "runtime_PC_swap_xy", "physical_channel_fault")
+        };
+        var detections = mrs.Select((mr, index) => new DetectionRecord(
+            $"batch-e-{mr.MrId}",
+            mr.MrId,
+            mutations[index % mutations.Length].MutationId,
+            ioGroups[index == mrs.Length - 1 ? 1 : 0].IoGroupId,
+            DetectionResult.Inconclusive,
+            EvidenceKind.ImportedResearchEvidence,
+            "Batch E preserves external real-runtime evidence boundaries; MetBench Docker/SSH execution is not claimed."))
+            .ToArray();
+
+        return new SutImportUnit(
+            SutImportUnit.CurrentSchemaVersion,
+            sut,
+            mrs,
+            ioGroups,
+            mutations,
+            detections,
+            new Provenance(
+                DomainValidityUrl,
+                DomainValidityCommit,
+                new[]
+                {
+                    "research_assets/runs/real-sut-node-permutation-pilot/manifest.yml",
+                    "research_assets/runs/mirror-y-rate-upgrade/manifest.yml",
+                    "research_assets/runs/mirror-y-symmetric-mesh/manifest.yml",
+                    "research_assets/runs/conservation-diagnostic-pilot/manifest.yml",
+                    "research_assets/runs/seeded-fault-detection/manifest.yml",
+                    "research_assets/runs/seeded-fault-detection/raw/metric_ledger.json"
+                },
+                "codex-batch-e-sciml-mgn-runtime",
+                new DateTimeOffset(2026, 6, 11, 0, 0, 0, TimeSpan.Zero)),
+            new CompatibilityProfile(
+                RuntimeReadiness.ImportedOnly,
+                new[]
+                {
+                    "Docker runtime contract is recorded, but MetBench has no production Docker executor for Batch E.",
+                    "SSH runtime contract is recorded, but MetBench has no production SSH executor for Batch E.",
+                    "Batch E remains imported-only with external evidence until a runtime executor records end-to-end MetBench execution."
+                }));
+    }
+
     private static MrAsset ReconcileMr(
         string mrId,
         string existingSutId,
@@ -498,6 +644,26 @@ public static class ExternalMrAcceptancePutFixtures
             operatorClass,
             MutationRepresentationKind.OperatorClassOnly,
             Metadata("source", "seeded_fault_metric_ledger", "representation", "seeded-fault"));
+    }
+
+    private static MrAsset MgnRuntimeMr(
+        string mrId,
+        string sutId,
+        string name,
+        IReadOnlyList<string> observables,
+        string manifestPath)
+    {
+        return new MrAsset(
+            mrId,
+            sutId,
+            name,
+            observables,
+            TransformBinding.ImportedOnly("Requires MetBench Docker or SSH runtime executor support before source/follow-up execution can be claimed."),
+            AssertionBinding.ImportedOnly("Requires runtime artifact retrieval and parser binding before pass/fail can be claimed in MetBench."),
+            Metadata(
+                "source_manifest", manifestPath,
+                "runtime_status", "blocked-until-docker-or-ssh-executor",
+                "evidence_boundary", "external-runtime-evidence-imported-only"));
     }
 
     private static IReadOnlyList<DetectionRecord> BuildHeatDetectionMatrix(

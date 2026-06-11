@@ -135,6 +135,43 @@ Cloud verification:
   `3` external-source prerequisite skips, and `290/298` with `8` dependency-gated
   skips.
 
+## 0.3 Batch E Runtime Contract / Imported-Only Status (2026-06-11)
+
+Batch E now has a MetBench import package and explicit Docker/SSH runtime
+contracts, but it is not promoted to executable runtime status. The current
+implementation records how the real MeshGraphNets assets must be staged and
+keeps execution fail-closed until production Docker or SSH executors exist.
+
+Implemented package:
+
+- `metbench-import-sciml-mgn-runtime-v1`: imports the MeshGraphNets
+  cylinder-flow runtime boundary as `ImportedOnly`, including Docker contract
+  `sciml-mgn-docker`, SSH contract `sciml-mgn-ssh`, real checkpoint/dataset
+  paths, seeded-fault ledger provenance, 5 imported-only MR records, 5 seeded
+  runtime mutation classes, and explicit compatibility findings.
+
+Implemented files:
+
+- `MetBench_BLL.Core/SystemMT/Runtime/RuntimeBackendContract.cs`
+- `MetBench_BLL.Core/SystemMT/ImportExport/Put/ExternalMrAcceptancePutFixtures.cs`
+- `MetBench_SystemMT.Tests/SystemMT/Runtime/RuntimeBackendContractTests.cs`
+- `MetBench_SystemMT.Tests/SystemMT/ImportExport/ExternalMrAcceptanceBatchImportTests.cs`
+
+Cloud verification:
+
+- Red phase: the focused external acceptance test filter failed with `CS0103`
+  and `CS0117` because `RuntimeBackendContract`,
+  `RuntimeBackendKind`, and `CreateBatchEScimlMgnRuntime` did not exist.
+- Green phase: `dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj
+  --no-restore --filter "FullyQualifiedName~RuntimeBackendContractTests|FullyQualifiedName~ExternalMrAcceptanceBatchImportTests"`
+  passed `21/21`.
+
+Execution boundary:
+
+- Docker and SSH contract projection is complete for import/export and
+  preflight-facing metadata.
+- Real Docker/SSH SUT execution remains blocked, not failed, until MetBench has
+  production executors with artifact staging and result collection evidence.
 
 ## 2. Source Repositories
 
@@ -347,10 +384,13 @@ Expected package:
 
 Acceptance:
 
-- Requires MetBench Docker or SSH runtime executor support before claiming
-  end-to-end MetBench execution.
-- Before executor support exists, this batch is `ImportedOnly` with external
-  evidence and blocked runtime readiness.
+- **Cloud contract complete:** Docker and SSH runtime contracts are recorded in
+  the import package and projected to non-executable placeholder runtime
+  profiles.
+- **Cloud import complete:** real checkpoint/dataset paths, seeded-fault ledger
+  provenance, runtime mutation classes, and imported-only MR cards are preserved.
+- **Runtime blocked:** MetBench Docker or SSH runtime executor support is still
+  required before claiming end-to-end MetBench execution.
 
 ## 5. Acceptance Test Cases
 
@@ -367,8 +407,8 @@ Acceptance:
 | AT-09 | Visualization | Open dashboard after Batch A runs | Pass/fail/anomaly counts and MR coverage are visible |
 | AT-10 | Runtime | Run local preflight for Batch A | Required Python dependencies pass; missing dependency fails closed |
 | AT-11 | Evidence | Import SciML seeded-fault ledger | 10 mutants and 5/10 union detections are displayed with limitations |
-| AT-12 | Docker | Submit Docker runtime pilot | Blocked until Docker executor exists; not counted as a failed MetBench test |
-| AT-13 | SSH | Submit SSH real-SUT pilot | Blocked until SSH executor exists; not counted as a failed MetBench test |
+| AT-12 | Docker | Validate Docker runtime contract for Batch E | Contract imports and projects to a non-executable placeholder; real execution is blocked until Docker executor exists |
+| AT-13 | SSH | Validate SSH runtime contract for Batch E | Contract imports and projects to a non-executable placeholder; real execution is blocked until SSH executor exists |
 
 ## 6. Test Data Inventory
 
@@ -444,8 +484,8 @@ Forbidden conclusion examples:
 7. Reconcile existing P3/P4/P5/P8/P9 metadata with Minimum-MR-SubSet provenance.
 8. Add Batch D import-only package builder for MR cards and seeded-fault ledgers.
 9. Add dashboard/report tests that display imported evidence limitations.
-10. Design Docker/SSH runtime executor contracts before Batch E is promoted from
-    `ImportedOnly` to executable.
+10. Add Docker/SSH runtime executor contracts for Batch E while keeping real
+    execution `ImportedOnly` until production executor support is implemented.
 
 ## 9. Verification Commands
 
