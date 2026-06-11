@@ -1,8 +1,13 @@
 using MetBench_BLL.Core.SystemMT.ImportExport.Put;
+using MetBench_BLL.Reporting.SystemMt;
+using MetBench_BLL.Reporting.SystemMt.Charts.Rendering;
 using MetBench_BLL.SystemMT.Catalog;
 using MetBench_BLL.SystemMT.Jobs;
 using MetBench_BLL.SystemMT.Launcher;
+using MetBench_BLL.SystemMT.Persistence;
 using MetBench_BLL.SystemMT.Pipeline;
+using MetBench_BLL.SystemMT.Reporting;
+using MetBench_BLL.SystemMT.Reporting.Charts;
 using MetBench_SystemMT.Tests.V2Anomaly;
 using MetBench_SystemMT.Tests.V2Pipeline;
 using Xunit;
@@ -63,19 +68,46 @@ public sealed class ExternalMrAcceptanceCompletionTests
     {
         var launcher = CreateAcceptanceLauncher(out var execs, out var results, out var anomalies);
 
-        var run = await launcher.RunBatchAsync(new[]
-        {
-            new BatchMrRunRequest("minmr-toy-sort-permutation"),
-            new BatchMrRunRequest("minmr-p1-heat-alpha-monotonic"),
-            new BatchMrRunRequest("minmr-p1-heat-timestep-convergence"),
-            new BatchMrRunRequest("minmr-p1-heat-mesh-convergence"),
-        });
+        var run = await RunBatchAAsync(launcher);
 
         Assert.All(run, r => Assert.True(r.Passed, $"{r.MrId}: {r.FailureReason}"));
         Assert.Equal(4, execs.Data.Count);
         Assert.Equal(4, results.Data.Count);
         Assert.All(execs.Data, e => Assert.Equal("ok", e.Status));
         Assert.Empty(anomalies.Recorded);
+    }
+
+    [Fact]
+    public async Task Batch_A_report_and_visualization_modules_render_execution_outputs()
+    {
+        var launcher = CreateAcceptanceLauncher(out _, out _, out _);
+        var run = await RunBatchAAsync(launcher);
+        var records = run.Select(ToResultRecord).ToList();
+        var context = new ReportContext(
+            "External MR Batch A acceptance",
+            new DateTimeOffset(2026, 6, 11, 0, 0, 0, TimeSpan.Zero));
+
+        var html = new HtmlSystemMtResultReportRenderer().Render(records, context);
+        var chartRenderer = new SkiaChartRenderer();
+        var chartOptions = new ChartRenderOptions(Width: 360, Height: 240, Dpi: 96);
+        var docx = new WordSystemMtResultReportRenderer(chartRenderer, chartOptions).Render(records, context);
+        var xlsx = new ExcelSystemMtResultReportRenderer(chartRenderer, chartOptions).Render(records, context);
+        var pdf = new PdfSystemMtResultReportRenderer(chartRenderer, chartOptions).Render(records, context);
+        var figures = records.Select(BinaryRunPointProjector.Project).ToList();
+
+        Assert.Contains("External MR Batch A acceptance", html, StringComparison.Ordinal);
+        Assert.Contains("Total: 4", html, StringComparison.Ordinal);
+        Assert.Contains("Passed: 4", html, StringComparison.Ordinal);
+        Assert.Contains("minmr-toy-sort-permutation", html, StringComparison.Ordinal);
+        Assert.StartsWith("PK", System.Text.Encoding.ASCII.GetString(docx, 0, 2));
+        Assert.StartsWith("PK", System.Text.Encoding.ASCII.GetString(xlsx, 0, 2));
+        Assert.StartsWith("%PDF", System.Text.Encoding.ASCII.GetString(pdf, 0, 4));
+        Assert.Equal(4, figures.Count);
+        Assert.All(figures, fig =>
+        {
+            Assert.Equal(ChartFigureKind.BinaryScatter, fig.Kind);
+            Assert.Equal(2, Assert.Single(fig.SeriesList).Points.Count);
+        });
     }
 
     [Fact]
@@ -119,6 +151,41 @@ public sealed class ExternalMrAcceptanceCompletionTests
         "sciml" => ExternalMrAcceptancePutFixtures.CreateBatchDScimlDomainValidity(),
         _ => throw new ArgumentOutOfRangeException(nameof(package), package, null)
     };
+
+    private static Task<IReadOnlyList<MrRunResult>> RunBatchAAsync(SystemMtLauncher launcher)
+    {
+        return launcher.RunBatchAsync(new[]
+        {
+            new BatchMrRunRequest("minmr-toy-sort-permutation"),
+            new BatchMrRunRequest("minmr-p1-heat-alpha-monotonic"),
+            new BatchMrRunRequest("minmr-p1-heat-timestep-convergence"),
+            new BatchMrRunRequest("minmr-p1-heat-mesh-convergence"),
+        });
+    }
+
+    private static SystemMtResultRecord ToResultRecord(MrRunResult result)
+    {
+        return new SystemMtResultRecord
+        {
+            Id = Guid.Parse(result.RecordId),
+            MrName = result.MrId,
+            RunAt = new DateTimeOffset(2026, 6, 11, 0, 0, 0, TimeSpan.Zero),
+            AssertionName = result.Passed ? "AcceptancePredicatePassed" : "AcceptancePredicateFailed",
+            ValueName = result.ValueName,
+            SourceValue = result.SourceValue,
+            FollowUpValue = result.FollowUpValue,
+            Passed = result.Passed,
+            FailureReason = result.FailureReason,
+            SourceCaseName = "source.in.json",
+            FollowUpCaseName = "followup.in.json",
+            SourceElapsed = result.SourceElapsed,
+            FollowUpElapsed = result.FollowUpElapsed,
+            SourceExitCode = 0,
+            FollowUpExitCode = 0,
+            SourceMetrics = new Dictionary<string, double> { [result.ValueName] = result.SourceValue },
+            FollowUpMetrics = new Dictionary<string, double> { [result.ValueName] = result.FollowUpValue },
+        };
+    }
 
     private static SystemMtLauncher CreateAcceptanceLauncher(
         out FakeExecRepo execs,

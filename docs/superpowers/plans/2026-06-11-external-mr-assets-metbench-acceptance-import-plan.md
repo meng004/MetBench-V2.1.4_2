@@ -82,6 +82,9 @@ Batch A and D:
   30-row seeded-fault matrix, the 5 detected records, the
   one-SUT / one-checkpoint limitation, and the deferred/diagnostic status of
   `mgn-discrete-divergence-boundedness`.
+- Batch A report/visualization path: the four local acceptance executions render
+  through HTML, Word, Excel, and PDF report renderers, and every execution
+  projects to a `BinaryRunPointProjector` chart DTO.
 
 Implemented files:
 
@@ -98,7 +101,7 @@ Cloud verification:
 
 - `dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj
   --no-restore --filter FullyQualifiedName~ExternalMrAcceptanceCompletionTests`
-  passed `6/6`.
+  passed `7/7`.
 
 Windows/WPF UI acceptance remains separate evidence, not cloud evidence. The
 VM task prompt is registered at
@@ -209,6 +212,8 @@ Acceptance:
   launcher using the explicit acceptance catalog.
 - **Cloud complete:** P1 mutant/MR detection records project to anomaly
   candidates with imported-evidence limitations.
+- **Cloud complete:** Batch A execution records render through HTML / Word /
+  Excel / PDF reports and binary run-point chart DTOs.
 - **VM pending:** WPF ImportAssets / RunBatch / ExportAssets / report /
   dashboard / anomaly views require the registered VM prompt before UI evidence
   can be claimed.
