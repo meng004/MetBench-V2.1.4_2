@@ -173,6 +173,18 @@
       <Link>TestAssets\minimum_mr_subset_p9_surrogate\sample\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\SUT\external_acceptance_minmr\*.py">
+      <Link>TestAssets\external_acceptance_minmr\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\SUT\external_acceptance_minmr\acceptance-catalog.json">
+      <Link>TestAssets\external_acceptance_minmr\acceptance-catalog.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\SUT\external_acceptance_minmr\sample\*.json">
+      <Link>TestAssets\external_acceptance_minmr\sample\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="..\SUT\scipy_ivp_lotka_volterra\*.py">
       <Link>TestAssets\scipy_ivp_lotka_volterra\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

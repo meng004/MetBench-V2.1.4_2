@@ -1,0 +1,4 @@
+{
+  "kind": "p10_pinn_hnn",
+  "params": { "training_steps": 100.0, "initial_loss": 1.0 }
+}

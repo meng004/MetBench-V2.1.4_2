@@ -1,0 +1,10 @@
+{
+  "kind": "p1_heat",
+  "params": {
+    "alpha": 0.01,
+    "num_points": 81,
+    "num_steps": 200,
+    "t_final": 0.05,
+    "amplitude": 1.0
+  }
+}
