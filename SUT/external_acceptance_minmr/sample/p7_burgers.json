@@ -1,0 +1,4 @@
+{
+  "kind": "p7_burgers",
+  "params": { "viscosity": 0.2, "amplitude": 1.0 }
+}
