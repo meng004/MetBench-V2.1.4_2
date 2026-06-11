@@ -55,25 +55,18 @@ Choose exactly one highest required level. If multiple categories apply, choose 
 - [ ] Merge method is appropriate for the branch policy.
 - [ ] After merge, local `main` should be synchronized before monitoring reads the workspace.
 
-## AI Review (advisory, automated)
+## AI Review
 
-Every PR opened against `main` automatically triggers `pr-soft-review.yml` (per
-[`docs/superpowers/specs/2026-05-26-pr-soft-review-via-claude-code-action.md`](../specs/2026-05-26-pr-soft-review-via-claude-code-action.md))
-which now runs two advisory reviewers:
+> **Retired (advisory).** The automated dual AI review — `pr-soft-review.yml` running
+> `openai/codex-action@v1` (Codex Governance Review) + `anthropics/claude-code-action@v1`
+> (Claude Semantic Review) on `pull_request` — was removed ~2026-05-27 (CLAUDE.md §12.3).
+> No soft-review workflow runs anymore; the spec
+> [`docs/superpowers/specs/2026-05-26-pr-soft-review-via-claude-code-action.md`](../specs/2026-05-26-pr-soft-review-via-claude-code-action.md)
+> is retained for historical context only. Its coverage is now provided by the mechanical
+> guards (modules A–E: `test` + grep + Roslyn + Stryker + parity tests) plus the author-side
+> on-demand module F `/code-review` (CLAUDE.md §12.2). **Keep this `## AI Review` header**
+> so the PR-gate grep (dotnet-test.yml check 5) still sees all 7 sections.
 
-- `openai/codex-action@v1` as **Codex Governance Review** for scope, status,
-  requirements/plan traceability, Windows classification, and Method MT /
-  System MT boundary drift.
-- `anthropics/claude-code-action@v1` as **Claude Semantic Review** for C# logic,
-  exception paths, runtime boundaries, test adequacy, and WPF semantic risk.
-
-- [ ] Codex Governance Review comment present on the PR (workflow ran, did not silently skip).
-- [ ] Claude Semantic Review comment present on the PR (workflow ran, did not silently skip).
-- [ ] Each FAIL / P0 / P1 in either AI review comment is either resolved or has a one-line
-      human reply explaining why it does not apply.
-- [ ] AI review jobs are **never** added to GitHub branch protection's required
-      checks list — their job is to surface findings, not to block merge.
-
-If the workflow itself errors (OpenAI / Anthropic API unavailable, quota
-exhausted, secret missing) the PR can still be merged; record the absence and
-rely on manual Layer 1 + Layer 2 review.
+- [ ] No automated AI review runs on this PR — this section is **N/A** for most PRs.
+- [ ] If author-side `/code-review` (module F) was run, note the level (low / medium / high)
+      and whether findings were acted on or dismissed; otherwise write "N/A — module F not run".
