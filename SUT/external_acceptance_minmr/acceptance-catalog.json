@@ -1,0 +1,170 @@
+{
+  "sut_name": "external-acceptance-minmr",
+  "program": {
+    "program_name": "external-acceptance-minmr",
+    "equation": "External acceptance fixtures",
+    "equation_key": "external-acceptance-minmr",
+    "program_type": "Num",
+    "runner_script_relative_path": "external_acceptance_minmr.py",
+    "input_parser_script_relative_path": "external_acceptance_minmr_input_parser.py",
+    "output_parser_script_relative_path": "external_acceptance_minmr_output_parser.py",
+    "input_adapter_script_relative_path": "external_acceptance_minmr_input_parser.py",
+    "output_adapter_script_relative_path": "external_acceptance_minmr_output_parser.py",
+    "python_executable_kind": "system"
+  },
+  "profile": {
+    "program_type": "Num",
+    "solver_method": "Pure-stdlib acceptance fixtures for Minimum-MR-SubSet toy and P1 heat slices",
+    "runtime_key": "system",
+    "input_contract": "JSON cases with kind=toy_sort or kind=p1_heat.",
+    "output_contract": "JSON scalar metrics used by imported acceptance MRs.",
+    "adapter": "Pure-stdlib Python runner and JSON parser under SUT/external_acceptance_minmr/.",
+    "dependency_risk": "pure-stdlib"
+  },
+  "mrs": [
+    {
+      "mr_id": "minmr-toy-sort-permutation",
+      "sut_name": "external-acceptance-minmr",
+      "display_name": "Minimum-MR toy sorting - permutation invariance",
+      "description": "Sorting output checksum is invariant under input permutation.",
+      "mr_family": "MinimumMrSubset.Toy.Sorting.Permutation",
+      "transformation_name": "PermuteIndices",
+      "assertion_type_code": "approx",
+      "assertion_name": "ApproxEqual",
+      "value_name": "sorted_checksum",
+      "default_parameters": { "permutation": "2,0,3,1" },
+      "transform_steps": [
+        { "transformation_name": "PermuteIndices", "target_field_path": "/values" }
+      ],
+      "tolerance_rel": 0,
+      "tolerance_abs": 1e-12,
+      "noise_aware": false,
+      "equation_key": "",
+      "equation": "Toy sorting",
+      "program_type": "Num",
+      "meta_pattern": "Inv",
+      "source_level": "ImportedResearchAcceptance",
+      "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Permutation invariance for a deterministic sorting toy program.",
+        "transformation_semantics": "Apply PermuteIndices to /values while preserving the multiset.",
+        "observable_summary": "Observe sorted_checksum from source and follow-up outputs.",
+        "predicate_summary": "ApproxEqual checks exact checksum preservation with a tight deterministic tolerance.",
+        "tolerance_summary": "Absolute tolerance 1e-12 covers only floating serialization noise.",
+        "applicability": "Applicable to the local acceptance toy_sort JSON sample.",
+        "failure_meaning": "Failure means the adapter or sorting fixture no longer preserves permutation invariance."
+      },
+      "sample_case_relative_path": "sample/toy_sort.json",
+      "work_root_name": "MetBenchExternalAcceptanceToySort",
+      "timeout_seconds": 30
+    },
+    {
+      "mr_id": "minmr-p1-heat-alpha-monotonic",
+      "sut_name": "external-acceptance-minmr",
+      "display_name": "Minimum-MR P1 heat - alpha monotonic smoothing",
+      "description": "Increasing heat diffusivity alpha at fixed final time decreases the maximum temperature.",
+      "mr_family": "MinimumMrSubset.P1.Heat.AlphaMonotonic",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "less",
+      "assertion_name": "LessThan",
+      "value_name": "max_u",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/params/alpha" }
+      ],
+      "tolerance_rel": 0,
+      "tolerance_abs": 0,
+      "noise_aware": false,
+      "equation_key": "",
+      "equation": "Heat equation",
+      "program_type": "Num",
+      "meta_pattern": "Mono",
+      "source_level": "ImportedResearchAcceptance",
+      "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "Diffusion smooths faster when alpha increases.",
+        "transformation_semantics": "Scale /params/alpha by factor=2.",
+        "observable_summary": "Observe max_u.",
+        "predicate_summary": "LessThan checks follow-up max_u < source max_u.",
+        "tolerance_summary": "Ordinal deterministic predicate.",
+        "applicability": "Applicable to stable explicit heat samples.",
+        "failure_meaning": "Failure indicates the P1 heat acceptance slice violated alpha smoothing monotonicity."
+      },
+      "sample_case_relative_path": "sample/p1_heat.json",
+      "work_root_name": "MetBenchExternalAcceptanceP1Heat",
+      "timeout_seconds": 30
+    },
+    {
+      "mr_id": "minmr-p1-heat-timestep-convergence",
+      "sut_name": "external-acceptance-minmr",
+      "display_name": "Minimum-MR P1 heat - timestep convergence",
+      "description": "Doubling the time-step count should keep max_u within the convergence tolerance.",
+      "mr_family": "MinimumMrSubset.P1.Heat.TimestepConvergence",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "approx",
+      "assertion_name": "ApproxEqual",
+      "value_name": "max_u",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/params/num_steps" }
+      ],
+      "tolerance_rel": 0.02,
+      "tolerance_abs": 1e-6,
+      "noise_aware": false,
+      "equation_key": "",
+      "equation": "Heat equation",
+      "program_type": "Num",
+      "meta_pattern": "Conv",
+      "source_level": "ImportedResearchAcceptance",
+      "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "A stable explicit heat solver should approach a plateau as time steps are refined.",
+        "transformation_semantics": "Scale /params/num_steps by factor=2.",
+        "observable_summary": "Observe max_u.",
+        "predicate_summary": "ApproxEqual checks source/follow-up max_u.",
+        "tolerance_summary": "Relative tolerance 0.02, absolute tolerance 1e-6.",
+        "applicability": "Applicable to the local p1_heat sample.",
+        "failure_meaning": "Failure indicates the acceptance heat slice did not preserve timestep convergence."
+      },
+      "sample_case_relative_path": "sample/p1_heat.json",
+      "work_root_name": "MetBenchExternalAcceptanceP1Heat",
+      "timeout_seconds": 30
+    },
+    {
+      "mr_id": "minmr-p1-heat-mesh-convergence",
+      "sut_name": "external-acceptance-minmr",
+      "display_name": "Minimum-MR P1 heat - mesh convergence",
+      "description": "Doubling grid points should keep max_u within the mesh-convergence tolerance.",
+      "mr_family": "MinimumMrSubset.P1.Heat.MeshConvergence",
+      "transformation_name": "ScaleField",
+      "assertion_type_code": "approx",
+      "assertion_name": "ApproxEqual",
+      "value_name": "max_u",
+      "default_parameters": { "factor": "2" },
+      "transform_steps": [
+        { "transformation_name": "ScaleField", "target_field_path": "/params/num_points" }
+      ],
+      "tolerance_rel": 0.05,
+      "tolerance_abs": 1e-6,
+      "noise_aware": false,
+      "equation_key": "",
+      "equation": "Heat equation",
+      "program_type": "Num",
+      "meta_pattern": "Conv",
+      "source_level": "ImportedResearchAcceptance",
+      "failure_correlation": "None",
+      "explanation_profile": {
+        "meta_pattern_rationale": "A smooth heat solution should remain close when the grid is refined.",
+        "transformation_semantics": "Scale /params/num_points by factor=2.",
+        "observable_summary": "Observe max_u.",
+        "predicate_summary": "ApproxEqual checks source/follow-up max_u.",
+        "tolerance_summary": "Relative tolerance 0.05, absolute tolerance 1e-6.",
+        "applicability": "Applicable to the local p1_heat sample.",
+        "failure_meaning": "Failure indicates the acceptance heat slice did not preserve mesh convergence."
+      },
+      "sample_case_relative_path": "sample/p1_heat.json",
+      "work_root_name": "MetBenchExternalAcceptanceP1Heat",
+      "timeout_seconds": 30
+    }
+  ]
+}

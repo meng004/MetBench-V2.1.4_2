@@ -1,6 +1,7 @@
 # External MR Assets MetBench Acceptance Import Plan (2026-06-11)
 
-> **Status:** Batch A/D cloud import fixtures implemented; VM UI acceptance still pending.
+> **Status:** Batch A/D cloud acceptance path implemented; Windows/WPF UI
+> acceptance evidence still requires the VM prompt registered in this plan.
 > **Scope:** Classify and batch-import experiment assets from
 > `meng004/Minimum-MR-SubSet` and
 > `meng004/Domain-Validity-Gated-MR-for-SciML` into MetBench acceptance testing
@@ -59,6 +60,49 @@ Evidence collected:
 - Regression: `dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj
   --no-restore --filter FullyQualifiedName~SystemMT.ImportExport` passed
   `52/52`, skipped `3` external-source prerequisite-gated tests.
+
+## 0.1 Batch A/D Cloud Completion Status (2026-06-11)
+
+Additional cloud-side acceptance coverage now closes the non-WPF parts of
+Batch A and D:
+
+- Batch A import/export job path: `ImportAssetsJobOperationHandler` stages the
+  toy and P1 packages and writes both `staging-manifest.json` and
+  `sut-import-unit.json`; `ExportAssetsJobOperationHandler` round-trips the
+  staged package back to a valid `sut-import-unit.json`.
+- Batch A launcher path: the explicit acceptance catalog
+  `SUT/external_acceptance_minmr/acceptance-catalog.json` binds one toy sorting MR and
+  three P1 heat MRs to pure-stdlib local Python runners. These MRs execute
+  through `SystemMtLauncher -> SystemMtPipeline -> SystemMtExecutionRecorder`
+  without changing the global catalog whitelist.
+- Batch A anomaly/evidence path: `ExternalMrAcceptanceEvidenceProjector`
+  projects the P1 50-row detection matrix to 10 anomaly candidates while
+  preserving the imported-research-evidence limitation.
+- Batch D evidence/report path: the same projector renders the SciML
+  30-row seeded-fault matrix, the 5 detected records, the
+  one-SUT / one-checkpoint limitation, and the deferred/diagnostic status of
+  `mgn-discrete-divergence-boundedness`.
+
+Implemented files:
+
+- `SUT/external_acceptance_minmr/acceptance-catalog.json`
+- `SUT/external_acceptance_minmr/external_acceptance_minmr.py`
+- `SUT/external_acceptance_minmr/external_acceptance_minmr_input_parser.py`
+- `SUT/external_acceptance_minmr/external_acceptance_minmr_output_parser.py`
+- `SUT/external_acceptance_minmr/sample/toy_sort.json`
+- `SUT/external_acceptance_minmr/sample/p1_heat.json`
+- `MetBench_BLL.Core/SystemMT/ImportExport/Put/ExternalMrAcceptanceEvidenceProjector.cs`
+- `MetBench_SystemMT.Tests/SystemMT/ImportExport/ExternalMrAcceptanceCompletionTests.cs`
+
+Cloud verification:
+
+- `dotnet test MetBench_SystemMT.Tests\MetBench_SystemMT.Tests.csproj
+  --no-restore --filter FullyQualifiedName~ExternalMrAcceptanceCompletionTests`
+  passed `6/6`.
+
+Windows/WPF UI acceptance remains separate evidence, not cloud evidence. The
+VM task prompt is registered at
+`docs/superpowers/vm-prompts/2026-06-11-batch-a-d-external-mr-assets-ui-acceptance-vm-prompt.md`.
 
 ## 2. Source Repositories
 
@@ -159,10 +203,15 @@ Expected packages:
 
 Acceptance:
 
-- `ImportAssets` stages the packages and writes `staging-manifest.json` plus
-  `sut-import-unit.json`.
-- At least one toy MR and three P1 heat MRs execute through the launcher.
-- At least one P1 mutant/MR detection record is projected into anomaly evidence.
+- **Cloud complete:** `ImportAssets` stages the packages and writes
+  `staging-manifest.json` plus `sut-import-unit.json`.
+- **Cloud complete:** one toy MR and three P1 heat MRs execute through the
+  launcher using the explicit acceptance catalog.
+- **Cloud complete:** P1 mutant/MR detection records project to anomaly
+  candidates with imported-evidence limitations.
+- **VM pending:** WPF ImportAssets / RunBatch / ExportAssets / report /
+  dashboard / anomaly views require the registered VM prompt before UI evidence
+  can be claimed.
 
 ### Batch B - Existing Minimum-MR Runtime Reconciliation
 
@@ -237,11 +286,14 @@ Expected package:
 
 Acceptance:
 
-- Node-permutation fixture can execute locally or be staged as a fixture verdict.
-- Seeded-fault detection matrix appears in reports and anomaly views with the
-  original one-SUT / one-checkpoint limitation.
-- Discrete divergence is displayed as deferred/diagnostic, not as a pass/fail
-  absolute conservation MR.
+- **Cloud complete:** node-permutation is staged as fixture evidence, not a
+  fresh MGN runtime verdict.
+- **Cloud complete:** seeded-fault detection matrix is projected to report text
+  and anomaly candidates with the original one-SUT / one-checkpoint limitation.
+- **Cloud complete:** discrete divergence is displayed as deferred/diagnostic,
+  not as a pass/fail absolute conservation MR.
+- **VM pending:** visual confirmation in WPF report/dashboard/anomaly views
+  requires the registered VM prompt.
 
 ### Batch E - Real SUT Runtime Extension
 
