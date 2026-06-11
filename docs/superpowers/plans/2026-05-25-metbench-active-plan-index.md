@@ -9,6 +9,12 @@
 
 ## 1. 当前活跃主计划与范围计划
 
+> **活跃计划数量统计（截至 2026-06-11，状态变动时同步更新）**：
+> - **§1 主/范围计划**：**3 个 Active** —— `2026-05-25-metbench-governed-next-stage-plan.md`、`2026-05-26-t3-coverage-assessment-and-next-sut-decision.md`（Active scoped reference）、`2026-05-28-v2-charter-rollout-chain-post-merge-review.md`（chain-end review marker）；外加 1 个 Anticipated 跟进（PR-Bol-3 P3 reflection facts）。其余约 40 行为 Done / Completed / Expired / Retracted / Superseded，保留作可追溯历史。
+> - **§2 设计文档**：**8 个 Active** + 1 个 Proposed（`2026-06-03-systemmt-async-execution-polling-design.md`）。注：`2026-05-26-pr-soft-review-via-claude-code-action.md` 行状态仍写 "Active design"，但 dual AI review 已按 CLAUDE.md §12 撤除（retired），该行为 stale 待清理（不在本次改动范围）。
+> - **§2.1 条件性活跃**：2 个。
+> - 本次更新背景：`2026-06-06-wpf-mvvm-convergence-plan.md` 已由 Active 转 Expired（4-PR 链 closure + R2 chain-end review 完成，#350 / #351），§1 Active 计数随之 4 → 3。
+
 | Plan | Status | Scope | Expiry condition |
 |---|---|---|---|
 | `docs/superpowers/plans/2026-06-06-wpf-mvvm-convergence-plan.md` | Expired — 4 PR 全部完成 + 8 条 source-guard 全绿 + VM 运行时证据齐（#350 `580e718`）+ chain-end holistic review done；status §6 标 Controlled | WPF MVVM 收敛（成熟度评估"5 套 MVVM"经核实为夸大；实测 3 有效+1 死引用+1 全局 Fody weave）。4 PR 链按风险递增：PR-1 删 Prism 死引用（云端）→ PR-2 删 PropertyChanged.Fody（VM）→ PR-3 9 个 legacy XAML 的 Stylet `s:Action` 换 `Microsoft.Xaml.Behaviors`（VM）→ PR-4 手写 `OnPropertyChanged` 调用迁移到 `[ObservableProperty]`/`SetProperty`。**实施偏离**：PR #333 把 PR-1/2/3 三项依赖移除（外加计划外的 Wpf.Ui 表面清理）squash 进一个合并，**跳过了 §3 逐 PR source-guard**；该缺口已由 follow-up `WpfMvvmConvergenceGuardTests`（PR #346）补齐。PR-4 实测形态比计划假设小（6 文件早已 `ObservableObject`，仅 6 处遗留手动 raise），云端机械迁移完成（#348 `2977af6`），第 7 条 guard `No_ViewModel_calls_OnPropertyChanged_manually` 转绿；VM 端 `dotnet build MetBench.sln` 0 errors + 6 处绑定刷新冒烟 + UIA driver 证据已入 main（#350）。**R2 chain-end holistic review**（[`docs/superpowers/specs/2026-06-11-wpf-mvvm-convergence-chain-post-merge-review.md`](../specs/2026-06-11-wpf-mvvm-convergence-chain-post-merge-review.md)）发现 3 findings：F3（guard 未扫 `Models/`）转为第 8 条 guard `No_Model_calls_OnPropertyChanged_manually`，F1（MRRecommendationPage 死 `s:Action show` binding 静默删除）/F2（`EventAggregator.Publish` 同步发布的潜在线程契约）已 dispositioned。**最终态：仅 CommunityToolkit.Mvvm + Microsoft.Xaml.Behaviors**。不在成熟度修复计划主干内,独立维度跟踪。 | 已到期（chain closure 完成）；保留作历史参考 |
