@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import os
 import tempfile
 import unittest
 from dataclasses import fields
@@ -40,11 +41,14 @@ class DockerRuntimeServerTests(unittest.TestCase):
         }
 
     def write_config_and_load(self, payload):
-        with tempfile.NamedTemporaryFile("w", suffix=".json") as handle:
-            json.dump(payload, handle)
-            handle.flush()
-
+        handle = tempfile.NamedTemporaryFile(
+            "w", suffix=".json", delete=False, encoding="utf-8")
+        try:
+            with handle:
+                json.dump(payload, handle)
             return self.server.load_config(handle.name)
+        finally:
+            os.unlink(handle.name)
 
     def valid_runtime_config(self):
         return self.server.RuntimeConfig(
@@ -514,11 +518,7 @@ class DockerRuntimeServerTests(unittest.TestCase):
             "max_output_bytes": 4096,
         }
 
-        with tempfile.NamedTemporaryFile("w", suffix=".json") as handle:
-            json.dump(payload, handle)
-            handle.flush()
-
-            config = self.server.load_config(handle.name)
+        config = self.write_config_and_load(payload)
 
         self.assertEqual(8765, config.bind_port)
         self.assertEqual(REPO_ROOT, config.repo_root)
