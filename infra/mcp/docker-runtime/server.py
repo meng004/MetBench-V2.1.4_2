@@ -238,6 +238,25 @@ def build_docker_run_command(
     return command
 
 
+def build_local_run_command(
+    config: RuntimeConfig,
+    image: str,
+    argv: list[str],
+    timeout_seconds: int | None = None,
+) -> list[str]:
+    validate_run_request(config, {"image": image, "argv": argv})
+
+    effective_timeout = config.default_timeout_seconds if timeout_seconds is None else timeout_seconds
+    if (
+        not isinstance(effective_timeout, int)
+        or isinstance(effective_timeout, bool)
+        or effective_timeout <= 0
+    ):
+        raise ValueError("timeout_seconds must be positive")
+
+    return list(argv)
+
+
 def _run_subprocess(command: list[str], timeout_seconds: int) -> CommandResult:
     completed = subprocess.run(
         command,
@@ -280,6 +299,8 @@ def build_runtime_image(
     arguments: dict[str, Any],
     runner=_run_subprocess,
 ) -> dict[str, Any]:
+    if config.backend == "local":
+        raise ValueError("build_runtime_image is not supported when backend is 'local'")
     image = _required_string(arguments, "image")
     if image not in config.allowed_images:
         raise ValueError(f"Image {image!r} is not allowlisted")
@@ -318,7 +339,10 @@ def run_sut_command(
     image = _required_string(arguments, "image")
     argv = arguments.get("argv")
     timeout_seconds = arguments.get("timeout_seconds", config.default_timeout_seconds)
-    command = build_docker_run_command(config, image, argv, timeout_seconds)
+    if config.backend == "local":
+        command = build_local_run_command(config, image, argv, timeout_seconds)
+    else:
+        command = build_docker_run_command(config, image, argv, timeout_seconds)
     result = runner(command, timeout_seconds)
     status = "completed" if result.returncode == 0 else "failed"
     record = {

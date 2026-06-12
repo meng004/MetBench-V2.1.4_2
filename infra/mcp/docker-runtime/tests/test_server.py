@@ -647,6 +647,79 @@ class DockerRuntimeServerTests(unittest.TestCase):
         self.assertIn("/tmp:/tmp", command)
         self.assertIn("/opt/openmc-data:/opt/openmc-data", command)
 
+    def local_runtime_config(self):
+        return self.server.RuntimeConfig(
+            bind_host="auto-private-ipv4",
+            bind_port=8766,
+            auth_token="secret",
+            repo_root="/home/mt",
+            allowed_images={
+                "wsl-openmc": self.server.ImageConfig(dockerfile="", context=""),
+            },
+            allowed_mount_roots=["/tmp"],
+            default_timeout_seconds=60,
+            max_output_bytes=1024,
+            backend="local",
+        )
+
+    def test_local_backend_runs_argv_directly_without_docker(self):
+        config = self.local_runtime_config()
+        calls = []
+
+        def fake_runner(command, timeout_seconds):
+            calls.append((command, timeout_seconds))
+            return self.server.CommandResult(returncode=0, stdout="ok", stderr="")
+
+        response = self.server.dispatch_tool(
+            config,
+            "Bearer secret",
+            {
+                "tool": "run_sut_command",
+                "arguments": {
+                    "image": "wsl-openmc",
+                    "argv": ["python", "sut.py", "--input", "in.json"],
+                    "timeout_seconds": 9,
+                },
+            },
+            runner=fake_runner,
+            id_factory=lambda: "local-run-1",
+        )
+
+        self.assertEqual("completed", response["status"])
+        self.assertEqual(1, len(calls))
+        self.assertEqual(["python", "sut.py", "--input", "in.json"], calls[0][0])
+        self.assertEqual(9, calls[0][1])
+        self.assertEqual(["python", "sut.py", "--input", "in.json"], response["command"])
+        self.assertNotIn("docker", response["command"])
+
+    def test_local_backend_still_rejects_non_allowlisted_image(self):
+        config = self.local_runtime_config()
+
+        with self.assertRaisesRegex(ValueError, "not allowlisted"):
+            self.server.dispatch_tool(
+                config,
+                "Bearer secret",
+                {
+                    "tool": "run_sut_command",
+                    "arguments": {"image": "other", "argv": ["python", "x.py"]},
+                },
+                runner=lambda command, timeout_seconds: self.server.CommandResult(0, "", ""),
+            )
+
+    def test_local_backend_rejects_build_runtime_image(self):
+        config = self.local_runtime_config()
+
+        with self.assertRaisesRegex(ValueError, "local"):
+            self.server.dispatch_tool(
+                config,
+                "Bearer secret",
+                {
+                    "tool": "build_runtime_image",
+                    "arguments": {"image": "wsl-openmc"},
+                },
+                runner=lambda command, timeout_seconds: self.server.CommandResult(0, "", ""),
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
