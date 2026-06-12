@@ -92,8 +92,7 @@ MetBench WPF (SystemMtAsyncJobPage)       │
 ### 4.2 .NET BLL.Core
 
 - `docker-mcp://` URI 新增两个可选 fail-closed 参数：
-  - `localPython` —— Docker profile 下 parser/output-parser 命令改用它（缺省回退
-    `LauncherOptions.SystemPython`）；runner 仍用 profile 的 `python`（关 G1）；
+  - `localPython` —— Docker profile 下 parser/output-parser 命令改用它（缺省沿用 profile 的 `python`，与既有行为逐字节一致；显式设置才覆盖）；runner 仍用 profile 的 `python`（关 G1）；
   - `pathStyle=wsl` —— `DockerMcpProcessExecutor` 把 argv 中匹配
     `^[A-Za-z]:[\\/]` 的 token 翻译为 `/mnt/<盘符小写>/...`，反斜杠转正斜杠，
     其余 token 原样（关 G2）；`pathStyle` 出现但值非 `wsl` →
