@@ -197,6 +197,7 @@ class DockerRuntimeServerTests(unittest.TestCase):
                 "allowed_mount_roots",
                 "default_timeout_seconds",
                 "max_output_bytes",
+                "backend",
             ],
             [field.name for field in fields(config)],
         )
@@ -544,6 +545,44 @@ class DockerRuntimeServerTests(unittest.TestCase):
         self.assertIn("context", payload["allowed_images"]["metbench-sut:latest"])
         self.assertIn("default_timeout_seconds", payload)
         self.assertIn("max_output_bytes", payload)
+
+
+    def test_load_config_defaults_backend_to_docker(self):
+        config = self.write_config_and_load(self.valid_config_payload())
+
+        self.assertEqual("docker", config.backend)
+
+    def test_load_config_accepts_local_backend(self):
+        payload = self.valid_config_payload()
+        payload["backend"] = "local"
+
+        config = self.write_config_and_load(payload)
+
+        self.assertEqual("local", config.backend)
+
+    def test_load_config_rejects_unknown_backend(self):
+        payload = self.valid_config_payload()
+        payload["backend"] = "kubernetes"
+
+        with self.assertRaisesRegex(ValueError, "backend"):
+            self.write_config_and_load(payload)
+
+    def test_load_config_local_backend_allows_image_without_dockerfile(self):
+        payload = self.valid_config_payload()
+        payload["backend"] = "local"
+        payload["allowed_images"] = {"wsl-openmc": {}}
+
+        config = self.write_config_and_load(payload)
+
+        self.assertEqual("", config.allowed_images["wsl-openmc"].dockerfile)
+        self.assertEqual("", config.allowed_images["wsl-openmc"].context)
+
+    def test_load_config_docker_backend_still_requires_dockerfile(self):
+        payload = self.valid_config_payload()
+        payload["allowed_images"] = {"img": {}}
+
+        with self.assertRaisesRegex(ValueError, "dockerfile"):
+            self.write_config_and_load(payload)
 
 
 if __name__ == "__main__":

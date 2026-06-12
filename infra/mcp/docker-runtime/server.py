@@ -26,6 +26,7 @@ class RuntimeConfig:
     allowed_mount_roots: list[str]
     default_timeout_seconds: int
     max_output_bytes: int
+    backend: str = "docker"
 
 
 @dataclass
@@ -95,7 +96,17 @@ def _required_positive_int(payload: dict[str, Any], field_name: str) -> int:
     return value
 
 
-def _load_allowed_images(payload: dict[str, Any]) -> dict[str, ImageConfig]:
+VALID_BACKENDS = ("docker", "local")
+
+
+def _load_backend(payload: dict[str, Any]) -> str:
+    backend = payload.get("backend", "docker")
+    if backend not in VALID_BACKENDS:
+        raise ValueError(f"backend must be one of {VALID_BACKENDS}")
+    return backend
+
+
+def _load_allowed_images(payload: dict[str, Any], backend: str = "docker") -> dict[str, ImageConfig]:
     allowed_images = payload.get("allowed_images")
     if not isinstance(allowed_images, dict) or not allowed_images:
         raise ValueError("allowed_images must be a non-empty object")
@@ -107,8 +118,14 @@ def _load_allowed_images(payload: dict[str, Any]) -> dict[str, ImageConfig]:
         if not isinstance(image, dict):
             raise ValueError("allowed_images entries must be objects")
 
-        dockerfile = _required_string(image, "dockerfile")
-        context = _required_string(image, "context")
+        if backend == "local":
+            dockerfile = image.get("dockerfile") or ""
+            context = image.get("context") or ""
+            if not isinstance(dockerfile, str) or not isinstance(context, str):
+                raise ValueError("allowed_images dockerfile/context must be strings when present")
+        else:
+            dockerfile = _required_string(image, "dockerfile")
+            context = _required_string(image, "context")
         result[name] = ImageConfig(dockerfile=dockerfile, context=context)
 
     return result
@@ -134,18 +151,21 @@ def load_config(path: str | Path) -> RuntimeConfig:
     if bind_port > 65535:
         raise ValueError("bind_port must be between 1 and 65535")
 
+    backend = _load_backend(payload)
+
     return RuntimeConfig(
         bind_host=bind_host,
         bind_port=bind_port,
         auth_token=auth_token,
         repo_root=repo_root,
-        allowed_images=_load_allowed_images(payload),
+        allowed_images=_load_allowed_images(payload, backend),
         allowed_mount_roots=_load_allowed_mount_roots(payload),
         default_timeout_seconds=_required_positive_int(
             payload,
             "default_timeout_seconds",
         ),
         max_output_bytes=_required_positive_int(payload, "max_output_bytes"),
+        backend=backend,
     )
 
 
