@@ -140,7 +140,14 @@ namespace MetBench_Client
                         "SUT"),
                     SystemPython: OperatingSystem.IsWindows() ? "python" : "python3",
                     OpenMocPython: Environment.GetEnvironmentVariable("METBENCH_OPENMOC_PYTHON")
-                        ?? (OperatingSystem.IsWindows() ? "python" : "python3")));
+                        ?? (OperatingSystem.IsWindows() ? "python" : "python3"),
+                    RuntimePythons: new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                    {
+                        // Blank values are skipped by ResolvePythonExecutable's non-blank check:
+                        // behavior is unchanged when the env vars are not set.
+                        ["system"] = Environment.GetEnvironmentVariable("METBENCH_SYSTEM_PYTHON") ?? "",
+                        ["openmc"] = Environment.GetEnvironmentVariable("METBENCH_OPENMC_PYTHON") ?? "",
+                    }));
 
                 // Share one LiteDatabase handle between the result and evidence repos
                 // because both target the same SystemMT.Litedb file. Default Direct mode
