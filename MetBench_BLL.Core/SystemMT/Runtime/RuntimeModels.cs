@@ -8,6 +8,7 @@ public enum RuntimeKind
 {
     LocalPython,
     PythonVirtualEnvironment,
+    DockerContainer,
     DockerPlaceholder,
     RemotePlaceholder,
     HpcPlaceholder
@@ -112,7 +113,9 @@ public sealed record RuntimeProfile
     public RuntimeArtifactPolicy ArtifactPolicy { get; }
 
     public bool IsExecutableInV1 =>
-        Kind is RuntimeKind.LocalPython or RuntimeKind.PythonVirtualEnvironment;
+        Kind is RuntimeKind.LocalPython
+            or RuntimeKind.PythonVirtualEnvironment
+            or RuntimeKind.DockerContainer;
 
     public static RuntimeProfile Placeholder(string runtimeKey, string displayName, RuntimeKind kind)
     {
@@ -122,10 +125,73 @@ public sealed record RuntimeProfile
         return new RuntimeProfile(NormalizeRuntimeKey(runtimeKey), displayName, kind, executablePath: null);
     }
 
+    public static RuntimeProfile DockerContainer(
+        string runtimeKey,
+        string displayName,
+        string image,
+        string probeCommand,
+        TimeSpan? timeout = null)
+    {
+        if (!IsSafeDockerImage(image))
+            throw new ArgumentException("Docker image name contains unsupported characters.", nameof(image));
+        if (!IsSafeDockerProbeCommand(probeCommand))
+            throw new ArgumentException("Docker probe command contains unsupported characters.", nameof(probeCommand));
+
+        return new RuntimeProfile(
+            runtimeKey,
+            displayName,
+            RuntimeKind.DockerContainer,
+            "docker",
+            versionChecks: new[]
+            {
+                new RuntimeVersionCheck("Docker image", "docker", $"image inspect {image}", timeout),
+                new RuntimeVersionCheck("Docker container probe", "docker", $"run --rm {image} {probeCommand}", timeout)
+            },
+            timeout: timeout ?? TimeSpan.FromSeconds(60));
+    }
+
     internal static string NormalizeRuntimeKey(string? runtimeKey) =>
         string.IsNullOrWhiteSpace(runtimeKey)
             ? "system"
             : runtimeKey.Trim().ToLowerInvariant();
+
+    private static bool IsSafeDockerImage(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        foreach (var ch in value)
+        {
+            if (char.IsLetterOrDigit(ch)
+                || ch is '-' or '_' or '.' or ':' or '/' or '@')
+            {
+                continue;
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+    private static bool IsSafeDockerProbeCommand(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        foreach (var ch in value)
+        {
+            if (char.IsLetterOrDigit(ch)
+                || ch is '-' or '_' or '.' or ':' or '/' or '=' or '+' or ' ')
+            {
+                continue;
+            }
+
+            return false;
+        }
+
+        return true;
+    }
 }
 
 public sealed record RuntimePreflightResult

@@ -69,19 +69,39 @@ public sealed class RuntimeProfileProviderTests
     [Fact]
     public void Docker_remote_and_HPC_kinds_are_modelable_but_not_executable_in_v1()
     {
-        var docker = RuntimeProfile.Placeholder("docker-demo", "Docker demo", RuntimeKind.DockerPlaceholder);
         var remote = RuntimeProfile.Placeholder("remote-demo", "Remote demo", RuntimeKind.RemotePlaceholder);
         var hpc = RuntimeProfile.Placeholder("hpc-demo", "HPC demo", RuntimeKind.HpcPlaceholder);
 
-        Assert.Equal(RuntimeKind.DockerPlaceholder, docker.Kind);
         Assert.Equal(RuntimeKind.RemotePlaceholder, remote.Kind);
         Assert.Equal(RuntimeKind.HpcPlaceholder, hpc.Kind);
-        Assert.False(docker.IsExecutableInV1);
         Assert.False(remote.IsExecutableInV1);
         Assert.False(hpc.IsExecutableInV1);
-        Assert.Null(docker.ExecutablePath);
         Assert.Null(remote.ExecutablePath);
         Assert.Null(hpc.ExecutablePath);
+    }
+
+    [Fact]
+    public void Docker_runtime_profile_is_executable_and_pins_image_probe()
+    {
+        var profile = RuntimeProfile.DockerContainer(
+            "docker-sciml",
+            "SciML Docker",
+            "metbench-runtime:latest",
+            "python --version",
+            TimeSpan.FromSeconds(60));
+
+        Assert.Equal("docker-sciml", profile.RuntimeKey);
+        Assert.Equal(RuntimeKind.DockerContainer, profile.Kind);
+        Assert.True(profile.IsExecutableInV1);
+        Assert.Equal("docker", profile.ExecutablePath);
+        Assert.Contains(profile.VersionChecks, check =>
+            check.Name == "Docker image" &&
+            check.Command == "docker" &&
+            check.Arguments == "image inspect metbench-runtime:latest");
+        Assert.Contains(profile.VersionChecks, check =>
+            check.Name == "Docker container probe" &&
+            check.Command == "docker" &&
+            check.Arguments == "run --rm metbench-runtime:latest python --version");
     }
 
     [Fact]

@@ -33,14 +33,38 @@ public sealed class RuntimePreflightServiceTests
         var executor = new RecordingProcessExecutor(_ =>
             new ProcessResult(0, "", "", TimeSpan.Zero, false));
         IRuntimePreflightService service = new RuntimePreflightService(executor);
-        var profile = RuntimeProfile.Placeholder("docker-demo", "Docker demo", RuntimeKind.DockerPlaceholder);
+        var profile = RuntimeProfile.Placeholder("remote-demo", "Remote demo", RuntimeKind.RemotePlaceholder);
 
         var result = await service.CheckAsync(profile);
 
         Assert.False(result.Passed);
         Assert.Equal(RuntimeFailureKind.MiddlewareUnavailable, result.FailureKind);
         Assert.Empty(executor.Commands);
-        Assert.Contains("DockerPlaceholder", result.Detail);
+        Assert.Contains("RemotePlaceholder", result.Detail);
+    }
+
+    [Fact]
+    public async Task Docker_profile_runs_docker_startup_image_and_container_probes()
+    {
+        var executor = new RecordingProcessExecutor(_ =>
+            new ProcessResult(0, "ok", "", TimeSpan.FromMilliseconds(1), false));
+        IRuntimePreflightService service = new RuntimePreflightService(executor);
+        var profile = RuntimeProfile.DockerContainer(
+            "docker-sciml",
+            "SciML Docker",
+            "metbench-runtime:latest",
+            "python --version");
+
+        var result = await service.CheckAsync(profile);
+
+        Assert.True(result.Passed);
+        Assert.Equal(new[]
+        {
+            "\"docker\" --version",
+            "\"docker\" image inspect metbench-runtime:latest",
+            "\"docker\" run --rm metbench-runtime:latest python --version"
+        }, executor.Commands);
+        Assert.Contains(result.Diagnostics, d => d.Name == "Docker container probe" && d.Passed);
     }
 
     [Fact]

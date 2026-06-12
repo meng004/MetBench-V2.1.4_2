@@ -234,6 +234,110 @@ public static class ExternalMrAcceptancePutFixtures
                 new[] { "Batch D preserves domain-validity evidence; graph/tensor adapters and calibrated divergence threshold are required before runtime promotion." }));
     }
 
+    public static SutImportUnit CreateBatchEScimlMgnRuntime()
+    {
+        var sut = new SutAsset(
+            "sciml-mgn-runtime",
+            "Domain-validity MGN real-SUT runtime assets",
+            "mesh graph neural surrogate / cylinder flow",
+            ProgramKind.Surrogate,
+            new AdapterSpec(
+                "domain-validity-mgn-runtime",
+                "Imported real-SUT runtime descriptor for Docker/SSH Batch E. MetBench can preflight Docker, but tensor/checkpoint adapters are not bound yet.",
+                "research_assets/runs",
+                new[] { "run_real_sut_node_permutation", "run_mirror_y", "run_conservation_diagnostic", "run_seeded_fault_detection" }),
+            new[]
+            {
+                new ObservableSpec("node_permutation_relative_l2", ObservableKind.Scalar, "relative_error", "Node permutation relative L2 replay metric"),
+                new ObservableSpec("mirror_y_relative_l2", ObservableKind.Scalar, "relative_error", "Mirror-y real/synthetic replay metric"),
+                new ObservableSpec("discrete_divergence", ObservableKind.Scalar, "residual", "Discrete divergence diagnostic replay metric"),
+                new ObservableSpec("checkpoint_id", ObservableKind.Summary, "id", "MGN checkpoint identifier"),
+                new ObservableSpec("seeded_fault_detection", ObservableKind.Summary, "rate", "Seeded-fault runtime detection summary")
+            },
+            Metadata(
+                "batch", "E",
+                "package_id", "metbench-import-sciml-mgn-runtime-v1",
+                "runtime", "docker",
+                "runtime_key", "docker-sciml",
+                "ssh_fallback", "blocked-until-executor"));
+
+        var mrs = new[]
+        {
+            new MrAsset(
+                "mgn-runtime-node-permutation-equivariance",
+                sut.SutId,
+                "MGN runtime node permutation equivariance",
+                new[] { "node_permutation_relative_l2", "checkpoint_id", "seeded_fault_detection" },
+                new TransformBinding(CompatibilityStatus.RequiresAdapter, "NodePermutationTensorTransform", ShapeSpec.ScalarSeries(), "Requires graph/tensor adapter and checkpoint-mounted Docker runtime."),
+                new AssertionBinding(CompatibilityStatus.MappedSupported, "RelativeL2LessOrEqualPredicate", "node_permutation_relative_l2", ToleranceSpec.Relative(1e-6), "Predicate is known, but metric extraction is not bound to MetBench yet."),
+                Metadata("source_run", "real-sut-node-permutation-pilot", "runtime", "docker-or-ssh")),
+            new MrAsset(
+                "mgn-runtime-mirror-y-equivariance",
+                sut.SutId,
+                "MGN runtime mirror-y equivariance",
+                new[] { "mirror_y_relative_l2", "checkpoint_id", "seeded_fault_detection" },
+                new TransformBinding(CompatibilityStatus.RequiresAdapter, "MirrorYTensorTransform", ShapeSpec.ScalarSeries(), "Requires geometry-aware tensor adapter and checkpoint-mounted Docker runtime."),
+                new AssertionBinding(CompatibilityStatus.MappedSupported, "RelativeL2LessOrEqualPredicate", "mirror_y_relative_l2", ToleranceSpec.Relative(1e-6), "Predicate is known, but metric extraction is not bound to MetBench yet."),
+                Metadata("source_run", "mirror-y-rate-upgrade;mirror-y-symmetric-mesh", "runtime", "docker-or-ssh")),
+            new MrAsset(
+                "mgn-runtime-discrete-divergence-diagnostic",
+                sut.SutId,
+                "MGN runtime discrete divergence diagnostic",
+                new[] { "discrete_divergence", "checkpoint_id" },
+                TransformBinding.ImportedOnly("Upstream threshold remains diagnostic until calibrated."),
+                AssertionBinding.ImportedOnly("Allowed verdicts are skip, out-of-relation-domain, or inconclusive; no pass/fail runtime assertion is claimed."),
+                Metadata("source_run", "conservation-diagnostic-pilot", "status", "diagnostic-only")),
+        };
+        var ioGroups = new[]
+        {
+            new IoGroup(
+                "sciml-mgn-runtime-checkpoint-dataset",
+                sut.SutId,
+                "Cylinder-flow checkpoint and dataset roots",
+                new[] { "datasets/cylinder_flow/source_graphs", "checkpoints/mgn_cylinder_flow" },
+                new[] { "runs/real_sut_metrics", "runs/seeded_fault_detection/raw/metric_ledger.json" },
+                Metadata("runtime", "docker-or-ssh", "artifact_policy", "external-paths-not-vendored"))
+        };
+        var mutations = new[]
+        {
+            ScimlMutation(sut.SutId, "BC_zero_inflow", "boundary_condition_fault"),
+            ScimlMutation(sut.SutId, "BC_nonzero_wall", "boundary_condition_fault"),
+            ScimlMutation(sut.SutId, "MA_drop_edges", "mesh_adjacency_fault"),
+            ScimlMutation(sut.SutId, "MA_permute_edges", "mesh_adjacency_fault"),
+            ScimlMutation(sut.SutId, "NS_skip_denorm", "normalization_scale_fault"),
+            ScimlMutation(sut.SutId, "NS_double_scale", "normalization_scale_fault"),
+            ScimlMutation(sut.SutId, "TR_sign_flip", "time_reversal_fault"),
+            ScimlMutation(sut.SutId, "TR_double_step", "time_reversal_fault"),
+            ScimlMutation(sut.SutId, "PC_swap_xy", "physical_channel_fault"),
+            ScimlMutation(sut.SutId, "PC_zero_vy", "physical_channel_fault")
+        };
+        var detections = BuildScimlDetectionMatrix(mrs, mutations, ioGroups[0]);
+
+        return new SutImportUnit(
+            SutImportUnit.CurrentSchemaVersion,
+            sut,
+            mrs,
+            ioGroups,
+            mutations,
+            detections,
+            new Provenance(
+                DomainValidityUrl,
+                DomainValidityCommit,
+                new[]
+                {
+                    "research_assets/runs/real-sut-node-permutation-pilot/manifest.yml",
+                    "research_assets/runs/mirror-y-rate-upgrade/manifest.yml",
+                    "research_assets/runs/mirror-y-symmetric-mesh/manifest.yml",
+                    "research_assets/runs/conservation-diagnostic-pilot/manifest.yml",
+                    "research_assets/runs/seeded-fault-detection/manifest.yml"
+                },
+                "codex-batch-e-sciml-mgn-runtime",
+                new DateTimeOffset(2026, 6, 12, 0, 0, 0, TimeSpan.Zero)),
+            new CompatibilityProfile(
+                RuntimeReadiness.ImportedOnly,
+                new[] { "Batch E records Docker/SSH runtime assets; Docker preflight is available, but MGN tensor/checkpoint adapters and artifact mounts are required before MetBench replay." }));
+    }
+
     private static MrAsset ToyMr(string mrId, string program, string name, params string[] observables)
     {
         return new MrAsset(
@@ -324,7 +428,10 @@ public static class ExternalMrAcceptancePutFixtures
         {
             ["mgn-node-permutation-equivariance"] = new HashSet<string>(StringComparer.Ordinal),
             ["mgn-mirror-y-equivariance"] = new HashSet<string>(StringComparer.Ordinal) { "MA_drop_edges", "PC_swap_xy" },
-            ["mgn-discrete-divergence-boundedness"] = new HashSet<string>(StringComparer.Ordinal) { "BC_zero_inflow", "BC_nonzero_wall", "NS_skip_denorm" }
+            ["mgn-discrete-divergence-boundedness"] = new HashSet<string>(StringComparer.Ordinal) { "BC_zero_inflow", "BC_nonzero_wall", "NS_skip_denorm" },
+            ["mgn-runtime-node-permutation-equivariance"] = new HashSet<string>(StringComparer.Ordinal),
+            ["mgn-runtime-mirror-y-equivariance"] = new HashSet<string>(StringComparer.Ordinal) { "MA_drop_edges", "PC_swap_xy" },
+            ["mgn-runtime-discrete-divergence-diagnostic"] = new HashSet<string>(StringComparer.Ordinal) { "BC_zero_inflow", "BC_nonzero_wall", "NS_skip_denorm" }
         };
         var detections = new List<DetectionRecord>();
         foreach (var mr in mrs)

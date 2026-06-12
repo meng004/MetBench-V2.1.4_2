@@ -81,10 +81,33 @@ public sealed class ExternalMrAcceptanceBatchImportTests
         Assert.Equal(RuntimeReadiness.ImportedOnly, profile.OverallReadiness);
     }
 
+    [Fact]
+    public void Batch_E_sciml_mgn_runtime_package_records_docker_assets_without_runtime_promotion()
+    {
+        var unit = ExternalMrAcceptancePutFixtures.CreateBatchEScimlMgnRuntime();
+
+        var validation = SutImportValidator.Validate(unit);
+        var profile = CompatibilityProfileBuilder.Build(unit);
+
+        Assert.True(validation.IsValid, string.Join(Environment.NewLine, validation.Errors));
+        Assert.Equal("sciml-mgn-runtime", unit.Sut.SutId);
+        Assert.Equal("metbench-import-sciml-mgn-runtime-v1", unit.Sut.Metadata["package_id"]);
+        Assert.Equal("docker", unit.Sut.Metadata["runtime"]);
+        Assert.Equal("docker-sciml", unit.Sut.Metadata["runtime_key"]);
+        Assert.Equal(3, unit.Mrs.Count);
+        Assert.Equal(10, unit.Mutations.Count);
+        Assert.Equal(30, unit.Detections.Count);
+        Assert.Equal(RuntimeReadiness.ImportedOnly, profile.OverallReadiness);
+        Assert.Contains(profile.Findings, finding => finding.Contains("transform", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(unit.Mrs, mr => mr.MrId == "mgn-runtime-discrete-divergence-diagnostic"
+            && mr.AssertionBinding.Status == CompatibilityStatus.ImportedOnly);
+    }
+
     [Theory]
     [InlineData("toy")]
     [InlineData("p1")]
     [InlineData("sciml")]
+    [InlineData("sciml-runtime")]
     public void Batch_A_and_D_packages_export_and_import_without_losing_evidence(string package)
     {
         var unit = package switch
@@ -92,6 +115,7 @@ public sealed class ExternalMrAcceptanceBatchImportTests
             "toy" => ExternalMrAcceptancePutFixtures.CreateBatchAToyClassic(),
             "p1" => ExternalMrAcceptancePutFixtures.CreateBatchAP1Heat(),
             "sciml" => ExternalMrAcceptancePutFixtures.CreateBatchDScimlDomainValidity(),
+            "sciml-runtime" => ExternalMrAcceptancePutFixtures.CreateBatchEScimlMgnRuntime(),
             _ => throw new ArgumentOutOfRangeException(nameof(package), package, null)
         };
         var root = Path.Combine(Path.GetTempPath(), "MetBenchExternalMrBatchRoundTrip", Guid.NewGuid().ToString("N"));

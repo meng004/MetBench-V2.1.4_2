@@ -147,6 +147,51 @@ import/export JSON packages needed to audit the run. Batch D remains
 imported-only by design: the VM check verifies UI import/export visibility and
 evidence preservation, not live MGN replay.
 
+## 0.3 Batch E Docker Pilot Status (2026-06-12)
+
+Batch E has a Docker pilot entry point and explicit test gate, but real Docker
+execution is not yet green on this workstation.
+
+Implemented:
+
+- `RuntimeKind.DockerContainer` and `RuntimeProfile.DockerContainer(...)` model a
+  Docker runtime as executable for preflight.
+- Docker preflight probes run:
+  `docker --version`,
+  `docker image inspect <image>`, and
+  `docker run --rm <image> <probe-command>`.
+- `RuntimeDockerPilotTests.Configured_docker_runtime_image_runs_real_container_probe`
+  executes a real container only when `METBENCH_DOCKER_RUNTIME_IMAGE` is set.
+  Without that variable it skips with an explicit reason.
+- `CreateBatchEScimlMgnRuntime()` creates the
+  `metbench-import-sciml-mgn-runtime-v1` package shape for the MGN Batch E
+  assets. It records Docker runtime metadata, checkpoint/dataset artifact
+  references, three runtime MR cards, and seeded-fault evidence. It remains
+  `ImportedOnly` because graph/tensor adapters, mounted artifact roots, and
+  calibrated diagnostic thresholds are not bound yet.
+
+Local evidence collected on 2026-06-12:
+
+- `docker --version`: Docker CLI exists, `Docker version 29.5.3, build d1c06ef`.
+- Initial sandboxed `docker images metbench-runtime ...`: failed because Docker
+  daemon pipe was absent and Docker config read was denied.
+- Escalated `docker images metbench-runtime ...`: failed with
+  `npipe:////./pipe/dockerDesktopLinuxEngine ... The system cannot find the file specified`.
+- After attempting to start Docker Desktop, Docker processes were present, but:
+  - `docker info --format ...`: returned empty fields plus a Docker API `500`.
+  - `docker version`: client `29.5.3`, API `1.54`, context `desktop-linux`, then
+    Docker API `500` on `/v1.54/version`.
+  - `docker ps` on both `desktop-linux` and `default`: failed or timed out with
+    Docker API `500` on `/containers/json`.
+
+Conclusion:
+
+- Batch E Docker executor/preflight code is ready for a real image probe.
+- This workstation has not produced a passing real Docker container run yet.
+- Do not claim Batch E real SUT execution until
+  `METBENCH_DOCKER_RUNTIME_IMAGE=<image>` plus the Docker pilot test passes and
+  the command output is recorded.
+
 ## 2. Source Repositories
 
 ### 2.1 Minimum-MR-SubSet
@@ -361,10 +406,12 @@ Expected package:
 
 Acceptance:
 
-- Requires MetBench Docker or SSH runtime executor support before claiming
-  end-to-end MetBench execution.
-- Before executor support exists, this batch is `ImportedOnly` with external
-  evidence and blocked runtime readiness.
+- Docker preflight/pilot support exists for an already-built local image, but
+  this is only a runtime probe, not MGN replay.
+- Requires graph/tensor adapters, artifact mount policy, and Docker or SSH
+  execution wiring before claiming end-to-end MetBench MGN execution.
+- Before those exist, this batch is `ImportedOnly` with external evidence and
+  blocked runtime readiness.
 
 ## 5. Acceptance Test Cases
 
@@ -381,7 +428,7 @@ Acceptance:
 | AT-09 | Visualization | Open dashboard after Batch A runs | Pass/fail/anomaly counts and MR coverage are visible |
 | AT-10 | Runtime | Run local preflight for Batch A | Required Python dependencies pass; missing dependency fails closed |
 | AT-11 | Evidence | Import SciML seeded-fault ledger | 10 mutants and 5/10 union detections are displayed with limitations |
-| AT-12 | Docker | Submit Docker runtime pilot | Blocked until Docker executor exists; not counted as a failed MetBench test |
+| AT-12 | Docker | Submit Docker runtime pilot | Runs a real `docker run --rm <image> python --version` probe only when `METBENCH_DOCKER_RUNTIME_IMAGE` is set; otherwise explicitly skipped. This does not claim MGN replay. |
 | AT-13 | SSH | Submit SSH real-SUT pilot | Blocked until SSH executor exists; not counted as a failed MetBench test |
 
 ## 6. Test Data Inventory
@@ -462,7 +509,8 @@ Batch A/D completion.
 7. Reconcile existing P3/P4/P5/P8/P9 metadata with Minimum-MR-SubSet provenance.
 8. Add Batch D import-only package builder for MR cards and seeded-fault ledgers.
 9. Add dashboard/report tests that display imported evidence limitations.
-10. Design Docker/SSH runtime executor contracts before Batch E is promoted from
+10. Add Docker runtime preflight/pilot gate for already-built local images.
+11. Design Docker/SSH runtime executor contracts before Batch E is promoted from
     `ImportedOnly` to executable.
 
 ## 9. Verification Commands
