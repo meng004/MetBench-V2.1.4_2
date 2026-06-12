@@ -1,0 +1,10 @@
+﻿PR-4 driver results
+branch=claude/pr4-vm-verify
+head=52b6071e8764d3244ae0d954513e50146cf570ff
+scale=1
+
+AC-V3a	pass	domain 'ReactorPhysics' checkbox ToggleState=On (IsChecked [ObservableProperty] raised)
+AC-V3b	pass	combo Text='ReactorPhysics' rebuilt from IsChecked via SelectedText SetProperty (not class name)
+AC-V3c	pass	combo Text='_test-csv' rebuilt from IsChecked via SelectedText SetProperty (app '_test-csv', not class name)
+AC-V3d	pass	Word->dialog; Word(repeat)->NO dialog (SetProperty short-circuit); Excel->dialog
+AC-V3e	pass	Binary was On; after Historical click Binary->Off (IsBinaryView synced via NotifyPropertyChangedFor), Historical->On

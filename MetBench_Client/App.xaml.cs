@@ -4,6 +4,7 @@ using MetBench_Client.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System;
 using System.IO;
@@ -168,8 +169,12 @@ namespace MetBench_Client
                 // IResultRepository / ISystemMtPipeline 一致。
                 services.AddScoped<SystemMtExecutionRecorder>();
                 services.AddSingleton<IMrCatalogProvider>(provider =>
-                    new ManifestMrCatalogProvider(
-                        provider.GetRequiredService<LauncherOptions>()));
+                {
+                    var launcherOptions = provider.GetRequiredService<LauncherOptions>();
+                    return new ManifestMrCatalogProvider(
+                        launcherOptions,
+                        ResolveMrManifestPaths(launcherOptions));
+                });
                 services.AddSingleton<ISystemMtManifestCatalogEditor>(provider =>
                     new SystemMtManifestCatalogEditor(
                         provider.GetRequiredService<LauncherOptions>().SutRoot));
@@ -424,6 +429,47 @@ namespace MetBench_Client
             System.Windows.MessageBox.Show(
                 $"Unhandled exception:\n{e.Exception.GetType().Name}: {e.Exception.Message}\n\nSee {logPath} for full details.",
                 "MetBench Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+        }
+
+        private static IReadOnlyList<string>? ResolveMrManifestPaths(LauncherOptions launcherOptions)
+        {
+            var raw = Environment.GetEnvironmentVariable("METBENCH_EXTRA_MR_MANIFESTS");
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                return null;
+            }
+
+            var paths = new List<string>();
+            if (Directory.Exists(launcherOptions.SutRoot))
+            {
+                foreach (var sutDir in Directory.GetDirectories(launcherOptions.SutRoot))
+                {
+                    var canonical = Path.Combine(sutDir, "catalog.json");
+                    if (File.Exists(canonical))
+                    {
+                        paths.Add(canonical);
+                    }
+                }
+            }
+
+            foreach (var part in raw.Split(Path.PathSeparator))
+            {
+                if (string.IsNullOrWhiteSpace(part))
+                {
+                    continue;
+                }
+
+                var path = part.Trim();
+                if (!Path.IsPathRooted(path))
+                {
+                    path = Path.Combine(launcherOptions.SutRoot, path);
+                }
+
+                paths.Add(path);
+            }
+
+            paths.Sort(StringComparer.Ordinal);
+            return paths.Count == 0 ? null : paths;
         }
     }
 }

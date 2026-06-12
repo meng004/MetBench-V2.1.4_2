@@ -88,6 +88,16 @@ public static class UiaHelpers
         return root.FindFirst(TreeScope.Descendants, cond);
     }
 
+    public static AutomationElement? FindByAutomationId(AutomationElement root, string automationId, ControlType? controlType = null)
+    {
+        Condition cond = controlType is null
+            ? new PropertyCondition(AutomationElement.AutomationIdProperty, automationId)
+            : new AndCondition(
+                new PropertyCondition(AutomationElement.AutomationIdProperty, automationId),
+                new PropertyCondition(AutomationElement.ControlTypeProperty, controlType));
+        return root.FindFirst(TreeScope.Descendants, cond);
+    }
+
     /// <summary>Find a navigation item (Wpf.Ui's NavigationViewItem renders as DataItem).</summary>
     public static AutomationElement? FindNavItem(AutomationElement root, string name)
     {
@@ -275,6 +285,83 @@ public static class UiaHelpers
     {
         var ed = FindEdit(root, name);
         return ed is not null && TrySetValue(ed, value);
+    }
+
+    public static void SetValueByAutomationId(AutomationElement root, string automationId, string value)
+    {
+        var ed = FindByAutomationId(root, automationId) ?? throw new InvalidOperationException(
+            $"Element '{automationId}' not found.");
+        if (!TrySetValue(ed, value))
+            throw new InvalidOperationException($"Element '{automationId}' did not accept ValuePattern.SetValue.");
+    }
+
+    public static string TextByAutomationId(AutomationElement root, string automationId)
+    {
+        var el = FindByAutomationId(root, automationId) ?? throw new InvalidOperationException(
+            $"Element '{automationId}' not found.");
+
+        try
+        {
+            if (el.GetCurrentPattern(ValuePattern.Pattern) is ValuePattern vp)
+                return vp.Current.Value ?? string.Empty;
+        }
+        catch { }
+
+        return el.Current.Name ?? string.Empty;
+    }
+
+    public static void ClickByAutomationId(AutomationElement root, string automationId, int settleMs = 400)
+    {
+        var el = FindByAutomationId(root, automationId) ?? throw new InvalidOperationException(
+            $"Element '{automationId}' not found.");
+        if (!TryInvoke(el) && !TryClickViaMouse(el))
+            throw new InvalidOperationException($"Element '{automationId}' could not be invoked.");
+        Thread.Sleep(settleMs);
+    }
+
+    public static bool SelectComboBoxItemByAutomationId(AutomationElement root, string automationId, string itemName, int settleMs = 600)
+    {
+        var combo = FindByAutomationId(root, automationId, ControlType.ComboBox);
+        if (combo is null)
+        {
+            Console.WriteLine($"  ComboBox '{automationId}' not found.");
+            return false;
+        }
+
+        if (combo.GetCurrentPattern(ExpandCollapsePattern.Pattern) is ExpandCollapsePattern ecp)
+        {
+            ecp.Expand();
+            Thread.Sleep(600);
+        }
+        else
+        {
+            TryClickViaMouse(combo);
+            Thread.Sleep(600);
+        }
+
+        AutomationElement? item = null;
+        foreach (var searchRoot in new[] { combo, root, AutomationElement.RootElement })
+        {
+            item = searchRoot.FindFirst(TreeScope.Subtree,
+                new PropertyCondition(AutomationElement.NameProperty, itemName));
+            if (item is not null)
+                break;
+        }
+
+        if (item is null)
+        {
+            Console.WriteLine($"  ComboBox '{automationId}' item '{itemName}' not found.");
+            try { if (combo.GetCurrentPattern(ExpandCollapsePattern.Pattern) is ExpandCollapsePattern ec2) ec2.Collapse(); } catch { }
+            return false;
+        }
+
+        if (TrySelect(item) || TryInvoke(item) || TryClickViaMouse(item))
+        {
+            Thread.Sleep(settleMs);
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>
