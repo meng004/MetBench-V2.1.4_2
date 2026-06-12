@@ -253,12 +253,13 @@ public sealed class LauncherDockerMcpLocalParserTests
                 proc.Start();
                 var stdoutTask = proc.StandardOutput.ReadToEndAsync();
                 var stderrTask = proc.StandardError.ReadToEndAsync();
-                // Honour the MCP timeout (default 30 s); extend to 60 s to be safe in CI
+                // Fixed 60 s ceiling so the fake server cannot hang CI indefinitely.
+                var delay = Task.Delay(TimeSpan.FromSeconds(60));
                 var finished = await Task.WhenAny(
                     Task.WhenAll(stdoutTask, stderrTask).ContinueWith(_ => proc.WaitForExit()),
-                    Task.Delay(TimeSpan.FromSeconds(60))).ConfigureAwait(false);
+                    delay).ConfigureAwait(false);
 
-                if (finished == Task.Delay(TimeSpan.FromSeconds(60)))
+                if (finished == delay)
                 {
                     try { proc.Kill(); } catch { }
                     return JsonSerializer.Serialize(new
