@@ -223,6 +223,116 @@ public sealed class RuntimePreflightLauncherTests
         Assert.Equal(RuntimeFailureKind.RuntimeProfileMissing.ToString(), diagnostic.FailureKind);
     }
 
+    [Fact]
+    public async Task Docker_runtime_profile_preserves_mcp_metadata_when_passed_to_preflight()
+    {
+        var execs = new FakeExecRepo();
+        var results = new FakeResultRepo();
+        var evidence = new InMemoryEvidenceRepo();
+        var anomalies = new RecordingAnomalyService();
+        var preflight = new StubRuntimePreflightService(profile =>
+            RuntimePreflightResult.Blocked(
+                profile,
+                RuntimeFailureKind.MiddlewareUnavailable,
+                "docker preflight stopped before SUT execution",
+                new[]
+                {
+                    new RuntimePreflightDiagnostic(
+                        "middleware",
+                        "docker-mcp",
+                        false,
+                        RuntimeFailureKind.MiddlewareUnavailable,
+                        "docker preflight stopped before SUT execution"),
+                }));
+        var options = new LauncherOptions(
+            SutRoot: TestAssetPaths.AssetRoot(),
+            SystemPython: TestAssetPaths.PythonExecutable(),
+            OpenMocPython: TestAssetPaths.PythonExecutable(),
+            RuntimePythons: new Dictionary<string, string>
+            {
+                ["openmoc-docker"] =
+                    "docker-mcp://openmoc-docker?image=metbench-sut:latest&python=/opt/openmoc-venv/bin/python&endpoint=http%3A%2F%2F127.0.0.1%3A8765",
+            });
+        var launcher = new SystemMtLauncher(
+            options,
+            new ThrowingPipeline(),
+            new SystemMtExecutionRecorder(execs, results, evidence),
+            anomalies,
+            new SingleEntryCatalogProvider(CreateDockerRuntimeEntry(options)),
+            severityThresholds: null,
+            runtimeProfileProvider: null,
+            runtimePreflightService: preflight);
+
+        var result = await launcher.RunAsync("docker-runtime-mr");
+
+        Assert.False(result.Passed);
+        var profile = Assert.Single(preflight.Calls);
+        Assert.Equal(RuntimeKind.Docker, profile.Kind);
+        Assert.NotNull(profile.DockerMcp);
+        Assert.Equal("metbench-sut:latest", profile.DockerMcp!.Image);
+        Assert.Equal("/opt/openmoc-venv/bin/python", profile.DockerMcp.PythonExecutable);
+        Assert.Equal("http://127.0.0.1:8765", profile.DockerMcp.Endpoint);
+        Assert.Empty(results.Data);
+        Assert.Empty(anomalies.Recorded);
+    }
+
+    [Fact]
+    public async Task Docker_runtime_profile_is_attached_to_pipeline_context_after_preflight_passes()
+    {
+        var execs = new FakeExecRepo();
+        var results = new FakeResultRepo();
+        var evidence = new InMemoryEvidenceRepo();
+        var anomalies = new RecordingAnomalyService();
+        var preflight = new StubRuntimePreflightService(profile =>
+            RuntimePreflightResult.Pass(
+                profile,
+                "docker preflight ok",
+                new[]
+                {
+                    new RuntimePreflightDiagnostic(
+                        "docker-mcp",
+                        profile.RuntimeKey,
+                        true,
+                        RuntimeFailureKind.None,
+                        "docker preflight ok"),
+                }));
+        var pipeline = new RecordingPipeline();
+        var options = new LauncherOptions(
+            SutRoot: TestAssetPaths.AssetRoot(),
+            SystemPython: TestAssetPaths.PythonExecutable(),
+            OpenMocPython: TestAssetPaths.PythonExecutable(),
+            RuntimePythons: new Dictionary<string, string>
+            {
+                ["openmoc-docker"] =
+                    "docker-mcp://openmoc-docker?image=metbench-sut:latest&python=/opt/openmoc-venv/bin/python&endpoint=http%3A%2F%2F127.0.0.1%3A8765",
+            });
+        var launcher = new SystemMtLauncher(
+            options,
+            pipeline,
+            new SystemMtExecutionRecorder(execs, results, evidence),
+            anomalies,
+            new SingleEntryCatalogProvider(CreateDockerRuntimeEntry(options)),
+            severityThresholds: null,
+            runtimeProfileProvider: null,
+            runtimePreflightService: preflight);
+
+        var result = await launcher.RunAsync("docker-runtime-mr");
+
+        Assert.True(result.Passed, result.FailureReason);
+        var context = Assert.Single(pipeline.Contexts);
+        Assert.NotNull(context.RuntimeProfile);
+        Assert.Equal(RuntimeKind.Docker, context.RuntimeProfile!.Kind);
+        Assert.NotNull(context.RuntimeProfile.DockerMcp);
+        Assert.Equal("metbench-sut:latest", context.RuntimeProfile.DockerMcp!.Image);
+        Assert.Equal("http://127.0.0.1:8765", context.RuntimeProfile.DockerMcp.Endpoint);
+        Assert.StartsWith("\"/opt/openmoc-venv/bin/python\"", context.InputParserCommand, StringComparison.Ordinal);
+        Assert.StartsWith("\"/opt/openmoc-venv/bin/python\"", context.OutputParserCommand, StringComparison.Ordinal);
+        Assert.StartsWith("\"/opt/openmoc-venv/bin/python\"", context.RunnerCommand, StringComparison.Ordinal);
+        Assert.DoesNotContain("docker-mcp://", context.InputParserCommand, StringComparison.Ordinal);
+        Assert.DoesNotContain("docker-mcp://", context.RunnerCommand, StringComparison.Ordinal);
+    }
+
+
     private static LauncherOptions Options() => new(
         SutRoot: TestAssetPaths.AssetRoot(),
         SystemPython: TestAssetPaths.PythonExecutable(),
@@ -262,6 +372,56 @@ public sealed class RuntimePreflightLauncherTests
             IProgress<string>? progress = null,
             CancellationToken cancellationToken = default) =>
             throw new InvalidOperationException("SUT pipeline should not run after a failed runtime preflight.");
+    }
+
+    private sealed class RecordingPipeline : ISystemMtPipeline
+    {
+        public List<PipelineContext> Contexts { get; } = new();
+
+        public Task<PipelineOutcome> ExecuteAsync(
+            PipelineContext context,
+            IProgress<string>? progress = null,
+            CancellationToken cancellationToken = default)
+        {
+            Contexts.Add(context);
+            return Task.FromResult(PassingOutcome(context));
+        }
+
+        public Task<PipelineOutcome> ExecuteMultiPhaseAsync(
+            MultiPhaseExecutionContext mp,
+            IProgress<string>? progress = null,
+            CancellationToken cancellationToken = default)
+        {
+            Contexts.Add(mp.Base);
+            return Task.FromResult(PassingOutcome(mp.Base));
+        }
+
+        private static PipelineOutcome PassingOutcome(PipelineContext context) =>
+            new(
+                FinalStatus: PipelineStatus.Ok,
+                ErrorMessage: null,
+                StartedAt: DateTime.UtcNow,
+                FinishedAt: DateTime.UtcNow,
+                ArtifactsDirectory: context.WorkingDirectory,
+                SourceInputPath: context.SourceCasePath,
+                FollowupInputPath: Path.Combine(context.WorkingDirectory, "followup.in.json"),
+                SourceOutputPath: Path.Combine(context.WorkingDirectory, "source.out.json"),
+                FollowupOutputPath: Path.Combine(context.WorkingDirectory, "followup.out.json"),
+                SourceMetrics: new Dictionary<string, double> { [context.ValueName] = 1.0 },
+                FollowupMetrics: new Dictionary<string, double> { [context.ValueName] = 2.0 },
+                AssertionResult: new MetBench_BLL.SystemMT.Assertions.SystemMtAssertionResultV2(
+                    context.AssertionTypeCode,
+                    Passed: true,
+                    SourceValue: 1.0,
+                    FollowupValue: 2.0,
+                    ObservedDelta: 1.0,
+                    ExpectedThreshold: null,
+                    Expression: "test",
+                    FailureReason: null),
+                SourceElapsed: TimeSpan.FromMilliseconds(1),
+                FollowupElapsed: TimeSpan.FromMilliseconds(1),
+                SourceExitCode: 0,
+                FollowupExitCode: 0);
     }
 
     private sealed class ThrowingPreflightService : IRuntimePreflightService
@@ -316,6 +476,38 @@ public sealed class RuntimePreflightLauncherTests
             Tolerance: null)
         {
             RuntimeKey = "fenics",
+        };
+
+    private static MrCatalogEntry CreateDockerRuntimeEntry(LauncherOptions options) =>
+        new(
+            Mr: new MrSummary(
+                Id: "docker-runtime-mr",
+                DisplayName: "Docker runtime MR",
+                SutName: "heat-equation",
+                TransformationName: "ScaleField",
+                AssertionName: "GreaterThan",
+                ValueName: "max_u",
+                DefaultParameters: new Dictionary<string, string> { ["factor"] = "2" },
+                Description: "test",
+                MrFamily: "HeatEquation.Mono.Amplitude"),
+            SampleCaseRelativePath: Path.Combine("heat_equation", "sample", "gaussian.json"),
+            RunnerScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation.py"),
+            InputAdapterScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_input_adapter.py"),
+            OutputAdapterScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_output_adapter.py"),
+            PythonExecutable: string.Empty,
+            WorkRootName: "metbench-docker-runtime-profile-test",
+            Timeout: TimeSpan.FromSeconds(30),
+            InputParserScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_input_parser.py"),
+            OutputParserScriptPath: Path.Combine(options.SutRoot, "heat_equation", "heat_equation_output_parser.py"),
+            TransformSteps: new[]
+            {
+                new MrCatalogTransformStep("ScaleField", "/initial/amplitude"),
+            },
+            AssertionTypeCode: "greater",
+            EquationKey: string.Empty,
+            Tolerance: null)
+        {
+            RuntimeKey = "openmoc-docker",
         };
 
     private sealed class InMemoryEvidenceRepo : IExecutionEvidenceRepository

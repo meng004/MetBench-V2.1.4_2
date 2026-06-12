@@ -44,6 +44,59 @@ public sealed class RuntimePreflightServiceTests
     }
 
     [Fact]
+    public async Task Docker_runtime_preflight_calls_mcp_health_without_local_startup_probe()
+    {
+        var executor = new RecordingProcessExecutor(_ =>
+            new ProcessResult(0, "local python should not run", "", TimeSpan.Zero, false));
+        var dockerClient = new RecordingDockerMcpRuntimeClient(
+            new DockerMcpHealthResult(
+                Available: true,
+                Status: "ok",
+                Detail: "MCP health ok",
+                BindHost: "192.168.1.20",
+                BindPort: 8765,
+                RepoRoot: "/repo"));
+        IRuntimePreflightService service = new RuntimePreflightService(executor, dockerClient);
+        var profile = CreateDockerProfile();
+
+        var result = await service.CheckAsync(profile);
+
+        Assert.True(result.Passed);
+        Assert.Empty(executor.Commands);
+        Assert.Same(profile.DockerMcp, dockerClient.OptionsSeen.Single());
+        var diagnostic = Assert.Single(result.Diagnostics);
+        Assert.Equal("docker-mcp", diagnostic.CheckKind);
+        Assert.Equal("openmoc-docker", diagnostic.Name);
+        Assert.True(diagnostic.Passed);
+        Assert.Contains("192.168.1.20:8765", diagnostic.Detail);
+    }
+
+    [Fact]
+    public async Task Docker_runtime_preflight_blocks_when_mcp_health_unavailable()
+    {
+        var executor = new RecordingProcessExecutor(_ =>
+            new ProcessResult(0, "local python should not run", "", TimeSpan.Zero, false));
+        var dockerClient = new RecordingDockerMcpRuntimeClient(
+            new DockerMcpHealthResult(
+                Available: false,
+                Status: "http_error",
+                Detail: "401 Unauthorized"));
+        IRuntimePreflightService service = new RuntimePreflightService(executor, dockerClient);
+        var profile = CreateDockerProfile();
+
+        var result = await service.CheckAsync(profile);
+
+        Assert.False(result.Passed);
+        Assert.Equal(RuntimeFailureKind.MiddlewareUnavailable, result.FailureKind);
+        Assert.Empty(executor.Commands);
+        var diagnostic = Assert.Single(result.Diagnostics);
+        Assert.Equal("docker-mcp", diagnostic.CheckKind);
+        Assert.False(diagnostic.Passed);
+        Assert.Equal(RuntimeFailureKind.MiddlewareUnavailable, diagnostic.FailureKind);
+        Assert.Contains("401 Unauthorized", result.Detail);
+    }
+
+    [Fact]
     public async Task Missing_import_blocks_as_dependency_missing()
     {
         var executor = new RecordingProcessExecutor(command =>
@@ -312,5 +365,43 @@ public sealed class RuntimePreflightServiceTests
             Commands.Add(command);
             return Task.FromResult(_handler(command));
         }
+    }
+
+    private static RuntimeProfile CreateDockerProfile() =>
+        new(
+            "openmoc-docker",
+            "openmoc-docker Docker MCP",
+            RuntimeKind.Docker,
+            "/opt/openmoc-venv/bin/python",
+            dockerMcp: new DockerMcpRuntimeOptions(
+                "http://192.168.1.20:8765",
+                "metbench-sut:latest",
+                "/opt/openmoc-venv/bin/python"));
+
+    private sealed class RecordingDockerMcpRuntimeClient : IDockerMcpRuntimeClient
+    {
+        private readonly DockerMcpHealthResult _result;
+
+        public RecordingDockerMcpRuntimeClient(DockerMcpHealthResult result)
+        {
+            _result = result;
+        }
+
+        public List<DockerMcpRuntimeOptions> OptionsSeen { get; } = new();
+
+        public Task<DockerMcpHealthResult> HealthAsync(
+            DockerMcpRuntimeOptions options,
+            CancellationToken cancellationToken = default)
+        {
+            OptionsSeen.Add(options);
+            return Task.FromResult(_result);
+        }
+
+        public Task<DockerMcpRunResult> RunSutCommandAsync(
+            DockerMcpRuntimeOptions options,
+            IReadOnlyList<string> argv,
+            int timeoutSeconds,
+            CancellationToken cancellationToken = default) =>
+            throw new InvalidOperationException("Preflight tests must not execute SUT commands.");
     }
 }

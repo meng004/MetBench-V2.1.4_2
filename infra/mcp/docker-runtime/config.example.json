@@ -1,0 +1,22 @@
+{
+  "repo_root": "/Users/limeng/Codes/MetBench-V2.1.4_2/.worktrees/docker-runtime-mcp",
+  "bind_host": "auto-private-ipv4",
+  "bind_port": 8765,
+  "auth_token": "change-me",
+  "allowed_images": {
+    "metbench-sut:latest": {
+      "dockerfile": "docker/sut/Dockerfile",
+      "context": "."
+    },
+    "metbench-runtime:latest": {
+      "dockerfile": "docker/runtime/Dockerfile",
+      "context": "."
+    }
+  },
+  "allowed_mount_roots": [
+    "/Users/limeng/Codes/MetBench-V2.1.4_2/.worktrees/docker-runtime-mcp",
+    "/tmp"
+  ],
+  "default_timeout_seconds": 60,
+  "max_output_bytes": 1048576
+}

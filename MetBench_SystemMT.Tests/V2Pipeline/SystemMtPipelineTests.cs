@@ -1,6 +1,7 @@
 using System.Text.Json;
 using MetBench_BLL.SystemMT.Assertions;
 using MetBench_BLL.SystemMT.Pipeline;
+using MetBench_BLL.SystemMT.Runtime;
 using Xunit;
 
 namespace MetBench_SystemMT.Tests.V2Pipeline;
@@ -178,6 +179,75 @@ public sealed class SystemMtPipelineTests : IDisposable
     }
 
     [Fact]
+    public async Task Docker_runtime_profile_routes_only_sut_runner_through_mcp()
+    {
+        var sourceOut = new
+        {
+            values = new Dictionary<string, double> { ["k_eff"] = 1.13 },
+            metadata = new Dictionary<string, string> { ["adapter"] = "docker-test" }
+        };
+        var followupOut = new
+        {
+            values = new Dictionary<string, double> { ["k_eff"] = 0.51 },
+            metadata = new Dictionary<string, string> { ["adapter"] = "docker-test" }
+        };
+        var local = new FakeProcessExecutor(cmd =>
+        {
+            if (cmd.Contains("fake-input-parser parse"))
+            {
+                var data = new Dictionary<string, object?>
+                {
+                    ["materials"] = new Dictionary<string, object?>
+                    {
+                        ["fuel"] = new Dictionary<string, object?> { ["temperature_kelvin"] = 600.0 }
+                    }
+                };
+                return new ProcessResult(0, JsonSerializer.Serialize(data), "", TimeSpan.FromMilliseconds(10), false);
+            }
+            if (cmd.Contains("fake-input-parser write"))
+                return new ProcessResult(0, "{}", "", TimeSpan.FromMilliseconds(10), false);
+            if (cmd.Contains("fake-output-parser"))
+            {
+                var outPath = ExtractOutputFileArg(cmd);
+                return new ProcessResult(0, File.ReadAllText(outPath), "", TimeSpan.FromMilliseconds(10), false);
+            }
+            return new ProcessResult(1, "", "Unexpected local command: " + cmd, TimeSpan.Zero, false);
+        });
+        var dockerClient = new DockerWritingClient(argv =>
+        {
+            var output = ArgAfter(argv, "--output");
+            var data = ArgAfter(argv, "--input").Contains("source.in.json", StringComparison.Ordinal)
+                ? sourceOut
+                : (object)followupOut;
+            File.WriteAllText(output, JsonSerializer.Serialize(data));
+            return new DockerMcpRunResult(0, "", "", TimedOut: false);
+        });
+        var pipeline = new SystemMtPipeline(local, dockerMcpProcessExecutor: new DockerMcpProcessExecutor(dockerClient));
+        var context = MakeContext("less") with
+        {
+            RuntimeProfile = new RuntimeProfile(
+                "openmoc-docker",
+                "openmoc-docker Docker MCP",
+                RuntimeKind.Docker,
+                "/opt/openmoc-venv/bin/python",
+                dockerMcp: new DockerMcpRuntimeOptions(
+                    "http://192.168.1.20:8765",
+                    "metbench-sut:latest",
+                    "/opt/openmoc-venv/bin/python")),
+        };
+
+        var outcome = await pipeline.ExecuteAsync(context);
+
+        Assert.Equal(PipelineStatus.Ok, outcome.FinalStatus);
+        Assert.Equal(2, dockerClient.RunRequests.Count);
+        Assert.All(dockerClient.RunRequests, request =>
+        {
+            Assert.Equal("metbench-sut:latest", request.Options.Image);
+            Assert.Contains("fake-runner", request.Argv);
+        });
+    }
+
+    [Fact]
     public async Task Pipeline_progress_callback_receives_state_transitions()
     {
         var fake = new FakeProcessExecutor(_ =>
@@ -213,6 +283,14 @@ public sealed class SystemMtPipelineTests : IDisposable
         var end = cmd.IndexOf('"', start);
         return cmd.Substring(start, end - start);
     }
+
+    private static string ArgAfter(IReadOnlyList<string> argv, string flag)
+    {
+        var index = argv.ToList().IndexOf(flag);
+        if (index < 0 || index == argv.Count - 1)
+            throw new InvalidOperationException($"No {flag} arg in " + string.Join(" ", argv));
+        return argv[index + 1];
+    }
 }
 
 internal sealed class SyncProgress : IProgress<string>
@@ -236,4 +314,36 @@ internal sealed class FakeProcessExecutor : IProcessExecutor
     {
         return Task.FromResult(_handler(command));
     }
+}
+
+internal sealed class DockerWritingClient : IDockerMcpRuntimeClient
+{
+    private readonly Func<IReadOnlyList<string>, DockerMcpRunResult> _handler;
+
+    public DockerWritingClient(Func<IReadOnlyList<string>, DockerMcpRunResult> handler)
+    {
+        _handler = handler;
+    }
+
+    public List<RunRequest> RunRequests { get; } = new();
+
+    public Task<DockerMcpHealthResult> HealthAsync(
+        DockerMcpRuntimeOptions options,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(new DockerMcpHealthResult(true, "ok", "ok"));
+
+    public Task<DockerMcpRunResult> RunSutCommandAsync(
+        DockerMcpRuntimeOptions options,
+        IReadOnlyList<string> argv,
+        int timeoutSeconds,
+        CancellationToken cancellationToken = default)
+    {
+        RunRequests.Add(new RunRequest(options, argv.ToArray(), timeoutSeconds));
+        return Task.FromResult(_handler(argv));
+    }
+
+    public sealed record RunRequest(
+        DockerMcpRuntimeOptions Options,
+        IReadOnlyList<string> Argv,
+        int TimeoutSeconds);
 }
