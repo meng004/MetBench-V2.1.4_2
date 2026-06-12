@@ -18,7 +18,10 @@ public sealed class SystemMtPageResourceTests
             "SystemMt_Run","SystemMt_SelectedMr","SystemMt_Source","SystemMt_FollowUp","SystemMt_Result",
             "Catalog_LoadedManifests","Catalog_LoadedSuts","Catalog_LoadedEquations","Catalog_LoadedSampleCases",
             "History_ExecutionHistory","Anomaly_Title","Anomaly_ApplyTransition","Replay_Title",
-            "ReportGenerator_Title","ReportGenerator_Export"
+            "ReportGenerator_Title","ReportGenerator_Export",
+            "Nav_SystemMtRuntimeEnvironments","RuntimeEnv_Title","RuntimeEnv_Subtitle",
+            "RuntimeEnv_RuntimeKey","RuntimeEnv_Endpoint","RuntimeEnv_Image","RuntimeEnv_Python",
+            "RuntimeEnv_AuthTokenEnv","RuntimeEnv_Status_Saved_Fmt","RuntimeEnv_Status_HealthFailed_Fmt"
         };
 
         foreach (var key in keys)
