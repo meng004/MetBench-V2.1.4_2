@@ -1,4 +1,6 @@
+import contextlib
 import importlib.util
+import io
 import json
 import os
 import tempfile
@@ -719,6 +721,32 @@ class DockerRuntimeServerTests(unittest.TestCase):
                 },
                 runner=lambda command, timeout_seconds: self.server.CommandResult(0, "", ""),
             )
+
+    def test_run_sut_command_logs_run_id_line(self):
+        config = self.local_runtime_config()
+
+        def fake_runner(command, timeout_seconds):
+            return self.server.CommandResult(returncode=0, stdout="ok", stderr="")
+
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            response = self.server.dispatch_tool(
+                config,
+                "Bearer secret",
+                {
+                    "tool": "run_sut_command",
+                    "arguments": {
+                        "image": "wsl-openmc",
+                        "argv": ["python", "sut.py"],
+                    },
+                },
+                runner=fake_runner,
+                id_factory=lambda: "log-test-run-1",
+            )
+
+        output = buf.getvalue()
+        self.assertIn("run_id=", output)
+        self.assertIn(response["run_id"], output)
 
     def test_acceptance_config_examples_load(self):
         base = Path(__file__).resolve().parents[1]

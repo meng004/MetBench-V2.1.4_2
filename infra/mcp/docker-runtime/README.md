@@ -120,6 +120,10 @@ command:
   environment (no Docker involved).  The `image` argument is still validated
   against `allowed_images`, but entries may omit `dockerfile` and `context`.
   `build_runtime_image` returns an explicit error when the backend is `"local"`.
+  The local backend executes commands with the server process's own privileges on
+  the host — any holder of the Bearer token can run arbitrary argv (the image key
+  is an allowlist label, not a sandbox); deploy only on trusted LANs with a
+  strong token.
 
 `allowed_mount_roots` entries should use consistent path casing and separators;
 deduplication against `repo_root` is case-sensitive.
@@ -131,11 +135,11 @@ Copy the relevant example, drop the `.example` suffix, and set a real
 
 ```
 # Case 1 – local backend on Windows (port 8764)
-python infra/mcp/docker-runtime/server.py infra/mcp/docker-runtime/config.local-win.example.json
+python infra/mcp/docker-runtime/server.py infra/mcp/docker-runtime/config.local-win.json
 
 # Case 2 – docker backend on Windows via Docker Desktop (port 8765)
-python infra/mcp/docker-runtime/server.py infra/mcp/docker-runtime/config.docker-win.example.json
+python infra/mcp/docker-runtime/server.py infra/mcp/docker-runtime/config.docker-win.json
 
 # Case 3 – local backend inside WSL simulating a remote Linux server (port 8766)
-python3 infra/mcp/docker-runtime/server.py infra/mcp/docker-runtime/config.local-wsl.example.json
+python3 infra/mcp/docker-runtime/server.py infra/mcp/docker-runtime/config.local-wsl.json
 ```

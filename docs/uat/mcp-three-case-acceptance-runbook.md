@@ -200,10 +200,10 @@ python3 infra/mcp/docker-runtime/server.py infra/mcp/docker-runtime/config.local
 每个 server 启动时会打印绑定地址，例如：
 
 ```
-Bound to 192.168.1.42:8764
+docker-runtime MCP server (local backend) listening on http://192.168.1.42:8764
 ```
 
-- 用例 1/2：`bind_host=auto-private-ipv4` 解析为 Windows host 的私有 IPv4（局域网 IP），记为 `<hostIP>`
+- 用例 1/2：`bind_host=auto-private-ipv4` 解析为 Windows host 的私有 IPv4（局域网 IP），记为 `<hostIP>`；可用 `ipconfig` 交叉确认
 - 用例 3：解析为 WSL 私有 IPv4，可另行确认：
 
 ```bash
@@ -225,10 +225,10 @@ Invoke-RestMethod -Uri "http://<hostIP>:8764/tool" `
 预期返回：
 
 ```json
-{ "status": "ok", "run_id": "...", ... }
+{"status": "ok", "bind_host": "192.168.1.42", "bind_port": 8764, "repo_root": "..."}
 ```
 
-将实际返回的 IP 与 `run_id` 截图或粘贴记入证据。
+将实际返回截图或粘贴记入证据（`bind_host` 即 `<hostIP>`，`repo_root` 应与 config 一致）。
 
 ---
 
@@ -430,7 +430,7 @@ dotnet run --project MetBench_Client
 
 | 判据 | 描述 | 用例 1 | 用例 2 | 用例 3 |
 |---|---|---|---|---|
-| **P1** client→server 正常 | preflight `RuntimeEvidence` 记录 docker-mcp 健康检查 pass；server 端有对应 run_id 记录 | `[ ]` | `[ ]` | `[ ]` |
+| **P1** client→server 正常 | preflight `RuntimeEvidence` 记录 docker-mcp 健康检查 pass；run_id 证据来自 server 控制台的 `run_sut_command run_id=... status=...` 日志行（每次 MR 运行产生 2 行：source + follow-up），操作员在验收测试/WPF 提交后截取这些行归档 | `[ ]` | `[ ]` | `[ ]` |
 | **P2** 异步 MT 正常 | async job 到终态 `Succeeded`，`MrRunResult` 持久化进 `SystemMT.Litedb`，WPF 页面截图为证 | `[ ]` | `[ ]` | `[ ]` |
 
 自动化验收（§4）覆盖 P1 + P2（测试 `Acceptance_1_*` 验 P1，`Acceptance_2_*` / `Acceptance_3_*` 验 P2）；WPF 手动验收（§5）提供 P2 的 UI 截图证据。

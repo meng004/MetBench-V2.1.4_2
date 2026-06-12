@@ -43,6 +43,7 @@ server，提交异步 MT 作业，验证两条判据：
 | G4 | server 无 local 执行后端 | `server.py` 仅 `build_docker_run_command` 一条执行路径 | 1、3 |
 | G5 | server 在 Windows host 上生成 `-v {root}:{root}` 同路径挂载，Windows 源路径不能作为 Linux 容器内目标路径 | `server.py:190-202` | 2 |
 | G6 | WPF 未把任何环境变量喂进 `RuntimePythons`，docker-mcp URI 无法进入 profile 解析 | `App.xaml.cs:137-143` 实际只注册 `SystemPython` + `OpenMocPython`（与 CLAUDE.md §6 文档示例漂移） | 全部 |
+| G7 | `SplitCommand` 把 `\` 一律当转义符消费，Windows 路径 token 被拆坏（实施期核实） | `DockerMcpProcessExecutor.cs`（修复前 L63-67） | 全部 |
 
 方案取舍（用户已确认）：client 侧 argv 路径翻译 + server 侧双后端 + server 侧挂载
 目标翻译。备选「server 侧 argv 翻译」被否（G1 无论如何只能 client 侧解决）；备选

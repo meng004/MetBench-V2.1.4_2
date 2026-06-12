@@ -357,6 +357,10 @@ def run_sut_command(
         "stderr": _trim_output(result.stderr, config.max_output_bytes),
     }
     RUN_RECORDS[run_id] = record
+    print(
+        f"run_sut_command run_id={run_id} status={status} image={image} returncode={result.returncode}",
+        flush=True,
+    )
     return record
 
 
@@ -444,6 +448,11 @@ def create_http_handler(config: RuntimeConfig, runner=_run_subprocess):
 def serve_http(config: RuntimeConfig) -> None:
     config.bind_host = resolve_bind_host(config.bind_host)
     server = ThreadingHTTPServer((config.bind_host, config.bind_port), create_http_handler(config))
+    print(
+        f"docker-runtime MCP server ({config.backend} backend) listening on "
+        f"http://{config.bind_host}:{config.bind_port}",
+        flush=True,
+    )
     server.serve_forever()
 
 
