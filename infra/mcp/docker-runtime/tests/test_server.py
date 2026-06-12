@@ -595,6 +595,18 @@ class DockerRuntimeServerTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "dockerfile/context"):
                     self.write_config_and_load(payload)
 
+    def test_translate_mount_target_converts_windows_paths(self):
+        cases = [
+            ("D:\\Codes\\MetBench", "/mnt/d/Codes/MetBench"),
+            ("c:/Users/lemon/AppData/Local/Temp", "/mnt/c/Users/lemon/AppData/Local/Temp"),
+            ("/opt/openmc-data", "/opt/openmc-data"),
+            ("relative/path", "relative/path"),
+        ]
+
+        for source, expected in cases:
+            with self.subTest(source=source):
+                self.assertEqual(expected, self.server.translate_mount_target(source))
+
 
 if __name__ == "__main__":
     unittest.main()

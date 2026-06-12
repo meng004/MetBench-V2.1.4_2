@@ -1,4 +1,5 @@
 import json
+import re
 import socket
 import subprocess
 import sys
@@ -188,6 +189,18 @@ def validate_run_request(config: RuntimeConfig, request: dict[str, Any]) -> dict
 def authorize(header: str | None, expected_token: str) -> None:
     if header != f"Bearer {expected_token}":
         raise PermissionError("Unauthorized")
+
+
+WINDOWS_PATH_PATTERN = re.compile(r"^([A-Za-z]):[\\/](.*)$")
+
+
+def translate_mount_target(path: str) -> str:
+    match = WINDOWS_PATH_PATTERN.match(path)
+    if match is None:
+        return path
+    drive = match.group(1).lower()
+    rest = match.group(2).replace("\\", "/")
+    return f"/mnt/{drive}/{rest}"
 
 
 def build_docker_run_command(
