@@ -607,6 +607,46 @@ class DockerRuntimeServerTests(unittest.TestCase):
             with self.subTest(source=source):
                 self.assertEqual(expected, self.server.translate_mount_target(source))
 
+    def test_build_docker_run_command_mounts_allowed_roots_with_translated_targets(self):
+        config = self.valid_runtime_config()
+        config.repo_root = "D:\\Codes\\MetBench"
+        config.allowed_mount_roots = [
+            "D:\\Codes\\MetBench",
+            "C:\\Users\\lemon\\AppData\\Local\\Temp",
+        ]
+
+        command = self.server.build_docker_run_command(
+            config,
+            "metbench-sut:latest",
+            ["python", "sut.py"],
+            timeout_seconds=30,
+        )
+
+        self.assertIn("D:\\Codes\\MetBench:/mnt/d/Codes/MetBench", command)
+        self.assertIn(
+            "C:\\Users\\lemon\\AppData\\Local\\Temp:/mnt/c/Users/lemon/AppData/Local/Temp",
+            command,
+        )
+        self.assertNotIn("/tmp:/tmp", command)
+        w_index = command.index("-w")
+        self.assertEqual("/mnt/d/Codes/MetBench", command[w_index + 1])
+        self.assertEqual(["metbench-sut:latest", "python", "sut.py"], command[-3:])
+
+    def test_build_docker_run_command_mounts_extra_linux_roots(self):
+        config = self.valid_runtime_config()
+        config.allowed_mount_roots = ["/tmp", "/opt/openmc-data"]
+
+        command = self.server.build_docker_run_command(
+            config,
+            "metbench-sut:latest",
+            ["python", "sut.py"],
+            timeout_seconds=30,
+        )
+
+        self.assertIn(f"{REPO_ROOT}:{REPO_ROOT}", command)
+        self.assertIn("/tmp:/tmp", command)
+        self.assertIn("/opt/openmc-data:/opt/openmc-data", command)
+
 
 if __name__ == "__main__":
     unittest.main()

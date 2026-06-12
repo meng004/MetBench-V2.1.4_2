@@ -203,6 +203,10 @@ def translate_mount_target(path: str) -> str:
     return f"/mnt/{drive}/{rest}"
 
 
+def _is_windows_path(path: str) -> bool:
+    return WINDOWS_PATH_PATTERN.match(path) is not None
+
+
 def build_docker_run_command(
     config: RuntimeConfig,
     image: str,
@@ -219,20 +223,19 @@ def build_docker_run_command(
     ):
         raise ValueError("timeout_seconds must be positive")
 
-    repo_root = str(Path(config.repo_root))
-    return [
-        "docker",
-        "run",
-        "--rm",
-        "-v",
-        f"{repo_root}:{repo_root}",
-        "-v",
-        "/tmp:/tmp",
-        "-w",
-        repo_root,
-        image,
-        *argv,
-    ]
+    roots: list[str] = []
+    for root in [config.repo_root, *config.allowed_mount_roots]:
+        if root not in roots:
+            roots.append(root)
+    # Legacy compatibility: Linux hosts always mounted /tmp; Windows hosts must not.
+    if not _is_windows_path(config.repo_root) and "/tmp" not in roots:
+        roots.append("/tmp")
+
+    command = ["docker", "run", "--rm"]
+    for root in roots:
+        command += ["-v", f"{root}:{translate_mount_target(root)}"]
+    command += ["-w", translate_mount_target(config.repo_root), image, *argv]
+    return command
 
 
 def _run_subprocess(command: list[str], timeout_seconds: int) -> CommandResult:
