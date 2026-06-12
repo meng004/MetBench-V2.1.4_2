@@ -8,6 +8,7 @@ public enum RuntimeKind
 {
     LocalPython,
     PythonVirtualEnvironment,
+    Docker,
     DockerPlaceholder,
     RemotePlaceholder,
     HpcPlaceholder
@@ -64,6 +65,12 @@ public sealed record RuntimeArtifactPolicy(
     bool PreserveLogs = true,
     string ArtifactRoot = "");
 
+public sealed record DockerMcpRuntimeOptions(
+    string Endpoint,
+    string Image,
+    string PythonExecutable,
+    string? AuthTokenEnvironmentVariable = null);
+
 public sealed record RuntimeProfile
 {
     public RuntimeProfile(
@@ -76,12 +83,15 @@ public sealed record RuntimeProfile
         IReadOnlyList<string>? requiredEnvironmentVariables = null,
         TimeSpan? timeout = null,
         RuntimeResourceHints? resourceHints = null,
-        RuntimeArtifactPolicy? artifactPolicy = null)
+        RuntimeArtifactPolicy? artifactPolicy = null,
+        DockerMcpRuntimeOptions? dockerMcp = null)
     {
         if (string.IsNullOrWhiteSpace(displayName))
             throw new ArgumentException("Runtime display name is required.", nameof(displayName));
         if (timeout <= TimeSpan.Zero)
             throw new ArgumentOutOfRangeException(nameof(timeout), "Runtime timeout must be positive.");
+        if (kind == RuntimeKind.Docker && dockerMcp is null)
+            throw new ArgumentException("Docker runtime profiles require Docker MCP options.", nameof(dockerMcp));
 
         RuntimeKey = NormalizeRuntimeKey(runtimeKey);
         DisplayName = displayName;
@@ -93,6 +103,7 @@ public sealed record RuntimeProfile
         Timeout = timeout ?? TimeSpan.FromSeconds(30);
         ResourceHints = resourceHints ?? new RuntimeResourceHints();
         ArtifactPolicy = artifactPolicy ?? new RuntimeArtifactPolicy();
+        DockerMcp = dockerMcp;
     }
 
     public string RuntimeKey { get; }
@@ -111,12 +122,14 @@ public sealed record RuntimeProfile
 
     public RuntimeArtifactPolicy ArtifactPolicy { get; }
 
+    public DockerMcpRuntimeOptions? DockerMcp { get; }
+
     public bool IsExecutableInV1 =>
-        Kind is RuntimeKind.LocalPython or RuntimeKind.PythonVirtualEnvironment;
+        Kind is RuntimeKind.LocalPython or RuntimeKind.PythonVirtualEnvironment or RuntimeKind.Docker;
 
     public static RuntimeProfile Placeholder(string runtimeKey, string displayName, RuntimeKind kind)
     {
-        if (kind is RuntimeKind.LocalPython or RuntimeKind.PythonVirtualEnvironment)
+        if (kind is RuntimeKind.LocalPython or RuntimeKind.PythonVirtualEnvironment or RuntimeKind.Docker)
             throw new ArgumentException("Executable runtime kinds require an executable path.", nameof(kind));
 
         return new RuntimeProfile(NormalizeRuntimeKey(runtimeKey), displayName, kind, executablePath: null);

@@ -6,6 +6,7 @@ using MetBench_BLL.SystemMT.Catalog.Typed.Migration;
 using MetBench_BLL.SystemMT.Catalog.Typed.Runtime;
 using MetBench_BLL.SystemMT.Catalog.Typed.Specs;
 using MetBench_BLL.SystemMT.ParameterMapping;
+using MetBench_BLL.SystemMT.Runtime;
 using MetBench_BLL.SystemMT.Transformations;
 
 namespace MetBench_BLL.SystemMT.Pipeline;
@@ -27,13 +28,16 @@ namespace MetBench_BLL.SystemMT.Pipeline;
 public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineContext, PipelineOutcome>
 {
     private readonly IProcessExecutor _processExecutor;
+    private readonly DockerMcpProcessExecutor _dockerMcpProcessExecutor;
     private readonly IPredicateDispatcher _predicateDispatcher;
 
     public SystemMtPipeline(
         IProcessExecutor? processExecutor = null,
+        DockerMcpProcessExecutor? dockerMcpProcessExecutor = null,
         IPredicateDispatcher? predicateDispatcher = null)
     {
         _processExecutor = processExecutor ?? new DefaultProcessExecutor();
+        _dockerMcpProcessExecutor = dockerMcpProcessExecutor ?? new DockerMcpProcessExecutor();
         _predicateDispatcher = predicateDispatcher ?? new PredicateDispatcher();
     }
 
@@ -101,8 +105,8 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
             progress?.Report(PipelineStatus.RunningSource);
             var runSourceCmd =
                 $"{ctx.RunnerCommand} --input \"{ctx.SourceCasePath}\" --output \"{sourceOutputPath}\"";
-            var rsResult = await _processExecutor.RunAsync(
-                runSourceCmd, artifactsDir, ctx.TimeoutSeconds, cancellationToken)
+            var rsResult = await RunSutCommandAsync(
+                ctx, runSourceCmd, artifactsDir, cancellationToken)
                 .ConfigureAwait(false);
             srcExitCode = rsResult.ExitCode;
             srcElapsed = rsResult.Elapsed;
@@ -112,8 +116,8 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
             progress?.Report(PipelineStatus.RunningFollowup);
             var runFollowupCmd =
                 $"{ctx.RunnerCommand} --input \"{followupInputPath}\" --output \"{followupOutputPath}\"";
-            var rfResult = await _processExecutor.RunAsync(
-                runFollowupCmd, artifactsDir, ctx.TimeoutSeconds, cancellationToken)
+            var rfResult = await RunSutCommandAsync(
+                ctx, runFollowupCmd, artifactsDir, cancellationToken)
                 .ConfigureAwait(false);
             flwExitCode = rfResult.ExitCode;
             flwElapsed = rfResult.Elapsed;
@@ -433,8 +437,8 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
 
                 // Run SUT
                 var runCmd = $"{ctx.RunnerCommand} --input \"{phaseInputPath}\" --output \"{phaseOutputPath}\"";
-                var rResult = await _processExecutor.RunAsync(
-                    runCmd, artifactsDir, ctx.TimeoutSeconds, cancellationToken)
+                var rResult = await RunSutCommandAsync(
+                    ctx, runCmd, artifactsDir, cancellationToken)
                     .ConfigureAwait(false);
                 if (i == 0) { firstElapsed = rResult.Elapsed; firstExitCode = rResult.ExitCode; }
                 if (i == mp.Phases.Count - 1) { lastElapsed = rResult.Elapsed; lastExitCode = rResult.ExitCode; }
@@ -536,5 +540,29 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
             FollowupElapsed: lastElapsed,
             SourceExitCode: firstExitCode,
             FollowupExitCode: lastExitCode);
+    }
+
+    private Task<ProcessResult> RunSutCommandAsync(
+        PipelineContext ctx,
+        string command,
+        string workingDirectory,
+        CancellationToken cancellationToken)
+    {
+        if (ctx.RuntimeProfile?.Kind == RuntimeKind.Docker)
+        {
+            if (ctx.RuntimeProfile.DockerMcp is null)
+            {
+                throw new InvalidOperationException(
+                    $"Docker runtime profile '{ctx.RuntimeProfile.RuntimeKey}' has no Docker MCP options.");
+            }
+
+            return _dockerMcpProcessExecutor.RunAsync(
+                ctx.RuntimeProfile.DockerMcp,
+                command,
+                ctx.TimeoutSeconds,
+                cancellationToken);
+        }
+
+        return _processExecutor.RunAsync(command, workingDirectory, ctx.TimeoutSeconds, cancellationToken);
     }
 }

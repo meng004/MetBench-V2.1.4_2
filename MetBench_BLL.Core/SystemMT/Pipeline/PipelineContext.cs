@@ -1,6 +1,7 @@
 using MetBench_BLL.Equations;
 using MetBench_BLL.SystemMT.Assertions;
 using MetBench_BLL.SystemMT.Catalog.Typed.Specs;
+using MetBench_BLL.SystemMT.Runtime;
 
 namespace MetBench_BLL.SystemMT.Pipeline;
 
@@ -65,4 +66,11 @@ public sealed record PipelineContext(
     /// <see cref="AssertionTypeCode"/> via the legacy migration mapper.
     /// </summary>
     public PredicateSpec? TypedPredicate { get; init; }
+
+    /// <summary>
+    /// Optional resolved runtime profile. Local profiles keep the existing host
+    /// process path; Docker profiles route only SUT runner commands through the
+    /// Docker MCP backend.
+    /// </summary>
+    public RuntimeProfile? RuntimeProfile { get; init; }
 }

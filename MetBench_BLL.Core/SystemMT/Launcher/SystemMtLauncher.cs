@@ -182,6 +182,20 @@ public sealed class SystemMtLauncher : ISystemMtLauncher, ISystemMtCatalogReader
 
         // Resolve transformation (single step direct;multi-step uses pre-registered composite)
         var (transformName, targetFieldPath) = ResolveTransformation(blueprint);
+        RuntimeProfile? resolvedRuntimeProfile = null;
+        var runtimeProfileResolutionError = string.Empty;
+        var pythonExecutable = blueprint.PythonExecutable;
+        try
+        {
+            resolvedRuntimeProfile = CreateRuntimeProfile(blueprint);
+            pythonExecutable = resolvedRuntimeProfile.DockerMcp?.PythonExecutable
+                ?? resolvedRuntimeProfile.ExecutablePath
+                ?? blueprint.PythonExecutable;
+        }
+        catch (RuntimeEnvironmentResolutionException ex)
+        {
+            runtimeProfileResolutionError = ex.Message;
+        }
 
         var context = new PipelineContext(
             MrCode: blueprint.Mr.Id,
@@ -196,9 +210,9 @@ public sealed class SystemMtLauncher : ISystemMtLauncher, ISystemMtCatalogReader
             SutName: blueprint.Mr.SutName,
             SourceCasePath: sourceInputPath,
             WorkingDirectory: workRoot,
-            InputParserCommand: $"\"{blueprint.PythonExecutable}\" \"{blueprint.InputParserScriptPath}\"",
-            OutputParserCommand: $"\"{blueprint.PythonExecutable}\" \"{blueprint.OutputParserScriptPath}\"",
-            RunnerCommand: $"\"{blueprint.PythonExecutable}\" \"{blueprint.RunnerScriptPath}\"",
+            InputParserCommand: $"\"{pythonExecutable}\" \"{blueprint.InputParserScriptPath}\"",
+            OutputParserCommand: $"\"{pythonExecutable}\" \"{blueprint.OutputParserScriptPath}\"",
+            RunnerCommand: $"\"{pythonExecutable}\" \"{blueprint.RunnerScriptPath}\"",
             TimeoutSeconds: (int)blueprint.Timeout.TotalSeconds,
             CatalogVersionSha: string.Empty,
             SutVersionSnapshot: string.Empty,
@@ -214,9 +228,14 @@ public sealed class SystemMtLauncher : ISystemMtLauncher, ISystemMtCatalogReader
         // PR-Bol-2A: 多相 error-monotonic 分支 — launcher 预构建 TypedSpec + TypedPredicate
         // via TypedSpecFactory.ForErrorMonotonic (string-code 分派仍封闭在 Migration/ 内),
         // 然后调 ExecuteMultiPhaseAsync. 30+ 现存 2-side MR 走 else 分支保持字节一致.
-        var runtimePreflight = await CreateRuntimePreflightResultAsync(blueprint, cancellationToken)
+        var runtimePreflight = await CreateRuntimePreflightResultAsync(
+                blueprint,
+                resolvedRuntimeProfile,
+                runtimeProfileResolutionError,
+                cancellationToken)
             .ConfigureAwait(false);
         var runtimeEvidence = RuntimeEvidence.FromPreflightResult(runtimePreflight);
+        context = context with { RuntimeProfile = runtimePreflight.Profile };
         if (!runtimePreflight.Passed)
         {
             var blocked = await _recorder.RecordBlockedPreflightAsync(
@@ -293,13 +312,23 @@ public sealed class SystemMtLauncher : ISystemMtLauncher, ISystemMtCatalogReader
             resolved.DependencyChecks,
             resolved.VersionChecks,
             resolved.RequiredEnvironmentVariables,
-            timeout: blueprint.Timeout);
+            timeout: blueprint.Timeout,
+            dockerMcp: resolved.DockerMcp);
     }
 
     private async Task<RuntimePreflightResult> CreateRuntimePreflightResultAsync(
         MrBlueprint blueprint,
+        RuntimeProfile? resolvedProfile,
+        string profileResolutionError,
         CancellationToken cancellationToken)
     {
+        if (resolvedProfile is not null)
+        {
+            return await _runtimePreflightService
+                .CheckAsync(resolvedProfile, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
         try
         {
             return await _runtimePreflightService
@@ -308,24 +337,35 @@ public sealed class SystemMtLauncher : ISystemMtLauncher, ISystemMtCatalogReader
         }
         catch (RuntimeEnvironmentResolutionException ex)
         {
-            var runtimeKey = RuntimeProfile.NormalizeRuntimeKey(blueprint.RuntimeKey);
-            var profile = RuntimeProfile.Placeholder(
-                runtimeKey,
-                $"{runtimeKey} runtime",
-                RuntimeKind.RemotePlaceholder);
-            var diagnostic = new RuntimePreflightDiagnostic(
-                "profile",
-                runtimeKey,
-                false,
-                RuntimeFailureKind.RuntimeProfileMissing,
-                ex.Message);
-
-            return RuntimePreflightResult.Blocked(
-                profile,
-                RuntimeFailureKind.RuntimeProfileMissing,
-                ex.Message,
-                new[] { diagnostic });
+            return MissingRuntimeProfilePreflight(blueprint, ex.Message);
         }
+        catch (InvalidOperationException) when (!string.IsNullOrWhiteSpace(profileResolutionError))
+        {
+            return MissingRuntimeProfilePreflight(blueprint, profileResolutionError);
+        }
+    }
+
+    private static RuntimePreflightResult MissingRuntimeProfilePreflight(
+        MrBlueprint blueprint,
+        string detail)
+    {
+        var runtimeKey = RuntimeProfile.NormalizeRuntimeKey(blueprint.RuntimeKey);
+        var profile = RuntimeProfile.Placeholder(
+            runtimeKey,
+            $"{runtimeKey} runtime",
+            RuntimeKind.RemotePlaceholder);
+        var diagnostic = new RuntimePreflightDiagnostic(
+            "profile",
+            runtimeKey,
+            false,
+            RuntimeFailureKind.RuntimeProfileMissing,
+            detail);
+
+        return RuntimePreflightResult.Blocked(
+            profile,
+            RuntimeFailureKind.RuntimeProfileMissing,
+            detail,
+            new[] { diagnostic });
     }
 
     private static (string TransformationName, string TargetFieldPath) ResolveTransformation(MrBlueprint blueprint)

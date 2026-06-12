@@ -15,12 +15,17 @@ public sealed class RuntimePreflightService : IRuntimePreflightService
     private const string ExecutableCheckKind = "executable";
     private const string StartupCheckKind = "startup";
     private const string MiddlewareCheckKind = "middleware";
+    private const string DockerMcpCheckKind = "docker-mcp";
 
     private readonly IProcessExecutor _processExecutor;
+    private readonly IDockerMcpRuntimeClient _dockerMcpRuntimeClient;
 
-    public RuntimePreflightService(IProcessExecutor processExecutor)
+    public RuntimePreflightService(
+        IProcessExecutor processExecutor,
+        IDockerMcpRuntimeClient? dockerMcpRuntimeClient = null)
     {
         _processExecutor = processExecutor ?? throw new ArgumentNullException(nameof(processExecutor));
+        _dockerMcpRuntimeClient = dockerMcpRuntimeClient ?? new DockerMcpRuntimeClient();
     }
 
     public async Task<RuntimePreflightResult> CheckAsync(
@@ -47,6 +52,9 @@ public sealed class RuntimePreflightService : IRuntimePreflightService
                 detail,
                 diagnostics);
         }
+
+        if (profile.Kind == RuntimeKind.Docker)
+            return await CheckDockerRuntimeAsync(profile, diagnostics, cancellationToken).ConfigureAwait(false);
 
         if (string.IsNullOrWhiteSpace(profile.ExecutablePath)
             || IsConfiguredFilePathMissing(profile.ExecutablePath))
@@ -211,6 +219,66 @@ public sealed class RuntimePreflightService : IRuntimePreflightService
             profile,
             $"Runtime preflight passed for runtime '{profile.RuntimeKey}' with {diagnostics.Count} check(s).",
             diagnostics);
+    }
+
+    private async Task<RuntimePreflightResult> CheckDockerRuntimeAsync(
+        RuntimeProfile profile,
+        List<RuntimePreflightDiagnostic> diagnostics,
+        CancellationToken cancellationToken)
+    {
+        if (profile.DockerMcp is null)
+        {
+            var missingDetail = $"Docker runtime profile '{profile.RuntimeKey}' has no Docker MCP options.";
+            diagnostics.Add(new RuntimePreflightDiagnostic(
+                DockerMcpCheckKind,
+                profile.RuntimeKey,
+                false,
+                RuntimeFailureKind.MiddlewareUnavailable,
+                missingDetail));
+            return RuntimePreflightResult.Blocked(
+                profile,
+                RuntimeFailureKind.MiddlewareUnavailable,
+                missingDetail,
+                diagnostics);
+        }
+
+        var health = await _dockerMcpRuntimeClient
+            .HealthAsync(profile.DockerMcp, cancellationToken)
+            .ConfigureAwait(false);
+        var detail = DockerHealthDetail(profile, health);
+        if (!health.Available)
+        {
+            diagnostics.Add(new RuntimePreflightDiagnostic(
+                DockerMcpCheckKind,
+                profile.RuntimeKey,
+                false,
+                RuntimeFailureKind.MiddlewareUnavailable,
+                detail));
+            return RuntimePreflightResult.Blocked(
+                profile,
+                RuntimeFailureKind.MiddlewareUnavailable,
+                detail,
+                diagnostics);
+        }
+
+        diagnostics.Add(new RuntimePreflightDiagnostic(
+            DockerMcpCheckKind,
+            profile.RuntimeKey,
+            true,
+            RuntimeFailureKind.None,
+            detail));
+        return RuntimePreflightResult.Pass(
+            profile,
+            $"Docker MCP runtime preflight passed for runtime '{profile.RuntimeKey}'.",
+            diagnostics);
+    }
+
+    private static string DockerHealthDetail(RuntimeProfile profile, DockerMcpHealthResult health)
+    {
+        if (!string.IsNullOrWhiteSpace(health.BindHost) || health.BindPort.HasValue)
+            return $"Docker MCP runtime '{profile.RuntimeKey}' status '{health.Status}' at {health.BindHost}:{health.BindPort}. {health.Detail}";
+
+        return $"Docker MCP runtime '{profile.RuntimeKey}' status '{health.Status}'. {health.Detail}";
     }
 
     private static bool IsConfiguredFilePathMissing(string executablePath)
