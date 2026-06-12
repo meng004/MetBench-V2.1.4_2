@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,6 +28,10 @@ public sealed class DockerMcpProcessExecutor
             throw new ArgumentNullException(nameof(options));
 
         var argv = SplitCommand(command);
+        if (options.PathStyle == DockerMcpPathStyle.Wsl)
+        {
+            argv = argv.Select(TranslateWindowsPathToWsl).ToList();
+        }
         var sw = Stopwatch.StartNew();
         var result = await _client
             .RunSutCommandAsync(options, argv, timeoutSeconds, cancellationToken)
@@ -39,6 +44,21 @@ public sealed class DockerMcpProcessExecutor
             result.Stderr,
             sw.Elapsed,
             result.TimedOut);
+    }
+
+    internal static string TranslateWindowsPathToWsl(string token)
+    {
+        if (token.Length < 3
+            || !char.IsAsciiLetter(token[0])
+            || token[1] != ':'
+            || (token[2] != '\\' && token[2] != '/'))
+        {
+            return token;
+        }
+
+        var drive = char.ToLowerInvariant(token[0]);
+        var rest = token[3..].Replace('\\', '/');
+        return $"/mnt/{drive}/{rest}";
     }
 
     internal static IReadOnlyList<string> SplitCommand(string command)
@@ -55,6 +75,10 @@ public sealed class DockerMcpProcessExecutor
         {
             if (escaping)
             {
+                if (ch != '"')
+                {
+                    current.Append('\\');
+                }
                 current.Append(ch);
                 escaping = false;
                 continue;
