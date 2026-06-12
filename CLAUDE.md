@@ -163,7 +163,7 @@ System-MT 引擎 + Launcher facade（`ISystemMtLauncher` 单一入口）+ LiteDB
 **验收标准：流程端到端走通**，不以覆盖全部方程为准（覆盖见 T3）。
 截至当前代码测试基线（实时见 [`docs/status/current.md`](docs/status/current.md)），System-MT 已切到 `ISystemMtLauncher` / `SystemMtLauncher`
 + provider-backed catalog 路径；WPF 默认注册 `ManifestMrCatalogProvider`，但 launcher
-launcher 已移除生产路径的 `HardcodedMrCatalogProvider` 过渡 fallback，现要求显式注入 `IMrCatalogProvider`。
+已移除生产路径的 `HardcodedMrCatalogProvider` 过渡 fallback，现要求显式注入 `IMrCatalogProvider`。
 
 **T1 · 直接支撑与操作入口**
 
@@ -209,7 +209,16 @@ MT 检出的违例进入异常调查工作流（查询 / 过滤 / 状态机 / �
 | `MetBench_DAL/` | `net8.0` | Anywhere | LiteDB-backed implementations. References `MetBench_BLL.Core` for the new system-MT result repository. |
 | `MetBench_BLL/` | `net8.0` | Anywhere (incl. Linux CI) | Legacy method-level MT business orchestration + cross-platform `MTVisualizationSerive` (LiveCharts data, no WPF) + Word/Excel/PDF report generators. **WPF chart plotters were extracted to `MetBench_Client/Services/Plotting/`** so BLL stays portable. |
 | `MetBench_Client/` | **`net8.0-windows7.0`**, `<UseWPF>true</UseWPF>` | Windows only | The WPF UI app. Entry point. |
-| `MetBench_SystemMT.Tests/` | `net8.0` | Anywhere (incl. Linux CI) | All tests. xUnit + Reqnroll. |
+| `MetBench_SystemMT.Tests/` | `net8.0` | Anywhere (incl. Linux CI) | All cross-platform tests. xUnit + Reqnroll. |
+| `MetBench_Client.Tests/` | **`net8.0-windows7.0`**, `<UseWPF>true</UseWPF>` | Windows only | WPF client tests (architecture + i18n). xUnit + Xunit.StaFact. **Not run by Linux CI.** |
+| `MetBench_UI.Localization/` | `net8.0` | Anywhere | Localization service + resources consumed by the WPF client. |
+| `MetBench_Analyzers/` | `netstandard2.0` | Anywhere | Roslyn analyzers METBENCH001 / METBENCH002 (§12 module B). |
+
+Non-csproj directories that matter: `SUT/` (SUT programs + Python adapters),
+`metbench/catalog/` (v2 MR catalog `.feature` files + migration assets),
+`infra/mcp/docker-runtime/` (LAN Docker runtime MCP bridge, Python — see §6),
+`docker/` (SUT runtime Dockerfiles + wrapper scripts), `tools/` (CI / governance /
+experiment scripts), `MetBench_Python/` (legacy method-level scripts, **not in the solution**).
 
 **Hard rule for cross-environment work**:
 
@@ -345,6 +354,14 @@ Current caveats on `main`:
   `system` / `openmoc` / `openmc` / `scipy` behaviour is preserved via compat fields;
   the resolver prefers `RuntimePythons[key]` (case-insensitive, non-blank) over the
   compat field when both are set.
+- **Docker runtime MCP backend (T1, PR #358)**: a `RuntimePythons` value may also be a
+  `docker-mcp://<runtime-key>?image=...&python=...&endpoint=...&authTokenEnv=...` URI
+  instead of a local Python path. Profile parsing fails closed (malformed URI / non-http(s)
+  endpoint / URI host ≠ runtime key); launcher preflight calls the bridge's `runtime_health`
+  instead of probing a host Python; only SUT **runner** commands route through MCP
+  `run_sut_command` — parser / adapter subprocesses stay local. The bridge server itself is
+  `infra/mcp/docker-runtime/server.py` (JSON-over-HTTP, Bearer auth, allowlisted images;
+  see its `README.md`).
 
 ## 7. Async & UI-thread conventions
 
@@ -358,6 +375,8 @@ Current caveats on `main`:
 |---------|----------------|
 | `dotnet build MetBench_BLL.Core/MetBench_BLL.Core.csproj` | Linux + Windows |
 | `dotnet test MetBench_SystemMT.Tests` | Linux + Windows |
+| `dotnet test MetBench_SystemMT.Tests --filter "FullyQualifiedName~<TypeOrMethodName>"` | Linux + Windows (run a single test / test class) |
+| `dotnet test MetBench_Client.Tests` | **Windows only** (WPF test project) |
 | `dotnet build MetBench.sln` | **Windows only** (WPF SDK targets) |
 | `dotnet build MetBench_Client/MetBench_Client.csproj` | **Windows only** |
 | `dotnet run --project MetBench_Client` | **Windows only** |
