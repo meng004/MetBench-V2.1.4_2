@@ -119,8 +119,8 @@ def _load_allowed_images(payload: dict[str, Any], backend: str = "docker") -> di
             raise ValueError("allowed_images entries must be objects")
 
         if backend == "local":
-            dockerfile = image.get("dockerfile") or ""
-            context = image.get("context") or ""
+            dockerfile = image.get("dockerfile", "")
+            context = image.get("context", "")
             if not isinstance(dockerfile, str) or not isinstance(context, str):
                 raise ValueError("allowed_images dockerfile/context must be strings when present")
         else:

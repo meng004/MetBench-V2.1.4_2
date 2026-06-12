@@ -546,7 +546,6 @@ class DockerRuntimeServerTests(unittest.TestCase):
         self.assertIn("default_timeout_seconds", payload)
         self.assertIn("max_output_bytes", payload)
 
-
     def test_load_config_defaults_backend_to_docker(self):
         config = self.write_config_and_load(self.valid_config_payload())
 
@@ -561,11 +560,13 @@ class DockerRuntimeServerTests(unittest.TestCase):
         self.assertEqual("local", config.backend)
 
     def test_load_config_rejects_unknown_backend(self):
-        payload = self.valid_config_payload()
-        payload["backend"] = "kubernetes"
+        for backend in ["kubernetes", 1, None, True]:
+            with self.subTest(backend=backend):
+                payload = self.valid_config_payload()
+                payload["backend"] = backend
 
-        with self.assertRaisesRegex(ValueError, "backend"):
-            self.write_config_and_load(payload)
+                with self.assertRaisesRegex(ValueError, "backend"):
+                    self.write_config_and_load(payload)
 
     def test_load_config_local_backend_allows_image_without_dockerfile(self):
         payload = self.valid_config_payload()
@@ -583,6 +584,16 @@ class DockerRuntimeServerTests(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, "dockerfile"):
             self.write_config_and_load(payload)
+
+    def test_load_config_local_backend_rejects_non_string_dockerfile(self):
+        for value in [42, None, False]:
+            with self.subTest(value=value):
+                payload = self.valid_config_payload()
+                payload["backend"] = "local"
+                payload["allowed_images"] = {"wsl-openmc": {"dockerfile": value}}
+
+                with self.assertRaisesRegex(ValueError, "dockerfile/context"):
+                    self.write_config_and_load(payload)
 
 
 if __name__ == "__main__":
