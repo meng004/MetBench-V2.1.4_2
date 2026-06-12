@@ -96,6 +96,52 @@ public sealed class DockerMcpRuntimeProfileTests
         Assert.Contains(expectedField, ex.Message, StringComparison.OrdinalIgnoreCase);
     }
 
+    [Fact]
+    public void Provider_parses_optional_local_python_and_wsl_path_style()
+    {
+        var options = Options(new Dictionary<string, string>
+        {
+            ["openmc"] =
+                "docker-mcp://openmc?image=metbench-sut:latest&python=/opt/openmc-venv/bin/python&endpoint=http%3A%2F%2F192.168.1.20%3A8765&authTokenEnv=METBENCH_DOCKER_MCP_TOKEN&localPython=python&pathStyle=wsl",
+        });
+        IRuntimeProfileProvider provider = new LauncherOptionsRuntimeProfileProvider(options);
+
+        var profile = provider.GetProfile("openmc");
+
+        Assert.NotNull(profile.DockerMcp);
+        Assert.Equal("python", profile.DockerMcp!.LocalPythonExecutable);
+        Assert.Equal(DockerMcpPathStyle.Wsl, profile.DockerMcp.PathStyle);
+    }
+
+    [Fact]
+    public void Provider_defaults_local_python_and_path_style_when_absent()
+    {
+        var options = Options(new Dictionary<string, string>
+        {
+            ["openmc"] =
+                "docker-mcp://openmc?image=metbench-sut:latest&python=/opt/openmc-venv/bin/python&endpoint=http%3A%2F%2F192.168.1.20%3A8765",
+        });
+        IRuntimeProfileProvider provider = new LauncherOptionsRuntimeProfileProvider(options);
+
+        var profile = provider.GetProfile("openmc");
+
+        Assert.Null(profile.DockerMcp!.LocalPythonExecutable);
+        Assert.Equal(DockerMcpPathStyle.None, profile.DockerMcp.PathStyle);
+    }
+
+    [Theory]
+    [InlineData("docker-mcp://openmc?image=i&python=p&endpoint=http%3A%2F%2F127.0.0.1%3A8765&pathStyle=windows")]
+    [InlineData("docker-mcp://openmc?image=i&python=p&endpoint=http%3A%2F%2F127.0.0.1%3A8765&pathStyle=")]
+    public void Provider_fails_closed_on_invalid_path_style(string value)
+    {
+        var options = Options(new Dictionary<string, string> { ["openmc"] = value });
+        IRuntimeProfileProvider provider = new LauncherOptionsRuntimeProfileProvider(options);
+
+        var ex = Assert.Throws<RuntimeEnvironmentResolutionException>(() => provider.GetProfile("openmc"));
+
+        Assert.Contains("pathStyle", ex.Message);
+    }
+
     private static LauncherOptions Options(IReadOnlyDictionary<string, string> runtimePythons) => new(
         SutRoot: "SUT",
         SystemPython: "python-system",
