@@ -11,14 +11,13 @@ namespace MetBench_SystemMT.Tests.SystemMT.Jobs;
 public sealed class WpfRuntimePythonsWiringTests
 {
     [Fact]
-    public void App_feeds_runtime_pythons_from_environment_variables()
+    public void App_feeds_runtime_pythons_from_configuration_section()
     {
         var app = ReadRepoFile("MetBench_Client", "App.xaml.cs");
 
-        Assert.Contains("RuntimePythons", app);
-        Assert.Contains("METBENCH_SYSTEM_PYTHON", app);
-        Assert.Contains("METBENCH_OPENMC_PYTHON", app);
-        Assert.Contains("StringComparer.OrdinalIgnoreCase", app);
+        Assert.Contains("LauncherOptions:RuntimePythons", app);
+        Assert.Contains("RuntimePythons: runtimePythons", app);
+        Assert.Contains("IDockerMcpRuntimeProfileStore", app);
     }
 
     private static string ReadRepoFile(params string[] parts)
