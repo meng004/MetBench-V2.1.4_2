@@ -133,7 +133,7 @@ RuntimePythons: new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
 - **MetBench 侧环境变量**（每用例一组，操作手册给出逐字命令）：
   - 用例 1：`METBENCH_SYSTEM_PYTHON=docker-mcp://system?image=windows-local&python=python&endpoint=http://<hostIP>:8764&authTokenEnv=METBENCH_DOCKER_MCP_TOKEN`
   - 用例 2：`METBENCH_OPENMC_PYTHON=docker-mcp://openmc?image=metbench-sut:latest&python=/opt/openmc-venv/bin/python&endpoint=http://<hostIP>:8765&authTokenEnv=METBENCH_DOCKER_MCP_TOKEN&localPython=python&pathStyle=wsl`
-  - 用例 3：`METBENCH_OPENMC_PYTHON=docker-mcp://openmc?image=wsl-openmc&python=/opt/openmc-venv/bin/python&endpoint=http://<wslIP>:8766&authTokenEnv=METBENCH_DOCKER_MCP_TOKEN&localPython=python&pathStyle=wsl`
+  - 用例 3：`METBENCH_OPENMC_PYTHON=docker-mcp://openmc?image=wsl-openmc&python=/home/<wsl_user>/openmc-venv/bin/python&endpoint=http://<wslIP>:8766&authTokenEnv=METBENCH_DOCKER_MCP_TOKEN&localPython=python&pathStyle=wsl`
   - （URI 内 `&`/`:` 等在实际设置时按 PowerShell 转义规则处理，手册给出可粘贴形式。）
 
 ## 6. 数据流（用例 2 一次 RunMr，差异点对照）
