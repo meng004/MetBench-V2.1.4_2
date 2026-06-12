@@ -1,0 +1,13 @@
+{
+  "backend": "local",
+  "bind_host": "auto-private-ipv4",
+  "bind_port": 8764,
+  "auth_token": "change-me",
+  "repo_root": "D:\\Codes\\MetBench-V2.1.4_2",
+  "allowed_images": {
+    "windows-local": {}
+  },
+  "allowed_mount_roots": ["D:\\Codes\\MetBench-V2.1.4_2"],
+  "default_timeout_seconds": 600,
+  "max_output_bytes": 1048576
+}

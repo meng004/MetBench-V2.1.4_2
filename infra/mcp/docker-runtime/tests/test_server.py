@@ -720,6 +720,22 @@ class DockerRuntimeServerTests(unittest.TestCase):
                 runner=lambda command, timeout_seconds: self.server.CommandResult(0, "", ""),
             )
 
+    def test_acceptance_config_examples_load(self):
+        base = Path(__file__).resolve().parents[1]
+        cases = [
+            ("config.local-win.example.json", "local", 8764),
+            ("config.docker-win.example.json", "docker", 8765),
+            ("config.local-wsl.example.json", "local", 8766),
+        ]
+
+        for name, backend, port in cases:
+            with self.subTest(name=name):
+                config = self.server.load_config(base / name)
+
+                self.assertEqual(backend, config.backend)
+                self.assertEqual(port, config.bind_port)
+                self.assertEqual("change-me", config.auth_token)
+
 
 if __name__ == "__main__":
     unittest.main()

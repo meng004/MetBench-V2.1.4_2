@@ -1,0 +1,19 @@
+{
+  "backend": "docker",
+  "bind_host": "auto-private-ipv4",
+  "bind_port": 8765,
+  "auth_token": "change-me",
+  "repo_root": "D:\\Codes\\MetBench-V2.1.4_2",
+  "allowed_images": {
+    "metbench-sut:latest": {
+      "dockerfile": "docker/Dockerfile",
+      "context": "docker"
+    }
+  },
+  "allowed_mount_roots": [
+    "D:\\Codes\\MetBench-V2.1.4_2",
+    "C:\\Users\\lemon\\AppData\\Local\\Temp"
+  ],
+  "default_timeout_seconds": 600,
+  "max_output_bytes": 1048576
+}
