@@ -112,6 +112,9 @@
   <data name="Nav_SystemMtSutCatalog" xml:space="preserve">
     <value>System MT SUT Catalog</value>
   </data>
+  <data name="Nav_SystemMtRuntimeEnvironments" xml:space="preserve">
+    <value>Runtime Environments</value>
+  </data>
   <data name="Nav_SystemMtEquationCatalog" xml:space="preserve">
     <value>System MT Equation Catalog</value>
   </data>
@@ -375,6 +378,63 @@
   </data>
   <data name="Catalog_SutCatalogSubtitle" xml:space="preserve">
     <value>Edit the program section of SUT/&lt;sut&gt;/catalog.json. MR bindings are edited on the MR Catalog page.</value>
+  </data>
+  <data name="RuntimeEnv_Title" xml:space="preserve">
+    <value>Runtime Environments</value>
+  </data>
+  <data name="RuntimeEnv_Subtitle" xml:space="preserve">
+    <value>Configure Docker MCP runtime profiles stored in appsettings.local.json.</value>
+  </data>
+  <data name="RuntimeEnv_Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="RuntimeEnv_TestConnection" xml:space="preserve">
+    <value>Health</value>
+  </data>
+  <data name="RuntimeEnv_SaveProfile" xml:space="preserve">
+    <value>Save profile</value>
+  </data>
+  <data name="RuntimeEnv_RuntimeKey" xml:space="preserve">
+    <value>Runtime key</value>
+  </data>
+  <data name="RuntimeEnv_Backend" xml:space="preserve">
+    <value>Backend</value>
+  </data>
+  <data name="RuntimeEnv_Value" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="RuntimeEnv_DockerMcpProfile" xml:space="preserve">
+    <value>Docker MCP profile</value>
+  </data>
+  <data name="RuntimeEnv_Endpoint" xml:space="preserve">
+    <value>Endpoint</value>
+  </data>
+  <data name="RuntimeEnv_Image" xml:space="preserve">
+    <value>Image</value>
+  </data>
+  <data name="RuntimeEnv_Python" xml:space="preserve">
+    <value>Python executable</value>
+  </data>
+  <data name="RuntimeEnv_AuthTokenEnv" xml:space="preserve">
+    <value>Auth token env</value>
+  </data>
+  <data name="RuntimeEnv_Status_Ready" xml:space="preserve">
+    <value>Ready.</value>
+  </data>
+  <data name="RuntimeEnv_Status_Loaded_Fmt" xml:space="preserve">
+    <value>Loaded {0} runtime profile(s).</value>
+  </data>
+  <data name="RuntimeEnv_Status_Saved_Fmt" xml:space="preserve">
+    <value>Saved runtime profile '{0}'. Restart MetBench to apply launcher configuration.</value>
+  </data>
+  <data name="RuntimeEnv_Status_SaveFailed_Fmt" xml:space="preserve">
+    <value>Save failed: {0}</value>
+  </data>
+  <data name="RuntimeEnv_Status_HealthOk_Fmt" xml:space="preserve">
+    <value>Docker MCP health OK at {0}:{1}.</value>
+  </data>
+  <data name="RuntimeEnv_Status_HealthFailed_Fmt" xml:space="preserve">
+    <value>Docker MCP health failed ({0}): {1}</value>
   </data>
   <data name="Catalog_NewSutDraft" xml:space="preserve">
     <value>New SUT draft</value>

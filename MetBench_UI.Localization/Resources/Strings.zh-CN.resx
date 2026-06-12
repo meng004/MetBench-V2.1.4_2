@@ -112,6 +112,9 @@
   <data name="Nav_SystemMtSutCatalog" xml:space="preserve">
     <value>系统级 SUT 目录</value>
   </data>
+  <data name="Nav_SystemMtRuntimeEnvironments" xml:space="preserve">
+    <value>运行时环境</value>
+  </data>
   <data name="Nav_SystemMtEquationCatalog" xml:space="preserve">
     <value>系统级方程目录</value>
   </data>
@@ -375,6 +378,63 @@
   </data>
   <data name="Catalog_SutCatalogSubtitle" xml:space="preserve">
     <value>编辑 SUT/&lt;sut&gt;/catalog.json 的程序段。MR 绑定在 MR 目录页编辑。</value>
+  </data>
+  <data name="RuntimeEnv_Title" xml:space="preserve">
+    <value>运行时环境</value>
+  </data>
+  <data name="RuntimeEnv_Subtitle" xml:space="preserve">
+    <value>配置保存在 appsettings.local.json 中的 Docker MCP 运行时 profile。</value>
+  </data>
+  <data name="RuntimeEnv_Refresh" xml:space="preserve">
+    <value>刷新</value>
+  </data>
+  <data name="RuntimeEnv_TestConnection" xml:space="preserve">
+    <value>健康检查</value>
+  </data>
+  <data name="RuntimeEnv_SaveProfile" xml:space="preserve">
+    <value>保存 Profile</value>
+  </data>
+  <data name="RuntimeEnv_RuntimeKey" xml:space="preserve">
+    <value>运行时 key</value>
+  </data>
+  <data name="RuntimeEnv_Backend" xml:space="preserve">
+    <value>后端</value>
+  </data>
+  <data name="RuntimeEnv_Value" xml:space="preserve">
+    <value>值</value>
+  </data>
+  <data name="RuntimeEnv_DockerMcpProfile" xml:space="preserve">
+    <value>Docker MCP Profile</value>
+  </data>
+  <data name="RuntimeEnv_Endpoint" xml:space="preserve">
+    <value>Endpoint</value>
+  </data>
+  <data name="RuntimeEnv_Image" xml:space="preserve">
+    <value>镜像</value>
+  </data>
+  <data name="RuntimeEnv_Python" xml:space="preserve">
+    <value>Python 可执行文件</value>
+  </data>
+  <data name="RuntimeEnv_AuthTokenEnv" xml:space="preserve">
+    <value>Token 环境变量</value>
+  </data>
+  <data name="RuntimeEnv_Status_Ready" xml:space="preserve">
+    <value>就绪。</value>
+  </data>
+  <data name="RuntimeEnv_Status_Loaded_Fmt" xml:space="preserve">
+    <value>已加载 {0} 个运行时 profile。</value>
+  </data>
+  <data name="RuntimeEnv_Status_Saved_Fmt" xml:space="preserve">
+    <value>已保存运行时 profile '{0}'。重启 MetBench 后 launcher 配置生效。</value>
+  </data>
+  <data name="RuntimeEnv_Status_SaveFailed_Fmt" xml:space="preserve">
+    <value>保存失败：{0}</value>
+  </data>
+  <data name="RuntimeEnv_Status_HealthOk_Fmt" xml:space="preserve">
+    <value>Docker MCP 健康检查通过：{0}:{1}。</value>
+  </data>
+  <data name="RuntimeEnv_Status_HealthFailed_Fmt" xml:space="preserve">
+    <value>Docker MCP 健康检查失败（{0}）：{1}</value>
   </data>
   <data name="Catalog_NewSutDraft" xml:space="preserve">
     <value>新建 SUT 草稿</value>

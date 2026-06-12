@@ -10,6 +10,12 @@ Edit `config.example.json` or provide an equivalent config file. The default
 the first private, non-loopback IPv4 address it can see on the host.
 
 ```bash
+rtk python3 tools/metbench-docker-runtime-mcp serve --config infra/mcp/docker-runtime/config.example.json
+```
+
+The legacy entry point still works:
+
+```bash
 rtk python3 infra/mcp/docker-runtime/server.py infra/mcp/docker-runtime/config.example.json
 ```
 
@@ -90,6 +96,15 @@ container working directory is set to the translated `repo_root`. The generated
 MetBench activates this backend through `LauncherOptions.RuntimePythons`.
 Configure a manifest runtime key with a `docker-mcp://` URI:
 
+```bash
+rtk python3 tools/metbench-docker-runtime-mcp profile-uri \
+  --runtime-key openmoc-docker \
+  --endpoint http://192.168.1.20:8765 \
+  --image metbench-sut:latest \
+  --python /opt/openmoc-venv/bin/python \
+  --auth-token-env METBENCH_DOCKER_MCP_TOKEN
+```
+
 ```csharp
 RuntimePythons = new Dictionary<string, string>
 {
@@ -143,3 +158,35 @@ python infra/mcp/docker-runtime/server.py infra/mcp/docker-runtime/config.docker
 # Case 3 – local backend inside WSL simulating a remote Linux server (port 8766)
 python3 infra/mcp/docker-runtime/server.py infra/mcp/docker-runtime/config.local-wsl.json
 ```
+
+The equivalent `serve --config <path>` subcommand form works for each case as
+well.
+
+## MetBench UI
+
+MetBench loads `appsettings.local.json` at startup and reads
+`LauncherOptions:RuntimePythons`. The WPF client includes a System MT
+`Runtime Environments` page for Docker MCP profiles. Fill:
+
+- Runtime key: the manifest `python_executable_kind` / runtime key, such as
+  `openmoc-docker` or `docker-linux`.
+- Endpoint: `http://<LAN-IP>:8765`.
+- Image: an image allowlisted by the MCP server config.
+- Python executable: the interpreter path inside the container.
+- Auth token env: optional environment variable name that stores the Bearer
+  token on the MetBench client machine.
+
+Saving writes the generated `docker-mcp://` value to:
+
+```json
+{
+  "LauncherOptions": {
+    "RuntimePythons": {
+      "docker-linux": "docker-mcp://docker-linux?image=..."
+    }
+  }
+}
+```
+
+Restart MetBench after saving so the launcher singleton reads the updated
+configuration.

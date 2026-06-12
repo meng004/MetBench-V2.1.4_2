@@ -1,3 +1,4 @@
+import argparse
 import json
 import re
 import socket
@@ -9,6 +10,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from ipaddress import ip_address
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote
 
 
 @dataclass
@@ -456,7 +458,72 @@ def serve_http(config: RuntimeConfig) -> None:
     server.serve_forever()
 
 
-def main(argv: list[str]) -> int:
+def build_profile_uri(
+    runtime_key: str,
+    endpoint: str,
+    image: str,
+    python: str,
+    auth_token_env: str | None = None,
+) -> str:
+    normalized_key = runtime_key.strip().lower()
+    query = [
+        ("image", image),
+        ("python", python),
+        ("endpoint", endpoint),
+    ]
+    if auth_token_env and auth_token_env.strip():
+        query.append(("authTokenEnv", auth_token_env.strip()))
+
+    encoded = "&".join(f"{name}={quote(value, safe='')}" for name, value in query)
+    return f"docker-mcp://{normalized_key}?{encoded}"
+
+
+def main(argv: list[str], serve=serve_http, out=print) -> int:
+    if len(argv) == 2 and not argv[1].startswith("-"):
+        serve(load_config(argv[1]))
+        return 0
+
+    parser = argparse.ArgumentParser(prog=Path(argv[0]).name)
+    subcommands = parser.add_subparsers(dest="command", required=True)
+
+    serve_parser = subcommands.add_parser("serve", help="serve Docker runtime MCP over HTTP")
+    serve_parser.add_argument("--config", required=True, help="path to Docker runtime MCP JSON config")
+
+    profile_parser = subcommands.add_parser(
+        "profile-uri",
+        help="print a docker-mcp:// runtime profile URI for MetBench appsettings.local.json",
+    )
+    profile_parser.add_argument("--runtime-key", required=True)
+    profile_parser.add_argument("--endpoint", required=True)
+    profile_parser.add_argument("--image", required=True)
+    profile_parser.add_argument("--python", required=True)
+    profile_parser.add_argument("--auth-token-env")
+
+    try:
+        args = parser.parse_args(argv[1:])
+    except SystemExit as error:
+        return int(error.code)
+
+    if args.command == "serve":
+        serve(load_config(args.config))
+        return 0
+    if args.command == "profile-uri":
+        out(
+            build_profile_uri(
+                args.runtime_key,
+                args.endpoint,
+                args.image,
+                args.python,
+                args.auth_token_env,
+            )
+        )
+        return 0
+
+    parser.print_usage(sys.stderr)
+    return 2
+
+
+def legacy_main(argv: list[str]) -> int:
     if len(argv) != 2:
         print("usage: server.py CONFIG_PATH", file=sys.stderr)
         return 2

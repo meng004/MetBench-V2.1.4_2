@@ -763,6 +763,57 @@ class DockerRuntimeServerTests(unittest.TestCase):
                 self.assertEqual(backend, config.backend)
                 self.assertEqual(port, config.bind_port)
                 self.assertEqual("change-me", config.auth_token)
+    def test_main_supports_serve_subcommand_for_cli_wrapper(self):
+        payload = self.valid_config_payload()
+        with tempfile.NamedTemporaryFile("w", suffix=".json") as handle:
+            json.dump(payload, handle)
+            handle.flush()
+
+            served = []
+
+            exit_code = self.server.main(
+                [
+                    "metbench-docker-runtime-mcp",
+                    "serve",
+                    "--config",
+                    handle.name,
+                ],
+                serve=lambda config: served.append(config),
+            )
+
+        self.assertEqual(0, exit_code)
+        self.assertEqual(1, len(served))
+        self.assertEqual("auto-private-ipv4", served[0].bind_host)
+
+    def test_main_prints_profile_uri_for_ui_copy_paste(self):
+        output = []
+
+        exit_code = self.server.main(
+            [
+                "metbench-docker-runtime-mcp",
+                "profile-uri",
+                "--runtime-key",
+                "docker-linux",
+                "--endpoint",
+                "http://192.168.1.42:8765",
+                "--image",
+                "metbench/runtime-python:latest",
+                "--python",
+                "python3",
+                "--auth-token-env",
+                "METBENCH_DOCKER_MCP_TOKEN",
+            ],
+            out=lambda value: output.append(value),
+        )
+
+        self.assertEqual(0, exit_code)
+        self.assertEqual(
+            "docker-mcp://docker-linux?image=metbench%2Fruntime-python%3Alatest"
+            "&python=python3"
+            "&endpoint=http%3A%2F%2F192.168.1.42%3A8765"
+            "&authTokenEnv=METBENCH_DOCKER_MCP_TOKEN",
+            output[0],
+        )
 
 
 if __name__ == "__main__":
