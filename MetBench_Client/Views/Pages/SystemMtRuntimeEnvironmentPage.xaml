@@ -1,0 +1,162 @@
+<Page
+    x:Class="MetBench_Client.Views.Pages.SystemMtRuntimeEnvironmentPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helpers="clr-namespace:MetBench_Client.Helpers"
+    xmlns:local="clr-namespace:MetBench_Client.Views.Pages"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="SystemMtRuntimeEnvironmentPage"
+    d:DataContext="{d:DesignInstance local:SystemMtRuntimeEnvironmentPage, IsDesignTimeCreatable=False}"
+    d:DesignHeight="720"
+    d:DesignWidth="1180"
+    ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+    ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    AutomationProperties.AutomationId="SystemMtRuntimeEnvironmentPage"
+    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    mc:Ignorable="d">
+
+    <Page.Resources>
+        <helpers:BindingProxy x:Key="LocalizationProxy" Data="{Binding}"/>
+    </Page.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock FontSize="22" FontWeight="Medium" Text="{Binding ViewModel.Localization[RuntimeEnv_Title]}"/>
+            <TextBlock
+                Margin="0,4,0,0"
+                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                Text="{Binding ViewModel.Localization[RuntimeEnv_Subtitle]}"/>
+        </StackPanel>
+
+        <Border
+            Grid.Row="1"
+            Margin="0,0,0,12"
+            Padding="14"
+            BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="4">
+            <StackPanel Orientation="Horizontal">
+                <ui:Button
+                    Margin="0,0,8,0"
+                    AutomationProperties.AutomationId="Button_RuntimeEnvRefresh"
+                    Command="{Binding ViewModel.RefreshRuntimeProfilesCommand, Mode=OneWay}"
+                    Content="{Binding ViewModel.Localization[RuntimeEnv_Refresh]}"/>
+                <ui:Button
+                    Margin="0,0,8,0"
+                    AutomationProperties.AutomationId="Button_RuntimeEnvHealth"
+                    Command="{Binding ViewModel.TestConnectionCommand, Mode=OneWay}"
+                    Content="{Binding ViewModel.Localization[RuntimeEnv_TestConnection]}"/>
+                <ui:Button
+                    Margin="0,0,16,0"
+                    AutomationProperties.AutomationId="Button_RuntimeEnvSave"
+                    Command="{Binding ViewModel.SaveProfileCommand, Mode=OneWay}"
+                    Content="{Binding ViewModel.Localization[RuntimeEnv_SaveProfile]}"/>
+                <TextBlock
+                    x:Name="TextBlock_RuntimeEnvStatus"
+                    Margin="0,4,0,0"
+                    AutomationProperties.AutomationId="TextBlock_RuntimeEnvStatus"
+                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                    Text="{Binding ViewModel.StatusMessage, Mode=OneWay}"
+                    TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="420"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border
+                Grid.Column="0"
+                BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="4">
+                <ui:DataGrid
+                    x:Name="DataGrid_RuntimeProfiles"
+                    AutomationProperties.AutomationId="DataGrid_RuntimeProfiles"
+                    AutoGenerateColumns="False"
+                    IsReadOnly="True"
+                    ItemsSource="{Binding ViewModel.RuntimeProfiles, Mode=OneWay}">
+                    <ui:DataGrid.Columns>
+                        <DataGridTextColumn Width="130" Binding="{Binding RuntimeKey}" Header="{Binding Data.ViewModel.Localization[RuntimeEnv_RuntimeKey], Source={StaticResource LocalizationProxy}}"/>
+                        <DataGridTextColumn Width="110" Binding="{Binding Backend}" Header="{Binding Data.ViewModel.Localization[RuntimeEnv_Backend], Source={StaticResource LocalizationProxy}}"/>
+                        <DataGridTextColumn Width="*" Binding="{Binding Value}" Header="{Binding Data.ViewModel.Localization[RuntimeEnv_Value], Source={StaticResource LocalizationProxy}}"/>
+                    </ui:DataGrid.Columns>
+                </ui:DataGrid>
+            </Border>
+
+            <Border
+                Grid.Column="2"
+                Padding="14"
+                BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="4">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="210"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12" FontWeight="Medium" Text="{Binding ViewModel.Localization[RuntimeEnv_DockerMcpProfile]}"/>
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="{Binding ViewModel.Localization[RuntimeEnv_RuntimeKey]}"/>
+                    <ui:TextBox
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Margin="0,0,0,8"
+                        AutomationProperties.AutomationId="TextBox_RuntimeEnvRuntimeKey"
+                        Text="{Binding ViewModel.RuntimeKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="{Binding ViewModel.Localization[RuntimeEnv_Endpoint]}"/>
+                    <ui:TextBox
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Margin="0,0,0,8"
+                        AutomationProperties.AutomationId="TextBox_RuntimeEnvEndpoint"
+                        Text="{Binding ViewModel.Endpoint, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="{Binding ViewModel.Localization[RuntimeEnv_Image]}"/>
+                    <ui:TextBox
+                        Grid.Row="3"
+                        Grid.Column="1"
+                        Margin="0,0,0,8"
+                        AutomationProperties.AutomationId="TextBox_RuntimeEnvImage"
+                        Text="{Binding ViewModel.Image, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="{Binding ViewModel.Localization[RuntimeEnv_Python]}"/>
+                    <ui:TextBox
+                        Grid.Row="4"
+                        Grid.Column="1"
+                        Margin="0,0,0,8"
+                        AutomationProperties.AutomationId="TextBox_RuntimeEnvPython"
+                        Text="{Binding ViewModel.PythonExecutable, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,0,8,0" VerticalAlignment="Center" Text="{Binding ViewModel.Localization[RuntimeEnv_AuthTokenEnv]}"/>
+                    <ui:TextBox
+                        Grid.Row="5"
+                        Grid.Column="1"
+                        AutomationProperties.AutomationId="TextBox_RuntimeEnvAuthTokenEnv"
+                        Text="{Binding ViewModel.AuthTokenEnvironmentVariable, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Page>

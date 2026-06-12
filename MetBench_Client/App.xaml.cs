@@ -27,6 +27,7 @@ using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_BLL.SystemMT.Catalog;
 using MetBench_BLL.SystemMT.Catalog.Editing;
 using MetBench_BLL.SystemMT.Reporting;
+using MetBench_BLL.SystemMT.Runtime;
 using MetBench_BLL.Discovery;
 using MetBench_BLL.Discovery.Validators;
 using MetBench_BLL.Mutation;
@@ -134,13 +135,25 @@ namespace MetBench_Client
                     throw new InvalidOperationException(
                         "InputGenerator must be constructed with a per-task adapter path; resolve PythonInputAdapter and the adapter path from the task instead."));
                 // Stage 4 launcher facade + persistence + reporting
-                services.AddSingleton(provider => new LauncherOptions(
-                    SutRoot: Path.Combine(
+                services.AddSingleton(provider =>
+                {
+                    var runtimePythons = context.Configuration
+                        .GetSection("LauncherOptions:RuntimePythons")
+                        .Get<Dictionary<string, string>>();
+                    return new LauncherOptions(
+                        SutRoot: Path.Combine(
+                            Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!,
+                            "SUT"),
+                        SystemPython: OperatingSystem.IsWindows() ? "python" : "python3",
+                        OpenMocPython: Environment.GetEnvironmentVariable("METBENCH_OPENMOC_PYTHON")
+                            ?? (OperatingSystem.IsWindows() ? "python" : "python3"),
+                        RuntimePythons: runtimePythons);
+                });
+                services.AddSingleton<IDockerMcpRuntimeProfileStore>(provider =>
+                    new LocalDockerMcpRuntimeProfileStore(Path.Combine(
                         Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!,
-                        "SUT"),
-                    SystemPython: OperatingSystem.IsWindows() ? "python" : "python3",
-                    OpenMocPython: Environment.GetEnvironmentVariable("METBENCH_OPENMOC_PYTHON")
-                        ?? (OperatingSystem.IsWindows() ? "python" : "python3")));
+                        "appsettings.local.json")));
+                services.AddSingleton<IDockerMcpRuntimeClient, DockerMcpRuntimeClient>();
 
                 // Share one LiteDatabase handle between the result and evidence repos
                 // because both target the same SystemMT.Litedb file. Default Direct mode
@@ -203,6 +216,8 @@ namespace MetBench_Client
                 services.AddScoped<ViewModels.SystemMtMrCatalogViewModel>();
                 services.AddScoped<Views.Pages.SystemMtSutCatalogPage>();
                 services.AddScoped<ViewModels.SystemMtSutCatalogViewModel>();
+                services.AddScoped<Views.Pages.SystemMtRuntimeEnvironmentPage>();
+                services.AddScoped<ViewModels.SystemMtRuntimeEnvironmentViewModel>();
                 services.AddScoped<ISystemMtEquationEditor, SystemMtEquationEditor>();
                 services.AddScoped<Views.Pages.SystemMtEquationCatalogPage>();
                 services.AddScoped<ViewModels.SystemMtEquationCatalogViewModel>();
