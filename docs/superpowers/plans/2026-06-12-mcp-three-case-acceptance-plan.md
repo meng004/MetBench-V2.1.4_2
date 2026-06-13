@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**状态**: 实现完成（Task 1-12 全部交付；现场三用例验收待按 runbook 执行）
+**状态**: 完成（Task 1-12 全部交付；三用例现场验收 2026-06-13 执行通过，证据见 vm-evidence/vm-summary.md）
 **Spec**: `docs/superpowers/specs/2026-06-12-mcp-three-case-acceptance-design.md`
 **分支**: `mcp-dual-backend-acceptance`（已存在，spec 已提交）
 
