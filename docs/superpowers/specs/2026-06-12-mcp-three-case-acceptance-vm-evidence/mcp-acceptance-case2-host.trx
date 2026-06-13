@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="671a59a7-da99-4ed3-8ecf-532f994c423c" name="lemon@PC-20260416OPJH 2026-06-13 22:35:58" runUser="PC-20260416OPJH\lemon" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-06-13T22:35:58.3659829+08:00" queuing="2026-06-13T22:35:58.3659838+08:00" start="2026-06-13T22:35:25.2597454+08:00" finish="2026-06-13T22:36:25.0635020+08:00" />
+  <TestSettings name="default" id="a974190d-7bf0-444f-acf1-902dec7ba017">
+    <Deployment runDeploymentRoot="lemon_PC-20260416OPJH_2026-06-13_22_35_58" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="0f7ba716-fed9-426b-ba1b-a0cbef5f7df9" testId="968c3961-ed4d-1125-3cd7-66f7c38d63bf" testName="MetBench_SystemMT.Tests.SystemMT.Acceptance.McpThreeCaseAcceptanceTests.Acceptance_3_async_job_reaches_succeeded_through_mcp" computerName="PC-20260416OPJH" duration="00:00:30.9749518" startTime="2026-06-13T22:35:58.3137377+08:00" endTime="2026-06-13T22:35:58.3137662+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0f7ba716-fed9-426b-ba1b-a0cbef5f7df9" />
+    <UnitTestResult executionId="6128b837-9f44-425d-ae7d-6b29a0c4352d" testId="ca3eabf5-5136-b194-b517-34290df3c05f" testName="MetBench_SystemMT.Tests.SystemMT.Acceptance.McpThreeCaseAcceptanceTests.Acceptance_2_launcher_runs_mr_end_to_end_through_mcp" computerName="PC-20260416OPJH" duration="00:00:26.6067200" startTime="2026-06-13T22:36:24.9367721+08:00" endTime="2026-06-13T22:36:24.9367727+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6128b837-9f44-425d-ae7d-6b29a0c4352d" />
+    <UnitTestResult executionId="15854a0d-ee2a-42da-b227-d132f179b30c" testId="469f8673-4ca2-4850-49e9-a9ffd1e7f001" testName="MetBench_SystemMT.Tests.SystemMT.Acceptance.McpThreeCaseAcceptanceTests.Acceptance_1_preflight_health_reaches_live_server" computerName="PC-20260416OPJH" duration="00:00:00.0129633" startTime="2026-06-13T22:35:58.3374848+08:00" endTime="2026-06-13T22:35:58.3374850+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="15854a0d-ee2a-42da-b227-d132f179b30c" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="MetBench_SystemMT.Tests.SystemMT.Acceptance.McpThreeCaseAcceptanceTests.Acceptance_2_launcher_runs_mr_end_to_end_through_mcp" storage="d:\codes\metbench-v2.1.4_2\metbench_systemmt.tests\bin\debug\net8.0\metbench_systemmt.tests.dll" id="ca3eabf5-5136-b194-b517-34290df3c05f">
+      <Execution id="6128b837-9f44-425d-ae7d-6b29a0c4352d" />
+      <TestMethod codeBase="D:\Codes\MetBench-V2.1.4_2\MetBench_SystemMT.Tests\bin\Debug\net8.0\MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.SystemMT.Acceptance.McpThreeCaseAcceptanceTests" name="Acceptance_2_launcher_runs_mr_end_to_end_through_mcp" />
+    </UnitTest>
+    <UnitTest name="MetBench_SystemMT.Tests.SystemMT.Acceptance.McpThreeCaseAcceptanceTests.Acceptance_1_preflight_health_reaches_live_server" storage="d:\codes\metbench-v2.1.4_2\metbench_systemmt.tests\bin\debug\net8.0\metbench_systemmt.tests.dll" id="469f8673-4ca2-4850-49e9-a9ffd1e7f001">
+      <Execution id="15854a0d-ee2a-42da-b227-d132f179b30c" />
+      <TestMethod codeBase="D:\Codes\MetBench-V2.1.4_2\MetBench_SystemMT.Tests\bin\Debug\net8.0\MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.SystemMT.Acceptance.McpThreeCaseAcceptanceTests" name="Acceptance_1_preflight_health_reaches_live_server" />
+    </UnitTest>
+    <UnitTest name="MetBench_SystemMT.Tests.SystemMT.Acceptance.McpThreeCaseAcceptanceTests.Acceptance_3_async_job_reaches_succeeded_through_mcp" storage="d:\codes\metbench-v2.1.4_2\metbench_systemmt.tests\bin\debug\net8.0\metbench_systemmt.tests.dll" id="968c3961-ed4d-1125-3cd7-66f7c38d63bf">
+      <Execution id="0f7ba716-fed9-426b-ba1b-a0cbef5f7df9" />
+      <TestMethod codeBase="D:\Codes\MetBench-V2.1.4_2\MetBench_SystemMT.Tests\bin\Debug\net8.0\MetBench_SystemMT.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="MetBench_SystemMT.Tests.SystemMT.Acceptance.McpThreeCaseAcceptanceTests" name="Acceptance_3_async_job_reaches_succeeded_through_mcp" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="968c3961-ed4d-1125-3cd7-66f7c38d63bf" executionId="0f7ba716-fed9-426b-ba1b-a0cbef5f7df9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ca3eabf5-5136-b194-b517-34290df3c05f" executionId="6128b837-9f44-425d-ae7d-6b29a0c4352d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="469f8673-4ca2-4850-49e9-a9ffd1e7f001" executionId="15854a0d-ee2a-42da-b227-d132f179b30c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="3" executed="3" passed="3" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.8.2+699d445a1a (64-bit .NET 9.0.17)&#xD;
+[xUnit.net 00:00:00.22]   Discovering: MetBench_SystemMT.Tests&#xD;
+[xUnit.net 00:00:00.75]   Discovered:  MetBench_SystemMT.Tests&#xD;
+[xUnit.net 00:00:00.77]   Starting:    MetBench_SystemMT.Tests&#xD;
+-&gt; Loading plugin D:\Codes\MetBench-V2.1.4_2\MetBench_SystemMT.Tests\bin\Debug\net8.0\MetBench_SystemMT.Tests.dll&#xD;
+-&gt; Loading plugin D:\Codes\MetBench-V2.1.4_2\MetBench_SystemMT.Tests\bin\Debug\net8.0\Reqnroll.xUnit.ReqnrollPlugin.dll&#xD;
+-&gt; Using default config&#xD;
+[xUnit.net 00:00:58.95]   Finished:    MetBench_SystemMT.Tests&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>
