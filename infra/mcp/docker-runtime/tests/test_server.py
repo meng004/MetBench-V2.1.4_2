@@ -1,5 +1,8 @@
+import contextlib
 import importlib.util
+import io
 import json
+import os
 import tempfile
 import unittest
 from dataclasses import fields
@@ -40,11 +43,14 @@ class DockerRuntimeServerTests(unittest.TestCase):
         }
 
     def write_config_and_load(self, payload):
-        with tempfile.NamedTemporaryFile("w", suffix=".json") as handle:
-            json.dump(payload, handle)
-            handle.flush()
-
+        handle = tempfile.NamedTemporaryFile(
+            "w", suffix=".json", delete=False, encoding="utf-8")
+        try:
+            with handle:
+                json.dump(payload, handle)
             return self.server.load_config(handle.name)
+        finally:
+            os.unlink(handle.name)
 
     def valid_runtime_config(self):
         return self.server.RuntimeConfig(
@@ -197,6 +203,7 @@ class DockerRuntimeServerTests(unittest.TestCase):
                 "allowed_mount_roots",
                 "default_timeout_seconds",
                 "max_output_bytes",
+                "backend",
             ],
             [field.name for field in fields(config)],
         )
@@ -513,11 +520,7 @@ class DockerRuntimeServerTests(unittest.TestCase):
             "max_output_bytes": 4096,
         }
 
-        with tempfile.NamedTemporaryFile("w", suffix=".json") as handle:
-            json.dump(payload, handle)
-            handle.flush()
-
-            config = self.server.load_config(handle.name)
+        config = self.write_config_and_load(payload)
 
         self.assertEqual(8765, config.bind_port)
         self.assertEqual(REPO_ROOT, config.repo_root)
@@ -545,6 +548,221 @@ class DockerRuntimeServerTests(unittest.TestCase):
         self.assertIn("default_timeout_seconds", payload)
         self.assertIn("max_output_bytes", payload)
 
+    def test_load_config_defaults_backend_to_docker(self):
+        config = self.write_config_and_load(self.valid_config_payload())
+
+        self.assertEqual("docker", config.backend)
+
+    def test_load_config_accepts_local_backend(self):
+        payload = self.valid_config_payload()
+        payload["backend"] = "local"
+
+        config = self.write_config_and_load(payload)
+
+        self.assertEqual("local", config.backend)
+
+    def test_load_config_rejects_unknown_backend(self):
+        for backend in ["kubernetes", 1, None, True]:
+            with self.subTest(backend=backend):
+                payload = self.valid_config_payload()
+                payload["backend"] = backend
+
+                with self.assertRaisesRegex(ValueError, "backend"):
+                    self.write_config_and_load(payload)
+
+    def test_load_config_local_backend_allows_image_without_dockerfile(self):
+        payload = self.valid_config_payload()
+        payload["backend"] = "local"
+        payload["allowed_images"] = {"wsl-openmc": {}}
+
+        config = self.write_config_and_load(payload)
+
+        self.assertEqual("", config.allowed_images["wsl-openmc"].dockerfile)
+        self.assertEqual("", config.allowed_images["wsl-openmc"].context)
+
+    def test_load_config_docker_backend_still_requires_dockerfile(self):
+        payload = self.valid_config_payload()
+        payload["allowed_images"] = {"img": {}}
+
+        with self.assertRaisesRegex(ValueError, "dockerfile"):
+            self.write_config_and_load(payload)
+
+    def test_load_config_local_backend_rejects_non_string_dockerfile(self):
+        for value in [42, None, False]:
+            with self.subTest(value=value):
+                payload = self.valid_config_payload()
+                payload["backend"] = "local"
+                payload["allowed_images"] = {"wsl-openmc": {"dockerfile": value}}
+
+                with self.assertRaisesRegex(ValueError, "dockerfile/context"):
+                    self.write_config_and_load(payload)
+
+    def test_translate_mount_target_converts_windows_paths(self):
+        cases = [
+            ("D:\\Codes\\MetBench", "/mnt/d/Codes/MetBench"),
+            ("c:/Users/lemon/AppData/Local/Temp", "/mnt/c/Users/lemon/AppData/Local/Temp"),
+            ("/opt/openmc-data", "/opt/openmc-data"),
+            ("relative/path", "relative/path"),
+        ]
+
+        for source, expected in cases:
+            with self.subTest(source=source):
+                self.assertEqual(expected, self.server.translate_mount_target(source))
+
+    def test_build_docker_run_command_mounts_allowed_roots_with_translated_targets(self):
+        config = self.valid_runtime_config()
+        config.repo_root = "D:\\Codes\\MetBench"
+        config.allowed_mount_roots = [
+            "D:\\Codes\\MetBench",
+            "C:\\Users\\lemon\\AppData\\Local\\Temp",
+        ]
+
+        command = self.server.build_docker_run_command(
+            config,
+            "metbench-sut:latest",
+            ["python", "sut.py"],
+            timeout_seconds=30,
+        )
+
+        self.assertIn("D:\\Codes\\MetBench:/mnt/d/Codes/MetBench", command)
+        self.assertIn(
+            "C:\\Users\\lemon\\AppData\\Local\\Temp:/mnt/c/Users/lemon/AppData/Local/Temp",
+            command,
+        )
+        self.assertNotIn("/tmp:/tmp", command)
+        w_index = command.index("-w")
+        self.assertEqual("/mnt/d/Codes/MetBench", command[w_index + 1])
+        self.assertEqual(["metbench-sut:latest", "python", "sut.py"], command[-3:])
+
+    def test_build_docker_run_command_mounts_extra_linux_roots(self):
+        config = self.valid_runtime_config()
+        config.allowed_mount_roots = ["/tmp", "/opt/openmc-data"]
+
+        command = self.server.build_docker_run_command(
+            config,
+            "metbench-sut:latest",
+            ["python", "sut.py"],
+            timeout_seconds=30,
+        )
+
+        self.assertIn(f"{REPO_ROOT}:{REPO_ROOT}", command)
+        self.assertIn("/tmp:/tmp", command)
+        self.assertIn("/opt/openmc-data:/opt/openmc-data", command)
+
+    def local_runtime_config(self):
+        return self.server.RuntimeConfig(
+            bind_host="auto-private-ipv4",
+            bind_port=8766,
+            auth_token="secret",
+            repo_root="/home/mt",
+            allowed_images={
+                "wsl-openmc": self.server.ImageConfig(dockerfile="", context=""),
+            },
+            allowed_mount_roots=["/tmp"],
+            default_timeout_seconds=60,
+            max_output_bytes=1024,
+            backend="local",
+        )
+
+    def test_local_backend_runs_argv_directly_without_docker(self):
+        config = self.local_runtime_config()
+        calls = []
+
+        def fake_runner(command, timeout_seconds):
+            calls.append((command, timeout_seconds))
+            return self.server.CommandResult(returncode=0, stdout="ok", stderr="")
+
+        response = self.server.dispatch_tool(
+            config,
+            "Bearer secret",
+            {
+                "tool": "run_sut_command",
+                "arguments": {
+                    "image": "wsl-openmc",
+                    "argv": ["python", "sut.py", "--input", "in.json"],
+                    "timeout_seconds": 9,
+                },
+            },
+            runner=fake_runner,
+            id_factory=lambda: "local-run-1",
+        )
+
+        self.assertEqual("completed", response["status"])
+        self.assertEqual(1, len(calls))
+        self.assertEqual(["python", "sut.py", "--input", "in.json"], calls[0][0])
+        self.assertEqual(9, calls[0][1])
+        self.assertEqual(["python", "sut.py", "--input", "in.json"], response["command"])
+        self.assertNotIn("docker", response["command"])
+
+    def test_local_backend_still_rejects_non_allowlisted_image(self):
+        config = self.local_runtime_config()
+
+        with self.assertRaisesRegex(ValueError, "not allowlisted"):
+            self.server.dispatch_tool(
+                config,
+                "Bearer secret",
+                {
+                    "tool": "run_sut_command",
+                    "arguments": {"image": "other", "argv": ["python", "x.py"]},
+                },
+                runner=lambda command, timeout_seconds: self.server.CommandResult(0, "", ""),
+            )
+
+    def test_local_backend_rejects_build_runtime_image(self):
+        config = self.local_runtime_config()
+
+        with self.assertRaisesRegex(ValueError, "local"):
+            self.server.dispatch_tool(
+                config,
+                "Bearer secret",
+                {
+                    "tool": "build_runtime_image",
+                    "arguments": {"image": "wsl-openmc"},
+                },
+                runner=lambda command, timeout_seconds: self.server.CommandResult(0, "", ""),
+            )
+
+    def test_run_sut_command_logs_run_id_line(self):
+        config = self.local_runtime_config()
+
+        def fake_runner(command, timeout_seconds):
+            return self.server.CommandResult(returncode=0, stdout="ok", stderr="")
+
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            response = self.server.dispatch_tool(
+                config,
+                "Bearer secret",
+                {
+                    "tool": "run_sut_command",
+                    "arguments": {
+                        "image": "wsl-openmc",
+                        "argv": ["python", "sut.py"],
+                    },
+                },
+                runner=fake_runner,
+                id_factory=lambda: "log-test-run-1",
+            )
+
+        output = buf.getvalue()
+        self.assertIn("run_id=", output)
+        self.assertIn(response["run_id"], output)
+
+    def test_acceptance_config_examples_load(self):
+        base = Path(__file__).resolve().parents[1]
+        cases = [
+            ("config.local-win.example.json", "local", 8764),
+            ("config.docker-win.example.json", "docker", 8765),
+            ("config.local-wsl.example.json", "local", 8766),
+        ]
+
+        for name, backend, port in cases:
+            with self.subTest(name=name):
+                config = self.server.load_config(base / name)
+
+                self.assertEqual(backend, config.backend)
+                self.assertEqual(port, config.bind_port)
+                self.assertEqual("change-me", config.auth_token)
     def test_main_supports_serve_subcommand_for_cli_wrapper(self):
         payload = self.valid_config_payload()
         with tempfile.NamedTemporaryFile("w", suffix=".json") as handle:

@@ -1,0 +1,13 @@
+{
+  "backend": "local",
+  "bind_host": "auto-private-ipv4",
+  "bind_port": 8766,
+  "auth_token": "change-me",
+  "repo_root": "/mnt/d/Codes/MetBench-V2.1.4_2",
+  "allowed_images": {
+    "wsl-openmc": {}
+  },
+  "allowed_mount_roots": ["/mnt/d/Codes/MetBench-V2.1.4_2", "/tmp"],
+  "default_timeout_seconds": 600,
+  "max_output_bytes": 1048576
+}

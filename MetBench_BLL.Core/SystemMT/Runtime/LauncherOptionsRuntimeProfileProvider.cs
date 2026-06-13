@@ -61,12 +61,24 @@ public sealed class LauncherOptionsRuntimeProfileProvider : IRuntimeProfileProvi
         query.TryGetValue("authTokenEnv", out var authTokenEnv);
         authTokenEnv = string.IsNullOrWhiteSpace(authTokenEnv) ? null : authTokenEnv;
 
+        query.TryGetValue("localPython", out var localPython);
+        localPython = string.IsNullOrWhiteSpace(localPython) ? null : localPython;
+
+        var pathStyle = DockerMcpPathStyle.None;
+        if (query.TryGetValue("pathStyle", out var pathStyleRaw))
+        {
+            if (!string.Equals(pathStyleRaw, "wsl", StringComparison.OrdinalIgnoreCase))
+                throw InvalidDockerRuntime(runtimeKey, "pathStyle");
+            pathStyle = DockerMcpPathStyle.Wsl;
+        }
+
         return new RuntimeProfile(
             runtimeKey,
             $"{runtimeKey} Docker MCP",
             RuntimeKind.Docker,
             python,
-            dockerMcp: new DockerMcpRuntimeOptions(endpoint, image, python, authTokenEnv));
+            dockerMcp: new DockerMcpRuntimeOptions(
+                endpoint, image, python, authTokenEnv, localPython, pathStyle));
     }
 
     private static Dictionary<string, string> ParseQuery(string query)

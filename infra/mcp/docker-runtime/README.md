@@ -84,10 +84,12 @@ Read a stored run result:
 }
 ```
 
-`run_sut_command` mounts `<repo_root>:<repo_root>` and `/tmp:/tmp`, sets the
-container working directory to `<repo_root>`, and rejects non-allowlisted
-images. The generated `docker run` command does not use privileged mode or host
-networking.
+`run_sut_command` deduplicates `[repo_root, *allowed_mount_roots]` and mounts
+each entry at its translated container target: Windows-style sources
+(`X:\path\...`) become `/mnt/x/path/...` inside the container; POSIX paths are
+passed through unchanged. `/tmp:/tmp` is only added on non-Windows hosts.  The
+container working directory is set to the translated `repo_root`. The generated
+`docker run` command does not use privileged mode or host networking.
 
 ## MetBench Runtime Backend
 
@@ -120,6 +122,45 @@ The URI host must match the manifest runtime key. The endpoint must be
 When a matching MR catalog entry uses `RuntimeKey = "openmoc-docker"`, launcher
 preflight calls `runtime_health`, and SUT runner commands are executed via
 `run_sut_command`. Parser and adapter commands remain local MetBench processes.
+
+## Backends
+
+The `backend` config field selects how `run_sut_command` executes the requested
+command:
+
+- **`"docker"` (default)** — runs allowlisted images via `docker run`.  Each
+  entry in `allowed_images` must supply `dockerfile` and `context` so
+  `build_runtime_image` can build it.
+- **`"local"`** — executes the `argv` directly in the server's own process
+  environment (no Docker involved).  The `image` argument is still validated
+  against `allowed_images`, but entries may omit `dockerfile` and `context`.
+  `build_runtime_image` returns an explicit error when the backend is `"local"`.
+  The local backend executes commands with the server process's own privileges on
+  the host — any holder of the Bearer token can run arbitrary argv (the image key
+  is an allowlist label, not a sandbox); deploy only on trusted LANs with a
+  strong token.
+
+`allowed_mount_roots` entries should use consistent path casing and separators;
+deduplication against `repo_root` is case-sensitive.
+
+### Acceptance deployment startup commands
+
+Copy the relevant example, drop the `.example` suffix, and set a real
+`repo_root` and `auth_token` before starting:
+
+```
+# Case 1 – local backend on Windows (port 8764)
+python infra/mcp/docker-runtime/server.py infra/mcp/docker-runtime/config.local-win.json
+
+# Case 2 – docker backend on Windows via Docker Desktop (port 8765)
+python infra/mcp/docker-runtime/server.py infra/mcp/docker-runtime/config.docker-win.json
+
+# Case 3 – local backend inside WSL simulating a remote Linux server (port 8766)
+python3 infra/mcp/docker-runtime/server.py infra/mcp/docker-runtime/config.local-wsl.json
+```
+
+The equivalent `serve --config <path>` subcommand form works for each case as
+well.
 
 ## MetBench UI
 

@@ -1,5 +1,6 @@
 import argparse
 import json
+import re
 import socket
 import subprocess
 import sys
@@ -28,6 +29,7 @@ class RuntimeConfig:
     allowed_mount_roots: list[str]
     default_timeout_seconds: int
     max_output_bytes: int
+    backend: str = "docker"
 
 
 @dataclass
@@ -97,7 +99,17 @@ def _required_positive_int(payload: dict[str, Any], field_name: str) -> int:
     return value
 
 
-def _load_allowed_images(payload: dict[str, Any]) -> dict[str, ImageConfig]:
+VALID_BACKENDS = ("docker", "local")
+
+
+def _load_backend(payload: dict[str, Any]) -> str:
+    backend = payload.get("backend", "docker")
+    if backend not in VALID_BACKENDS:
+        raise ValueError(f"backend must be one of {VALID_BACKENDS}")
+    return backend
+
+
+def _load_allowed_images(payload: dict[str, Any], backend: str = "docker") -> dict[str, ImageConfig]:
     allowed_images = payload.get("allowed_images")
     if not isinstance(allowed_images, dict) or not allowed_images:
         raise ValueError("allowed_images must be a non-empty object")
@@ -109,8 +121,14 @@ def _load_allowed_images(payload: dict[str, Any]) -> dict[str, ImageConfig]:
         if not isinstance(image, dict):
             raise ValueError("allowed_images entries must be objects")
 
-        dockerfile = _required_string(image, "dockerfile")
-        context = _required_string(image, "context")
+        if backend == "local":
+            dockerfile = image.get("dockerfile", "")
+            context = image.get("context", "")
+            if not isinstance(dockerfile, str) or not isinstance(context, str):
+                raise ValueError("allowed_images dockerfile/context must be strings when present")
+        else:
+            dockerfile = _required_string(image, "dockerfile")
+            context = _required_string(image, "context")
         result[name] = ImageConfig(dockerfile=dockerfile, context=context)
 
     return result
@@ -136,18 +154,21 @@ def load_config(path: str | Path) -> RuntimeConfig:
     if bind_port > 65535:
         raise ValueError("bind_port must be between 1 and 65535")
 
+    backend = _load_backend(payload)
+
     return RuntimeConfig(
         bind_host=bind_host,
         bind_port=bind_port,
         auth_token=auth_token,
         repo_root=repo_root,
-        allowed_images=_load_allowed_images(payload),
+        allowed_images=_load_allowed_images(payload, backend),
         allowed_mount_roots=_load_allowed_mount_roots(payload),
         default_timeout_seconds=_required_positive_int(
             payload,
             "default_timeout_seconds",
         ),
         max_output_bytes=_required_positive_int(payload, "max_output_bytes"),
+        backend=backend,
     )
 
 
@@ -172,6 +193,22 @@ def authorize(header: str | None, expected_token: str) -> None:
         raise PermissionError("Unauthorized")
 
 
+WINDOWS_PATH_PATTERN = re.compile(r"^([A-Za-z]):[\\/](.*)$")
+
+
+def translate_mount_target(path: str) -> str:
+    match = WINDOWS_PATH_PATTERN.match(path)
+    if match is None:
+        return path
+    drive = match.group(1).lower()
+    rest = match.group(2).replace("\\", "/")
+    return f"/mnt/{drive}/{rest}"
+
+
+def _is_windows_path(path: str) -> bool:
+    return WINDOWS_PATH_PATTERN.match(path) is not None
+
+
 def build_docker_run_command(
     config: RuntimeConfig,
     image: str,
@@ -188,20 +225,38 @@ def build_docker_run_command(
     ):
         raise ValueError("timeout_seconds must be positive")
 
-    repo_root = str(Path(config.repo_root))
-    return [
-        "docker",
-        "run",
-        "--rm",
-        "-v",
-        f"{repo_root}:{repo_root}",
-        "-v",
-        "/tmp:/tmp",
-        "-w",
-        repo_root,
-        image,
-        *argv,
-    ]
+    roots: list[str] = []
+    for root in [config.repo_root, *config.allowed_mount_roots]:
+        if root not in roots:
+            roots.append(root)
+    # Legacy compatibility: Linux hosts always mounted /tmp; Windows hosts must not.
+    if not _is_windows_path(config.repo_root) and "/tmp" not in roots:
+        roots.append("/tmp")
+
+    command = ["docker", "run", "--rm"]
+    for root in roots:
+        command += ["-v", f"{root}:{translate_mount_target(root)}"]
+    command += ["-w", translate_mount_target(config.repo_root), image, *argv]
+    return command
+
+
+def build_local_run_command(
+    config: RuntimeConfig,
+    image: str,
+    argv: list[str],
+    timeout_seconds: int | None = None,
+) -> list[str]:
+    validate_run_request(config, {"image": image, "argv": argv})
+
+    effective_timeout = config.default_timeout_seconds if timeout_seconds is None else timeout_seconds
+    if (
+        not isinstance(effective_timeout, int)
+        or isinstance(effective_timeout, bool)
+        or effective_timeout <= 0
+    ):
+        raise ValueError("timeout_seconds must be positive")
+
+    return list(argv)
 
 
 def _run_subprocess(command: list[str], timeout_seconds: int) -> CommandResult:
@@ -246,6 +301,8 @@ def build_runtime_image(
     arguments: dict[str, Any],
     runner=_run_subprocess,
 ) -> dict[str, Any]:
+    if config.backend == "local":
+        raise ValueError("build_runtime_image is not supported when backend is 'local'")
     image = _required_string(arguments, "image")
     if image not in config.allowed_images:
         raise ValueError(f"Image {image!r} is not allowlisted")
@@ -284,7 +341,10 @@ def run_sut_command(
     image = _required_string(arguments, "image")
     argv = arguments.get("argv")
     timeout_seconds = arguments.get("timeout_seconds", config.default_timeout_seconds)
-    command = build_docker_run_command(config, image, argv, timeout_seconds)
+    if config.backend == "local":
+        command = build_local_run_command(config, image, argv, timeout_seconds)
+    else:
+        command = build_docker_run_command(config, image, argv, timeout_seconds)
     result = runner(command, timeout_seconds)
     status = "completed" if result.returncode == 0 else "failed"
     record = {
@@ -299,6 +359,10 @@ def run_sut_command(
         "stderr": _trim_output(result.stderr, config.max_output_bytes),
     }
     RUN_RECORDS[run_id] = record
+    print(
+        f"run_sut_command run_id={run_id} status={status} image={image} returncode={result.returncode}",
+        flush=True,
+    )
     return record
 
 
@@ -386,6 +450,11 @@ def create_http_handler(config: RuntimeConfig, runner=_run_subprocess):
 def serve_http(config: RuntimeConfig) -> None:
     config.bind_host = resolve_bind_host(config.bind_host)
     server = ThreadingHTTPServer((config.bind_host, config.bind_port), create_http_handler(config))
+    print(
+        f"docker-runtime MCP server ({config.backend} backend) listening on "
+        f"http://{config.bind_host}:{config.bind_port}",
+        flush=True,
+    )
     server.serve_forever()
 
 

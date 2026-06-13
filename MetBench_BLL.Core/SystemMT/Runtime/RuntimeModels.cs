@@ -65,11 +65,19 @@ public sealed record RuntimeArtifactPolicy(
     bool PreserveLogs = true,
     string ArtifactRoot = "");
 
+public enum DockerMcpPathStyle
+{
+    None = 0,
+    Wsl = 1,
+}
+
 public sealed record DockerMcpRuntimeOptions(
     string Endpoint,
     string Image,
     string PythonExecutable,
-    string? AuthTokenEnvironmentVariable = null);
+    string? AuthTokenEnvironmentVariable = null,
+    string? LocalPythonExecutable = null,
+    DockerMcpPathStyle PathStyle = DockerMcpPathStyle.None);
 
 public sealed record RuntimeProfile
 {

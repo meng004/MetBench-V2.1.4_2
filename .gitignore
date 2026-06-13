@@ -13,6 +13,9 @@ x86/
 .worktrees/
 *.user
 *.suo
+
+# Local acceptance scratch (real tokens, server configs, build logs — never commit)
+.acceptance/
 *.userosscache
 *.sln.docstates
 

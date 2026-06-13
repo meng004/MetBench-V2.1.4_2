@@ -185,12 +185,15 @@ public sealed class SystemMtLauncher : ISystemMtLauncher, ISystemMtCatalogReader
         RuntimeProfile? resolvedRuntimeProfile = null;
         var runtimeProfileResolutionError = string.Empty;
         var pythonExecutable = blueprint.PythonExecutable;
+        var parserPythonExecutable = blueprint.PythonExecutable;
         try
         {
             resolvedRuntimeProfile = CreateRuntimeProfile(blueprint);
             pythonExecutable = resolvedRuntimeProfile.DockerMcp?.PythonExecutable
                 ?? resolvedRuntimeProfile.ExecutablePath
                 ?? blueprint.PythonExecutable;
+            parserPythonExecutable = resolvedRuntimeProfile.DockerMcp?.LocalPythonExecutable
+                ?? pythonExecutable;
         }
         catch (RuntimeEnvironmentResolutionException ex)
         {
@@ -210,8 +213,8 @@ public sealed class SystemMtLauncher : ISystemMtLauncher, ISystemMtCatalogReader
             SutName: blueprint.Mr.SutName,
             SourceCasePath: sourceInputPath,
             WorkingDirectory: workRoot,
-            InputParserCommand: $"\"{pythonExecutable}\" \"{blueprint.InputParserScriptPath}\"",
-            OutputParserCommand: $"\"{pythonExecutable}\" \"{blueprint.OutputParserScriptPath}\"",
+            InputParserCommand: $"\"{parserPythonExecutable}\" \"{blueprint.InputParserScriptPath}\"",
+            OutputParserCommand: $"\"{parserPythonExecutable}\" \"{blueprint.OutputParserScriptPath}\"",
             RunnerCommand: $"\"{pythonExecutable}\" \"{blueprint.RunnerScriptPath}\"",
             TimeoutSeconds: (int)blueprint.Timeout.TotalSeconds,
             CatalogVersionSha: string.Empty,
