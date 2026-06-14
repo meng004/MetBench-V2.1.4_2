@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**状态**: 待执行
+**状态**: 完成（Task 1-6 全交付；容器内全 48 变异真跑，347 ran/73 detected，硬性质通过，2026-06-14）
 **Spec**: `docs/superpowers/specs/2026-06-13-sp2-mutation-real-run-design.md`
 **分支**: `sp2-mutation-real-run`（已存在，spec 已提交）
 
