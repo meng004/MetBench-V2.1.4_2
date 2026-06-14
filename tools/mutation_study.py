@@ -750,14 +750,29 @@ def cmd_baseline(args: argparse.Namespace) -> int:
             flw_out = tmp_path / f"flw-out-{sc['id']}.json"
             effective_factor = scenario_factor(sc, DEFAULT_FACTOR)
             sc_source = scenario_source(sc)
-            apply_transformation(SUT_DIR, sc, sc_source, flw_in, effective_factor, python_exec)
-            result = run_solver(SUT_DIR, sc, flw_in, flw_out, python_exec)
-            followups[sc["id"]] = {
-                "k_eff": float(result["k_eff"]),
-                "k_eff_std": float(result.get("k_eff_std", 0.0)),
-                "factor": effective_factor,
-                "source_case": str(sc_source.relative_to(REPO_ROOT)),
-            }
+            # A single follow-up scenario can fail for reasons outside MetBench's
+            # control (e.g. the upstream OpenMC PR #3712 add_temperature bug on the
+            # fuel-temperature scenarios). Record it as an error entry and keep
+            # going so one bad scenario does not abort the whole baseline; the
+            # screen/matrix/stats paths already tolerate NaN/error follow-ups.
+            try:
+                apply_transformation(SUT_DIR, sc, sc_source, flw_in, effective_factor, python_exec)
+                result = run_solver(SUT_DIR, sc, flw_in, flw_out, python_exec)
+                followups[sc["id"]] = {
+                    "k_eff": float(result["k_eff"]),
+                    "k_eff_std": float(result.get("k_eff_std", 0.0)),
+                    "factor": effective_factor,
+                    "source_case": str(sc_source.relative_to(REPO_ROOT)),
+                }
+            except Exception as exc:  # noqa: BLE001 - record and continue
+                print(f"  WARN: follow-up baseline {sc['id']} failed: {exc}", file=sys.stderr)
+                followups[sc["id"]] = {
+                    "k_eff": float("nan"),
+                    "k_eff_std": 0.0,
+                    "factor": effective_factor,
+                    "source_case": str(sc_source.relative_to(REPO_ROOT)),
+                    "error": str(exc),
+                }
     for sid in skipped_scenarios:
         followups[sid] = {"k_eff": float("nan"), "k_eff_std": 0.0, "skipped": True}
 
