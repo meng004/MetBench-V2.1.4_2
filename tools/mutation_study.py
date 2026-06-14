@@ -533,10 +533,14 @@ def openmc_available() -> bool:
         return False
 
 
-SUBPROCESS_TIMEOUT_S = 60  # normal OpenMC source case is ~7s, OpenMOC ~0.6s.
-# 60s accommodates the slowest legitimate case (10x particle refinement
-# at 50000 particles ≈ 50s) while still capping pathological mutants
-# (chi-zero, fission-zero) that drive the OpenMC binary into long
+SUBPROCESS_TIMEOUT_S = int(os.environ.get("METBENCH_MUTATION_TIMEOUT_S", "60"))
+# Default 60s assumes the reference host where a normal OpenMC source case
+# is ~7s (OpenMOC ~0.6s) and the slowest legitimate case (10x particle
+# refinement at 50000 particles) is ~50s. On slower hosts/containers that
+# refined follow-up can exceed 60s (e.g. ~75s inside metbench-runtime), so
+# the ceiling is overridable via METBENCH_MUTATION_TIMEOUT_S without
+# changing the committed default. The ceiling still caps pathological
+# mutants (chi-zero, fission-zero) that drive the OpenMC binary into long
 # fruitless transport loops. Failing cells land as status="error",
 # which the screening + stats paths already handle. Combined with
 # `start_new_session=True` + killpg in run_subprocess, timeouts release
