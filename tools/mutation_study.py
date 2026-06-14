@@ -833,9 +833,13 @@ def screen_one(mutation: Mutation, args: argparse.Namespace) -> dict:
     solver = mutation_solver(mutation)
     with tempfile.TemporaryDirectory(prefix=f"mut-{mutation.id}-") as tmp:
         tmp_path = Path(tmp)
-        sut_copy = stage_sut(mutation, tmp_path)
-        print(f"  {mutation.id}: running screening (solver={solver}) ...", file=sys.stderr)
         try:
+            # stage_sut applies the mutant patch; a precondition failure here
+            # (the mutant's target string drifted out of the current SUT source)
+            # is an inapplicable/stale mutant — record classification="error"
+            # and continue rather than aborting the whole screen run.
+            sut_copy = stage_sut(mutation, tmp_path)
+            print(f"  {mutation.id}: running screening (solver={solver}) ...", file=sys.stderr)
             if solver in ("openmoc", "both"):
                 mut_moc = run_source(sut_copy, "openmoc", openmoc_python, openmc_python, reps=1)
             else:
@@ -1015,7 +1019,20 @@ def matrix_one(mutation: Mutation, args: argparse.Namespace) -> dict:
     cells: list[dict] = []
     with tempfile.TemporaryDirectory(prefix=f"mat-{mutation.id}-") as tmp:
         tmp_path = Path(tmp)
-        sut_copy = stage_sut(mutation, tmp_path)
+        try:
+            sut_copy = stage_sut(mutation, tmp_path)
+        except RuntimeError as e:
+            # Inapplicable/stale mutant: patch precondition no longer matches the
+            # current SUT source. Record an error matrix and continue so one
+            # drifted mutant does not abort matrix --all-semantic.
+            payload = {
+                "mutation_id": mutation.id,
+                "factor": args.factor,
+                "error": str(e)[:2000],
+                "cells": [],
+            }
+            matrix_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+            return payload
 
         for sc in SCENARIOS:
             cell: dict = {"scenario_id": sc["id"]}
