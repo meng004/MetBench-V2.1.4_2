@@ -1,0 +1,40 @@
+{
+  "mutation_id": "Mut35-openmc-runner-chi-fast-only",
+  "predicted_classification": "semantic",
+  "target_file": "SUT/openmc/openmc_runner.py",
+  "solver": "openmc",
+  "patched_source": {
+    "openmoc": null,
+    "openmc": {
+      "solver": "openmc",
+      "reps": [
+        1.1245000140252819,
+        1.1245000140252845,
+        1.1245000140252834
+      ],
+      "stds": [
+        0.0017868522811580578,
+        0.0017868522811688315,
+        0.0017868522811381315
+      ],
+      "mean": 1.1245000140252832,
+      "max_std": 0.0017868522811688315
+    }
+  },
+  "baseline": {
+    "openmoc": 1.1330583459569659,
+    "openmc": 1.1245000140252788
+  },
+  "classifications_per_solver": {
+    "openmc": {
+      "abs_delta": 4.440892098500626e-15,
+      "rel_delta": 3.949214800455125e-15,
+      "mc_threshold_3sigma": 0.0053605568435064945,
+      "rel_threshold": 0.005622500070126394,
+      "threshold": 0.005622500070126394,
+      "semantic": false
+    }
+  },
+  "classification": "equivalent",
+  "threshold_rel": 0.005
+}

@@ -1,0 +1,40 @@
+{
+  "mutation_id": "Mut34-openmc-adapter-particles-no-op",
+  "predicted_classification": "semantic",
+  "target_file": "SUT/openmc/openmc_input_adapter_refine_particles.py",
+  "solver": "openmc",
+  "patched_source": {
+    "openmoc": null,
+    "openmc": {
+      "solver": "openmc",
+      "reps": [
+        1.124500014025285,
+        1.12450001402528,
+        1.1245000140252586
+      ],
+      "stds": [
+        0.0017868522811699513,
+        0.0017868522811970422,
+        0.0017868522811539216
+      ],
+      "mean": 1.1245000140252746,
+      "max_std": 0.0017868522811970422
+    }
+  },
+  "baseline": {
+    "openmoc": 1.1330583459569659,
+    "openmc": 1.1245000140252788
+  },
+  "classifications_per_solver": {
+    "openmc": {
+      "abs_delta": 4.218847493575595e-15,
+      "rel_delta": 3.751754060432369e-15,
+      "mc_threshold_3sigma": 0.0053605568435911265,
+      "rel_threshold": 0.005622500070126394,
+      "threshold": 0.005622500070126394,
+      "semantic": false
+    }
+  },
+  "classification": "equivalent",
+  "threshold_rel": 0.005
+}

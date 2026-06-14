@@ -12,6 +12,26 @@
       "ratio": NaN,
       "assertion": "greater",
       "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          NaN,
+          NaN
+        ],
+        "moderator": [
+          NaN,
+          NaN
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          NaN,
+          NaN
+        ],
+        "moderator": [
+          NaN,
+          NaN
+        ]
+      },
       "assertion_passed": false,
       "outcome": "detected"
     },
@@ -29,6 +49,26 @@
       "ratio": NaN,
       "assertion": "less",
       "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          NaN,
+          NaN
+        ],
+        "moderator": [
+          NaN,
+          NaN
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          NaN,
+          NaN
+        ],
+        "moderator": [
+          NaN,
+          NaN
+        ]
+      },
       "assertion_passed": false,
       "outcome": "detected"
     },
@@ -46,6 +86,26 @@
       "ratio": NaN,
       "assertion": "approx",
       "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          NaN,
+          NaN
+        ],
+        "moderator": [
+          NaN,
+          NaN
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          NaN,
+          NaN
+        ],
+        "moderator": [
+          NaN,
+          NaN
+        ]
+      },
       "assertion_passed": false,
       "outcome": "detected"
     },
@@ -59,6 +119,26 @@
       "ratio": NaN,
       "assertion": "less",
       "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          NaN,
+          NaN
+        ],
+        "moderator": [
+          NaN,
+          NaN
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          NaN,
+          NaN
+        ],
+        "moderator": [
+          NaN,
+          NaN
+        ]
+      },
       "assertion_passed": false,
       "outcome": "detected"
     },
@@ -72,6 +152,26 @@
       "ratio": NaN,
       "assertion": "less",
       "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          NaN,
+          NaN
+        ],
+        "moderator": [
+          NaN,
+          NaN
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          NaN,
+          NaN
+        ],
+        "moderator": [
+          NaN,
+          NaN
+        ]
+      },
       "assertion_passed": false,
       "outcome": "detected"
     },
@@ -97,6 +197,26 @@
       "ratio": NaN,
       "assertion": "less",
       "factor": 0.5,
+      "k_source_flux": {
+        "fuel": [
+          NaN,
+          NaN
+        ],
+        "moderator": [
+          NaN,
+          NaN
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          NaN,
+          NaN
+        ],
+        "moderator": [
+          NaN,
+          NaN
+        ]
+      },
       "assertion_passed": false,
       "outcome": "detected"
     },
@@ -114,6 +234,26 @@
       "ratio": NaN,
       "assertion": "greater",
       "factor": 1.05,
+      "k_source_flux": {
+        "fuel": [
+          NaN,
+          NaN
+        ],
+        "moderator": [
+          NaN,
+          NaN
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          NaN,
+          NaN
+        ],
+        "moderator": [
+          NaN,
+          NaN
+        ]
+      },
       "assertion_passed": false,
       "outcome": "detected"
     },
@@ -123,6 +263,236 @@
     },
     {
       "scenario_id": "openmc-pincell-particles-refine",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-rotate-90",
+      "status": "ran",
+      "k_source": NaN,
+      "k_followup": NaN,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": NaN,
+      "assertion": "approx",
+      "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          NaN,
+          NaN
+        ],
+        "moderator": [
+          NaN,
+          NaN
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          NaN,
+          NaN
+        ],
+        "moderator": [
+          NaN,
+          NaN
+        ]
+      },
+      "assertion_passed": false,
+      "outcome": "detected"
+    },
+    {
+      "scenario_id": "openmc-pincell-rotate-90",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-mirror-x",
+      "status": "ran",
+      "k_source": NaN,
+      "k_followup": NaN,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": NaN,
+      "assertion": "approx",
+      "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          NaN,
+          NaN
+        ],
+        "moderator": [
+          NaN,
+          NaN
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          NaN,
+          NaN
+        ],
+        "moderator": [
+          NaN,
+          NaN
+        ]
+      },
+      "assertion_passed": false,
+      "outcome": "detected"
+    },
+    {
+      "scenario_id": "openmc-pincell-mirror-x",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-mirror-y",
+      "status": "ran",
+      "k_source": NaN,
+      "k_followup": NaN,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": NaN,
+      "assertion": "approx",
+      "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          NaN,
+          NaN
+        ],
+        "moderator": [
+          NaN,
+          NaN
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          NaN,
+          NaN
+        ],
+        "moderator": [
+          NaN,
+          NaN
+        ]
+      },
+      "assertion_passed": false,
+      "outcome": "detected"
+    },
+    {
+      "scenario_id": "openmc-pincell-mirror-y",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-mirror-x-tally",
+      "status": "ran",
+      "k_source": NaN,
+      "k_followup": NaN,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": NaN,
+      "assertion": "flux-pointwise-approx",
+      "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          NaN,
+          NaN
+        ],
+        "moderator": [
+          NaN,
+          NaN
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          NaN,
+          NaN
+        ],
+        "moderator": [
+          NaN,
+          NaN
+        ]
+      },
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmc-pincell-mirror-x-tally",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-mirror-y-tally",
+      "status": "ran",
+      "k_source": NaN,
+      "k_followup": NaN,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": NaN,
+      "assertion": "flux-pointwise-approx",
+      "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          NaN,
+          NaN
+        ],
+        "moderator": [
+          NaN,
+          NaN
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          NaN,
+          NaN
+        ],
+        "moderator": [
+          NaN,
+          NaN
+        ]
+      },
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmc-pincell-mirror-y-tally",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-fuel-temperature",
+      "status": "ran",
+      "k_source": NaN,
+      "k_followup": NaN,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": NaN,
+      "assertion": "less",
+      "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          NaN,
+          NaN
+        ],
+        "moderator": [
+          NaN,
+          NaN
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          NaN,
+          NaN
+        ],
+        "moderator": [
+          NaN,
+          NaN
+        ]
+      },
+      "assertion_passed": false,
+      "outcome": "detected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-temperature",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-temperature-via-add-temperature",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-moderator-temperature-via-borated-water",
       "status": "not-affected"
     }
   ]

@@ -13,93 +13,108 @@
   "openmc": {
     "solver": "openmc",
     "reps": [
-      1.1245000140252919,
-      1.1245000140252905,
-      1.124500014025276
+      1.1245000140252903,
+      1.124500014025271,
+      1.1245000140252748
     ],
     "stds": [
-      0.0017868522811834808,
-      0.0017868522811717534,
-      0.001786852281194857
+      0.001786852281156157,
+      0.0017868522811834674,
+      0.0017868522811529605
     ],
-    "mean": 1.124500014025286,
-    "max_std": 0.001786852281194857
+    "mean": 1.1245000140252788,
+    "max_std": 0.0017868522811834674
   },
   "followups": {
     "openmoc-pincell-nu-sigma-f": {
       "k_eff": 1.6999039264109281,
       "k_eff_std": 0.0,
-      "factor": 1.5
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell.json"
     },
     "openmc-pincell-nu-sigma-f": {
-      "k_eff": 1.6899608591871385,
-      "k_eff_std": 0.002516574199836923,
-      "factor": 1.5
+      "k_eff": 1.6899608591871322,
+      "k_eff_std": 0.002516574199844911,
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell.json"
     },
     "openmoc-pincell-sigma-a": {
       "k_eff": 0.8069041098845144,
       "k_eff_std": 0.0,
-      "factor": 1.5
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell.json"
     },
     "openmc-pincell-sigma-a": {
-      "k_eff": 0.8027171860617847,
-      "k_eff_std": 0.0013193223083113582,
-      "factor": 1.5
+      "k_eff": 0.8027171860618014,
+      "k_eff_std": 0.0013193223083139331,
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell.json"
     },
     "openmoc-pincell-group-permute": {
       "k_eff": 1.1330583459569659,
       "k_eff_std": 0.0,
-      "factor": 1.5
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell.json"
     },
     "openmoc-pincell-fuel-sigma-t": {
       "k_eff": 0.11127219735430455,
       "k_eff_std": 0.0,
-      "factor": 1.5
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell.json"
     },
     "openmoc-pincell-moderator-sigma-a": {
       "k_eff": 0.47635343316499984,
       "k_eff_std": 0.0,
-      "factor": 1.5
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell.json"
     },
     "openmc-pincell-group-permute": {
-      "k_eff": 1.126009504111914,
-      "k_eff_std": 0.0017763420637616286,
-      "factor": 1.5
+      "k_eff": 1.1260095041119202,
+      "k_eff_std": 0.0017763420637628476,
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell.json"
     },
     "openmc-pincell-fuel-sigma-t": {
-      "k_eff": 0.1129234843229024,
-      "k_eff_std": 0.00021529635848134622,
-      "factor": 1.5
+      "k_eff": 0.11292348432290354,
+      "k_eff_std": 0.00021529635848187097,
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell.json"
     },
     "openmc-pincell-moderator-sigma-a": {
-      "k_eff": 0.9683112180448833,
-      "k_eff_std": 0.0016647893051874828,
-      "factor": 1.5
+      "k_eff": 0.968311218044897,
+      "k_eff_std": 0.0016647893051962958,
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell.json"
     },
     "openmoc-pincell-fuel-sigma-s": {
       "k_eff": 1.0918528592930699,
       "k_eff_std": 0.0,
-      "factor": 0.5
+      "factor": 0.5,
+      "source_case": "SUT/openmoc/sample/pincell.json"
     },
     "openmc-pincell-fuel-sigma-s": {
-      "k_eff": 1.0932569778147136,
-      "k_eff_std": 0.0019547208762928903,
-      "factor": 0.5
+      "k_eff": 1.093256977814721,
+      "k_eff_std": 0.0019547208762747234,
+      "factor": 0.5,
+      "source_case": "SUT/openmoc/sample/pincell.json"
     },
     "openmoc-pincell-fuel-radius": {
       "k_eff": 1.1747611153388409,
       "k_eff_std": 0.0,
-      "factor": 1.05
+      "factor": 1.05,
+      "source_case": "SUT/openmoc/sample/pincell.json"
     },
     "openmc-pincell-fuel-radius": {
-      "k_eff": 1.1708592074426414,
-      "k_eff_std": 0.0017145646357927774,
-      "factor": 1.05
+      "k_eff": 1.1708592074425983,
+      "k_eff_std": 0.0017145646357809333,
+      "factor": 1.05,
+      "source_case": "SUT/openmoc/sample/pincell.json"
     },
     "openmc-pincell-particles-refine": {
-      "k_eff": 1.1247657626517267,
-      "k_eff_std": 0.0005489853886409126,
-      "factor": 10.0
+      "k_eff": 1.1247657626518501,
+      "k_eff_std": 0.0005489853886582338,
+      "factor": 10.0,
+      "source_case": "SUT/openmoc/sample/pincell.json"
     },
     "openmoc-pincell-rotate-90": {
       "k_eff": 1.1594917385615202,
@@ -108,8 +123,8 @@
       "source_case": "SUT/openmoc/sample/pincell-asymmetric.json"
     },
     "openmc-pincell-rotate-90": {
-      "k_eff": 1.1535361614026634,
-      "k_eff_std": 0.0019251225475307512,
+      "k_eff": 1.1535361614026918,
+      "k_eff_std": 0.0019251225475485773,
       "factor": 1.5,
       "source_case": "SUT/openmoc/sample/pincell-asymmetric.json"
     },
@@ -120,8 +135,8 @@
       "source_case": "SUT/openmoc/sample/pincell-offcentre.json"
     },
     "openmc-pincell-mirror-x": {
-      "k_eff": 1.0980778782345744,
-      "k_eff_std": 0.0018005599517459008,
+      "k_eff": 1.0980778782345766,
+      "k_eff_std": 0.001800559951724251,
       "factor": 1.5,
       "source_case": "SUT/openmoc/sample/pincell-offcentre.json"
     },
@@ -132,8 +147,32 @@
       "source_case": "SUT/openmoc/sample/pincell-offcentre.json"
     },
     "openmc-pincell-mirror-y": {
-      "k_eff": 1.095554069002453,
-      "k_eff_std": 0.001858624921749161,
+      "k_eff": 1.0955540690024472,
+      "k_eff_std": 0.0018586249217457038,
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell-offcentre.json"
+    },
+    "openmoc-pincell-mirror-x-tally": {
+      "k_eff": 1.1027016169736694,
+      "k_eff_std": 0.0,
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell-offcentre.json"
+    },
+    "openmc-pincell-mirror-x-tally": {
+      "k_eff": 1.0980778782345793,
+      "k_eff_std": 0.0018005599517337849,
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell-offcentre.json"
+    },
+    "openmoc-pincell-mirror-y-tally": {
+      "k_eff": 1.1027113849239967,
+      "k_eff_std": 0.0,
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell-offcentre.json"
+    },
+    "openmc-pincell-mirror-y-tally": {
+      "k_eff": 1.0955540690024514,
+      "k_eff_std": 0.0018586249217580344,
       "factor": 1.5,
       "source_case": "SUT/openmoc/sample/pincell-offcentre.json"
     },
@@ -144,81 +183,24 @@
       "source_case": "SUT/openmoc/sample/pincell.json"
     },
     "openmc-pincell-fuel-temperature": {
-      "k_eff": 1.1096562568751973,
-      "k_eff_std": 0.0014905864482547826,
+      "k_eff": 1.1096562568752157,
+      "k_eff_std": 0.0014905864482603383,
       "factor": 1.5,
       "source_case": "SUT/openmoc/sample/pincell.json"
-    },
-    "openmoc-pincell-mirror-x-tally": {
-      "k_eff": 1.1027016169736694,
-      "k_eff_std": 0.0,
-      "factor": 1.5,
-      "source_case": "SUT/openmoc/sample/pincell-offcentre.json",
-      "flux_per_cell": {
-        "fuel": [
-          64.86702728271484,
-          22.795103073120117
-        ],
-        "moderator": [
-          64.50758361816406,
-          23.014171600341797
-        ]
-      }
-    },
-    "openmc-pincell-mirror-x-tally": {
-      "k_eff": 1.098077878234572,
-      "k_eff_std": 0.0018005599517480543,
-      "factor": 1.5,
-      "source_case": "SUT/openmoc/sample/pincell-offcentre.json",
-      "flux_per_cell": {
-        "fuel": [
-          17.936419618980516,
-          6.271595336081807
-        ],
-        "moderator": [
-          41.94968803396489,
-          14.987361033544364
-        ]
-      }
-    },
-    "openmoc-pincell-mirror-y-tally": {
-      "k_eff": 1.1027113849239967,
-      "k_eff_std": 0.0,
-      "factor": 1.5,
-      "source_case": "SUT/openmoc/sample/pincell-offcentre.json",
-      "flux_per_cell": {
-        "fuel": [
-          64.86653900146484,
-          22.79512596130371
-        ],
-        "moderator": [
-          64.50711059570312,
-          23.014196395874023
-        ]
-      }
-    },
-    "openmc-pincell-mirror-y-tally": {
-      "k_eff": 1.0955540690024426,
-      "k_eff_std": 0.001858624921764335,
-      "factor": 1.5,
-      "source_case": "SUT/openmoc/sample/pincell-offcentre.json",
-      "flux_per_cell": {
-        "fuel": [
-          17.918908225409147,
-          6.280864583744124
-        ],
-        "moderator": [
-          41.89847195498548,
-          15.014361033569736
-        ]
-      }
     },
     "openmc-pincell-fuel-temperature-via-add-temperature": {
       "k_eff": NaN,
       "k_eff_std": 0.0,
       "factor": 1.5,
-      "error": "OpenMC PR #3712 add_temperature \u2192 None triggered on this followup; baseline cannot be computed against the installed (buggy) OpenMC 0.15.3.",
-      "upstream_bug_triggered": "openmc-pr-3712"
+      "source_case": "SUT/openmoc/sample/pincell.json",
+      "error": "Subprocess failed (exit 1): /opt/openmc-venv/bin/python /work/SUT/openmc/openmc_runner.py --input /tmp/baseline-flw-y5hykt0f/flw-in-openmc-pincell-fuel-temperature-via-add-temperature.json --output /tmp/baseline-flw-y5hykt0f/flw-out-openmc-pincell-fuel-temperature-via-add-temperature.json\nstdout:\n\nstderr:\nTraceback (most recent call last):\n  File \"/work/SUT/openmc/openmc_runner.py\", line 307, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/work/SUT/openmc/openmc_runner.py\", line 300, in main\n    result = solve(case)\n             ^^^^^^^^^^^\n  File \"/work/SUT/openmc/openmc_runner.py\", line 226, in solve\n    _build_mgxs_library(case, library_path)\n  File \"/work/SUT/openmc/openmc_runner.py\", line 103, in _build_mgxs_library\n    raise RuntimeError(\nRuntimeError: OpenMC PR #3712 (add_temperature \u2192 None) triggered on fuel: object of type 'NoneType' has no len()\n"
+    },
+    "openmc-pincell-moderator-temperature-via-borated-water": {
+      "k_eff": NaN,
+      "k_eff_std": 0.0,
+      "factor": 1.5,
+      "source_case": "SUT/openmoc/sample/pincell.json",
+      "error": "Subprocess failed (exit 1): /opt/openmc-venv/bin/python /work/SUT/openmc/openmc_runner.py --input /tmp/baseline-flw-y5hykt0f/flw-in-openmc-pincell-moderator-temperature-via-borated-water.json --output /tmp/baseline-flw-y5hykt0f/flw-out-openmc-pincell-moderator-temperature-via-borated-water.json\nstdout:\n\nstderr:\nTraceback (most recent call last):\n  File \"/work/SUT/openmc/openmc_runner.py\", line 307, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/work/SUT/openmc/openmc_runner.py\", line 300, in main\n    result = solve(case)\n             ^^^^^^^^^^^\n  File \"/work/SUT/openmc/openmc_runner.py\", line 226, in solve\n    _build_mgxs_library(case, library_path)\n  File \"/work/SUT/openmc/openmc_runner.py\", line 127, in _build_mgxs_library\n    raise RuntimeError(\nRuntimeError: OpenMC PR #3662 (borated_water drops temperature when density set) triggered on moderator: requested T=900.0, got mat.temperature=None\n"
     }
   },
   "factor": 1.5,
