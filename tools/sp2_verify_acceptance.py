@@ -1,20 +1,29 @@
 #!/usr/bin/env python3
 """SP2 acceptance verifier: reads docs/experiments/_data and checks the
-SP2 spec §4 mechanically-checkable properties:
+SP2 spec §4 properties against the mutant author's INTENT
+(predicted_classification), not the source-only screening label.
 
-  1. matrix produced for every semantic mutant (screening said semantic
-     -> a matrix.json exists with >=1 cell).
-  2. Mut00 identity: zero false-positive -> no scenario cell has
-     outcome == "detected".
-  3. equivalent mutants survive -> no detected cell (survival is correct;
-     a detected cell is recorded as an anomaly, not a hard fail here).
-  4. semantic mutants detected -> each semantic mutant has >=1 cell with
-     outcome == "detected"; semantic mutants with zero detections are
-     reported as coverage gaps (recorded, not hidden).
+Why predicted_classification: screening runs only the source case, so
+adapter mutants (which only bite during the follow-up transform) are
+screening-classified "equivalent" even when they are intended semantic
+bugs. Keying the equivalent/semantic split off predicted_classification
+avoids mislabelling those correct kills as anomalies.
+
+Properties:
+  1. (hard) every applicable semantic-intent mutant has a matrix.json
+     with >=1 cell (matrix --all ran all mutants).
+  2. (hard) Mut00 identity has zero false-positive: no detected cell and
+     screening did not call it semantic.
+  3. equivalent-intent mutants (true no-ops/identity) that get detected
+     are anomalies (MR over-sensitivity / MC noise) -> recorded.
+  4. semantic-intent mutants with NO MR detection are coverage gaps
+     -> recorded.
+  Drifted mutants (screening classification == "error", patch precondition
+  no longer matches the SUT source) are reported as inapplicable.
 
 Exit code 0 iff hard properties (1, 2) hold AND baseline + screening are
-present. Properties 3/4 anomalies are printed and summarized but do not
-flip the exit code (they are T6 findings to record per spec §4).
+present. Properties 3/4 + drift are printed and summarized but do not flip
+the exit code (they are T6 findings to record per spec §4).
 """
 from __future__ import annotations
 
@@ -34,12 +43,17 @@ def mut_id_is_identity(mid: str) -> bool:
     return mid.lower().startswith("mut00")
 
 
+def detected_cells(matrix: dict | None) -> int:
+    if not matrix:
+        return 0
+    return sum(1 for c in matrix.get("cells", []) if c.get("outcome") == "detected")
+
+
 def main() -> int:
     baseline = load(DATA / "baseline.json")
     if baseline is None:
         print("FAIL: baseline.json missing")
         return 1
-
     if not CAND.exists():
         print("FAIL: candidates/ missing")
         return 1
@@ -51,20 +65,23 @@ def main() -> int:
         s = load(d / "screening.json")
         if s is not None:
             screened[d.name] = s
-
     if not screened:
         print("FAIL: no screening.json found")
         return 1
 
-    semantic = [k for k, v in screened.items()
-                if v.get("classification") == "semantic"]
-    equivalent = [k for k, v in screened.items()
-                  if v.get("classification") == "equivalent"]
+    inapplicable = [k for k, v in screened.items()
+                    if v.get("classification") == "error"]
+    applicable = {k: v for k, v in screened.items() if k not in inapplicable}
+
+    semantic = [k for k, v in applicable.items()
+                if v.get("predicted_classification") == "semantic"]
+    equivalent = [k for k, v in applicable.items()
+                  if v.get("predicted_classification") == "equivalent"]
 
     hard_ok = True
     anomalies: list[str] = []
 
-    # property 1: every semantic mutant has a matrix with >=1 cell
+    # P1: every applicable semantic-intent mutant has a matrix with >=1 cell
     missing_matrix = []
     for mid in semantic:
         m = load(CAND / mid / "matrix.json")
@@ -72,45 +89,43 @@ def main() -> int:
             missing_matrix.append(mid)
     if missing_matrix:
         hard_ok = False
-        print(f"FAIL(P1): semantic mutants without matrix: {missing_matrix}")
+        print(f"FAIL(P1): semantic-intent mutants without matrix: {missing_matrix}")
     else:
-        print(f"OK(P1): {len(semantic)} semantic mutants each have a matrix")
+        print(f"OK(P1): {len(semantic)} semantic-intent mutants each have a matrix")
 
-    # property 2: Mut00 identity zero false-positive
+    # P2: Mut00 identity zero false-positive
     id_detected = []
     for mid, s in screened.items():
         if not mut_id_is_identity(mid):
             continue
-        m = load(CAND / mid / "matrix.json")
-        if m:
-            for c in m.get("cells", []):
-                if c.get("outcome") == "detected":
-                    id_detected.append((mid, c.get("scenario_id")))
+        if detected_cells(load(CAND / mid / "matrix.json")) > 0:
+            id_detected.append((mid, "matrix detected"))
         if s.get("classification") == "semantic":
             id_detected.append((mid, "screening=semantic"))
     if id_detected:
         hard_ok = False
-        print(f"FAIL(P2): identity mutant flagged detected: {id_detected}")
+        print(f"FAIL(P2): identity mutant flagged: {id_detected}")
     else:
         print("OK(P2): Mut00 identity has zero false-positive detections")
 
-    # property 3: equivalent survive (anomaly if detected)
-    for mid in equivalent:
-        m = load(CAND / mid / "matrix.json")
-        if m and any(c.get("outcome") == "detected" for c in m.get("cells", [])):
-            anomalies.append(f"equivalent mutant {mid} was detected (unexpected kill)")
+    # P3: equivalent-intent mutants detected -> anomaly
+    eq_killed = [mid for mid in equivalent
+                 if detected_cells(load(CAND / mid / "matrix.json")) > 0]
+    if eq_killed:
+        anomalies.append(
+            f"equivalent-intent mutants detected (MR over-sensitivity / MC noise): {eq_killed}")
 
-    # property 4: semantic detected by >=1 MR (gap if none)
-    gaps = []
-    for mid in semantic:
-        m = load(CAND / mid / "matrix.json")
-        detected = m and any(c.get("outcome") == "detected" for c in m.get("cells", []))
-        if not detected:
-            gaps.append(mid)
+    # P4: semantic-intent mutants with no detection -> coverage gap
+    gaps = [mid for mid in semantic
+            if detected_cells(load(CAND / mid / "matrix.json")) == 0]
     if gaps:
-        anomalies.append(f"semantic mutants with NO MR detection (coverage gaps): {gaps}")
-    print(f"INFO: semantic={len(semantic)} equivalent={len(equivalent)} "
-          f"detected-gaps={len(gaps)}")
+        anomalies.append(f"semantic-intent mutants with NO MR detection (coverage gaps): {gaps}")
+
+    print(f"INFO: applicable={len(applicable)} semantic-intent={len(semantic)} "
+          f"equivalent-intent={len(equivalent)} inapplicable(drifted)={len(inapplicable)}")
+    if inapplicable:
+        print(f"INFO: drifted/inapplicable mutants (patch precondition no longer matches SUT): "
+              f"{inapplicable}")
 
     if anomalies:
         print("ANOMALIES (recorded per spec §4, do not flip exit code):")
