@@ -25,10 +25,10 @@
 | B. MR 测试主流程 | 9 | 6 | 3 | | B2-B5 ✅(System-MT 端到端真跑通)+B7 ✅(播种 2 异常)+B1 ✅(修复后发现产 14 候选)；B6/B8/B9 ⚠️ |
 | C. MR 发现 & 验证 | 11 | 7 | 3 | | C1-C5/C10-C11 trx ✅；C6/C7/C9 ⚠️；C8 未跑 |
 | D. R-Case 自动复现 | 2 | 2 | | | D1-D2 trx ✅ |
-| E. 可视化 & 报表 | 7 | 3 | 3 | | E6/E7 trx + E2 UI ✅；E3/E4/E5 ⚠️(E5 导航已修，页面 stub) |
+| E. 可视化 & 报表 | 7 | 4 | 2 | | E6/E7 trx + E2/E5 UI ✅；E3/E4 ⚠️ |
 | F. 持久化 & schema | 5 | 5 | | | F1-F5 trx ✅ |
 | G. 运营 & 性能 | 5 | 4 | | | G1-G2/G4-G5 trx ✅；G3 已删除 |
-| **合计** | **47** | **31** | **14** | **0** | SP3a 22 trx ✅ + SP3b UI 9 ✅(A1/A7/B1/B2-B5/B7/E2) / 14 ⚠️ / 0 ❌ / 1 未跑(C8)；**24/24 页导航渲染通过**；**6 项发现已修 5(代码) + 1 重新归类**。SP3b 部分验收(见 sp3b-summary.md)。 |
+| **合计** | **47** | **32** | **13** | **0** | SP3a 22 trx ✅ + SP3b UI 10 ✅(A1/A7/B1/B2-B5/B7/E2/E5) / 13 ⚠️ / 0 ❌ / 1 未跑(C8)；**24/24 页导航渲染通过**；**6 项发现已修 5(代码) + 1 重新归类**；E5 后续实现(6 卡 summary)。SP3b 部分验收(见 sp3b-summary.md)。 |
 
 **Release 判定**（验收员勾选）：
 
@@ -104,7 +104,7 @@
 | E2 | Coverage Dashboard 4 维饼图 | 4 个 PieChart 均含 ≥ 2 扇区 + legend | 🟡 | ✅ | sp3b: sweepDisp-E2「4-Dimension Coverage Dashboard」+MetaPattern Coverage 饼图 2 扇区(红/绿)；其余 3 图在下方 |
 | E3 | 报表导出 4 端 | `Word/Excel/PDF/HTML` 4 文件均生成 + 可打开 | 🔴 | ⚠️ | sp3b: caseE3 ReportTypeComboBox 确有 4 端(Pdf/Word/Excel/Html)+Export 按钮；导出未跑完(selcombo 在该 combo 上 UIA 超时) |
 | E4 | HTML 嵌入 WebView2 | 页内渲染正确，CSS / 表格无错位 | 🟡 | ⚠️ | sp3b: sweepDisp-E4 报告页+WebView2 控件存在；需先生成报告才渲染 HTML |
-| E5 | Dashboard 主页 cards | ≥ 4 个 summary card + 数值有意义 | 🟢 | ⚠️ | sp3b: **修复导航入口后**(加 Nav_Dashboard)verifyFix1 可达且渲染；但 Dashboard 页仅 1 个「Click me!」演示按钮，**非 ≥4 summary cards**(页面内容仍是占位 stub，独立内容 gap) |
+| E5 | Dashboard 主页 cards | ≥ 4 个 summary card + 数值有意义 | 🟢 | ✅ | **已实现**：Dashboard 主页改为 6 张 summary card（已注册 SUT / 蜕变关系 / 元模式覆盖 / SUT×MR 绑定 / 已知缺陷复现 / 变异杀死率），数值取自 CoverageService.Compute() 真实计数（同 E2 的 coverage 服务）；UIA 实跑 dump+截图见 2026-06-16-e5-dashboard-evidence（e5-tree.txt 6 卡 + e5-02 截图） |
 | E6 | SystemMtReport service CLI | Passed ≥ 6, Failed 0 | 🟡 | ✅ | sp3a-host.trx · 12 passed |
 | E7 | HtmlReportRenderer 单测 | Passed > 0, Failed 0 | 🟡 | ✅ | sp3a-host.trx · 20 passed |
 

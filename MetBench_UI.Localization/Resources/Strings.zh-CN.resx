@@ -883,6 +883,24 @@
   <data name="Dashboard_ClickMe" xml:space="preserve">
     <value>点击我！</value>
   </data>
+  <data name="Dashboard_Suts" xml:space="preserve">
+    <value>已注册 SUT</value>
+  </data>
+  <data name="Dashboard_Mrs" xml:space="preserve">
+    <value>蜕变关系</value>
+  </data>
+  <data name="Dashboard_MetaPatterns" xml:space="preserve">
+    <value>元模式覆盖</value>
+  </data>
+  <data name="Dashboard_Bindings" xml:space="preserve">
+    <value>SUT×MR 绑定</value>
+  </data>
+  <data name="Dashboard_Bugs" xml:space="preserve">
+    <value>已知缺陷复现</value>
+  </data>
+  <data name="Dashboard_Mutation" xml:space="preserve">
+    <value>变异杀死率</value>
+  </data>
   <data name="Discovery_DiscovererLabel" xml:space="preserve">
     <value>发现器：</value>
   </data>
