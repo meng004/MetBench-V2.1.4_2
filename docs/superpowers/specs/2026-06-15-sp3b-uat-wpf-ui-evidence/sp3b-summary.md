@@ -55,10 +55,16 @@
 
 ## Tally
 
-- **✅ verified**: A1, A7, B2, B3, B4, B5, E2 (7) + navigation/render for all 25 pages.
-- **⚠️ partial / finding**: A2, A3, A4, A6, B1, B6, B7, C6, C7, C9, E4 (11).
-- **⏳ not run (page renders; needs upstream run)**: A5, B8, B9, C8, E3 (5).
+- **✅ verified**: A1, A7, B2, B3, B4, B5, E2 (7) + navigation/render for all 24 UI pages.
+- **⚠️ partial / finding**: A2, A3, A4, A5, A6, B1, B6, B7, C6, C7, C9, E3, E4 (13).
+- **⏳ not run (page renders; needs upstream run)**: B8, B9, C8 (3).
 - **❌ gap**: E5 (1).
+
+### Continue-session deltas (after the first commit)
+- **C9** ⚠️→ improved: `Seed demo data` populates **5 mutants (Mut-1..5, all selected)** + MR Bindings panel + `Start campaign` executes (`caseC9-02-campaign.png`); kill-rate results grid stays empty (needs MR-binding checkbox selection — not driven).
+- **B1** ⚠️ + **finding**: `Run discovery` runs but errors `python exited 2: can't open …bin\…\tools\noether_candidates.py` — the discovery sidecar script is **not deployed to the build output**; candidates: 0. (Also blocks C6 population.)
+- **E3** ⚠️: `ReportTypeComboBox` confirmed to expose **all 4 formats (Pdf / Word / Excel / Html)** + Export; export not completed (selcombo hit a UIA timeout on this combo).
+- **A5** ⚠️: MRManagement form is text-fillable (Context/Input/Output/dimensions) + Add executed; outcome unconfirmed — the application ComboBox has no AutomationId and method-level MR Add likely requires an app selected.
 
 The core T0 System-MT flow (B2–B5) passes end-to-end with a real metamorphic check (advection linearity, ×2). Most ⚠️/⏳ pages render correctly and only lack content because the upstream operation (discovery run, failing-MR run for anomalies, mutation seed, report generate, method-MT run) was not executed in this session; the tooling supports all of them.
 
@@ -68,6 +74,7 @@ The core T0 System-MT flow (B2–B5) passes end-to-end with a real metamorphic c
 3. B6 button label typo `Eecute MT` → `Execute MT`.
 4. E5 Dashboard page has no nav entry (unreachable).
 5. WPF System-MT needs `python` resolvable (default `SystemPython="python"`; no env-var override for system python like there is for openmoc/openmc/scipy) — preflight correctly diagnoses (exit 9009).
+6. Discovery (`Run discovery`) sidecar script `tools/noether_candidates.py` is **not deployed to the build output dir** → discovery errors (`python exited 2: can't open file …\bin\…\tools\noether_candidates.py`), candidates: 0. The page tries to run it relative to the app bin.
 
 ## Test data left behind
 `UAT-SP3b-App` (Application) and likely `UAT-SP3b-Domain` (Domain) were created in `MetBench_DataBase/MR.Litedb` during A1/A4. Harmless test rows; imported SUTs re-seed on launch.
