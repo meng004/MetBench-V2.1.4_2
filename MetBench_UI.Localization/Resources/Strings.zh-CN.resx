@@ -1000,6 +1000,12 @@
   <data name="Mutation_CampaignSummary" xml:space="preserve">
     <value>任务摘要</value>
   </data>
+  <data name="Mutation_SimulatedBadge" xml:space="preserve">
+    <value>⚠ 模拟</value>
+  </data>
+  <data name="Mutation_SimulatedTooltip" xml:space="preserve">
+    <value>T6 原型：本活动使用确定性 stub cell-runner（StubCellRunner），所示检出率 / 结果为占位值，非真实测量。真实变异运行经 tools/mutation_study.py 离线执行。</value>
+  </data>
   <data name="Mutation_SummaryTotal" xml:space="preserve">
     <value>总计：</value>
   </data>

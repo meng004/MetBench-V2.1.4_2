@@ -112,6 +112,19 @@
                 CornerRadius="4" Padding="10"
                 Margin="0,0,0,12">
             <StackPanel>
+                <!-- T6 maturity gate (assessment P1): the in-app cell-runner is a deterministic SIMULATOR
+                     (StubCellRunner) — kill-rate / detection-rate / outcomes are placeholders, NOT real
+                     measurements. Always-visible so the numbers below can never be mistaken for measured. -->
+                <Border Margin="0,0,0,10" Padding="10,8"
+                        Background="#33E67E22" BorderBrush="#E67E22" BorderThickness="1" CornerRadius="4">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding ViewModel.Localization[Mutation_SimulatedBadge]}"
+                                   Foreground="#E67E22" FontWeight="Bold" VerticalAlignment="Top" Margin="0,0,10,0" />
+                        <TextBlock Text="{Binding ViewModel.Localization[Mutation_SimulatedTooltip]}"
+                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                   TextWrapping="Wrap" VerticalAlignment="Center" MaxWidth="820" />
+                    </StackPanel>
+                </Border>
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                     <ui:Button Appearance="Primary"
                                Content="{Binding ViewModel.Localization[Mutation_StartCampaign]}"
