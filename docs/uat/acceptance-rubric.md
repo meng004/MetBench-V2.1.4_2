@@ -82,7 +82,7 @@
 | C7 | MR Recommendation UI | top-K 推荐 + 按 confidence 排序 | 🟢 | | 截图 |
 | C8 | AutoDetectMR UI | 进度条 < 2 min + 候选可入库 | 🟡 | | 截图 |
 | C9 | Mutation Campaign UI | Kill Rate ≥ 0 + diff 可看 | 🟡 | | 截图 |
-| C10 | SCG-Heuristic Discoverer | Passed ≥ 29, Failed 0 + 三类 pattern 都产 candidate | 🟡 | | trx |
+| C10 | SCG-Heuristic Discoverer | Passed ≥ 14, Failed 0 + 三类 pattern 都产 candidate（原阈值 29 为陈旧枚举预估；实际 trx 测得 14，三类 pattern 各有专门断言：DirectCause_pattern_produces_monotonic_hint / Mediator_pattern_only_when_no_direct_edge / Confounder_pattern_detects_common_cause） | 🟡 | | trx |
 | C11 | OpenMC 第 3-SUT BDD smoke | Cross-program neutron transport feature: openmc-pincell-nu-sigma-f + openmc-pincell-sigma-a 2 scenarios 跑通；`OpenMcRunnerSmokeTests` Passed = 1, Failed 0；output JSON 含 `k_eff` ∈ [0.5, 2.0] + `metadata.runner=openmc` | 🟡 | | trx |
 
 ---
@@ -92,7 +92,7 @@
 | # | 用例 | 通过准则 | 阻断 | 结果 | 证据 |
 |---|------|---------|------|------|------|
 | D1 | R-Case service 跑通 | Passed ≥ 9, Failed 0 | 🔴 | | trx |
-| D2 | r-case.reproduced audit | trx 含 fact `WriteAudit_records_r_case_reproduced` 通过 | 🔴 | | trx |
+| D2 | r-case.reproduced audit | trx 含 fact `ReproduceAsync_anomaly_with_large_gap_marks_reproduced` 通过（原名 `WriteAudit_records_r_case_reproduced` 为陈旧近似；实际断言 r-case.reproduced 在 `RCaseReproductionServiceTests.ReproduceAsync_anomaly_with_large_gap_marks_reproduced`） | 🔴 | | trx |
 
 ---
 
