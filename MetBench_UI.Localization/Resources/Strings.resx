@@ -1000,6 +1000,12 @@
   <data name="Mutation_CampaignSummary" xml:space="preserve">
     <value>Campaign Summary</value>
   </data>
+  <data name="Mutation_SimulatedBadge" xml:space="preserve">
+    <value>⚠ SIMULATED</value>
+  </data>
+  <data name="Mutation_SimulatedTooltip" xml:space="preserve">
+    <value>T6 prototype: this campaign uses a deterministic stub cell-runner (StubCellRunner). The detection-rate / outcomes shown are placeholders, NOT real measurements. Real mutation runs execute offline via tools/mutation_study.py.</value>
+  </data>
   <data name="Mutation_SummaryTotal" xml:space="preserve">
     <value>Total: </value>
   </data>
