@@ -37,6 +37,9 @@ internal static class Program
 {
     private static readonly string[] TerminalStates = ["Succeeded", "Failed", "Cancelled"];
 
+    private static int _dialogShotIndex;
+    private static string NextDialogShotIndex() => (++_dialogShotIndex).ToString();
+
     private static int Main(string[] args)
     {
         if (args.Length == 0)
@@ -433,6 +436,35 @@ internal static class Program
 
     [DllImport("user32.dll")]
     private static extern bool PostMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+
+    [DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    [DllImport("user32.dll")]
+    private static extern int GetSystemMetrics(int nIndex);
+
+    private static bool CaptureVirtualScreen(string path)
+    {
+        try
+        {
+            int x = GetSystemMetrics(76); // SM_XVIRTUALSCREEN
+            int y = GetSystemMetrics(77); // SM_YVIRTUALSCREEN
+            int w = GetSystemMetrics(78); // SM_CXVIRTUALSCREEN
+            int h = GetSystemMetrics(79); // SM_CYVIRTUALSCREEN
+            if (w <= 0 || h <= 0) { w = GetSystemMetrics(0); h = GetSystemMetrics(1); x = 0; y = 0; }
+            using var bmp = new System.Drawing.Bitmap(w, h);
+            using (var g = System.Drawing.Graphics.FromImage(bmp))
+            {
+                g.CopyFromScreen(x, y, 0, 0, new System.Drawing.Size(w, h));
+            }
+            bmp.Save(path, System.Drawing.Imaging.ImageFormat.Png);
+            return true;
+        }
+        catch (Exception ex) { Console.WriteLine($"[screen] {ex.Message}"); return false; }
+    }
 
     private const uint WM_KEYDOWN = 0x0100;
     private const uint WM_KEYUP   = 0x0101;
@@ -959,7 +991,7 @@ internal static class Program
                 Console.WriteLine($"[step] {op}{(arg.Length > 0 ? ":" + arg : "")}");
                 try
                 {
-                    if (!ExecuteStep(window, automation, evidenceDir, label, op, arg, failures))
+                    if (!ExecuteStep(app, window, automation, evidenceDir, label, op, arg, failures))
                     {
                         // ExecuteStep returns false only for unrecoverable nav/find errors
                         Console.Error.WriteLine($"[step] '{op}' did not complete successfully");
@@ -1005,12 +1037,32 @@ internal static class Program
         return (arg[..i].Trim(), arg[(i + 1)..].Trim());
     }
 
-    private static bool ExecuteStep(Window window, UIA3Automation automation, string evidenceDir, string label,
+    private static bool ExecuteStep(Application app, Window window, UIA3Automation automation, string evidenceDir, string label,
                                     string op, string arg, List<string> failures)
     {
         var cf = automation.ConditionFactory;
         switch (op)
         {
+            case "dialog":
+            {
+                var ok = DismissDialog(app, window, automation, arg, evidenceDir, label);
+                if (!ok) failures.Add($"dialog button '{arg}' not found/clicked");
+                return ok;
+            }
+            case "dialogopt":
+            {
+                // Optional dialog dismiss: clicks a matching button if a dialog is present,
+                // but never fails the case if none is found (for unpredictable confirm/success
+                // dialog sequences). Empty arg => broad default button set (确定/是(Y)/是/OK/Yes).
+                DismissDialog(app, window, automation, arg, evidenceDir, label, timeoutMs: 4000);
+                return true;
+            }
+            case "openfile":
+            {
+                var ok = DriveOpenFileDialog(app, window, automation, arg);
+                if (!ok) failures.Add($"openfile '{arg}' could not be driven");
+                return ok;
+            }
             case "nav":
                 return NavigateGeneric(window, automation, arg);
 
@@ -1066,6 +1118,25 @@ internal static class Program
                 Console.WriteLine($"[setid] {id} = '{val}'");
                 return true;
             }
+            case "setidx":
+            {
+                // setidx:<ControlType>,<index>=<value> — set value on the Nth descendant of the
+                // given control type within the content frame (for controls without AutomationId,
+                // e.g. the page filter TextBox = first Edit).
+                var (left, val) = SplitKv(arg);
+                var parts = left.Split(',');
+                var ctName = parts[0].Trim();
+                int idx = (parts.Length > 1 && int.TryParse(parts[1].Trim(), out var ii)) ? ii : 0;
+                var frameEl = FindById(window, automation, "PART_NavigationViewContentPresenter") ?? (AutomationElement)window;
+                var ctv = Enum.TryParse<ControlType>(ctName, true, out var parsed) ? parsed : ControlType.Edit;
+                var all = frameEl.FindAllDescendants(cf.ByControlType(ctv));
+                if (idx < 0 || idx >= all.Length) { failures.Add($"setidx {ctName}[{idx}] out of range (found {all.Length})"); return false; }
+                var vpi = all[idx].Patterns.Value.PatternOrDefault;
+                if (vpi == null) { failures.Add($"setidx {ctName}[{idx}] has no ValuePattern"); return false; }
+                vpi.SetValue(val);
+                Console.WriteLine($"[setidx] {ctName}[{idx}] = '{val}'");
+                return true;
+            }
             case "selcombo":
             {
                 var (id, text) = SplitKv(arg);
@@ -1088,6 +1159,26 @@ internal static class Program
                 Console.WriteLine($"[selrow] {id}[{idx}] selected");
                 return true;
             }
+            case "selrowname":
+            {
+                var (gid, text) = SplitKv(arg);
+                var grid = WaitFor(window, automation, () => FindById(window, automation, gid), 8_000);
+                if (grid == null) { failures.Add($"selrowname grid '{gid}' not found"); return false; }
+                foreach (var r in grid.FindAllDescendants(cf.ByControlType(ControlType.DataItem)))
+                {
+                    var cell = r.FindFirstDescendant(cf.ByName(text));
+                    if (cell != null)
+                    {
+                        var sip = r.Patterns.SelectionItem.PatternOrDefault;
+                        if (sip != null) sip.Select();
+                        else r.Patterns.LegacyIAccessible.PatternOrDefault?.DoDefaultAction();
+                        Console.WriteLine($"[selrowname] selected row containing '{text}'");
+                        return true;
+                    }
+                }
+                failures.Add($"selrowname: no row with '{text}' on current page");
+                return false;
+            }
             case "invokeid":
             {
                 var el = WaitFor(window, automation, () => FindById(window, automation, arg), 10_000);
@@ -1099,6 +1190,20 @@ internal static class Program
                 var el = WaitFor(window, automation, () => FindByName(window, automation, arg), 10_000);
                 if (el == null) { failures.Add($"invokename '{arg}' not found"); return false; }
                 return InvokeElement(el, arg, failures);
+            }
+            case "clickid":
+            {
+                var el = WaitFor(window, automation, () => FindById(window, automation, arg), 10_000);
+                if (el == null) { failures.Add($"clickid '{arg}' not found"); return false; }
+                try { el.Click(); Console.WriteLine($"[clickid] real-clicked '{arg}'"); return true; }
+                catch (Exception ex) { failures.Add($"clickid '{arg}': {ex.Message}"); return false; }
+            }
+            case "clickname":
+            {
+                var el = WaitFor(window, automation, () => FindByName(window, automation, arg), 10_000);
+                if (el == null) { failures.Add($"clickname '{arg}' not found"); return false; }
+                try { el.Click(); Console.WriteLine($"[clickname] real-clicked '{arg}'"); return true; }
+                catch (Exception ex) { failures.Add($"clickname '{arg}': {ex.Message}"); return false; }
             }
             case "assertid":
             {
@@ -1132,6 +1237,61 @@ internal static class Program
                 Console.WriteLine($"[gridrows] '{arg}' = {count}");
                 return true;
             }
+            case "screen":
+            {
+                var path = Path.Combine(evidenceDir, $"{label}-{arg}.png");
+                if (CaptureVirtualScreen(path)) Console.WriteLine($"[screen] full-desktop -> {path}");
+                else Console.WriteLine("[screen] capture failed");
+                return true;
+            }
+            case "foreground":
+            {
+                try
+                {
+                    var h = window.Properties.NativeWindowHandle.Value;
+                    ShowWindow(h, 9 /* SW_RESTORE */);
+                    SetForegroundWindow(h);
+                    window.Focus();
+                    Console.WriteLine("[foreground] set");
+                }
+                catch (Exception ex) { Console.WriteLine($"[foreground] {ex.Message}"); }
+                return true;
+            }
+            case "dumpdialog":
+            {
+                var p = Path.Combine(evidenceDir, $"{label}-{arg}.txt");
+                using var sw = new StreamWriter(p, append: false);
+                foreach (var w in GetProcessWindows(app, automation))
+                {
+                    string nm = "", c = "";
+                    try { nm = w.Name ?? ""; } catch { }
+                    try { c = w.ClassName ?? ""; } catch { }
+                    if (c == "Window" && nm == "MetBench") continue;
+                    sw.WriteLine($"=== window Name='{nm}' Cls='{c}' ===");
+                    DumpElementTo(sw, w, 0, 10);
+                }
+                Console.WriteLine($"[dumpdialog] -> {p}");
+                return true;
+            }
+            case "wins":
+            {
+                try
+                {
+                    var kids = automation.GetDesktop().FindAllChildren();
+                    Console.WriteLine($"[wins] desktop has {kids.Length} top-level children; app.ProcessId={app.ProcessId}");
+                    foreach (var k in kids)
+                    {
+                        string nm = "", c = ""; int pid = -1;
+                        try { nm = k.Name ?? ""; } catch { }
+                        try { c = k.ClassName ?? ""; } catch { }
+                        try { pid = k.Properties.ProcessId.Value; } catch { }
+                        if (pid == app.ProcessId || c == "#32770" || nm.Length > 0)
+                            Console.WriteLine($"[wins]   pid={pid}{(pid == app.ProcessId ? "*" : "")} Cls='{c}' Name='{nm}'");
+                    }
+                }
+                catch (Exception ex) { Console.WriteLine($"[wins] error: {ex.Message}"); }
+                return true;
+            }
             case "log":
                 Console.WriteLine($"[log] {arg}");
                 return true;
@@ -1151,6 +1311,166 @@ internal static class Program
         var toggle = el.Patterns.Toggle.PatternOrDefault;
         if (toggle != null) { toggle.Toggle(); Console.WriteLine($"[invoke] {tag} via TogglePattern"); return true; }
         failures.Add($"invoke '{tag}' supports neither Invoke/Legacy/Toggle");
+        return false;
+    }
+
+    /// <summary>
+    /// Enumerate top-level windows belonging to the app's process by scanning the UIA
+    /// desktop and filtering on ProcessId. More reliable than Application.GetAllTopLevelWindows
+    /// for native modal dialogs (OpenFileDialog, Win32 MessageBox) which that API can miss.
+    /// </summary>
+    private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
+    [DllImport("user32.dll")]
+    private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
+
+    [DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
+    [DllImport("user32.dll")]
+    private static extern bool IsWindowVisible(IntPtr hWnd);
+
+    /// <summary>
+    /// Enumerate visible top-level windows owned by the app's process via Win32 EnumWindows
+    /// (reliable for native dialogs — Win32 MessageBox "#32770" and OpenFileDialog — which the
+    /// UIA desktop child scan can miss), then wrap each HWND as a UIA element via FromHandle.
+    /// </summary>
+    private static List<AutomationElement> GetProcessWindows(Application app, UIA3Automation automation)
+    {
+        var hwnds = new List<IntPtr>();
+        try
+        {
+            EnumWindows((h, l) =>
+            {
+                try
+                {
+                    if (!IsWindowVisible(h)) return true;
+                    GetWindowThreadProcessId(h, out uint wpid);
+                    if (wpid == (uint)app.ProcessId) hwnds.Add(h);
+                }
+                catch { /* ignore */ }
+                return true;
+            }, IntPtr.Zero);
+        }
+        catch { /* ignore */ }
+
+        var list = new List<AutomationElement>();
+        foreach (var h in hwnds)
+        {
+            try { var el = automation.FromHandle(h); if (el != null) list.Add(el); }
+            catch { /* ignore */ }
+        }
+        return list;
+    }
+
+    /// <summary>
+    /// Find a modal dialog (a top-level window of the app that is not the main shell),
+    /// log its message text, screenshot it, and click a button by Name. Win32 MessageBox
+    /// dialogs (ClassName "#32770") and Wpf.Ui windows are both separate top-level windows
+    /// not reachable from the main window subtree, so they need this top-level scan.
+    /// </summary>
+    private static bool DismissDialog(Application app, Window mainWindow, UIA3Automation automation,
+                                      string buttonSpec, string evidenceDir, string label, int timeoutMs = 10000)
+    {
+        var names = string.IsNullOrWhiteSpace(buttonSpec)
+            ? new[] { "确定", "是(Y)", "是", "OK", "Yes" }
+            : buttonSpec.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        var deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);
+        while (DateTime.UtcNow < deadline)
+        {
+            try
+            {
+                foreach (var w in GetProcessWindows(app, automation))
+                {
+                    string cls = ""; string nm = "";
+                    try { cls = w.ClassName ?? ""; } catch { /* ignore */ }
+                    try { nm = w.Name ?? ""; } catch { /* ignore */ }
+                    if (cls == "Window" && nm == "MetBench") continue; // skip main shell
+
+                    string text = "";
+                    try
+                    {
+                        var texts = w.FindAllDescendants(automation.ConditionFactory.ByControlType(ControlType.Text));
+                        text = string.Join(" | ", texts.Select(t => { try { return t.Name; } catch { return ""; } })
+                                                       .Where(s => !string.IsNullOrWhiteSpace(s)));
+                    }
+                    catch { /* ignore */ }
+                    Console.WriteLine($"[dialog] window Name='{nm}' Cls='{cls}' text='{text}'");
+
+                    try
+                    {
+                        var hwnd = w.Properties.NativeWindowHandle.Value;
+                        var p = Path.Combine(evidenceDir, $"{label}-dialog{NextDialogShotIndex()}.png");
+                        if (TryPrintWindowCapture(hwnd, p)) Console.WriteLine($"[dialog] shot -> {p}");
+                    }
+                    catch { /* ignore */ }
+
+                    foreach (var n in names)
+                    {
+                        var btn = w.FindFirstDescendant(automation.ConditionFactory.ByName(n));
+                        if (btn != null)
+                        {
+                            var inv = btn.Patterns.Invoke.PatternOrDefault;
+                            if (inv != null) { inv.Invoke(); Console.WriteLine($"[dialog] clicked '{n}'"); return true; }
+                            var leg = btn.Patterns.LegacyIAccessible.PatternOrDefault;
+                            if (leg != null) { leg.DoDefaultAction(); Console.WriteLine($"[dialog] clicked '{n}' (legacy)"); return true; }
+                        }
+                    }
+                }
+            }
+            catch { /* retry */ }
+            Thread.Sleep(300);
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Drive a standard Win32 OpenFileDialog: set its filename edit (AutomationId "1148")
+    /// to the given path and click Open ("打开(O)" / "Open" / AutomationId "1").
+    /// </summary>
+    private static bool DriveOpenFileDialog(Application app, Window mainWindow, UIA3Automation automation,
+                                            string path, int timeoutMs = 10000)
+    {
+        var cf = automation.ConditionFactory;
+        var deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);
+        while (DateTime.UtcNow < deadline)
+        {
+            try
+            {
+                foreach (var w in GetProcessWindows(app, automation))
+                {
+                    string cls = ""; string nm = "";
+                    try { cls = w.ClassName ?? ""; } catch { /* ignore */ }
+                    try { nm = w.Name ?? ""; } catch { /* ignore */ }
+                    if (cls == "Window" && nm == "MetBench") continue;
+                    Console.WriteLine($"[openfile] candidate window Name='{nm}' Cls='{cls}'");
+
+                    // Target the editable filename field specifically (Aid 1148 belongs to both
+                    // the ComboBox wrapper and its inner Edit; the ComboBox has no ValuePattern).
+                    var edit = w.FindFirstDescendant(cf.ByAutomationId("1148").And(cf.ByControlType(ControlType.Edit)))
+                             ?? w.FindFirstDescendant(cf.ByControlType(ControlType.Edit));
+                    var openBtn = w.FindFirstDescendant(cf.ByName("打开(O)"))
+                                ?? w.FindFirstDescendant(cf.ByName("打开"))
+                                ?? w.FindFirstDescendant(cf.ByName("Open"))
+                                ?? w.FindFirstDescendant(cf.ByAutomationId("1"));
+                    if (edit == null || openBtn == null) continue;
+
+                    Console.WriteLine($"[openfile] dialog Name='{nm}' edit.Cls='{edit.ClassName}' -> '{path}'");
+                    var vp = edit.Patterns.Value.PatternOrDefault;
+                    if (vp != null) { vp.SetValue(path); Console.WriteLine("[openfile] filename set via ValuePattern"); }
+                    else { Console.WriteLine("[openfile] WARN: filename edit has no ValuePattern"); }
+                    Thread.Sleep(500);
+                    var inv = openBtn.Patterns.Invoke.PatternOrDefault;
+                    if (inv != null) { inv.Invoke(); Console.WriteLine("[openfile] Open clicked"); return true; }
+                    openBtn.Patterns.LegacyIAccessible.PatternOrDefault?.DoDefaultAction();
+                    Console.WriteLine("[openfile] Open clicked (legacy)");
+                    return true;
+                }
+            }
+            catch { /* retry */ }
+            Thread.Sleep(300);
+        }
         return false;
     }
 

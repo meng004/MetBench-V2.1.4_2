@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: superpowers:executing-plans / subagent-driven-development. Steps use checkbox (`- [ ]`) tracking.
 
-**状态**: 进行中（工具+引擎已就绪并冒烟通过 A7；逐用例执行中）
+**状态**: 部分完成（工具/引擎完备并稳健；核心流程已真验：A1 创建、A7 元模式、E2 覆盖、B2-B5 System-MT 端到端真跑通过；其余数据依赖页渲染但需上游运行；5 项产品/UX 发现已记录）。详见 `docs/superpowers/specs/2026-06-15-sp3b-uat-wpf-ui-evidence/sp3b-summary.md`。25/25 页导航渲染通过；7 ✅ / 11 ⚠️ / 1 ❌(E5 无入口) / 5 未跑。
 **分支**: `sp3b-uat-wpf-ui-acceptance`
 **前序**: SP3a（22 trx 支撑类用例，PR #366 已合并）。SP3b 收尾 UAT rubric 剩余 **25 个 WPF UI 类**用例。
 

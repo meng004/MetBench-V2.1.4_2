@@ -1,0 +1,8 @@
+[Pane] Name='' Aid='PART_NavigationViewContentPresenter' Cls='Frame'
+  [Text] Name='Report Type' Aid='' Cls='TextBlock'
+  [ComboBox] Name='' Aid='ReportTypeComboBox' Cls='ComboBox'
+  [Button] Name='Export' Aid='' Cls='Button'
+    [Text] Name='' Aid='' Cls='TextBlock'
+    [Text] Name='Export' Aid='' Cls='TextBlock'
+  [Pane] Name='' Aid='webview2' Cls='HwndHost'
+    [Text] Name='' Aid='?' Cls='Static'
