@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using MetBench_BLL;
 using CommunityToolkit.Mvvm.Input;
 using MetBench_Client.Helpers;
@@ -299,7 +299,7 @@ namespace MetBench_Client.ViewModels
                 await showMessageAsync(msg, "Tips");
                 return;
             }
-            var msg2 = "是否修改该记录?";
+            var msg2 = "是否删除该记录?";
             var result = await UiDialog.ConfirmAsync(msg2, "Tips");
 
             if(result)
