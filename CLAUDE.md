@@ -228,7 +228,7 @@ MT 检出的违例进入异常调查工作流（查询 / 过滤 / 状态机 / �
 | Charts | `LiveChartsCore.SkiaSharpView.WPF` | Used for visualization on existing pages. |
 | HTML hosting in WPF | `Microsoft.Web.WebView2` | Available; suitable for embedding `HtmlSystemMtResultReportRenderer` output. |
 
-`Stylet` is currently used (`s:View.ActionTarget`) across 9 legacy XAML files: `ApplicationManagementPage.xaml`, `AutoDetectMRPage.xaml`, `DomainManagementPage.xaml`, `MRDisplayPage.xaml`, `MRManagementPage.xaml`, `MRRecommendationPage.xaml`, `MTExecutionPage.xaml`, `MTReportGeneratorPage.xaml`, and `Views/Windows/ApplicationProgramsWindow.xaml`. Convergence onto a single MVVM mechanism is a tracked follow-up (`docs/superpowers/plans/2026-06-06-metbench-maturity-remediation-plan.md`). Do **not** introduce Stylet on new pages — match the simpler pattern used by `SettingsPage`.
+`Stylet` has been **removed** — PR #333 collapsed the Prism / PropertyChanged.Fody / Stylet cleanup, replacing Stylet `s:Action` / `s:View.ActionTarget` routing with `Microsoft.Xaml.Behaviors`. MetBench_Client no longer references Stylet (0 occurrences), pinned by `WpfMvvmConvergenceGuardTests.Client_csproj_does_not_reference_Stylet` + `No_Xaml_uses_Stylet_action_routing`. New code uses `CommunityToolkit.Mvvm` `[RelayCommand]` + `Command` bindings (or `Microsoft.Xaml.Behaviors` for event-to-command) — match the pattern used by `SettingsPage`; do **not** reintroduce Stylet.
 
 ## 5. Page ↔ ViewModel pairing pattern
 
@@ -333,7 +333,7 @@ Current caveats on `main`:
 - The v1.2 implementation line is complete for the current roadmap on `main`.
   Inventory has **two distinct layers — do not conflate**: the v1.2 typed-catalog *migration denominator* is
   **44 MR + 4 Property** (merged migration assets + coverage gates; an older report summary said 43, superseded);
-  the *runtime catalog provider inventory* is **33 MR / 16 SUT / 13 equations**
+  the *runtime catalog provider inventory* is **38 MR / 21 SUT / 17 equations**
   (authoritative source `.github/governance/expected-catalog-counts.txt`, enforced by `ExpectedCatalogCountsWhitelist`).
 - **PR-1 T1 manifest-driven runtime environments** (`LauncherOptions.RuntimePythons` + `ResolvePythonExecutable`):
   new SUT runtime families (FEniCS, FiPy, torch-surrogate, ...) belong in `catalog.json`'s
@@ -477,7 +477,7 @@ Author-side（PR push 前，可选，按需 LLM）
 |---|---|---|---|---|
 | **A. 功能正确性** | 每 PR push、main 推进 | `.github/workflows/dotnet-test.yml` 的 `test` job（dotnet build + xUnit + Reqnroll） | ✅ Required | Cat A |
 | **B. 机械模式守卫** | 每 PR push | grep G6/G8/G9/G10/G11([`decision-record-template.md`](docs/superpowers/templates/decision-record-template.md), P7 新)；Roslyn METBENCH001 + METBENCH002(P3 新)；`*ParityTests.cs` + `Audit_*_providers_produce_identical_matrices` + `Render_*_renders_<contract>`；catalog-derived 计数白名单(P1 新，替 G7) | grep advisory；Roslyn + parity tests 经 `test` job → 实质 Required | Cat A + Cat B L1 子类 |
-| **C. 负空间守卫** | Stryker：cron + label / R4：作者侧推荐 | `tools/mutation-testing/`（P4 升级 break=-3pp PR-delta gate）+ PR Gate Checklist 「Tests」节 R4 sub-check | Stryker：升级后 Required；R4 semantic：Advisory | Cat B M5 / B1 / R4 子类 |
+| **C. 负空间守卫** | Stryker：cron + label / R4：作者侧推荐 | `tools/mutation-testing/`（当前 `break=0` informational；P4 升级到 break=-3pp PR-delta gate 仍 deferred/未落地，见 debt #1）+ PR Gate Checklist 「Tests」节 R4 sub-check | Stryker：当前 Advisory（informational，未落地为 Required）；R4 semantic：Advisory | Cat B M5 / B1 / R4 子类 |
 | **D. 漂移侦测** | 周一 cron + spec/plan 改动 | `tools/spec_freshness_audit.py`（P2 加 orphan-spec）+ `.github/workflows/spec-freshness-monitor.yml` | Async / Issue-based，永不阻塞 PR | Cat B D1 / D2 / A4 / T3 子类 |
 | **E. 链尾整体审查** | ≥ 3-PR chain 最后一个 PR 合入后 | 人工 fresh-session `Explore` ritual + `/code-review ultra`（P5 自动喂入累积 diff）+ [`chain-end-review-checklist.md`](docs/superpowers/templates/chain-end-review-checklist.md) | 阻塞性 ritual：ledger 标 Controlled 必须在 review doc 落地后 | Cat B 全谱兜底 |
 | **F. 作者侧顾问** | 作者本地，可选 | `/code-review low/medium/high` superpowers skill | 非门禁 | Cat A 语义级 |
