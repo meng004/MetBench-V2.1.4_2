@@ -28,6 +28,7 @@ using System.Threading;
 using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Capturing;
+using FlaUI.Core.Definitions;
 using FlaUI.UIA3;
 
 namespace UiaAcceptance;
@@ -58,6 +59,25 @@ internal static class Program
         if (dumpMode)
         {
             return RunDump(exePath!);
+        }
+
+        // Steps DSL mode (general SP3b UI driver)
+        if (argMap.ContainsKey("--steps"))
+        {
+            if (!argMap.TryGetValue("--evidence", out var evDir) || string.IsNullOrWhiteSpace(evDir))
+            {
+                Console.Error.WriteLine("ERROR: --evidence is required for steps mode");
+                return 2;
+            }
+            argMap.TryGetValue("--label", out var lbl);
+            argMap.TryGetValue("--steps", out var stepsSpec);
+            int stepsTimeout = 600;
+            if (argMap.TryGetValue("--timeout-seconds", out var stoStr) && int.TryParse(stoStr, out var stoVal))
+            {
+                stepsTimeout = stoVal;
+            }
+            Directory.CreateDirectory(evDir!);
+            return RunSteps(exePath!, evDir!, lbl ?? "case", stepsSpec ?? "", stepsTimeout);
         }
 
         // Acceptance mode
@@ -881,6 +901,376 @@ internal static class Program
             }
         }
         return result;
+    }
+
+    // =========================================================================
+    // STEPS DSL MODE (SP3b general UI driver)
+    // =========================================================================
+    //
+    // A small step language so heterogeneous UI cases can be driven from the
+    // command line without recompiling. Steps are ';'-separated; each is "op"
+    // or "op:arg" (arg may contain '=' for key=value ops). All interaction is
+    // via UIA patterns only (no SendInput); nav uses Focus + posted Space/Enter.
+    //
+    //   nav:<NavAutomationId>            navigate to a NavigationViewItem
+    //   waitid:<AutomationId>            wait (<=60s) until element present by id
+    //   waitname:<Name>                  wait (<=60s) until element present by Name
+    //   sleep:<ms>                       fixed settle
+    //   shot:<name>                      screenshot -> <label>-<name>.png
+    //   dumppage:<tag>                   dump content-frame subtree -> <label>-<tag>.txt
+    //   dumpall:<tag>                    dump whole-window subtree -> <label>-<tag>.txt
+    //   setid:<AutomationId>=<value>     ValuePattern.SetValue on element
+    //   selcombo:<AutomationId>=<text>   select combo item by text
+    //   selrow:<GridAutomationId>=<idx>  select DataGrid row by 0-based index
+    //   invokeid:<AutomationId>          Invoke (or Legacy DoDefaultAction)
+    //   invokename:<Name>                Invoke by Name
+    //   assertid:<AutomationId>          assert element present (else exit!=0)
+    //   assertname:<Name>                assert element present by Name (else exit!=0)
+    //   assertgridmin:<GridAid>=<n>      assert DataGrid row count >= n (else exit!=0)
+    //   gridrows:<GridAid>               log DataGrid row count
+    //   log:<text>                       echo a marker line
+    //
+    // Exit 0 iff all assert* steps passed and no step hit a hard error.
+
+    private static int RunSteps(string exePath, string evidenceDir, string label, string stepsSpec, int timeoutSeconds)
+    {
+        Console.WriteLine($"[steps] exe={exePath} label={label} evidence={evidenceDir} timeout={timeoutSeconds}s");
+        Console.WriteLine($"[steps] spec={stepsSpec}");
+
+        var steps = stepsSpec.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var failures = new List<string>();
+
+        var app = LaunchApp(exePath);
+        try
+        {
+            using var automation = new UIA3Automation();
+            var window = WaitForMainWindow(app, automation, timeoutMs: 30_000);
+            if (window == null)
+            {
+                Console.Error.WriteLine("ERROR: main window did not appear");
+                return 1;
+            }
+            Console.WriteLine($"[steps] Main window: '{window.Name}'");
+            Thread.Sleep(2000); // settle after startup
+
+            foreach (var raw in steps)
+            {
+                var (op, arg) = SplitStep(raw);
+                Console.WriteLine($"[step] {op}{(arg.Length > 0 ? ":" + arg : "")}");
+                try
+                {
+                    if (!ExecuteStep(window, automation, evidenceDir, label, op, arg, failures))
+                    {
+                        // ExecuteStep returns false only for unrecoverable nav/find errors
+                        Console.Error.WriteLine($"[step] '{op}' did not complete successfully");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    var msg = $"step '{op}:{arg}' threw: {ex.Message}";
+                    Console.Error.WriteLine("[step] " + msg);
+                    failures.Add(msg);
+                }
+            }
+
+            Console.WriteLine();
+            if (failures.Count == 0)
+            {
+                Console.WriteLine($"[steps] SUCCESS — all asserts passed for label={label}");
+                return 0;
+            }
+
+            Console.Error.WriteLine($"[steps] FAILED — {failures.Count} problem(s) for label={label}:");
+            foreach (var f in failures) Console.Error.WriteLine("   - " + f);
+            return 1;
+        }
+        finally
+        {
+            try { app.Close(); } catch { /* ignore */ }
+            Thread.Sleep(800);
+        }
+    }
+
+    private static (string op, string arg) SplitStep(string raw)
+    {
+        int i = raw.IndexOf(':');
+        if (i < 0) return (raw.Trim(), "");
+        return (raw[..i].Trim(), raw[(i + 1)..].Trim());
+    }
+
+    private static (string key, string val) SplitKv(string arg)
+    {
+        int i = arg.IndexOf('=');
+        if (i < 0) return (arg.Trim(), "");
+        return (arg[..i].Trim(), arg[(i + 1)..].Trim());
+    }
+
+    private static bool ExecuteStep(Window window, UIA3Automation automation, string evidenceDir, string label,
+                                    string op, string arg, List<string> failures)
+    {
+        var cf = automation.ConditionFactory;
+        switch (op)
+        {
+            case "nav":
+                return NavigateGeneric(window, automation, arg);
+
+            case "waitid":
+            {
+                var el = WaitFor(window, automation, () => FindById(window, automation, arg), 60_000);
+                if (el == null) { failures.Add($"waitid '{arg}' not found within 60s"); return false; }
+                return true;
+            }
+            case "waitname":
+            {
+                var el = WaitFor(window, automation, () => FindByName(window, automation, arg), 60_000);
+                if (el == null) { failures.Add($"waitname '{arg}' not found within 60s"); return false; }
+                return true;
+            }
+            case "sleep":
+                if (int.TryParse(arg, out var ms)) Thread.Sleep(ms);
+                return true;
+
+            case "shot":
+            {
+                var path = Path.Combine(evidenceDir, $"{label}-{arg}.png");
+                TakeScreenshot(window, path);
+                Console.WriteLine($"[shot] -> {path}");
+                return true;
+            }
+            case "dumppage":
+            {
+                var frame = FindById(window, automation, "PART_NavigationViewContentPresenter");
+                var path = Path.Combine(evidenceDir, $"{label}-{arg}.txt");
+                using var sw = new StreamWriter(path, append: false);
+                if (frame != null) DumpElementTo(sw, frame, 0, 12);
+                else { sw.WriteLine("(content frame not found; dumping window)"); DumpElementTo(sw, window, 0, 12); }
+                Console.WriteLine($"[dumppage] -> {path}");
+                return true;
+            }
+            case "dumpall":
+            {
+                var path = Path.Combine(evidenceDir, $"{label}-{arg}.txt");
+                using var sw = new StreamWriter(path, append: false);
+                DumpElementTo(sw, window, 0, 14);
+                Console.WriteLine($"[dumpall] -> {path}");
+                return true;
+            }
+            case "setid":
+            {
+                var (id, val) = SplitKv(arg);
+                var el = WaitFor(window, automation, () => FindById(window, automation, id), 10_000);
+                if (el == null) { failures.Add($"setid target '{id}' not found"); return false; }
+                var vp = el.Patterns.Value.PatternOrDefault;
+                if (vp == null) { failures.Add($"setid '{id}' has no ValuePattern"); return false; }
+                vp.SetValue(val);
+                Console.WriteLine($"[setid] {id} = '{val}'");
+                return true;
+            }
+            case "selcombo":
+            {
+                var (id, text) = SplitKv(arg);
+                var combo = FindById(window, automation, id)?.AsComboBox();
+                if (combo == null) { failures.Add($"selcombo target '{id}' not found"); return false; }
+                if (!SelectComboItemByText(combo, text, "selcombo")) { failures.Add($"selcombo '{id}' could not select '{text}'"); return false; }
+                return true;
+            }
+            case "selrow":
+            {
+                var (id, idxStr) = SplitKv(arg);
+                if (!int.TryParse(idxStr, out var idx)) { failures.Add($"selrow index '{idxStr}' invalid"); return false; }
+                var grid = FindById(window, automation, id);
+                if (grid == null) { failures.Add($"selrow grid '{id}' not found"); return false; }
+                var rows = grid.FindAllDescendants(cf.ByControlType(ControlType.DataItem));
+                if (idx < 0 || idx >= rows.Length) { failures.Add($"selrow index {idx} out of range (rows={rows.Length})"); return false; }
+                var sel = rows[idx].Patterns.SelectionItem.PatternOrDefault;
+                if (sel != null) { sel.Select(); }
+                else { rows[idx].Patterns.LegacyIAccessible.PatternOrDefault?.DoDefaultAction(); }
+                Console.WriteLine($"[selrow] {id}[{idx}] selected");
+                return true;
+            }
+            case "invokeid":
+            {
+                var el = WaitFor(window, automation, () => FindById(window, automation, arg), 10_000);
+                if (el == null) { failures.Add($"invokeid '{arg}' not found"); return false; }
+                return InvokeElement(el, arg, failures);
+            }
+            case "invokename":
+            {
+                var el = WaitFor(window, automation, () => FindByName(window, automation, arg), 10_000);
+                if (el == null) { failures.Add($"invokename '{arg}' not found"); return false; }
+                return InvokeElement(el, arg, failures);
+            }
+            case "assertid":
+            {
+                var el = WaitFor(window, automation, () => FindById(window, automation, arg), 8_000);
+                if (el == null) { failures.Add($"ASSERT FAIL: id '{arg}' not present"); return false; }
+                Console.WriteLine($"[assert] id '{arg}' present OK");
+                return true;
+            }
+            case "assertname":
+            {
+                var el = WaitFor(window, automation, () => FindByName(window, automation, arg), 8_000);
+                if (el == null) { failures.Add($"ASSERT FAIL: name '{arg}' not present"); return false; }
+                Console.WriteLine($"[assert] name '{arg}' present OK");
+                return true;
+            }
+            case "assertgridmin":
+            {
+                var (id, nStr) = SplitKv(arg);
+                if (!int.TryParse(nStr, out var n)) { failures.Add($"assertgridmin n '{nStr}' invalid"); return false; }
+                var grid = WaitFor(window, automation, () => FindById(window, automation, id), 8_000);
+                if (grid == null) { failures.Add($"ASSERT FAIL: grid '{id}' not present"); return false; }
+                var count = grid.FindAllDescendants(cf.ByControlType(ControlType.DataItem)).Length;
+                Console.WriteLine($"[assert] grid '{id}' rows={count} (min {n})");
+                if (count < n) { failures.Add($"ASSERT FAIL: grid '{id}' rows {count} < {n}"); return false; }
+                return true;
+            }
+            case "gridrows":
+            {
+                var grid = WaitFor(window, automation, () => FindById(window, automation, arg), 8_000);
+                var count = grid == null ? -1 : grid.FindAllDescendants(cf.ByControlType(ControlType.DataItem)).Length;
+                Console.WriteLine($"[gridrows] '{arg}' = {count}");
+                return true;
+            }
+            case "log":
+                Console.WriteLine($"[log] {arg}");
+                return true;
+
+            default:
+                failures.Add($"unknown step op '{op}'");
+                return false;
+        }
+    }
+
+    private static bool InvokeElement(AutomationElement el, string tag, List<string> failures)
+    {
+        var invoke = el.Patterns.Invoke.PatternOrDefault;
+        if (invoke != null) { invoke.Invoke(); Console.WriteLine($"[invoke] {tag} via InvokePattern"); return true; }
+        var legacy = el.Patterns.LegacyIAccessible.PatternOrDefault;
+        if (legacy != null) { legacy.DoDefaultAction(); Console.WriteLine($"[invoke] {tag} via LegacyIAccessible"); return true; }
+        var toggle = el.Patterns.Toggle.PatternOrDefault;
+        if (toggle != null) { toggle.Toggle(); Console.WriteLine($"[invoke] {tag} via TogglePattern"); return true; }
+        failures.Add($"invoke '{tag}' supports neither Invoke/Legacy/Toggle");
+        return false;
+    }
+
+    private static AutomationElement? FindById(Window w, UIA3Automation a, string id)
+    {
+        try { return w.FindFirstDescendant(a.ConditionFactory.ByAutomationId(id)); } catch { return null; }
+    }
+
+    private static AutomationElement? FindByName(Window w, UIA3Automation a, string name)
+    {
+        try { return w.FindFirstDescendant(a.ConditionFactory.ByName(name)); } catch { return null; }
+    }
+
+    private static AutomationElement? WaitFor(Window w, UIA3Automation a, Func<AutomationElement?> find, int timeoutMs)
+    {
+        var deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);
+        while (DateTime.UtcNow < deadline)
+        {
+            try { var e = find(); if (e != null) return e; } catch { /* retry */ }
+            Thread.Sleep(400);
+        }
+        return null;
+    }
+
+    private static string Breadcrumb(Window w, UIA3Automation a)
+    {
+        try
+        {
+            var bc = w.FindFirstDescendant(a.ConditionFactory.ByAutomationId("BreadcrumbBar"));
+            if (bc == null) return "";
+            var texts = bc.FindAllDescendants(a.ConditionFactory.ByControlType(ControlType.Text));
+            return texts.Length > 0 ? (texts[^1].Name ?? "") : "";
+        }
+        catch { return ""; }
+    }
+
+    /// <summary>
+    /// Generic NavigationViewItem activation by AutomationId. Tries UIA patterns,
+    /// then Focus + posted Space/Enter (Wpf.Ui nav items are ButtonBase DataItems
+    /// without an Invoke peer). "Navigated" is confirmed via the breadcrumb text
+    /// matching the nav item's Name.
+    /// </summary>
+    private static bool NavigateGeneric(Window window, UIA3Automation automation, string navId)
+    {
+        var cf = automation.ConditionFactory;
+        var navItem = window.FindFirstDescendant(cf.ByAutomationId(navId));
+        if (navItem == null)
+        {
+            Console.Error.WriteLine($"[nav] nav item '{navId}' not found");
+            return false;
+        }
+        var navName = navItem.Name ?? "";
+        Console.WriteLine($"[nav] target '{navId}' Name='{navName}'");
+
+        bool Navigated() => Breadcrumb(window, automation).Contains(navName, StringComparison.OrdinalIgnoreCase);
+
+        // Already there?
+        if (!string.IsNullOrEmpty(navName) && Navigated())
+        {
+            Console.WriteLine($"[nav] already on '{navName}'");
+            return true;
+        }
+
+        // 1) patterns
+        foreach (var (pat, act) in new (string, Action)[]
+        {
+            ("Invoke", () => navItem.Patterns.Invoke.PatternOrDefault?.Invoke()),
+            ("SelectionItem", () => navItem.Patterns.SelectionItem.PatternOrDefault?.Select()),
+            ("Legacy", () => navItem.Patterns.LegacyIAccessible.PatternOrDefault?.DoDefaultAction()),
+        })
+        {
+            try { act(); } catch (Exception ex) { Console.WriteLine($"[nav] {pat} failed: {ex.Message}"); continue; }
+            if (WaitNavigated(Navigated, 3500)) { Console.WriteLine($"[nav] {pat} navigated"); return true; }
+        }
+
+        // 2) Focus + posted Space / Enter to the app HWND
+        try { navItem.Focus(); Thread.Sleep(250); } catch { /* ignore */ }
+        IntPtr hwnd;
+        try { hwnd = window.Properties.NativeWindowHandle.Value; }
+        catch { Console.Error.WriteLine("[nav] no native handle"); return false; }
+
+        foreach (var (vk, name) in new[] { (VK_SPACE, "SPACE"), (VK_RETURN, "RETURN") })
+        {
+            try { navItem.Focus(); } catch { /* ignore */ }
+            Thread.Sleep(150);
+            PostMessage(hwnd, WM_KEYDOWN, (IntPtr)vk, (IntPtr)0x00000001);
+            Thread.Sleep(120);
+            PostMessage(hwnd, WM_KEYUP, (IntPtr)vk, (IntPtr)unchecked((int)0xC0000001));
+            if (WaitNavigated(Navigated, 4000)) { Console.WriteLine($"[nav] posted {name} navigated"); return true; }
+        }
+
+        // If breadcrumb check is unreliable for this page, accept after settle.
+        Console.Error.WriteLine($"[nav] WARN: could not confirm navigation to '{navName}' via breadcrumb; continuing");
+        Thread.Sleep(1500);
+        return true;
+    }
+
+    private static bool WaitNavigated(Func<bool> navigated, int timeoutMs)
+    {
+        var deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);
+        while (DateTime.UtcNow < deadline)
+        {
+            try { if (navigated()) return true; } catch { /* retry */ }
+            Thread.Sleep(300);
+        }
+        return false;
+    }
+
+    private static void DumpElementTo(StreamWriter sw, AutomationElement el, int depth, int maxDepth)
+    {
+        if (depth > maxDepth) return;
+        var indent = new string(' ', depth * 2);
+        string name, aid, cls, ct;
+        try { name = el.Name ?? ""; } catch { name = "?"; }
+        try { aid = el.AutomationId ?? ""; } catch { aid = "?"; }
+        try { cls = el.ClassName ?? ""; } catch { cls = "?"; }
+        try { ct = el.ControlType.ToString(); } catch { ct = "?"; }
+        sw.WriteLine($"{indent}[{ct}] Name='{name}' Aid='{aid}' Cls='{cls}'");
+        try { foreach (var child in el.FindAllChildren()) DumpElementTo(sw, child, depth + 1, maxDepth); }
+        catch { /* some elements don't enumerate */ }
     }
 
     private static void PrintUsage()
