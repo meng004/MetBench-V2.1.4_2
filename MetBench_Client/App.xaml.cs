@@ -144,7 +144,8 @@ namespace MetBench_Client
                         SutRoot: Path.Combine(
                             Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!,
                             "SUT"),
-                        SystemPython: OperatingSystem.IsWindows() ? "python" : "python3",
+                        SystemPython: Environment.GetEnvironmentVariable("METBENCH_SYSTEM_PYTHON")
+                            ?? (OperatingSystem.IsWindows() ? "python" : "python3"),
                         OpenMocPython: Environment.GetEnvironmentVariable("METBENCH_OPENMOC_PYTHON")
                             ?? (OperatingSystem.IsWindows() ? "python" : "python3"),
                         RuntimePythons: runtimePythons);
@@ -292,7 +293,8 @@ namespace MetBench_Client
                     return new NullLlmGateway();
                 });
                 services.AddSingleton<MetaPatternDiscoverer>(provider => new MetaPatternDiscoverer(
-                    OperatingSystem.IsWindows() ? "python" : "python3",
+                    Environment.GetEnvironmentVariable("METBENCH_SYSTEM_PYTHON")
+                        ?? (OperatingSystem.IsWindows() ? "python" : "python3"),
                     Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!, "tools", "noether_candidates.py")));
                 services.AddSingleton<LlmNativeDiscoverer>(provider =>
                     new LlmNativeDiscoverer(provider.GetRequiredService<ILlmGateway>()));

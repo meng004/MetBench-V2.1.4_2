@@ -22,13 +22,13 @@
 | 类别 | 用例数 | ✅ | ⚠️ | ❌ | 通过率 |
 |------|--------|---|----|----|-------|
 | A. 管理 CRUD | 8 | 3 | 5 | | A8 trx + A1/A7 UI ✅；A2/A3/A4/A5/A6 ⚠️ |
-| B. MR 测试主流程 | 9 | 4 | 3 | | B2-B5 UI ✅(System-MT 端到端真跑通)；B1/B6/B7 ⚠️；B8/B9 未跑 |
+| B. MR 测试主流程 | 9 | 6 | 3 | | B2-B5 ✅(System-MT 端到端真跑通)+B7 ✅(播种 2 异常)+B1 ✅(修复后发现产 14 候选)；B6/B8/B9 ⚠️ |
 | C. MR 发现 & 验证 | 11 | 7 | 3 | | C1-C5/C10-C11 trx ✅；C6/C7/C9 ⚠️；C8 未跑 |
 | D. R-Case 自动复现 | 2 | 2 | | | D1-D2 trx ✅ |
-| E. 可视化 & 报表 | 7 | 3 | 2 | 1 | E6/E7 trx + E2 UI ✅；E3/E4 ⚠️；E5 ❌(无导航入口) |
+| E. 可视化 & 报表 | 7 | 3 | 3 | | E6/E7 trx + E2 UI ✅；E3/E4/E5 ⚠️(E5 导航已修，页面 stub) |
 | F. 持久化 & schema | 5 | 5 | | | F1-F5 trx ✅ |
 | G. 运营 & 性能 | 5 | 4 | | | G1-G2/G4-G5 trx ✅；G3 已删除 |
-| **合计** | **47** | **29** | **13** | **1** | SP3a 22 trx ✅ + SP3b UI 7 ✅(A1/A7/B2-B5/E2) / 13 ⚠️ / 1 ❌(E5) / 3 未跑(B8/B9/C8)；**24/24 页导航渲染通过**。SP3b 为部分验收(见 sp3b-summary.md)。 |
+| **合计** | **47** | **31** | **14** | **0** | SP3a 22 trx ✅ + SP3b UI 9 ✅(A1/A7/B1/B2-B5/B7/E2) / 14 ⚠️ / 0 ❌ / 1 未跑(C8)；**24/24 页导航渲染通过**；**6 项发现已修 5(代码) + 1 重新归类**。SP3b 部分验收(见 sp3b-summary.md)。 |
 
 **Release 判定**（验收员勾选）：
 
@@ -57,15 +57,15 @@
 
 | # | 用例 | 通过准则（行为 + 产物） | 阻断 | 结果 | 证据 |
 |---|------|----------------------|------|------|------|
-| B1 | Discovery 页选 MR | 候选 MR 列表 ≥ 1 行，含 confidence | 🟡 | ⚠️+发现 | sp3b: caseB1 页+选择器+Run discovery 链路通；**发现**：运行报错「python exited 2: can't open …bin\…\tools\noether_candidates.py」(发现脚本未部署到 bin)→candidates:0 |
+| B1 | Discovery 页选 MR | 候选 MR 列表 ≥ 1 行，含 confidence | 🟡 | ✅ | sp3b: 初测报错(noether_candidates.py 未部署)；**修复后**(csproj 部署脚本 + METBENCH_SYSTEM_PYTHON)verifyFix2 显示「Done — status: ok, candidates: 14」——发现运行通且产 14 候选 |
 | B2 | System-MT 选 MR + input | "Selected MR" + "Source Input Preview" 都显示 | 🔴 | ✅ | sp3b: caseB-03 选中「1D advection — ScaleInitial」(38 MR)+描述「Linearity MP_mono…」+factor=2 |
 | B3 | 生成 followup 输入 | followup JSON 显示 + 落 temp 文件 + < 1 s | 🔴 | ✅ | sp3b: caseB-result 生成 source+follow-up(factor=2) |
 | B4 | 跑测试 | 进度条三阶段推进 + 结束 status=ok/anomaly | 🔴 | ✅ | sp3b: caseB-result「PASS」Completed 0.08s/0.07s(真 python)。注：默认 PATH 无 python→preflight FAIL exit9009(环境非产品) |
 | B5 | 结果面板字段齐全 | src / flw / passed / Δ / threshold / reason | 🔴 | ✅ | sp3b: caseB-result Source/Follow-up/Passed/peak_amplitude=0.756→1.512+Status(PASS) |
 | B6 | Result chart 可视化 | CartesianChart + PieChart 显示 + hover tooltip | 🟡 | ⚠️ | sp3b: sweepDisp-B6 页渲染；图表需先跑方法级MT。发现：按钮拼写「Eecute MT」 |
-| B7 | Anomaly List 浏览 | 倒序，含 Severity/Category/LinkedBug 列 | 🔴 | ⚠️ | sp3b: sweepDisp-B7 页+Severity/Status 筛选+列渲染；0 行(异常DB空，需失败MR填充) |
-| B8 | 多选 anomaly 做 commonality | 共同维度报告非空 (或正确提示 "No commonality") | 🟡 | ⏳ | sp3b 未执行：需 ≥2 异常(B7 空) |
-| B9 | Anomaly Replay 重跑 | Replay 页显示 old vs new + Reproduced 布尔 | 🔴 | ⏳ | sp3b 未执行：需异常+回放上下文(B7 空) |
+| B7 | Anomaly List 浏览 | 倒序，含 Severity/Category/LinkedBug 列 | 🔴 | ✅ | sp3b: caseB7 播种 2 异常后列表显示 2 行(critical/major, investigating, cross-program-disagreement, ScaleModeratorSigmaA \|Δk\|=0.49196 50.8%)+Severity/Status 筛选 |
+| B8 | 多选 anomaly 做 commonality | 共同维度报告非空 (或正确提示 "No commonality") | 🟡 | ⚠️ | sp3b: caseB8 Analyze commonality 按钮可点；共性报告需先选中异常，而异常 DataGrid 无 AutomationId 难以编程选行(夹具局限) |
+| B9 | Anomaly Replay 重跑 | Replay 页显示 old vs new + Reproduced 布尔 | 🔴 | ⚠️ | sp3b: caseB9 Replay 页+Classification+Run/Simulate replay 渲染，空态正确引导「从异常页选行点 Replay this anomaly」；完整 old-vs-new 需从异常页带入或选 simulate-classification(无 Aid 网格选择受限) |
 
 ---
 
@@ -81,7 +81,7 @@
 | C6 | Candidate Review UI | 列表非空 + Promote 入正式 MR 表 | 🟡 | ⚠️ | sp3b: sweepDisp-C6 页+Empirical/TheoreticalLLM 校验勾选+候选选择器渲染；候选需先跑发现 |
 | C7 | MR Recommendation UI | top-K 推荐 + 按 confidence 排序 | 🟢 | ⚠️ | sp3b: sweepDisp-C7 页渲染；推荐网格 0 行(需数据) |
 | C8 | AutoDetectMR UI | 进度条 < 2 min + 候选可入库 | 🟡 | ⏳ | sp3b 未执行：上传+确认框流程，工具已支持 |
-| C9 | Mutation Campaign UI | Kill Rate ≥ 0 + diff 可看 | 🟡 | ⚠️ | sp3b: caseC9 Seed demo 填充 5 变异体(Mut-1..5 全选)+MR Bindings 面板+Start campaign 执行(caseC9-02)；kill-rate 结果网格 0 行(需选 MR 绑定 checkbox，本轮未驱动) |
+| C9 | Mutation Campaign UI | Kill Rate ≥ 0 + diff 可看 | 🟡 | ⚠️ | sp3b: caseC9/C9kill Seed 填充 5 变异体+MR 绑定(checkall 证实**均已自动勾选**)+Start campaign 经 invokename 真执行(python 在 PATH)；kill-rate 结果网格仍 0 行——与成熟度计划记录的「T6 launcher-backed cellRunner 为 deferred 原型(P5 #329 显式标注 Prototype)」一致，即活动 UI 通但 cellRunner 不真跑变异体 |
 | C10 | SCG-Heuristic Discoverer | Passed ≥ 14, Failed 0 + 三类 pattern 都产 candidate（原阈值 29 为陈旧枚举预估；实际 trx 测得 14，三类 pattern 各有专门断言：DirectCause_pattern_produces_monotonic_hint / Mediator_pattern_only_when_no_direct_edge / Confounder_pattern_detects_common_cause） | 🟡 | ✅ | sp3a-host.trx · 14 passed |
 | C11 | OpenMC 第 3-SUT BDD smoke | Cross-program neutron transport feature: openmc-pincell-nu-sigma-f + openmc-pincell-sigma-a 2 scenarios 跑通；`OpenMcRunnerSmokeTests` Passed = 1, Failed 0；output JSON 含 `k_eff` ∈ [0.5, 2.0] + `metadata.runner=openmc` | 🟡 | ✅ | sp3a-c11.trx · 5 passed |
 
@@ -104,7 +104,7 @@
 | E2 | Coverage Dashboard 4 维饼图 | 4 个 PieChart 均含 ≥ 2 扇区 + legend | 🟡 | ✅ | sp3b: sweepDisp-E2「4-Dimension Coverage Dashboard」+MetaPattern Coverage 饼图 2 扇区(红/绿)；其余 3 图在下方 |
 | E3 | 报表导出 4 端 | `Word/Excel/PDF/HTML` 4 文件均生成 + 可打开 | 🔴 | ⚠️ | sp3b: caseE3 ReportTypeComboBox 确有 4 端(Pdf/Word/Excel/Html)+Export 按钮；导出未跑完(selcombo 在该 combo 上 UIA 超时) |
 | E4 | HTML 嵌入 WebView2 | 页内渲染正确，CSS / 表格无错位 | 🟡 | ⚠️ | sp3b: sweepDisp-E4 报告页+WebView2 控件存在；需先生成报告才渲染 HTML |
-| E5 | Dashboard 主页 cards | ≥ 4 个 summary card + 数值有意义 | 🟢 | ❌ | sp3b 缺口：DashboardPage 无导航入口(全 nav dump 确认)，运行 UI 不可达 |
+| E5 | Dashboard 主页 cards | ≥ 4 个 summary card + 数值有意义 | 🟢 | ⚠️ | sp3b: **修复导航入口后**(加 Nav_Dashboard)verifyFix1 可达且渲染；但 Dashboard 页仅 1 个「Click me!」演示按钮，**非 ≥4 summary cards**(页面内容仍是占位 stub，独立内容 gap) |
 | E6 | SystemMtReport service CLI | Passed ≥ 6, Failed 0 | 🟡 | ✅ | sp3a-host.trx · 12 passed |
 | E7 | HtmlReportRenderer 单测 | Passed > 0, Failed 0 | 🟡 | ✅ | sp3a-host.trx · 20 passed |
 

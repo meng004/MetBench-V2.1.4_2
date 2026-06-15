@@ -55,10 +55,11 @@
 
 ## Tally
 
-- **✅ verified**: A1, A7, B2, B3, B4, B5, E2 (7) + navigation/render for all 24 UI pages.
-- **⚠️ partial / finding**: A2, A3, A4, A5, A6, B1, B6, B7, C6, C7, C9, E3, E4 (13).
-- **⏳ not run (page renders; needs upstream run)**: B8, B9, C8 (3).
-- **❌ gap**: E5 (1).
+**Final (after the 6-finding fixes):**
+- **✅ verified (9)**: A1, A7, B1 (discovery 14 candidates after fix), B2, B3, B4, B5, B7 (2 seeded anomalies), E2 + navigation/render for all 24 UI pages.
+- **⚠️ partial (14)**: A2, A3, A4, A5, A6, B6, B8, B9, C6, C7, C9, E3, E4, E5 (E5 now reachable; page is a stub).
+- **⏳ not run (1)**: C8.
+- **❌ gap (0)**: none — E5's unreachable-nav gap is fixed (page-content stub remains a ⚠️).
 
 ### Continue-session deltas (after the first commit)
 - **C9** ⚠️→ improved: `Seed demo data` populates **5 mutants (Mut-1..5, all selected)** + MR Bindings panel + `Start campaign` executes (`caseC9-02-campaign.png`); kill-rate results grid stays empty (needs MR-binding checkbox selection — not driven).
@@ -68,13 +69,16 @@
 
 The core T0 System-MT flow (B2–B5) passes end-to-end with a real metamorphic check (advection linearity, ×2). Most ⚠️/⏳ pages render correctly and only lack content because the upstream operation (discovery run, failing-MR run for anomalies, mutation seed, report generate, method-MT run) was not executed in this session; the tooling supports all of them.
 
-## Product/UX findings (for the team)
-1. A3 delete confirm dialog text mislabeled `是否修改该记录?` (should say delete). 
-2. A3 deleting an imported-SUT Application returns `删除记录 失败`.
-3. B6 button label typo `Eecute MT` → `Execute MT`.
-4. E5 Dashboard page has no nav entry (unreachable).
-5. WPF System-MT needs `python` resolvable (default `SystemPython="python"`; no env-var override for system python like there is for openmoc/openmc/scipy) — preflight correctly diagnoses (exit 9009).
-6. Discovery (`Run discovery`) sidecar script `tools/noether_candidates.py` is **not deployed to the build output dir** → discovery errors (`python exited 2: can't open file …\bin\…\tools\noether_candidates.py`), candidates: 0. The page tries to run it relative to the app bin.
+## Product/UX findings — and their fixes in this PR
+
+5 of 6 are **fixed in code + rebuilt + re-verified**; #2 is **re-classified** (automation artifact, not a defect).
+
+1. **FIXED** — A3 delete confirm text `是否修改该记录?` → `是否删除该记录?` in `ApplicationManagementViewModel.btnDelect_Click`. (Domain/MR delete methods carry the same latent typo — out of the reported A3 scope; noted for follow-up.)
+2. **RE-CLASSIFIED (not a defect)** — A3 `删除记录 失败` occurred because `btnDelect_Click` builds the target from `Create()` (the form), and UIA programmatic row-select did not fire `ShowSelected` to populate it (empty IdApplication). A real user selects → form populates → delete works. Same root cause as A2; minor design smell (delete reads the form, not `DataGridSelectedItem`). No code change.
+3. **FIXED** — B6 typo `Eecute MT` → `Execute MT` (`Strings.resx` `MtExec_ExecuteMt`). Verified: `verifyFix1-B6` shows `Execute MT`.
+4. **FIXED (reachability)** — E5 Dashboard gains a nav entry (`Nav_Dashboard` in `MainWindowViewModel` + en/zh resx). Verified reachable (`verifyFix1`). NOTE: Dashboard page is still a stub (one `Click me!` button, not ≥4 cards) → E5 stays ⚠️ (separate content gap).
+5. **FIXED** — System-MT reads `METBENCH_SYSTEM_PYTHON` (App.xaml.cs `SystemPython` + `MetaPatternDiscoverer`), mirroring the OpenMOC override. Verified: `verifyFix2-b4` PASS via the env var with `python` NOT on PATH.
+6. **FIXED** — `tools/noether_candidates.py` now deployed to `<bin>/tools/` via a `MetBench_Client.csproj` copy item. Verified: `verifyFix2-b1` = `Done — status: ok, candidates: 14` (was missing-file error / 0) → **B1 now ✅**.
 
 ## Test data left behind
 `UAT-SP3b-App` (Application) and likely `UAT-SP3b-Domain` (Domain) were created in `MetBench_DataBase/MR.Litedb` during A1/A4. Harmless test rows; imported SUTs re-seed on launch.

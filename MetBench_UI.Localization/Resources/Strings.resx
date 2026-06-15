@@ -91,6 +91,9 @@
   <data name="Common_NotAvailable" xml:space="preserve">
     <value>N/A</value>
   </data>
+  <data name="Nav_Dashboard" xml:space="preserve">
+    <value>Dashboard</value>
+  </data>
   <data name="Nav_MrDisplay" xml:space="preserve">
     <value>MR Display</value>
   </data>
@@ -1115,7 +1118,7 @@
     <value>CodeName</value>
   </data>
   <data name="MtExec_ExecuteMt" xml:space="preserve">
-    <value>Eecute MT</value>
+    <value>Execute MT</value>
   </data>
   <data name="MtExec_MinNumber" xml:space="preserve">
     <value>MinNumber</value>

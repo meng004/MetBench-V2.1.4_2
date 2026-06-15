@@ -93,6 +93,12 @@
 			<Link>SUT\%(RecursiveDir)%(Filename)%(Extension)</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<!-- Deploy the MR-discovery Python sidecar so MetaPatternDiscoverer resolves it at
+		     <bin>/tools/noether_candidates.py (SP3b finding: it was missing from output). -->
+		<None Include="..\tools\noether_candidates.py">
+			<Link>tools\noether_candidates.py</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 	</ItemGroup>
 
 </Project>

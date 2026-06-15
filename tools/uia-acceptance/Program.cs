@@ -1137,6 +1137,26 @@ internal static class Program
                 Console.WriteLine($"[setidx] {ctName}[{idx}] = '{val}'");
                 return true;
             }
+            case "checkall":
+            {
+                // checkall:<substr> — toggle ON every CheckBox in the content frame whose
+                // Name contains <substr> (case-insensitive; empty substr = all). For panels of
+                // dynamically-named selectable checkboxes (e.g. mutation MR-binding rows).
+                var frameEl = FindById(window, automation, "PART_NavigationViewContentPresenter") ?? (AutomationElement)window;
+                var boxes = frameEl.FindAllDescendants(cf.ByControlType(ControlType.CheckBox));
+                int toggled = 0, matched = 0;
+                foreach (var b in boxes)
+                {
+                    string nm = ""; try { nm = b.Name ?? ""; } catch { }
+                    if (arg.Length > 0 && !nm.Contains(arg, StringComparison.OrdinalIgnoreCase)) continue;
+                    matched++;
+                    var tp = b.Patterns.Toggle.PatternOrDefault;
+                    if (tp != null) { if (tp.ToggleState.Value != ToggleState.On) { tp.Toggle(); toggled++; } }
+                    else { b.Patterns.LegacyIAccessible.PatternOrDefault?.DoDefaultAction(); toggled++; }
+                }
+                Console.WriteLine($"[checkall] '{arg}': matched {matched}, toggled {toggled} to checked");
+                return true;
+            }
             case "selcombo":
             {
                 var (id, text) = SplitKv(arg);
