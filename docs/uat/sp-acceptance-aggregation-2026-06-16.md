@@ -57,7 +57,7 @@
 5. Discovery `noether_candidates.py` 未部署到 bin → csproj 部署（修复后发现产 14 候选）。
 
 **待跟进（follow-up）：**
-6. SP4 发现：`csv-roundtrip-identity`、`projectile-scale-v0` 经 WPF 异步页 `System.Text.Json` 解析 SUT 输出失败（非单-JSON 输出）；launcher/xUnit 路径可跑——异步结果解析需与 launcher 输出处理对齐。
+6. ~~SP4 发现：`csv-roundtrip-identity`、`projectile-scale-v0` 经 WPF 异步页 `System.Text.Json` 解析 SUT 输出失败（非单-JSON 输出）~~ **→ 已修**（PR fix-async-json-parse）：根因是 `SystemMtExecutionRecorder.BuildSampleTraces` 无条件 `JsonDocument.Parse` 非-JSON sample（recorder 写证据时，非 launcher 核心）；改为 best-effort try/catch 降级空 traces。单元回归 + 端到端复跑两 MR 现均 Succeeded（SP4 33/38→35/38）。详见 `docs/superpowers/specs/2026-06-16-finding6-async-json-parse-fix/fix-summary.md`。
 7. SP4：3 openmc MR 作业 Succeeded 但 **MR 断言失败=异常**（与 T5 已知 OpenMOC×OpenMC 跨程序分歧一致）；host-openmc 结果可信度 vs 容器 openmc 待裁。
 8. SP3b：Dashboard 页内容仍是占位 stub（≥4 cards 未实现）；Domain/MR 删除确认有同款「是否修改」latent typo（A3 同类，报告范围外）；C8 AutoDetectMR 未跑；若干数据依赖 ⚠️ 页需上游运行（异常/发现/变异 campaign 已具工具支持）。
 9. T6（SP2）：8 个 semantic 变异无 MR 检出（检测盲区，指向最小 MR 完备子集搜索——已记录的 deferred T6 工作）。

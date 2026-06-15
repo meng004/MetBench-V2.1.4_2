@@ -268,6 +268,51 @@ public sealed class ExecutionEvidenceWriteThroughTests
     }
 
     [Fact]
+    public async Task Record_with_non_json_sample_case_degrades_to_no_traces_and_does_not_fail_run()
+    {
+        // Regression for SP4 finding #6: the CSV / plain-text I/O SUTs (e.g. _test-csv,
+        // projectile) have non-JSON sample cases. BuildSampleTraces JSON-parsed them and
+        // threw a fatal JsonException ("'k' is an invalid start of a value") that failed
+        // the whole async RunMr job — even though the launcher run itself succeeded.
+        // Sample traces are evidence enrichment, so a non-JSON sample must degrade to
+        // "no traces" rather than fail the run (mirrors InputCaseReader's best-effort).
+        var execRepo = new FakeExecRepo();
+        var resRepo = new FakeResultRepo();
+        var evRepo = new InMemoryEvidenceRepo();
+        var v3Repo = new InMemoryV3Repo();
+        var tempDir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "metbench-evidence-tests", Guid.NewGuid().ToString("N"));
+        System.IO.Directory.CreateDirectory(tempDir);
+        var sourcePath = System.IO.Path.Combine(tempDir, "source.csv");
+        var followupPath = System.IO.Path.Combine(tempDir, "followup.csv");
+        // Non-JSON CSV; the leading 'k' is exactly what made JsonDocument.Parse throw.
+        await System.IO.File.WriteAllTextAsync(sourcePath, "key,factor\necho_value,1\n");
+        await System.IO.File.WriteAllTextAsync(followupPath, "key,factor\necho_value,2\n");
+
+        try
+        {
+            var recorder = new SystemMtExecutionRecorder(execRepo, resRepo, evRepo, v3Repo);
+            var recorded = await recorder.RecordAsync(
+                CtxFor("csv-roundtrip-identity") with { SourceCasePath = sourcePath },
+                OkOutcome() with
+                {
+                    FollowupInputPath = followupPath,
+                    FollowupMetrics = new Dictionary<string, double> { ["echo_value"] = 2.0 },
+                },
+                mrInstanceId: 1);
+
+            // Did NOT throw → run recorded, evidence written, sample traces gracefully empty.
+            Assert.NotNull(recorded.ResultId);
+            var evidence = await evRepo.GetByExecutionAsync(recorded.ExecutionId);
+            Assert.NotNull(evidence);
+            Assert.Empty(evidence!.SampleTraces);
+        }
+        finally
+        {
+            try { System.IO.Directory.Delete(tempDir, recursive: true); } catch { }
+        }
+    }
+
+    [Fact]
     public async Task Record_writes_sample_trace_per_changed_input_field_not_only_target()
     {
         var execRepo = new FakeExecRepo();

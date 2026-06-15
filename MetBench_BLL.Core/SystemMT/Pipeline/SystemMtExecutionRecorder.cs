@@ -340,28 +340,43 @@ public sealed class SystemMtExecutionRecorder
 
         // Parse each input file exactly once; the declared target field and the
         // changed-field diff below both read from the same parsed documents.
-        using var sourceDoc = JsonDocument.Parse(File.ReadAllText(context.SourceCasePath));
-        using var followupDoc = JsonDocument.Parse(File.ReadAllText(outcome.FollowupInputPath));
-
-        if (!TryResolveJsonPointer(sourceDoc.RootElement, context.TargetFieldPath, out var sourceTarget)
-            || !TryResolveJsonPointer(followupDoc.RootElement, context.TargetFieldPath, out var followupTarget))
+        // Sample traces are run-record enrichment built from JSON input leaves. A
+        // non-JSON sample case (the CSV / plain-text I/O SUTs, e.g. _test-csv /
+        // projectile) has no JSON leaves to trace, so a parse failure must degrade to
+        // "no traces" rather than fail the run — mirroring InputCaseReader's best-effort
+        // contract. (Previously this threw a fatal JsonException that failed the whole
+        // async RunMr job for those SUTs even though the launcher run itself succeeded.)
+        try
         {
+            using var sourceDoc = JsonDocument.Parse(File.ReadAllText(context.SourceCasePath));
+            using var followupDoc = JsonDocument.Parse(File.ReadAllText(outcome.FollowupInputPath));
+
+            if (!TryResolveJsonPointer(sourceDoc.RootElement, context.TargetFieldPath, out var sourceTarget)
+                || !TryResolveJsonPointer(followupDoc.RootElement, context.TargetFieldPath, out var followupTarget))
+            {
+                return traces;
+            }
+
+            traces.Add(new ExecutionSampleTrace
+            {
+                VariableName = context.ValueName,
+                Path = context.TargetFieldPath,
+                SourceValueJson = sourceTarget.GetRawText(),
+                TransformedValueJson = followupTarget.GetRawText(),
+                OutputValueJson = MetricJson(outcome, context.ValueName),
+            });
+
+            // Task 6 granularity: beyond the single declared target field, capture an honest
+            // (source, transformed, output) triple for every other input leaf that the MR
+            // transformation actually changed — diffed from the same parsed documents.
+            AppendChangedFieldTraces(traces, context, outcome, sourceDoc.RootElement, followupDoc.RootElement);
+        }
+        catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException)
+        {
+            // Non-JSON / unreadable sample case: degrade to no traces, never fail the run.
             return traces;
         }
 
-        traces.Add(new ExecutionSampleTrace
-        {
-            VariableName = context.ValueName,
-            Path = context.TargetFieldPath,
-            SourceValueJson = sourceTarget.GetRawText(),
-            TransformedValueJson = followupTarget.GetRawText(),
-            OutputValueJson = MetricJson(outcome, context.ValueName),
-        });
-
-        // Task 6 granularity: beyond the single declared target field, capture an honest
-        // (source, transformed, output) triple for every other input leaf that the MR
-        // transformation actually changed — diffed from the same parsed documents.
-        AppendChangedFieldTraces(traces, context, outcome, sourceDoc.RootElement, followupDoc.RootElement);
         return traces;
     }
 
