@@ -74,6 +74,7 @@ namespace MetBench_Client.ViewModels
 
             NavigationItems = new ObservableCollection<object>
             {
+                LocalizedNav("Nav_Dashboard",                  SymbolRegular.Home24,                  typeof(Views.Pages.DashboardPage),                  _localizedNavigation),
                 LocalizedNav("Nav_MrDisplay",                  SymbolRegular.CalendarDataBar24,       typeof(Views.Pages.MRDisplayPage),                  _localizedNavigation),
                 LocalizedNav("Nav_MrManagement",               SymbolRegular.DataHistogram24,         typeof(Views.Pages.MRManagementPage),               _localizedNavigation),
                 LocalizedNav("Nav_ApplicationManagement",      SymbolRegular.DataHistogram24,         typeof(Views.Pages.ApplicationManagementPage),      _localizedNavigation),

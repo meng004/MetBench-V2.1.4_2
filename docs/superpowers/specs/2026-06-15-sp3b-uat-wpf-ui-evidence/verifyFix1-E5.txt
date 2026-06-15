@@ -1,0 +1,4 @@
+[Pane] Name='' Aid='PART_NavigationViewContentPresenter' Cls='Frame'
+  [Button] Name='Click me!' Aid='' Cls='Button'
+    [Text] Name='Click me!' Aid='' Cls='TextBlock'
+  [Text] Name='0' Aid='' Cls='TextBlock'

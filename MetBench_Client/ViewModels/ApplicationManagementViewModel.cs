@@ -566,7 +566,7 @@ namespace MetBench_Client.ViewModels
                 return;
             }
 
-            var msg2 = "是否修改该记录?";
+            var msg2 = "是否删除该记录?";
             var result = await UiDialog.ConfirmAsync(msg2, "Tips");
             if (result)
             {
