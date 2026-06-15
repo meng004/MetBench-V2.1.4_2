@@ -8,7 +8,9 @@
     },
     {
       "scenario_id": "openmc-pincell-nu-sigma-f",
-      "status": "skipped-no-openmc"
+      "status": "error",
+      "error": "Subprocess timed out after 300s: /opt/openmc-venv/bin/python /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/SUT/openmc/openmc_runner.py --input /work/SUT/openmoc/sample/pincell.json --output /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/src-openmc-openmc-pincell-nu-sigma-f.json\nstdout (partial):\n\nstderr (partial):\n",
+      "outcome": "error"
     },
     {
       "scenario_id": "openmoc-pincell-sigma-a",
@@ -16,7 +18,9 @@
     },
     {
       "scenario_id": "openmc-pincell-sigma-a",
-      "status": "skipped-no-openmc"
+      "status": "error",
+      "error": "Subprocess timed out after 300s: /opt/openmc-venv/bin/python /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/SUT/openmc/openmc_runner.py --input /work/SUT/openmoc/sample/pincell.json --output /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/src-openmc-openmc-pincell-sigma-a.json\nstdout (partial):\n\nstderr (partial):\n",
+      "outcome": "error"
     },
     {
       "scenario_id": "openmoc-pincell-group-permute",
@@ -32,15 +36,21 @@
     },
     {
       "scenario_id": "openmc-pincell-group-permute",
-      "status": "skipped-no-openmc"
+      "status": "error",
+      "error": "Subprocess timed out after 300s: /opt/openmc-venv/bin/python /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/SUT/openmc/openmc_runner.py --input /work/SUT/openmoc/sample/pincell.json --output /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/src-openmc-openmc-pincell-group-permute.json\nstdout (partial):\n\nstderr (partial):\n",
+      "outcome": "error"
     },
     {
       "scenario_id": "openmc-pincell-fuel-sigma-t",
-      "status": "skipped-no-openmc"
+      "status": "error",
+      "error": "Subprocess timed out after 300s: /opt/openmc-venv/bin/python /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/SUT/openmc/openmc_runner.py --input /work/SUT/openmoc/sample/pincell.json --output /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/src-openmc-openmc-pincell-fuel-sigma-t.json\nstdout (partial):\n\nstderr (partial):\n",
+      "outcome": "error"
     },
     {
       "scenario_id": "openmc-pincell-moderator-sigma-a",
-      "status": "skipped-no-openmc"
+      "status": "error",
+      "error": "Subprocess timed out after 300s: /opt/openmc-venv/bin/python /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/SUT/openmc/openmc_runner.py --input /work/SUT/openmoc/sample/pincell.json --output /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/src-openmc-openmc-pincell-moderator-sigma-a.json\nstdout (partial):\n\nstderr (partial):\n",
+      "outcome": "error"
     },
     {
       "scenario_id": "openmoc-pincell-fuel-sigma-s",
@@ -48,7 +58,9 @@
     },
     {
       "scenario_id": "openmc-pincell-fuel-sigma-s",
-      "status": "skipped-no-openmc"
+      "status": "error",
+      "error": "Subprocess timed out after 300s: /opt/openmc-venv/bin/python /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/SUT/openmc/openmc_runner.py --input /work/SUT/openmoc/sample/pincell.json --output /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/src-openmc-openmc-pincell-fuel-sigma-s.json\nstdout (partial):\n\nstderr (partial):\n",
+      "outcome": "error"
     },
     {
       "scenario_id": "openmoc-pincell-fuel-radius",
@@ -56,11 +68,15 @@
     },
     {
       "scenario_id": "openmc-pincell-fuel-radius",
-      "status": "skipped-no-openmc"
+      "status": "error",
+      "error": "Subprocess timed out after 300s: /opt/openmc-venv/bin/python /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/SUT/openmc/openmc_runner.py --input /work/SUT/openmoc/sample/pincell.json --output /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/src-openmc-openmc-pincell-fuel-radius.json\nstdout (partial):\n\nstderr (partial):\n",
+      "outcome": "error"
     },
     {
       "scenario_id": "openmc-pincell-particles-refine",
-      "status": "skipped-no-openmc"
+      "status": "error",
+      "error": "Subprocess timed out after 300s: /opt/openmc-venv/bin/python /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/SUT/openmc/openmc_runner.py --input /work/SUT/openmoc/sample/pincell.json --output /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/src-openmc-openmc-pincell-particles-refine.json\nstdout (partial):\n\nstderr (partial):\n",
+      "outcome": "error"
     },
     {
       "scenario_id": "openmoc-pincell-rotate-90",
@@ -68,7 +84,71 @@
     },
     {
       "scenario_id": "openmc-pincell-rotate-90",
-      "status": "skipped-no-openmc"
+      "status": "error",
+      "error": "Subprocess timed out after 300s: /opt/openmc-venv/bin/python /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/SUT/openmc/openmc_runner.py --input /work/SUT/openmoc/sample/pincell-asymmetric.json --output /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/src-openmc-openmc-pincell-rotate-90.json\nstdout (partial):\n\nstderr (partial):\n",
+      "outcome": "error"
+    },
+    {
+      "scenario_id": "openmoc-pincell-mirror-x",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-mirror-x",
+      "status": "error",
+      "error": "Subprocess timed out after 300s: /opt/openmc-venv/bin/python /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/SUT/openmc/openmc_runner.py --input /work/SUT/openmoc/sample/pincell-offcentre.json --output /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/src-openmc-openmc-pincell-mirror-x.json\nstdout (partial):\n\nstderr (partial):\n",
+      "outcome": "error"
+    },
+    {
+      "scenario_id": "openmoc-pincell-mirror-y",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-mirror-y",
+      "status": "error",
+      "error": "Subprocess timed out after 300s: /opt/openmc-venv/bin/python /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/SUT/openmc/openmc_runner.py --input /work/SUT/openmoc/sample/pincell-offcentre.json --output /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/src-openmc-openmc-pincell-mirror-y.json\nstdout (partial):\n\nstderr (partial):\n",
+      "outcome": "error"
+    },
+    {
+      "scenario_id": "openmoc-pincell-mirror-x-tally",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-mirror-x-tally",
+      "status": "error",
+      "error": "Subprocess timed out after 300s: /opt/openmc-venv/bin/python /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/SUT/openmc/openmc_runner.py --input /work/SUT/openmoc/sample/pincell-offcentre.json --output /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/src-openmc-openmc-pincell-mirror-x-tally.json\nstdout (partial):\n\nstderr (partial):\n",
+      "outcome": "error"
+    },
+    {
+      "scenario_id": "openmoc-pincell-mirror-y-tally",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-mirror-y-tally",
+      "status": "error",
+      "error": "Subprocess timed out after 300s: /opt/openmc-venv/bin/python /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/SUT/openmc/openmc_runner.py --input /work/SUT/openmoc/sample/pincell-offcentre.json --output /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/src-openmc-openmc-pincell-mirror-y-tally.json\nstdout (partial):\n\nstderr (partial):\n",
+      "outcome": "error"
+    },
+    {
+      "scenario_id": "openmoc-pincell-fuel-temperature",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-temperature",
+      "status": "error",
+      "error": "Subprocess timed out after 300s: /opt/openmc-venv/bin/python /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/SUT/openmc/openmc_runner.py --input /work/SUT/openmoc/sample/pincell.json --output /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/src-openmc-openmc-pincell-fuel-temperature.json\nstdout (partial):\n\nstderr (partial):\n",
+      "outcome": "error"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-temperature-via-add-temperature",
+      "status": "error",
+      "error": "Subprocess timed out after 300s: /opt/openmc-venv/bin/python /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/SUT/openmc/openmc_runner.py --input /work/SUT/openmoc/sample/pincell.json --output /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/src-openmc-openmc-pincell-fuel-temperature-via-add-temperature.json\nstdout (partial):\n\nstderr (partial):\n",
+      "outcome": "error"
+    },
+    {
+      "scenario_id": "openmc-pincell-moderator-temperature-via-borated-water",
+      "status": "error",
+      "error": "Subprocess timed out after 300s: /opt/openmc-venv/bin/python /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/SUT/openmc/openmc_runner.py --input /work/SUT/openmoc/sample/pincell.json --output /tmp/mat-Mut15-openmc-runner-chi-zero-2ya_r5hq/src-openmc-openmc-pincell-moderator-temperature-via-borated-water.json\nstdout (partial):\n\nstderr (partial):\n",
+      "outcome": "error"
     }
   ]
 }

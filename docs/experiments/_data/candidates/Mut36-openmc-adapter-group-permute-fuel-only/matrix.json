@@ -33,13 +33,33 @@
     {
       "scenario_id": "openmc-pincell-group-permute",
       "status": "ran",
-      "k_source": 1.124500014025287,
-      "k_followup": 0.536778340505108,
-      "k_source_std": 0.001786852281155658,
-      "k_followup_std": 0.0015790479236781035,
-      "ratio": 0.4773484515875135,
+      "k_source": 1.1245000140253023,
+      "k_followup": 0.5367783405051123,
+      "k_source_std": 0.001786852281146931,
+      "k_followup_std": 0.0015790479236861262,
+      "ratio": 0.4773484515875109,
       "assertion": "approx",
       "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          18.52604367982285,
+          6.425805277727579
+        ],
+        "moderator": [
+          39.62176164707446,
+          13.997437161322816
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          2.8198481016883834,
+          14.703700332370412
+        ],
+        "moderator": [
+          6.03483880973947,
+          31.192720647285974
+        ]
+      },
       "assertion_passed": false,
       "outcome": "detected"
     },
@@ -69,6 +89,62 @@
     },
     {
       "scenario_id": "openmc-pincell-particles-refine",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-rotate-90",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-rotate-90",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-mirror-x",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-mirror-x",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-mirror-y",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-mirror-y",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-mirror-x-tally",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-mirror-x-tally",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-mirror-y-tally",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-mirror-y-tally",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-fuel-temperature",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-temperature",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-temperature-via-add-temperature",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-moderator-temperature-via-borated-water",
       "status": "not-affected"
     }
   ]

@@ -533,10 +533,14 @@ def openmc_available() -> bool:
         return False
 
 
-SUBPROCESS_TIMEOUT_S = 60  # normal OpenMC source case is ~7s, OpenMOC ~0.6s.
-# 60s accommodates the slowest legitimate case (10x particle refinement
-# at 50000 particles ≈ 50s) while still capping pathological mutants
-# (chi-zero, fission-zero) that drive the OpenMC binary into long
+SUBPROCESS_TIMEOUT_S = int(os.environ.get("METBENCH_MUTATION_TIMEOUT_S", "60"))
+# Default 60s assumes the reference host where a normal OpenMC source case
+# is ~7s (OpenMOC ~0.6s) and the slowest legitimate case (10x particle
+# refinement at 50000 particles) is ~50s. On slower hosts/containers that
+# refined follow-up can exceed 60s (e.g. ~75s inside metbench-runtime), so
+# the ceiling is overridable via METBENCH_MUTATION_TIMEOUT_S without
+# changing the committed default. The ceiling still caps pathological
+# mutants (chi-zero, fission-zero) that drive the OpenMC binary into long
 # fruitless transport loops. Failing cells land as status="error",
 # which the screening + stats paths already handle. Combined with
 # `start_new_session=True` + killpg in run_subprocess, timeouts release
@@ -746,14 +750,29 @@ def cmd_baseline(args: argparse.Namespace) -> int:
             flw_out = tmp_path / f"flw-out-{sc['id']}.json"
             effective_factor = scenario_factor(sc, DEFAULT_FACTOR)
             sc_source = scenario_source(sc)
-            apply_transformation(SUT_DIR, sc, sc_source, flw_in, effective_factor, python_exec)
-            result = run_solver(SUT_DIR, sc, flw_in, flw_out, python_exec)
-            followups[sc["id"]] = {
-                "k_eff": float(result["k_eff"]),
-                "k_eff_std": float(result.get("k_eff_std", 0.0)),
-                "factor": effective_factor,
-                "source_case": str(sc_source.relative_to(REPO_ROOT)),
-            }
+            # A single follow-up scenario can fail for reasons outside MetBench's
+            # control (e.g. the upstream OpenMC PR #3712 add_temperature bug on the
+            # fuel-temperature scenarios). Record it as an error entry and keep
+            # going so one bad scenario does not abort the whole baseline; the
+            # screen/matrix/stats paths already tolerate NaN/error follow-ups.
+            try:
+                apply_transformation(SUT_DIR, sc, sc_source, flw_in, effective_factor, python_exec)
+                result = run_solver(SUT_DIR, sc, flw_in, flw_out, python_exec)
+                followups[sc["id"]] = {
+                    "k_eff": float(result["k_eff"]),
+                    "k_eff_std": float(result.get("k_eff_std", 0.0)),
+                    "factor": effective_factor,
+                    "source_case": str(sc_source.relative_to(REPO_ROOT)),
+                }
+            except Exception as exc:  # noqa: BLE001 - record and continue
+                print(f"  WARN: follow-up baseline {sc['id']} failed: {exc}", file=sys.stderr)
+                followups[sc["id"]] = {
+                    "k_eff": float("nan"),
+                    "k_eff_std": 0.0,
+                    "factor": effective_factor,
+                    "source_case": str(sc_source.relative_to(REPO_ROOT)),
+                    "error": str(exc),
+                }
     for sid in skipped_scenarios:
         followups[sid] = {"k_eff": float("nan"), "k_eff_std": 0.0, "skipped": True}
 
@@ -814,9 +833,13 @@ def screen_one(mutation: Mutation, args: argparse.Namespace) -> dict:
     solver = mutation_solver(mutation)
     with tempfile.TemporaryDirectory(prefix=f"mut-{mutation.id}-") as tmp:
         tmp_path = Path(tmp)
-        sut_copy = stage_sut(mutation, tmp_path)
-        print(f"  {mutation.id}: running screening (solver={solver}) ...", file=sys.stderr)
         try:
+            # stage_sut applies the mutant patch; a precondition failure here
+            # (the mutant's target string drifted out of the current SUT source)
+            # is an inapplicable/stale mutant — record classification="error"
+            # and continue rather than aborting the whole screen run.
+            sut_copy = stage_sut(mutation, tmp_path)
+            print(f"  {mutation.id}: running screening (solver={solver}) ...", file=sys.stderr)
             if solver in ("openmoc", "both"):
                 mut_moc = run_source(sut_copy, "openmoc", openmoc_python, openmc_python, reps=1)
             else:
@@ -996,7 +1019,20 @@ def matrix_one(mutation: Mutation, args: argparse.Namespace) -> dict:
     cells: list[dict] = []
     with tempfile.TemporaryDirectory(prefix=f"mat-{mutation.id}-") as tmp:
         tmp_path = Path(tmp)
-        sut_copy = stage_sut(mutation, tmp_path)
+        try:
+            sut_copy = stage_sut(mutation, tmp_path)
+        except RuntimeError as e:
+            # Inapplicable/stale mutant: patch precondition no longer matches the
+            # current SUT source. Record an error matrix and continue so one
+            # drifted mutant does not abort matrix --all-semantic.
+            payload = {
+                "mutation_id": mutation.id,
+                "factor": args.factor,
+                "error": str(e)[:2000],
+                "cells": [],
+            }
+            matrix_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+            return payload
 
         for sc in SCENARIOS:
             cell: dict = {"scenario_id": sc["id"]}

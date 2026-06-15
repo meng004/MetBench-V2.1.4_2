@@ -9,13 +9,33 @@
     {
       "scenario_id": "openmc-pincell-nu-sigma-f",
       "status": "ran",
-      "k_source": 1.091868591488576,
-      "k_followup": 1.730092483267029,
-      "k_source_std": 0.05149577343159909,
-      "k_followup_std": 0.025937010312114653,
+      "k_source": 1.0918685914885755,
+      "k_followup": 1.7300924832670284,
+      "k_source_std": 0.051495773431600174,
+      "k_followup_std": 0.02593701031211893,
       "ratio": 1.5845244535410108,
       "assertion": "greater",
       "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          18.236874865927884,
+          6.231006979850726
+        ],
+        "moderator": [
+          39.291216948411936,
+          13.263813458781812
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          18.11907240308194,
+          6.628964379967805
+        ],
+        "moderator": [
+          39.518400089657725,
+          14.364542580070717
+        ]
+      },
       "assertion_passed": true,
       "outcome": "missed"
     },
@@ -26,13 +46,33 @@
     {
       "scenario_id": "openmc-pincell-sigma-a",
       "status": "ran",
-      "k_source": 1.091868591488576,
+      "k_source": 1.0918685914885755,
       "k_followup": 0.8612739548039311,
-      "k_source_std": 0.051495773431598016,
-      "k_followup_std": 0.02833576752893614,
-      "ratio": 0.7888073358990311,
+      "k_source_std": 0.051495773431600174,
+      "k_followup_std": 0.028335767528934182,
+      "ratio": 0.7888073358990314,
       "assertion": "less",
       "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          18.23687486592789,
+          6.231006979850726
+        ],
+        "moderator": [
+          39.29121694841188,
+          13.263813458781842
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          17.222940364292043,
+          4.799023236245765
+        ],
+        "moderator": [
+          36.733854569857215,
+          10.681884793261572
+        ]
+      },
       "assertion_passed": true,
       "outcome": "missed"
     },
@@ -53,37 +93,97 @@
       "status": "ran",
       "k_source": 1.091868591488576,
       "k_followup": 1.2274118186382263,
-      "k_source_std": 0.051495773431600174,
-      "k_followup_std": 0.024841326154949057,
+      "k_source_std": 0.05149577343159586,
+      "k_followup_std": 0.024841326154942354,
       "ratio": 1.124138772931329,
       "assertion": "approx",
       "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          18.236874865927877,
+          6.231006979850714
+        ],
+        "moderator": [
+          39.29121694841202,
+          13.26381345878184
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          7.058506496372907,
+          19.1805549931039
+        ],
+        "moderator": [
+          15.378836853996626,
+          40.93199366262494
+        ]
+      },
       "assertion_passed": false,
       "outcome": "detected"
     },
     {
       "scenario_id": "openmc-pincell-fuel-sigma-t",
       "status": "ran",
-      "k_source": 1.0918685914885757,
-      "k_followup": 0.11146190282628488,
+      "k_source": 1.0918685914885753,
+      "k_followup": 0.11146190282628483,
       "k_source_std": 0.05149577343159909,
-      "k_followup_std": 0.006251086566959248,
+      "k_followup_std": 0.006251086566959456,
       "ratio": 0.10208362406901518,
       "assertion": "less",
       "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          18.236874865927888,
+          6.2310069798507195
+        ],
+        "moderator": [
+          39.29121694841191,
+          13.263813458781833
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          5.96505272587558,
+          0.468278373039496
+        ],
+        "moderator": [
+          12.80968152187515,
+          1.111541781531464
+        ]
+      },
       "assertion_passed": true,
       "outcome": "missed"
     },
     {
       "scenario_id": "openmc-pincell-moderator-sigma-a",
       "status": "ran",
-      "k_source": 1.0918685914885757,
-      "k_followup": 0.9976349186882221,
-      "k_source_std": 0.05149577343159909,
-      "k_followup_std": 0.021782831095612507,
-      "ratio": 0.9136950421186837,
+      "k_source": 1.0918685914885755,
+      "k_followup": 0.9976349186882217,
+      "k_source_std": 0.051495773431600174,
+      "k_followup_std": 0.021782831095615057,
+      "ratio": 0.9136950421186836,
       "assertion": "less",
       "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          18.23687486592789,
+          6.231006979850726
+        ],
+        "moderator": [
+          39.29121694841202,
+          13.263813458781831
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          17.597551904656576,
+          5.655019722034628
+        ],
+        "moderator": [
+          37.918066322451175,
+          12.024794662170391
+        ]
+      },
       "assertion_passed": false,
       "outcome": "detected"
     },
@@ -94,13 +194,33 @@
     {
       "scenario_id": "openmc-pincell-fuel-sigma-s",
       "status": "ran",
-      "k_source": 1.091868591488576,
-      "k_followup": 1.1703358407510622,
-      "k_source_std": 0.051495773431598016,
+      "k_source": 1.0918685914885755,
+      "k_followup": 1.1703358407510625,
+      "k_source_std": 0.051495773431600174,
       "k_followup_std": 0.07173657605101312,
-      "ratio": 1.0718651034329227,
+      "ratio": 1.0718651034329234,
       "assertion": "less",
       "factor": 0.5,
+      "k_source_flux": {
+        "fuel": [
+          18.23687486592789,
+          6.231006979850723
+        ],
+        "moderator": [
+          39.29121694841197,
+          13.263813458781842
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          22.928243700809933,
+          6.5405436489832525
+        ],
+        "moderator": [
+          48.5530160103361,
+          14.049056067713328
+        ]
+      },
       "assertion_passed": false,
       "outcome": "detected"
     },
@@ -111,26 +231,66 @@
     {
       "scenario_id": "openmc-pincell-fuel-radius",
       "status": "ran",
-      "k_source": 1.091868591488576,
-      "k_followup": 1.1371661460879514,
-      "k_source_std": 0.051495773431598016,
-      "k_followup_std": 0.09413859949578995,
-      "ratio": 1.0414862694581406,
+      "k_source": 1.0918685914885755,
+      "k_followup": 1.1371661460879512,
+      "k_source_std": 0.05149577343159909,
+      "k_followup_std": 0.09413859949579113,
+      "ratio": 1.0414862694581408,
       "assertion": "greater",
       "factor": 1.05,
+      "k_source_flux": {
+        "fuel": [
+          18.236874865927884,
+          6.231006979850716
+        ],
+        "moderator": [
+          39.291216948411915,
+          13.263813458781847
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          18.056715705926912,
+          6.527815754441016
+        ],
+        "moderator": [
+          33.83937035640975,
+          12.521414918503808
+        ]
+      },
       "assertion_passed": false,
       "outcome": "detected"
     },
     {
       "scenario_id": "openmc-pincell-particles-refine",
       "status": "ran",
-      "k_source": 1.0918685914885757,
-      "k_followup": 1.091868591488576,
-      "k_source_std": 0.05149577343159909,
+      "k_source": 1.0918685914885755,
+      "k_followup": 1.0918685914885755,
+      "k_source_std": 0.051495773431600174,
       "k_followup_std": 0.05149577343159909,
-      "ratio": 1.0000000000000002,
+      "ratio": 1.0,
       "assertion": "variance-ratio",
       "factor": 10.0,
+      "k_source_flux": {
+        "fuel": [
+          18.23687486592789,
+          6.231006979850728
+        ],
+        "moderator": [
+          39.29121694841191,
+          13.263813458781835
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          18.236874865927884,
+          6.231006979850719
+        ],
+        "moderator": [
+          39.291216948411915,
+          13.263813458781852
+        ]
+      },
       "assertion_passed": false,
       "outcome": "detected"
     },
@@ -141,15 +301,232 @@
     {
       "scenario_id": "openmc-pincell-rotate-90",
       "status": "ran",
-      "k_source": 1.1927070008834662,
-      "k_followup": 1.1884777491103737,
-      "k_source_std": 0.07507207474977766,
-      "k_followup_std": 0.03058140223640102,
-      "ratio": 0.9964540731546309,
+      "k_source": 1.192707000883466,
+      "k_followup": 1.1884777491103742,
+      "k_source_std": 0.07507207474977692,
+      "k_followup_std": 0.030581402236397392,
+      "ratio": 0.9964540731546314,
       "assertion": "approx",
       "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          18.72625610941549,
+          6.855328829285665
+        ],
+        "moderator": [
+          36.35601456148611,
+          13.757143314067298
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          19.448029441426442,
+          6.7987882471900525
+        ],
+        "moderator": [
+          38.085316068167145,
+          13.385522695319326
+        ]
+      },
       "assertion_passed": true,
       "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmoc-pincell-mirror-x",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-mirror-x",
+      "status": "ran",
+      "k_source": 1.1970369267194758,
+      "k_followup": 1.12140458732933,
+      "k_source_std": 0.012623742564676363,
+      "k_followup_std": 0.02801421035359016,
+      "ratio": 0.9368170373846201,
+      "assertion": "approx",
+      "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          17.502132137802043,
+          6.9330561088660865
+        ],
+        "moderator": [
+          41.94006679786277,
+          16.060192053189564
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          18.84227498537216,
+          6.394977811009259
+        ],
+        "moderator": [
+          44.46797344132522,
+          14.839580143512336
+        ]
+      },
+      "assertion_passed": false,
+      "outcome": "detected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-mirror-y",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-mirror-y",
+      "status": "ran",
+      "k_source": 1.1970369267194756,
+      "k_followup": 1.1192682083075052,
+      "k_source_std": 0.012623742564671966,
+      "k_followup_std": 0.08010098313242438,
+      "ratio": 0.9350323146462169,
+      "assertion": "approx",
+      "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          17.502132137802032,
+          6.933056108866082
+        ],
+        "moderator": [
+          41.94006679786273,
+          16.06019205318955
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          17.369265820909664,
+          6.441564901301498
+        ],
+        "moderator": [
+          40.066219617661346,
+          15.594673408053657
+        ]
+      },
+      "assertion_passed": false,
+      "outcome": "detected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-mirror-x-tally",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-mirror-x-tally",
+      "status": "ran",
+      "k_source": 1.1970369267194756,
+      "k_followup": 1.12140458732933,
+      "k_source_std": 0.012623742564671966,
+      "k_followup_std": 0.0280142103535961,
+      "ratio": 0.9368170373846203,
+      "assertion": "flux-pointwise-approx",
+      "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          17.502132137802015,
+          6.933056108866093
+        ],
+        "moderator": [
+          41.94006679786273,
+          16.06019205318953
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          18.842274985372182,
+          6.394977811009249
+        ],
+        "moderator": [
+          44.46797344132523,
+          14.839580143512363
+        ]
+      },
+      "assertion_passed": false,
+      "outcome": "detected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-mirror-y-tally",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-mirror-y-tally",
+      "status": "ran",
+      "k_source": 1.1970369267194756,
+      "k_followup": 1.1192682083075056,
+      "k_source_std": 0.012623742564671966,
+      "k_followup_std": 0.08010098313242438,
+      "ratio": 0.9350323146462173,
+      "assertion": "flux-pointwise-approx",
+      "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          17.50213213780201,
+          6.933056108866087
+        ],
+        "moderator": [
+          41.94006679786272,
+          16.06019205318954
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          17.369265820909664,
+          6.441564901301493
+        ],
+        "moderator": [
+          40.066219617661424,
+          15.594673408053652
+        ]
+      },
+      "assertion_passed": false,
+      "outcome": "detected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-fuel-temperature",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-temperature",
+      "status": "ran",
+      "k_source": 1.0918685914885755,
+      "k_followup": 1.0879512080319798,
+      "k_source_std": 0.051495773431600174,
+      "k_followup_std": 0.08636825000968337,
+      "ratio": 0.9964122207680184,
+      "assertion": "less",
+      "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          18.236874865927888,
+          6.231006979850725
+        ],
+        "moderator": [
+          39.291216948411936,
+          13.263813458781854
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          18.586303443272126,
+          6.191686044696728
+        ],
+        "moderator": [
+          40.44151558611008,
+          13.628194030106448
+        ]
+      },
+      "assertion_passed": false,
+      "outcome": "detected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-temperature-via-add-temperature",
+      "status": "error",
+      "error": "Subprocess failed (exit 1): /opt/openmc-venv/bin/python /tmp/mat-Mut18-openmc-runner-batches-too-few-pf9bkk9w/SUT/openmc/openmc_runner.py --input /tmp/mat-Mut18-openmc-runner-batches-too-few-pf9bkk9w/flw-in-openmc-pincell-fuel-temperature-via-add-temperature.json --output /tmp/mat-Mut18-openmc-runner-batches-too-few-pf9bkk9w/flw-out-openmc-pincell-fuel-temperature-via-add-temperature.json\nstdout:\n\nstderr:\nTraceback (most recent call last):\n  File \"/tmp/mat-Mut18-openmc-runner-batches-too-few-pf9bkk9w/SUT/openmc/openmc_runner.py\", line 307, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/tmp/mat-Mut18-openmc-runner-batches-too-few-pf9bkk9w/SUT/openmc/openmc_runner.py\", line 300, in main\n    result = solve(case)\n             ^^^^^^^^^^^\n  File \"/tmp/mat-Mut18-openmc-runner-batches-too-few-pf9bkk9w/SUT/openmc/openmc_runner.py\", line 226, in solve\n    _build_mgxs_library(case, library_path)\n  File \"/tmp/mat-Mut18-openmc-runner-batches-too-few-pf9bkk9w/SUT/openmc/openmc_runner.py\", line 103, in _build_mgxs_library\n    raise RuntimeError(\nRuntimeError: OpenMC PR #3712 (add_temperature \u2192 None) triggered on fuel: object of type 'NoneType' has no len()\n",
+      "outcome": "error"
+    },
+    {
+      "scenario_id": "openmc-pincell-moderator-temperature-via-borated-water",
+      "status": "error",
+      "error": "Subprocess failed (exit 1): /opt/openmc-venv/bin/python /tmp/mat-Mut18-openmc-runner-batches-too-few-pf9bkk9w/SUT/openmc/openmc_runner.py --input /tmp/mat-Mut18-openmc-runner-batches-too-few-pf9bkk9w/flw-in-openmc-pincell-moderator-temperature-via-borated-water.json --output /tmp/mat-Mut18-openmc-runner-batches-too-few-pf9bkk9w/flw-out-openmc-pincell-moderator-temperature-via-borated-water.json\nstdout:\n\nstderr:\nTraceback (most recent call last):\n  File \"/tmp/mat-Mut18-openmc-runner-batches-too-few-pf9bkk9w/SUT/openmc/openmc_runner.py\", line 307, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/tmp/mat-Mut18-openmc-runner-batches-too-few-pf9bkk9w/SUT/openmc/openmc_runner.py\", line 300, in main\n    result = solve(case)\n             ^^^^^^^^^^^\n  File \"/tmp/mat-Mut18-openmc-runner-batches-too-few-pf9bkk9w/SUT/openmc/openmc_runner.py\", line 226, in solve\n    _build_mgxs_library(case, library_path)\n  File \"/tmp/mat-Mut18-openmc-runner-batches-too-few-pf9bkk9w/SUT/openmc/openmc_runner.py\", line 127, in _build_mgxs_library\n    raise RuntimeError(\nRuntimeError: OpenMC PR #3662 (borated_water drops temperature when density set) triggered on moderator: requested T=900.0, got mat.temperature=None\n",
+      "outcome": "error"
     }
   ]
 }

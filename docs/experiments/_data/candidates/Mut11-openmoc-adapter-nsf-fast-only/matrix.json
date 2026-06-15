@@ -12,6 +12,26 @@
       "ratio": 0.46225757468573975,
       "assertion": "greater",
       "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          65.70623016357422,
+          22.726083755493164
+        ],
+        "moderator": [
+          65.40027618408203,
+          22.929122924804688
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          50.73627471923828,
+          22.30085563659668
+        ],
+        "moderator": [
+          49.7328987121582,
+          22.59068489074707
+        ]
+      },
       "assertion_passed": false,
       "outcome": "detected"
     },
@@ -69,6 +89,62 @@
     },
     {
       "scenario_id": "openmc-pincell-particles-refine",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-rotate-90",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-rotate-90",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-mirror-x",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-mirror-x",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-mirror-y",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-mirror-y",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-mirror-x-tally",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-mirror-x-tally",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-mirror-y-tally",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-mirror-y-tally",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-fuel-temperature",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-temperature",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-temperature-via-add-temperature",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-moderator-temperature-via-borated-water",
       "status": "not-affected"
     }
   ]

@@ -12,6 +12,26 @@
       "ratio": 0.9999999452099345,
       "assertion": "greater",
       "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          7.725125789642334,
+          25.097196578979492
+        ],
+        "moderator": [
+          7.754446029663086,
+          25.700334548950195
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          5.150087356567383,
+          16.731462478637695
+        ],
+        "moderator": [
+          5.1696343421936035,
+          17.133554458618164
+        ]
+      },
       "assertion_passed": false,
       "outcome": "detected"
     },
@@ -29,6 +49,26 @@
       "ratio": 0.8594205096416971,
       "assertion": "less",
       "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          7.725125789642334,
+          25.097196578979492
+        ],
+        "moderator": [
+          7.754446029663086,
+          25.700334548950195
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          18.98318099975586,
+          24.636804580688477
+        ],
+        "moderator": [
+          19.07010841369629,
+          25.511043548583984
+        ]
+      },
       "assertion_passed": true,
       "outcome": "missed"
     },
@@ -46,6 +86,26 @@
       "ratio": 1.0,
       "assertion": "approx",
       "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          7.725125789642334,
+          25.097196578979492
+        ],
+        "moderator": [
+          7.754446029663086,
+          25.700334548950195
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          25.097196578979492,
+          7.725125789642334
+        ],
+        "moderator": [
+          25.700334548950195,
+          7.754446029663086
+        ]
+      },
       "assertion_passed": true,
       "outcome": "missed"
     },
@@ -59,6 +119,26 @@
       "ratio": 0.28481573907526314,
       "assertion": "less",
       "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          7.725125789642334,
+          25.097196578979492
+        ],
+        "moderator": [
+          7.754446029663086,
+          25.700334548950195
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          52.27651596069336,
+          23.275287628173828
+        ],
+        "moderator": [
+          53.387451171875,
+          27.153484344482422
+        ]
+      },
       "assertion_passed": true,
       "outcome": "missed"
     },
@@ -72,6 +152,26 @@
       "ratio": 0.9404541488903199,
       "assertion": "less",
       "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          7.725125789642334,
+          25.097196578979492
+        ],
+        "moderator": [
+          7.754446029663086,
+          25.700334548950195
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          15.99067211151123,
+          24.759180068969727
+        ],
+        "moderator": [
+          16.051136016845703,
+          25.277055740356445
+        ]
+      },
       "assertion_passed": true,
       "outcome": "missed"
     },
@@ -97,6 +197,26 @@
       "ratio": 1.1038764687510372,
       "assertion": "less",
       "factor": 0.5,
+      "k_source_flux": {
+        "fuel": [
+          7.725125789642334,
+          25.097196578979492
+        ],
+        "moderator": [
+          7.754446029663086,
+          25.700334548950195
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          20.70105743408203,
+          24.566551208496094
+        ],
+        "moderator": [
+          20.753379821777344,
+          25.183191299438477
+        ]
+      },
       "assertion_passed": false,
       "outcome": "detected"
     },
@@ -114,6 +234,26 @@
       "ratio": 0.9724403164011964,
       "assertion": "greater",
       "factor": 1.05,
+      "k_source_flux": {
+        "fuel": [
+          7.725125789642334,
+          25.097196578979492
+        ],
+        "moderator": [
+          7.754446029663086,
+          25.700334548950195
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          7.917385101318359,
+          22.889856338500977
+        ],
+        "moderator": [
+          7.94779634475708,
+          23.451427459716797
+        ]
+      },
       "assertion_passed": false,
       "outcome": "detected"
     },
@@ -123,6 +263,236 @@
     },
     {
       "scenario_id": "openmc-pincell-particles-refine",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-rotate-90",
+      "status": "ran",
+      "k_source": 0.000599536360062164,
+      "k_followup": 0.0005995367550035521,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": 1.0000006587446808,
+      "assertion": "approx",
+      "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          9.008310317993164,
+          25.019681930541992
+        ],
+        "moderator": [
+          9.0569429397583,
+          25.646690368652344
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          9.008318901062012,
+          25.019685745239258
+        ],
+        "moderator": [
+          9.056951522827148,
+          25.646692276000977
+        ]
+      },
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmc-pincell-rotate-90",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-mirror-x",
+      "status": "ran",
+      "k_source": 0.0006017911083846773,
+      "k_followup": 0.0006017915104845893,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": 1.0000006681719062,
+      "assertion": "approx",
+      "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          6.816821575164795,
+          25.169044494628906
+        ],
+        "moderator": [
+          6.843966960906982,
+          25.80003547668457
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          6.81680965423584,
+          25.16904067993164
+        ],
+        "moderator": [
+          6.843955039978027,
+          25.800029754638672
+        ]
+      },
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmc-pincell-mirror-x",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-mirror-y",
+      "status": "ran",
+      "k_source": 0.0006017911083846773,
+      "k_followup": 0.0006017915114009241,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": 1.0000006696945853,
+      "assertion": "approx",
+      "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          6.816821575164795,
+          25.169044494628906
+        ],
+        "moderator": [
+          6.843966960906982,
+          25.80003547668457
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          6.816811561584473,
+          25.169044494628906
+        ],
+        "moderator": [
+          6.84395694732666,
+          25.80003547668457
+        ]
+      },
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmc-pincell-mirror-y",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-mirror-x-tally",
+      "status": "ran",
+      "k_source": 0.0006017911083846773,
+      "k_followup": 0.0006017915104845893,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": 1.0000006681719062,
+      "assertion": "flux-pointwise-approx",
+      "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          6.816821575164795,
+          25.169044494628906
+        ],
+        "moderator": [
+          6.843966960906982,
+          25.80003547668457
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          6.81680965423584,
+          25.16904067993164
+        ],
+        "moderator": [
+          6.843955039978027,
+          25.800029754638672
+        ]
+      },
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmc-pincell-mirror-x-tally",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-mirror-y-tally",
+      "status": "ran",
+      "k_source": 0.0006017911083846773,
+      "k_followup": 0.0006017915114009241,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": 1.0000006696945853,
+      "assertion": "flux-pointwise-approx",
+      "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          6.816821575164795,
+          25.169044494628906
+        ],
+        "moderator": [
+          6.843966960906982,
+          25.80003547668457
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          6.816811561584473,
+          25.169044494628906
+        ],
+        "moderator": [
+          6.84395694732666,
+          25.80003547668457
+        ]
+      },
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmc-pincell-mirror-y-tally",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmoc-pincell-fuel-temperature",
+      "status": "ran",
+      "k_source": 0.0005913922197768902,
+      "k_followup": 0.0005868310812680667,
+      "k_source_std": 0.0,
+      "k_followup_std": 0.0,
+      "ratio": 0.9922874560126201,
+      "assertion": "less",
+      "factor": 1.5,
+      "k_source_flux": {
+        "fuel": [
+          7.725125789642334,
+          25.097196578979492
+        ],
+        "moderator": [
+          7.754446029663086,
+          25.700334548950195
+        ]
+      },
+      "k_followup_flux": {
+        "fuel": [
+          8.112149238586426,
+          25.081369400024414
+        ],
+        "moderator": [
+          8.143189430236816,
+          25.696195602416992
+        ]
+      },
+      "assertion_passed": true,
+      "outcome": "missed"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-temperature",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-temperature-via-add-temperature",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-moderator-temperature-via-borated-water",
       "status": "not-affected"
     }
   ]

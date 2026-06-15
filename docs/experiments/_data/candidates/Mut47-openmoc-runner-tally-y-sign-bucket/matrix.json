@@ -486,6 +486,14 @@
     {
       "scenario_id": "openmc-pincell-fuel-temperature",
       "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-fuel-temperature-via-add-temperature",
+      "status": "not-affected"
+    },
+    {
+      "scenario_id": "openmc-pincell-moderator-temperature-via-borated-water",
+      "status": "not-affected"
     }
   ]
 }

@@ -1,36 +1,6 @@
 {
   "mutation_id": "Mut02-openmoc-runner-sigt-from-siga",
-  "predicted_classification": "semantic",
-  "target_file": "SUT/openmoc/openmoc_runner.py",
   "solver": "openmoc",
-  "patched_source": {
-    "openmoc": {
-      "solver": "openmoc",
-      "reps": [
-        Infinity
-      ],
-      "stds": [
-        0.0
-      ],
-      "mean": Infinity,
-      "max_std": 0.0
-    },
-    "openmc": null
-  },
-  "baseline": {
-    "openmoc": 1.1330583459569659,
-    "openmc": 1.1245000140252948
-  },
-  "classifications_per_solver": {
-    "openmoc": {
-      "abs_delta": Infinity,
-      "rel_delta": Infinity,
-      "mc_threshold_3sigma": 0.0,
-      "rel_threshold": 0.005665291729784829,
-      "threshold": 0.005665291729784829,
-      "semantic": true
-    }
-  },
-  "classification": "semantic",
-  "threshold_rel": 0.005
+  "error": "Patch precondition failed: expected exactly one occurrence of 'm.setSigmaT(mat[\"sigma_t\"])', found 0",
+  "classification": "error"
 }
