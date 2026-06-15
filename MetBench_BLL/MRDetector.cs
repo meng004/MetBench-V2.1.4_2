@@ -11,17 +11,6 @@
             _resultParser = resultParser;
         }
 
-        //public async Task< ParsedResult> Recognize(TargetProgram target)
-        //{
-        //    // 1. 执行算法
-        //    var detectionResult = _algorithms.Execute(target);
-        //    mrCsvPath = detectionResult.Result["MRCsvPath"] as string;
-        //    //2.解析结果
-        //    var parsedResults = _resultParser.Parse(detectionResult);
-        //    //3.生成最终报告
-        //    return parsedResults;
-        //    //return null;
-        //}
         public async Task<ParsedResult> Recognize(TargetProgram target)
         {
             // 1. 异步执行算法
