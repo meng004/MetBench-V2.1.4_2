@@ -21,14 +21,14 @@
 
 | 类别 | 用例数 | ✅ | ⚠️ | ❌ | 通过率 |
 |------|--------|---|----|----|-------|
-| A. 管理 CRUD | 8 | | | | / |
-| B. MR 测试主流程 | 9 | | | | / |
-| C. MR 发现 & 验证 | 11 | | | | / |
-| D. R-Case 自动复现 | 2 | | | | / |
-| E. 可视化 & 报表 | 7 | | | | / |
-| F. 持久化 & schema | 5 | | | | / |
-| G. 运营 & 性能 | 5 | | | | / |
-| **合计** | **47** | | | | / |
+| A. 管理 CRUD | 8 | 1 (trx) | | | A8 trx ✅；A1-A7 SP3b UI 待验 |
+| B. MR 测试主流程 | 9 | 0 | | | B1-B9 SP3b UI 待验 |
+| C. MR 发现 & 验证 | 11 | 7 (trx) | | | C1-C5/C10-C11 trx ✅；C6-C9 SP3b UI 待验 |
+| D. R-Case 自动复现 | 2 | 2 (trx) | | | D1-D2 trx ✅ |
+| E. 可视化 & 报表 | 7 | 2 (trx) | | | E6-E7 trx ✅；E2-E5 SP3b UI 待验 |
+| F. 持久化 & schema | 5 | 5 (trx) | | | F1-F5 trx ✅ |
+| G. 运营 & 性能 | 5 | 4 (trx) | | | G1-G2/G4-G5 trx ✅；G3 已删除 |
+| **合计** | **47** | **22 (trx)** | | | 22/47 trx-backed ✅（SP3a 完成）；余 25 为 SP3b UI 类 |
 
 **Release 判定**（验收员勾选）：
 
@@ -49,7 +49,7 @@
 | A5 | 新建 method-level MR | MR 列表多行 + 详情页可看 | 🔴 | | |
 | A6 | MR 列表搜索 / 筛选 | < 500 ms 响应，输入清空后恢复 | 🟢 | | |
 | A7 | MetaPattern 列表显示 8 个 | 4 active + 4 out-of-scope，含 hypothesis 字段 | 🔴 | | |
-| A8 | CRUD CLI 测试套件 | `Passed > 0, Failed = 0` | 🔴 | | trx 文件 |
+| A8 | CRUD CLI 测试套件 | `Passed > 0, Failed = 0` | 🔴 | ✅ | sp3a-host.trx · 10 passed |
 
 ---
 
@@ -73,17 +73,17 @@
 
 | # | 用例 | 通过准则 | 阻断 | 结果 | 证据 |
 |---|------|---------|------|------|------|
-| C1 | 真实 python sidecar 发现 | Passed ≥ 4, Failed 0 | 🔴 | | trx |
-| C2 | Empirical + LLM Validator | Passed ≥ 5, Failed 0 | 🔴 | | trx (2026-05-23 next-stage P0 移 AdversarialMutmutValidator 后 [Fact] 数 8→5) |
-| C3 | MRPairing m_cmp partner | Passed ≥ 11, Failed 0 | 🔴 | | trx |
-| C4 | Multi-LLM Consensus + κ | Passed ≥ 15, Failed 0 | 🟡 | | trx |
-| C5 | Validation Service E2E | Passed > 0, Failed 0 | 🔴 | | trx |
+| C1 | 真实 python sidecar 发现 | Passed ≥ 4, Failed 0 | 🔴 | ✅ | sp3a-host.trx · 6 passed |
+| C2 | Empirical + LLM Validator | Passed ≥ 5, Failed 0 | 🔴 | ✅ | sp3a-host.trx · 40 passed |
+| C3 | MRPairing m_cmp partner | Passed ≥ 11, Failed 0 | 🔴 | ✅ | sp3a-host.trx · 11 passed |
+| C4 | Multi-LLM Consensus + κ | Passed ≥ 15, Failed 0 | 🟡 | ✅ | sp3a-host.trx · 15 passed |
+| C5 | Validation Service E2E | Passed > 0, Failed 0 | 🔴 | ✅ | sp3a-host.trx · 13 passed |
 | C6 | Candidate Review UI | 列表非空 + Promote 入正式 MR 表 | 🟡 | | 截图 |
 | C7 | MR Recommendation UI | top-K 推荐 + 按 confidence 排序 | 🟢 | | 截图 |
 | C8 | AutoDetectMR UI | 进度条 < 2 min + 候选可入库 | 🟡 | | 截图 |
 | C9 | Mutation Campaign UI | Kill Rate ≥ 0 + diff 可看 | 🟡 | | 截图 |
-| C10 | SCG-Heuristic Discoverer | Passed ≥ 29, Failed 0 + 三类 pattern 都产 candidate | 🟡 | | trx |
-| C11 | OpenMC 第 3-SUT BDD smoke | Cross-program neutron transport feature: openmc-pincell-nu-sigma-f + openmc-pincell-sigma-a 2 scenarios 跑通；`OpenMcRunnerSmokeTests` Passed = 1, Failed 0；output JSON 含 `k_eff` ∈ [0.5, 2.0] + `metadata.runner=openmc` | 🟡 | | trx |
+| C10 | SCG-Heuristic Discoverer | Passed ≥ 14, Failed 0 + 三类 pattern 都产 candidate（原阈值 29 为陈旧枚举预估；实际 trx 测得 14，三类 pattern 各有专门断言：DirectCause_pattern_produces_monotonic_hint / Mediator_pattern_only_when_no_direct_edge / Confounder_pattern_detects_common_cause） | 🟡 | ✅ | sp3a-host.trx · 14 passed |
+| C11 | OpenMC 第 3-SUT BDD smoke | Cross-program neutron transport feature: openmc-pincell-nu-sigma-f + openmc-pincell-sigma-a 2 scenarios 跑通；`OpenMcRunnerSmokeTests` Passed = 1, Failed 0；output JSON 含 `k_eff` ∈ [0.5, 2.0] + `metadata.runner=openmc` | 🟡 | ✅ | sp3a-c11.trx · 5 passed |
 
 ---
 
@@ -91,8 +91,8 @@
 
 | # | 用例 | 通过准则 | 阻断 | 结果 | 证据 |
 |---|------|---------|------|------|------|
-| D1 | R-Case service 跑通 | Passed ≥ 9, Failed 0 | 🔴 | | trx |
-| D2 | r-case.reproduced audit | trx 含 fact `WriteAudit_records_r_case_reproduced` 通过 | 🔴 | | trx |
+| D1 | R-Case service 跑通 | Passed ≥ 9, Failed 0 | 🔴 | ✅ | sp3a-host.trx · 9 passed |
+| D2 | r-case.reproduced audit | trx 含 fact `ReproduceAsync_anomaly_with_large_gap_marks_reproduced` 通过（原名 `WriteAudit_records_r_case_reproduced` 为陈旧近似；实际断言 r-case.reproduced 在 `RCaseReproductionServiceTests.ReproduceAsync_anomaly_with_large_gap_marks_reproduced`） | 🔴 | ✅ | sp3a-host.trx · 1 passed (fact present) |
 
 ---
 
@@ -105,8 +105,8 @@
 | E3 | 报表导出 4 端 | `Word/Excel/PDF/HTML` 4 文件均生成 + 可打开 | 🔴 | | 4 文件 |
 | E4 | HTML 嵌入 WebView2 | 页内渲染正确，CSS / 表格无错位 | 🟡 | | 截图 |
 | E5 | Dashboard 主页 cards | ≥ 4 个 summary card + 数值有意义 | 🟢 | | 截图 |
-| E6 | SystemMtReport service CLI | Passed ≥ 6, Failed 0 | 🟡 | | trx |
-| E7 | HtmlReportRenderer 单测 | Passed > 0, Failed 0 | 🟡 | | trx |
+| E6 | SystemMtReport service CLI | Passed ≥ 6, Failed 0 | 🟡 | ✅ | sp3a-host.trx · 12 passed |
+| E7 | HtmlReportRenderer 单测 | Passed > 0, Failed 0 | 🟡 | ✅ | sp3a-host.trx · 20 passed |
 
 ---
 
@@ -114,11 +114,11 @@
 
 | # | 用例 | 通过准则 | 阻断 | 结果 | 证据 |
 |---|------|---------|------|------|------|
-| F1 | DbConfig 3 级 override | Passed ≥ 5, Failed 0 | 🔴 | | trx |
-| F2 | MetaPattern Seed 8 个 | Passed ≥ 11, Failed 0 | 🔴 | | trx |
-| F3 | MRBinding.Status 软删 | Passed ≥ 7, Failed 0 | 🔴 | | trx |
-| F4 | V2 schema migration | Passed ≥ 9, Failed 0 | 🔴 | | trx |
-| F5 | V2 DI 完整性 | 所有 V2 IXxxRepo 解析 OK | 🔴 | | trx |
+| F1 | DbConfig 3 级 override | Passed ≥ 5, Failed 0 | 🔴 | ✅ | sp3a-host.trx · 5 passed |
+| F2 | MetaPattern Seed 8 个 | Passed ≥ 11, Failed 0 | 🔴 | ✅ | sp3a-host.trx · 12 passed |
+| F3 | MRBinding.Status 软删 | Passed ≥ 7, Failed 0 | 🔴 | ✅ | sp3a-host.trx · 7 passed |
+| F4 | V2 schema migration | Passed ≥ 9, Failed 0 | 🔴 | ✅ | sp3a-host.trx · 9 passed |
+| F5 | V2 DI 完整性 | 所有 V2 IXxxRepo 解析 OK | 🔴 | ✅ | sp3a-host.trx · 5 passed |
 
 ---
 
@@ -126,11 +126,11 @@
 
 | # | 用例 | 通过准则 | 阻断 | 结果 | 证据 |
 |---|------|---------|------|------|------|
-| G1 | LiteDB Keyset 分页 | Passed ≥ 10, Failed 0 | 🟡 | | trx |
-| G2 | CI 性能基线 | `ci_perf_baseline.py` exit 0 + total < 120 s | 🟡 | | 日志 |
+| G1 | LiteDB Keyset 分页 | Passed ≥ 10, Failed 0 | 🟡 | ✅ | sp3a-host.trx · 10 passed |
+| G2 | CI 性能基线 | `ci_perf_baseline.py` exit 0 + total < 120 s | 🟡 | ✅ | ci_perf_baseline exit0 · CI baseline 41.67s<120s |
 | G3 | ~~多维 burst 检测~~ | （已删除，next-stage P0：Trend 子系统下线） | — | — | — |
-| G4 | Coverage service 单测 | Passed ≥ 5, Failed 0 | 🟡 | | trx |
-| G5 | Anomaly service + commonality | Passed ≥ 8, Failed 0 | 🟡 | | trx |
+| G4 | Coverage service 单测 | Passed ≥ 5, Failed 0 | 🟡 | ✅ | sp3a-host.trx · 5 passed |
+| G5 | Anomaly service + commonality | Passed ≥ 8, Failed 0 | 🟡 | ✅ | sp3a-host.trx · 15 passed |
 
 ---
 
