@@ -80,7 +80,7 @@
 | C5 | Validation Service E2E | Passed > 0, Failed 0 | 🔴 | ✅ | sp3a-host.trx · 13 passed |
 | C6 | Candidate Review UI | 列表非空 + Promote 入正式 MR 表 | 🟡 | ⚠️ | sp3b: sweepDisp-C6 页+Empirical/TheoreticalLLM 校验勾选+候选选择器渲染；候选需先跑发现 |
 | C7 | MR Recommendation UI | top-K 推荐 + 按 confidence 排序 | 🟢 | ⚠️ | sp3b: sweepDisp-C7 页渲染；推荐网格 0 行(需数据) |
-| C8 | AutoDetectMR UI | 进度条 < 2 min + 候选可入库 | 🟡 | ⏳ | sp3b 未执行：上传+确认框流程，工具已支持 |
+| C8 | AutoDetectMR UI | 进度条 < 2 min + 候选可入库 | 🟡 | ⏳ deferred | UI 流程（上传确认框 + OpenFileDialog + 进度条 + StoreMR 入库确认）与检测脚本 MetBench_Python/AutoMRDetector/auto_mr_detector-3.py 均在仓库；真跑通依赖**遗留方法级 AutoMR python 栈**（AutoMRAlgorithm.RunPythonScriptAsync 经 FindFirstPythonInPath 取 PATH 含 "Python" 目录 + sympy/numpy），当前运行时缺 sympy → deferred（与 SP1-SP5 system-MT 运行时独立）。见 SP5 报告 §4 #8 |
 | C9 | Mutation Campaign UI | Kill Rate ≥ 0 + diff 可看 | 🟡 | ⚠️ | sp3b: caseC9/C9kill Seed 填充 5 变异体+MR 绑定(checkall 证实**均已自动勾选**)+Start campaign 经 invokename 真执行(python 在 PATH)；kill-rate 结果网格仍 0 行——与成熟度计划记录的「T6 launcher-backed cellRunner 为 deferred 原型(P5 #329 显式标注 Prototype)」一致，即活动 UI 通但 cellRunner 不真跑变异体 |
 | C10 | SCG-Heuristic Discoverer | Passed ≥ 14, Failed 0 + 三类 pattern 都产 candidate（原阈值 29 为陈旧枚举预估；实际 trx 测得 14，三类 pattern 各有专门断言：DirectCause_pattern_produces_monotonic_hint / Mediator_pattern_only_when_no_direct_edge / Confounder_pattern_detects_common_cause） | 🟡 | ✅ | sp3a-host.trx · 14 passed |
 | C11 | OpenMC 第 3-SUT BDD smoke | Cross-program neutron transport feature: openmc-pincell-nu-sigma-f + openmc-pincell-sigma-a 2 scenarios 跑通；`OpenMcRunnerSmokeTests` Passed = 1, Failed 0；output JSON 含 `k_eff` ∈ [0.5, 2.0] + `metadata.runner=openmc` | 🟡 | ✅ | sp3a-c11.trx · 5 passed |
