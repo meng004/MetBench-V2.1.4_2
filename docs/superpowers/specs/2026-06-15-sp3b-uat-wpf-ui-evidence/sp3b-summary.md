@@ -83,5 +83,16 @@ The core T0 System-MT flow (B2–B5) passes end-to-end with a real metamorphic c
 ## Test data left behind
 `UAT-SP3b-App` (Application) and likely `UAT-SP3b-Domain` (Domain) were created in `MetBench_DataBase/MR.Litedb` during A1/A4. Harmless test rows; imported SUTs re-seed on launch.
 
+## Ultra-review outcome (max-effort, multi-angle)
+
+Ran a max-effort review of the PR diff (`origin/main...HEAD`) via two parallel finder agents.
+
+- **Production WPF fixes (5): all verified correct, no bugs.** `SymbolRegular.Home24` confirmed a real Wpf.Ui enum member (reflection); DashboardPage DI-registered; landing page stays `MRDisplayPage` (nav-order change is safe); resx well-formed, no duplicate keys, no en/zh asymmetry; csproj `Link` matches the runtime path; delete-confirm edit is surgical (Modify's string untouched).
+- **FlaUI acceptance tool (8 findings, all false-PASS-risk hardening).** Highest-impact fixed in this PR + re-verified:
+  - **L1009** — empty/blank `--steps` reported SUCCESS doing nothing → now refuses (exit 2). Verified (`regEmpty`).
+  - **L1585** — `NavigateGeneric` returned `true` on unconfirmed navigation (false-PASS on wrong page) → now fail-safe: unconfirmed nav records a failure (`return false`). Verified the confirmed-nav path still passes (`regA7`: breadcrumb-confirmed nav + assert → SUCCESS), so prior verdicts (all logged confirmed nav) remain valid.
+  - **L1248** — `assertgridmin`/`gridrows` count realized (viewport) `DataItem`s on virtualized WPF DataGrids, not the logical row count; the SP3b row counts (e.g. 5 apps = page-1 realized, 2 anomalies = small data fully realized) reflect rendered rows. Documented limitation; small-data asserts here were unaffected.
+  - Lower-impact, not triggered in any SP3b run (noted for future hardening): `DriveOpenFileDialog` clicks Open even if the filename ValuePattern was null (L1483; empirically the Edit had ValuePattern and the upload worked); `checkall` legacy-fallback `DoDefaultAction` could untoggle an already-on legacy checkbox (L1155; the TogglePattern branch used by mutation checkboxes is correct); `setidx`/`checkall` fall back to the whole window if the content frame is missing (L1130); malformed `sleep` arg silently no-ops (L1082). The `cls=="Window"` main-shell guard (L1409) is **refuted** by runtime evidence — the `wins` dumps show the main window's ClassName IS `Window`, and all dialog/openfile drives worked.
+
 ## Conclusion
 SP3b verifies the WPF navigation/render layer for all 25 cases and the core CRUD-create + System-MT execution + coverage + metapatterns flows with real evidence, and records 5 actionable findings. It is a **partial** UAT: data-dependent flows (anomalies/discovery/mutation/report/method-MT) need their upstream operation run to show content. The extended `tools/uia-acceptance` driver makes completing them straightforward.

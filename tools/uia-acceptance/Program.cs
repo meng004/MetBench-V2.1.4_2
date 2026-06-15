@@ -970,6 +970,11 @@ internal static class Program
         Console.WriteLine($"[steps] spec={stepsSpec}");
 
         var steps = stepsSpec.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (steps.Length == 0)
+        {
+            Console.Error.WriteLine("ERROR: --steps produced zero steps (empty/blank spec); refusing to report success");
+            return 2;
+        }
         var failures = new List<string>();
 
         var app = LaunchApp(exePath);
@@ -1064,7 +1069,12 @@ internal static class Program
                 return ok;
             }
             case "nav":
-                return NavigateGeneric(window, automation, arg);
+                if (!NavigateGeneric(window, automation, arg))
+                {
+                    failures.Add($"nav '{arg}' could not be confirmed (breadcrumb never matched)");
+                    return false;
+                }
+                return true;
 
             case "waitid":
             {
@@ -1582,10 +1592,12 @@ internal static class Program
             if (WaitNavigated(Navigated, 4000)) { Console.WriteLine($"[nav] posted {name} navigated"); return true; }
         }
 
-        // If breadcrumb check is unreliable for this page, accept after settle.
-        Console.Error.WriteLine($"[nav] WARN: could not confirm navigation to '{navName}' via breadcrumb; continuing");
-        Thread.Sleep(1500);
-        return true;
+        // Fail-safe for acceptance: if navigation cannot be confirmed via the breadcrumb
+        // after every pattern + posted-key attempt, treat it as a failure rather than
+        // silently proceeding on the wrong page (which would risk a false PASS). An
+        // acceptance tool should fail conservatively, never pass on an unverified nav.
+        Console.Error.WriteLine($"[nav] ERROR: could not confirm navigation to '{navName}' via breadcrumb");
+        return false;
     }
 
     private static bool WaitNavigated(Func<bool> navigated, int timeoutMs)
