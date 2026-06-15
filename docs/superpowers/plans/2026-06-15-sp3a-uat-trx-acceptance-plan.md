@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**状态**: 待执行
+**状态**: 完成（22 trx 用例全 ✅，2026-06-15）
 **Spec**: `docs/superpowers/specs/2026-06-15-sp3a-uat-trx-acceptance-design.md`
 **分支**: `sp3a-uat-trx-acceptance`（已存在，spec 已提交）
 
