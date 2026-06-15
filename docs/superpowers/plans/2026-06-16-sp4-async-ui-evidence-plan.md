@@ -1,6 +1,6 @@
 # SP4 每 SUT/MR WPF 异步页 UI 证据 Implementation Plan
 
-**状态**: 进行中
+**状态**: 完成待 PR —— 38 MR 异步页全跑：**33 job-Succeeded（UI 证据，含 3 个 openmc 作业 Succeeded 但 MR 违例=异常）+ 5 job-Failed**（openmoc×3 host 无运行时=容器侧、SP1 已覆盖；csv-roundtrip/projectile×2 = 异步页 JSON 解析发现）。证据 `docs/superpowers/specs/2026-06-16-sp4-async-ui-evidence/`（sp4-results.csv + 38 终态截图 + sp4-summary.md）。
 **Spec 锚**: `docs/superpowers/specs/2026-06-13-sp1-all-real-runtime-acceptance-design.md` §SP4（"每 SUT/MR WPF 异步页 UI 证据"）
 **分支**: `sp4-async-ui-evidence`
 **前序**: SP1(#364)/SP2(#365)/SP3a(#366)/SP3b(#367) 已合并。
