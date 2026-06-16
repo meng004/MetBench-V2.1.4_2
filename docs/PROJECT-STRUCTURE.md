@@ -144,11 +144,11 @@ SUT 接入到框架的 hook：
 | **ColdStart** | — | `ColdStart/` | 1 | 1 |
 
 **测试总数对照**：
-- 当前 release-readiness 绿基线：`docs/superpowers/specs/2026-05-30-t0-t5-vm-release-smoke/vm-summary.md` 记录 **22/22** required filtered commands PASS；`dotnet test MetBench_SystemMT.Tests` full suite **1558 pass / 0 fail / 12 env-gated OpenMOC/OpenMC skips**；Windows `dotnet build MetBench.sln` **0 errors**；T0-T5 screenshot matrix **21/21 PASS**。
+- 当前 release-readiness 绿基线：`docs/superpowers/specs/2026-05-30-t0-t5-vm-release-smoke/vm-summary.md` 记录 **22/22** required filtered commands PASS；`dotnet test MetBench_SystemMT.Tests` full suite **1558 pass / 0 fail / 12 env-gated OpenMOC/OpenMC skips**；Windows `dotnet build MetBench.sln` **0 errors**，但 WPF / legacy 侧仍有 nullable、obsolete、StyleCop 等 warning debt；T0-T5 screenshot matrix **21/21 PASS**。
 - 当前 client i18n 绿基线：`docs/superpowers/specs/2026-05-30-client-i18n-vm-evidence/vm-summary.md` 记录 `MetBench_SystemMT.Tests` ClientI18n **10/10 PASS**、`MetBench_Client.Tests` ClientI18n **3/3 PASS**、base UIA screenshots **9/9 PASS**；后续 `vm-status.jsonl` 追加 full-page bilingual screenshots for System-MT/catalog/legacy/function pages and runtime status strings.
 - v1.2 迁移 / gate 当前真相层：**44 MR + 4 Property** 已进入 typed catalog 工件、golden fixtures 与 coverage gate
 - 历史参考基线：`453e369`（PR #160 docs gate）= 1196 pass；`2f997dd`（PR #161 PR-B differential runner）= 1196 pass；`66eb297`（PR #162 PR-A I/O adapter）= 1209 pass。更早：`5d4dcc7`（PR #119）= **1048 pass / 0 fail / 8 skip / 1056 total**；`e839214`（PR #110）= **1043 pass / 0 fail / 0 skip**（PR-B/C/D 前）；`373bb59` = **961 / 0 / 8 / 969**；`763e067`（PR #93）= **965 / 0 / 0**
-- 当前 Windows WPF 证据：T0-T5 release smoke 和 client i18n evidence 均记录 `dotnet build MetBench.sln` / WPF build **0 errors**，并由 `tools/smokeshot/` 产出 UIA/PrintWindow 截图证据。
+- 当前 Windows WPF 证据：T0-T5 release smoke 和 client i18n evidence 均记录 `dotnet build MetBench.sln` / WPF build **0 errors**；warning debt 不等于完成清零，仍需分批治理；UIA/PrintWindow 截图证据由 `tools/smokeshot/` 产出。
 - UAT BDD filter（`FullyQualifiedName~UAT`）：**48 Pass / 0 Skip**
 - BDD smoke（Features filter）：**30 Pass / 1 Skip**
 
@@ -174,7 +174,7 @@ UAT 是测试 **MetBench 框架本身**功能，跟 SUT MR 测试是两个层面
 - 📘 [`docs/uat/test-procedures.md`](uat/test-procedures.md)：47 用例三段式手册（初始条件 / 操作步骤 / 断言）
 - 🧪 [`MetBench_SystemMT.Tests/Features/Uat/UC-*.feature`](../MetBench_SystemMT.Tests/Features/Uat/)：21 个 BDD wrapper（每用例 1 scenario，反射验证 ≥ N facts + trx baseline 检查）
 - 🪟 [`docs/uat/runbooks/windows-uat-round-1.md`](uat/runbooks/windows-uat-round-1.md)：Windows 端 **21 个 WPF UI 用例**（A1-A7 + B1-B9 + E1-E5）1 轮操作手册；其余 5 个 CLI 用例（A8 / D1 / D2 / E6 / E7）已由 cloud baseline 覆盖
-- 📊 [`docs/uat/reports/baseline-2026-05-17/`](uat/reports/baseline-2026-05-17/)：当前基线（521/521，可作 release-v2.1.0 reference）
+- 📊 [`docs/uat/reports/baseline-2026-05-17/`](uat/reports/baseline-2026-05-17/)：release-v2.1.0 historical reference；当前绿基线以 [`docs/status/current.md`](status/current.md) 为准
 - 🗓 [`docs/uat/reports/dashboard.md`](uat/reports/dashboard.md)：历史轮次趋势
 
 ---

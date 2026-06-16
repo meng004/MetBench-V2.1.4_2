@@ -158,7 +158,7 @@ public sealed class SystemMtReportServiceTests : IDisposable
     }
 
     [Fact]
-    public void GenerateExecution_appends_typed_mr_verification_section_when_evidence_present()
+    public async Task GenerateExecutionAsync_appends_typed_mr_verification_section_with_diagnostics_when_evidence_present()
     {
         var (svc, fakes) = MakeServiceWithEvidence(out var evRepo);
         var execId = Guid.NewGuid();
@@ -191,7 +191,7 @@ public sealed class SystemMtReportServiceTests : IDisposable
         };
 
         var path = Path.Combine(_tmpDir, "exec-with-ev.md");
-        svc.GenerateExecution(execId, path);
+        await svc.GenerateExecutionAsync(execId, path);
         var content = File.ReadAllText(path);
 
         Assert.Contains("## Typed verification", content);
@@ -246,7 +246,7 @@ public sealed class SystemMtReportServiceTests : IDisposable
     }
 
     [Fact]
-    public void GenerateExecution_typed_skipped_evidence_shows_reason_and_omits_diagnostic()
+    public async Task GenerateExecutionAsync_typed_skipped_evidence_shows_reason_and_omits_diagnostic()
     {
         var (svc, fakes) = MakeServiceWithEvidence(out var evRepo);
         var execId = Guid.NewGuid();
@@ -272,7 +272,7 @@ public sealed class SystemMtReportServiceTests : IDisposable
         };
 
         var path = Path.Combine(_tmpDir, "exec-skipped.md");
-        svc.GenerateExecution(execId, path);
+        await svc.GenerateExecutionAsync(execId, path);
         var content = File.ReadAllText(path);
 
         Assert.Contains("Status: SkippedMissingObservable", content);
@@ -283,7 +283,7 @@ public sealed class SystemMtReportServiceTests : IDisposable
 
 
     [Fact]
-    public void GenerateExecution_appends_pair_quality_section_when_evidence_present()
+    public async Task GenerateExecutionAsync_appends_pair_quality_section_when_evidence_present()
     {
         var (svc, fakes) = MakeServiceWithEvidence(out var evRepo);
         var execId = Guid.NewGuid();
@@ -330,7 +330,7 @@ public sealed class SystemMtReportServiceTests : IDisposable
         };
 
         var path = Path.Combine(_tmpDir, "exec-pair-quality.md");
-        svc.GenerateExecution(execId, path);
+        await svc.GenerateExecutionAsync(execId, path);
         var content = File.ReadAllText(path);
 
         Assert.Contains("## Pair quality", content);
@@ -350,7 +350,7 @@ public sealed class SystemMtReportServiceTests : IDisposable
     }
 
     [Fact]
-    public void GenerateExecution_default_empty_pair_quality_keeps_legacy_no_pair_section_behavior()
+    public async Task GenerateExecutionAsync_default_empty_pair_quality_keeps_legacy_no_pair_section_behavior()
     {
         var (svc, fakes) = MakeServiceWithEvidence(out var evRepo);
         var execId = Guid.NewGuid();
@@ -368,7 +368,7 @@ public sealed class SystemMtReportServiceTests : IDisposable
         };
 
         var path = Path.Combine(_tmpDir, "exec-empty-pair-quality.md");
-        svc.GenerateExecution(execId, path);
+        await svc.GenerateExecutionAsync(execId, path);
         var content = File.ReadAllText(path);
 
         Assert.DoesNotContain("Pair quality", content);
@@ -376,7 +376,7 @@ public sealed class SystemMtReportServiceTests : IDisposable
     }
 
     [Fact]
-    public void GenerateExecution_typed_property_evidence_lists_predicates_in_order()
+    public async Task GenerateExecutionAsync_typed_property_evidence_lists_predicates_in_order()
     {
         var (svc, fakes) = MakeServiceWithEvidence(out var evRepo);
         var execId = Guid.NewGuid();
@@ -405,7 +405,7 @@ public sealed class SystemMtReportServiceTests : IDisposable
         };
 
         var path = Path.Combine(_tmpDir, "exec-prop.md");
-        svc.GenerateExecution(execId, path);
+        await svc.GenerateExecutionAsync(execId, path);
         var content = File.ReadAllText(path);
 
         Assert.Contains("Spec kind: PropertySpec", content);
