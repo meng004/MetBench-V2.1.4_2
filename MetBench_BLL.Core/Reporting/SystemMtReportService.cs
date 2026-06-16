@@ -48,8 +48,7 @@ public sealed class SystemMtReportService
     {
         var exec = _executions.Get(executionId)
             ?? throw new InvalidOperationException($"Execution {executionId} not found");
-        var evidence = _evidence?.GetByExecutionAsync(executionId).GetAwaiter().GetResult();
-        return GenerateExecution(exec, evidence, contentPath);
+        return GenerateExecution(exec, evidence: null, contentPath);
     }
 
     public async Task<ReportRenderResult> GenerateExecutionAsync(

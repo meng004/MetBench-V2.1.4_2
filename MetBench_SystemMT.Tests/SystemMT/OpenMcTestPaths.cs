@@ -30,12 +30,13 @@ internal static class OpenMcTestPaths
             process.StartInfo = new ProcessStartInfo
             {
                 FileName = OpenMcPython(),
-                Arguments = "-c \"import openmc\"",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 CreateNoWindow = true
             };
+            process.StartInfo.ArgumentList.Add("-c");
+            process.StartInfo.ArgumentList.Add("import openmc");
 
             process.Start();
 

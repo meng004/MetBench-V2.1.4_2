@@ -33,12 +33,15 @@ public sealed class PythonOutputAdapter
         process.StartInfo = new ProcessStartInfo
         {
             FileName = _pythonExecutable,
-            Arguments = $"{Quote(adapterPath)} parse-output --output-file {Quote(outputPath)}",
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             CreateNoWindow = true
         };
+        process.StartInfo.ArgumentList.Add(adapterPath);
+        process.StartInfo.ArgumentList.Add("parse-output");
+        process.StartInfo.ArgumentList.Add("--output-file");
+        process.StartInfo.ArgumentList.Add(outputPath);
 
         process.Start();
         var stdout = await process.StandardOutput.ReadToEndAsync(cancellationToken);
@@ -83,8 +86,4 @@ public sealed class PythonOutputAdapter
         }
     }
 
-    private static string Quote(string value)
-    {
-        return value.Contains(' ') ? $"\"{value}\"" : value;
-    }
 }

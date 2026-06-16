@@ -1,35 +1,53 @@
+using System.ComponentModel;
 using System.Diagnostics;
 
 namespace MetBench_BLL.SystemMT.Pipeline;
 
 /// <summary>
-/// 真实子进程执行器 — 用 <see cref="Process"/> 跑命令；带超时 + stderr / stdout 捕获。
+/// Executes a child process directly with structured argv. Shells are not used.
 /// </summary>
 public sealed class DefaultProcessExecutor : IProcessExecutor
 {
     public async Task<ProcessResult> RunAsync(
-        string command,
+        ProcessInvocation invocation,
         string workingDirectory,
         int timeoutSeconds,
         CancellationToken cancellationToken)
     {
-        // 简化：command 是单个 shell 命令字符串；用 sh -c (Linux/Mac) 或 cmd /c (Windows) 执行
-        var (fileName, arguments) = PlatformShell(command);
+        ArgumentNullException.ThrowIfNull(invocation);
+        if (string.IsNullOrWhiteSpace(invocation.FileName))
+            throw new ArgumentException("Executable file name is required.", nameof(invocation));
 
         var psi = new ProcessStartInfo
         {
-            FileName = fileName,
-            Arguments = arguments,
+            FileName = invocation.FileName,
             WorkingDirectory = workingDirectory,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
             CreateNoWindow = true,
         };
+        foreach (var argument in invocation.Arguments)
+        {
+            psi.ArgumentList.Add(argument);
+        }
 
         var sw = Stopwatch.StartNew();
         using var process = new Process { StartInfo = psi };
-        process.Start();
+        try
+        {
+            process.Start();
+        }
+        catch (Exception ex) when (ex is Win32Exception or InvalidOperationException)
+        {
+            sw.Stop();
+            return new ProcessResult(
+                ExitCode: -1,
+                Stdout: string.Empty,
+                Stderr: ex.ToString(),
+                Elapsed: sw.Elapsed,
+                TimedOut: false);
+        }
 
         var stdoutTask = process.StandardOutput.ReadToEndAsync();
         var stderrTask = process.StandardError.ReadToEndAsync();
@@ -37,7 +55,7 @@ public sealed class DefaultProcessExecutor : IProcessExecutor
         using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeoutCts.CancelAfter(TimeSpan.FromSeconds(timeoutSeconds));
 
-        bool timedOut = false;
+        var timedOut = false;
         try
         {
             await process.WaitForExitAsync(timeoutCts.Token).ConfigureAwait(false);
@@ -101,23 +119,5 @@ public sealed class DefaultProcessExecutor : IProcessExecutor
         {
             return string.Empty;
         }
-    }
-
-    private static (string FileName, string Arguments) PlatformShell(string command)
-    {
-        if (OperatingSystem.IsWindows())
-        {
-            // cmd.exe /c with a command containing multiple quoted tokens
-            // (e.g. `"python" "C:\path\script.py" parse --input "C:\path\in.json"`)
-            // triggers cmd's documented rule-2 quote-stripping (`cmd /?`):
-            // > if more than 2 quotes are present, strip the leading and trailing
-            // > quote chars from the command, leaving the middle intact.
-            // That mangles the command into `python" "C:\path\script.py" ...` and
-            // cmd prints `系统找不到指定的路径` on stderr. Pass `/s /c "<command>"`
-            // so cmd treats the entire command as one quoted block and only strips
-            // the outer pair we explicitly add.
-            return ("cmd.exe", $"/s /c \"{command}\"");
-        }
-        return ("/bin/sh", $"-c \"{command.Replace("\"", "\\\"")}\"");
     }
 }

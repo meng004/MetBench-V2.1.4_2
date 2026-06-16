@@ -42,7 +42,7 @@ Responsibility boundaries:
 | **1D heat equation** (finite-difference solver) | Validates abstraction transfers beyond neutron transport | `ScaleAmplitude` (linearity) | Python (stdlib only) |
 | **Projectile** | Closed-loop demo SUT | trivial range MR | Python |
 
-详见 [`docs/PROJECT-STRUCTURE.md`](docs/PROJECT-STRUCTURE.md) §2 §3（含 4 SUT 单元 + 系统级 BDD 测试矩阵 + Launcher MR 注册映射）。
+详见 [`docs/PROJECT-STRUCTURE.md`](docs/PROJECT-STRUCTURE.md) §2 §3（含当前 SUT inventory、系统级 BDD 测试矩阵与 Launcher MR 注册映射）。
 
 ## Build and run tests
 
@@ -67,10 +67,11 @@ source build for OpenMC; SWIG build for OpenMOC).
 
 Every push to `main` and every pull request runs
 `dotnet test MetBench_SystemMT.Tests` on `ubuntu-24.04` via
-`.github/workflows/dotnet-test.yml`. OpenMOC + OpenMC are not built in CI;
-their tests skip cleanly there. Cold runtime is around 35 seconds for the
-full 521 tests (cumulative 73 s; budget 120 s gated by
-`tools/ci_perf_baseline.py`).
+`.github/workflows/dotnet-test.yml`. OpenMOC, OpenMC, SciPy, and other
+environment-sensitive paths skip cleanly when the matching runtime is not
+configured. The current pass / skip baseline is maintained in the
+[current status ledger](docs/status/current.md), while CI also enforces a
+120-second performance budget through `tools/ci_perf_baseline.py`.
 
 A second workflow `.github/workflows/f11-monthly-monitor.yml` runs on a
 monthly cron (`17 3 1 * *` UTC) to poll OpenMOC upstream for adjoint-flux
@@ -93,7 +94,7 @@ docs/                    # design specs and staged implementation plans
 
 ## Roadmap and design docs
 
-- 📘 [`docs/PROJECT-STRUCTURE.md`](docs/PROJECT-STRUCTURE.md) — 项目结构 / 4 SUT 测试矩阵 / MetBench 框架测试覆盖 一目了然
+- 📘 [`docs/PROJECT-STRUCTURE.md`](docs/PROJECT-STRUCTURE.md) — 项目结构 / SUT 测试矩阵 / MetBench 框架测试覆盖 一目了然
 - 🧭 [`AGENTS.md`](AGENTS.md) — 分阶段 roadmap
 - 🤖 [`CLAUDE.md`](CLAUDE.md) — AI agent / 协作者非显然约定
 - 🗒 [`docs/superpowers/plans/`](docs/superpowers/plans/) — per-stage 实现计划 + RFC
@@ -106,7 +107,7 @@ Current state at the time of this README:
 - **Stage 4** (platform features, persistence, reporting, second SUT): landed
 - **Stage 5 Phase 1** (mutation-based empirical validation of the MR suite): landed
 - **Stage 6** (v2 development P1-P8 cloud-side): landed
-- **Stage 7** (W11-W12: Multi-LLM consensus 真实跑通 / OpenMC 第 3 SUT 接入 / UAT 47 用例 markdown + 21 用例 BDD / scenario→MR 命名统一 / LiteDB schema migration / F11 月度监控): landed 2026-05-17，baseline-2026-05-17 全套 **521/521 Pass**
+- **Stage 7** (W11-W12: Multi-LLM consensus 真实跑通 / OpenMC 第 3 SUT 接入 / UAT 47 用例 markdown + 21 用例 BDD / scenario→MR 命名统一 / LiteDB schema migration / F11 月度监控): landed 2026-05-17，baseline-2026-05-17 作为 release-v2.1.0 historical reference；当前绿基线见 [`docs/status/current.md`](docs/status/current.md)
 
 剩余前置：Windows 端跑过 1 轮 UAT round-1（**21 个 WPF UI 用例** A1-A7 + B1-B9 + E1-E5；其余 5 个 CLI 用例 A8/D1/D2/E6/E7 已由 cloud baseline 覆盖，参 [windows-uat-round-1.md](docs/uat/runbooks/windows-uat-round-1.md)）→ tag `release-v2.1.0`。
 

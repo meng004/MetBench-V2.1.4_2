@@ -1,23 +1,59 @@
 using MetBench_BLL.SystemMT.Pipeline;
+using MetBench_SystemMT.Tests.SystemMT;
 using Xunit;
 
 namespace MetBench_SystemMT.Tests.V2Pipeline;
 
-/// <summary>
-/// G1 smoke：确认 <see cref="DefaultProcessExecutor"/> 真正能 spawn 子进程并捕获 stdout/stderr。
-/// 跨平台：用 echo（Windows: cmd /c echo / Linux: /bin/sh -c echo）。
-/// </summary>
 public sealed class DefaultProcessExecutorSmokeTests
 {
     [Fact]
-    public async Task RunAsync_executes_echo_and_captures_stdout()
+    public async Task RunAsync_executes_argv_without_shell_interpretation()
+    {
+        var workDir = Path.Combine(
+            Path.GetTempPath(),
+            "MetBenchArgvExecutorSmoke",
+            Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(workDir);
+        try
+        {
+            var scriptPath = Path.Combine(workDir, "argv echo.py");
+            await File.WriteAllTextAsync(
+                scriptPath,
+                """
+                import sys
+                print(sys.argv[1])
+                """);
+
+            var exec = new DefaultProcessExecutor();
+            var result = await exec.RunAsync(
+                new ProcessInvocation(
+                    TestAssetPaths.PythonExecutable(),
+                    new[] { scriptPath, "literal && exit 9" }),
+                workDir,
+                timeoutSeconds: 5,
+                CancellationToken.None);
+
+            Assert.Equal(0, result.ExitCode);
+            Assert.Contains("literal && exit 9", result.Stdout);
+            Assert.False(result.TimedOut);
+        }
+        finally
+        {
+            try { Directory.Delete(workDir, recursive: true); } catch { /* test cleanup best effort */ }
+        }
+    }
+
+    [Fact]
+    public async Task RunAsync_executes_process_and_captures_stdout()
     {
         var exec = new DefaultProcessExecutor();
         var result = await exec.RunAsync(
-            command: "echo metbench-smoke",
-            workingDirectory: Path.GetTempPath(),
+            new ProcessInvocation(
+                TestAssetPaths.PythonExecutable(),
+                new[] { "-c", "print('metbench-smoke')" }),
+            Path.GetTempPath(),
             timeoutSeconds: 5,
-            cancellationToken: CancellationToken.None);
+            CancellationToken.None);
 
         Assert.Equal(0, result.ExitCode);
         Assert.Contains("metbench-smoke", result.Stdout);
@@ -25,24 +61,52 @@ public sealed class DefaultProcessExecutorSmokeTests
     }
 
     [Fact]
+    public async Task RunAsync_returns_process_result_when_executable_is_missing()
+    {
+        var exec = new DefaultProcessExecutor();
+        var missingExecutable = Path.Combine(
+            Path.GetTempPath(),
+            $"metbench-missing-{Guid.NewGuid():N}");
+
+        var result = await exec.RunAsync(
+            new ProcessInvocation(missingExecutable, Array.Empty<string>()),
+            Path.GetTempPath(),
+            timeoutSeconds: 5,
+            CancellationToken.None);
+
+        Assert.Equal(-1, result.ExitCode);
+        Assert.Empty(result.Stdout);
+        Assert.Contains(Path.GetFileName(missingExecutable), result.Stderr);
+        Assert.False(result.TimedOut);
+    }
+
+    [Fact]
     public async Task RunAsync_propagates_nonzero_exit_code()
     {
         var exec = new DefaultProcessExecutor();
-        // exit 7 is portable across cmd and /bin/sh
-        var cmd = OperatingSystem.IsWindows() ? "exit 7" : "exit 7";
-        var result = await exec.RunAsync(cmd, Path.GetTempPath(), 5, CancellationToken.None);
+        var result = await exec.RunAsync(
+            new ProcessInvocation(
+                TestAssetPaths.PythonExecutable(),
+                new[] { "-c", "import sys; sys.exit(7)" }),
+            Path.GetTempPath(),
+            timeoutSeconds: 5,
+            CancellationToken.None);
+
         Assert.Equal(7, result.ExitCode);
         Assert.False(result.TimedOut);
     }
 
     [Fact]
-    public async Task RunAsync_times_out_when_command_runs_too_long()
+    public async Task RunAsync_times_out_when_process_runs_too_long()
     {
         var exec = new DefaultProcessExecutor();
-        // sleep 5 (Linux) / timeout 5 (Windows). 给 1 秒预算，必超时。
-        var cmd = OperatingSystem.IsWindows() ? "ping -n 6 127.0.0.1 > nul" : "sleep 5";
-        var result = await exec.RunAsync(cmd, Path.GetTempPath(),
-            timeoutSeconds: 1, cancellationToken: CancellationToken.None);
+        var result = await exec.RunAsync(
+            new ProcessInvocation(
+                TestAssetPaths.PythonExecutable(),
+                new[] { "-c", "import time; time.sleep(5)" }),
+            Path.GetTempPath(),
+            timeoutSeconds: 1,
+            CancellationToken.None);
 
         Assert.True(result.TimedOut);
         Assert.Equal(-1, result.ExitCode);
@@ -52,11 +116,14 @@ public sealed class DefaultProcessExecutorSmokeTests
     public async Task RunAsync_captures_stderr_separately_from_stdout()
     {
         var exec = new DefaultProcessExecutor();
-        // 跨 sh / cmd 都 work：write 到 stderr
-        var cmd = OperatingSystem.IsWindows()
-            ? "echo only-err 1>&2"
-            : "echo only-err 1>&2";
-        var result = await exec.RunAsync(cmd, Path.GetTempPath(), 5, CancellationToken.None);
+        var result = await exec.RunAsync(
+            new ProcessInvocation(
+                TestAssetPaths.PythonExecutable(),
+                new[] { "-c", "import sys; print('only-err', file=sys.stderr)" }),
+            Path.GetTempPath(),
+            timeoutSeconds: 5,
+            CancellationToken.None);
+
         Assert.Equal(0, result.ExitCode);
         Assert.Contains("only-err", result.Stderr);
         Assert.DoesNotContain("only-err", result.Stdout);

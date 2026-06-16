@@ -1,4 +1,4 @@
-using MetBench_BLL.SystemMT.Assertions;
+﻿using MetBench_BLL.SystemMT.Assertions;
 using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_SystemMT.Tests.SystemMT;
 using Reqnroll;
@@ -37,7 +37,7 @@ public sealed class ProjectileRangeSteps
         var python = TestAssetPaths.PythonExecutable();
         var projectileDir = Path.Combine(assetRoot, "projectile");
 
-        // Doubling v0 quadruples range (R ∝ v0²)
+        // Doubling v0 quadruples range (R 鈭?v0虏)
         var ctx = new PipelineContext(
             MrCode: "bdd-projectile-scale-v0",
             TransformationName: "ScaleField",
@@ -51,9 +51,9 @@ public sealed class ProjectileRangeSteps
             SutName: "projectile",
             SourceCasePath: _sourceInputPath!,
             WorkingDirectory: _workRoot,
-            InputParserCommand: $"\"{python}\" \"{Path.Combine(projectileDir, "projectile_input_parser.py")}\"",
-            OutputParserCommand: $"\"{python}\" \"{Path.Combine(projectileDir, "projectile_output_parser.py")}\"",
-            RunnerCommand: $"\"{python}\" \"{Path.Combine(projectileDir, "projectile.py")}\"",
+            InputParserInvocation: new ProcessInvocation(python, new[] { Path.Combine(projectileDir, "projectile_input_parser.py") }),
+            OutputParserInvocation: new ProcessInvocation(python, new[] { Path.Combine(projectileDir, "projectile_output_parser.py") }),
+            RunnerInvocation: new ProcessInvocation(python, new[] { Path.Combine(projectileDir, "projectile.py") }),
             TimeoutSeconds: 10,
             CatalogVersionSha: string.Empty,
             SutVersionSnapshot: string.Empty,

@@ -23,13 +23,16 @@ public sealed class CliProgramRunner
         process.StartInfo = new ProcessStartInfo
         {
             FileName = program.ExecutablePath,
-            Arguments = arguments,
             WorkingDirectory = testCase.WorkingDirectory,
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             CreateNoWindow = true
         };
+        foreach (var argument in arguments)
+        {
+            process.StartInfo.ArgumentList.Add(argument);
+        }
 
         foreach (var item in testCase.EnvironmentVariables)
         {
@@ -85,16 +88,54 @@ public sealed class CliProgramRunner
         }
     }
 
-    private static string BuildArguments(string argumentTemplate, SystemMtCase testCase)
+    private static IReadOnlyList<string> BuildArguments(string argumentTemplate, SystemMtCase testCase)
     {
-        return argumentTemplate
-            .Replace("{input}", Quote(testCase.InputPath), StringComparison.Ordinal)
-            .Replace("{output}", Quote(testCase.OutputPath), StringComparison.Ordinal);
+        return Tokenize(argumentTemplate)
+            .Select(token => token
+                .Replace("{input}", testCase.InputPath, StringComparison.Ordinal)
+                .Replace("{output}", testCase.OutputPath, StringComparison.Ordinal))
+            .ToArray();
     }
 
-    private static string Quote(string value)
+    private static IReadOnlyList<string> Tokenize(string template)
     {
-        return value.Contains(' ') ? $"\"{value}\"" : value;
+        var tokens = new List<string>();
+        var current = new System.Text.StringBuilder();
+        var inQuotes = false;
+
+        foreach (var ch in template)
+        {
+            if (ch == '"')
+            {
+                inQuotes = !inQuotes;
+                continue;
+            }
+
+            if (char.IsWhiteSpace(ch) && !inQuotes)
+            {
+                if (current.Length > 0)
+                {
+                    tokens.Add(current.ToString());
+                    current.Clear();
+                }
+
+                continue;
+            }
+
+            current.Append(ch);
+        }
+
+        if (inQuotes)
+        {
+            throw new InvalidOperationException("Configuration failure: argument template contains an unterminated quote.");
+        }
+
+        if (current.Length > 0)
+        {
+            tokens.Add(current.ToString());
+        }
+
+        return tokens;
     }
 
     private static async Task<bool> WaitForExitAsync(Process process, TimeSpan timeout, CancellationToken cancellationToken)

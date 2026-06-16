@@ -23,12 +23,13 @@ internal static class ScipyTestPaths
             process.StartInfo = new ProcessStartInfo
             {
                 FileName = ScipyPython(),
-                Arguments = "-c \"import scipy.integrate\"",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 CreateNoWindow = true
             };
+            process.StartInfo.ArgumentList.Add("-c");
+            process.StartInfo.ArgumentList.Add("import scipy.integrate");
 
             process.Start();
 

@@ -72,17 +72,6 @@
     </Compile>
   </ItemGroup>
 
-	<ItemGroup>
-		<Compile Update="Views\Pages\AutoDetectMRPage.xaml.cs">
-			<SubType>Code</SubType>
-		</Compile>
-		<Compile Update="Views\Pages\MRRecommendationPage.xaml.cs">
-			<SubType>Code</SubType>
-		</Compile>
-		<Compile Update="Views\Pages\MTReportGeneratorPage.xaml.cs">
-			<SubType>Code</SubType>
-		</Compile>
-	</ItemGroup>
 	<!--
     SUT files are linked into the build output as SUT\<sut>\... so the launcher
     facade (LauncherOptions.SutRoot = "<exe>/SUT") can locate Python runners,

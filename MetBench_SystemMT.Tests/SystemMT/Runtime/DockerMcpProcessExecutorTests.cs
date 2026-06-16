@@ -7,7 +7,7 @@ namespace MetBench_SystemMT.Tests.SystemMT.Runtime;
 public sealed class DockerMcpProcessExecutorTests
 {
     [Fact]
-    public async Task Run_async_converts_shell_command_to_mcp_run_sut_command()
+    public async Task Run_async_converts_invocation_to_mcp_run_sut_command()
     {
         var client = new RecordingDockerMcpRuntimeClient(new DockerMcpRunResult(
             ExitCode: 0,
@@ -22,7 +22,16 @@ public sealed class DockerMcpProcessExecutorTests
 
         var result = await executor.RunAsync(
             options,
-            "\"/opt/openmoc-venv/bin/python\" \"SUT/openmoc/runner.py\" --input \"/tmp/source case.json\" --output \"/tmp/source.out.json\"",
+            new ProcessInvocation(
+                "/opt/openmoc-venv/bin/python",
+                new[]
+                {
+                    "SUT/openmoc/runner.py",
+                    "--input",
+                    "/tmp/source case.json",
+                    "--output",
+                    "/tmp/source.out.json",
+                }),
             timeoutSeconds: 60,
             CancellationToken.None);
 
@@ -57,7 +66,11 @@ public sealed class DockerMcpProcessExecutorTests
             Image: "metbench-sut:latest",
             PythonExecutable: "python");
 
-        var result = await executor.RunAsync(options, "python runner.py", 1, CancellationToken.None);
+        var result = await executor.RunAsync(
+            options,
+            new ProcessInvocation("python", new[] { "runner.py" }),
+            1,
+            CancellationToken.None);
 
         Assert.True(result.TimedOut);
         Assert.Equal(-1, result.ExitCode);
@@ -65,14 +78,21 @@ public sealed class DockerMcpProcessExecutorTests
     }
 
     [Fact]
-    public void SplitCommand_preserves_backslashes_in_quoted_windows_paths()
+    public async Task RunAsync_rejects_empty_executable_before_calling_mcp_client()
     {
-        var argv = DockerMcpProcessExecutor.SplitCommand(
-            "\"python\" \"D:\\repo\\runner.py\" --input \"C:\\Temp\\in.json\"");
+        var client = new RecordingClient();
+        var executor = new DockerMcpProcessExecutor(client);
+        var options = new DockerMcpRuntimeOptions(
+            "http://127.0.0.1:8765", "img", "python");
 
-        Assert.Equal(
-            new[] { "python", @"D:\repo\runner.py", "--input", @"C:\Temp\in.json" },
-            argv);
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            executor.RunAsync(
+                options,
+                new ProcessInvocation("", Array.Empty<string>()),
+                30,
+                CancellationToken.None));
+
+        Assert.Null(client.LastArgv);
     }
 
     [Theory]
@@ -98,7 +118,9 @@ public sealed class DockerMcpProcessExecutorTests
 
         await executor.RunAsync(
             options,
-            "\"/opt/venv/bin/python\" \"D:\\repo\\SUT\\runner.py\" --input \"C:\\Temp\\in.json\"",
+            new ProcessInvocation(
+                "/opt/venv/bin/python",
+                new[] { @"D:\repo\SUT\runner.py", "--input", @"C:\Temp\in.json" }),
             30,
             CancellationToken.None);
 
@@ -121,7 +143,11 @@ public sealed class DockerMcpProcessExecutorTests
         var options = new DockerMcpRuntimeOptions(
             "http://127.0.0.1:8765", "img", "python");
 
-        await executor.RunAsync(options, "python \"D:\\repo\\runner.py\"", 30, CancellationToken.None);
+        await executor.RunAsync(
+            options,
+            new ProcessInvocation("python", new[] { @"D:\repo\runner.py" }),
+            30,
+            CancellationToken.None);
 
         Assert.Equal(new[] { "python", @"D:\repo\runner.py" }, client.LastArgv);
     }

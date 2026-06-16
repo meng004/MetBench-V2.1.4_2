@@ -213,9 +213,15 @@ public sealed class SystemMtLauncher : ISystemMtLauncher, ISystemMtCatalogReader
             SutName: blueprint.Mr.SutName,
             SourceCasePath: sourceInputPath,
             WorkingDirectory: workRoot,
-            InputParserCommand: $"\"{parserPythonExecutable}\" \"{blueprint.InputParserScriptPath}\"",
-            OutputParserCommand: $"\"{parserPythonExecutable}\" \"{blueprint.OutputParserScriptPath}\"",
-            RunnerCommand: $"\"{pythonExecutable}\" \"{blueprint.RunnerScriptPath}\"",
+            InputParserInvocation: new ProcessInvocation(
+                parserPythonExecutable,
+                new[] { blueprint.InputParserScriptPath }),
+            OutputParserInvocation: new ProcessInvocation(
+                parserPythonExecutable,
+                new[] { blueprint.OutputParserScriptPath }),
+            RunnerInvocation: new ProcessInvocation(
+                pythonExecutable,
+                new[] { blueprint.RunnerScriptPath }),
             TimeoutSeconds: (int)blueprint.Timeout.TotalSeconds,
             CatalogVersionSha: string.Empty,
             SutVersionSnapshot: string.Empty,

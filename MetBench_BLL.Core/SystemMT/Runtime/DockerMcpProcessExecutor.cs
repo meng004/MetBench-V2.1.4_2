@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MetBench_BLL.SystemMT.Pipeline;
@@ -20,14 +19,19 @@ public sealed class DockerMcpProcessExecutor
 
     public async Task<ProcessResult> RunAsync(
         DockerMcpRuntimeOptions options,
-        string command,
+        ProcessInvocation invocation,
         int timeoutSeconds,
         CancellationToken cancellationToken)
     {
         if (options is null)
             throw new ArgumentNullException(nameof(options));
+        ArgumentNullException.ThrowIfNull(invocation);
+        if (string.IsNullOrWhiteSpace(invocation.FileName))
+            throw new ArgumentException("Executable file name is required.", nameof(invocation));
 
-        var argv = SplitCommand(command);
+        IReadOnlyList<string> argv = new[] { invocation.FileName }
+            .Concat(invocation.Arguments)
+            .ToArray();
         if (options.PathStyle == DockerMcpPathStyle.Wsl)
         {
             argv = argv.Select(TranslateWindowsPathToWsl).ToList();
@@ -59,68 +63,5 @@ public sealed class DockerMcpProcessExecutor
         var drive = char.ToLowerInvariant(token[0]);
         var rest = token[3..].Replace('\\', '/');
         return $"/mnt/{drive}/{rest}";
-    }
-
-    internal static IReadOnlyList<string> SplitCommand(string command)
-    {
-        if (string.IsNullOrWhiteSpace(command))
-            throw new ArgumentException("Command must be non-empty.", nameof(command));
-
-        var result = new List<string>();
-        var current = new StringBuilder();
-        var inDoubleQuotes = false;
-        var escaping = false;
-
-        foreach (var ch in command)
-        {
-            if (escaping)
-            {
-                if (ch != '"')
-                {
-                    current.Append('\\');
-                }
-                current.Append(ch);
-                escaping = false;
-                continue;
-            }
-
-            if (ch == '\\')
-            {
-                escaping = true;
-                continue;
-            }
-
-            if (ch == '"')
-            {
-                inDoubleQuotes = !inDoubleQuotes;
-                continue;
-            }
-
-            if (char.IsWhiteSpace(ch) && !inDoubleQuotes)
-            {
-                FlushToken(result, current);
-                continue;
-            }
-
-            current.Append(ch);
-        }
-
-        if (escaping)
-            current.Append('\\');
-        if (inDoubleQuotes)
-            throw new ArgumentException("Command contains an unterminated quoted string.", nameof(command));
-
-        FlushToken(result, current);
-        if (result.Count == 0)
-            throw new ArgumentException("Command must contain at least one argument.", nameof(command));
-        return result;
-    }
-
-    private static void FlushToken(List<string> result, StringBuilder current)
-    {
-        if (current.Length == 0)
-            return;
-        result.Add(current.ToString());
-        current.Clear();
     }
 }

@@ -1,4 +1,4 @@
-using MetBench_BLL.SystemMT.Assertions;
+﻿using MetBench_BLL.SystemMT.Assertions;
 using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_SystemMT.Tests.SystemMT;
 using Reqnroll;
@@ -36,7 +36,7 @@ public sealed class OpenMocPinCellNuSigmaFSteps
     [Given("an OpenMOC MR transformation {string} with parameter {string} set to {string}")]
     public void GivenTheMrTransformation(string name, string parameterName, string parameterValue)
     {
-        _ = name; // "ScaleNuSigmaF" → mapped to ScaleField in When step
+        _ = name; // "ScaleNuSigmaF" 鈫?mapped to ScaleField in When step
         _params[parameterName] = parameterValue;
     }
 
@@ -60,9 +60,9 @@ public sealed class OpenMocPinCellNuSigmaFSteps
             SutName: "openmoc",
             SourceCasePath: _sourceInputPath,
             WorkingDirectory: _workRoot,
-            InputParserCommand: $"\"{openmocPython}\" \"{Path.Combine(openmocDir, "openmoc_input_parser.py")}\"",
-            OutputParserCommand: $"\"{openmocPython}\" \"{Path.Combine(openmocDir, "openmoc_output_parser.py")}\"",
-            RunnerCommand: $"\"{openmocPython}\" \"{Path.Combine(openmocDir, "openmoc_runner.py")}\"",
+            InputParserInvocation: new ProcessInvocation(openmocPython, new[] { Path.Combine(openmocDir, "openmoc_input_parser.py") }),
+            OutputParserInvocation: new ProcessInvocation(openmocPython, new[] { Path.Combine(openmocDir, "openmoc_output_parser.py") }),
+            RunnerInvocation: new ProcessInvocation(openmocPython, new[] { Path.Combine(openmocDir, "openmoc_runner.py") }),
             TimeoutSeconds: 120,
             CatalogVersionSha: string.Empty,
             SutVersionSnapshot: string.Empty,

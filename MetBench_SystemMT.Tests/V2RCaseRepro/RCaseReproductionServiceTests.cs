@@ -9,7 +9,7 @@ using Xunit;
 namespace MetBench_SystemMT.Tests.V2RCaseRepro;
 
 /// <summary>
-/// F9 测试：RCaseReproductionService —— 自动复现 R-Case + 链接到 KnownBug。
+/// F9 测试：RCaseReproductionService —�?自动复现 R-Case + 链接�?KnownBug�?
 /// </summary>
 public sealed class RCaseReproductionServiceTests
 {
@@ -26,7 +26,7 @@ public sealed class RCaseReproductionServiceTests
     [Fact]
     public async Task ReproduceAsync_anomaly_with_large_gap_marks_reproduced()
     {
-        // R-Case-4: ModSigmaA(1.5) → OpenMOC 0.4764 vs OpenMC 0.9683 (51% gap)
+        // R-Case-4: ModSigmaA(1.5) �?OpenMOC 0.4764 vs OpenMC 0.9683 (51% gap)
         var fakes = MakeFakes(rCase4: true);
         var svc = NewService(fakes);
 
@@ -62,7 +62,7 @@ public sealed class RCaseReproductionServiceTests
         var fakes = MakeFakes(rCase4: true);
         var svc = NewService(fakes);
 
-        // pipeline 通过 + 两个 k 都接近 → gap < threshold
+        // pipeline 通过 + 两个 k 都接�?�?gap < threshold
         var report = await svc.ReproduceAsync(
             MakeSpecAndPrime(fakes, "R-Case-4", PipelineStatus.Ok, sourceK: 1.00, followupK: 1.005, threshold: 0.05));
 
@@ -94,7 +94,7 @@ public sealed class RCaseReproductionServiceTests
     [Fact]
     public async Task ReproduceAsync_anomaly_status_alone_triggers_reproduction_even_when_gap_small()
     {
-        // Pipeline status=anomaly 但 gap 小 → 仍标 reproduced（assertion 已判 fail）
+        // Pipeline status=anomaly �?gap �?�?仍标 reproduced（assertion 已判 fail�?
         var fakes = MakeFakes(rCase4: true);
         var svc = NewService(fakes);
 
@@ -188,7 +188,7 @@ public sealed class RCaseReproductionServiceTests
                 IdBug = 4, Code = "R-Case-4",
                 Title = "OpenMOC CPUSolver power-iter basin @ moderator-σ_a factor=1.5",
                 Status = "open",
-                Description = "MetBench self-discovery: OpenMOC k=0.4764 vs OpenMC k=0.9683 — 51% gap.",
+                Description = "MetBench self-discovery: OpenMOC k=0.4764 vs OpenMC k=0.9683 �?51% gap.",
             };
             fakes.Bugs.Add(fakes.RCase4);
         }
@@ -196,7 +196,7 @@ public sealed class RCaseReproductionServiceTests
     }
 
     /// <summary>
-    /// 同时构造 spec 并把对应 outcome 注入 fakes.Pipeline.NextOutcome。
+    /// 同时构�?spec 并把对应 outcome 注入 fakes.Pipeline.NextOutcome�?
     /// </summary>
     private static RCaseReproductionSpec MakeSpecAndPrime(
         Fakes fakes,
@@ -233,7 +233,7 @@ public sealed class RCaseReproductionServiceTests
             SutName: "openmoc",
             SourceCasePath: "/tmp/case.json",
             WorkingDirectory: "/tmp",
-            InputParserCommand: "x", OutputParserCommand: "x", RunnerCommand: "x",
+            InputParserInvocation: new ProcessInvocation("x", Array.Empty<string>()), OutputParserInvocation: new ProcessInvocation("x", Array.Empty<string>()), RunnerInvocation: new ProcessInvocation("x", Array.Empty<string>()),
             TimeoutSeconds: 60,
             CatalogVersionSha: catalogSha,
             SutVersionSnapshot: sutVersion,
@@ -277,7 +277,7 @@ public sealed class RCaseReproductionServiceTests
     }
 }
 
-/// <summary>测试用 pipeline — 把 spec 的 (status, sourceK, followupK) 反推到 outcome。</summary>
+/// <summary>测试�?pipeline �?�?spec �?(status, sourceK, followupK) 反推�?outcome�?/summary>
 internal sealed class ProgrammablePipeline : ISystemMtPipeline
 {
     public PipelineOutcome? NextOutcome { get; set; }
@@ -294,9 +294,9 @@ internal sealed class ProgrammablePipeline : ISystemMtPipeline
     }
 
     /// <summary>
-    /// 默认行为：用 context.TransformationName 当 hint 反推一个 outcome。
-    /// 测试覆盖到的具体值由 MakeSpec → ProgrammablePipeline.NextOutcome 显式设。
-    /// 兜底 outcome 是 Ok + k=1.0。
+    /// 默认行为：用 context.TransformationName �?hint 反推一�?outcome�?
+    /// 测试覆盖到的具体值由 MakeSpec �?ProgrammablePipeline.NextOutcome 显式设�?
+    /// 兜底 outcome �?Ok + k=1.0�?
     /// </summary>
     private static PipelineOutcome BuildFromTransformName(PipelineContext _)
         => new(

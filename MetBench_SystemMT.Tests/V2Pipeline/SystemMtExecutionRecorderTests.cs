@@ -8,9 +8,9 @@ using Xunit;
 namespace MetBench_SystemMT.Tests.V2Pipeline;
 
 /// <summary>
-/// P1 — <see cref="SystemMtExecutionRecorder"/>：把一次 <c>PipelineOutcome</c> 投影为
-/// <c>Execution</c> + <c>Result</c>，作为 v2 结果 schema 的统一写入口。
-/// 计划见 docs/superpowers/plans/2026-05-22-systemmt-engine-unification-plan.md。
+/// P1 �?<see cref="SystemMtExecutionRecorder"/>：把一�?<c>PipelineOutcome</c> 投影�?
+/// <c>Execution</c> + <c>Result</c>，作�?v2 结果 schema 的统一写入口�?
+/// 计划�?docs/superpowers/plans/2026-05-22-systemmt-engine-unification-plan.md�?
 /// </summary>
 public sealed class SystemMtExecutionRecorderTests
 {
@@ -139,7 +139,7 @@ public sealed class SystemMtExecutionRecorderTests
             Parameters: new Dictionary<string, string>(), Tolerance: new AssertionTolerance(),
             ExtraAssertionValues: null,
             SutName: "openmoc", SourceCasePath: "/tmp/src.json", WorkingDirectory: "/tmp",
-            InputParserCommand: "x", OutputParserCommand: "x", RunnerCommand: "x",
+            InputParserInvocation: new ProcessInvocation("x", Array.Empty<string>()), OutputParserInvocation: new ProcessInvocation("x", Array.Empty<string>()), RunnerInvocation: new ProcessInvocation("x", Array.Empty<string>()),
             TimeoutSeconds: 60,
             CatalogVersionSha: catalogSha, SutVersionSnapshot: sutVersion,
             MetbenchVersion: metbenchVersion, TriggeredBy: triggeredBy);

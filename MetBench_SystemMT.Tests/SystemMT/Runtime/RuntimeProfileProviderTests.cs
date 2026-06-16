@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System;
+using System.Text.Json;
 using MetBench_BLL.SystemMT.Launcher;
 using MetBench_BLL.SystemMT.Runtime;
 using Xunit;
@@ -113,6 +114,70 @@ public sealed class RuntimeProfileProviderTests
         Assert.Single(profile.DependencyChecks);
         Assert.Single(profile.VersionChecks);
         Assert.Single(profile.RequiredEnvironmentVariables);
+    }
+
+    [Fact]
+    public void Runtime_version_check_keeps_legacy_command_alias()
+    {
+#pragma warning disable CS0618
+        var check = new RuntimeVersionCheck("Python", "python");
+
+        Assert.Equal("python", check.Executable);
+        Assert.Equal("python", check.Command);
+#pragma warning restore CS0618
+    }
+
+    [Fact]
+    public void Runtime_version_check_deserializes_legacy_command_field()
+    {
+        const string json = """
+            {
+              "Name": "Python",
+              "Command": "python",
+              "Arguments": ["--version"]
+            }
+            """;
+
+        var check = JsonSerializer.Deserialize<RuntimeVersionCheck>(json);
+
+        Assert.NotNull(check);
+        Assert.Equal("python", check!.Executable);
+        Assert.Equal("--version", check.Arguments);
+        Assert.Equal(new[] { "--version" }, check.ArgumentList);
+    }
+
+    [Fact]
+    public void Runtime_version_check_deserializes_legacy_string_arguments_field()
+    {
+        const string json = """
+            {
+              "Name": "Python",
+              "Command": "python",
+              "Arguments": "--version"
+            }
+            """;
+
+        var check = JsonSerializer.Deserialize<RuntimeVersionCheck>(json);
+
+        Assert.NotNull(check);
+        Assert.Equal("python", check!.Executable);
+        Assert.Equal("--version", check.Arguments);
+        Assert.Equal(new[] { "--version" }, check.ArgumentList);
+    }
+
+    [Fact]
+    public void Runtime_version_check_keeps_legacy_record_deconstruction_shape()
+    {
+#pragma warning disable CS0618
+        var check = new RuntimeVersionCheck("Python", "python", "--version");
+
+        var (name, command, arguments, timeout) = check;
+
+        Assert.Equal("Python", name);
+        Assert.Equal("python", command);
+        Assert.Equal("--version", arguments);
+        Assert.Null(timeout);
+#pragma warning restore CS0618
     }
 
     [Fact]

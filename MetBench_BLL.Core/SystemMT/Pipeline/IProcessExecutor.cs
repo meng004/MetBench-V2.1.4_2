@@ -6,10 +6,18 @@ namespace MetBench_BLL.SystemMT.Pipeline;
 public interface IProcessExecutor
 {
     Task<ProcessResult> RunAsync(
-        string command,
+        ProcessInvocation invocation,
         string workingDirectory,
         int timeoutSeconds,
         CancellationToken cancellationToken);
+}
+
+public sealed record ProcessInvocation(
+    string FileName,
+    IReadOnlyList<string> Arguments)
+{
+    public ProcessInvocation WithArguments(params string[] arguments) =>
+        this with { Arguments = Arguments.Concat(arguments).ToArray() };
 }
 
 public sealed record ProcessResult(

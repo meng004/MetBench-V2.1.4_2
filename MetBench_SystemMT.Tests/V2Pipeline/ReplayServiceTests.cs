@@ -5,8 +5,8 @@ using Xunit;
 namespace MetBench_SystemMT.Tests.V2Pipeline;
 
 /// <summary>
-/// TDD 验证 P4.4 ReplayService —— 把 Pipeline 抽象成 fake，
-/// 仅验证分类逻辑（Reproduced / FixedOrFlaky / RegressionOnReplay / 等）。
+/// TDD 验证 P4.4 ReplayService —�?�?Pipeline 抽象�?fake�?
+/// 仅验证分类逻辑（Reproduced / FixedOrFlaky / RegressionOnReplay / 等）�?
 /// </summary>
 public sealed class ReplayServiceTests
 {
@@ -99,7 +99,7 @@ public sealed class ReplayServiceTests
             Tolerance: new AssertionTolerance(),
             ExtraAssertionValues: null,
             SutName: "test", SourceCasePath: "/tmp/x", WorkingDirectory: "/tmp",
-            InputParserCommand: "x", OutputParserCommand: "x", RunnerCommand: "x",
+            InputParserInvocation: new ProcessInvocation("x", Array.Empty<string>()), OutputParserInvocation: new ProcessInvocation("x", Array.Empty<string>()), RunnerInvocation: new ProcessInvocation("x", Array.Empty<string>()),
             TimeoutSeconds: 60,
             CatalogVersionSha: "sha", SutVersionSnapshot: "v1",
             MetbenchVersion: "v2", TriggeredBy: "test");
@@ -153,7 +153,7 @@ internal sealed class FakePipeline : ISystemMtPipeline
     }
 
     // PR-Bol-2A: ISystemMtPipeline interface added ExecuteMultiPhaseAsync; replay tests do not
-    // exercise the multi-phase path, so throw NotImplementedException — any test that hits this
+    // exercise the multi-phase path, so throw NotImplementedException �?any test that hits this
     // surface accidentally fails loudly.
     public Task<PipelineOutcome> ExecuteMultiPhaseAsync(
         MultiPhaseExecutionContext mp,

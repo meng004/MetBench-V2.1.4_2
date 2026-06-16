@@ -37,12 +37,19 @@ public sealed class PythonInputAdapter
         process.StartInfo = new ProcessStartInfo
         {
             FileName = _pythonExecutable,
-            Arguments = $"{Quote(adapterPath)} transform-input --source-file {Quote(sourceInputPath)} --output-file {Quote(followUpInputPath)} --params {Quote(paramsJson)}",
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             CreateNoWindow = true
         };
+        process.StartInfo.ArgumentList.Add(adapterPath);
+        process.StartInfo.ArgumentList.Add("transform-input");
+        process.StartInfo.ArgumentList.Add("--source-file");
+        process.StartInfo.ArgumentList.Add(sourceInputPath);
+        process.StartInfo.ArgumentList.Add("--output-file");
+        process.StartInfo.ArgumentList.Add(followUpInputPath);
+        process.StartInfo.ArgumentList.Add("--params");
+        process.StartInfo.ArgumentList.Add(paramsJson);
 
         process.Start();
         var stdout = await process.StandardOutput.ReadToEndAsync(cancellationToken);
@@ -74,10 +81,4 @@ public sealed class PythonInputAdapter
         }
     }
 
-    private static string Quote(string value)
-    {
-        return value.Contains(' ') || value.Contains('"')
-            ? $"\"{value.Replace("\"", "\\\"")}\""
-            : value;
-    }
 }

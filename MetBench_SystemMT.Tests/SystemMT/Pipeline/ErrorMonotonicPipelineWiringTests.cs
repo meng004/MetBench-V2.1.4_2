@@ -56,9 +56,9 @@ public sealed class ErrorMonotonicPipelineWiringTests : IDisposable
         SutName: "fake-sut",
         SourceCasePath: Path.Combine(_workDir, "source.in.json"),
         WorkingDirectory: _workDir,
-        InputParserCommand: "fake-input-parser",
-        OutputParserCommand: "fake-output-parser",
-        RunnerCommand: "fake-runner",
+        InputParserInvocation: new ProcessInvocation("fake-input-parser", Array.Empty<string>()),
+        OutputParserInvocation: new ProcessInvocation("fake-output-parser", Array.Empty<string>()),
+        RunnerInvocation: new ProcessInvocation("fake-runner", Array.Empty<string>()),
         TimeoutSeconds: 30,
         CatalogVersionSha: "test",
         SutVersionSnapshot: "test",
@@ -185,7 +185,7 @@ public sealed class ErrorMonotonicPipelineWiringTests : IDisposable
     public async Task ExecuteMultiPhaseAsync_anomaly_on_non_monotonic_error_increase()
     {
         var (spec, predicate) = BuildSpec();
-        // coarse error = |1.43 - 1.44| = 0.01; medium error = |1.40 - 1.44| = 0.04 > 0.01 â†’ fail
+        // coarse error = |1.43 - 1.44| = 0.01; medium error = |1.40 - 1.44| = 0.04 > 0.01 â†?fail
         var pipeline = new SystemMtPipeline(BuildHappyExecutor(new()
         {
             ["coarse"] = 1.43, ["medium"] = 1.40, ["reference"] = 1.44

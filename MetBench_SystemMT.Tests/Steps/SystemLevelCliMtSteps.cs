@@ -1,4 +1,4 @@
-using MetBench_BLL.SystemMT.Assertions;
+﻿using MetBench_BLL.SystemMT.Assertions;
 using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_SystemMT.Tests.SystemMT;
 using Reqnroll;
@@ -51,9 +51,9 @@ public sealed class SystemLevelCliMtSteps
             SutName: "example-cli",
             SourceCasePath: _sourceInputPath!,
             WorkingDirectory: _workRoot,
-            InputParserCommand: $"\"{python}\" \"{Path.Combine(assetRoot, "example_cli_input_parser.py")}\"",
-            OutputParserCommand: $"\"{python}\" \"{Path.Combine(assetRoot, "example_cli_output_parser.py")}\"",
-            RunnerCommand: $"\"{python}\" \"{Path.Combine(assetRoot, "example_cli.py")}\"",
+            InputParserInvocation: new ProcessInvocation(python, new[] { Path.Combine(assetRoot, "example_cli_input_parser.py") }),
+            OutputParserInvocation: new ProcessInvocation(python, new[] { Path.Combine(assetRoot, "example_cli_output_parser.py") }),
+            RunnerInvocation: new ProcessInvocation(python, new[] { Path.Combine(assetRoot, "example_cli.py") }),
             TimeoutSeconds: 10,
             CatalogVersionSha: string.Empty,
             SutVersionSnapshot: string.Empty,

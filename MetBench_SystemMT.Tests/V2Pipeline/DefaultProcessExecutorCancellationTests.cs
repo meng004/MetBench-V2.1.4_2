@@ -22,10 +22,12 @@ public sealed class DefaultProcessExecutorCancellationTests : IDisposable
     {
         var script = WriteSleepingPidScript();
         var pidFile = Path.Combine(_workDir, "cancel.pid");
-        var command = $"{Quote(TestAssetPaths.PythonExecutable())} {Quote(script)} {Quote(pidFile)}";
+        var invocation = new ProcessInvocation(
+            TestAssetPaths.PythonExecutable(),
+            new[] { script, pidFile });
         using var cts = new CancellationTokenSource();
 
-        var runTask = new DefaultProcessExecutor().RunAsync(command, _workDir, timeoutSeconds: 30, cts.Token);
+        var runTask = new DefaultProcessExecutor().RunAsync(invocation, _workDir, timeoutSeconds: 30, cts.Token);
         var pid = await WaitForPidFileAsync(pidFile);
 
         try
@@ -46,10 +48,12 @@ public sealed class DefaultProcessExecutorCancellationTests : IDisposable
     {
         var script = WriteSleepingPidScript();
         var pidFile = Path.Combine(_workDir, "timeout.pid");
-        var command = $"{Quote(TestAssetPaths.PythonExecutable())} {Quote(script)} {Quote(pidFile)}";
+        var invocation = new ProcessInvocation(
+            TestAssetPaths.PythonExecutable(),
+            new[] { script, pidFile });
 
         var result = await new DefaultProcessExecutor().RunAsync(
-            command,
+            invocation,
             _workDir,
             timeoutSeconds: 1,
             CancellationToken.None);
@@ -79,10 +83,10 @@ public sealed class DefaultProcessExecutorCancellationTests : IDisposable
             sys.exit(3)
             """);
 
-        var command = $"{Quote(TestAssetPaths.PythonExecutable())} {Quote(script)}";
-
         var result = await new DefaultProcessExecutor().RunAsync(
-            command,
+            new ProcessInvocation(
+                TestAssetPaths.PythonExecutable(),
+                new[] { script }),
             _workDir,
             timeoutSeconds: 5,
             CancellationToken.None);
@@ -193,10 +197,5 @@ public sealed class DefaultProcessExecutorCancellationTests : IDisposable
         {
             // Best-effort cleanup for failed process-control tests.
         }
-    }
-
-    private static string Quote(string value)
-    {
-        return "\"" + value.Replace("\"", "\\\"", StringComparison.Ordinal) + "\"";
     }
 }
