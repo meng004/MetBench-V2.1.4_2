@@ -35,7 +35,7 @@ python --version          # 应显示 Python 3.10+ 版本号，而非跳转 Stor
 $env:METBENCH_TEST_PYTHON = "C:\Python312\python.exe"   # 按本机实际路径填写
 ```
 
-`TestAssetPaths.PythonExecutable()` 优先读 `METBENCH_TEST_PYTHON`；未设时 Windows 上默认用 `python`。
+`TestAssetPaths.PythonExecutable()` 优先读 `METBENCH_TEST_PYTHON`；未设时 Windows 上按 `python` → `python3` → `py` 探测 PATH，全部缺失时保留旧默认 `python` 以暴露环境缺口。
 
 ### 1.2 Docker Desktop（用例 2 需要）
 

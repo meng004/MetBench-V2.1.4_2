@@ -20,7 +20,7 @@ namespace MetBench_Client.Views.Windows
     /// <summary>
     /// ApplicationProgramsWindow.xaml 的交互逻辑
     /// </summary>
-    public partial class ApplicationProgramsWindow : INavigationWindow, INavigableView<ViewModels.ApplicationManagementViewModel>
+    public partial class ApplicationProgramsWindow : INavigableView<ViewModels.ApplicationManagementViewModel>
     {
         public ApplicationManagementViewModel ViewModel
         {
@@ -33,26 +33,6 @@ namespace MetBench_Client.Views.Windows
             //数据上下文初始化赋值
             DataContext = this;
             InitializeComponent();
-        }
-
-        public INavigationView GetNavigation()
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Navigate(Type pageType)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetServiceProvider(IServiceProvider serviceProvider)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetPageService(IPageService pageService)
-        {
-            throw new NotImplementedException();
         }
 
         public void ShowWindow()

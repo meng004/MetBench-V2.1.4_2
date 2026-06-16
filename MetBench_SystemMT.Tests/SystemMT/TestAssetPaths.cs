@@ -19,6 +19,9 @@ internal static class TestAssetPaths
             return configured;
         }
 
-        return OperatingSystem.IsWindows() ? "python" : "python3";
+        return TestPythonExecutableResolver.Resolve(
+            configured,
+            OperatingSystem.IsWindows(),
+            TestPythonExecutableResolver.CommandExists);
     }
 }

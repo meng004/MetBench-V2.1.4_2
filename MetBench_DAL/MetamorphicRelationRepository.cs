@@ -379,10 +379,78 @@ namespace MetBench_DAL
             }
         }
 
-        //暂时不需要
         public ObservableCollection<MetamorphicRelation> Get(MetamorphicRelation entity)
         {
-            throw new NotImplementedException();
+            ArgumentNullException.ThrowIfNull(entity);
+
+            using (var db = new LiteDatabase(_conn))
+            {
+                MetamorphicRelations = db.GetCollection<MetamorphicRelation>(_dbConfig.MetamorphicRelations_Collection_Key);
+                var query = MetamorphicRelations.FindAll().AsEnumerable();
+
+                if (!string.IsNullOrWhiteSpace(entity.Description))
+                    query = query.Where(mr => Contains(mr.Description, entity.Description));
+                if (!string.IsNullOrWhiteSpace(entity.Context))
+                    query = query.Where(mr => Contains(mr.Context, entity.Context));
+                if (!string.IsNullOrWhiteSpace(entity.Constraint))
+                    query = query.Where(mr => Contains(mr.Constraint, entity.Constraint));
+                if (!string.IsNullOrWhiteSpace(entity.OrderOfMR))
+                    query = query.Where(mr => Contains(mr.OrderOfMR, entity.OrderOfMR));
+                if (!string.IsNullOrWhiteSpace(entity.InputPattern))
+                    query = query.Where(mr => Contains(mr.InputPattern, entity.InputPattern));
+                if (!string.IsNullOrWhiteSpace(entity.OutputPattern))
+                    query = query.Where(mr => Contains(mr.OutputPattern, entity.OutputPattern));
+                if (!string.IsNullOrWhiteSpace(entity.DimensionOfInputPattern))
+                    query = query.Where(mr => Contains(mr.DimensionOfInputPattern, entity.DimensionOfInputPattern));
+                if (!string.IsNullOrWhiteSpace(entity.DimensionOfOutputPattern))
+                    query = query.Where(mr => Contains(mr.DimensionOfOutputPattern, entity.DimensionOfOutputPattern));
+                if (!string.IsNullOrWhiteSpace(entity.Granularity))
+                    query = query.Where(mr => Contains(mr.Granularity, entity.Granularity));
+                if (!string.IsNullOrWhiteSpace(entity.Hierarchy))
+                    query = query.Where(mr => Contains(mr.Hierarchy, entity.Hierarchy));
+                if (!string.IsNullOrWhiteSpace(entity.Operator))
+                    query = query.Where(mr => Contains(mr.Operator, entity.Operator));
+                if (!string.IsNullOrWhiteSpace(entity.Expression))
+                    query = query.Where(mr => Contains(mr.Expression, entity.Expression));
+                if (!string.IsNullOrWhiteSpace(entity.ApplicationName))
+                    query = query.Where(mr => Contains(mr.ApplicationName, entity.ApplicationName));
+                if (!string.IsNullOrWhiteSpace(entity.Code))
+                    query = query.Where(mr => Contains(mr.Code, entity.Code));
+                if (!string.IsNullOrWhiteSpace(entity.MetaPatternCode))
+                    query = query.Where(mr => Contains(mr.MetaPatternCode, entity.MetaPatternCode));
+                if (!string.IsNullOrWhiteSpace(entity.TransformationName))
+                    query = query.Where(mr => Contains(mr.TransformationName, entity.TransformationName));
+                if (!string.IsNullOrWhiteSpace(entity.AssertionTypeCode))
+                    query = query.Where(mr => Contains(mr.AssertionTypeCode, entity.AssertionTypeCode));
+                if (!string.IsNullOrWhiteSpace(entity.ValueName))
+                    query = query.Where(mr => Contains(mr.ValueName, entity.ValueName));
+                if (entity.NoiseAware)
+                    query = query.Where(mr => mr.NoiseAware);
+                if (entity.ToleranceRel != 0)
+                    query = query.Where(mr => mr.ToleranceRel == entity.ToleranceRel);
+                if (!string.IsNullOrWhiteSpace(entity.FeatureFilePath))
+                    query = query.Where(mr => Contains(mr.FeatureFilePath, entity.FeatureFilePath));
+                if (entity.DiscoveryRunId.HasValue)
+                    query = query.Where(mr => mr.DiscoveryRunId == entity.DiscoveryRunId);
+                if (entity.DiscoveryConfidence.HasValue)
+                    query = query.Where(mr => mr.DiscoveryConfidence == entity.DiscoveryConfidence);
+                if (!string.IsNullOrWhiteSpace(entity.DiscoveryMethod)
+                    && !string.Equals(entity.DiscoveryMethod, "manual", StringComparison.Ordinal))
+                    query = query.Where(mr => string.Equals(mr.DiscoveryMethod, entity.DiscoveryMethod, StringComparison.Ordinal));
+                if (entity.CreatedAt != default)
+                    query = query.Where(mr => mr.CreatedAt == entity.CreatedAt);
+                if (!string.IsNullOrWhiteSpace(entity.CreatedBy))
+                    query = query.Where(mr => Contains(mr.CreatedBy, entity.CreatedBy));
+                if (!string.IsNullOrWhiteSpace(entity.Kind))
+                    query = query.Where(mr => string.Equals(mr.Kind, entity.Kind, StringComparison.Ordinal));
+                if (!string.IsNullOrWhiteSpace(entity.EquationKey))
+                    query = query.Where(mr => Contains(mr.EquationKey, entity.EquationKey));
+                if (!string.IsNullOrWhiteSpace(entity.ValueShape)
+                    && !string.Equals(entity.ValueShape, "scalar", StringComparison.Ordinal))
+                    query = query.Where(mr => string.Equals(mr.ValueShape, entity.ValueShape, StringComparison.Ordinal));
+
+                return new ObservableCollection<MetamorphicRelation>(query.ToList());
+            }
         }
 
         //public int Add_Return_ID(MetamorphicRelation metamorphicRelation)
@@ -470,5 +538,9 @@ namespace MetBench_DAL
                 return collection.Exists(query);
             }
         }
+
+        private static bool Contains(string? value, string expected) =>
+            !string.IsNullOrEmpty(value)
+            && value.Contains(expected, StringComparison.OrdinalIgnoreCase);
     }
 }
