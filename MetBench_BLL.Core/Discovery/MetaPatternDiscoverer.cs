@@ -39,13 +39,16 @@ public sealed class MetaPatternDiscoverer : IMRDiscoverer
 
     public async Task<DiscoveryRunOutcome> DiscoverAsync(int? targetApplicationId, CancellationToken ct = default)
     {
-        var psi = new ProcessStartInfo(_pythonExe, $"\"{_scriptPath}\"")
+        var psi = new ProcessStartInfo
         {
+            FileName = _pythonExe,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
             CreateNoWindow = true,
         };
+        psi.ArgumentList.Add(_scriptPath);
+
         using var proc = Process.Start(psi)
             ?? throw new InvalidOperationException($"Failed to start {_pythonExe} {_scriptPath}");
 

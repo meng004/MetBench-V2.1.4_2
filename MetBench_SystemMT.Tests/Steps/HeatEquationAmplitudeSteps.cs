@@ -1,4 +1,4 @@
-using MetBench_BLL.SystemMT.Assertions;
+﻿using MetBench_BLL.SystemMT.Assertions;
 using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_SystemMT.Tests.SystemMT;
 using Reqnroll;
@@ -31,7 +31,7 @@ public sealed class HeatEquationAmplitudeSteps
     [Given("a heat-equation transformation {string} with parameter {string} set to {string}")]
     public void GivenTheHeatEquationTransformation(string name, string parameterName, string parameterValue)
     {
-        _ = name; // "ScaleAmplitude" → mapped to ScaleField in When step
+        _ = name; // "ScaleAmplitude" 鈫?mapped to ScaleField in When step
         _params[parameterName] = parameterValue;
     }
 
@@ -55,9 +55,9 @@ public sealed class HeatEquationAmplitudeSteps
             SutName: "heat-equation",
             SourceCasePath: _sourceInputPath,
             WorkingDirectory: _workRoot,
-            InputParserCommand: $"\"{python}\" \"{Path.Combine(heatDir, "heat_equation_input_parser.py")}\"",
-            OutputParserCommand: $"\"{python}\" \"{Path.Combine(heatDir, "heat_equation_output_parser.py")}\"",
-            RunnerCommand: $"\"{python}\" \"{Path.Combine(heatDir, "heat_equation.py")}\"",
+            InputParserInvocation: new ProcessInvocation(python, new[] { Path.Combine(heatDir, "heat_equation_input_parser.py") }),
+            OutputParserInvocation: new ProcessInvocation(python, new[] { Path.Combine(heatDir, "heat_equation_output_parser.py") }),
+            RunnerInvocation: new ProcessInvocation(python, new[] { Path.Combine(heatDir, "heat_equation.py") }),
             TimeoutSeconds: 30,
             CatalogVersionSha: string.Empty,
             SutVersionSnapshot: string.Empty,

@@ -1,4 +1,4 @@
-using MetBench_BLL.SystemMT.Assertions;
+﻿using MetBench_BLL.SystemMT.Assertions;
 using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_SystemMT.Tests.SystemMT;
 using Reqnroll;
@@ -73,9 +73,9 @@ public sealed class CrossProgramSteps
             SutName: solver,
             SourceCasePath: _sourceInputPath,
             WorkingDirectory: _workRoot,
-            InputParserCommand: $"\"{python}\" \"{Path.Combine(solverDir, $"{solver}_input_parser.py")}\"",
-            OutputParserCommand: $"\"{python}\" \"{Path.Combine(solverDir, $"{solver}_output_parser.py")}\"",
-            RunnerCommand: $"\"{python}\" \"{Path.Combine(solverDir, $"{solver}_runner.py")}\"",
+            InputParserInvocation: new ProcessInvocation(python, new[] { Path.Combine(solverDir, $"{solver}_input_parser.py") }),
+            OutputParserInvocation: new ProcessInvocation(python, new[] { Path.Combine(solverDir, $"{solver}_output_parser.py") }),
+            RunnerInvocation: new ProcessInvocation(python, new[] { Path.Combine(solverDir, $"{solver}_runner.py") }),
             TimeoutSeconds: timeoutSeconds,
             CatalogVersionSha: string.Empty,
             SutVersionSnapshot: string.Empty,

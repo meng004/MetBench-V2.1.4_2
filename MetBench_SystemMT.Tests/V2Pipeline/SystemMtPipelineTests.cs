@@ -54,9 +54,9 @@ public sealed class SystemMtPipelineTests : IDisposable
             SutName: "test-sut",
             SourceCasePath: Path.Combine(_workDir, "source.in.json"),
             WorkingDirectory: _workDir,
-            InputParserCommand: "fake-input-parser",
-            OutputParserCommand: "fake-output-parser",
-            RunnerCommand: "fake-runner",
+            InputParserInvocation: new ProcessInvocation("fake-input-parser", Array.Empty<string>()),
+            OutputParserInvocation: new ProcessInvocation("fake-output-parser", Array.Empty<string>()),
+            RunnerInvocation: new ProcessInvocation("fake-runner", Array.Empty<string>()),
             TimeoutSeconds: 30,
             CatalogVersionSha: "test-sha",
             SutVersionSnapshot: "test-sut-v1",
@@ -310,9 +310,23 @@ internal sealed class FakeProcessExecutor : IProcessExecutor
     }
 
     public Task<ProcessResult> RunAsync(
-        string command, string workingDirectory, int timeoutSeconds, CancellationToken cancellationToken)
+        ProcessInvocation invocation, string workingDirectory, int timeoutSeconds, CancellationToken cancellationToken)
     {
-        return Task.FromResult(_handler(command));
+        return Task.FromResult(_handler(ToDisplayString(invocation)));
+    }
+
+    private static string ToDisplayString(ProcessInvocation invocation) =>
+        string.Join(" ", new[] { invocation.FileName }.Concat(invocation.Arguments.Select(FormatArgument)));
+
+    private static string FormatArgument(string argument)
+    {
+        if (argument.StartsWith("--", StringComparison.Ordinal)
+            || argument.All(ch => char.IsLetterOrDigit(ch) || ch is '-' or '_'))
+        {
+            return argument;
+        }
+
+        return "\"" + argument.Replace("\"", "\\\"", StringComparison.Ordinal) + "\"";
     }
 }
 

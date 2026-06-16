@@ -29,9 +29,9 @@ public sealed record PipelineContext(
     string SutName,                                     // "openmoc"
     string SourceCasePath,                              // 输入文件路径
     string WorkingDirectory,                            // pipeline 临时工作目录
-    string InputParserCommand,                          // 用于 subprocess 调用 Python parser
-    string OutputParserCommand,
-    string RunnerCommand,                               // 用于调用 SUT runner
+    ProcessInvocation InputParserInvocation,
+    ProcessInvocation OutputParserInvocation,
+    ProcessInvocation RunnerInvocation,
     int TimeoutSeconds,
 
     // === 版本快照（启动时锁定）===

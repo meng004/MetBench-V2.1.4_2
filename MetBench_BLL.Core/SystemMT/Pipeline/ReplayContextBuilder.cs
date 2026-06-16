@@ -104,9 +104,9 @@ public sealed class ReplayContextBuilder
             SutName: app.Name ?? "",
             SourceCasePath: samplePath,
             WorkingDirectory: workingDirectory,
-            InputParserCommand: app.CodeName ?? "",   // 调用方需进一步解析 — 简化为 codename
-            OutputParserCommand: app.CodeName ?? "",
-            RunnerCommand: app.CodeName ?? "",
+            InputParserInvocation: new ProcessInvocation(app.CodeName ?? "", Array.Empty<string>()),
+            OutputParserInvocation: new ProcessInvocation(app.CodeName ?? "", Array.Empty<string>()),
+            RunnerInvocation: new ProcessInvocation(app.CodeName ?? "", Array.Empty<string>()),
             TimeoutSeconds: 300,
 
             CatalogVersionSha: execution.CatalogVersionSha,

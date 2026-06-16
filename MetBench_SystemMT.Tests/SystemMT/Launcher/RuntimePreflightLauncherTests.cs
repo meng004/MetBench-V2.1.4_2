@@ -325,11 +325,14 @@ public sealed class RuntimePreflightLauncherTests
         Assert.NotNull(context.RuntimeProfile.DockerMcp);
         Assert.Equal("metbench-sut:latest", context.RuntimeProfile.DockerMcp!.Image);
         Assert.Equal("http://127.0.0.1:8765", context.RuntimeProfile.DockerMcp.Endpoint);
-        Assert.StartsWith("\"/opt/openmoc-venv/bin/python\"", context.InputParserCommand, StringComparison.Ordinal);
-        Assert.StartsWith("\"/opt/openmoc-venv/bin/python\"", context.OutputParserCommand, StringComparison.Ordinal);
-        Assert.StartsWith("\"/opt/openmoc-venv/bin/python\"", context.RunnerCommand, StringComparison.Ordinal);
-        Assert.DoesNotContain("docker-mcp://", context.InputParserCommand, StringComparison.Ordinal);
-        Assert.DoesNotContain("docker-mcp://", context.RunnerCommand, StringComparison.Ordinal);
+        Assert.Equal("/opt/openmoc-venv/bin/python", context.InputParserInvocation.FileName);
+        Assert.Equal("/opt/openmoc-venv/bin/python", context.OutputParserInvocation.FileName);
+        Assert.Equal("/opt/openmoc-venv/bin/python", context.RunnerInvocation.FileName);
+        Assert.DoesNotContain("docker-mcp://", context.InputParserInvocation.FileName, StringComparison.Ordinal);
+        Assert.DoesNotContain("docker-mcp://", context.RunnerInvocation.FileName, StringComparison.Ordinal);
+        Assert.Single(context.InputParserInvocation.Arguments);
+        Assert.Single(context.OutputParserInvocation.Arguments);
+        Assert.Single(context.RunnerInvocation.Arguments);
     }
 
 

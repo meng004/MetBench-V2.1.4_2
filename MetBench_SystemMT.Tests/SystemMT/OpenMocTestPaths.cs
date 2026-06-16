@@ -30,12 +30,13 @@ internal static class OpenMocTestPaths
             process.StartInfo = new ProcessStartInfo
             {
                 FileName = OpenMocPython(),
-                Arguments = "-c \"import openmoc\"",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 CreateNoWindow = true
             };
+            process.StartInfo.ArgumentList.Add("-c");
+            process.StartInfo.ArgumentList.Add("import openmoc");
 
             process.Start();
 

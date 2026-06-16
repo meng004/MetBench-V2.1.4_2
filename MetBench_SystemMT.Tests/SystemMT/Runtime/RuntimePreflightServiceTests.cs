@@ -357,13 +357,28 @@ public sealed class RuntimePreflightServiceTests
         public List<string> Commands { get; } = new();
 
         public Task<ProcessResult> RunAsync(
-            string command,
+            ProcessInvocation invocation,
             string workingDirectory,
             int timeoutSeconds,
             CancellationToken cancellationToken)
         {
+            var command = ToDisplayString(invocation);
             Commands.Add(command);
             return Task.FromResult(_handler(command));
+        }
+
+        private static string ToDisplayString(ProcessInvocation invocation) =>
+            string.Join(" ", new[] { invocation.FileName }.Concat(invocation.Arguments.Select(FormatArgument)));
+
+        private static string FormatArgument(string argument)
+        {
+            if (argument.StartsWith("--", StringComparison.Ordinal)
+                || argument.All(ch => char.IsLetterOrDigit(ch) || ch is '-' or '_' or '.' or ':' or '/' or '\\' or '='))
+            {
+                return argument;
+            }
+
+            return "\"" + argument.Replace("\"", "\\\"", StringComparison.Ordinal) + "\"";
         }
     }
 

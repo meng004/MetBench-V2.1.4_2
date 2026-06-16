@@ -37,9 +37,9 @@ public sealed class ExecutionEvidenceWriteThroughTests
             SutName: sutName,
             SourceCasePath: "/tmp/case.json",
             WorkingDirectory: "/tmp",
-            InputParserCommand: "",
-            OutputParserCommand: "",
-            RunnerCommand: "",
+            InputParserInvocation: new ProcessInvocation("", Array.Empty<string>()),
+            OutputParserInvocation: new ProcessInvocation("", Array.Empty<string>()),
+            RunnerInvocation: new ProcessInvocation("", Array.Empty<string>()),
             TimeoutSeconds: 30,
             CatalogVersionSha: "abc123",
             SutVersionSnapshot: "v1",
@@ -273,7 +273,7 @@ public sealed class ExecutionEvidenceWriteThroughTests
         // Regression for SP4 finding #6: the CSV / plain-text I/O SUTs (e.g. _test-csv,
         // projectile) have non-JSON sample cases. BuildSampleTraces JSON-parsed them and
         // threw a fatal JsonException ("'k' is an invalid start of a value") that failed
-        // the whole async RunMr job â€” even though the launcher run itself succeeded.
+        // the whole async RunMr job â€?even though the launcher run itself succeeded.
         // Sample traces are evidence enrichment, so a non-JSON sample must degrade to
         // "no traces" rather than fail the run (mirrors InputCaseReader's best-effort).
         var execRepo = new FakeExecRepo();
@@ -300,7 +300,7 @@ public sealed class ExecutionEvidenceWriteThroughTests
                 },
                 mrInstanceId: 1);
 
-            // Did NOT throw â†’ run recorded, evidence written, sample traces gracefully empty.
+            // Did NOT throw â†?run recorded, evidence written, sample traces gracefully empty.
             Assert.NotNull(recorded.ResultId);
             var evidence = await evRepo.GetByExecutionAsync(recorded.ExecutionId);
             Assert.NotNull(evidence);
@@ -485,7 +485,7 @@ public sealed class ExecutionEvidenceWriteThroughTests
     public async Task Live_pipeline_outcome_carries_typed_triple_into_evidence_without_explicit_typed_args()
     {
         // Wires PR-C0's TypedVerification block all the way through the live
-        // SystemMtPipeline â†’ SystemMtExecutionRecorder loop, without the
+        // SystemMtPipeline â†?SystemMtExecutionRecorder loop, without the
         // caller having to hand the typed triple in explicitly. The pipeline
         // captures the typed (MrSpec, PredicateSpec, VerificationResult)
         // produced by the dispatcher, attaches them to PipelineOutcome via
@@ -558,9 +558,9 @@ public sealed class ExecutionEvidenceWriteThroughTests
                 SutName: "test-sut",
                 SourceCasePath: sourcePath,
                 WorkingDirectory: tempDir,
-                InputParserCommand: "input-parser",
-                OutputParserCommand: "output-parser",
-                RunnerCommand: "runner",
+                InputParserInvocation: new ProcessInvocation("input-parser", Array.Empty<string>()),
+                OutputParserInvocation: new ProcessInvocation("output-parser", Array.Empty<string>()),
+                RunnerInvocation: new ProcessInvocation("runner", Array.Empty<string>()),
                 TimeoutSeconds: 30,
                 CatalogVersionSha: "test-sha",
                 SutVersionSnapshot: "test-sut-v1",

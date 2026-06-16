@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace MetBench_BLL.SystemMT.Runtime;
 
@@ -36,11 +38,164 @@ public sealed record RuntimeDependencyCheck(
     string ImportName,
     bool Required = true);
 
-public sealed record RuntimeVersionCheck(
-    string Name,
-    string Command,
-    string Arguments = "--version",
-    TimeSpan? Timeout = null);
+[JsonConverter(typeof(RuntimeVersionCheckJsonConverter))]
+public sealed record RuntimeVersionCheck
+{
+    public RuntimeVersionCheck(
+        string Name,
+        string Command,
+        string Arguments = "--version",
+        TimeSpan? Timeout = null)
+    {
+        this.Name = Name ?? string.Empty;
+        Executable = Command ?? string.Empty;
+        this.Arguments = Arguments ?? string.Empty;
+        ArgumentList = SplitLegacyArguments(this.Arguments);
+        this.Timeout = Timeout;
+    }
+
+    public RuntimeVersionCheck(
+        string name,
+        string executable,
+        IReadOnlyList<string> argumentList,
+        TimeSpan? timeout = null)
+    {
+        Name = name ?? string.Empty;
+        Executable = executable ?? string.Empty;
+        ArgumentList = argumentList?.ToArray() ?? new[] { "--version" };
+        Arguments = JoinLegacyArguments(ArgumentList);
+        Timeout = timeout;
+    }
+
+    public string Name { get; init; }
+
+    public string Executable { get; init; }
+
+    [Obsolete("Use Executable. Command is kept for source and JSON compatibility.")]
+    public string Command
+    {
+        get => Executable;
+        init
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                Executable = value;
+            }
+        }
+    }
+
+    public string Arguments { get; init; }
+
+    public IReadOnlyList<string> ArgumentList { get; init; }
+
+    public TimeSpan? Timeout { get; init; }
+
+    [Obsolete("Use explicit properties. This preserves the old positional record shape.")]
+    public void Deconstruct(out string name, out string executableCommand, out string arguments, out TimeSpan? timeout)
+    {
+        name = Name;
+        executableCommand = Executable;
+        arguments = Arguments;
+        timeout = Timeout;
+    }
+
+    private static IReadOnlyList<string> SplitLegacyArguments(string arguments)
+    {
+        return string.IsNullOrWhiteSpace(arguments)
+            ? Array.Empty<string>()
+            : arguments.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    }
+
+    private static string JoinLegacyArguments(IReadOnlyList<string> arguments) =>
+        string.Join(" ", arguments);
+}
+
+internal sealed class RuntimeVersionCheckJsonConverter : JsonConverter<RuntimeVersionCheck>
+{
+    public override RuntimeVersionCheck Read(
+        ref Utf8JsonReader reader,
+        Type typeToConvert,
+        JsonSerializerOptions options)
+    {
+        using var document = JsonDocument.ParseValue(ref reader);
+        var root = document.RootElement;
+
+        var name = ReadString(root, nameof(RuntimeVersionCheck.Name)) ?? string.Empty;
+        var executable = ReadString(root, nameof(RuntimeVersionCheck.Executable));
+        var command = ReadString(root, "Command");
+        var resolvedExecutable = !string.IsNullOrWhiteSpace(executable)
+            ? executable!
+            : command ?? string.Empty;
+        var timeout = ReadTimeout(root, options);
+
+        if (TryReadStringArray(root, nameof(RuntimeVersionCheck.ArgumentList), out var argumentList)
+            || TryReadStringArray(root, nameof(RuntimeVersionCheck.Arguments), out argumentList))
+        {
+            return new RuntimeVersionCheck(name, resolvedExecutable, argumentList, timeout);
+        }
+
+        var legacyArguments = ReadString(root, nameof(RuntimeVersionCheck.Arguments));
+        return new RuntimeVersionCheck(name, resolvedExecutable, legacyArguments ?? "--version", timeout);
+    }
+
+    public override void Write(
+        Utf8JsonWriter writer,
+        RuntimeVersionCheck value,
+        JsonSerializerOptions options)
+    {
+        writer.WriteStartObject();
+        writer.WriteString(nameof(RuntimeVersionCheck.Name), value.Name);
+        writer.WriteString(nameof(RuntimeVersionCheck.Executable), value.Executable);
+        writer.WriteString(nameof(RuntimeVersionCheck.Arguments), value.Arguments);
+        writer.WritePropertyName(nameof(RuntimeVersionCheck.ArgumentList));
+        JsonSerializer.Serialize(writer, value.ArgumentList, options);
+        if (value.Timeout is not null)
+        {
+            writer.WritePropertyName(nameof(RuntimeVersionCheck.Timeout));
+            JsonSerializer.Serialize(writer, value.Timeout, options);
+        }
+        writer.WriteEndObject();
+    }
+
+    private static string? ReadString(JsonElement root, string propertyName)
+    {
+        return root.TryGetProperty(propertyName, out var property)
+            && property.ValueKind == JsonValueKind.String
+            ? property.GetString()
+            : null;
+    }
+
+    private static bool TryReadStringArray(
+        JsonElement root,
+        string propertyName,
+        out IReadOnlyList<string> values)
+    {
+        values = Array.Empty<string>();
+        if (!root.TryGetProperty(propertyName, out var property)
+            || property.ValueKind != JsonValueKind.Array)
+        {
+            return false;
+        }
+
+        values = property
+            .EnumerateArray()
+            .Where(item => item.ValueKind == JsonValueKind.String)
+            .Select(item => item.GetString() ?? string.Empty)
+            .ToArray();
+        return true;
+    }
+
+    private static TimeSpan? ReadTimeout(JsonElement root, JsonSerializerOptions options)
+    {
+        if (!root.TryGetProperty(nameof(RuntimeVersionCheck.Timeout), out var property)
+            || property.ValueKind == JsonValueKind.Null)
+        {
+            return null;
+        }
+
+        return property.Deserialize<TimeSpan?>(options);
+    }
+}
 
 public sealed record RuntimePreflightDiagnostic(
     string CheckKind,

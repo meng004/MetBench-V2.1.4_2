@@ -12,7 +12,7 @@ using Xunit;
 namespace MetBench_SystemMT.Tests.SystemMT.Pipeline;
 
 /// <summary>
-/// PR-Bol-2A pin: <see cref="SystemMtPipeline.ExecuteMultiPhaseAsync"/> flow â€” per-phase
+/// PR-Bol-2A pin: <see cref="SystemMtPipeline.ExecuteMultiPhaseAsync"/> flow â€?per-phase
 /// parameter overrides, status-string emission, display-compat field mapping, failure
 /// surfaces. Complementary to <see cref="ErrorMonotonicPipelineWiringTests"/> which pins
 /// the typed-spec injection contract.
@@ -56,9 +56,9 @@ public sealed class MultiPhasePipelineTests : IDisposable
         SutName: "fake-sut",
         SourceCasePath: Path.Combine(_workDir, "source.in.json"),
         WorkingDirectory: _workDir,
-        InputParserCommand: "fake-input-parser",
-        OutputParserCommand: "fake-output-parser",
-        RunnerCommand: "fake-runner",
+        InputParserInvocation: new ProcessInvocation("fake-input-parser", Array.Empty<string>()),
+        OutputParserInvocation: new ProcessInvocation("fake-output-parser", Array.Empty<string>()),
+        RunnerInvocation: new ProcessInvocation("fake-runner", Array.Empty<string>()),
         TimeoutSeconds: 30,
         CatalogVersionSha: "test",
         SutVersionSnapshot: "test",
@@ -320,9 +320,9 @@ public sealed class MultiPhasePipelineTests : IDisposable
     [Fact]
     public async Task Multi_phase_three_phase_minimum_runs_three_SUT_invocations()
     {
-        // Boundary: ErrorMonotonicPredicate validator requires OrderedRoles.Count â‰¥ 2
-        // (ErrorMonotonicPredicateValidator.cs:21â€“24). With the "last phase = ReferenceRole"
-        // convention this means total phases â‰¥ 3. Sanity-check that the boundary actually
+        // Boundary: ErrorMonotonicPredicate validator requires OrderedRoles.Count â‰?2
+        // (ErrorMonotonicPredicateValidator.cs:21â€?4). With the "last phase = ReferenceRole"
+        // convention this means total phases â‰?3. Sanity-check that the boundary actually
         // works end-to-end.
         var spec = TypedSpecFactory.ForErrorMonotonic(
             "mr-em", "k_eff",

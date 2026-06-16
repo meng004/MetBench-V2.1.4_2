@@ -100,9 +100,9 @@ public sealed class RuntimePreflightService : IRuntimePreflightService
                 "Present."));
         }
 
-        var startupCommand = $"{Quote(profile.ExecutablePath!)} --version";
+        var startupInvocation = new ProcessInvocation(profile.ExecutablePath!, new[] { "--version" });
         var startupResult = await _processExecutor.RunAsync(
-            startupCommand,
+            startupInvocation,
             Environment.CurrentDirectory,
             TimeoutSeconds(profile.Timeout),
             cancellationToken).ConfigureAwait(false);
@@ -124,7 +124,7 @@ public sealed class RuntimePreflightService : IRuntimePreflightService
 
         foreach (var check in profile.VersionChecks)
         {
-            if (!TryBuildVersionCommand(profile, check, out var command, out var invalidCommandDetail))
+            if (!TryBuildVersionInvocation(profile, check, out var invocation, out var invalidCommandDetail))
             {
                 diagnostics.Add(new RuntimePreflightDiagnostic(
                     VersionCheckKind,
@@ -140,7 +140,7 @@ public sealed class RuntimePreflightService : IRuntimePreflightService
             }
 
             var result = await _processExecutor.RunAsync(
-                command,
+                invocation,
                 Environment.CurrentDirectory,
                 TimeoutSeconds(check.Timeout ?? profile.Timeout),
                 cancellationToken).ConfigureAwait(false);
@@ -180,7 +180,7 @@ public sealed class RuntimePreflightService : IRuntimePreflightService
             }
 
             var result = await _processExecutor.RunAsync(
-                BuildImportCommand(profile, check),
+                BuildImportInvocation(profile, check),
                 Environment.CurrentDirectory,
                 TimeoutSeconds(profile.Timeout),
                 cancellationToken).ConfigureAwait(false);
@@ -289,38 +289,36 @@ public sealed class RuntimePreflightService : IRuntimePreflightService
         return !File.Exists(executablePath);
     }
 
-    private static bool TryBuildVersionCommand(
+    private static bool TryBuildVersionInvocation(
         RuntimeProfile profile,
         RuntimeVersionCheck check,
-        out string command,
+        out ProcessInvocation invocation,
         out string invalidDetail)
     {
-        command = string.Empty;
+        invocation = new ProcessInvocation(string.Empty, Array.Empty<string>());
         invalidDetail = string.Empty;
 
-        var executable = string.IsNullOrWhiteSpace(check.Command)
+        var executable = string.IsNullOrWhiteSpace(check.Executable)
             ? profile.ExecutablePath!
-            : check.Command;
+            : check.Executable;
 
-        if (!IsSafeShellExecutable(executable))
+        if (!IsSafeExecutable(executable))
         {
             invalidDetail = $"Version check '{check.Name}' has an unsafe executable command.";
             return false;
         }
-        if (!IsSafeShellArguments(check.Arguments))
+        if (!AreSafeArguments(check.ArgumentList))
         {
             invalidDetail = $"Version check '{check.Name}' has unsafe command arguments.";
             return false;
         }
 
-        command = string.IsNullOrWhiteSpace(check.Arguments)
-            ? Quote(executable)
-            : $"{Quote(executable)} {check.Arguments}";
+        invocation = new ProcessInvocation(executable, check.ArgumentList.ToArray());
         return true;
     }
 
-    private static string BuildImportCommand(RuntimeProfile profile, RuntimeDependencyCheck check) =>
-        $"{Quote(profile.ExecutablePath!)} -c \"import {check.ImportName}\"";
+    private static ProcessInvocation BuildImportInvocation(RuntimeProfile profile, RuntimeDependencyCheck check) =>
+        new(profile.ExecutablePath!, new[] { "-c", $"import {check.ImportName}" });
 
     private static int TimeoutSeconds(TimeSpan timeout) =>
         Math.Max(1, (int)Math.Ceiling(timeout.TotalSeconds));
@@ -379,15 +377,7 @@ public sealed class RuntimePreflightService : IRuntimePreflightService
             : text[..500];
     }
 
-    private static string Quote(string value)
-    {
-        if (value.StartsWith("\"", StringComparison.Ordinal) && value.EndsWith("\"", StringComparison.Ordinal))
-            return value;
-
-        return $"\"{value.Replace("\"", "\\\"", StringComparison.Ordinal)}\"";
-    }
-
-    private static bool IsSafeShellExecutable(string value)
+    private static bool IsSafeExecutable(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
             return false;
@@ -395,20 +385,20 @@ public sealed class RuntimePreflightService : IRuntimePreflightService
         return value.IndexOfAny(new[] { '"', '&', '|', ';', '<', '>', '`', '\r', '\n' }) < 0;
     }
 
-    private static bool IsSafeShellArguments(string value)
+    private static bool AreSafeArguments(IReadOnlyList<string> arguments)
     {
-        if (string.IsNullOrWhiteSpace(value))
-            return true;
-
-        foreach (var ch in value)
+        foreach (var argument in arguments)
         {
-            if (char.IsLetterOrDigit(ch)
-                || ch is '-' or '_' or '.' or ':' or '/' or '\\' or '=' or '+' or ' ')
+            foreach (var ch in argument)
             {
-                continue;
-            }
+                if (char.IsLetterOrDigit(ch)
+                    || ch is '-' or '_' or '.' or ':' or '/' or '\\' or '=' or '+' or ' ')
+                {
+                    continue;
+                }
 
-            return false;
+                return false;
+            }
         }
 
         return true;
