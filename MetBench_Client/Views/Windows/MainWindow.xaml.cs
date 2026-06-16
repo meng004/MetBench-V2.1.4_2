@@ -51,12 +51,12 @@ namespace MetBench_Client.Views.Windows
 
         INavigationView INavigationWindow.GetNavigation()
         {
-            throw new NotImplementedException();
+            return RootNavigation;
         }
 
         public void SetServiceProvider(IServiceProvider serviceProvider)
         {
-            throw new NotImplementedException();
+            ArgumentNullException.ThrowIfNull(serviceProvider);
         }
         private void MainWindow_OnSizeChanged(object sender, SizeChangedEventArgs e)
         {

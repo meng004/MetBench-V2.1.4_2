@@ -144,7 +144,8 @@ public sealed class ExecutionArtifactExporter
         if (request.IncludeMarkdown)
         {
             var markdownFile = Path.Combine(request.ExportRoot, "report.md");
-            _markdown!.GenerateExecution(request.ExecutionId, markdownFile);
+            await _markdown!.GenerateExecutionAsync(request.ExecutionId, markdownFile, cancellationToken)
+                .ConfigureAwait(false);
             files.Add("report.md");
         }
 

@@ -79,7 +79,7 @@
 | 编号 | 需求来源 | 功能描述 | 实现文件 | 测试文件 | 测试结果 |
 |---|---|---|---|---|---|
 | F-T6-01 | AGENTS Stage 6 P7；CLAUDE.md §2 T6 | MutationCampaignService（campaign matrix + 杀死率 / 存活率） | `MetBench_BLL.Core/Mutation/MutationCampaignService.cs`<br>`Mutation/MutationCampaignSpec.cs` / `MutationCampaignSummary.cs` | `V2Mutation/MutationCampaignServiceTests.cs`<br>`V2Mutation/FakeMutationRepositories.cs` | ✅ pass |
-| F-T6-02 | CLAUDE.md §2 T6 backlog | 语义变异 + 等价变异体识别 + 最小 MR 完备子集 | **未落地** | **无** | ☐ **缺口**：Stage 8 backlog（CLAUDE.md §2 / AGENTS Stage 8 "主线之外待完善"） |
+| F-T6-02 | CLAUDE.md §2 T6 backlog | 语义变异 + 等价变异体识别 + 最小 MR 完备子集 | **未落地**；本轮仅登记后续边界 | **无**；需独立 T6 plan + tests | ☐ **缺口**：Stage 8 backlog（CLAUDE.md §2 / AGENTS Stage 8 "主线之外待完善"）；后续边界见 `docs/superpowers/plans/2026-06-16-quality-follow-up-plan.md` |
 
 ## 8. F-MR-* · MR 协议层 + 方程函数容器（横切，P0–P7）
 
@@ -124,7 +124,7 @@
 | ~~G-01~~ ✅ 已缓解(2026-05-31) | F-T1-05（WPF 客户端） | ~~云端 CI 不能编译 WPF（`net8.0-windows7.0`），完全无自动测试覆盖~~ | Windows-only WPF 仍不能在 Linux CI 编译，但已新增 `MetBench_Client.Tests` + `tools/smokeshot` VM/UIA 证据路径 | T0-T5 VM release smoke 21/21 PASS；Client i18n VM 9/9 base screenshots + full-page bilingual evidence；后续 Windows-touching PR 仍需 VM evidence |
 | ~~G-02~~ ✅ 已完成(2026-05-23) | F-T2-03（LiveCharts 数据层） | ~~MTVisualizationService 跨平台部分无独立单测~~ | — | 新建 `Bll/MtVisualizationServiceTests.cs`（6 测试覆盖 Line/Scatter/Pie/未初始化/非法 PlotType/重复 Initialize） |
 | ~~G-03~~ ✅ 已完成(2026-05-23) | F-T3-03（反应堆 5 方程锚定） | ~~diffusion + Navier-Stokes 两条 L2 解析解 / SUT 未落地~~ | T3 覆盖完成 | S8-P3 落 navier-stokes（1D subchannel SUT + 2 MR）；S8-P4 落 diffusion（1D FD SUT + 2 MR）。5 方程全覆盖（boltzmann / bateman / fourier / diffusion / navier-stokes） |
-| G-04 | F-T6-02（语义变异 + 等价识别 + 最小 MR 子集） | 完全未实现 | Stage 8 变异模块增强未启动 | CLAUDE.md §2 / AGENTS Stage 8 "主线之外"已列为 backlog |
+| G-04 | F-T6-02（语义变异 + 等价识别 + 最小 MR 子集） | 完全未实现 | Stage 8 变异模块增强未启动；`2026-06-16-quality-follow-up-plan.md` 仅记录边界，不宣称交付 | CLAUDE.md §2 / AGENTS Stage 8 "主线之外"已列为 backlog |
 | ~~G-05~~ ✅ 已完成(2026-05-23；PR-D refit 2026-05-25) | F-MR-P7 | ~~LaTeX→SymPy `[Obsolete]` 后无 grep 守卫单测~~ | — | 已建 `Architecture/ObsoleteAttributeGuardTests.cs` 覆盖 `Latextosympy` + `Latextosympy_Await`（`SystemMtRunner` 已在 PR-D / #119 删除，对应 InlineData 与单独 fact 已同步移除；其作用由 `Architecture/SemanticCatalogBoundaryTests.cs` 接管） |
 | ~~G-06~~ ✅ 已完成(2026-05-23) | F-T1-04 / F-MR-P5 | ~~method MT 协议层未接入业务路径~~ | — | 已建 `IMtPipeline<TReq,TOut>` 共享抽象（BLL.Core/MT）+ `MethodMtPipeline`（BLL/MethodMT，实现协议层）+ `MethodMtRunRequest/Outcome` 数据 record + `MethodMtCatalogService` 扩 CRUD（Get/Update/Delete）+ `SystemMtPipeline` 加 IMtPipeline 显式接口实现；20 新测试（7 pipeline + 4 Bateman 参数化 AAA + 9 CRUD）；全量回归 810→830 pass。注：4 处 `Latextosympy*` 调用已澄清属 v1 展示衍生字段（不在 G-06 范围），归 G-11 处置 |
 | ~~G-07~~ ✅ 已完成(全部；PR-D 终局清理 2026-05-25) | F-T0-02 / F-T0-01 | ~~W1 引擎残留~~ | — | 云端：`SystemMtRunner` 先加 `[Obsolete]`；VM 端（G-07b）：`App.xaml.cs:130` DI 注册已删除（commit `dcf978a`）。**PR-D / #119 已删除整套 W1 类**：`IMrAssertion.cs`、`ApproxEqualAssertion.cs`、`GreaterThanAssertion.cs`、`LessThanAssertion.cs`、`SystemMtRunner.cs`、`EqualityThresholds.cs` 与对应 5 个测试文件均已 `git rm`，`Architecture/SemanticCatalogBoundaryTests.cs` 守卫防止回潮 |

@@ -49,11 +49,30 @@ public sealed class SystemMtReportService
         var exec = _executions.Get(executionId)
             ?? throw new InvalidOperationException($"Execution {executionId} not found");
         var evidence = _evidence?.GetByExecutionAsync(executionId).GetAwaiter().GetResult();
+        return GenerateExecution(exec, evidence, contentPath);
+    }
+
+    public async Task<ReportRenderResult> GenerateExecutionAsync(
+        Guid executionId,
+        string contentPath,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var exec = _executions.Get(executionId)
+            ?? throw new InvalidOperationException($"Execution {executionId} not found");
+        var evidence = _evidence is null
+            ? null
+            : await _evidence.GetByExecutionAsync(executionId, cancellationToken).ConfigureAwait(false);
+        return GenerateExecution(exec, evidence, contentPath);
+    }
+
+    private ReportRenderResult GenerateExecution(Execution exec, ExecutionEvidence? evidence, string contentPath)
+    {
         var content = BuildExecutionMarkdown(
             exec,
             evidence?.TypedVerification,
             HasPairQuality(evidence?.PairQuality) ? evidence!.PairQuality : null);
-        return Persist(ScopeExecution, executionId.ToString(), contentPath, content);
+        return Persist(ScopeExecution, exec.IdExecution.ToString(), contentPath, content);
     }
 
     public ReportRenderResult GenerateAnomaly(Guid anomalyId, string contentPath)

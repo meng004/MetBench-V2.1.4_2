@@ -37,22 +37,23 @@ namespace MetBench_Client.Views.Windows
 
         public INavigationView GetNavigation()
         {
-            throw new NotImplementedException();
+            return null!;
         }
 
         public bool Navigate(Type pageType)
         {
-            throw new NotImplementedException();
+            ArgumentNullException.ThrowIfNull(pageType);
+            return false;
         }
 
         public void SetServiceProvider(IServiceProvider serviceProvider)
         {
-            throw new NotImplementedException();
+            ArgumentNullException.ThrowIfNull(serviceProvider);
         }
 
         public void SetPageService(IPageService pageService)
         {
-            throw new NotImplementedException();
+            ArgumentNullException.ThrowIfNull(pageService);
         }
 
         public void ShowWindow()

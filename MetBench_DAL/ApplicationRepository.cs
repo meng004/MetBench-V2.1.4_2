@@ -237,10 +237,48 @@ namespace MetBench_DAL
         }
 
 
-        //还没开发
         public ObservableCollection<Application> Get(Application application)
         {
-            throw new NotImplementedException();
+            ArgumentNullException.ThrowIfNull(application);
+
+            using (var db = new LiteDatabase(_conn))
+            {
+                Applications = db.GetCollection<Application>(_dbConfig.Applications_Collection_Key);
+                var query = Applications.FindAll().AsEnumerable();
+
+                if (!string.IsNullOrWhiteSpace(application.Name))
+                    query = query.Where(app => Contains(app.Name, application.Name));
+                if (!string.IsNullOrWhiteSpace(application.Description))
+                    query = query.Where(app => Contains(app.Description, application.Description));
+                if (!string.IsNullOrWhiteSpace(application.ProgrammingLanguage))
+                    query = query.Where(app => Contains(app.ProgrammingLanguage, application.ProgrammingLanguage));
+                if (application.LinesOfCode != 0)
+                    query = query.Where(app => app.LinesOfCode == application.LinesOfCode);
+                if (!string.IsNullOrWhiteSpace(application.CodeName))
+                    query = query.Where(app => Contains(app.CodeName, application.CodeName));
+                if (!string.IsNullOrWhiteSpace(application.SourceTestCaseName))
+                    query = query.Where(app => Contains(app.SourceTestCaseName, application.SourceTestCaseName));
+                if (!string.IsNullOrWhiteSpace(application.DOI))
+                    query = query.Where(app => Contains(app.DOI, application.DOI));
+                if (!string.IsNullOrWhiteSpace(application.Url))
+                    query = query.Where(app => Contains(app.Url, application.Url));
+                if (!string.IsNullOrWhiteSpace(application.DomainName))
+                    query = query.Where(app => Contains(app.DomainName, application.DomainName));
+                if (!string.IsNullOrWhiteSpace(application.Version))
+                    query = query.Where(app => Contains(app.Version, application.Version));
+                if (application.RuntimeId.HasValue)
+                    query = query.Where(app => app.RuntimeId == application.RuntimeId);
+                if (!string.IsNullOrWhiteSpace(application.RunnerEntryPath))
+                    query = query.Where(app => Contains(app.RunnerEntryPath, application.RunnerEntryPath));
+                if (!string.IsNullOrWhiteSpace(application.InputParserPath))
+                    query = query.Where(app => Contains(app.InputParserPath, application.InputParserPath));
+                if (!string.IsNullOrWhiteSpace(application.OutputParserPath))
+                    query = query.Where(app => Contains(app.OutputParserPath, application.OutputParserPath));
+                if (!string.IsNullOrWhiteSpace(application.Kind))
+                    query = query.Where(app => string.Equals(app.Kind, application.Kind, StringComparison.Ordinal));
+
+                return new ObservableCollection<Application>(query.ToList());
+            }
         }
         /// <summary>
         ///  通过Name进行模糊查询应用程序
@@ -456,6 +494,9 @@ namespace MetBench_DAL
             }
         }
 
+        private static bool Contains(string? value, string expected) =>
+            !string.IsNullOrEmpty(value)
+            && value.Contains(expected, StringComparison.OrdinalIgnoreCase);
 
     }
 }

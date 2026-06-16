@@ -206,6 +206,46 @@ public sealed class SystemMtReportServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task GenerateExecutionAsync_appends_typed_mr_verification_section_when_evidence_present()
+    {
+        var (svc, fakes) = MakeServiceWithEvidence(out var evRepo);
+        var execId = Guid.NewGuid();
+        fakes.Executions.Add(new Execution
+        {
+            IdExecution = execId,
+            MRInstanceId = 5,
+            Status = "ok",
+            TriggeredBy = "alice",
+            QueuedAt = DateTime.UtcNow,
+            SutVersionSnapshot = "v1.2",
+            MetbenchVersion = "v2.1",
+        });
+        evRepo.Data[execId] = new ExecutionEvidence
+        {
+            IdEvidence = Guid.NewGuid(),
+            ExecutionId = execId,
+            TypedVerification = new TypedVerificationEvidence
+            {
+                SpecId = "heat-equation-amplitude",
+                SpecKind = "MrSpec",
+                PredicateId = "amplitude-greater",
+                PredicateKind = "BinaryComparison",
+                Status = "Passed",
+                Passed = true,
+            },
+        };
+
+        var path = Path.Combine(_tmpDir, "exec-with-ev-async.md");
+        await svc.GenerateExecutionAsync(execId, path);
+        var content = File.ReadAllText(path);
+
+        Assert.Contains("## Typed verification", content);
+        Assert.Contains("Spec ID: heat-equation-amplitude", content);
+        Assert.Contains("Predicate: amplitude-greater (BinaryComparison)", content);
+        Assert.Equal("single-execution", fakes.Reports.Data.Single().Scope);
+    }
+
+    [Fact]
     public void GenerateExecution_typed_skipped_evidence_shows_reason_and_omits_diagnostic()
     {
         var (svc, fakes) = MakeServiceWithEvidence(out var evRepo);
