@@ -97,7 +97,7 @@ namespace MetBench_Client.ViewModels
         private int ParamIndex { get; set; } = 0;
 
         // 参数窗口
-        private INavigationWindow _navigationWindow;
+        private ApplicationProgramsWindow? _parametersWindow;
 
         // DataGrid控件的数据源
         public ObservableCollection<Application> Data { get; set; }
@@ -781,8 +781,8 @@ namespace MetBench_Client.ViewModels
 
             // 显示到窗口的DataGrid上
             Params = InputParameters;
-            _navigationWindow = (_serviceProvider.GetService(typeof(ApplicationProgramsWindow)) as INavigationWindow)!;
-            _navigationWindow.ShowWindow();
+            _parametersWindow = _serviceProvider.GetRequiredService<ApplicationProgramsWindow>();
+            _parametersWindow.ShowWindow();
         }
 
         public void btnOutputParams_Click()
@@ -792,8 +792,8 @@ namespace MetBench_Client.ViewModels
 
             // 绑定数据到窗口的DataGrid上
             Params = OutputParameters;
-            _navigationWindow = (_serviceProvider.GetService(typeof(ApplicationProgramsWindow)) as INavigationWindow)!;
-            _navigationWindow.ShowWindow();
+            _parametersWindow = _serviceProvider.GetRequiredService<ApplicationProgramsWindow>();
+            _parametersWindow.ShowWindow();
         }
 
         // 参数窗口的OK点击事件
@@ -808,13 +808,13 @@ namespace MetBench_Client.ViewModels
                 OutputParameters = Params;
             }
             Params.Clear();
-            _navigationWindow.CloseWindow();
+            _parametersWindow?.CloseWindow();
         }
 
         public void WindowbtnCancel_Click()
         {
             Params.Clear();
-            _navigationWindow.CloseWindow();
+            _parametersWindow?.CloseWindow();
         }
 
         // 进行页面跳转

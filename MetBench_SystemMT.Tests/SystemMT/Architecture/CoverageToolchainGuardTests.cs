@@ -38,6 +38,22 @@ public sealed class CoverageToolchainGuardTests
     }
 
     [Fact]
+    public void Only_main_window_implements_navigation_window()
+    {
+        var windowsDir = Path.Combine(RepositoryRoot(), "MetBench_Client", "Views", "Windows");
+        var offenders = Directory.EnumerateFiles(windowsDir, "*.cs", SearchOption.AllDirectories)
+            .Where(path => !string.Equals(Path.GetFileName(path), "MainWindow.xaml.cs", StringComparison.Ordinal))
+            .Where(path => File.ReadAllText(path).Contains("INavigationWindow", StringComparison.Ordinal))
+            .Select(path => Path.GetRelativePath(RepositoryRoot(), path))
+            .OrderBy(path => path, StringComparer.Ordinal)
+            .ToArray();
+
+        Assert.True(offenders.Length == 0,
+            "Secondary WPF windows should not claim the main navigation-window contract: "
+            + string.Join(", ", offenders));
+    }
+
+    [Fact]
     public void Async_execution_artifact_export_does_not_call_sync_markdown_generation()
     {
         var exporterPath = Path.Combine(
