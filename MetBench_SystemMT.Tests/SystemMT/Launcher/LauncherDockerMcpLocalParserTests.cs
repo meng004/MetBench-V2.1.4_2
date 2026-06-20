@@ -55,10 +55,12 @@ public sealed class LauncherDockerMcpLocalParserTests
         var results = new FakeResultRepo();
         var recorder = new SystemMtExecutionRecorder(execs, results);
         var anomaly = new RecordingAnomalyService();
+        var runtimeExecutor = new RuntimeProcessExecutorRegistry(
+            new LocalRuntimeProcessExecutor(),
+            new DockerRuntimeProcessExecutor(new DockerMcpProcessExecutor(dockerClient)));
         var launcher = new SystemMtLauncher(
             options,
-            new SystemMtPipeline(
-                dockerMcpProcessExecutor: new DockerMcpProcessExecutor(dockerClient)),
+            new SystemMtPipeline(runtimeProcessExecutor: runtimeExecutor),
             recorder,
             anomaly,
             new ManifestMrCatalogProvider(options),

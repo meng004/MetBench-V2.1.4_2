@@ -28,16 +28,18 @@ namespace MetBench_BLL.SystemMT.Pipeline;
 public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineContext, PipelineOutcome>
 {
     private readonly IProcessExecutor _processExecutor;
-    private readonly DockerMcpProcessExecutor _dockerMcpProcessExecutor;
+    private readonly IRuntimeProcessExecutor _runtimeProcessExecutor;
     private readonly IPredicateDispatcher _predicateDispatcher;
 
     public SystemMtPipeline(
         IProcessExecutor? processExecutor = null,
-        DockerMcpProcessExecutor? dockerMcpProcessExecutor = null,
+        IRuntimeProcessExecutor? runtimeProcessExecutor = null,
         IPredicateDispatcher? predicateDispatcher = null)
     {
         _processExecutor = processExecutor ?? new DefaultProcessExecutor();
-        _dockerMcpProcessExecutor = dockerMcpProcessExecutor ?? new DockerMcpProcessExecutor();
+        _runtimeProcessExecutor = runtimeProcessExecutor
+            ?? new RuntimeProcessExecutorRegistry(
+                new LocalRuntimeProcessExecutor(_processExecutor));
         _predicateDispatcher = predicateDispatcher ?? new PredicateDispatcher();
     }
 
@@ -547,23 +549,11 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
         PipelineContext ctx,
         ProcessInvocation invocation,
         string workingDirectory,
-        CancellationToken cancellationToken)
-    {
-        if (ctx.RuntimeProfile?.Kind == RuntimeKind.Docker)
-        {
-            if (ctx.RuntimeProfile.DockerMcp is null)
-            {
-                throw new InvalidOperationException(
-                    $"Docker runtime profile '{ctx.RuntimeProfile.RuntimeKey}' has no Docker MCP options.");
-            }
-
-            return _dockerMcpProcessExecutor.RunAsync(
-                ctx.RuntimeProfile.DockerMcp,
-                invocation,
-                ctx.TimeoutSeconds,
-                cancellationToken);
-        }
-
-        return _processExecutor.RunAsync(invocation, workingDirectory, ctx.TimeoutSeconds, cancellationToken);
-    }
+        CancellationToken cancellationToken) =>
+        _runtimeProcessExecutor.RunAsync(
+            ctx.RuntimeProfile,
+            invocation,
+            workingDirectory,
+            ctx.TimeoutSeconds,
+            cancellationToken);
 }

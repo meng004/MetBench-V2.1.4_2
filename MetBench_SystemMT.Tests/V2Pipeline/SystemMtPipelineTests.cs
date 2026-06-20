@@ -222,7 +222,10 @@ public sealed class SystemMtPipelineTests : IDisposable
             File.WriteAllText(output, JsonSerializer.Serialize(data));
             return new DockerMcpRunResult(0, "", "", TimedOut: false);
         });
-        var pipeline = new SystemMtPipeline(local, dockerMcpProcessExecutor: new DockerMcpProcessExecutor(dockerClient));
+        var runtimeExecutor = new RuntimeProcessExecutorRegistry(
+            new LocalRuntimeProcessExecutor(local),
+            new DockerRuntimeProcessExecutor(new DockerMcpProcessExecutor(dockerClient)));
+        var pipeline = new SystemMtPipeline(local, runtimeExecutor);
         var context = MakeContext("less") with
         {
             RuntimeProfile = new RuntimeProfile(
