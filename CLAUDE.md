@@ -5,6 +5,65 @@ captures the **non-obvious conventions** the codebase has settled on so new
 work fits in cleanly. For project intent and the staged plan, see
 [`AGENTS.md`](AGENTS.md). For build/test, see [`README.md`](README.md).
 
+## 0. System MT 架构最高纲领
+
+MetBench 的架构哲学是：**以证据为真相层、以 System MT 工作流为主权核心、
+以 API / MCP / Skill / Runtime Agent 为边界适配器**。任何新入口、新运行时、
+新自动化能力都必须服务这个核心，而不得替代它。
+
+### 0.1 工作流主权
+
+System MT 语义只属于 MetBench core。MR 选择后的执行必须回到既有主路径：
+
+```text
+JobService -> Launcher -> Pipeline -> Typed Verification -> Recorder / Evidence / Anomaly
+```
+
+不得由 API、MCP、Skill、Runtime Agent、Docker backend 或 VM 脚本另写第二套 MR
+变换、断言、状态机、结果落库或异常分类逻辑。新增能力若不能自然接入这条路径，
+必须先停下来补设计，而不是绕行。
+
+### 0.2 Adapter 分层
+
+入口可以多元，但只能是 adapter：
+
+- WPF、REST API、Business MCP、CLI 都是业务控制面的 adapter。
+- Docker MCP、Runtime Agent、Windows VM Agent、local process 都是运行执行面的 adapter。
+- Codex / Claude Code skill 是意图适配器，只把用户意图翻译成受控 API/MCP 调用。
+
+Business MCP 面向 agent，可封装 REST API，也可与 REST API 并列调用同一个
+Application Service；二者不得各自实现一套 workflow。Runtime MCP 面向 runtime
+backend，不是 agent 默认业务入口。普通 agent 不应直接调用 Runtime MCP 跑 SUT，
+除非任务明确是 runtime 运维诊断。
+
+### 0.3 判断内聚
+
+权限、路由、重试、输入校验、运行时 preflight、job terminal state、typed
+verification、pass/fail、evidence 写入和 anomaly 分类必须由确定性代码完成。模型、
+Skill、外部 Agent、远端 VM 只能提供建议、执行回执或结构化观测，不能成为判断主体。
+
+Runtime Agent 只能负责受控环境中的运行：staging、license/date/snapshot profile、
+白名单 SUT 执行、stdout/stderr/exit code/output artifacts 收集和 evidence 回传。
+它不得自行判定 MR 是否成立，不得把 runtime/license/date/snapshot 失败伪装成 MR
+assertion anomaly，也不得在失败时静默降级到本地运行。
+
+### 0.4 证据优先
+
+任何自动化能力最终都必须产生可审计 evidence，而不是依赖调用者叙述。运行环境、
+runtime profile、agent id、license profile、date profile、snapshot、程序 hash、
+artifact policy、输入/输出 hash、取消/超时状态等会影响复现和信任的事实，都应进入
+RuntimeEvidence、ExecutionEvidence、job record、artifact manifest 或报告投影。
+
+### 0.5 安全边界
+
+闭源/授权 SUT 的程序文件和 license 不随任务移动。API 和 Agent 不得暴露任意 shell、
+任意 argv、任意路径上传/下载或任意 artifact 读取；所有路径必须经过白名单、归一化和
+path traversal 校验。Windows VM、固定 MAC、license profile、date profile、snapshot
+restore 等能力不得塞进 Docker runtime 语义；它们属于独立 Runtime Agent backend。
+
+一句话原则：**MetBench core 负责 MT 流程和判断；边界 adapter 负责表达意图或执行环境；
+证据负责成为真相。**
+
 ## 1. 行为约束（Behavioral Constraints — 最高优先级）
 
 > 本节为 AI agent 与贡献者的强制行为约束，**凌驾于本文件其余所有约定**。
