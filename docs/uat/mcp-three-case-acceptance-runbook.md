@@ -251,6 +251,8 @@ Invoke-RestMethod -Uri "http://<hostIP>:8764/tool" `
 $pythonEncoded = [Uri]::EscapeDataString("C:\Python312\python.exe")  # 按实际路径替换
 $env:METBENCH_MCP_ACCEPTANCE_URI = `
     "docker-mcp://system?image=windows-local" + `
+    "&tool=python" + `
+    "&local=python" + `
     "&python=$pythonEncoded" + `
     "&endpoint=http://<hostIP>:8764" + `
     "&authTokenEnv=METBENCH_DOCKER_MCP_TOKEN"
@@ -274,6 +276,8 @@ dotnet test MetBench_SystemMT.Tests/MetBench_SystemMT.Tests.csproj --no-restore 
 $localPythonEncoded = [Uri]::EscapeDataString("C:\Python312\python.exe")  # 按实际路径替换
 $env:METBENCH_MCP_ACCEPTANCE_URI = `
     "docker-mcp://openmc?image=metbench-sut:latest" + `
+    "&tool=openmc-runner" + `
+    "&local=openmc-runner" + `
     "&python=/opt/openmc-venv/bin/python" + `
     "&endpoint=http://<hostIP>:8765" + `
     "&authTokenEnv=METBENCH_DOCKER_MCP_TOKEN" + `
@@ -288,9 +292,10 @@ dotnet test MetBench_SystemMT.Tests/MetBench_SystemMT.Tests.csproj --no-restore 
 ```
 
 **说明**：
-- `python=/opt/openmc-venv/bin/python`：容器内 OpenMC venv python，SUT runner 命令由此执行。
+- `tool=openmc-runner` / `local=openmc-runner`：结构化 MCP 工具名与本地代理名，SUT runner 命令由 allowlisted tool 执行。
+- `python=/opt/openmc-venv/bin/python`：容器内 OpenMC venv python，用于 runtime profile / preflight 语义。
 - `localPython`：Windows host 上的 Python 全路径，parser/output-parser 在本地执行时使用（关闭缺口 G1）。
-- `pathStyle=wsl`：launcher 将 argv 中匹配 `^[A-Za-z]:[\\/]` 的 token 翻译为 `/mnt/<盘符小写>/...`，容器内可解析（关闭缺口 G2）。
+- `pathStyle=wsl`：launcher 将 args 中匹配 `^[A-Za-z]:[\\/]` 的 token 翻译为 `/mnt/<盘符小写>/...`，容器内可解析（关闭缺口 G2）。
 - server 端 `allowed_mount_roots` 须含仓库根和 Windows 临时目录（见§3.1）；`docker run` 挂载目标按 `X:\path` → `/mnt/x/path` 规则翻译（关闭缺口 G3/G5）。
 
 ---
@@ -303,6 +308,8 @@ dotnet test MetBench_SystemMT.Tests/MetBench_SystemMT.Tests.csproj --no-restore 
 $localPythonEncoded = [Uri]::EscapeDataString("C:\Python312\python.exe")  # 按实际路径替换
 $env:METBENCH_MCP_ACCEPTANCE_URI = `
     "docker-mcp://openmc?image=wsl-openmc" + `
+    "&tool=openmc-runner" + `
+    "&local=openmc-runner" + `
     "&python=/home/<wsl_user>/openmc-venv/bin/python" + `
     "&endpoint=http://<wslIP>:8766" + `
     "&authTokenEnv=METBENCH_DOCKER_MCP_TOKEN" + `

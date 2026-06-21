@@ -848,7 +848,7 @@ git commit -m "fix(runtime): preserve backslashes in SplitCommand and translate 
 
 ```csharp
 // options: RuntimePythons["system"] =
-//   $"docker-mcp://system?image=test-image&python=/nonexistent/container-python"
+//   $"docker-mcp://system?image=test-image&tool=test-runner&local=test-runner&python=/nonexistent/container-python"
 //   + $"&endpoint={Uri.EscapeDataString(fakeServer.Endpoint)}"
 //   + $"&localPython={Uri.EscapeDataString(TestAssetPaths.PythonExecutable())}"
 // （system key 的 docker-mcp URI 会让该 key 全部 MR 走 MCP——测试自包含，无全局影响）
@@ -857,7 +857,7 @@ var result = await launcher.RunAsync(MrId);
 
 Assert.True(result.Passed, "FailureReason: " + result.FailureReason);
 // G1 fact：parser/output-parser 在本地跑（若走了假容器 python /nonexistent/... 会失败）
-// 路由 fact：恰好 2 次 run_sut_command（source + followup），且每次 argv[0] 是假容器 python
+// 路由 fact：恰好 2 次 run_sut_command（source + followup），且每次使用 structured MCP tool
 Assert.Equal(2, fakeServer.RunSutCommandCalls.Count);
 Assert.All(fakeServer.RunSutCommandCalls, argv =>
     Assert.Equal("/nonexistent/container-python", argv[0]));
