@@ -238,7 +238,8 @@ def translate_mount_target(path: str) -> str:
         command = self.server.build_docker_run_command(
             config,
             "metbench-sut:latest",
-            ["python", "sut.py"],
+            "openmc-runner",
+            ["--input", "in.json"],
             timeout_seconds=30,
         )
 
@@ -250,7 +251,9 @@ def translate_mount_target(path: str) -> str:
         self.assertNotIn("/tmp:/tmp", command)
         w_index = command.index("-w")
         self.assertEqual("/mnt/d/Codes/MetBench", command[w_index + 1])
-        self.assertEqual(["metbench-sut:latest", "python", "sut.py"], command[-3:])
+        self.assertEqual(
+            ["metbench-sut:latest", "/usr/local/bin/openmc-runner", "--input", "in.json"],
+            command[-4:])
 
     def test_build_docker_run_command_mounts_extra_linux_roots(self):
         config = self.valid_runtime_config()
@@ -259,13 +262,17 @@ def translate_mount_target(path: str) -> str:
         command = self.server.build_docker_run_command(
             config,
             "metbench-sut:latest",
-            ["python", "sut.py"],
+            "openmc-runner",
+            ["--input", "in.json"],
             timeout_seconds=30,
         )
 
         self.assertIn(f"{REPO_ROOT}:{REPO_ROOT}", command)
         self.assertIn("/tmp:/tmp", command)
         self.assertIn("/opt/openmc-data:/opt/openmc-data", command)
+        self.assertEqual(
+            ["metbench-sut:latest", "/usr/local/bin/openmc-runner", "--input", "in.json"],
+            command[-4:])
 ```
 
 - [ ] **Step 2: 跑测试确认失败** — Expected: 新增 2 个测试 FAIL（现实现只挂 repo_root 与 /tmp）。
@@ -280,10 +287,11 @@ def _is_windows_path(path: str) -> bool:
 def build_docker_run_command(
     config: RuntimeConfig,
     image: str,
-    argv: list[str],
+    tool: str,
+    args: list[str],
     timeout_seconds: int | None = None,
 ) -> list[str]:
-    validate_run_request(config, {"image": image, "argv": argv})
+    command_args = validate_run_request(config, {"image": image, "tool": tool, "args": args})
 
     effective_timeout = config.default_timeout_seconds if timeout_seconds is None else timeout_seconds
     if (
@@ -304,7 +312,7 @@ def build_docker_run_command(
     command = ["docker", "run", "--rm"]
     for root in roots:
         command += ["-v", f"{root}:{translate_mount_target(root)}"]
-    command += ["-w", translate_mount_target(config.repo_root), image, *argv]
+    command += ["-w", translate_mount_target(config.repo_root), image, *command_args]
     return command
 ```
 
@@ -337,7 +345,7 @@ def build_docker_run_command(
             backend="local",
         )
 
-    def test_local_backend_runs_argv_directly_without_docker(self):
+    def test_local_backend_runs_structured_tool_without_docker(self):
         config = self.local_runtime_config()
         calls = []
 
@@ -352,7 +360,8 @@ def build_docker_run_command(
                 "tool": "run_sut_command",
                 "arguments": {
                     "image": "wsl-openmc",
-                    "argv": ["python", "sut.py", "--input", "in.json"],
+                    "tool": "openmc-runner",
+                    "args": ["--input", "in.json"],
                     "timeout_seconds": 9,
                 },
             },
@@ -362,9 +371,9 @@ def build_docker_run_command(
 
         self.assertEqual("completed", response["status"])
         self.assertEqual(1, len(calls))
-        self.assertEqual(["python", "sut.py", "--input", "in.json"], calls[0][0])
+        self.assertEqual(["/usr/local/bin/openmc-runner", "--input", "in.json"], calls[0][0])
         self.assertEqual(9, calls[0][1])
-        self.assertEqual(["python", "sut.py", "--input", "in.json"], response["command"])
+        self.assertEqual(["/usr/local/bin/openmc-runner", "--input", "in.json"], response["command"])
         self.assertNotIn("docker", response["command"])
 
     def test_local_backend_still_rejects_non_allowlisted_image(self):
@@ -376,7 +385,7 @@ def build_docker_run_command(
                 "Bearer secret",
                 {
                     "tool": "run_sut_command",
-                    "arguments": {"image": "other", "argv": ["python", "x.py"]},
+                    "arguments": {"image": "other", "tool": "openmc-runner", "args": []},
                 },
                 runner=lambda command, timeout_seconds: self.server.CommandResult(0, "", ""),
             )
@@ -404,10 +413,11 @@ def build_docker_run_command(
 def build_local_run_command(
     config: RuntimeConfig,
     image: str,
-    argv: list[str],
+    tool: str,
+    args: list[str],
     timeout_seconds: int | None = None,
 ) -> list[str]:
-    validate_run_request(config, {"image": image, "argv": argv})
+    command_args = validate_run_request(config, {"image": image, "tool": tool, "args": args})
 
     effective_timeout = config.default_timeout_seconds if timeout_seconds is None else timeout_seconds
     if (
@@ -417,7 +427,7 @@ def build_local_run_command(
     ):
         raise ValueError("timeout_seconds must be positive")
 
-    return list(argv)
+    return list(command_args)
 ```
 
 `run_sut_command` 中把 `command = build_docker_run_command(...)` 改为：
@@ -561,7 +571,7 @@ python3 infra/mcp/docker-runtime/server.py infra/mcp/docker-runtime/config.local
         var options = Options(new Dictionary<string, string>
         {
             ["openmc"] =
-                "docker-mcp://openmc?image=metbench-sut:latest&python=/opt/openmc-venv/bin/python&endpoint=http%3A%2F%2F192.168.1.20%3A8765&authTokenEnv=METBENCH_DOCKER_MCP_TOKEN&localPython=python&pathStyle=wsl",
+                "docker-mcp://openmc?image=metbench-sut:latest&tool=openmc-runner&local=openmc-runner&python=/opt/openmc-venv/bin/python&endpoint=http%3A%2F%2F192.168.1.20%3A8765&authTokenEnv=METBENCH_DOCKER_MCP_TOKEN&localPython=python&pathStyle=wsl",
         });
         IRuntimeProfileProvider provider = new LauncherOptionsRuntimeProfileProvider(options);
 
@@ -578,7 +588,7 @@ python3 infra/mcp/docker-runtime/server.py infra/mcp/docker-runtime/config.local
         var options = Options(new Dictionary<string, string>
         {
             ["openmc"] =
-                "docker-mcp://openmc?image=metbench-sut:latest&python=/opt/openmc-venv/bin/python&endpoint=http%3A%2F%2F192.168.1.20%3A8765",
+                "docker-mcp://openmc?image=metbench-sut:latest&tool=openmc-runner&local=openmc-runner&python=/opt/openmc-venv/bin/python&endpoint=http%3A%2F%2F192.168.1.20%3A8765",
         });
         IRuntimeProfileProvider provider = new LauncherOptionsRuntimeProfileProvider(options);
 
@@ -589,8 +599,8 @@ python3 infra/mcp/docker-runtime/server.py infra/mcp/docker-runtime/config.local
     }
 
     [Theory]
-    [InlineData("docker-mcp://openmc?image=i&python=p&endpoint=http%3A%2F%2F127.0.0.1%3A8765&pathStyle=windows")]
-    [InlineData("docker-mcp://openmc?image=i&python=p&endpoint=http%3A%2F%2F127.0.0.1%3A8765&pathStyle=")]
+    [InlineData("docker-mcp://openmc?image=i&tool=t&local=l&python=p&endpoint=http%3A%2F%2F127.0.0.1%3A8765&pathStyle=windows")]
+    [InlineData("docker-mcp://openmc?image=i&tool=t&local=l&python=p&endpoint=http%3A%2F%2F127.0.0.1%3A8765&pathStyle=")]
     public void Provider_fails_closed_on_invalid_path_style(string value)
     {
         var options = Options(new Dictionary<string, string> { ["openmc"] = value });

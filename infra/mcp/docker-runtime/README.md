@@ -65,7 +65,8 @@ Run a SUT command:
   "tool": "run_sut_command",
   "arguments": {
     "image": "metbench-sut:latest",
-    "argv": ["python", "SUT/demo.py"],
+    "tool": "openmoc-runner",
+    "args": ["--input", "/tmp/metbench/source.in.json", "--output", "/tmp/metbench/source.out.json"],
     "timeout_seconds": 60
   }
 }
@@ -101,6 +102,8 @@ rtk python3 tools/metbench-docker-runtime-mcp profile-uri \
   --runtime-key openmoc-docker \
   --endpoint http://192.168.1.20:8765 \
   --image metbench-sut:latest \
+  --tool openmoc-runner \
+  --local openmoc-runner \
   --python /opt/openmoc-venv/bin/python \
   --auth-token-env METBENCH_DOCKER_MCP_TOKEN
 ```
@@ -111,6 +114,8 @@ RuntimePythons = new Dictionary<string, string>
     ["openmoc-docker"] =
         "docker-mcp://openmoc-docker"
         + "?image=metbench-sut:latest"
+        + "&tool=openmoc-runner"
+        + "&local=openmoc-runner"
         + "&python=/opt/openmoc-venv/bin/python"
         + "&endpoint=http%3A%2F%2F192.168.1.20%3A8765"
         + "&authTokenEnv=METBENCH_DOCKER_MCP_TOKEN",
@@ -172,6 +177,10 @@ MetBench loads `appsettings.local.json` at startup and reads
   `openmoc-docker` or `docker-linux`.
 - Endpoint: `http://<LAN-IP>:8765`.
 - Image: an image allowlisted by the MCP server config.
+- Tool: a tool name allowlisted by the MCP server config, such as
+  `openmoc-runner`.
+- Local executable: the local tool proxy name stored in the runtime profile,
+  usually matching Tool.
 - Python executable: the interpreter path inside the container.
 - Auth token env: optional environment variable name that stores the Bearer
   token on the MetBench client machine.

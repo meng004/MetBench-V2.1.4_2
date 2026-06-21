@@ -347,8 +347,8 @@ WPF 启动时加载 MetBench_Client 输出目录旁的 `appsettings.local.json`�
 环境变量接线已撤除）。**修改 appsettings.local.json 后需重启 WPF** 才能生效。
 
 也可以不手写 JSON，直接在 WPF 新增的 **SystemMtRuntimeEnvironmentPage 运行时环境页面**
-里填 runtime key / endpoint / image / python / auth token env 并保存——保存即写入同一份
-`appsettings.local.json`（同样需重启 WPF 生效）。
+里填 runtime key / endpoint / image / tool / local executable / python / auth token env
+并保存——保存即写入同一份 `appsettings.local.json`（同样需重启 WPF 生效）。
 
 **注意**：配置 `system` key 后，当前 WPF 会话内**所有** `system` key 的 MR 均经 MCP
 路由——请使用专用验收会话，不要与日常使用会话混用。
@@ -360,13 +360,15 @@ python infra/mcp/docker-runtime/server.py profile-uri `
     --runtime-key system `
     --endpoint http://<hostIP>:8764 `
     --image windows-local `
+    --tool python `
+    --local python `
     --python C:\Python312\python.exe `
     --auth-token-env METBENCH_DOCKER_MCP_TOKEN
 ```
 
 **注意**：`profile-uri` 命令不支持 `localPython` / `pathStyle` 两个参数。用例 2/3 需在
 生成的 URI 末尾手动追加 `&localPython=<URL编码的Windows python完整路径>&pathStyle=wsl`，
-或直接手写完整 URI（运行时环境页面同样不含这两个字段，保存后需手动编辑 JSON 补全）。
+或直接手写完整 URI。
 
 **用例 1**：在 MetBench_Client 输出目录（`MetBench_Client\bin\Debug\net8.0-windows7.0\`
 或实际输出目录）写 `appsettings.local.json`，`python=` 取 URL 编码后的本机 Python 完整路径：
@@ -375,7 +377,7 @@ python infra/mcp/docker-runtime/server.py profile-uri `
 {
   "LauncherOptions": {
     "RuntimePythons": {
-      "system": "docker-mcp://system?image=windows-local&python=C%3A%5CPython312%5Cpython.exe&endpoint=http%3A%2F%2F<hostIP>%3A8764&authTokenEnv=METBENCH_DOCKER_MCP_TOKEN"
+      "system": "docker-mcp://system?image=windows-local&tool=python&local=python&python=C%3A%5CPython312%5Cpython.exe&endpoint=http%3A%2F%2F<hostIP>%3A8764&authTokenEnv=METBENCH_DOCKER_MCP_TOKEN"
     }
   }
 }
@@ -387,7 +389,7 @@ python infra/mcp/docker-runtime/server.py profile-uri `
 {
   "LauncherOptions": {
     "RuntimePythons": {
-      "openmc": "docker-mcp://openmc?image=metbench-sut%3Alatest&python=%2Fopt%2Fopenmc-venv%2Fbin%2Fpython&endpoint=http%3A%2F%2F<hostIP>%3A8765&authTokenEnv=METBENCH_DOCKER_MCP_TOKEN&localPython=C%3A%5CPython312%5Cpython.exe&pathStyle=wsl"
+      "openmc": "docker-mcp://openmc?image=metbench-sut%3Alatest&tool=openmc-runner&local=openmc-runner&python=%2Fopt%2Fopenmc-venv%2Fbin%2Fpython&endpoint=http%3A%2F%2F<hostIP>%3A8765&authTokenEnv=METBENCH_DOCKER_MCP_TOKEN&localPython=C%3A%5CPython312%5Cpython.exe&pathStyle=wsl"
     }
   }
 }
@@ -399,7 +401,7 @@ python infra/mcp/docker-runtime/server.py profile-uri `
 {
   "LauncherOptions": {
     "RuntimePythons": {
-      "openmc": "docker-mcp://openmc?image=wsl-openmc&python=%2Fhome%2F<wsl_user>%2Fopenmc-venv%2Fbin%2Fpython&endpoint=http%3A%2F%2F<wslIP>%3A8766&authTokenEnv=METBENCH_DOCKER_MCP_TOKEN&localPython=C%3A%5CPython312%5Cpython.exe&pathStyle=wsl"
+      "openmc": "docker-mcp://openmc?image=wsl-openmc&tool=openmc-runner&local=openmc-runner&python=%2Fhome%2F<wsl_user>%2Fopenmc-venv%2Fbin%2Fpython&endpoint=http%3A%2F%2F<wslIP>%3A8766&authTokenEnv=METBENCH_DOCKER_MCP_TOKEN&localPython=C%3A%5CPython312%5Cpython.exe&pathStyle=wsl"
     }
   }
 }
