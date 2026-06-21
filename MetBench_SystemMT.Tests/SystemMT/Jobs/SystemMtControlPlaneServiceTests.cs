@@ -60,6 +60,26 @@ public class SystemMtControlPlaneServiceTests
         Assert.Contains("ArGv", ex.Message);
     }
 
+    [Theory]
+    [InlineData("artifactPath")]
+    [InlineData("sourcePath")]
+    [InlineData("manifestUri")]
+    [InlineData("runnerCommand")]
+    [InlineData("pythonExecutable")]
+    [InlineData("dataRoot")]
+    public async Task SubmitRunAsync_rejects_infrastructure_looking_override_keys(string key)
+    {
+        var svc = new SystemMtControlPlaneService(new CapturingJobService());
+        var request = new SystemMtControlPlaneRunRequest(
+            "mr-alpha",
+            new Dictionary<string, string> { [key] = "unsafe" });
+
+        var ex = await Assert.ThrowsAsync<ArgumentException>(
+            () => svc.SubmitRunAsync(request, default));
+
+        Assert.Contains(key, ex.Message);
+    }
+
     [Fact]
     public async Task SubmitRunAsync_rejects_blank_override_key_and_null_value()
     {

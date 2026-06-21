@@ -6,18 +6,16 @@ namespace MetBench_BLL.SystemMT.ControlPlane;
 
 public sealed class SystemMtControlPlaneService : ISystemMtControlPlaneService
 {
-    private static readonly HashSet<string> ReservedOverrideKeys = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly string[] ReservedOverrideKeyFragments =
     {
         "argv",
         "command",
-        "manifestPath",
-        "artifactRoot",
-        "packageRoot",
-        "stagingRoot",
-        "exportRoot",
-        "workingDirectory",
+        "manifest",
+        "artifact",
+        "root",
+        "path",
+        "workingdirectory",
         "executable",
-        "executablePath",
     };
 
     private readonly ISystemMtJobService _jobs;
@@ -136,7 +134,7 @@ public sealed class SystemMtControlPlaneService : ISystemMtControlPlaneService
             var normalizedKey = key.Trim();
             if (string.IsNullOrWhiteSpace(normalizedKey))
                 throw new ArgumentException("Parameter override keys must be non-blank.", nameof(overrides));
-            if (ReservedOverrideKeys.Contains(normalizedKey))
+            if (ContainsReservedOverrideFragment(normalizedKey))
                 throw new ArgumentException(
                     $"Parameter override '{normalizedKey}' is reserved for infrastructure and cannot be submitted through the control plane.",
                     nameof(overrides));
@@ -150,4 +148,8 @@ public sealed class SystemMtControlPlaneService : ISystemMtControlPlaneService
 
         return copy.Count == 0 ? null : copy;
     }
+
+    private static bool ContainsReservedOverrideFragment(string key) =>
+        ReservedOverrideKeyFragments.Any(fragment =>
+            key.Contains(fragment, StringComparison.OrdinalIgnoreCase));
 }

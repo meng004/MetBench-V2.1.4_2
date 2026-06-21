@@ -25,10 +25,18 @@ public sealed class SystemMtControlPlaneBoundaryTests
 
     private static readonly string[] PublicApiRawPathTerms =
     {
+        "Argv",
+        "Command",
+        "Manifest",
+        "ManifestPath",
+        "ArtifactRoot",
         "PackageRoot",
         "StagingRoot",
         "ExportRoot",
         "ArtifactPath",
+        "WorkingDirectory",
+        "Executable",
+        "ExecutablePath",
     };
 
     [Fact]
@@ -97,6 +105,7 @@ public sealed class SystemMtControlPlaneBoundaryTests
         return
         [
             Path.Combine(root, "MetBench_Api"),
+            Path.Combine(root, "MetBench_BLL.Core", "SystemMT", "ControlPlane"),
             Path.Combine(root, "MetBench_BLL.Core", "SystemMT", "Mcp"),
             Path.Combine(root, "MetBench_BLL.Core", "SystemMT", "BusinessMcp"),
             Path.Combine(root, "MetBench_BLL.Core", "SystemMT", "Api"),
