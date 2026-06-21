@@ -40,6 +40,12 @@ namespace MetBench_Client.ViewModels
         private string _image = "metbench/runtime-python:latest";
 
         [ObservableProperty]
+        private string _toolName = "openmoc-runner";
+
+        [ObservableProperty]
+        private string _localExecutable = "openmoc-runner";
+
+        [ObservableProperty]
         private string _pythonExecutable = "python3";
 
         [ObservableProperty]
@@ -100,7 +106,9 @@ namespace MetBench_Client.ViewModels
                     draft.PythonExecutable.Trim(),
                     string.IsNullOrWhiteSpace(draft.AuthTokenEnvironmentVariable)
                         ? null
-                        : draft.AuthTokenEnvironmentVariable.Trim()));
+                        : draft.AuthTokenEnvironmentVariable.Trim(),
+                    ToolName: draft.ToolName.Trim(),
+                    LocalExecutable: draft.LocalExecutable.Trim()));
                 StatusMessage = health.Available
                     ? string.Format(Localization["RuntimeEnv_Status_HealthOk_Fmt"], health.BindHost, health.BindPort)
                     : string.Format(Localization["RuntimeEnv_Status_HealthFailed_Fmt"], health.Status, health.Detail);
@@ -115,6 +123,8 @@ namespace MetBench_Client.ViewModels
             RuntimeKey,
             Endpoint,
             Image,
+            ToolName,
+            LocalExecutable,
             PythonExecutable,
             string.IsNullOrWhiteSpace(AuthTokenEnvironmentVariable)
                 ? null

@@ -158,6 +158,14 @@ public sealed class DockerMcpRuntimeClientTests
         Assert.DoesNotContain("WorkingDirectory", source, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void RunSutCommandAsync_does_not_shadow_request_parameter_with_http_message_variable()
+    {
+        var source = File.ReadAllText(Path.Combine(SolutionRoot(), "MetBench_BLL.Core", "SystemMT", "Runtime", "DockerMcpRuntimeClient.cs"));
+
+        Assert.DoesNotContain("using var request = new HttpRequestMessage", source, StringComparison.Ordinal);
+    }
+
     private sealed class CapturingHandler : HttpMessageHandler
     {
         private readonly HttpStatusCode _status;

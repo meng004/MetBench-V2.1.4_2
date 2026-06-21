@@ -68,15 +68,15 @@ public sealed class DockerMcpRuntimeClient : IDockerMcpRuntimeClient
 
         try
         {
-            using var request = new HttpRequestMessage(HttpMethod.Post, ToolUri(options.Endpoint));
+            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, ToolUri(options.Endpoint));
             if (!string.IsNullOrWhiteSpace(token))
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            request.Content = new StringContent(
+                httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            httpRequest.Content = new StringContent(
                 JsonSerializer.Serialize(new { tool = "runtime_health", arguments = new { } }, JsonOptions),
                 Encoding.UTF8,
                 "application/json");
 
-            using var response = await _http.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            using var response = await _http.SendAsync(httpRequest, cancellationToken).ConfigureAwait(false);
             var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
@@ -132,10 +132,10 @@ public sealed class DockerMcpRuntimeClient : IDockerMcpRuntimeClient
 
         try
         {
-            using var request = new HttpRequestMessage(HttpMethod.Post, ToolUri(options.Endpoint));
+            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, ToolUri(options.Endpoint));
             if (!string.IsNullOrWhiteSpace(token))
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            request.Content = new StringContent(
+                httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            httpRequest.Content = new StringContent(
                 JsonSerializer.Serialize(new
                 {
                     tool = "run_sut_command",
@@ -150,7 +150,7 @@ public sealed class DockerMcpRuntimeClient : IDockerMcpRuntimeClient
                 Encoding.UTF8,
                 "application/json");
 
-            using var response = await _http.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            using var response = await _http.SendAsync(httpRequest, cancellationToken).ConfigureAwait(false);
             var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
