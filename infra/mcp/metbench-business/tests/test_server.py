@@ -1,9 +1,11 @@
 import importlib.util
+import io
 import json
 import os
 import tempfile
 import unittest
 from pathlib import Path
+from urllib.error import HTTPError
 
 
 SERVER_PATH = Path(__file__).resolve().parents[1] / "server.py"
@@ -124,6 +126,26 @@ class MetBenchBusinessServerTests(unittest.TestCase):
         )
 
         self.assertEqual(("DELETE", "/api/v1/systemmt/jobs/job-1", None), api.calls[0])
+
+    def test_call_rest_api_raises_for_rest_http_error_body(self):
+        config = self.write_config_and_load(self.valid_config_payload())
+        original = self.server.urllib_request.urlopen
+
+        def raise_bad_request(_request, timeout):
+            raise HTTPError(
+                "http://127.0.0.1:5080/api/v1/systemmt/jobs",
+                400,
+                "Bad Request",
+                hdrs={},
+                fp=io.BytesIO(b'{"code":"bad_request","message":"MrId must be non-blank."}'),
+            )
+
+        self.server.urllib_request.urlopen = raise_bad_request
+        try:
+            with self.assertRaisesRegex(ValueError, "HTTP 400"):
+                self.server.call_rest_api(config, "POST", "/api/v1/systemmt/jobs", {"mrId": ""})
+        finally:
+            self.server.urllib_request.urlopen = original
 
 
 class FakeApiClient:

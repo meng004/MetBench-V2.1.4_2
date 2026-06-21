@@ -159,8 +159,8 @@ def call_rest_api(
             data = response.read().decode("utf-8")
     except HTTPError as error:
         data = error.read().decode("utf-8")
-        if not data:
-            raise ValueError(f"REST API returned HTTP {error.code}") from error
+        detail = data.strip() if data else error.reason
+        raise ValueError(f"REST API returned HTTP {error.code}: {detail}") from error
 
     return {} if not data else json.loads(data)
 
