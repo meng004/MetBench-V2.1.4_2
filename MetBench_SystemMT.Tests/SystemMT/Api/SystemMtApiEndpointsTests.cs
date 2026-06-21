@@ -9,6 +9,21 @@ namespace MetBench_SystemMT.Tests.SystemMT.Api;
 public sealed class SystemMtApiEndpointsTests
 {
     [Fact]
+    public void Program_registers_control_plane_facade_dependencies()
+    {
+        var root = SolutionRoot();
+        var program = File.ReadAllText(Path.Combine(root, "MetBench_Api", "Program.cs"));
+
+        Assert.Contains("AddSingleton<IJobQueue, ChannelJobQueue>()", program);
+        Assert.Contains("AddSingleton<IJobStore, InMemoryJobStore>()", program);
+        Assert.Contains("AddSingleton<IJobCancellationRegistry, JobCancellationRegistry>()", program);
+        Assert.Contains("AddSingleton<ISystemMtJobService, SystemMtJobService>()", program);
+        Assert.Contains(
+            "AddSingleton<ISystemMtControlPlaneService, SystemMtControlPlaneService>()",
+            program);
+    }
+
+    [Fact]
     public async Task SubmitRunAsync_returns_accepted_and_forwards_control_plane_request()
     {
         var controlPlane = new FakeControlPlane();
@@ -187,5 +202,18 @@ public sealed class SystemMtApiEndpointsTests
             CancelledJobId = jobId;
             return Task.CompletedTask;
         }
+    }
+
+    private static string SolutionRoot()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null)
+        {
+            if (dir.GetFiles("*.sln").Length > 0)
+                return dir.FullName;
+            dir = dir.Parent;
+        }
+
+        throw new DirectoryNotFoundException($"Could not locate solution root from {AppContext.BaseDirectory}.");
     }
 }
