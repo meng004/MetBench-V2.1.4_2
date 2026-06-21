@@ -186,6 +186,8 @@ public sealed class SystemMtLauncher : ISystemMtLauncher, ISystemMtCatalogReader
         var runtimeProfileResolutionError = string.Empty;
         var pythonExecutable = blueprint.PythonExecutable;
         var parserPythonExecutable = blueprint.PythonExecutable;
+        var runnerExecutable = blueprint.PythonExecutable;
+        IReadOnlyList<string> runnerBaseArguments = new[] { blueprint.RunnerScriptPath };
         try
         {
             resolvedRuntimeProfile = CreateRuntimeProfile(blueprint);
@@ -194,10 +196,20 @@ public sealed class SystemMtLauncher : ISystemMtLauncher, ISystemMtCatalogReader
                 ?? blueprint.PythonExecutable;
             parserPythonExecutable = resolvedRuntimeProfile.DockerMcp?.LocalPythonExecutable
                 ?? pythonExecutable;
+            if (resolvedRuntimeProfile.DockerMcp is { } dockerMcp)
+            {
+                runnerExecutable = dockerMcp.LocalExecutable;
+                runnerBaseArguments = Array.Empty<string>();
+            }
+            else
+            {
+                runnerExecutable = pythonExecutable;
+            }
         }
         catch (RuntimeEnvironmentResolutionException ex)
         {
             runtimeProfileResolutionError = ex.Message;
+            runnerExecutable = pythonExecutable;
         }
 
         var context = new PipelineContext(
@@ -220,8 +232,8 @@ public sealed class SystemMtLauncher : ISystemMtLauncher, ISystemMtCatalogReader
                 parserPythonExecutable,
                 new[] { blueprint.OutputParserScriptPath }),
             RunnerInvocation: new ProcessInvocation(
-                pythonExecutable,
-                new[] { blueprint.RunnerScriptPath }),
+                runnerExecutable,
+                runnerBaseArguments),
             TimeoutSeconds: (int)blueprint.Timeout.TotalSeconds,
             CatalogVersionSha: string.Empty,
             SutVersionSnapshot: string.Empty,

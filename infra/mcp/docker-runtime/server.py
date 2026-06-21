@@ -1,5 +1,6 @@
 import argparse
 import json
+import os
 import re
 import socket
 import subprocess
@@ -214,7 +215,7 @@ def validate_run_request(config: RuntimeConfig, request: dict[str, Any]) -> list
     for arg in args:
         if not isinstance(arg, str) or not arg.strip():
             raise ValueError("args must contain only non-blank strings")
-        _validate_tool_argument(arg)
+        _validate_tool_argument(config, arg)
 
     return [config.allowed_tools[tool].executable, *args]
 
@@ -227,17 +228,33 @@ def authorize(header: str | None, expected_token: str) -> None:
 WINDOWS_PATH_PATTERN = re.compile(r"^([A-Za-z]):[\\/](.*)$")
 
 
-def _validate_tool_argument(arg: str) -> None:
+def _validate_tool_argument(config: RuntimeConfig, arg: str) -> None:
     if arg in {"-c", "/c", "-m", "/m"}:
         raise ValueError("tool arguments must not request shell or module execution")
     if arg.lower().endswith((".py", ".pyc")):
         raise ValueError("tool arguments must not contain script path values")
-    if arg.startswith("/") or WINDOWS_PATH_PATTERN.match(arg):
-        raise ValueError("tool arguments must not contain absolute host paths")
+    if (arg.startswith("/") or WINDOWS_PATH_PATTERN.match(arg)) and not _is_allowed_data_path(config, arg):
+        raise ValueError("absolute tool arguments must be under an allowed mount root")
     if ".." in re.split(r"[\\/]", arg):
         raise ValueError("tool arguments must not contain path traversal")
     if any(operator in arg for operator in [";", "&&", "||", "|"]) or "$(" in arg or "`" in arg:
         raise ValueError("tool arguments must not contain shell operators")
+
+
+def _is_allowed_data_path(config: RuntimeConfig, path: str) -> bool:
+    translated_path = os.path.normpath(translate_mount_target(path))
+    roots = [config.repo_root, *config.allowed_mount_roots]
+    if not _is_windows_path(config.repo_root):
+        roots.append("/tmp")
+
+    for root in roots:
+        translated_root = os.path.normpath(translate_mount_target(root))
+        try:
+            if os.path.commonpath([translated_path, translated_root]) == translated_root:
+                return True
+        except ValueError:
+            continue
+    return False
 
 
 def translate_mount_target(path: str) -> str:

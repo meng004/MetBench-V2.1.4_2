@@ -39,14 +39,20 @@ public sealed class DockerMcpProcessExecutor
                 nameof(invocation));
         }
 
-        var args = invocation.Arguments?.ToArray() ?? Array.Empty<string>();
+        string[] args;
+        if (options.PathStyle == DockerMcpPathStyle.Wsl)
+        {
+            args = (invocation.Arguments ?? Array.Empty<string>())
+                .Select(TranslateWindowsPathToWsl)
+                .ToArray();
+        }
+        else
+        {
+            args = invocation.Arguments?.ToArray() ?? Array.Empty<string>();
+        }
         foreach (var arg in args)
         {
             ValidateToolArgument(arg);
-        }
-        if (options.PathStyle == DockerMcpPathStyle.Wsl)
-        {
-            args = args.Select(TranslateWindowsPathToWsl).ToArray();
         }
         var sw = Stopwatch.StartNew();
         var result = await _client
@@ -80,8 +86,6 @@ public sealed class DockerMcpProcessExecutor
         {
             throw new ArgumentException("Docker MCP tool arguments must not contain script path values.");
         }
-        if (arg.StartsWith("/", StringComparison.Ordinal) || IsWindowsAbsolutePath(arg))
-            throw new ArgumentException("Docker MCP tool arguments must not contain absolute host paths.");
         if (arg.Split(new[] { '/', '\\' }, StringSplitOptions.None).Any(part => part == ".."))
             throw new ArgumentException("Docker MCP tool arguments must not contain path traversal.");
         if (arg.Contains(';', StringComparison.Ordinal)

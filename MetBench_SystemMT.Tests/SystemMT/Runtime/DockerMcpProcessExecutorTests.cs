@@ -131,8 +131,6 @@ public sealed class DockerMcpProcessExecutorTests
     [InlineData("/m")]
     [InlineData("runner.py")]
     [InlineData("../secret.json")]
-    [InlineData("/etc/passwd")]
-    [InlineData(@"C:\Temp\secret.json")]
     [InlineData("&&")]
     [InlineData("|")]
     [InlineData("$(id)")]
@@ -186,18 +184,18 @@ public sealed class DockerMcpProcessExecutorTests
 
         await executor.RunAsync(
             options,
-            new ProcessInvocation(
-                "openmc-runner",
-                new[] { "--input", "case.json" }),
+                new ProcessInvocation(
+                    "openmc-runner",
+                    new[] { "--input", @"C:\Users\lemon\AppData\Local\Temp\source.json" }),
             30,
             CancellationToken.None);
 
         Assert.Equal(
             new[]
-            {
-                "--input",
-                "case.json",
-            },
+                {
+                    "--input",
+                    "/mnt/c/Users/lemon/AppData/Local/Temp/source.json",
+                },
             client.LastRequest!.Args);
     }
 

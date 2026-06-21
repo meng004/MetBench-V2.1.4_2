@@ -267,6 +267,29 @@ class DockerRuntimeServerTests(unittest.TestCase):
             command,
         )
 
+    def test_validate_run_request_allows_data_paths_under_mount_roots(self):
+        config = self.valid_runtime_config()
+
+        command = self.server.validate_run_request(
+            config,
+            {
+                "image": "metbench-sut:latest",
+                "tool": "openmoc-runner",
+                "args": ["--input", "/tmp/metbench/source.json", "--output", f"{REPO_ROOT}/out.json"],
+            },
+        )
+
+        self.assertEqual(
+            [
+                "/opt/metbench-tools/openmoc-runner",
+                "--input",
+                "/tmp/metbench/source.json",
+                "--output",
+                f"{REPO_ROOT}/out.json",
+            ],
+            command,
+        )
+
     def test_validate_run_request_requires_list_of_non_blank_string_args(self):
         config = self.valid_runtime_config()
         cases = [
@@ -294,6 +317,7 @@ class DockerRuntimeServerTests(unittest.TestCase):
             ["/m", "module"],
             ["../secret.json"],
             ["/etc/passwd"],
+            ["/tmp/runner.py"],
             [r"C:\Windows\system32\cmd.exe"],
             ["runner.py"],
             ["RUNNER.PY"],

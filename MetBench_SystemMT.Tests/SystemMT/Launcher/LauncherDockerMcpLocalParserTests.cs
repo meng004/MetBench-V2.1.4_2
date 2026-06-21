@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,15 +20,15 @@ namespace MetBench_SystemMT.Tests.SystemMT.Launcher;
 /// G1 fact test: parser/output-parser commands run locally via DefaultProcessExecutor
 /// but were built on the container python path. After the fix, an explicit
 /// <c>localPython</c> URI param overrides the parser executable while the
-/// runner still uses the profile (container) python.
+    /// runner still routes through the structured Docker MCP tool.
 ///
 /// Test design: in-process fake MCP client. CI-safe, no docker or loopback listener.
-/// The fake client substitutes argv[0] with the real local python for the runner calls,
-/// so the runner succeeds even with a bogus container python. The parser commands run
-/// locally — before the fix they use the bogus path and fail; after the fix they use
+    /// The fake client maps the structured tool call back to the real local Python + runner
+    /// script, so the runner succeeds even with bogus container paths. The parser commands run
+    /// locally — before the fix they use the bogus path and fail; after the fix they use
 /// <c>localPython</c> and succeed.
-/// Routing fact: exactly 2 <c>run_sut_command</c> calls (source + follow-up), each with
-/// the bogus container python as argv[0].
+    /// Routing fact: exactly 2 <c>run_sut_command</c> calls (source + follow-up), each using
+    /// the allowlisted structured MCP tool/local executable instead of a Python script argv.
 /// </summary>
 public sealed class LauncherDockerMcpLocalParserTests
 {
@@ -35,11 +36,15 @@ public sealed class LauncherDockerMcpLocalParserTests
     public async Task Parser_commands_run_locally_while_runner_routes_through_mcp()
     {
         var localPython = TestAssetPaths.PythonExecutable();
-        var dockerClient = new FakeMcpRuntimeClient(localPython);
+        var runnerScriptPath = Path.Combine(
+            TestAssetPaths.AssetRoot(),
+            "minimum_mr_subset_p3",
+            "minimum_mr_subset_p3.py");
+        var dockerClient = new FakeMcpRuntimeClient(localPython, runnerScriptPath);
 
         var uri = "docker-mcp://system?image=test-image"
             + "&tool=test-runner"
-            + "&local=/nonexistent/container-python"
+            + "&local=test-runner"
             + "&python=/nonexistent/container-python"
             + $"&endpoint={Uri.EscapeDataString("http://127.0.0.1:1")}"
             + $"&localPython={Uri.EscapeDataString(localPython)}";
@@ -77,7 +82,10 @@ public sealed class LauncherDockerMcpLocalParserTests
         Assert.True(result.Passed, "FailureReason: " + result.FailureReason);
         Assert.Equal(2, dockerClient.RunSutCommandCalls.Count);
         Assert.All(dockerClient.RunSutCommandCalls, argv =>
-            Assert.Equal("/nonexistent/container-python", argv[0]));
+        {
+            Assert.Equal("test-runner", argv[0]);
+            Assert.DoesNotContain(argv, arg => arg.EndsWith(".py", StringComparison.OrdinalIgnoreCase));
+        });
     }
 
     // ---- in-process fake MCP client ----
@@ -86,19 +94,21 @@ public sealed class LauncherDockerMcpLocalParserTests
     /// In-process fake for the minimal MCP surface consumed by the launcher:
     /// <list type="bullet">
     ///   <item><c>runtime_health</c> → 200 with "ok" status.</item>
-    ///   <item><c>run_sut_command</c> → records argv[0], replaces it with the real
-    ///     local python, runs the process locally, and returns the captured output.</item>
+    ///   <item><c>run_sut_command</c> → records the structured tool invocation,
+    ///     maps it to the real local runner script, and returns the captured output.</item>
     /// </list>
     /// </summary>
     private sealed class FakeMcpRuntimeClient : IDockerMcpRuntimeClient
     {
         private readonly string _realLocalPython;
+        private readonly string _runnerScriptPath;
 
         public List<IReadOnlyList<string>> RunSutCommandCalls { get; } = new();
 
-        public FakeMcpRuntimeClient(string realLocalPython)
+        public FakeMcpRuntimeClient(string realLocalPython, string runnerScriptPath)
         {
             _realLocalPython = realLocalPython;
+            _runnerScriptPath = runnerScriptPath;
         }
 
         public Task<DockerMcpHealthResult> HealthAsync(
@@ -117,20 +127,19 @@ public sealed class LauncherDockerMcpLocalParserTests
             DockerMcpRunRequest request,
             CancellationToken cancellationToken = default)
         {
-            // Record the call with the original argv[0] (the container python path)
-            var argv = new[] { options.PythonExecutable }.Concat(request.Args).ToArray();
+            var argv = new[] { options.LocalExecutable }.Concat(request.Args).ToArray();
             lock (RunSutCommandCalls)
             {
                 RunSutCommandCalls.Add(argv.ToArray());
             }
 
-            if (argv.Count == 0)
+            if (argv.Length == 0)
             {
                 return new DockerMcpRunResult(-1, string.Empty, "empty argv", TimedOut: false);
             }
 
-            // Replace argv[0] with the real local python so the process can actually run
-            var realArgv = new List<string>(argv) { [0] = _realLocalPython };
+            var realArgv = new List<string> { _realLocalPython, _runnerScriptPath };
+            realArgv.AddRange(request.Args);
 
             // Run locally to simulate what the container would do
             var psi = new ProcessStartInfo

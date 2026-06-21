@@ -46,6 +46,7 @@ public sealed class DockerMcpRuntimeProfileSettingsTests
         var options = new LauncherOptions(
             SutRoot: "SUT",
             SystemPython: "python",
+            OpenMocPython: "python",
             RuntimePythons: new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 ["openmoc"] = draft.ToRuntimePythonValue(),
