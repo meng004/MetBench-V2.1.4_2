@@ -191,7 +191,7 @@ Saving writes the generated `docker-mcp://` value to:
 {
   "LauncherOptions": {
     "RuntimePythons": {
-      "docker-linux": "docker-mcp://docker-linux?image=..."
+      "docker-linux": "docker-mcp://docker-linux?image=metbench-sut:latest&tool=openmoc-runner&local=openmoc-runner&python=/opt/openmoc-venv/bin/python&endpoint=http%3A%2F%2F192.168.1.20%3A8765"
     }
   }
 }
