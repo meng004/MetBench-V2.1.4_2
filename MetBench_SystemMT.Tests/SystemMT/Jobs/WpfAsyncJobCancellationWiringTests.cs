@@ -21,6 +21,17 @@ public sealed class WpfAsyncJobCancellationWiringTests
     }
 
     [Fact]
+    public void App_di_registers_business_control_plane_service()
+    {
+        var app = ReadRepoFile("MetBench_Client", "App.xaml.cs");
+
+        Assert.Contains("using MetBench_BLL.SystemMT.ControlPlane;", app);
+        Assert.Contains(
+            "services.AddSingleton<ISystemMtControlPlaneService, SystemMtControlPlaneService>();",
+            app);
+    }
+
+    [Fact]
     public void Hosted_worker_passes_registered_cancellation_registry_to_worker()
     {
         var hosted = ReadRepoFile("MetBench_Client", "Hosting", "SystemMtJobWorkerHostedService.cs");

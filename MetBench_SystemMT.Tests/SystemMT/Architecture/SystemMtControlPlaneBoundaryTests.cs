@@ -108,6 +108,7 @@ public sealed class SystemMtControlPlaneBoundaryTests
         return
         [
             Path.Combine(root, "MetBench_Api"),
+            Path.Combine(root, "MetBench_BLL.Core", "SystemMT", "ControlPlane"),
             Path.Combine(root, "MetBench_BLL.Core", "SystemMT", "Api"),
         ];
     }
