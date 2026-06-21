@@ -21,6 +21,9 @@ public sealed class SystemMtApiEndpointsTests
         Assert.Contains(
             "AddSingleton<ISystemMtControlPlaneService, SystemMtControlPlaneService>()",
             program);
+        Assert.Contains("AddSystemMtRepositories()", program);
+        Assert.Contains("AddScoped<ISystemMtLauncher>", program);
+        Assert.Contains("AddHostedService<SystemMtApiJobWorkerHostedService>()", program);
     }
 
     [Fact]

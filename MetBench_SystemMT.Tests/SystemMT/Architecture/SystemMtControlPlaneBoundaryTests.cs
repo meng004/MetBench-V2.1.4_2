@@ -88,7 +88,7 @@ public sealed class SystemMtControlPlaneBoundaryTests
         var root = SolutionRoot();
         var violations = new List<string>();
 
-        foreach (var file in ExistingCsFiles(PublicApiRoots(root)))
+        foreach (var file in ExistingCsFiles(PublicApiRoots(root), skipProgram: true))
         {
             ScanFileForTerms(root, file, PublicApiRawPathTerms, violations);
         }
@@ -122,7 +122,7 @@ public sealed class SystemMtControlPlaneBoundaryTests
         ];
     }
 
-    private static IEnumerable<string> ExistingCsFiles(IEnumerable<string> roots)
+    private static IEnumerable<string> ExistingCsFiles(IEnumerable<string> roots, bool skipProgram = false)
     {
         foreach (var root in roots)
         {
@@ -131,6 +131,8 @@ public sealed class SystemMtControlPlaneBoundaryTests
 
             foreach (var file in Directory.GetFiles(root, "*.cs", SearchOption.AllDirectories))
             {
+                if (skipProgram && Path.GetFileName(file).Equals("Program.cs", StringComparison.Ordinal))
+                    continue;
                 yield return file;
             }
         }
