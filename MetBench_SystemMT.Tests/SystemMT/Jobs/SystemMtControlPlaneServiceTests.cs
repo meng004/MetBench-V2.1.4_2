@@ -47,6 +47,20 @@ public class SystemMtControlPlaneServiceTests
     }
 
     [Fact]
+    public async Task SubmitRunAsync_rejects_reserved_override_keys_after_trimming()
+    {
+        var svc = new SystemMtControlPlaneService(new CapturingJobService());
+        var request = new SystemMtControlPlaneRunRequest(
+            "mr-alpha",
+            new Dictionary<string, string> { [" ArGv "] = "unsafe" });
+
+        var ex = await Assert.ThrowsAsync<ArgumentException>(
+            () => svc.SubmitRunAsync(request, default));
+
+        Assert.Contains("ArGv", ex.Message);
+    }
+
+    [Fact]
     public async Task SubmitRunAsync_rejects_blank_override_key_and_null_value()
     {
         var svc = new SystemMtControlPlaneService(new CapturingJobService());

@@ -133,18 +133,19 @@ public sealed class SystemMtControlPlaneService : ISystemMtControlPlaneService
         var copy = new Dictionary<string, string>(StringComparer.Ordinal);
         foreach (var (key, value) in overrides)
         {
-            if (string.IsNullOrWhiteSpace(key))
+            var normalizedKey = key.Trim();
+            if (string.IsNullOrWhiteSpace(normalizedKey))
                 throw new ArgumentException("Parameter override keys must be non-blank.", nameof(overrides));
-            if (ReservedOverrideKeys.Contains(key))
+            if (ReservedOverrideKeys.Contains(normalizedKey))
                 throw new ArgumentException(
-                    $"Parameter override '{key}' is reserved for infrastructure and cannot be submitted through the control plane.",
+                    $"Parameter override '{normalizedKey}' is reserved for infrastructure and cannot be submitted through the control plane.",
                     nameof(overrides));
             if (value is null)
                 throw new ArgumentException(
-                    $"Parameter override '{key}' must not be null.",
+                    $"Parameter override '{normalizedKey}' must not be null.",
                     nameof(overrides));
 
-            copy[key.Trim()] = value;
+            copy[normalizedKey] = value;
         }
 
         return copy.Count == 0 ? null : copy;
