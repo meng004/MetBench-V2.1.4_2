@@ -68,6 +68,48 @@ public sealed class DockerMcpRuntimeClientTests
         Assert.Contains("Unauthorized", result.Detail);
     }
 
+    [Fact]
+    public async Task RunSutCommandAsync_posts_structured_tool_request_without_raw_argv()
+    {
+        var handler = new CapturingHandler(
+            HttpStatusCode.OK,
+            """
+            {
+              "run_id": "run-1",
+              "status": "completed",
+              "returncode": 0,
+              "stdout": "ok",
+              "stderr": ""
+            }
+            """);
+        var client = new DockerMcpRuntimeClient(new HttpClient(handler));
+        var options = new DockerMcpRuntimeOptions(
+            Endpoint: "http://127.0.0.1:8765",
+            Image: "metbench-sut:latest",
+            PythonExecutable: "/opt/metbench-tools/openmoc-runner",
+            ToolName: "openmoc-runner",
+            LocalExecutable: "/host/openmoc-runner");
+
+        var result = await client.RunSutCommandAsync(
+            options,
+            new DockerMcpRunRequest(
+                Image: "metbench-sut:latest",
+                Tool: "openmoc-runner",
+                Args: new[] { "--input", "source.json" },
+                WorkingDirectory: string.Empty,
+                TimeoutSeconds: 60));
+
+        Assert.Equal(0, result.ExitCode);
+        Assert.Equal(HttpMethod.Post, handler.LastRequest!.Method);
+        Assert.Contains("\"tool\":\"run_sut_command\"", handler.LastRequestBody);
+        Assert.Contains("\"arguments\":", handler.LastRequestBody);
+        Assert.Contains("\"image\":\"metbench-sut:latest\"", handler.LastRequestBody);
+        Assert.Contains("\"tool\":\"openmoc-runner\"", handler.LastRequestBody);
+        Assert.Contains("\"args\":[\"--input\",\"source.json\"]", handler.LastRequestBody);
+        Assert.Contains("\"timeout_seconds\":60", handler.LastRequestBody);
+        Assert.DoesNotContain("argv", handler.LastRequestBody);
+    }
+
     private sealed class CapturingHandler : HttpMessageHandler
     {
         private readonly HttpStatusCode _status;

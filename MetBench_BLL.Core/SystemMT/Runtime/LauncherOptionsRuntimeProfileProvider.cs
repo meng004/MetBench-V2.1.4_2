@@ -52,6 +52,8 @@ public sealed class LauncherOptionsRuntimeProfileProvider : IRuntimeProfileProvi
         var image = RequiredQueryValue(runtimeKey, query, "image");
         var python = RequiredQueryValue(runtimeKey, query, "python");
         var endpoint = RequiredQueryValue(runtimeKey, query, "endpoint");
+        var tool = RequiredQueryValue(runtimeKey, query, "tool");
+        var local = RequiredQueryValue(runtimeKey, query, "local");
         if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var endpointUri)
             || (endpointUri.Scheme != Uri.UriSchemeHttp && endpointUri.Scheme != Uri.UriSchemeHttps))
         {
@@ -78,7 +80,7 @@ public sealed class LauncherOptionsRuntimeProfileProvider : IRuntimeProfileProvi
             RuntimeKind.Docker,
             python,
             dockerMcp: new DockerMcpRuntimeOptions(
-                endpoint, image, python, authTokenEnv, localPython, pathStyle));
+                endpoint, image, python, authTokenEnv, localPython, pathStyle, tool, local));
     }
 
     private static Dictionary<string, string> ParseQuery(string query)

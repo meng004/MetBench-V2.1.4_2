@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -16,9 +18,22 @@ public interface IDockerMcpRuntimeClient
 
     Task<DockerMcpRunResult> RunSutCommandAsync(
         DockerMcpRuntimeOptions options,
+        DockerMcpRunRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var legacyArgv = new[] { request.Tool }.Concat(request.Args).ToArray();
+        return RunSutCommandAsync(options, legacyArgv, request.TimeoutSeconds, cancellationToken);
+    }
+
+    [Obsolete("Use DockerMcpRunRequest. This compatibility shim must not be used by the HTTP runtime client.")]
+    Task<DockerMcpRunResult> RunSutCommandAsync(
+        DockerMcpRuntimeOptions options,
         IReadOnlyList<string> argv,
         int timeoutSeconds,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotSupportedException("Raw argv Docker MCP requests are not supported.");
+    }
 }
 
 public sealed record DockerMcpHealthResult(
@@ -101,16 +116,21 @@ public sealed class DockerMcpRuntimeClient : IDockerMcpRuntimeClient
 
     public async Task<DockerMcpRunResult> RunSutCommandAsync(
         DockerMcpRuntimeOptions options,
-        IReadOnlyList<string> argv,
-        int timeoutSeconds,
+        DockerMcpRunRequest request,
         CancellationToken cancellationToken = default)
     {
         if (options is null)
             throw new ArgumentNullException(nameof(options));
-        if (argv is null || argv.Count == 0)
-            throw new ArgumentException("Docker MCP run requires a non-empty argv.", nameof(argv));
-        if (timeoutSeconds <= 0)
-            throw new ArgumentOutOfRangeException(nameof(timeoutSeconds), "Timeout must be positive.");
+        if (request is null)
+            throw new ArgumentNullException(nameof(request));
+        if (string.IsNullOrWhiteSpace(request.Image))
+            throw new ArgumentException("Docker MCP run requires an image.", nameof(request));
+        if (string.IsNullOrWhiteSpace(request.Tool))
+            throw new ArgumentException("Docker MCP run requires a tool.", nameof(request));
+        if (request.Args is null)
+            throw new ArgumentException("Docker MCP run requires args.", nameof(request));
+        if (request.TimeoutSeconds <= 0)
+            throw new ArgumentOutOfRangeException(nameof(request), "Timeout must be positive.");
 
         var token = ResolveAuthToken(options);
         if (options.AuthTokenEnvironmentVariable is not null && string.IsNullOrWhiteSpace(token))
@@ -133,9 +153,10 @@ public sealed class DockerMcpRuntimeClient : IDockerMcpRuntimeClient
                     tool = "run_sut_command",
                     arguments = new
                     {
-                        image = options.Image,
-                        argv,
-                        timeout_seconds = timeoutSeconds,
+                        image = request.Image,
+                        tool = request.Tool,
+                        args = request.Args,
+                        timeout_seconds = request.TimeoutSeconds,
                     },
                 }, JsonOptions),
                 Encoding.UTF8,

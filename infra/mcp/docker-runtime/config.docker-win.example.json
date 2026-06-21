@@ -10,6 +10,11 @@
       "context": "docker"
     }
   },
+  "allowed_tools": {
+    "openmoc-runner": {
+      "executable": "/opt/metbench-tools/openmoc-runner"
+    }
+  },
   "allowed_mount_roots": [
     "D:\\Codes\\MetBench-V2.1.4_2",
     "C:\\Users\\lemon\\AppData\\Local\\Temp"

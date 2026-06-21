@@ -232,7 +232,16 @@ public sealed record DockerMcpRuntimeOptions(
     string PythonExecutable,
     string? AuthTokenEnvironmentVariable = null,
     string? LocalPythonExecutable = null,
-    DockerMcpPathStyle PathStyle = DockerMcpPathStyle.None);
+    DockerMcpPathStyle PathStyle = DockerMcpPathStyle.None,
+    string ToolName = "",
+    string LocalExecutable = "");
+
+public sealed record DockerMcpRunRequest(
+    string Image,
+    string Tool,
+    IReadOnlyList<string> Args,
+    string WorkingDirectory,
+    int TimeoutSeconds);
 
 public sealed record RuntimeProfile
 {

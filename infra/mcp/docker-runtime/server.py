@@ -20,12 +20,18 @@ class ImageConfig:
 
 
 @dataclass
+class ToolConfig:
+    executable: str
+
+
+@dataclass
 class RuntimeConfig:
     bind_host: str
     bind_port: int
     auth_token: str
     repo_root: str
     allowed_images: dict[str, ImageConfig]
+    allowed_tools: dict[str, ToolConfig]
     allowed_mount_roots: list[str]
     default_timeout_seconds: int
     max_output_bytes: int
@@ -134,6 +140,22 @@ def _load_allowed_images(payload: dict[str, Any], backend: str = "docker") -> di
     return result
 
 
+def _load_allowed_tools(payload: dict[str, Any]) -> dict[str, ToolConfig]:
+    allowed_tools = payload.get("allowed_tools")
+    if not isinstance(allowed_tools, dict) or not allowed_tools:
+        raise ValueError("allowed_tools must be a non-empty object")
+
+    result: dict[str, ToolConfig] = {}
+    for name, tool in allowed_tools.items():
+        if not isinstance(name, str) or not name.strip():
+            raise ValueError("allowed_tools keys must be non-blank strings")
+        if not isinstance(tool, dict):
+            raise ValueError("allowed_tools entries must be objects")
+        result[name] = ToolConfig(executable=_required_string(tool, "executable"))
+
+    return result
+
+
 def _load_allowed_mount_roots(payload: dict[str, Any]) -> list[str]:
     allowed_mount_roots = payload.get("allowed_mount_roots")
     if not isinstance(allowed_mount_roots, list) or not allowed_mount_roots:
@@ -162,6 +184,7 @@ def load_config(path: str | Path) -> RuntimeConfig:
         auth_token=auth_token,
         repo_root=repo_root,
         allowed_images=_load_allowed_images(payload, backend),
+        allowed_tools=_load_allowed_tools(payload),
         allowed_mount_roots=_load_allowed_mount_roots(payload),
         default_timeout_seconds=_required_positive_int(
             payload,
@@ -172,20 +195,28 @@ def load_config(path: str | Path) -> RuntimeConfig:
     )
 
 
-def validate_run_request(config: RuntimeConfig, request: dict[str, Any]) -> dict[str, Any]:
+def validate_run_request(config: RuntimeConfig, request: dict[str, Any]) -> list[str]:
     image = str(request.get("image", ""))
     if image not in config.allowed_images:
         raise ValueError(f"Image {image!r} is not allowlisted")
 
-    argv = request.get("argv")
-    if not isinstance(argv, list):
-        raise ValueError("argv must be a list of non-blank strings")
+    if "argv" in request:
+        raise ValueError("raw argv is not accepted; use an allowlisted tool and args")
 
-    for arg in argv:
+    tool = str(request.get("tool", ""))
+    if tool not in config.allowed_tools:
+        raise ValueError(f"Tool {tool!r} is not allowlisted")
+
+    args = request.get("args", [])
+    if not isinstance(args, list):
+        raise ValueError("args must be a list of non-blank strings")
+
+    for arg in args:
         if not isinstance(arg, str) or not arg.strip():
-            raise ValueError("argv must contain only non-blank strings")
+            raise ValueError("args must contain only non-blank strings")
+        _validate_tool_argument(arg)
 
-    return request
+    return [config.allowed_tools[tool].executable, *args]
 
 
 def authorize(header: str | None, expected_token: str) -> None:
@@ -194,6 +225,19 @@ def authorize(header: str | None, expected_token: str) -> None:
 
 
 WINDOWS_PATH_PATTERN = re.compile(r"^([A-Za-z]):[\\/](.*)$")
+
+
+def _validate_tool_argument(arg: str) -> None:
+    if arg in {"-c", "/c", "-m", "/m"}:
+        raise ValueError("tool arguments must not request shell or module execution")
+    if arg.endswith((".py", ".pyc")):
+        raise ValueError("tool arguments must not contain script path values")
+    if arg.startswith("/") or WINDOWS_PATH_PATTERN.match(arg):
+        raise ValueError("tool arguments must not contain absolute host paths")
+    if ".." in re.split(r"[\\/]", arg):
+        raise ValueError("tool arguments must not contain path traversal")
+    if any(operator in arg for operator in [";", "&&", "||", "|"]) or "$(" in arg or "`" in arg:
+        raise ValueError("tool arguments must not contain shell operators")
 
 
 def translate_mount_target(path: str) -> str:
@@ -212,10 +256,11 @@ def _is_windows_path(path: str) -> bool:
 def build_docker_run_command(
     config: RuntimeConfig,
     image: str,
-    argv: list[str],
+    tool: str,
+    args: list[str],
     timeout_seconds: int | None = None,
 ) -> list[str]:
-    validate_run_request(config, {"image": image, "argv": argv})
+    command_args = validate_run_request(config, {"image": image, "tool": tool, "args": args})
 
     effective_timeout = config.default_timeout_seconds if timeout_seconds is None else timeout_seconds
     if (
@@ -236,17 +281,18 @@ def build_docker_run_command(
     command = ["docker", "run", "--rm"]
     for root in roots:
         command += ["-v", f"{root}:{translate_mount_target(root)}"]
-    command += ["-w", translate_mount_target(config.repo_root), image, *argv]
+    command += ["-w", translate_mount_target(config.repo_root), image, *command_args]
     return command
 
 
 def build_local_run_command(
     config: RuntimeConfig,
     image: str,
-    argv: list[str],
+    tool: str,
+    args: list[str],
     timeout_seconds: int | None = None,
 ) -> list[str]:
-    validate_run_request(config, {"image": image, "argv": argv})
+    command_args = validate_run_request(config, {"image": image, "tool": tool, "args": args})
 
     effective_timeout = config.default_timeout_seconds if timeout_seconds is None else timeout_seconds
     if (
@@ -256,7 +302,7 @@ def build_local_run_command(
     ):
         raise ValueError("timeout_seconds must be positive")
 
-    return list(argv)
+    return list(command_args)
 
 
 def _run_subprocess(command: list[str], timeout_seconds: int) -> CommandResult:
@@ -339,19 +385,21 @@ def run_sut_command(
 ) -> dict[str, Any]:
     run_id = id_factory()
     image = _required_string(arguments, "image")
-    argv = arguments.get("argv")
+    tool = _required_string(arguments, "tool")
+    args = arguments.get("args", [])
     timeout_seconds = arguments.get("timeout_seconds", config.default_timeout_seconds)
     if config.backend == "local":
-        command = build_local_run_command(config, image, argv, timeout_seconds)
+        command = build_local_run_command(config, image, tool, args, timeout_seconds)
     else:
-        command = build_docker_run_command(config, image, argv, timeout_seconds)
+        command = build_docker_run_command(config, image, tool, args, timeout_seconds)
     result = runner(command, timeout_seconds)
     status = "completed" if result.returncode == 0 else "failed"
     record = {
         "run_id": run_id,
         "status": status,
         "image": image,
-        "argv": argv,
+        "tool": tool,
+        "args": args,
         "timeout_seconds": timeout_seconds,
         "command": command,
         "returncode": result.returncode,
@@ -463,11 +511,15 @@ def build_profile_uri(
     endpoint: str,
     image: str,
     python: str,
+    tool: str,
+    local: str,
     auth_token_env: str | None = None,
 ) -> str:
     normalized_key = runtime_key.strip().lower()
     query = [
         ("image", image),
+        ("tool", tool),
+        ("local", local),
         ("python", python),
         ("endpoint", endpoint),
     ]
@@ -496,6 +548,8 @@ def main(argv: list[str], serve=serve_http, out=print) -> int:
     profile_parser.add_argument("--runtime-key", required=True)
     profile_parser.add_argument("--endpoint", required=True)
     profile_parser.add_argument("--image", required=True)
+    profile_parser.add_argument("--tool", required=True)
+    profile_parser.add_argument("--local", required=True)
     profile_parser.add_argument("--python", required=True)
     profile_parser.add_argument("--auth-token-env")
 
@@ -514,6 +568,8 @@ def main(argv: list[str], serve=serve_http, out=print) -> int:
                 args.endpoint,
                 args.image,
                 args.python,
+                args.tool,
+                args.local,
                 args.auth_token_env,
             )
         )

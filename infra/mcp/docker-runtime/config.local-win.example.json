@@ -7,6 +7,11 @@
   "allowed_images": {
     "windows-local": {}
   },
+  "allowed_tools": {
+    "openmoc-runner": {
+      "executable": "D:\\Codes\\MetBench-V2.1.4_2\\tools\\openmoc-runner.cmd"
+    }
+  },
   "allowed_mount_roots": ["D:\\Codes\\MetBench-V2.1.4_2"],
   "default_timeout_seconds": 600,
   "max_output_bytes": 1048576

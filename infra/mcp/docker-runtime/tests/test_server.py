@@ -37,6 +37,11 @@ class DockerRuntimeServerTests(unittest.TestCase):
                     "context": ".",
                 },
             },
+            "allowed_tools": {
+                "openmoc-runner": {
+                    "executable": "/opt/metbench-tools/openmoc-runner",
+                },
+            },
             "allowed_mount_roots": [REPO_ROOT, "/tmp"],
             "default_timeout_seconds": 60,
             "max_output_bytes": 4096,
@@ -62,6 +67,11 @@ class DockerRuntimeServerTests(unittest.TestCase):
                 "metbench-sut:latest": self.server.ImageConfig(
                     dockerfile="docker/sut/Dockerfile",
                     context=".",
+                ),
+            },
+            allowed_tools={
+                "openmoc-runner": self.server.ToolConfig(
+                    executable="/opt/metbench-tools/openmoc-runner",
                 ),
             },
             allowed_mount_roots=["/tmp"],
@@ -187,6 +197,11 @@ class DockerRuntimeServerTests(unittest.TestCase):
             auth_token="secret",
             repo_root=REPO_ROOT,
             allowed_images={"metbench-sut:latest": image},
+            allowed_tools={
+                "openmoc-runner": self.server.ToolConfig(
+                    executable="/opt/metbench-tools/openmoc-runner",
+                ),
+            },
             allowed_mount_roots=["/tmp"],
             default_timeout_seconds=60,
             max_output_bytes=1024,
@@ -200,6 +215,7 @@ class DockerRuntimeServerTests(unittest.TestCase):
                 "auth_token",
                 "repo_root",
                 "allowed_images",
+                "allowed_tools",
                 "allowed_mount_roots",
                 "default_timeout_seconds",
                 "max_output_bytes",
@@ -209,44 +225,89 @@ class DockerRuntimeServerTests(unittest.TestCase):
         )
         self.assertEqual("docker/sut/Dockerfile", config.allowed_images["metbench-sut:latest"].dockerfile)
 
+    def test_load_config_requires_allowed_tools(self):
+        payload = self.valid_config_payload()
+        payload.pop("allowed_tools")
+
+        with self.assertRaisesRegex(ValueError, "allowed_tools"):
+            self.write_config_and_load(payload)
+
     def test_validate_run_request_rejects_non_allowlisted_image(self):
         config = self.valid_runtime_config()
 
         with self.assertRaisesRegex(ValueError, "not allowlisted"):
             self.server.validate_run_request(
                 config,
-                {"image": "untrusted:latest", "argv": ["python", "script.py"]},
+                {"image": "untrusted:latest", "tool": "openmoc-runner", "args": []},
             )
 
-    def test_validate_run_request_allows_sut_flags_after_image(self):
+    def test_validate_run_request_rejects_raw_argv(self):
         config = self.valid_runtime_config()
 
-        result = self.server.validate_run_request(
+        with self.assertRaisesRegex(ValueError, "raw argv"):
+            self.server.validate_run_request(
+                config,
+                {"image": "metbench-sut:latest", "argv": ["python", "runner.py"]},
+            )
+
+    def test_validate_run_request_allows_allowlisted_tool_args(self):
+        config = self.valid_runtime_config()
+
+        command = self.server.validate_run_request(
             config,
             {
                 "image": "metbench-sut:latest",
-                "argv": ["python", "runner.py", "--input", "source.json", "--output", "out.json"],
+                "tool": "openmoc-runner",
+                "args": ["--input", "source.json", "--output", "out.json"],
             },
         )
 
-        self.assertEqual("metbench-sut:latest", result["image"])
+        self.assertEqual(
+            ["/opt/metbench-tools/openmoc-runner", "--input", "source.json", "--output", "out.json"],
+            command,
+        )
 
-    def test_validate_run_request_requires_list_of_non_blank_string_argv(self):
+    def test_validate_run_request_requires_list_of_non_blank_string_args(self):
         config = self.valid_runtime_config()
         cases = [
-            ("python script.py", "argv"),
-            ([None], "argv"),
-            ([123], "argv"),
-            ([""], "argv"),
-            (["python", "  "], "argv"),
+            ("--input source.json", "args"),
+            ([None], "args"),
+            ([123], "args"),
+            ([""], "args"),
+            (["--input", "  "], "args"),
         ]
 
-        for argv, expected_message in cases:
-            with self.subTest(argv=argv):
+        for args, expected_message in cases:
+            with self.subTest(args=args):
                 with self.assertRaisesRegex(ValueError, expected_message):
                     self.server.validate_run_request(
                         config,
-                        {"image": "metbench-sut:latest", "argv": argv},
+                        {"image": "metbench-sut:latest", "tool": "openmoc-runner", "args": args},
+                    )
+
+    def test_validate_run_request_rejects_unsafe_tool_args(self):
+        config = self.valid_runtime_config()
+        cases = [
+            ["-c", "id"],
+            ["/c", "id"],
+            ["-m", "module"],
+            ["/m", "module"],
+            ["../secret.json"],
+            ["/etc/passwd"],
+            [r"C:\Windows\system32\cmd.exe"],
+            ["runner.py"],
+            ["&&"],
+            ["|"],
+            ["$(id)"],
+            ["`id`"],
+        ]
+
+        for args in cases:
+            with self.subTest(args=args):
+                with self.assertRaises(ValueError):
+                    self.server.validate_run_request(
+                        config,
+                        {"image": "metbench-sut:latest", "tool": "openmoc-runner", "args": args},
                     )
 
     def test_authorize_accepts_only_exact_bearer_token(self):
@@ -275,7 +336,8 @@ class DockerRuntimeServerTests(unittest.TestCase):
         command = self.server.build_docker_run_command(
             config,
             "metbench-sut:latest",
-            ["python", "sut.py"],
+            "openmoc-runner",
+            ["--input", "source.json"],
             timeout_seconds=30,
         )
 
@@ -287,7 +349,10 @@ class DockerRuntimeServerTests(unittest.TestCase):
         self.assertIn("/tmp:/tmp", command)
         self.assertIn("-w", command)
         self.assertIn(REPO_ROOT, command)
-        self.assertEqual(["metbench-sut:latest", "python", "sut.py"], command[-3:])
+        self.assertEqual(
+            ["metbench-sut:latest", "/opt/metbench-tools/openmoc-runner", "--input", "source.json"],
+            command[-4:],
+        )
         self.assertNotIn("--privileged", command)
         self.assertNotIn("--network", command)
         self.assertNotIn("host", command)
@@ -299,7 +364,8 @@ class DockerRuntimeServerTests(unittest.TestCase):
             self.server.build_docker_run_command(
                 config,
                 "untrusted:latest",
-                ["python", "sut.py"],
+                "openmoc-runner",
+                [],
             )
 
         for timeout_seconds in [0, -1]:
@@ -308,7 +374,8 @@ class DockerRuntimeServerTests(unittest.TestCase):
                     self.server.build_docker_run_command(
                         config,
                         "metbench-sut:latest",
-                        ["python", "sut.py"],
+                        "openmoc-runner",
+                        [],
                         timeout_seconds=timeout_seconds,
                     )
 
@@ -321,7 +388,8 @@ class DockerRuntimeServerTests(unittest.TestCase):
                     self.server.build_docker_run_command(
                         config,
                         "metbench-sut:latest",
-                        ["python", "sut.py"],
+                        "openmoc-runner",
+                        [],
                         timeout_seconds=timeout_seconds,
                     )
 
@@ -357,11 +425,12 @@ class DockerRuntimeServerTests(unittest.TestCase):
             "Bearer secret",
             {
                 "tool": "run_sut_command",
-                "arguments": {
-                    "image": "metbench-sut:latest",
-                    "argv": ["python", "sut.py"],
-                    "timeout_seconds": 12,
-                },
+                    "arguments": {
+                        "image": "metbench-sut:latest",
+                        "tool": "openmoc-runner",
+                        "args": ["--input", "source.json"],
+                        "timeout_seconds": 12,
+                    },
             },
             runner=fake_runner,
             id_factory=lambda: "generated-run-1",
@@ -372,7 +441,10 @@ class DockerRuntimeServerTests(unittest.TestCase):
         self.assertEqual(0, run_response["returncode"])
         self.assertEqual(1, len(calls))
         self.assertEqual(12, calls[0][1])
-        self.assertEqual(["metbench-sut:latest", "python", "sut.py"], calls[0][0][-3:])
+        self.assertEqual(
+            ["metbench-sut:latest", "/opt/metbench-tools/openmoc-runner", "--input", "source.json"],
+            calls[0][0][-4:],
+        )
 
         result_response = self.server.dispatch_tool(
             config,
@@ -403,11 +475,12 @@ class DockerRuntimeServerTests(unittest.TestCase):
             "Bearer secret",
             {
                 "tool": "run_sut_command",
-                "arguments": {
-                    "run_id": "attacker-controlled",
-                    "image": "metbench-sut:latest",
-                    "argv": ["python", "first.py"],
-                },
+                    "arguments": {
+                        "run_id": "attacker-controlled",
+                        "image": "metbench-sut:latest",
+                        "tool": "openmoc-runner",
+                        "args": ["--input", "first.json"],
+                    },
             },
             runner=fake_runner,
             id_factory=lambda: "generated-a",
@@ -417,11 +490,12 @@ class DockerRuntimeServerTests(unittest.TestCase):
             "Bearer secret",
             {
                 "tool": "run_sut_command",
-                "arguments": {
-                    "run_id": "attacker-controlled",
-                    "image": "metbench-sut:latest",
-                    "argv": ["python", "second.py"],
-                },
+                    "arguments": {
+                        "run_id": "attacker-controlled",
+                        "image": "metbench-sut:latest",
+                        "tool": "openmoc-runner",
+                        "args": ["--input", "second.json"],
+                    },
             },
             runner=fake_runner,
             id_factory=lambda: "generated-b",
@@ -430,8 +504,8 @@ class DockerRuntimeServerTests(unittest.TestCase):
         self.assertEqual("generated-a", first["run_id"])
         self.assertEqual("generated-b", second["run_id"])
         self.assertNotIn("attacker-controlled", self.server.RUN_RECORDS)
-        self.assertEqual(["python", "first.py"], self.server.RUN_RECORDS["generated-a"]["argv"])
-        self.assertEqual(["python", "second.py"], self.server.RUN_RECORDS["generated-b"]["argv"])
+        self.assertEqual(["--input", "first.json"], self.server.RUN_RECORDS["generated-a"]["args"])
+        self.assertEqual(["--input", "second.json"], self.server.RUN_RECORDS["generated-b"]["args"])
 
     def test_dispatch_build_runtime_image_uses_fake_runner(self):
         config = self.valid_runtime_config()
@@ -515,6 +589,11 @@ class DockerRuntimeServerTests(unittest.TestCase):
                     "context": ".",
                 },
             },
+            "allowed_tools": {
+                "openmoc-runner": {
+                    "executable": "/opt/metbench-tools/openmoc-runner",
+                },
+            },
             "allowed_mount_roots": [REPO_ROOT, "/tmp"],
             "default_timeout_seconds": 60,
             "max_output_bytes": 4096,
@@ -545,6 +624,9 @@ class DockerRuntimeServerTests(unittest.TestCase):
         self.assertIn("metbench-runtime:latest", payload["allowed_images"])
         self.assertIn("dockerfile", payload["allowed_images"]["metbench-sut:latest"])
         self.assertIn("context", payload["allowed_images"]["metbench-sut:latest"])
+        self.assertIn("allowed_tools", payload)
+        self.assertIn("openmoc-runner", payload["allowed_tools"])
+        self.assertIn("executable", payload["allowed_tools"]["openmoc-runner"])
         self.assertIn("default_timeout_seconds", payload)
         self.assertIn("max_output_bytes", payload)
 
@@ -620,7 +702,8 @@ class DockerRuntimeServerTests(unittest.TestCase):
         command = self.server.build_docker_run_command(
             config,
             "metbench-sut:latest",
-            ["python", "sut.py"],
+            "openmoc-runner",
+            ["--input", "source.json"],
             timeout_seconds=30,
         )
 
@@ -632,7 +715,10 @@ class DockerRuntimeServerTests(unittest.TestCase):
         self.assertNotIn("/tmp:/tmp", command)
         w_index = command.index("-w")
         self.assertEqual("/mnt/d/Codes/MetBench", command[w_index + 1])
-        self.assertEqual(["metbench-sut:latest", "python", "sut.py"], command[-3:])
+        self.assertEqual(
+            ["metbench-sut:latest", "/opt/metbench-tools/openmoc-runner", "--input", "source.json"],
+            command[-4:],
+        )
 
     def test_build_docker_run_command_mounts_extra_linux_roots(self):
         config = self.valid_runtime_config()
@@ -641,7 +727,8 @@ class DockerRuntimeServerTests(unittest.TestCase):
         command = self.server.build_docker_run_command(
             config,
             "metbench-sut:latest",
-            ["python", "sut.py"],
+            "openmoc-runner",
+            ["--output", "out.json"],
             timeout_seconds=30,
         )
 
@@ -658,13 +745,16 @@ class DockerRuntimeServerTests(unittest.TestCase):
             allowed_images={
                 "wsl-openmc": self.server.ImageConfig(dockerfile="", context=""),
             },
+            allowed_tools={
+                "openmc-runner": self.server.ToolConfig(executable="/usr/local/bin/openmc-runner"),
+            },
             allowed_mount_roots=["/tmp"],
             default_timeout_seconds=60,
             max_output_bytes=1024,
             backend="local",
         )
 
-    def test_local_backend_runs_argv_directly_without_docker(self):
+    def test_local_backend_runs_allowlisted_tool_without_docker(self):
         config = self.local_runtime_config()
         calls = []
 
@@ -679,7 +769,8 @@ class DockerRuntimeServerTests(unittest.TestCase):
                 "tool": "run_sut_command",
                 "arguments": {
                     "image": "wsl-openmc",
-                    "argv": ["python", "sut.py", "--input", "in.json"],
+                    "tool": "openmc-runner",
+                    "args": ["--input", "in.json"],
                     "timeout_seconds": 9,
                 },
             },
@@ -689,9 +780,9 @@ class DockerRuntimeServerTests(unittest.TestCase):
 
         self.assertEqual("completed", response["status"])
         self.assertEqual(1, len(calls))
-        self.assertEqual(["python", "sut.py", "--input", "in.json"], calls[0][0])
+        self.assertEqual(["/usr/local/bin/openmc-runner", "--input", "in.json"], calls[0][0])
         self.assertEqual(9, calls[0][1])
-        self.assertEqual(["python", "sut.py", "--input", "in.json"], response["command"])
+        self.assertEqual(["/usr/local/bin/openmc-runner", "--input", "in.json"], response["command"])
         self.assertNotIn("docker", response["command"])
 
     def test_local_backend_still_rejects_non_allowlisted_image(self):
@@ -703,7 +794,7 @@ class DockerRuntimeServerTests(unittest.TestCase):
                 "Bearer secret",
                 {
                     "tool": "run_sut_command",
-                    "arguments": {"image": "other", "argv": ["python", "x.py"]},
+                    "arguments": {"image": "other", "tool": "openmc-runner", "args": []},
                 },
                 runner=lambda command, timeout_seconds: self.server.CommandResult(0, "", ""),
             )
@@ -737,7 +828,8 @@ class DockerRuntimeServerTests(unittest.TestCase):
                     "tool": "run_sut_command",
                     "arguments": {
                         "image": "wsl-openmc",
-                        "argv": ["python", "sut.py"],
+                        "tool": "openmc-runner",
+                        "args": [],
                     },
                 },
                 runner=fake_runner,
@@ -798,6 +890,10 @@ class DockerRuntimeServerTests(unittest.TestCase):
                 "http://192.168.1.42:8765",
                 "--image",
                 "metbench/runtime-python:latest",
+                "--tool",
+                "openmoc-runner",
+                "--local",
+                "/host/openmoc-runner",
                 "--python",
                 "python3",
                 "--auth-token-env",
@@ -809,6 +905,8 @@ class DockerRuntimeServerTests(unittest.TestCase):
         self.assertEqual(0, exit_code)
         self.assertEqual(
             "docker-mcp://docker-linux?image=metbench%2Fruntime-python%3Alatest"
+            "&tool=openmoc-runner"
+            "&local=%2Fhost%2Fopenmoc-runner"
             "&python=python3"
             "&endpoint=http%3A%2F%2F192.168.1.42%3A8765"
             "&authTokenEnv=METBENCH_DOCKER_MCP_TOKEN",
