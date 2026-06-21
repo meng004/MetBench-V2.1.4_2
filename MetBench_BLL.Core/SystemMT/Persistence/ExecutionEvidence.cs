@@ -78,6 +78,10 @@ public sealed class RuntimeEvidence
 
     public List<RuntimeCheckEvidence> Diagnostics { get; set; } = new();
 
+    public string SourceRunId { get; set; } = string.Empty;
+
+    public string FollowupRunId { get; set; } = string.Empty;
+
     public static RuntimeEvidence FromPreflightResult(RuntimePreflightResult result)
     {
         ArgumentNullException.ThrowIfNull(result);

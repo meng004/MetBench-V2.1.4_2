@@ -284,7 +284,7 @@ public sealed class SystemMtExecutionRecorder
             SampleTraces = BuildSampleTraces(context, outcome),
             TransformationParameters = new Dictionary<string, string>(context.Parameters),
             RecordedAtUtc = outcome.FinishedAt.ToUniversalTime(),
-            RuntimeEvidence = runtimeEvidence,
+            RuntimeEvidence = AttachRuntimeRunIds(runtimeEvidence, outcome),
         };
 
         // ExecutionEvidence v2: project typed verifier output. Precedence is
@@ -313,6 +313,19 @@ public sealed class SystemMtExecutionRecorder
         }
 
         await _evidence!.SaveAsync(evidence, cancellationToken);
+    }
+
+    private static RuntimeEvidence? AttachRuntimeRunIds(
+        RuntimeEvidence? runtimeEvidence,
+        PipelineOutcome outcome)
+    {
+        if (runtimeEvidence is null)
+            return null;
+        if (!string.IsNullOrWhiteSpace(outcome.SourceRuntimeRunId))
+            runtimeEvidence.SourceRunId = outcome.SourceRuntimeRunId;
+        if (!string.IsNullOrWhiteSpace(outcome.FollowupRuntimeRunId))
+            runtimeEvidence.FollowupRunId = outcome.FollowupRuntimeRunId;
+        return runtimeEvidence;
     }
 
     private static bool RoleOutputsProduced(PipelineOutcome outcome)

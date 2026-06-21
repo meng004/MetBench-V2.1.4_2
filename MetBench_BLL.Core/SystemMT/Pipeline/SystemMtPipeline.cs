@@ -64,6 +64,8 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
         TimeSpan flwElapsed = TimeSpan.Zero;
         int srcExitCode = 0;
         int flwExitCode = 0;
+        string sourceRuntimeRunId = string.Empty;
+        string followupRuntimeRunId = string.Empty;
 
         try
         {
@@ -112,6 +114,7 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
                 .ConfigureAwait(false);
             srcExitCode = rsResult.ExitCode;
             srcElapsed = rsResult.Elapsed;
+            sourceRuntimeRunId = rsResult.RuntimeRunId;
             if (rsResult.TimedOut) return Fail(PipelineStatus.Timeout, "Source SUT timed out");
             if (rsResult.ExitCode != 0) return Fail(PipelineStatus.Error, "Source SUT failed: " + rsResult.Stderr);
 
@@ -123,6 +126,7 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
                 .ConfigureAwait(false);
             flwExitCode = rfResult.ExitCode;
             flwElapsed = rfResult.Elapsed;
+            followupRuntimeRunId = rfResult.RuntimeRunId;
             if (rfResult.TimedOut) return Fail(PipelineStatus.Timeout, "Followup SUT timed out");
             if (rfResult.ExitCode != 0) return Fail(PipelineStatus.Error, "Followup SUT failed: " + rfResult.Stderr);
 
@@ -167,6 +171,8 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
                 TypedSpec = typedSpec,
                 TypedPredicate = typedPredicate,
                 TypedVerification = typedVerification,
+                SourceRuntimeRunId = sourceRuntimeRunId,
+                FollowupRuntimeRunId = followupRuntimeRunId,
             };
         }
         catch (OperationCanceledException)
@@ -195,7 +201,11 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
             SourceElapsed: srcElapsed,
             FollowupElapsed: flwElapsed,
             SourceExitCode: srcExitCode,
-            FollowupExitCode: flwExitCode);
+            FollowupExitCode: flwExitCode)
+        {
+            SourceRuntimeRunId = sourceRuntimeRunId,
+            FollowupRuntimeRunId = followupRuntimeRunId,
+        };
     }
 
     private async Task<Dictionary<string, object?>> ParseOutputDict(
@@ -364,6 +374,8 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
         TimeSpan lastElapsed = TimeSpan.Zero;
         int firstExitCode = 0;
         int lastExitCode = 0;
+        string firstRuntimeRunId = string.Empty;
+        string lastRuntimeRunId = string.Empty;
         string firstInputPath = "";
         string lastInputPath = "";
         string firstOutputPath = "";
@@ -443,8 +455,18 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
                 var rResult = await RunSutCommandAsync(
                     ctx, runInvocation, artifactsDir, cancellationToken)
                     .ConfigureAwait(false);
-                if (i == 0) { firstElapsed = rResult.Elapsed; firstExitCode = rResult.ExitCode; }
-                if (i == mp.Phases.Count - 1) { lastElapsed = rResult.Elapsed; lastExitCode = rResult.ExitCode; }
+                if (i == 0)
+                {
+                    firstElapsed = rResult.Elapsed;
+                    firstExitCode = rResult.ExitCode;
+                    firstRuntimeRunId = rResult.RuntimeRunId;
+                }
+                if (i == mp.Phases.Count - 1)
+                {
+                    lastElapsed = rResult.Elapsed;
+                    lastExitCode = rResult.ExitCode;
+                    lastRuntimeRunId = rResult.RuntimeRunId;
+                }
                 if (rResult.TimedOut)
                     return Fail(PipelineStatus.Timeout, $"Phase '{phase.Role}' SUT timed out");
                 if (rResult.ExitCode != 0)
@@ -515,6 +537,8 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
                 TypedPredicate = typedPredicate,
                 TypedVerification = verification,
                 PhaseMetrics = phaseMetrics,
+                SourceRuntimeRunId = firstRuntimeRunId,
+                FollowupRuntimeRunId = lastRuntimeRunId,
             };
         }
         catch (OperationCanceledException)
@@ -542,7 +566,11 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
             SourceElapsed: firstElapsed,
             FollowupElapsed: lastElapsed,
             SourceExitCode: firstExitCode,
-            FollowupExitCode: lastExitCode);
+            FollowupExitCode: lastExitCode)
+        {
+            SourceRuntimeRunId = firstRuntimeRunId,
+            FollowupRuntimeRunId = lastRuntimeRunId,
+        };
     }
 
     private Task<ProcessResult> RunSutCommandAsync(

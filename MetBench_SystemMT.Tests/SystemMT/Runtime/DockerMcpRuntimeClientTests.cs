@@ -99,6 +99,7 @@ public sealed class DockerMcpRuntimeClientTests
                 TimeoutSeconds: 60));
 
         Assert.Equal(0, result.ExitCode);
+        Assert.Equal("run-1", result.RunId);
         Assert.Equal(HttpMethod.Post, handler.LastRequest!.Method);
         Assert.Contains("\"tool\":\"run_sut_command\"", handler.LastRequestBody);
         Assert.Contains("\"arguments\":", handler.LastRequestBody);

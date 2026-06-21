@@ -50,4 +50,8 @@ public sealed record PipelineOutcome(
     /// meaningful for multi-phase runs.
     /// </summary>
     public IReadOnlyDictionary<string, IReadOnlyDictionary<string, double>>? PhaseMetrics { get; init; }
+
+    public string SourceRuntimeRunId { get; init; } = string.Empty;
+
+    public string FollowupRuntimeRunId { get; init; } = string.Empty;
 }

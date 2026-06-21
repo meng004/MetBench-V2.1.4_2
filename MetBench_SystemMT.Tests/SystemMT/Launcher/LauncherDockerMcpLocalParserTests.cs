@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MetBench_BLL.SystemMT.Catalog;
 using MetBench_BLL.SystemMT.Launcher;
+using MetBench_BLL.SystemMT.Persistence;
 using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_BLL.SystemMT.Runtime;
 using MetBench_SystemMT.Tests.SystemMT;
@@ -60,7 +61,8 @@ public sealed class LauncherDockerMcpLocalParserTests
 
         var execs = new FakeExecRepo();
         var results = new FakeResultRepo();
-        var recorder = new SystemMtExecutionRecorder(execs, results);
+        var evidence = new InMemoryEvidenceRepo();
+        var recorder = new SystemMtExecutionRecorder(execs, results, evidence);
         var anomaly = new RecordingAnomalyService();
         var runtimeExecutor = new RuntimeProcessExecutorRegistry(
             new LocalRuntimeProcessExecutor(),
@@ -86,6 +88,12 @@ public sealed class LauncherDockerMcpLocalParserTests
             Assert.Equal("test-runner", argv[0]);
             Assert.DoesNotContain(argv, arg => arg.EndsWith(".py", StringComparison.OrdinalIgnoreCase));
         });
+        Assert.True(Guid.TryParse(result.RecordId, out var executionId));
+        var executionEvidence = await evidence.GetByExecutionAsync(executionId);
+        Assert.NotNull(executionEvidence);
+        Assert.NotNull(executionEvidence!.RuntimeEvidence);
+        Assert.Equal("mcp-run-1", executionEvidence.RuntimeEvidence!.SourceRunId);
+        Assert.Equal("mcp-run-2", executionEvidence.RuntimeEvidence.FollowupRunId);
     }
 
     // ---- in-process fake MCP client ----
@@ -132,10 +140,11 @@ public sealed class LauncherDockerMcpLocalParserTests
             {
                 RunSutCommandCalls.Add(argv.ToArray());
             }
+            var runId = $"mcp-run-{RunSutCommandCalls.Count}";
 
             if (argv.Length == 0)
             {
-                return new DockerMcpRunResult(-1, string.Empty, "empty argv", TimedOut: false);
+                    return new DockerMcpRunResult(-1, string.Empty, "empty argv", TimedOut: false, RunId: runId);
             }
 
             var realArgv = new List<string> { _realLocalPython, _runnerScriptPath };
@@ -173,7 +182,7 @@ public sealed class LauncherDockerMcpLocalParserTests
                 if (finished == delay)
                 {
                     try { proc.Kill(); } catch { }
-                    return new DockerMcpRunResult(-1, string.Empty, "timed out", TimedOut: true);
+                    return new DockerMcpRunResult(-1, string.Empty, "timed out", TimedOut: true, RunId: runId);
                 }
 
                 stdoutSb.Append(await stdoutTask.ConfigureAwait(false));
@@ -182,14 +191,44 @@ public sealed class LauncherDockerMcpLocalParserTests
             }
             catch (Exception ex)
             {
-                return new DockerMcpRunResult(-1, string.Empty, ex.Message, TimedOut: false);
+                return new DockerMcpRunResult(-1, string.Empty, ex.Message, TimedOut: false, RunId: runId);
             }
 
             return new DockerMcpRunResult(
                 exitCode,
                 stdoutSb.ToString(),
                 stderrSb.ToString(),
-                TimedOut: false);
+                TimedOut: false,
+                RunId: runId);
+        }
+    }
+
+    private sealed class InMemoryEvidenceRepo : IExecutionEvidenceRepository
+    {
+        private readonly List<ExecutionEvidence> _store = new();
+
+        public Task SaveAsync(ExecutionEvidence evidence, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            _store.RemoveAll(e => e.ExecutionId == evidence.ExecutionId);
+            _store.Add(evidence);
+            return Task.CompletedTask;
+        }
+
+        public Task<ExecutionEvidence?> GetByExecutionAsync(
+            Guid executionId,
+            CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.FromResult<ExecutionEvidence?>(_store.Find(e => e.ExecutionId == executionId));
+        }
+
+        public Task<bool> DeleteByExecutionIdAsync(
+            Guid executionId,
+            CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.FromResult(_store.RemoveAll(e => e.ExecutionId == executionId) > 0);
         }
     }
 }

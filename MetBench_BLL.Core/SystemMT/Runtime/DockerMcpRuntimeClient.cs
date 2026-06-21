@@ -32,7 +32,8 @@ public sealed record DockerMcpRunResult(
     int ExitCode,
     string Stdout,
     string Stderr,
-    bool TimedOut);
+    bool TimedOut,
+    string RunId = "");
 
 public sealed class DockerMcpRuntimeClient : IDockerMcpRuntimeClient
 {
@@ -224,7 +225,8 @@ public sealed class DockerMcpRuntimeClient : IDockerMcpRuntimeClient
                 returnCode,
                 GetString(root, "stdout"),
                 stderr,
-                timedOut);
+                timedOut,
+                GetString(root, "run_id"));
         }
         catch (JsonException ex)
         {

@@ -72,7 +72,8 @@ public sealed class DockerMcpProcessExecutor
             result.Stdout,
             result.Stderr,
             sw.Elapsed,
-            result.TimedOut);
+            result.TimedOut,
+            result.RunId);
     }
 
     private static void ValidateToolArgument(string arg)
