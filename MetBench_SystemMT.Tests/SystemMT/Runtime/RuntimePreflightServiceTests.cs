@@ -387,11 +387,13 @@ public sealed class RuntimePreflightServiceTests
             "openmoc-docker",
             "openmoc-docker Docker MCP",
             RuntimeKind.Docker,
-            "/opt/openmoc-venv/bin/python",
+            "/host/openmoc-runner",
             dockerMcp: new DockerMcpRuntimeOptions(
                 "http://192.168.1.20:8765",
                 "metbench-sut:latest",
-                "/opt/openmoc-venv/bin/python"));
+                "/opt/openmoc-venv/bin/python",
+                ToolName: "openmoc-runner",
+                LocalExecutable: "/host/openmoc-runner"));
 
     private sealed class RecordingDockerMcpRuntimeClient : IDockerMcpRuntimeClient
     {
@@ -414,8 +416,7 @@ public sealed class RuntimePreflightServiceTests
 
         public Task<DockerMcpRunResult> RunSutCommandAsync(
             DockerMcpRuntimeOptions options,
-            IReadOnlyList<string> argv,
-            int timeoutSeconds,
+            DockerMcpRunRequest request,
             CancellationToken cancellationToken = default) =>
             throw new InvalidOperationException("Preflight tests must not execute SUT commands.");
     }

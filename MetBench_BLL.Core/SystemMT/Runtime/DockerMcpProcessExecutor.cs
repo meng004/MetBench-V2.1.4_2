@@ -56,7 +56,6 @@ public sealed class DockerMcpProcessExecutor
                     options.Image,
                     options.ToolName,
                     args,
-                    WorkingDirectory: string.Empty,
                     timeoutSeconds),
                 cancellationToken)
             .ConfigureAwait(false);

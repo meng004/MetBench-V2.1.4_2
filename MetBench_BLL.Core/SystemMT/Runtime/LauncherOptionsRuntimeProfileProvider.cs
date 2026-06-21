@@ -78,7 +78,7 @@ public sealed class LauncherOptionsRuntimeProfileProvider : IRuntimeProfileProvi
             runtimeKey,
             $"{runtimeKey} Docker MCP",
             RuntimeKind.Docker,
-            python,
+            local,
             dockerMcp: new DockerMcpRuntimeOptions(
                 endpoint, image, python, authTokenEnv, localPython, pathStyle, tool, local));
     }

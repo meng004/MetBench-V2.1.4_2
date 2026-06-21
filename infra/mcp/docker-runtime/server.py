@@ -230,7 +230,7 @@ WINDOWS_PATH_PATTERN = re.compile(r"^([A-Za-z]):[\\/](.*)$")
 def _validate_tool_argument(arg: str) -> None:
     if arg in {"-c", "/c", "-m", "/m"}:
         raise ValueError("tool arguments must not request shell or module execution")
-    if arg.endswith((".py", ".pyc")):
+    if arg.lower().endswith((".py", ".pyc")):
         raise ValueError("tool arguments must not contain script path values")
     if arg.startswith("/") or WINDOWS_PATH_PATTERN.match(arg):
         raise ValueError("tool arguments must not contain absolute host paths")

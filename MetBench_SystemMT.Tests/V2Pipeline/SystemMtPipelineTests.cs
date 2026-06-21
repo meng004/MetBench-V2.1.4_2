@@ -232,11 +232,13 @@ public sealed class SystemMtPipelineTests : IDisposable
                 "openmoc-docker",
                 "openmoc-docker Docker MCP",
                 RuntimeKind.Docker,
-                "/opt/openmoc-venv/bin/python",
+                "fake-runner",
                 dockerMcp: new DockerMcpRuntimeOptions(
                     "http://192.168.1.20:8765",
                     "metbench-sut:latest",
-                    "/opt/openmoc-venv/bin/python")),
+                    "/opt/openmoc-venv/bin/python",
+                    ToolName: "fake-runner",
+                    LocalExecutable: "fake-runner")),
         };
 
         var outcome = await pipeline.ExecuteAsync(context);
@@ -246,7 +248,7 @@ public sealed class SystemMtPipelineTests : IDisposable
         Assert.All(dockerClient.RunRequests, request =>
         {
             Assert.Equal("metbench-sut:latest", request.Options.Image);
-            Assert.Contains("fake-runner", request.Argv);
+            Assert.Equal("fake-runner", request.Request.Tool);
         });
     }
 
@@ -351,16 +353,14 @@ internal sealed class DockerWritingClient : IDockerMcpRuntimeClient
 
     public Task<DockerMcpRunResult> RunSutCommandAsync(
         DockerMcpRuntimeOptions options,
-        IReadOnlyList<string> argv,
-        int timeoutSeconds,
+        DockerMcpRunRequest request,
         CancellationToken cancellationToken = default)
     {
-        RunRequests.Add(new RunRequest(options, argv.ToArray(), timeoutSeconds));
-        return Task.FromResult(_handler(argv));
+        RunRequests.Add(new RunRequest(options, request));
+        return Task.FromResult(_handler(request.Args));
     }
 
     public sealed record RunRequest(
         DockerMcpRuntimeOptions Options,
-        IReadOnlyList<string> Argv,
-        int TimeoutSeconds);
+        DockerMcpRunRequest Request);
 }

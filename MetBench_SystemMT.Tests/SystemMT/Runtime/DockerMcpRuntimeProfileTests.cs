@@ -23,7 +23,7 @@ public sealed class DockerMcpRuntimeProfileTests
         Assert.Equal("openmoc-docker", profile.RuntimeKey);
         Assert.Equal(RuntimeKind.Docker, profile.Kind);
         Assert.True(profile.IsExecutableInV1);
-        Assert.Equal("/usr/local/bin/python", profile.ExecutablePath);
+        Assert.Equal("/host/openmoc-runner", profile.ExecutablePath);
         Assert.NotNull(profile.DockerMcp);
         Assert.Equal("http://127.0.0.1:8765", profile.DockerMcp.Endpoint);
         Assert.Equal("metbench/openmoc:latest", profile.DockerMcp.Image);
@@ -46,7 +46,7 @@ public sealed class DockerMcpRuntimeProfileTests
         var profile = provider.GetProfile("openmoc");
 
         Assert.Equal(RuntimeKind.Docker, profile.Kind);
-        Assert.Equal("/opt/metbench-tools/openmoc-runner", profile.ExecutablePath);
+        Assert.Equal("/host/openmoc-runner", profile.ExecutablePath);
         Assert.NotNull(profile.DockerMcp);
         Assert.Equal("metbench-sut:latest", profile.DockerMcp!.Image);
         Assert.Equal("openmoc-runner", profile.DockerMcp.ToolName);

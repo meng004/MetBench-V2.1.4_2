@@ -38,6 +38,8 @@ public sealed class LauncherDockerMcpLocalParserTests
         var dockerClient = new FakeMcpRuntimeClient(localPython);
 
         var uri = "docker-mcp://system?image=test-image"
+            + "&tool=test-runner"
+            + "&local=/nonexistent/container-python"
             + "&python=/nonexistent/container-python"
             + $"&endpoint={Uri.EscapeDataString("http://127.0.0.1:1")}"
             + $"&localPython={Uri.EscapeDataString(localPython)}";
@@ -112,11 +114,11 @@ public sealed class LauncherDockerMcpLocalParserTests
 
         public async Task<DockerMcpRunResult> RunSutCommandAsync(
             DockerMcpRuntimeOptions options,
-            IReadOnlyList<string> argv,
-            int timeoutSeconds,
+            DockerMcpRunRequest request,
             CancellationToken cancellationToken = default)
         {
             // Record the call with the original argv[0] (the container python path)
+            var argv = new[] { options.PythonExecutable }.Concat(request.Args).ToArray();
             lock (RunSutCommandCalls)
             {
                 RunSutCommandCalls.Add(argv.ToArray());

@@ -62,17 +62,19 @@ public sealed class RuntimeProcessExecutorRegistryTests
         var options = new DockerMcpRuntimeOptions(
             "http://127.0.0.1:8765",
             "metbench-sut:latest",
-            "/opt/venv/bin/python");
+            "/opt/venv/bin/python",
+            ToolName: "openmoc-runner",
+            LocalExecutable: "/host/openmoc-runner");
         var profile = new RuntimeProfile(
             "openmoc-docker",
             "OpenMOC Docker",
             RuntimeKind.Docker,
-            "/opt/venv/bin/python",
+            "/host/openmoc-runner",
             dockerMcp: options);
 
         var result = await registry.RunAsync(
             profile,
-            new ProcessInvocation("/opt/venv/bin/python", new[] { "runner.py" }),
+            new ProcessInvocation("/host/openmoc-runner", new[] { "--input", "source.json" }),
             "/tmp/work",
             timeoutSeconds: 30,
             CancellationToken.None);
@@ -81,8 +83,10 @@ public sealed class RuntimeProcessExecutorRegistryTests
         Assert.Empty(local.RunRequests);
         var request = Assert.Single(docker.RunRequests);
         Assert.Same(options, request.Options);
-        Assert.Equal(new[] { "/opt/venv/bin/python", "runner.py" }, request.Argv);
-        Assert.Equal(30, request.TimeoutSeconds);
+        Assert.Equal("metbench-sut:latest", request.Request.Image);
+        Assert.Equal("openmoc-runner", request.Request.Tool);
+        Assert.Equal(new[] { "--input", "source.json" }, request.Request.Args);
+        Assert.Equal(30, request.Request.TimeoutSeconds);
     }
 
     [Theory]
@@ -212,11 +216,10 @@ public sealed class RuntimeProcessExecutorRegistryTests
 
         public Task<DockerMcpRunResult> RunSutCommandAsync(
             DockerMcpRuntimeOptions options,
-            IReadOnlyList<string> argv,
-            int timeoutSeconds,
+            DockerMcpRunRequest request,
             CancellationToken cancellationToken = default)
         {
-            RunRequests.Add(new DockerRunRequest(options, argv.ToArray(), timeoutSeconds));
+            RunRequests.Add(new DockerRunRequest(options, request));
             return Task.FromResult(_runResult);
         }
     }
@@ -228,6 +231,5 @@ public sealed class RuntimeProcessExecutorRegistryTests
 
     private sealed record DockerRunRequest(
         DockerMcpRuntimeOptions Options,
-        IReadOnlyList<string> Argv,
-        int TimeoutSeconds);
+        DockerMcpRunRequest Request);
 }

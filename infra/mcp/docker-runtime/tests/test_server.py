@@ -296,6 +296,8 @@ class DockerRuntimeServerTests(unittest.TestCase):
             ["/etc/passwd"],
             [r"C:\Windows\system32\cmd.exe"],
             ["runner.py"],
+            ["RUNNER.PY"],
+            ["RUNNER.PYC"],
             ["&&"],
             ["|"],
             ["$(id)"],

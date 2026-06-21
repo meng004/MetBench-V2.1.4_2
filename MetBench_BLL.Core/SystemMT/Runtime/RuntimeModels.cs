@@ -240,7 +240,6 @@ public sealed record DockerMcpRunRequest(
     string Image,
     string Tool,
     IReadOnlyList<string> Args,
-    string WorkingDirectory,
     int TimeoutSeconds);
 
 public sealed record RuntimeProfile
