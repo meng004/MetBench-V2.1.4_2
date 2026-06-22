@@ -28,11 +28,14 @@ public sealed class DockerMcpProcessExecutor
         ArgumentNullException.ThrowIfNull(invocation);
         if (string.IsNullOrWhiteSpace(invocation.FileName))
             throw new ArgumentException("Executable file name is required.", nameof(invocation));
-        if (string.IsNullOrWhiteSpace(options.ToolName))
+        var legacyToolMapping = !string.IsNullOrWhiteSpace(options.ToolName)
+            || !string.IsNullOrWhiteSpace(options.LocalExecutable);
+        if (legacyToolMapping && string.IsNullOrWhiteSpace(options.ToolName))
             throw new ArgumentException("Docker MCP tool name is required.", nameof(options));
-        if (string.IsNullOrWhiteSpace(options.LocalExecutable))
+        if (legacyToolMapping && string.IsNullOrWhiteSpace(options.LocalExecutable))
             throw new ArgumentException("Docker MCP local executable is required.", nameof(options));
-        if (!string.Equals(invocation.FileName, options.LocalExecutable, StringComparison.Ordinal))
+        if (legacyToolMapping
+            && !string.Equals(invocation.FileName, options.LocalExecutable, StringComparison.Ordinal))
         {
             throw new ArgumentException(
                 "Docker MCP invocation executable must match the configured local executable.",
@@ -55,12 +58,13 @@ public sealed class DockerMcpProcessExecutor
             ValidateToolArgument(arg);
         }
         var sw = Stopwatch.StartNew();
+        var toolName = legacyToolMapping ? options.ToolName : invocation.FileName;
         var result = await _client
             .RunSutCommandAsync(
                 options,
                 new DockerMcpRunRequest(
                     options.Image,
-                    options.ToolName,
+                    toolName,
                     args,
                     timeoutSeconds),
                 cancellationToken)

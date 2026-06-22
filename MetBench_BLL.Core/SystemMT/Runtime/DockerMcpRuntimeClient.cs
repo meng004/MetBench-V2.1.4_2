@@ -118,7 +118,8 @@ public sealed class DockerMcpRuntimeClient : IDockerMcpRuntimeClient
             throw new ArgumentOutOfRangeException(nameof(request), "Timeout must be positive.");
         if (!string.Equals(request.Image, options.Image, StringComparison.Ordinal))
             throw new ArgumentException("Docker MCP run request image must match configured image.", nameof(request));
-        if (!string.Equals(request.Tool, options.ToolName, StringComparison.Ordinal))
+        if (!string.IsNullOrWhiteSpace(options.ToolName)
+            && !string.Equals(request.Tool, options.ToolName, StringComparison.Ordinal))
             throw new ArgumentException("Docker MCP run request tool must match configured tool.", nameof(request));
 
         var token = ResolveAuthToken(options);

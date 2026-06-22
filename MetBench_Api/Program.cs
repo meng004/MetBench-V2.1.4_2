@@ -8,7 +8,6 @@ using MetBench_BLL.SystemMT.Persistence;
 using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_DAL;
 using MetBench_IDAL;
-using LiteDB;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddProblemDetails();
@@ -18,18 +17,10 @@ builder.Services.AddSingleton<IJobStore, InMemoryJobStore>();
 builder.Services.AddSingleton<IJobCancellationRegistry, JobCancellationRegistry>();
 builder.Services.AddSingleton<ISystemMtJobService, SystemMtJobService>();
 builder.Services.AddSingleton<ISystemMtControlPlaneService, SystemMtControlPlaneService>();
-builder.Services.AddSingleton(provider =>
-{
-    var dataDir = builder.Configuration["MetBench:DataDir"] ?? AppContext.BaseDirectory;
-    Directory.CreateDirectory(dataDir);
-    return new LiteDatabase(
-        $"Filename={Path.Combine(dataDir, "SystemMT.Litedb")};UTC_DATE=true",
-        new BsonMapper());
-});
 builder.Services.AddSingleton<ISystemMtResultRepository>(provider =>
-    new LiteDbSystemMtResultRepository(provider.GetRequiredService<LiteDatabase>()));
+    new LiteDbSystemMtResultRepository(DbConfig.Instance._conn));
 builder.Services.AddSingleton<IExecutionEvidenceRepository>(provider =>
-    new LiteDbExecutionEvidenceRepository(provider.GetRequiredService<LiteDatabase>()));
+    new LiteDbExecutionEvidenceRepository(DbConfig.Instance._conn));
 builder.Services.AddSingleton(provider =>
 {
     var runtimePythons = builder.Configuration

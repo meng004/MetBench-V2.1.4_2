@@ -39,6 +39,12 @@ public sealed class SystemMtControlPlaneBoundaryTests
         "ExecutablePath",
     };
 
+    private static readonly string[] RedundantPublicControlPlaneTerms =
+    {
+        "Workflow",
+        "workflow",
+    };
+
     [Fact]
     public void SystemMtPipeline_does_not_reference_runtime_executor_implementations_directly()
     {
@@ -100,6 +106,50 @@ public sealed class SystemMtControlPlaneBoundaryTests
             + "Offenders:\n  - " + string.Join("\n  - ", violations.Order(StringComparer.Ordinal)));
     }
 
+    [Fact]
+    public void Public_api_and_business_mcp_do_not_expose_workflow_as_a_resource()
+    {
+        var root = SolutionRoot();
+        var violations = new List<string>();
+
+        foreach (var file in ExistingPublicSurfaceFiles(root))
+        {
+            ScanFileForTerms(root, file, RedundantPublicControlPlaneTerms, violations);
+        }
+
+        Assert.True(
+            violations.Count == 0,
+            "The public control-plane vocabulary uses durable jobs as the resource. Workflow is a "
+            + "descriptive internal process term, not a REST or MCP resource. Offenders:\n  - "
+            + string.Join("\n  - ", violations.Order(StringComparer.Ordinal)));
+    }
+
+    [Fact]
+    public void Control_plane_design_defines_submit_execution_and_runtime_boundaries()
+    {
+        var root = SolutionRoot();
+        var designPath = Path.Combine(
+            root,
+            "docs",
+            "superpowers",
+            "specs",
+            "2026-06-21-systemmt-api-mcp-control-plane-design.md");
+        var text = File.ReadAllText(designPath);
+
+        Assert.Contains(
+            "Submit creates a `jobId`; it does not create an `ExecutionId`.",
+            text,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "Runtime MCP creates runtime `run_id` values; it does not create jobs or executions.",
+            text,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "The core recorder creates `ExecutionId` after the job runs far enough to produce persisted result/evidence.",
+            text,
+            StringComparison.Ordinal);
+    }
+
     private static string[] ControlPlaneAdapterRoots(string root)
     {
         return
@@ -134,6 +184,27 @@ public sealed class SystemMtControlPlaneBoundaryTests
                 if (skipProgram && Path.GetFileName(file).Equals("Program.cs", StringComparison.Ordinal))
                     continue;
                 yield return file;
+            }
+        }
+    }
+
+    private static IEnumerable<string> ExistingPublicSurfaceFiles(string root)
+    {
+        foreach (var file in ExistingCsFiles(PublicApiRoots(root), skipProgram: true))
+            yield return file;
+
+        foreach (var rootPath in new[]
+        {
+            Path.Combine(root, "infra", "mcp", "metbench-business"),
+        })
+        {
+            if (!Directory.Exists(rootPath))
+                continue;
+
+            foreach (var pattern in new[] { "*.py" })
+            {
+                foreach (var file in Directory.GetFiles(rootPath, pattern, SearchOption.AllDirectories))
+                    yield return file;
             }
         }
     }

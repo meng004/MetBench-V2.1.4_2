@@ -51,9 +51,9 @@ public sealed class DbConfigTests : IDisposable
     public void OverrideConnectionString_returns_override_value_via_conn_getter()
     {
         var dbPath = Path.Combine(_scratchDir, "override.litedb");
-        var expected = $"Filename={dbPath}";
+        var expected = $"Filename={dbPath};Connection=shared";
 
-        DbConfig.OverrideConnectionString(expected);
+        DbConfig.OverrideConnectionString($"Filename={dbPath}");
 
         var conn = DbConfig.Instance._conn;
         Assert.Equal(expected, conn);
@@ -77,7 +77,7 @@ public sealed class DbConfigTests : IDisposable
         // 现在只剩 env var → _conn 应当从 env 解析
         var via_env = DbConfig.Instance._conn;
 
-        Assert.Equal($"Filename={dbPath}", via_env);
+        Assert.Equal($"Filename={dbPath};Connection=shared", via_env);
         Assert.Equal(via_override, via_env);
     }
 
@@ -93,7 +93,7 @@ public sealed class DbConfigTests : IDisposable
 
         var conn = DbConfig.Instance._conn;
 
-        Assert.Equal($"Filename={overridePath}", conn);
+        Assert.Equal($"Filename={overridePath};Connection=shared", conn);
         Assert.DoesNotContain("from-env", conn);
     }
 
@@ -110,7 +110,7 @@ public sealed class DbConfigTests : IDisposable
         DbConfig.ResetOverride();
 
         var conn = DbConfig.Instance._conn;
-        Assert.Equal($"Filename={envPath}", conn);
+        Assert.Equal($"Filename={envPath};Connection=shared", conn);
     }
 
     // ===== Test 5: Path.Combine 跨平台 — 不含 Windows 反斜杠硬路径 =====
@@ -130,7 +130,19 @@ public sealed class DbConfigTests : IDisposable
 
         // conn 中不应当混入异平台分隔符
         Assert.Contains(Path.DirectorySeparatorChar.ToString(), nested);
-        Assert.Equal($"Filename={nested}", conn);
+        Assert.Equal($"Filename={nested};Connection=shared", conn);
+    }
+
+    [Fact]
+    public void Explicit_connection_mode_is_preserved()
+    {
+        var dbPath = Path.Combine(_scratchDir, "explicit-direct.litedb");
+        var expected = $"Filename={dbPath};Connection=direct";
+
+        DbConfig.OverrideConnectionString(expected);
+
+        var conn = DbConfig.Instance._conn;
+        Assert.Equal(expected, conn);
     }
 
     // ===== Test 6: Override + 真实 LiteDB 集成 — Instance ctor 可用新串建库 =====

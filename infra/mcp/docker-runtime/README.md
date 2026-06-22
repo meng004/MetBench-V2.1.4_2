@@ -74,6 +74,9 @@ Run a SUT command:
 
 The response contains a service-generated `run_id`.
 
+A Runtime MCP `run_id` identifies one backend command invocation. It is not a
+MetBench `job_id`, not a System MT `ExecutionId`, and not a workflow id.
+
 Read a stored run result:
 
 ```json
@@ -84,6 +87,37 @@ Read a stored run result:
   }
 }
 ```
+
+Request a runtime kill:
+
+```json
+{
+  "tool": "kill_run",
+  "arguments": {
+    "run_id": "<runtime run id>"
+  }
+}
+```
+
+## Runtime Stop Semantics
+
+Runtime MCP is the execution plane. Its force-stop semantic is `kill`, and it
+targets a concrete runtime execution handle such as a `run_id`, process id, or
+container id. It does not target a MetBench job id and must not decide MR
+pass/fail, job terminal state, anomaly classification, or artifact visibility.
+
+The user-facing business stop semantic is `cancel`, exposed by REST API /
+Business MCP as `cancel_job(job_id)`. A job cancellation may propagate to a
+Runtime MCP kill only when the backend exposes an in-flight killable handle.
+
+Current implementation note: `run_sut_command` is synchronous. It returns a
+`run_id` after the requested command completes and stores the completed run
+record for `get_run_result`. That supports evidence correlation, but it is not
+yet an in-flight remote kill contract. The current `kill_run` tool therefore
+returns `not_found` for unknown run ids and `not_running` for completed
+synchronous run records; it does not claim to terminate a live backend process.
+A true Runtime MCP kill contract requires an async execution shape such as
+`start_run_command -> get_run_result -> kill_run`.
 
 `run_sut_command` deduplicates `[repo_root, *allowed_mount_roots]` and mounts
 each entry at its translated container target: Windows-style sources

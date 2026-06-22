@@ -57,6 +57,17 @@ class DockerRuntimeServerTests(unittest.TestCase):
         finally:
             os.unlink(handle.name)
 
+    def test_load_config_accepts_utf8_bom_config_file(self):
+        payload = self.valid_config_payload()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config_path = Path(temp_dir) / "runtime.json"
+            config_path.write_bytes(b"\xef\xbb\xbf" + json.dumps(payload).encode("utf-8"))
+
+            config = self.server.load_config(config_path)
+
+        self.assertEqual("secret", config.auth_token)
+        self.assertEqual(8765, config.bind_port)
+
     def valid_runtime_config(self):
         return self.server.RuntimeConfig(
             bind_host="auto-private-ipv4",
@@ -290,6 +301,38 @@ class DockerRuntimeServerTests(unittest.TestCase):
             command,
         )
 
+    def test_validate_run_request_translates_windows_data_paths_for_linux_backend(self):
+        config = self.local_runtime_config()
+        config.allowed_mount_roots = [
+            "/tmp",
+            "/mnt/c/Users/lemon/AppData/Local/Temp",
+        ]
+
+        command = self.server.validate_run_request(
+            config,
+            {
+                "image": "wsl-openmc",
+                "tool": "openmc-runner",
+                "args": [
+                    "--input",
+                    "C:\\Users\\lemon\\AppData\\Local\\Temp\\MetBench\\source.in.json",
+                    "--output",
+                    "C:\\Users\\lemon\\AppData\\Local\\Temp\\MetBench\\source.out.json",
+                ],
+            },
+        )
+
+        self.assertEqual(
+            [
+                "/usr/local/bin/openmc-runner",
+                "--input",
+                "/mnt/c/Users/lemon/AppData/Local/Temp/MetBench/source.in.json",
+                "--output",
+                "/mnt/c/Users/lemon/AppData/Local/Temp/MetBench/source.out.json",
+            ],
+            command,
+        )
+
     def test_validate_run_request_requires_list_of_non_blank_string_args(self):
         config = self.valid_runtime_config()
         cases = [
@@ -485,6 +528,50 @@ class DockerRuntimeServerTests(unittest.TestCase):
         )
 
         self.assertEqual(run_response, result_response)
+
+    def test_dispatch_kill_run_returns_not_running_for_completed_synchronous_run(self):
+        config = self.valid_runtime_config()
+
+        def fake_runner(command, timeout_seconds):
+            return self.server.CommandResult(returncode=0, stdout="sut ok", stderr="")
+
+        self.server.dispatch_tool(
+            config,
+            "Bearer secret",
+            {
+                "tool": "run_sut_command",
+                "arguments": {
+                    "image": "metbench-sut:latest",
+                    "tool": "openmoc-runner",
+                    "args": ["--input", "source.json"],
+                },
+            },
+            runner=fake_runner,
+            id_factory=lambda: "completed-run-1",
+        )
+
+        response = self.server.dispatch_tool(
+            config,
+            "Bearer secret",
+            {"tool": "kill_run", "arguments": {"run_id": "completed-run-1"}},
+        )
+
+        self.assertEqual("completed-run-1", response["run_id"])
+        self.assertEqual("not_running", response["status"])
+        self.assertFalse(response["killed"])
+
+    def test_dispatch_kill_run_returns_not_found_for_unknown_run(self):
+        config = self.valid_runtime_config()
+
+        response = self.server.dispatch_tool(
+            config,
+            "Bearer secret",
+            {"tool": "kill_run", "arguments": {"run_id": "missing-run"}},
+        )
+
+        self.assertEqual("missing-run", response["run_id"])
+        self.assertEqual("not_found", response["status"])
+        self.assertFalse(response["killed"])
 
     def test_run_sut_command_generates_id_and_ignores_client_supplied_run_id(self):
         config = self.valid_runtime_config()
@@ -883,10 +970,9 @@ class DockerRuntimeServerTests(unittest.TestCase):
                 self.assertEqual("change-me", config.auth_token)
     def test_main_supports_serve_subcommand_for_cli_wrapper(self):
         payload = self.valid_config_payload()
-        with tempfile.NamedTemporaryFile("w", suffix=".json") as handle:
-            json.dump(payload, handle)
-            handle.flush()
-
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config_path = Path(temp_dir) / "runtime.json"
+            config_path.write_text(json.dumps(payload), encoding="utf-8")
             served = []
 
             exit_code = self.server.main(
@@ -894,7 +980,7 @@ class DockerRuntimeServerTests(unittest.TestCase):
                     "metbench-docker-runtime-mcp",
                     "serve",
                     "--config",
-                    handle.name,
+                    str(config_path),
                 ],
                 serve=lambda config: served.append(config),
             )

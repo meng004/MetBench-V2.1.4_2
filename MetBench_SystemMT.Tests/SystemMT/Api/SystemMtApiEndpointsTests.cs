@@ -27,6 +27,30 @@ public sealed class SystemMtApiEndpointsTests
     }
 
     [Fact]
+    public void Program_uses_dbconfig_as_single_database_configuration_path()
+    {
+        var root = SolutionRoot();
+        var program = File.ReadAllText(Path.Combine(root, "MetBench_Api", "Program.cs"));
+
+        Assert.DoesNotContain("new LiteDatabase", program, StringComparison.Ordinal);
+        Assert.DoesNotContain("MetBench:DataDir", program, StringComparison.Ordinal);
+        Assert.DoesNotContain("GetRequiredService<LiteDatabase>", program, StringComparison.Ordinal);
+        Assert.Contains("DbConfig.Instance._conn", program, StringComparison.Ordinal);
+        Assert.Contains("new LiteDbSystemMtResultRepository(DbConfig.Instance._conn)", program, StringComparison.Ordinal);
+        Assert.Contains("new LiteDbExecutionEvidenceRepository(DbConfig.Instance._conn)", program, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Api_maps_cancel_as_job_action_not_delete_resource()
+    {
+        var root = SolutionRoot();
+        var endpoints = File.ReadAllText(Path.Combine(root, "MetBench_Api", "SystemMtApiEndpoints.cs"));
+
+        Assert.Contains("MapPost(\"/jobs/{jobId:guid}/cancel\"", endpoints, StringComparison.Ordinal);
+        Assert.DoesNotContain("MapDelete(\"/jobs/{jobId:guid}\"", endpoints, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task SubmitRunAsync_returns_accepted_and_forwards_control_plane_request()
     {
         var controlPlane = new FakeControlPlane();

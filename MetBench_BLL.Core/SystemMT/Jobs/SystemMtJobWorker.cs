@@ -148,6 +148,7 @@ public sealed class SystemMtJobWorker
             UpdatedAtUtc = now,
             FinishedAtUtc = now,
             ArtifactPath = outcome?.ArtifactPath ?? record.ArtifactPath,
+            ExecutionId = outcome?.ExecutionId ?? record.ExecutionId,
             BatchItems = outcome?.BatchItems ?? record.BatchItems,
         }, CancellationToken.None);
     }

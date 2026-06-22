@@ -96,6 +96,56 @@ public sealed class LauncherDockerMcpLocalParserTests
         Assert.Equal("mcp-run-2", executionEvidence.RuntimeEvidence.FollowupRunId);
     }
 
+    [Fact]
+    public async Task Remote_tool_profile_builds_tool_id_invocations_without_python_or_script_arguments()
+    {
+        var localPython = TestAssetPaths.PythonExecutable();
+        var uri = "docker-mcp://system?image=test-image"
+            + $"&endpoint={Uri.EscapeDataString("http://127.0.0.1:1")}";
+
+        var options = new LauncherOptions(
+            SutRoot: TestAssetPaths.AssetRoot(),
+            SystemPython: localPython,
+            OpenMocPython: localPython,
+            RuntimePythons: new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["system"] = uri,
+            });
+
+        var pipeline = new CapturingPipeline();
+        var recorder = new SystemMtExecutionRecorder(
+            new FakeExecRepo(),
+            new FakeResultRepo(),
+            new InMemoryEvidenceRepo());
+        var dockerClient = new FakeMcpRuntimeClient(localPython, "unused.py");
+        var launcher = new SystemMtLauncher(
+            options,
+            pipeline,
+            recorder,
+            new RecordingAnomalyService(),
+            new ManifestMrCatalogProvider(options),
+            severityThresholds: null,
+            runtimeProfileProvider: null,
+            runtimePreflightService: new RuntimePreflightService(
+                new DefaultProcessExecutor(),
+                dockerClient));
+
+        var result = await launcher.RunAsync("p3-trajectory-sensitivity");
+
+        Assert.True(result.Passed, "FailureReason: " + result.FailureReason);
+        var context = Assert.Single(pipeline.Contexts);
+        Assert.Equal("input-parser", context.InputParserInvocation.FileName);
+        Assert.Empty(context.InputParserInvocation.Arguments);
+        Assert.Equal("output-parser", context.OutputParserInvocation.FileName);
+        Assert.Empty(context.OutputParserInvocation.Arguments);
+        Assert.Equal("sut-runner", context.RunnerInvocation.FileName);
+        Assert.Empty(context.RunnerInvocation.Arguments);
+        Assert.NotNull(context.RuntimeProfile?.DockerMcp);
+        Assert.Equal("", context.RuntimeProfile!.DockerMcp!.PythonExecutable);
+        Assert.Equal("", context.RuntimeProfile.DockerMcp.ToolName);
+        Assert.Equal("", context.RuntimeProfile.DockerMcp.LocalExecutable);
+    }
+
     // ---- in-process fake MCP client ----
 
     /// <summary>
@@ -230,5 +280,42 @@ public sealed class LauncherDockerMcpLocalParserTests
             cancellationToken.ThrowIfCancellationRequested();
             return Task.FromResult(_store.RemoveAll(e => e.ExecutionId == executionId) > 0);
         }
+    }
+
+    private sealed class CapturingPipeline : ISystemMtPipeline
+    {
+        public List<PipelineContext> Contexts { get; } = new();
+
+        public Task<PipelineOutcome> ExecuteAsync(
+            PipelineContext context,
+            IProgress<string>? progress = null,
+            CancellationToken cancellationToken = default)
+        {
+            Contexts.Add(context);
+            var now = DateTime.UtcNow;
+            return Task.FromResult(new PipelineOutcome(
+                FinalStatus: PipelineStatus.Ok,
+                ErrorMessage: null,
+                StartedAt: now,
+                FinishedAt: now,
+                ArtifactsDirectory: context.WorkingDirectory,
+                SourceInputPath: context.SourceCasePath,
+                FollowupInputPath: Path.Combine(context.WorkingDirectory, "followup.in.json"),
+                SourceOutputPath: Path.Combine(context.WorkingDirectory, "source.out.json"),
+                FollowupOutputPath: Path.Combine(context.WorkingDirectory, "followup.out.json"),
+                SourceMetrics: null,
+                FollowupMetrics: null,
+                AssertionResult: null,
+                SourceElapsed: TimeSpan.Zero,
+                FollowupElapsed: TimeSpan.Zero,
+                SourceExitCode: 0,
+                FollowupExitCode: 0));
+        }
+
+        public Task<PipelineOutcome> ExecuteMultiPhaseAsync(
+            MultiPhaseExecutionContext mp,
+            IProgress<string>? progress = null,
+            CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
     }
 }

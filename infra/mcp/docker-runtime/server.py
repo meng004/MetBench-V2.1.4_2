@@ -167,7 +167,7 @@ def _load_allowed_mount_roots(payload: dict[str, Any]) -> list[str]:
 
 
 def load_config(path: str | Path) -> RuntimeConfig:
-    with open(path, "r", encoding="utf-8") as handle:
+    with open(path, "r", encoding="utf-8-sig") as handle:
         payload = json.load(handle)
 
     bind_host = _required_string(payload, "bind_host")
@@ -212,12 +212,14 @@ def validate_run_request(config: RuntimeConfig, request: dict[str, Any]) -> list
     if not isinstance(args, list):
         raise ValueError("args must be a list of non-blank strings")
 
+    normalized_args: list[str] = []
     for arg in args:
         if not isinstance(arg, str) or not arg.strip():
             raise ValueError("args must contain only non-blank strings")
         _validate_tool_argument(config, arg)
+        normalized_args.append(_normalize_tool_argument(config, arg))
 
-    return [config.allowed_tools[tool].executable, *args]
+    return [config.allowed_tools[tool].executable, *normalized_args]
 
 
 def authorize(header: str | None, expected_token: str) -> None:
@@ -239,6 +241,12 @@ def _validate_tool_argument(config: RuntimeConfig, arg: str) -> None:
         raise ValueError("tool arguments must not contain path traversal")
     if any(operator in arg for operator in [";", "&&", "||", "|"]) or "$(" in arg or "`" in arg:
         raise ValueError("tool arguments must not contain shell operators")
+
+
+def _normalize_tool_argument(config: RuntimeConfig, arg: str) -> str:
+    if (arg.startswith("/") or WINDOWS_PATH_PATTERN.match(arg)) and _is_allowed_data_path(config, arg):
+        return translate_mount_target(arg)
+    return arg
 
 
 def _is_allowed_data_path(config: RuntimeConfig, path: str) -> bool:
@@ -438,6 +446,26 @@ def get_run_result(arguments: dict[str, Any]) -> dict[str, Any]:
     return RUN_RECORDS[run_id]
 
 
+def kill_run(arguments: dict[str, Any]) -> dict[str, Any]:
+    run_id = _required_string(arguments, "run_id")
+    record = RUN_RECORDS.get(run_id)
+    if record is None:
+        return {
+            "run_id": run_id,
+            "status": "not_found",
+            "killed": False,
+            "message": f"Unknown run_id {run_id!r}",
+        }
+
+    return {
+        "run_id": run_id,
+        "status": "not_running",
+        "killed": False,
+        "existing_status": record.get("status", ""),
+        "message": "run_sut_command is synchronous; completed run records have no live backend handle to kill",
+    }
+
+
 def dispatch_tool(
     config: RuntimeConfig,
     authorization_header: str | None,
@@ -461,6 +489,8 @@ def dispatch_tool(
         return run_sut_command(config, arguments, runner=runner, id_factory=id_factory)
     if tool == "get_run_result":
         return get_run_result(arguments)
+    if tool == "kill_run":
+        return kill_run(arguments)
     raise ValueError(f"Unknown tool {tool!r}")
 
 

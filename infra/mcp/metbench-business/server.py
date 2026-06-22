@@ -53,7 +53,7 @@ def _required_positive_int(payload: dict[str, Any], field_name: str) -> int:
 
 
 def load_config(path: str) -> BusinessMcpConfig:
-    with open(path, "r", encoding="utf-8") as handle:
+    with open(path, "r", encoding="utf-8-sig") as handle:
         payload = json.load(handle)
 
     bind_port = _required_positive_int(payload, "bind_port")
@@ -110,7 +110,7 @@ def dispatch_tool(
     if tool == "get_evidence":
         return client("GET", f"/api/v1/systemmt/jobs/{_required_job_id(arguments)}/evidence")
     if tool == "cancel_job":
-        return client("DELETE", f"/api/v1/systemmt/jobs/{_required_job_id(arguments)}")
+        return client("POST", f"/api/v1/systemmt/jobs/{_required_job_id(arguments)}/cancel")
 
     raise ValueError(f"Unknown tool {tool!r}")
 

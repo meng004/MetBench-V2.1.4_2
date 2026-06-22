@@ -12,7 +12,7 @@ public static class SystemMtApiEndpoints
         group.MapGet("/jobs/{jobId:guid}", GetJobAsync);
         group.MapGet("/jobs/{jobId:guid}/result", GetResultAsync);
         group.MapGet("/jobs/{jobId:guid}/evidence", GetEvidenceAsync);
-        group.MapDelete("/jobs/{jobId:guid}", CancelJobAsync);
+        group.MapPost("/jobs/{jobId:guid}/cancel", CancelJobAsync);
         return endpoints;
     }
 

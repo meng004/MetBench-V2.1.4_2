@@ -73,8 +73,8 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
             progress?.Report(PipelineStatus.ParsingSource);
             var parseSourceInvocation =
                 ctx.InputParserInvocation.WithArguments("parse", "--input", ctx.SourceCasePath);
-            var psResult = await _processExecutor.RunAsync(
-                parseSourceInvocation, artifactsDir, ctx.TimeoutSeconds, cancellationToken)
+            var psResult = await RunToolAsync(
+                ctx, parseSourceInvocation, artifactsDir, cancellationToken)
                 .ConfigureAwait(false);
             if (psResult.ExitCode != 0)
                 return Fail(PipelineStatus.Error, "ParsingSource failed: " + psResult.Stderr);
@@ -99,8 +99,8 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
             File.WriteAllText(dictTempPath, JsonSerializer.Serialize(followupDict));
             var writeInvocation = ctx.InputParserInvocation.WithArguments(
                 "write", "--dict-file", dictTempPath, "--output", followupInputPath);
-            var wResult = await _processExecutor.RunAsync(
-                writeInvocation, artifactsDir, ctx.TimeoutSeconds, cancellationToken)
+            var wResult = await RunToolAsync(
+                ctx, writeInvocation, artifactsDir, cancellationToken)
                 .ConfigureAwait(false);
             if (wResult.ExitCode != 0)
                 return Fail(PipelineStatus.Error, "WritingFollowup failed: " + wResult.Stderr);
@@ -212,7 +212,7 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
         PipelineContext ctx, string outputPath, string workDir, CancellationToken ct)
     {
         var invocation = ctx.OutputParserInvocation.WithArguments("parse", "--output-file", outputPath);
-        var result = await _processExecutor.RunAsync(invocation, workDir, ctx.TimeoutSeconds, ct)
+        var result = await RunToolAsync(ctx, invocation, workDir, ct)
             .ConfigureAwait(false);
         if (result.ExitCode != 0)
             throw new InvalidOperationException(
@@ -394,8 +394,8 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
             progress?.Report(PipelineStatus.ParsingSource);
             var parseSourceInvocation =
                 ctx.InputParserInvocation.WithArguments("parse", "--input", ctx.SourceCasePath);
-            var psResult = await _processExecutor.RunAsync(
-                parseSourceInvocation, artifactsDir, ctx.TimeoutSeconds, cancellationToken)
+            var psResult = await RunToolAsync(
+                ctx, parseSourceInvocation, artifactsDir, cancellationToken)
                 .ConfigureAwait(false);
             if (psResult.ExitCode != 0)
                 return Fail(PipelineStatus.Error, "ParsingSource failed: " + psResult.Stderr);
@@ -442,8 +442,8 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
                 File.WriteAllText(dictTempPath, JsonSerializer.Serialize(phaseDict));
                 var writeInvocation = ctx.InputParserInvocation.WithArguments(
                     "write", "--dict-file", dictTempPath, "--output", phaseInputPath);
-                var wResult = await _processExecutor.RunAsync(
-                    writeInvocation, artifactsDir, ctx.TimeoutSeconds, cancellationToken)
+                var wResult = await RunToolAsync(
+                    ctx, writeInvocation, artifactsDir, cancellationToken)
                     .ConfigureAwait(false);
                 if (wResult.ExitCode != 0)
                     return Fail(PipelineStatus.Error,
@@ -584,4 +584,27 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
             workingDirectory,
             ctx.TimeoutSeconds,
             cancellationToken);
+
+    private Task<ProcessResult> RunToolAsync(
+        PipelineContext ctx,
+        ProcessInvocation invocation,
+        string workingDirectory,
+        CancellationToken cancellationToken) =>
+        IsRemoteToolMode(ctx.RuntimeProfile)
+            ? _runtimeProcessExecutor.RunAsync(
+                ctx.RuntimeProfile,
+                invocation,
+                workingDirectory,
+                ctx.TimeoutSeconds,
+                cancellationToken)
+            : _processExecutor.RunAsync(
+                invocation,
+                workingDirectory,
+                ctx.TimeoutSeconds,
+                cancellationToken);
+
+    private static bool IsRemoteToolMode(RuntimeProfile? runtimeProfile) =>
+        runtimeProfile?.DockerMcp is { } dockerMcp
+        && string.IsNullOrWhiteSpace(dockerMcp.ToolName)
+        && string.IsNullOrWhiteSpace(dockerMcp.LocalExecutable);
 }

@@ -33,4 +33,5 @@ public sealed record JobExecutionOutcome(
     string? FailureReason,
     string? FailureKind = null,
     IReadOnlyList<SystemMtBatchJobItem>? BatchItems = null,
-    string? ArtifactPath = null);
+    string? ArtifactPath = null,
+    Guid? ExecutionId = null);

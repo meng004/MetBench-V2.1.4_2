@@ -220,6 +220,27 @@ public sealed class DockerMcpProcessExecutorTests
         Assert.Equal(new[] { "--output", "out.json" }, client.LastRequest!.Args);
     }
 
+    [Fact]
+    public async Task RunAsync_uses_invocation_file_name_as_remote_tool_when_no_legacy_tool_mapping_is_configured()
+    {
+        var client = new RecordingClient();
+        var executor = new DockerMcpProcessExecutor(client);
+        var options = new DockerMcpRuntimeOptions(
+            "http://127.0.0.1:8765",
+            "metbench-e2e:latest",
+            PythonExecutable: "");
+
+        await executor.RunAsync(
+            options,
+            new ProcessInvocation("input-parser", new[] { "--input", "source.json" }),
+            30,
+            CancellationToken.None);
+
+        Assert.Equal("metbench-e2e:latest", client.LastRequest!.Image);
+        Assert.Equal("input-parser", client.LastRequest.Tool);
+        Assert.Equal(new[] { "--input", "source.json" }, client.LastRequest.Args);
+    }
+
     private sealed class RecordingClient : IDockerMcpRuntimeClient
     {
         public DockerMcpRunRequest? LastRequest;

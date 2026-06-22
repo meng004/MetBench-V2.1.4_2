@@ -40,9 +40,50 @@ The current `origin/main` direction is mostly aligned: Docker Runtime MCP is beh
 
 Runtime MCP remains an execution-plane adapter. The server owns image/tool/mount allowlists and produces bounded run records. The C# runtime client sends structured `{ image, tool, args, timeout_seconds }` requests, receives `run_id`, and makes that id available to the core evidence path.
 
-The control plane is a BLL.Core application service. It depends on existing business services: `ISystemMtJobService`, `ISystemMtCatalogReader` or `ISystemMtLauncher`, `IJobStore`, and `ISystemMtArtifactAccessService`. It exposes operations such as `SubmitRun`, `SubmitBatch`, `GetJob`, `CancelJob`, `GetResult`, `ListArtifacts(jobId)`, and `GetArtifact(jobId, artifactId)`.
+The control plane is a BLL.Core application service. It depends on existing business services: `ISystemMtJobService`, `ISystemMtCatalogReader` or `ISystemMtLauncher`, and `IJobStore`. It exposes operations such as `SubmitRun`, `GetJob`, `CancelJob`, `GetResult`, and `GetEvidence`.
 
-REST API and Business MCP use the same control-plane contract. REST handles HTTP auth, DTO binding, request size limits, and `ProblemDetails`. Business MCP exposes agent-facing tools only: `list_mrs`, `submit_run`, `submit_batch`, `get_job`, `cancel_job`, `get_result`, `list_artifacts`, and `get_artifact`.
+REST API and Business MCP use the same control-plane contract. REST handles HTTP auth, DTO binding, request size limits, and `ProblemDetails`. Business MCP exposes the current agent-facing tools only: `business_health`, `submit_run`, `get_job`, `cancel_job`, `get_result`, and `get_evidence`.
+
+## Control Semantics Vocabulary
+
+The API and MCP surfaces use one shared semantic vocabulary. A term belongs to exactly one plane unless this section explicitly says it is a cross-plane propagation.
+
+### Resource Terms
+
+These terms are intentionally not interchangeable:
+
+| Term | Plane | Identifier | Definition | Must not mean |
+|---|---|---|---|---|
+| `workflow` | Internal architecture description | None | The ordered System MT orchestration path inside MetBench core, such as `SystemMtJobService -> SystemMtLauncher -> SystemMtPipeline -> Typed Verification -> Recorder / Evidence / Anomaly`. It is not a public REST or MCP resource. | A submit target, durable record, queue item, or Runtime MCP command. |
+| `job` | Business control plane | `jobId` | The durable, pollable async business execution record stored by `SystemMtJobService`. A job has one `SystemMtJobKind`, one state machine, progress, phase, failure reason, optional `ExecutionId`, and optional artifact pointer. | A runtime process, Docker container, Runtime MCP `run_id`, or MR assertion result. |
+| `operation` / `job kind` | Business control plane | `SystemMtJobKind` | The kind of work carried by one job, for example `RunMr`, `RunBatch`, `ImportAssets`, `ExportAssets`, `ExportExecutionArtifacts`, or `ExportReport`. | A second resource hierarchy above job. |
+| `run` / `submit_run` | Business control plane command | Returns `jobId` | A user-facing command that creates a `RunMr` job. The command name is a verb phrase, not a separate resource type. | Runtime MCP `run_sut_command` or `run_id`. |
+| `execution` | Core result/evidence layer | `ExecutionId` | The persisted System MT execution result/evidence created by the core launcher/recorder path after a job runs far enough to produce result evidence. | The job record or runtime backend process. |
+| `runtime run` | Runtime execution plane | Runtime `run_id` | One backend command invocation owned by Runtime MCP, such as parser, SUT runner, or output parser execution. Multiple runtime runs may support one MetBench job. | A MetBench job, workflow, or execution result. |
+
+Public API and Business MCP use `job` as the resource. They may expose verbs such as `submit_run` for usability, but they must not add `workflow` as another resource name or accept runtime `run_id` values where a `jobId` is required.
+
+The creation chain is intentionally one-way:
+
+- Submit creates a `jobId`; it does not create an `ExecutionId`.
+- Runtime MCP creates runtime `run_id` values; it does not create jobs or executions.
+- The core recorder creates `ExecutionId` after the job runs far enough to produce persisted result/evidence.
+
+| Semantic | Chinese label | Plane | Public surface | Target | Definition |
+|---|---|---|---|---|---|
+| `submit` | 提交 | Business control plane | REST API / Business MCP | MR id, batch MR ids, or operation request | Creates a durable System MT job and returns a job id. It does not directly start a process from the adapter. |
+| `poll` / `get_job` | 查询 | Business control plane | REST API / Business MCP | Job id | Reads durable job state, phase, progress, failure reason, artifact pointer, and execution id when available. |
+| `get_result` / `get_evidence` | 取结果 / 取证据 | Business control plane | REST API / Business MCP | Job id | Reads the MetBench result/evidence produced by the core workflow. It does not read host paths supplied by the caller. |
+| `cancel` | 取消 | Business control plane | REST API / Business MCP | Job id | Requests that a queued or running business job stop and transition to the `Cancelled` terminal state. REST expresses this as `POST /jobs/{jobId}/cancel`; Business MCP expresses it as `cancel_job`. This is the user-facing stop operation. |
+| `kill` | 终止 | Runtime execution plane | Runtime MCP only | Runtime `run_id` or backend execution handle | Forcibly stops an already-started backend execution unit such as a process, process tree, container, or remote command. This is an execution-plane operation, not a business workflow operation. |
+
+`cancel` and `kill` are related but not interchangeable:
+
+- `cancel` is job-oriented, durable, idempotent, and owns the business terminal state. A cancelled job must not later be rewritten as `Succeeded` by an orphaned worker result.
+- `kill` is backend-oriented, best-effort, and owns only runtime interruption evidence. It must not decide MR pass/fail, job success/failure, anomaly classification, or artifact visibility.
+- A running job `cancel` may propagate to a runtime `kill` when the active backend exposes a killable runtime handle. That propagation is an implementation detail recorded in runtime evidence; callers still invoke `cancel_job`.
+- A direct Runtime MCP `kill` is reserved for runtime diagnostics or internal cancellation propagation. Business MCP must not expose `kill_run`, Docker controls, raw process ids, or container ids.
+- If a backend cannot kill an in-flight run, `cancel` still marks the business job as cancelled, but evidence must not claim true runtime termination unless process/container disappearance is observed.
 
 ## Data Flow
 
@@ -82,6 +123,8 @@ No public API or Business MCP request accepts `PackageRoot`, `StagingRoot`, `Exp
 - A failed MR assertion remains a successful job carrying a failed MR verdict; infrastructure/runtime failures may fail the job.
 - Runtime preflight failures remain runtime failures, not MR assertion anomalies.
 - Artifact reads require a terminal job with an artifact manifest path recorded by the worker/export operation.
+- `cancel_job` is the only public Business MCP stop operation. It targets a job id and never accepts runtime run ids, process ids, container ids, or host paths.
+- Runtime MCP `kill` semantics require a runtime handle that exists before the command completes. The current synchronous `run_sut_command` shape can return a `run_id` only after completion, so `kill_run` can honestly report `not_found` or `not_running` but cannot claim true in-flight remote kill by itself.
 
 ## Testing Strategy
 

@@ -42,6 +42,17 @@ class MetBenchBusinessServerTests(unittest.TestCase):
         finally:
             os.unlink(handle.name)
 
+    def test_load_config_accepts_utf8_bom_config_file(self):
+        payload = self.valid_config_payload()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config_path = Path(temp_dir) / "business.json"
+            config_path.write_bytes(b"\xef\xbb\xbf" + json.dumps(payload).encode("utf-8"))
+
+            config = self.server.load_config(config_path)
+
+        self.assertEqual("mcp-secret", config.auth_token)
+        self.assertEqual("http://127.0.0.1:5080", config.api_base_url)
+
     def test_load_config_rejects_blank_api_base_url(self):
         payload = self.valid_config_payload()
         payload["api_base_url"] = " "
@@ -56,6 +67,17 @@ class MetBenchBusinessServerTests(unittest.TestCase):
         for term in forbidden:
             with self.subTest(term=term):
                 self.assertNotIn(term, joined)
+
+    def test_design_doc_lists_current_business_mcp_tools(self):
+        root = Path(__file__).resolve().parents[4]
+        design_path = root / "docs" / "superpowers" / "specs" / "2026-06-21-systemmt-api-mcp-control-plane-design.md"
+        text = design_path.read_text(encoding="utf-8")
+
+        expected = (
+            "`business_health`, `submit_run`, `get_job`, `cancel_job`, "
+            "`get_result`, and `get_evidence`"
+        )
+        self.assertIn(expected, text)
 
     def test_dispatch_submit_run_posts_business_job_request_to_rest_api(self):
         config = self.write_config_and_load(self.valid_config_payload())
@@ -114,7 +136,7 @@ class MetBenchBusinessServerTests(unittest.TestCase):
         self.assertEqual({"jobId": "job-1", "state": "Succeeded"}, result)
         self.assertEqual(("GET", "/api/v1/systemmt/jobs/job-1", None), api.calls[0])
 
-    def test_dispatch_cancel_job_deletes_job_resource(self):
+    def test_dispatch_cancel_job_posts_cancel_action(self):
         config = self.write_config_and_load(self.valid_config_payload())
         api = FakeApiClient({})
 
@@ -125,7 +147,7 @@ class MetBenchBusinessServerTests(unittest.TestCase):
             api_client=api,
         )
 
-        self.assertEqual(("DELETE", "/api/v1/systemmt/jobs/job-1", None), api.calls[0])
+        self.assertEqual(("POST", "/api/v1/systemmt/jobs/job-1/cancel", None), api.calls[0])
 
     def test_call_rest_api_raises_for_rest_http_error_body(self):
         config = self.write_config_and_load(self.valid_config_payload())

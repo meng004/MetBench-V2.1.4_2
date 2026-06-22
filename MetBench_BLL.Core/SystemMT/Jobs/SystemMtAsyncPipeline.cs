@@ -49,6 +49,7 @@ public sealed class SystemMtAsyncPipeline : ISystemMtAsyncPipeline
         // RunAsync 不抛即基础设施成功；抛异常（Python 失败 / 缺 SUT 文件等）由 worker catch → Failed。
         MrRunResult result = await _launcher.RunAsync(request.MrId, request.ParameterOverrides, cancellationToken);
 
+        var executionId = TryParseExecutionId(result);
         var runtimeFailureKind = await ResolveRuntimeFailureKindAsync(result, cancellationToken);
         if (runtimeFailureKind is not null)
         {
@@ -57,12 +58,18 @@ public sealed class SystemMtAsyncPipeline : ISystemMtAsyncPipeline
                 sutName,
                 Result: null,
                 FailureReason: result.FailureReason,
-                FailureKind: runtimeFailureKind);
+                FailureKind: runtimeFailureKind,
+                ExecutionId: executionId);
         }
 
         progress?.Report(new SystemMtJobProgress(SystemMtJobState.Asserting, "asserting", 90));
 
-        return new JobExecutionOutcome(SystemMtJobState.Succeeded, sutName, result, null);
+        return new JobExecutionOutcome(
+            SystemMtJobState.Succeeded,
+            sutName,
+            result,
+            FailureReason: null,
+            ExecutionId: executionId);
     }
 
     private async Task<string> ResolveSutNameAsync(string mrId, CancellationToken cancellationToken)
@@ -87,4 +94,7 @@ public sealed class SystemMtAsyncPipeline : ISystemMtAsyncPipeline
         var runtime = evidence?.RuntimeEvidence;
         return runtime is { Passed: false } ? runtime.FailureKind : null;
     }
+
+    private static Guid? TryParseExecutionId(MrRunResult result) =>
+        Guid.TryParse(result.RecordId, out var executionId) ? executionId : null;
 }

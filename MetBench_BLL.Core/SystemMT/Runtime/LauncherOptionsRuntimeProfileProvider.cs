@@ -50,14 +50,33 @@ public sealed class LauncherOptionsRuntimeProfileProvider : IRuntimeProfileProvi
                 $"Docker MCP runtime for key '{runtimeKey}' has an invalid or missing 'endpoint' field: {ex.Message}");
         }
         var image = RequiredQueryValue(runtimeKey, query, "image");
-        var python = RequiredQueryValue(runtimeKey, query, "python");
         var endpoint = RequiredQueryValue(runtimeKey, query, "endpoint");
-        var tool = RequiredQueryValue(runtimeKey, query, "tool");
-        var local = RequiredQueryValue(runtimeKey, query, "local");
         if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var endpointUri)
             || (endpointUri.Scheme != Uri.UriSchemeHttp && endpointUri.Scheme != Uri.UriSchemeHttps))
         {
             throw InvalidDockerRuntime(runtimeKey, "endpoint");
+        }
+
+        query.TryGetValue("python", out var python);
+        query.TryGetValue("tool", out var tool);
+        query.TryGetValue("local", out var local);
+        var legacyToolMapping = !string.IsNullOrWhiteSpace(python)
+            || !string.IsNullOrWhiteSpace(tool)
+            || !string.IsNullOrWhiteSpace(local);
+        if (legacyToolMapping)
+        {
+            if (string.IsNullOrWhiteSpace(python))
+                throw InvalidDockerRuntime(runtimeKey, "python");
+            if (string.IsNullOrWhiteSpace(tool))
+                throw InvalidDockerRuntime(runtimeKey, "tool");
+            if (string.IsNullOrWhiteSpace(local))
+                throw InvalidDockerRuntime(runtimeKey, "local");
+        }
+        else
+        {
+            python = string.Empty;
+            tool = string.Empty;
+            local = string.Empty;
         }
 
         query.TryGetValue("authTokenEnv", out var authTokenEnv);
@@ -65,10 +84,14 @@ public sealed class LauncherOptionsRuntimeProfileProvider : IRuntimeProfileProvi
 
         query.TryGetValue("localPython", out var localPython);
         localPython = string.IsNullOrWhiteSpace(localPython) ? null : localPython;
+        if (!legacyToolMapping && localPython is not null)
+            throw InvalidDockerRuntime(runtimeKey, "localPython");
 
         var pathStyle = DockerMcpPathStyle.None;
         if (query.TryGetValue("pathStyle", out var pathStyleRaw))
         {
+            if (!legacyToolMapping)
+                throw InvalidDockerRuntime(runtimeKey, "pathStyle");
             if (!string.Equals(pathStyleRaw, "wsl", StringComparison.OrdinalIgnoreCase))
                 throw InvalidDockerRuntime(runtimeKey, "pathStyle");
             pathStyle = DockerMcpPathStyle.Wsl;
@@ -78,7 +101,7 @@ public sealed class LauncherOptionsRuntimeProfileProvider : IRuntimeProfileProvi
             runtimeKey,
             $"{runtimeKey} Docker MCP",
             RuntimeKind.Docker,
-            local,
+            string.IsNullOrWhiteSpace(local) ? null : local,
             dockerMcp: new DockerMcpRuntimeOptions(
                 endpoint, image, python, authTokenEnv, localPython, pathStyle, tool, local));
     }
