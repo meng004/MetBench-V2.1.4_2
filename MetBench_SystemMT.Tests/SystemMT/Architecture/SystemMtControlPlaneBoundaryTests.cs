@@ -1,3 +1,4 @@
+using MetBench_BLL.SystemMT.Jobs;
 using Xunit;
 
 namespace MetBench_SystemMT.Tests.SystemMT.Architecture;
@@ -125,16 +126,126 @@ public sealed class SystemMtControlPlaneBoundaryTests
     }
 
     [Fact]
+    public void Semantic_workflow_is_internal_process_term_not_public_resource()
+    {
+        var root = SolutionRoot();
+        var design = ReadControlPlaneDesign(root);
+
+        Assert.Contains("`workflow`", design, StringComparison.Ordinal);
+        Assert.Contains("It is not a public REST or MCP resource.", design, StringComparison.Ordinal);
+        Assert.Contains("A submit target, durable record, queue item, or Runtime MCP command.", design, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Semantic_job_is_the_public_business_control_plane_resource()
+    {
+        var root = SolutionRoot();
+        var endpoints = File.ReadAllText(Path.Combine(root, "MetBench_Api", "SystemMtApiEndpoints.cs"));
+
+        Assert.Contains("MapPost(\"/jobs\"", endpoints, StringComparison.Ordinal);
+        Assert.Contains("MapGet(\"/jobs/{jobId:guid}\"", endpoints, StringComparison.Ordinal);
+        Assert.Contains("MapGet(\"/jobs/{jobId:guid}/result\"", endpoints, StringComparison.Ordinal);
+        Assert.DoesNotContain("MapPost(\"/runs\"", endpoints, StringComparison.Ordinal);
+        Assert.DoesNotContain("MapGet(\"/runs", endpoints, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Semantic_operation_or_job_kind_is_internal_classification_not_public_resource()
+    {
+        var root = SolutionRoot();
+        var design = ReadControlPlaneDesign(root);
+        var endpoints = File.ReadAllText(Path.Combine(root, "MetBench_Api", "SystemMtApiEndpoints.cs"));
+
+        Assert.Contains("`operation` / `job kind`", design, StringComparison.Ordinal);
+        Assert.True(Enum.IsDefined(typeof(SystemMtJobKind), SystemMtJobKind.RunMr));
+        Assert.True(Enum.IsDefined(typeof(SystemMtJobKind), SystemMtJobKind.ExportReport));
+        Assert.DoesNotContain("MapPost(\"/operations", endpoints, StringComparison.Ordinal);
+        Assert.DoesNotContain("MapGet(\"/operations", endpoints, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Semantic_submit_run_is_a_command_that_creates_a_job_receipt()
+    {
+        var root = SolutionRoot();
+        var design = ReadControlPlaneDesign(root);
+        var businessServer = File.ReadAllText(Path.Combine(root, "infra", "mcp", "metbench-business", "server.py"));
+
+        Assert.Contains("Submit creates a `jobId`; it does not create an `ExecutionId`.", design, StringComparison.Ordinal);
+        Assert.Contains("\"submit_run\"", businessServer, StringComparison.Ordinal);
+        Assert.Contains("\"/api/v1/systemmt/jobs\"", businessServer, StringComparison.Ordinal);
+        Assert.DoesNotContain("\"/api/v1/systemmt/runs\"", businessServer, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Semantic_execution_is_persisted_result_identifier_not_submit_receipt()
+    {
+        var root = SolutionRoot();
+        var design = ReadControlPlaneDesign(root);
+        var controlPlane = File.ReadAllText(Path.Combine(
+            root,
+            "MetBench_BLL.Core",
+            "SystemMT",
+            "ControlPlane",
+            "SystemMtControlPlaneService.cs"));
+
+        Assert.Contains(
+            "The core recorder creates `ExecutionId` after the job runs far enough to produce persisted result/evidence.",
+            design,
+            StringComparison.Ordinal);
+        Assert.Contains("status?.ExecutionId", controlPlane, StringComparison.Ordinal);
+        Assert.Contains("GetByExecutionAsync(executionId", controlPlane, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Semantic_runtime_run_is_runtime_mcp_invocation_id_not_business_job()
+    {
+        var root = SolutionRoot();
+        var design = ReadControlPlaneDesign(root);
+        var runtimeServer = File.ReadAllText(Path.Combine(root, "infra", "mcp", "docker-runtime", "server.py"));
+        var businessServer = File.ReadAllText(Path.Combine(root, "infra", "mcp", "metbench-business", "server.py"));
+
+        Assert.Contains("Runtime MCP creates runtime `run_id` values; it does not create jobs or executions.", design, StringComparison.Ordinal);
+        Assert.Contains("\"run_id\"", runtimeServer, StringComparison.Ordinal);
+        Assert.Contains("RUN_RECORDS", runtimeServer, StringComparison.Ordinal);
+        Assert.DoesNotContain("\"run_id\"", businessServer, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Semantic_cancel_is_business_control_action_against_job_id()
+    {
+        var root = SolutionRoot();
+        var design = ReadControlPlaneDesign(root);
+        var endpoints = File.ReadAllText(Path.Combine(root, "MetBench_Api", "SystemMtApiEndpoints.cs"));
+        var businessServer = File.ReadAllText(Path.Combine(root, "infra", "mcp", "metbench-business", "server.py"));
+
+        Assert.Contains("`cancel` |", design, StringComparison.Ordinal);
+        Assert.Contains("Business control plane", design, StringComparison.Ordinal);
+        Assert.Contains("MapPost(\"/jobs/{jobId:guid}/cancel\"", endpoints, StringComparison.Ordinal);
+        Assert.Contains("client(\"POST\"", businessServer, StringComparison.Ordinal);
+        Assert.Contains("/api/v1/systemmt/jobs/", businessServer, StringComparison.Ordinal);
+        Assert.Contains("/cancel", businessServer, StringComparison.Ordinal);
+        Assert.DoesNotContain("MapDelete(\"/jobs/{jobId:guid}\"", endpoints, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Semantic_kill_is_runtime_only_and_not_business_mcp_tool()
+    {
+        var root = SolutionRoot();
+        var design = ReadControlPlaneDesign(root);
+        var runtimeServer = File.ReadAllText(Path.Combine(root, "infra", "mcp", "docker-runtime", "server.py"));
+        var businessServer = File.ReadAllText(Path.Combine(root, "infra", "mcp", "metbench-business", "server.py"));
+
+        Assert.Contains("`kill` |", design, StringComparison.Ordinal);
+        Assert.Contains("Runtime execution plane", design, StringComparison.Ordinal);
+        Assert.Contains("\"kill_run\"", runtimeServer, StringComparison.Ordinal);
+        Assert.DoesNotContain("\"kill_run\"", businessServer, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Control_plane_design_defines_submit_execution_and_runtime_boundaries()
     {
         var root = SolutionRoot();
-        var designPath = Path.Combine(
-            root,
-            "docs",
-            "superpowers",
-            "specs",
-            "2026-06-21-systemmt-api-mcp-control-plane-design.md");
-        var text = File.ReadAllText(designPath);
+        var text = ReadControlPlaneDesign(root);
 
         Assert.Contains(
             "Submit creates a `jobId`; it does not create an `ExecutionId`.",
@@ -148,6 +259,23 @@ public sealed class SystemMtControlPlaneBoundaryTests
             "The core recorder creates `ExecutionId` after the job runs far enough to produce persisted result/evidence.",
             text,
             StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void E2e_cleanup_uses_cancel_action_not_delete_job_resource()
+    {
+        var root = SolutionRoot();
+        var e2ePath = Path.Combine(
+            root,
+            "MetBench_SystemMT.Tests",
+            "SystemMT",
+            "Acceptance",
+            "SystemMtApiBusinessRuntimeMcpEndToEndTests.cs");
+        var text = File.ReadAllText(e2ePath);
+
+        Assert.DoesNotContain("HttpMethod.Delete", text, StringComparison.Ordinal);
+        Assert.Contains("HttpMethod.Post", text, StringComparison.Ordinal);
+        Assert.Contains("/cancel", text, StringComparison.Ordinal);
     }
 
     private static string[] ControlPlaneAdapterRoots(string root)
@@ -229,6 +357,13 @@ public sealed class SystemMtControlPlaneBoundaryTests
             }
         }
     }
+
+    private static string ReadControlPlaneDesign(string root) => File.ReadAllText(Path.Combine(
+        root,
+        "docs",
+        "superpowers",
+        "specs",
+        "2026-06-21-systemmt-api-mcp-control-plane-design.md"));
 
     private static string SolutionRoot()
     {

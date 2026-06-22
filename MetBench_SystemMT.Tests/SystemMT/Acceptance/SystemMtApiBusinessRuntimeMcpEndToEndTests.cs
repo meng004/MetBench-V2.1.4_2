@@ -156,8 +156,8 @@ public sealed class SystemMtApiBusinessRuntimeMcpEndToEndTests
         {
             using var timeout = new CancellationTokenSource(RequestTimeout);
             using var request = new HttpRequestMessage(
-                HttpMethod.Delete,
-                BuildUri(apiUrl, $"api/v1/systemmt/jobs/{jobId}"));
+                HttpMethod.Post,
+                BuildUri(apiUrl, $"api/v1/systemmt/jobs/{jobId}/cancel"));
             using var response = await http.SendAsync(request, timeout.Token);
             var body = await response.Content.ReadAsStringAsync(timeout.Token);
             if (response.IsSuccessStatusCode)
