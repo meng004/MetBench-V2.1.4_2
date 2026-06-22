@@ -46,6 +46,25 @@ public sealed class SystemMtControlPlaneBoundaryTests
         "workflow",
     };
 
+    private static readonly string[] SemanticTerms =
+    {
+        "workflow",
+        "job",
+        "operation / job kind",
+        "submit_run",
+        "execution",
+        "runtime run",
+        "cancel",
+        "kill",
+    };
+
+    private static readonly string[] SemanticEnvironments =
+    {
+        "API",
+        "Business MCP",
+        "Runtime MCP",
+    };
+
     [Fact]
     public void SystemMtPipeline_does_not_reference_runtime_executor_implementations_directly()
     {
@@ -278,6 +297,90 @@ public sealed class SystemMtControlPlaneBoundaryTests
         Assert.Contains("/cancel", text, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void Semantic_validation_matrix_documents_every_term_in_every_environment()
+    {
+        var root = SolutionRoot();
+        var matrixPath = Path.Combine(root, "docs", "uat", "control-semantics-validation-matrix.md");
+        var text = File.ReadAllText(matrixPath);
+
+        foreach (var semantic in SemanticTerms)
+        {
+            foreach (var environment in SemanticEnvironments)
+            {
+                Assert.Contains($"| `{semantic}` | {environment} |", text, StringComparison.Ordinal);
+            }
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(SemanticEnvironmentCases))]
+    public void Semantic_validation_matrix_has_environment_specific_guard(
+        string semantic,
+        string environment,
+        string[] requiredTerms,
+        string[] forbiddenTerms)
+    {
+        var root = SolutionRoot();
+        var source = ReadSemanticEnvironmentSource(root, environment);
+
+        foreach (var term in requiredTerms)
+        {
+            Assert.True(
+                source.Contains(term, StringComparison.Ordinal),
+                $"Semantic '{semantic}' in '{environment}' must contain '{term}'.");
+        }
+
+        foreach (var term in forbiddenTerms)
+        {
+            Assert.True(
+                !source.Contains(term, StringComparison.Ordinal),
+                $"Semantic '{semantic}' in '{environment}' must not contain '{term}'.");
+        }
+    }
+
+    public static IEnumerable<object[]> SemanticEnvironmentCases()
+    {
+        yield return Case("workflow", "API", [], ["workflow", "Workflow"]);
+        yield return Case("workflow", "Business MCP", [], ["workflow", "Workflow"]);
+        yield return Case("workflow", "Runtime MCP", [], ["workflow", "Workflow"]);
+
+        yield return Case("job", "API", ["MapPost(\"/jobs\"", "MapGet(\"/jobs/{jobId:guid}\""], ["MapPost(\"/runs", "MapGet(\"/runs"]);
+        yield return Case("job", "Business MCP", ["\"get_job\"", "/api/v1/systemmt/jobs"], []);
+        yield return Case("job", "Runtime MCP", [], ["jobId", "job_id"]);
+
+        yield return Case("operation / job kind", "API", ["SystemMtJobKind", "RunMr"], ["MapPost(\"/operations", "MapGet(\"/operations"]);
+        yield return Case("operation / job kind", "Business MCP", [], ["submit_operation", "job_kind", "/operations"]);
+        yield return Case("operation / job kind", "Runtime MCP", [], ["SystemMtJobKind", "job_kind", "/operations"]);
+
+        yield return Case("submit_run", "API", ["SubmitRunAsync", "SystemMtJobReceiptResponse"], ["MapPost(\"/runs"]);
+        yield return Case("submit_run", "Business MCP", ["\"submit_run\"", "\"/api/v1/systemmt/jobs\""], ["\"/api/v1/systemmt/runs\""]);
+        yield return Case("submit_run", "Runtime MCP", [], ["submit_run"]);
+
+        yield return Case("execution", "API", ["ExecutionId", "GetByExecutionAsync"], []);
+        yield return Case("execution", "Business MCP", ["\"get_evidence\""], ["ExecutionId", "execution_id"]);
+        yield return Case("execution", "Runtime MCP", [], ["ExecutionId", "execution_id"]);
+
+        yield return Case("runtime run", "API", ["SourceRunId", "FollowupRunId"], ["run_sut_command"]);
+        yield return Case("runtime run", "Business MCP", [], ["\"run_id\"", "run_sut_command"]);
+        yield return Case("runtime run", "Runtime MCP", ["\"run_id\"", "RUN_RECORDS"], ["jobId", "ExecutionId"]);
+
+        yield return Case("cancel", "API", ["MapPost(\"/jobs/{jobId:guid}/cancel\"", "CancelAsync"], ["MapDelete(\"/jobs/{jobId:guid}\""]);
+        yield return Case("cancel", "Business MCP", ["\"cancel_job\"", "/cancel"], ["\"kill_run\""]);
+        yield return Case("cancel", "Runtime MCP", [], ["\"cancel_job\""]);
+
+        yield return Case("kill", "API", [], ["kill_run"]);
+        yield return Case("kill", "Business MCP", [], ["\"kill_run\""]);
+        yield return Case("kill", "Runtime MCP", ["\"kill_run\"", "kill_run("], ["\"cancel_job\""]);
+
+        static object[] Case(
+            string semantic,
+            string environment,
+            string[] requiredTerms,
+            string[] forbiddenTerms) =>
+            [semantic, environment, requiredTerms, forbiddenTerms];
+    }
+
     private static string[] ControlPlaneAdapterRoots(string root)
     {
         return
@@ -364,6 +467,32 @@ public sealed class SystemMtControlPlaneBoundaryTests
         "superpowers",
         "specs",
         "2026-06-21-systemmt-api-mcp-control-plane-design.md"));
+
+    private static string ReadSemanticEnvironmentSource(string root, string environment)
+    {
+        string[] files = environment switch
+        {
+            "API" =>
+            [
+                Path.Combine(root, "MetBench_Api", "SystemMtApiEndpoints.cs"),
+                Path.Combine(root, "MetBench_BLL.Core", "SystemMT", "ControlPlane", "SystemMtControlPlaneService.cs"),
+                Path.Combine(root, "MetBench_BLL.Core", "SystemMT", "ControlPlane", "ISystemMtControlPlaneService.cs"),
+                Path.Combine(root, "MetBench_BLL.Core", "SystemMT", "Jobs", "SystemMtJobService.cs"),
+                Path.Combine(root, "MetBench_BLL.Core", "SystemMT", "Jobs", "Operations", "SystemMtJobKind.cs"),
+            ],
+            "Business MCP" =>
+            [
+                Path.Combine(root, "infra", "mcp", "metbench-business", "server.py"),
+            ],
+            "Runtime MCP" =>
+            [
+                Path.Combine(root, "infra", "mcp", "docker-runtime", "server.py"),
+            ],
+            _ => throw new ArgumentOutOfRangeException(nameof(environment), environment, "Unknown semantic environment."),
+        };
+
+        return string.Join("\n", files.Where(File.Exists).Select(File.ReadAllText));
+    }
 
     private static string SolutionRoot()
     {
