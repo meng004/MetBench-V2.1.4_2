@@ -89,7 +89,9 @@ class DockerRuntimeServerTests(unittest.TestCase):
             max_output_bytes=4096,
         )
         with self.assertRaisesRegex(ValueError, "not allowlisted"):
-            server.validate_run_request(cfg, {"image": "ubuntu:latest", "argv": ["python", "--version"]})
+            server.validate_run_request(
+                cfg,
+                {"image": "ubuntu:latest", "tool": "openmoc-runner", "args": ["--version"]})
 
     def test_run_request_rejects_raw_docker_flags(self):
         cfg = server.RuntimeConfig(
@@ -102,8 +104,10 @@ class DockerRuntimeServerTests(unittest.TestCase):
             default_timeout_seconds=120,
             max_output_bytes=4096,
         )
-        with self.assertRaisesRegex(ValueError, "raw Docker flag"):
-            server.validate_run_request(cfg, {"image": "metbench-sut:latest", "argv": ["--privileged"]})
+        with self.assertRaisesRegex(ValueError, "shell"):
+            server.validate_run_request(
+                cfg,
+                {"image": "metbench-sut:latest", "tool": "openmoc-runner", "args": ["-c", "id"]})
 
 
 if __name__ == "__main__":
@@ -190,13 +194,18 @@ def validate_run_request(config: RuntimeConfig, request: dict) -> list[str]:
     image = str(request.get("image", "")).strip()
     if image not in config.allowed_images:
         raise ValueError(f"Image '{image}' is not allowlisted.")
-    argv = request.get("argv")
-    if not isinstance(argv, list) or not argv or not all(isinstance(item, str) and item for item in argv):
-        raise ValueError("argv must be a non-empty list of strings.")
-    for item in argv:
+    if "argv" in request:
+        raise ValueError("raw argv is not accepted; use an allowlisted tool and args.")
+    tool = str(request.get("tool", "")).strip()
+    if tool not in config.allowed_tools:
+        raise ValueError(f"Tool '{tool}' is not allowlisted.")
+    args = request.get("args", [])
+    if not isinstance(args, list) or not all(isinstance(item, str) and item.strip() for item in args):
+        raise ValueError("args must be a list of non-empty strings.")
+    for item in args:
         if item.startswith("--"):
             raise ValueError("raw Docker flag arguments are not allowed.")
-    return argv
+    return [config.allowed_tools[tool].executable, *args]
 
 
 def _local_ipv4_addresses() -> list[str]:
@@ -356,7 +365,7 @@ public sealed class DockerMcpRuntimeProfileTests
             OpenMocPython: "python3",
             RuntimePythons: new Dictionary<string, string>
             {
-                ["openmoc-docker"] = "docker-mcp://openmoc-docker?image=metbench-sut:latest&python=/opt/openmoc-venv/bin/python&endpoint=http://192.168.1.20:8765"
+                ["openmoc-docker"] = "docker-mcp://openmoc-docker?image=metbench-sut:latest&tool=openmoc-runner&local=openmoc-runner&python=/opt/openmoc-venv/bin/python&endpoint=http://192.168.1.20:8765"
             });
 
         var profile = new LauncherOptionsRuntimeProfileProvider(options).GetProfile("openmoc-docker");

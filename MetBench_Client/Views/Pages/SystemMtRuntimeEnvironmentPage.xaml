@@ -113,6 +113,8 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,12" FontWeight="Medium" Text="{Binding ViewModel.Localization[RuntimeEnv_DockerMcpProfile]}"/>
@@ -141,17 +143,33 @@
                         AutomationProperties.AutomationId="TextBox_RuntimeEnvImage"
                         Text="{Binding ViewModel.Image, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
-                    <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="{Binding ViewModel.Localization[RuntimeEnv_Python]}"/>
+                    <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="{Binding ViewModel.Localization[RuntimeEnv_Tool]}"/>
                     <ui:TextBox
                         Grid.Row="4"
+                        Grid.Column="1"
+                        Margin="0,0,0,8"
+                        AutomationProperties.AutomationId="TextBox_RuntimeEnvTool"
+                        Text="{Binding ViewModel.ToolName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="{Binding ViewModel.Localization[RuntimeEnv_LocalExecutable]}"/>
+                    <ui:TextBox
+                        Grid.Row="5"
+                        Grid.Column="1"
+                        Margin="0,0,0,8"
+                        AutomationProperties.AutomationId="TextBox_RuntimeEnvLocalExecutable"
+                        Text="{Binding ViewModel.LocalExecutable, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <TextBlock Grid.Row="6" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="{Binding ViewModel.Localization[RuntimeEnv_Python]}"/>
+                    <ui:TextBox
+                        Grid.Row="6"
                         Grid.Column="1"
                         Margin="0,0,0,8"
                         AutomationProperties.AutomationId="TextBox_RuntimeEnvPython"
                         Text="{Binding ViewModel.PythonExecutable, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
-                    <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,0,8,0" VerticalAlignment="Center" Text="{Binding ViewModel.Localization[RuntimeEnv_AuthTokenEnv]}"/>
+                    <TextBlock Grid.Row="7" Grid.Column="0" Margin="0,0,8,0" VerticalAlignment="Center" Text="{Binding ViewModel.Localization[RuntimeEnv_AuthTokenEnv]}"/>
                     <ui:TextBox
-                        Grid.Row="5"
+                        Grid.Row="7"
                         Grid.Column="1"
                         AutomationProperties.AutomationId="TextBox_RuntimeEnvAuthTokenEnv"
                         Text="{Binding ViewModel.AuthTokenEnvironmentVariable, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>

@@ -16,8 +16,7 @@ public interface IDockerMcpRuntimeClient
 
     Task<DockerMcpRunResult> RunSutCommandAsync(
         DockerMcpRuntimeOptions options,
-        IReadOnlyList<string> argv,
-        int timeoutSeconds,
+        DockerMcpRunRequest request,
         CancellationToken cancellationToken = default);
 }
 
@@ -33,7 +32,8 @@ public sealed record DockerMcpRunResult(
     int ExitCode,
     string Stdout,
     string Stderr,
-    bool TimedOut);
+    bool TimedOut,
+    string RunId = "");
 
 public sealed class DockerMcpRuntimeClient : IDockerMcpRuntimeClient
 {
@@ -69,15 +69,15 @@ public sealed class DockerMcpRuntimeClient : IDockerMcpRuntimeClient
 
         try
         {
-            using var request = new HttpRequestMessage(HttpMethod.Post, ToolUri(options.Endpoint));
+            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, ToolUri(options.Endpoint));
             if (!string.IsNullOrWhiteSpace(token))
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            request.Content = new StringContent(
+                httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            httpRequest.Content = new StringContent(
                 JsonSerializer.Serialize(new { tool = "runtime_health", arguments = new { } }, JsonOptions),
                 Encoding.UTF8,
                 "application/json");
 
-            using var response = await _http.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            using var response = await _http.SendAsync(httpRequest, cancellationToken).ConfigureAwait(false);
             var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
@@ -101,16 +101,26 @@ public sealed class DockerMcpRuntimeClient : IDockerMcpRuntimeClient
 
     public async Task<DockerMcpRunResult> RunSutCommandAsync(
         DockerMcpRuntimeOptions options,
-        IReadOnlyList<string> argv,
-        int timeoutSeconds,
+        DockerMcpRunRequest request,
         CancellationToken cancellationToken = default)
     {
         if (options is null)
             throw new ArgumentNullException(nameof(options));
-        if (argv is null || argv.Count == 0)
-            throw new ArgumentException("Docker MCP run requires a non-empty argv.", nameof(argv));
-        if (timeoutSeconds <= 0)
-            throw new ArgumentOutOfRangeException(nameof(timeoutSeconds), "Timeout must be positive.");
+        if (request is null)
+            throw new ArgumentNullException(nameof(request));
+        if (string.IsNullOrWhiteSpace(request.Image))
+            throw new ArgumentException("Docker MCP run requires an image.", nameof(request));
+        if (string.IsNullOrWhiteSpace(request.Tool))
+            throw new ArgumentException("Docker MCP run requires a tool.", nameof(request));
+        if (request.Args is null)
+            throw new ArgumentException("Docker MCP run requires args.", nameof(request));
+        if (request.TimeoutSeconds <= 0)
+            throw new ArgumentOutOfRangeException(nameof(request), "Timeout must be positive.");
+        if (!string.Equals(request.Image, options.Image, StringComparison.Ordinal))
+            throw new ArgumentException("Docker MCP run request image must match configured image.", nameof(request));
+        if (!string.IsNullOrWhiteSpace(options.ToolName)
+            && !string.Equals(request.Tool, options.ToolName, StringComparison.Ordinal))
+            throw new ArgumentException("Docker MCP run request tool must match configured tool.", nameof(request));
 
         var token = ResolveAuthToken(options);
         if (options.AuthTokenEnvironmentVariable is not null && string.IsNullOrWhiteSpace(token))
@@ -124,24 +134,25 @@ public sealed class DockerMcpRuntimeClient : IDockerMcpRuntimeClient
 
         try
         {
-            using var request = new HttpRequestMessage(HttpMethod.Post, ToolUri(options.Endpoint));
+            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, ToolUri(options.Endpoint));
             if (!string.IsNullOrWhiteSpace(token))
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            request.Content = new StringContent(
+                httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            httpRequest.Content = new StringContent(
                 JsonSerializer.Serialize(new
                 {
                     tool = "run_sut_command",
                     arguments = new
                     {
-                        image = options.Image,
-                        argv,
-                        timeout_seconds = timeoutSeconds,
+                        image = request.Image,
+                        tool = request.Tool,
+                        args = request.Args,
+                        timeout_seconds = request.TimeoutSeconds,
                     },
                 }, JsonOptions),
                 Encoding.UTF8,
                 "application/json");
 
-            using var response = await _http.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            using var response = await _http.SendAsync(httpRequest, cancellationToken).ConfigureAwait(false);
             var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
@@ -215,7 +226,8 @@ public sealed class DockerMcpRuntimeClient : IDockerMcpRuntimeClient
                 returnCode,
                 GetString(root, "stdout"),
                 stderr,
-                timedOut);
+                timedOut,
+                GetString(root, "run_id"));
         }
         catch (JsonException ex)
         {

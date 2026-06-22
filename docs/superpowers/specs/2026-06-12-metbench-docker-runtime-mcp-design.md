@@ -62,7 +62,7 @@ Integration boundary:
 The Docker backend is represented as a runtime profile whose key is configured through `LauncherOptions.RuntimePythons` using a URI-like value:
 
 ```text
-docker-mcp://<runtime-key>?image=metbench-sut:latest&python=/opt/openmoc-venv/bin/python&endpoint=http://LAN-IP:PORT
+docker-mcp://<runtime-key>?image=metbench-sut:latest&tool=openmoc-runner&local=openmoc-runner&python=/opt/openmoc-venv/bin/python&endpoint=http://LAN-IP:PORT
 ```
 
 The value is not a local executable path. The provider parses it into Docker runtime metadata and returns a Docker runtime profile. Local Python keys keep their existing behavior.
@@ -125,8 +125,8 @@ Phase B runtime config example:
 ```csharp
 RuntimePythons = new Dictionary<string, string>
 {
-    ["openmoc-docker"] = "docker-mcp://openmoc-docker?image=metbench-sut:latest&python=/opt/openmoc-venv/bin/python&endpoint=http://192.168.1.20:8765",
-    ["openmc-docker"] = "docker-mcp://openmc-docker?image=metbench-sut:latest&python=/opt/openmc-venv/bin/python&endpoint=http://192.168.1.20:8765"
+    ["openmoc-docker"] = "docker-mcp://openmoc-docker?image=metbench-sut:latest&tool=openmoc-runner&local=openmoc-runner&python=/opt/openmoc-venv/bin/python&endpoint=http://192.168.1.20:8765",
+    ["openmc-docker"] = "docker-mcp://openmc-docker?image=metbench-sut:latest&tool=openmc-runner&local=openmc-runner&python=/opt/openmc-venv/bin/python&endpoint=http://192.168.1.20:8765"
 }
 ```
 

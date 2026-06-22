@@ -17,20 +17,21 @@ public sealed class DockerMcpProcessExecutorTests
         var options = new DockerMcpRuntimeOptions(
             Endpoint: "http://192.168.1.20:8765",
             Image: "metbench-sut:latest",
-            PythonExecutable: "/opt/openmoc-venv/bin/python");
+            PythonExecutable: "/opt/metbench-tools/openmoc-runner",
+            ToolName: "openmoc-runner",
+            LocalExecutable: "/host/openmoc-runner");
         var executor = new DockerMcpProcessExecutor(client);
 
         var result = await executor.RunAsync(
             options,
             new ProcessInvocation(
-                "/opt/openmoc-venv/bin/python",
+                "/host/openmoc-runner",
                 new[]
                 {
-                    "SUT/openmoc/runner.py",
                     "--input",
-                    "/tmp/source case.json",
+                    "source-case.json",
                     "--output",
-                    "/tmp/source.out.json",
+                    "source.out.json",
                 }),
             timeoutSeconds: 60,
             CancellationToken.None);
@@ -40,16 +41,16 @@ public sealed class DockerMcpProcessExecutorTests
         Assert.False(result.TimedOut);
         var request = Assert.Single(client.RunRequests);
         Assert.Same(options, request.Options);
-        Assert.Equal(60, request.TimeoutSeconds);
+        Assert.Equal(60, request.Request.TimeoutSeconds);
+        Assert.Equal("metbench-sut:latest", request.Request.Image);
+        Assert.Equal("openmoc-runner", request.Request.Tool);
         Assert.Equal(new[]
         {
-            "/opt/openmoc-venv/bin/python",
-            "SUT/openmoc/runner.py",
             "--input",
-            "/tmp/source case.json",
+            "source-case.json",
             "--output",
-            "/tmp/source.out.json",
-        }, request.Argv);
+            "source.out.json",
+        }, request.Request.Args);
     }
 
     [Fact]
@@ -64,11 +65,13 @@ public sealed class DockerMcpProcessExecutorTests
         var options = new DockerMcpRuntimeOptions(
             Endpoint: "http://127.0.0.1:8765",
             Image: "metbench-sut:latest",
-            PythonExecutable: "python");
+            PythonExecutable: "/opt/metbench-tools/openmoc-runner",
+            ToolName: "openmoc-runner",
+            LocalExecutable: "openmoc-runner");
 
         var result = await executor.RunAsync(
             options,
-            new ProcessInvocation("python", new[] { "runner.py" }),
+            new ProcessInvocation("openmoc-runner", Array.Empty<string>()),
             1,
             CancellationToken.None);
 
@@ -83,7 +86,11 @@ public sealed class DockerMcpProcessExecutorTests
         var client = new RecordingClient();
         var executor = new DockerMcpProcessExecutor(client);
         var options = new DockerMcpRuntimeOptions(
-            "http://127.0.0.1:8765", "img", "python");
+            "http://127.0.0.1:8765",
+            "img",
+            "/opt/metbench-tools/openmoc-runner",
+            ToolName: "openmoc-runner",
+            LocalExecutable: "openmoc-runner");
 
         await Assert.ThrowsAsync<ArgumentException>(() =>
             executor.RunAsync(
@@ -92,7 +99,62 @@ public sealed class DockerMcpProcessExecutorTests
                 30,
                 CancellationToken.None));
 
-        Assert.Null(client.LastArgv);
+        Assert.Null(client.LastRequest);
+    }
+
+    [Fact]
+    public async Task RunAsync_rejects_commands_that_do_not_match_configured_local_executable()
+    {
+        var client = new RecordingClient();
+        var executor = new DockerMcpProcessExecutor(client);
+        var options = new DockerMcpRuntimeOptions(
+            "http://127.0.0.1:8765",
+            "metbench-sut:latest",
+            "/opt/metbench-tools/openmoc-runner",
+            ToolName: "openmoc-runner",
+            LocalExecutable: "/host/openmoc-runner");
+
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            executor.RunAsync(
+                options,
+                new ProcessInvocation("/bin/sh", new[] { "-c", "id" }),
+                timeoutSeconds: 60,
+                CancellationToken.None));
+
+        Assert.Null(client.LastRequest);
+    }
+
+    [Theory]
+    [InlineData("-c")]
+    [InlineData("/c")]
+    [InlineData("-m")]
+    [InlineData("/m")]
+    [InlineData("runner.py")]
+    [InlineData("../secret.json")]
+    [InlineData("&&")]
+    [InlineData("|")]
+    [InlineData("$(id)")]
+    [InlineData("`id`")]
+    public async Task RunAsync_rejects_unsafe_args_before_calling_mcp_client(string unsafeArg)
+    {
+        var client = new RecordingClient();
+        var executor = new DockerMcpProcessExecutor(client);
+        var options = new DockerMcpRuntimeOptions(
+            "http://127.0.0.1:8765",
+            "metbench-sut:latest",
+            "/opt/metbench-tools/openmoc-runner",
+            ToolName: "openmoc-runner",
+            LocalExecutable: "/host/openmoc-runner",
+            PathStyle: DockerMcpPathStyle.Wsl);
+
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            executor.RunAsync(
+                options,
+                new ProcessInvocation("/host/openmoc-runner", new[] { unsafeArg }),
+                timeoutSeconds: 60,
+                CancellationToken.None));
+
+        Assert.Null(client.LastRequest);
     }
 
     [Theory]
@@ -113,26 +175,28 @@ public sealed class DockerMcpProcessExecutorTests
         var client = new RecordingClient();
         var executor = new DockerMcpProcessExecutor(client);
         var options = new DockerMcpRuntimeOptions(
-            "http://127.0.0.1:8765", "img", "/opt/venv/bin/python",
+            "http://127.0.0.1:8765",
+            "img",
+            "/opt/metbench-tools/openmc-runner",
+            ToolName: "openmc-runner",
+            LocalExecutable: "openmc-runner",
             PathStyle: DockerMcpPathStyle.Wsl);
 
         await executor.RunAsync(
             options,
-            new ProcessInvocation(
-                "/opt/venv/bin/python",
-                new[] { @"D:\repo\SUT\runner.py", "--input", @"C:\Temp\in.json" }),
+                new ProcessInvocation(
+                    "openmc-runner",
+                    new[] { "--input", @"C:\Users\lemon\AppData\Local\Temp\source.json" }),
             30,
             CancellationToken.None);
 
         Assert.Equal(
             new[]
-            {
-                "/opt/venv/bin/python",
-                "/mnt/d/repo/SUT/runner.py",
-                "--input",
-                "/mnt/c/Temp/in.json",
-            },
-            client.LastArgv);
+                {
+                    "--input",
+                    "/mnt/c/Users/lemon/AppData/Local/Temp/source.json",
+                },
+            client.LastRequest!.Args);
     }
 
     [Fact]
@@ -141,20 +205,45 @@ public sealed class DockerMcpProcessExecutorTests
         var client = new RecordingClient();
         var executor = new DockerMcpProcessExecutor(client);
         var options = new DockerMcpRuntimeOptions(
-            "http://127.0.0.1:8765", "img", "python");
+            "http://127.0.0.1:8765",
+            "img",
+            "/opt/metbench-tools/openmc-runner",
+            ToolName: "openmc-runner",
+            LocalExecutable: "openmc-runner");
 
         await executor.RunAsync(
             options,
-            new ProcessInvocation("python", new[] { @"D:\repo\runner.py" }),
+            new ProcessInvocation("openmc-runner", new[] { "--output", "out.json" }),
             30,
             CancellationToken.None);
 
-        Assert.Equal(new[] { "python", @"D:\repo\runner.py" }, client.LastArgv);
+        Assert.Equal(new[] { "--output", "out.json" }, client.LastRequest!.Args);
+    }
+
+    [Fact]
+    public async Task RunAsync_uses_invocation_file_name_as_remote_tool_when_no_legacy_tool_mapping_is_configured()
+    {
+        var client = new RecordingClient();
+        var executor = new DockerMcpProcessExecutor(client);
+        var options = new DockerMcpRuntimeOptions(
+            "http://127.0.0.1:8765",
+            "metbench-e2e:latest",
+            PythonExecutable: "");
+
+        await executor.RunAsync(
+            options,
+            new ProcessInvocation("input-parser", new[] { "--input", "source.json" }),
+            30,
+            CancellationToken.None);
+
+        Assert.Equal("metbench-e2e:latest", client.LastRequest!.Image);
+        Assert.Equal("input-parser", client.LastRequest.Tool);
+        Assert.Equal(new[] { "--input", "source.json" }, client.LastRequest.Args);
     }
 
     private sealed class RecordingClient : IDockerMcpRuntimeClient
     {
-        public IReadOnlyList<string>? LastArgv;
+        public DockerMcpRunRequest? LastRequest;
 
         public Task<DockerMcpHealthResult> HealthAsync(
             DockerMcpRuntimeOptions options, CancellationToken cancellationToken = default)
@@ -162,11 +251,10 @@ public sealed class DockerMcpProcessExecutorTests
 
         public Task<DockerMcpRunResult> RunSutCommandAsync(
             DockerMcpRuntimeOptions options,
-            IReadOnlyList<string> argv,
-            int timeoutSeconds,
+            DockerMcpRunRequest request,
             CancellationToken cancellationToken = default)
         {
-            LastArgv = argv;
+            LastRequest = request;
             return Task.FromResult(new DockerMcpRunResult(0, string.Empty, string.Empty, false));
         }
     }
@@ -189,17 +277,15 @@ public sealed class DockerMcpProcessExecutorTests
 
         public Task<DockerMcpRunResult> RunSutCommandAsync(
             DockerMcpRuntimeOptions options,
-            IReadOnlyList<string> argv,
-            int timeoutSeconds,
+            DockerMcpRunRequest request,
             CancellationToken cancellationToken = default)
         {
-            RunRequests.Add(new RunRequest(options, argv.ToArray(), timeoutSeconds));
+            RunRequests.Add(new RunRequest(options, request));
             return Task.FromResult(_runResult);
         }
     }
 
     private sealed record RunRequest(
         DockerMcpRuntimeOptions Options,
-        IReadOnlyList<string> Argv,
-        int TimeoutSeconds);
+        DockerMcpRunRequest Request);
 }

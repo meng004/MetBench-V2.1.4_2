@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MetBench_BLL.SystemMT.Catalog;
 using MetBench_BLL.SystemMT.Launcher;
+using MetBench_BLL.SystemMT.Persistence;
 using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_BLL.SystemMT.Runtime;
 using MetBench_SystemMT.Tests.SystemMT;
@@ -19,15 +21,15 @@ namespace MetBench_SystemMT.Tests.SystemMT.Launcher;
 /// G1 fact test: parser/output-parser commands run locally via DefaultProcessExecutor
 /// but were built on the container python path. After the fix, an explicit
 /// <c>localPython</c> URI param overrides the parser executable while the
-/// runner still uses the profile (container) python.
+    /// runner still routes through the structured Docker MCP tool.
 ///
 /// Test design: in-process fake MCP client. CI-safe, no docker or loopback listener.
-/// The fake client substitutes argv[0] with the real local python for the runner calls,
-/// so the runner succeeds even with a bogus container python. The parser commands run
-/// locally — before the fix they use the bogus path and fail; after the fix they use
+    /// The fake client maps the structured tool call back to the real local Python + runner
+    /// script, so the runner succeeds even with bogus container paths. The parser commands run
+    /// locally — before the fix they use the bogus path and fail; after the fix they use
 /// <c>localPython</c> and succeed.
-/// Routing fact: exactly 2 <c>run_sut_command</c> calls (source + follow-up), each with
-/// the bogus container python as argv[0].
+    /// Routing fact: exactly 2 <c>run_sut_command</c> calls (source + follow-up), each using
+    /// the allowlisted structured MCP tool/local executable instead of a Python script argv.
 /// </summary>
 public sealed class LauncherDockerMcpLocalParserTests
 {
@@ -35,9 +37,15 @@ public sealed class LauncherDockerMcpLocalParserTests
     public async Task Parser_commands_run_locally_while_runner_routes_through_mcp()
     {
         var localPython = TestAssetPaths.PythonExecutable();
-        var dockerClient = new FakeMcpRuntimeClient(localPython);
+        var runnerScriptPath = Path.Combine(
+            TestAssetPaths.AssetRoot(),
+            "minimum_mr_subset_p3",
+            "minimum_mr_subset_p3.py");
+        var dockerClient = new FakeMcpRuntimeClient(localPython, runnerScriptPath);
 
         var uri = "docker-mcp://system?image=test-image"
+            + "&tool=test-runner"
+            + "&local=test-runner"
             + "&python=/nonexistent/container-python"
             + $"&endpoint={Uri.EscapeDataString("http://127.0.0.1:1")}"
             + $"&localPython={Uri.EscapeDataString(localPython)}";
@@ -53,7 +61,8 @@ public sealed class LauncherDockerMcpLocalParserTests
 
         var execs = new FakeExecRepo();
         var results = new FakeResultRepo();
-        var recorder = new SystemMtExecutionRecorder(execs, results);
+        var evidence = new InMemoryEvidenceRepo();
+        var recorder = new SystemMtExecutionRecorder(execs, results, evidence);
         var anomaly = new RecordingAnomalyService();
         var runtimeExecutor = new RuntimeProcessExecutorRegistry(
             new LocalRuntimeProcessExecutor(),
@@ -75,7 +84,66 @@ public sealed class LauncherDockerMcpLocalParserTests
         Assert.True(result.Passed, "FailureReason: " + result.FailureReason);
         Assert.Equal(2, dockerClient.RunSutCommandCalls.Count);
         Assert.All(dockerClient.RunSutCommandCalls, argv =>
-            Assert.Equal("/nonexistent/container-python", argv[0]));
+        {
+            Assert.Equal("test-runner", argv[0]);
+            Assert.DoesNotContain(argv, arg => arg.EndsWith(".py", StringComparison.OrdinalIgnoreCase));
+        });
+        Assert.True(Guid.TryParse(result.RecordId, out var executionId));
+        var executionEvidence = await evidence.GetByExecutionAsync(executionId);
+        Assert.NotNull(executionEvidence);
+        Assert.NotNull(executionEvidence!.RuntimeEvidence);
+        Assert.Equal("mcp-run-1", executionEvidence.RuntimeEvidence!.SourceRunId);
+        Assert.Equal("mcp-run-2", executionEvidence.RuntimeEvidence.FollowupRunId);
+    }
+
+    [Fact]
+    public async Task Remote_tool_profile_builds_tool_id_invocations_without_python_or_script_arguments()
+    {
+        var localPython = TestAssetPaths.PythonExecutable();
+        var uri = "docker-mcp://system?image=test-image"
+            + $"&endpoint={Uri.EscapeDataString("http://127.0.0.1:1")}";
+
+        var options = new LauncherOptions(
+            SutRoot: TestAssetPaths.AssetRoot(),
+            SystemPython: localPython,
+            OpenMocPython: localPython,
+            RuntimePythons: new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["system"] = uri,
+            });
+
+        var pipeline = new CapturingPipeline();
+        var recorder = new SystemMtExecutionRecorder(
+            new FakeExecRepo(),
+            new FakeResultRepo(),
+            new InMemoryEvidenceRepo());
+        var dockerClient = new FakeMcpRuntimeClient(localPython, "unused.py");
+        var launcher = new SystemMtLauncher(
+            options,
+            pipeline,
+            recorder,
+            new RecordingAnomalyService(),
+            new ManifestMrCatalogProvider(options),
+            severityThresholds: null,
+            runtimeProfileProvider: null,
+            runtimePreflightService: new RuntimePreflightService(
+                new DefaultProcessExecutor(),
+                dockerClient));
+
+        var result = await launcher.RunAsync("p3-trajectory-sensitivity");
+
+        Assert.True(result.Passed, "FailureReason: " + result.FailureReason);
+        var context = Assert.Single(pipeline.Contexts);
+        Assert.Equal("input-parser", context.InputParserInvocation.FileName);
+        Assert.Empty(context.InputParserInvocation.Arguments);
+        Assert.Equal("output-parser", context.OutputParserInvocation.FileName);
+        Assert.Empty(context.OutputParserInvocation.Arguments);
+        Assert.Equal("sut-runner", context.RunnerInvocation.FileName);
+        Assert.Empty(context.RunnerInvocation.Arguments);
+        Assert.NotNull(context.RuntimeProfile?.DockerMcp);
+        Assert.Equal("", context.RuntimeProfile!.DockerMcp!.PythonExecutable);
+        Assert.Equal("", context.RuntimeProfile.DockerMcp.ToolName);
+        Assert.Equal("", context.RuntimeProfile.DockerMcp.LocalExecutable);
     }
 
     // ---- in-process fake MCP client ----
@@ -84,19 +152,21 @@ public sealed class LauncherDockerMcpLocalParserTests
     /// In-process fake for the minimal MCP surface consumed by the launcher:
     /// <list type="bullet">
     ///   <item><c>runtime_health</c> → 200 with "ok" status.</item>
-    ///   <item><c>run_sut_command</c> → records argv[0], replaces it with the real
-    ///     local python, runs the process locally, and returns the captured output.</item>
+    ///   <item><c>run_sut_command</c> → records the structured tool invocation,
+    ///     maps it to the real local runner script, and returns the captured output.</item>
     /// </list>
     /// </summary>
     private sealed class FakeMcpRuntimeClient : IDockerMcpRuntimeClient
     {
         private readonly string _realLocalPython;
+        private readonly string _runnerScriptPath;
 
         public List<IReadOnlyList<string>> RunSutCommandCalls { get; } = new();
 
-        public FakeMcpRuntimeClient(string realLocalPython)
+        public FakeMcpRuntimeClient(string realLocalPython, string runnerScriptPath)
         {
             _realLocalPython = realLocalPython;
+            _runnerScriptPath = runnerScriptPath;
         }
 
         public Task<DockerMcpHealthResult> HealthAsync(
@@ -112,23 +182,23 @@ public sealed class LauncherDockerMcpLocalParserTests
 
         public async Task<DockerMcpRunResult> RunSutCommandAsync(
             DockerMcpRuntimeOptions options,
-            IReadOnlyList<string> argv,
-            int timeoutSeconds,
+            DockerMcpRunRequest request,
             CancellationToken cancellationToken = default)
         {
-            // Record the call with the original argv[0] (the container python path)
+            var argv = new[] { options.LocalExecutable }.Concat(request.Args).ToArray();
             lock (RunSutCommandCalls)
             {
                 RunSutCommandCalls.Add(argv.ToArray());
             }
+            var runId = $"mcp-run-{RunSutCommandCalls.Count}";
 
-            if (argv.Count == 0)
+            if (argv.Length == 0)
             {
-                return new DockerMcpRunResult(-1, string.Empty, "empty argv", TimedOut: false);
+                    return new DockerMcpRunResult(-1, string.Empty, "empty argv", TimedOut: false, RunId: runId);
             }
 
-            // Replace argv[0] with the real local python so the process can actually run
-            var realArgv = new List<string>(argv) { [0] = _realLocalPython };
+            var realArgv = new List<string> { _realLocalPython, _runnerScriptPath };
+            realArgv.AddRange(request.Args);
 
             // Run locally to simulate what the container would do
             var psi = new ProcessStartInfo
@@ -162,7 +232,7 @@ public sealed class LauncherDockerMcpLocalParserTests
                 if (finished == delay)
                 {
                     try { proc.Kill(); } catch { }
-                    return new DockerMcpRunResult(-1, string.Empty, "timed out", TimedOut: true);
+                    return new DockerMcpRunResult(-1, string.Empty, "timed out", TimedOut: true, RunId: runId);
                 }
 
                 stdoutSb.Append(await stdoutTask.ConfigureAwait(false));
@@ -171,14 +241,81 @@ public sealed class LauncherDockerMcpLocalParserTests
             }
             catch (Exception ex)
             {
-                return new DockerMcpRunResult(-1, string.Empty, ex.Message, TimedOut: false);
+                return new DockerMcpRunResult(-1, string.Empty, ex.Message, TimedOut: false, RunId: runId);
             }
 
             return new DockerMcpRunResult(
                 exitCode,
                 stdoutSb.ToString(),
                 stderrSb.ToString(),
-                TimedOut: false);
+                TimedOut: false,
+                RunId: runId);
         }
+    }
+
+    private sealed class InMemoryEvidenceRepo : IExecutionEvidenceRepository
+    {
+        private readonly List<ExecutionEvidence> _store = new();
+
+        public Task SaveAsync(ExecutionEvidence evidence, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            _store.RemoveAll(e => e.ExecutionId == evidence.ExecutionId);
+            _store.Add(evidence);
+            return Task.CompletedTask;
+        }
+
+        public Task<ExecutionEvidence?> GetByExecutionAsync(
+            Guid executionId,
+            CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.FromResult<ExecutionEvidence?>(_store.Find(e => e.ExecutionId == executionId));
+        }
+
+        public Task<bool> DeleteByExecutionIdAsync(
+            Guid executionId,
+            CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.FromResult(_store.RemoveAll(e => e.ExecutionId == executionId) > 0);
+        }
+    }
+
+    private sealed class CapturingPipeline : ISystemMtPipeline
+    {
+        public List<PipelineContext> Contexts { get; } = new();
+
+        public Task<PipelineOutcome> ExecuteAsync(
+            PipelineContext context,
+            IProgress<string>? progress = null,
+            CancellationToken cancellationToken = default)
+        {
+            Contexts.Add(context);
+            var now = DateTime.UtcNow;
+            return Task.FromResult(new PipelineOutcome(
+                FinalStatus: PipelineStatus.Ok,
+                ErrorMessage: null,
+                StartedAt: now,
+                FinishedAt: now,
+                ArtifactsDirectory: context.WorkingDirectory,
+                SourceInputPath: context.SourceCasePath,
+                FollowupInputPath: Path.Combine(context.WorkingDirectory, "followup.in.json"),
+                SourceOutputPath: Path.Combine(context.WorkingDirectory, "source.out.json"),
+                FollowupOutputPath: Path.Combine(context.WorkingDirectory, "followup.out.json"),
+                SourceMetrics: null,
+                FollowupMetrics: null,
+                AssertionResult: null,
+                SourceElapsed: TimeSpan.Zero,
+                FollowupElapsed: TimeSpan.Zero,
+                SourceExitCode: 0,
+                FollowupExitCode: 0));
+        }
+
+        public Task<PipelineOutcome> ExecuteMultiPhaseAsync(
+            MultiPhaseExecutionContext mp,
+            IProgress<string>? progress = null,
+            CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
     }
 }

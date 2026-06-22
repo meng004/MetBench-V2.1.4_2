@@ -68,6 +68,105 @@ public sealed class DockerMcpRuntimeClientTests
         Assert.Contains("Unauthorized", result.Detail);
     }
 
+    [Fact]
+    public async Task RunSutCommandAsync_posts_structured_tool_request_without_raw_argv()
+    {
+        var handler = new CapturingHandler(
+            HttpStatusCode.OK,
+            """
+            {
+              "run_id": "run-1",
+              "status": "completed",
+              "returncode": 0,
+              "stdout": "ok",
+              "stderr": ""
+            }
+            """);
+        var client = new DockerMcpRuntimeClient(new HttpClient(handler));
+        var options = new DockerMcpRuntimeOptions(
+            Endpoint: "http://127.0.0.1:8765",
+            Image: "metbench-sut:latest",
+            PythonExecutable: "/opt/metbench-tools/openmoc-runner",
+            ToolName: "openmoc-runner",
+            LocalExecutable: "/host/openmoc-runner");
+
+        var result = await client.RunSutCommandAsync(
+            options,
+            new DockerMcpRunRequest(
+                Image: "metbench-sut:latest",
+                Tool: "openmoc-runner",
+                Args: new[] { "--input", "source.json" },
+                TimeoutSeconds: 60));
+
+        Assert.Equal(0, result.ExitCode);
+        Assert.Equal("run-1", result.RunId);
+        Assert.Equal(HttpMethod.Post, handler.LastRequest!.Method);
+        Assert.Contains("\"tool\":\"run_sut_command\"", handler.LastRequestBody);
+        Assert.Contains("\"arguments\":", handler.LastRequestBody);
+        Assert.Contains("\"image\":\"metbench-sut:latest\"", handler.LastRequestBody);
+        Assert.Contains("\"tool\":\"openmoc-runner\"", handler.LastRequestBody);
+        Assert.Contains("\"args\":[\"--input\",\"source.json\"]", handler.LastRequestBody);
+        Assert.Contains("\"timeout_seconds\":60", handler.LastRequestBody);
+        Assert.DoesNotContain("argv", handler.LastRequestBody);
+    }
+
+    [Theory]
+    [InlineData("other-image:latest", "openmoc-runner", "image")]
+    [InlineData("metbench-sut:latest", "other-runner", "tool")]
+    public async Task RunSutCommandAsync_rejects_request_that_does_not_match_configured_options(
+        string requestImage,
+        string requestTool,
+        string expectedMessage)
+    {
+        var handler = new CapturingHandler(
+            HttpStatusCode.OK,
+            """{"returncode":0,"stdout":"","stderr":""}""");
+        var client = new DockerMcpRuntimeClient(new HttpClient(handler));
+        var options = new DockerMcpRuntimeOptions(
+            Endpoint: "http://127.0.0.1:8765",
+            Image: "metbench-sut:latest",
+            PythonExecutable: "/opt/metbench-tools/openmoc-runner",
+            ToolName: "openmoc-runner",
+            LocalExecutable: "/host/openmoc-runner");
+
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() =>
+            client.RunSutCommandAsync(
+                options,
+                new DockerMcpRunRequest(
+                    Image: requestImage,
+                    Tool: requestTool,
+                    Args: Array.Empty<string>(),
+                    TimeoutSeconds: 60)));
+
+        Assert.Contains(expectedMessage, ex.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Null(handler.LastRequest);
+    }
+
+    [Fact]
+    public void IDockerMcpRuntimeClient_exposes_only_structured_run_request()
+    {
+        var source = File.ReadAllText(Path.Combine(SolutionRoot(), "MetBench_BLL.Core", "SystemMT", "Runtime", "DockerMcpRuntimeClient.cs"));
+
+        Assert.DoesNotContain("IReadOnlyList<string> argv", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("Raw argv Docker MCP", source, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void DockerMcpRunRequest_does_not_expose_unwired_working_directory()
+    {
+        var source = File.ReadAllText(Path.Combine(SolutionRoot(), "MetBench_BLL.Core", "SystemMT", "Runtime", "RuntimeModels.cs"));
+
+        Assert.DoesNotContain("WorkingDirectory", source, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void RunSutCommandAsync_does_not_shadow_request_parameter_with_http_message_variable()
+    {
+        var source = File.ReadAllText(Path.Combine(SolutionRoot(), "MetBench_BLL.Core", "SystemMT", "Runtime", "DockerMcpRuntimeClient.cs"));
+
+        Assert.DoesNotContain("using var request = new HttpRequestMessage", source, StringComparison.Ordinal);
+    }
+
     private sealed class CapturingHandler : HttpMessageHandler
     {
         private readonly HttpStatusCode _status;
@@ -93,5 +192,18 @@ public sealed class DockerMcpRuntimeClientTests
                 Content = new StringContent(_body, Encoding.UTF8, "application/json")
             };
         }
+    }
+
+    private static string SolutionRoot()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null)
+        {
+            if (dir.GetFiles("*.sln").Length > 0)
+                return dir.FullName;
+            dir = dir.Parent;
+        }
+
+        throw new DirectoryNotFoundException($"Could not locate solution root from {AppContext.BaseDirectory}.");
     }
 }

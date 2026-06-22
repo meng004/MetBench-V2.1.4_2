@@ -25,4 +25,5 @@ public sealed record ProcessResult(
     string Stdout,
     string Stderr,
     TimeSpan Elapsed,
-    bool TimedOut);
+    bool TimedOut,
+    string RuntimeRunId = "");

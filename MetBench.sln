@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetBench_UI.Localization", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetBench_Client.Tests", "MetBench_Client.Tests\MetBench_Client.Tests.csproj", "{79B6A259-86A6-4E19-BBF7-F056AB078B24}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetBench_Api", "MetBench_Api\MetBench_Api.csproj", "{A97DB8D6-621C-4ACD-AA28-1C338977AF94}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -153,6 +155,18 @@ Global
 		{79B6A259-86A6-4E19-BBF7-F056AB078B24}.Release|x64.Build.0 = Release|Any CPU
 		{79B6A259-86A6-4E19-BBF7-F056AB078B24}.Release|x86.ActiveCfg = Release|Any CPU
 		{79B6A259-86A6-4E19-BBF7-F056AB078B24}.Release|x86.Build.0 = Release|Any CPU
+		{A97DB8D6-621C-4ACD-AA28-1C338977AF94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A97DB8D6-621C-4ACD-AA28-1C338977AF94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A97DB8D6-621C-4ACD-AA28-1C338977AF94}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A97DB8D6-621C-4ACD-AA28-1C338977AF94}.Debug|x64.Build.0 = Debug|Any CPU
+		{A97DB8D6-621C-4ACD-AA28-1C338977AF94}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A97DB8D6-621C-4ACD-AA28-1C338977AF94}.Debug|x86.Build.0 = Debug|Any CPU
+		{A97DB8D6-621C-4ACD-AA28-1C338977AF94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A97DB8D6-621C-4ACD-AA28-1C338977AF94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A97DB8D6-621C-4ACD-AA28-1C338977AF94}.Release|x64.ActiveCfg = Release|Any CPU
+		{A97DB8D6-621C-4ACD-AA28-1C338977AF94}.Release|x64.Build.0 = Release|Any CPU
+		{A97DB8D6-621C-4ACD-AA28-1C338977AF94}.Release|x86.ActiveCfg = Release|Any CPU
+		{A97DB8D6-621C-4ACD-AA28-1C338977AF94}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

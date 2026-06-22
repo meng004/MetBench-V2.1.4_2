@@ -232,11 +232,13 @@ public sealed class SystemMtPipelineTests : IDisposable
                 "openmoc-docker",
                 "openmoc-docker Docker MCP",
                 RuntimeKind.Docker,
-                "/opt/openmoc-venv/bin/python",
+                "fake-runner",
                 dockerMcp: new DockerMcpRuntimeOptions(
                     "http://192.168.1.20:8765",
                     "metbench-sut:latest",
-                    "/opt/openmoc-venv/bin/python")),
+                    "/opt/openmoc-venv/bin/python",
+                    ToolName: "fake-runner",
+                    LocalExecutable: "fake-runner")),
         };
 
         var outcome = await pipeline.ExecuteAsync(context);
@@ -246,8 +248,91 @@ public sealed class SystemMtPipelineTests : IDisposable
         Assert.All(dockerClient.RunRequests, request =>
         {
             Assert.Equal("metbench-sut:latest", request.Options.Image);
-            Assert.Contains("fake-runner", request.Argv);
+            Assert.Equal("fake-runner", request.Request.Tool);
         });
+    }
+
+    [Fact]
+    public async Task Remote_tool_docker_profile_routes_parsers_writer_and_runner_through_mcp()
+    {
+        var sourceOut = new
+        {
+            values = new Dictionary<string, double> { ["k_eff"] = 1.13 },
+            metadata = new Dictionary<string, string> { ["adapter"] = "remote-tool-test" }
+        };
+        var followupOut = new
+        {
+            values = new Dictionary<string, double> { ["k_eff"] = 0.51 },
+            metadata = new Dictionary<string, string> { ["adapter"] = "remote-tool-test" }
+        };
+        var local = new FakeProcessExecutor(cmd =>
+            new ProcessResult(1, "", "Unexpected local command: " + cmd, TimeSpan.Zero, false));
+        var dockerClient = new DockerWritingClient(argv =>
+        {
+            if (argv.Contains("parse") && argv.Contains("--input"))
+            {
+                var data = new Dictionary<string, object?>
+                {
+                    ["materials"] = new Dictionary<string, object?>
+                    {
+                        ["fuel"] = new Dictionary<string, object?> { ["temperature_kelvin"] = 600.0 }
+                    }
+                };
+                return new DockerMcpRunResult(0, JsonSerializer.Serialize(data), "", TimedOut: false);
+            }
+            if (argv.Contains("write"))
+                return new DockerMcpRunResult(0, "{}", "", TimedOut: false);
+            if (argv.Contains("--input") && argv.Contains("--output"))
+            {
+                var output = ArgAfter(argv, "--output");
+                var data = ArgAfter(argv, "--input").Contains("source.in.json", StringComparison.Ordinal)
+                    ? sourceOut
+                    : (object)followupOut;
+                File.WriteAllText(output, JsonSerializer.Serialize(data));
+                return new DockerMcpRunResult(0, "", "", TimedOut: false);
+            }
+            if (argv.Contains("parse") && argv.Contains("--output-file"))
+            {
+                var outPath = ArgAfter(argv, "--output-file");
+                return new DockerMcpRunResult(0, File.ReadAllText(outPath), "", TimedOut: false);
+            }
+
+            return new DockerMcpRunResult(1, "", "Unexpected remote argv: " + string.Join(" ", argv), TimedOut: false);
+        });
+        var runtimeExecutor = new RuntimeProcessExecutorRegistry(
+            new LocalRuntimeProcessExecutor(local),
+            new DockerRuntimeProcessExecutor(new DockerMcpProcessExecutor(dockerClient)));
+        var pipeline = new SystemMtPipeline(local, runtimeExecutor);
+        var context = MakeContext("less") with
+        {
+            InputParserInvocation = new ProcessInvocation("input-parser", Array.Empty<string>()),
+            OutputParserInvocation = new ProcessInvocation("output-parser", Array.Empty<string>()),
+            RunnerInvocation = new ProcessInvocation("sut-runner", Array.Empty<string>()),
+            RuntimeProfile = new RuntimeProfile(
+                "system",
+                "system Docker MCP",
+                RuntimeKind.Docker,
+                executablePath: null,
+                dockerMcp: new DockerMcpRuntimeOptions(
+                    "http://192.168.1.20:8765",
+                    "metbench-sut:latest",
+                    PythonExecutable: "")),
+        };
+
+        var outcome = await pipeline.ExecuteAsync(context);
+
+        Assert.Equal(PipelineStatus.Ok, outcome.FinalStatus);
+        Assert.Equal(
+            new[]
+            {
+                "input-parser",
+                "input-parser",
+                "sut-runner",
+                "sut-runner",
+                "output-parser",
+                "output-parser",
+            },
+            dockerClient.RunRequests.Select(request => request.Request.Tool).ToArray());
     }
 
     [Fact]
@@ -351,16 +436,14 @@ internal sealed class DockerWritingClient : IDockerMcpRuntimeClient
 
     public Task<DockerMcpRunResult> RunSutCommandAsync(
         DockerMcpRuntimeOptions options,
-        IReadOnlyList<string> argv,
-        int timeoutSeconds,
+        DockerMcpRunRequest request,
         CancellationToken cancellationToken = default)
     {
-        RunRequests.Add(new RunRequest(options, argv.ToArray(), timeoutSeconds));
-        return Task.FromResult(_handler(argv));
+        RunRequests.Add(new RunRequest(options, request));
+        return Task.FromResult(_handler(request.Args));
     }
 
     public sealed record RunRequest(
         DockerMcpRuntimeOptions Options,
-        IReadOnlyList<string> Argv,
-        int TimeoutSeconds);
+        DockerMcpRunRequest Request);
 }

@@ -42,6 +42,20 @@ public class SystemMtJobWorkerTests
     }
 
     [Fact]
+    public async Task Success_path_persists_execution_id_from_outcome()
+    {
+        var (store, id) = Seed("mr-ok");
+        var executionId = Guid.NewGuid();
+        var worker = new SystemMtJobWorker(store, new ExecutionIdPipeline(executionId));
+
+        await worker.RunJobAsync(id, default);
+
+        var rec = await store.GetAsync(id, default);
+        Assert.Equal(SystemMtJobState.Succeeded, rec!.State);
+        Assert.Equal(executionId, rec.ExecutionId);
+    }
+
+    [Fact]
     public async Task Timeout_path_reaches_TimedOut_with_reason()
     {
         var (store, id) = Seed();
@@ -273,6 +287,28 @@ public class SystemMtJobWorkerTests
             Started.TrySetResult();
             await Task.Delay(Timeout.Infinite, cancellationToken);   // throws OCE when token trips
             return new JobExecutionOutcome(SystemMtJobState.Succeeded, "openmc", null, null);
+        }
+    }
+
+    private sealed class ExecutionIdPipeline : ISystemMtAsyncPipeline
+    {
+        private readonly Guid _executionId;
+
+        public ExecutionIdPipeline(Guid executionId) => _executionId = executionId;
+
+        public Task<JobExecutionOutcome> ExecuteJobAsync(
+            Guid jobId,
+            SystemMtJobRequest request,
+            IProgress<SystemMtJobProgress>? progress,
+            CancellationToken cancellationToken)
+        {
+            var outcome = new JobExecutionOutcome(
+                SystemMtJobState.Succeeded,
+                "openmc",
+                JobsTestData.Result(request.MrId, passed: true),
+                FailureReason: null,
+                ExecutionId: _executionId);
+            return Task.FromResult(outcome);
         }
     }
 

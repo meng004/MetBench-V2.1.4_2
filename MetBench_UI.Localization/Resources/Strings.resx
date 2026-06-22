@@ -415,6 +415,12 @@
   <data name="RuntimeEnv_Image" xml:space="preserve">
     <value>Image</value>
   </data>
+  <data name="RuntimeEnv_Tool" xml:space="preserve">
+    <value>Tool</value>
+  </data>
+  <data name="RuntimeEnv_LocalExecutable" xml:space="preserve">
+    <value>Local executable</value>
+  </data>
   <data name="RuntimeEnv_Python" xml:space="preserve">
     <value>Python executable</value>
   </data>

@@ -26,6 +26,7 @@ using MetBench_BLL.SystemMT.Persistence.Editing;
 using MetBench_BLL.SystemMT.Pipeline;
 using MetBench_BLL.SystemMT.Catalog;
 using MetBench_BLL.SystemMT.Catalog.Editing;
+using MetBench_BLL.SystemMT.ControlPlane;
 using MetBench_BLL.SystemMT.Reporting;
 using MetBench_BLL.SystemMT.Runtime;
 using MetBench_BLL.Discovery;
@@ -207,6 +208,7 @@ namespace MetBench_Client
                 });
                 services.AddSingleton<IJobCancellationRegistry, JobCancellationRegistry>();
                 services.AddSingleton<ISystemMtJobService, SystemMtJobService>();
+                services.AddSingleton<ISystemMtControlPlaneService, SystemMtControlPlaneService>();
                 services.AddHostedService<SystemMtJobWorkerHostedService>();
 
                 services.AddScoped<Views.Pages.SystemMtExecutionPage>();

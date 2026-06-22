@@ -251,7 +251,7 @@ public sealed class RuntimePreflightLauncherTests
             RuntimePythons: new Dictionary<string, string>
             {
                 ["openmoc-docker"] =
-                    "docker-mcp://openmoc-docker?image=metbench-sut:latest&python=/opt/openmoc-venv/bin/python&endpoint=http%3A%2F%2F127.0.0.1%3A8765",
+                    "docker-mcp://openmoc-docker?image=metbench-sut:latest&tool=openmoc-runner&local=openmoc-runner&python=/opt/openmoc-venv/bin/python&endpoint=http%3A%2F%2F127.0.0.1%3A8765",
             });
         var launcher = new SystemMtLauncher(
             options,
@@ -304,7 +304,7 @@ public sealed class RuntimePreflightLauncherTests
             RuntimePythons: new Dictionary<string, string>
             {
                 ["openmoc-docker"] =
-                    "docker-mcp://openmoc-docker?image=metbench-sut:latest&python=/opt/openmoc-venv/bin/python&endpoint=http%3A%2F%2F127.0.0.1%3A8765",
+                    "docker-mcp://openmoc-docker?image=metbench-sut:latest&tool=openmoc-runner&local=openmoc-runner&python=/opt/openmoc-venv/bin/python&endpoint=http%3A%2F%2F127.0.0.1%3A8765",
             });
         var launcher = new SystemMtLauncher(
             options,
@@ -327,12 +327,15 @@ public sealed class RuntimePreflightLauncherTests
         Assert.Equal("http://127.0.0.1:8765", context.RuntimeProfile.DockerMcp.Endpoint);
         Assert.Equal("/opt/openmoc-venv/bin/python", context.InputParserInvocation.FileName);
         Assert.Equal("/opt/openmoc-venv/bin/python", context.OutputParserInvocation.FileName);
-        Assert.Equal("/opt/openmoc-venv/bin/python", context.RunnerInvocation.FileName);
+        Assert.Equal("openmoc-runner", context.RunnerInvocation.FileName);
         Assert.DoesNotContain("docker-mcp://", context.InputParserInvocation.FileName, StringComparison.Ordinal);
         Assert.DoesNotContain("docker-mcp://", context.RunnerInvocation.FileName, StringComparison.Ordinal);
         Assert.Single(context.InputParserInvocation.Arguments);
         Assert.Single(context.OutputParserInvocation.Arguments);
-        Assert.Single(context.RunnerInvocation.Arguments);
+        Assert.Empty(context.RunnerInvocation.Arguments);
+        Assert.DoesNotContain(
+            context.RunnerInvocation.Arguments,
+            arg => arg.EndsWith(".py", StringComparison.OrdinalIgnoreCase));
     }
 
 

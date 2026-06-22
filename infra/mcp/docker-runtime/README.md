@@ -65,13 +65,17 @@ Run a SUT command:
   "tool": "run_sut_command",
   "arguments": {
     "image": "metbench-sut:latest",
-    "argv": ["python", "SUT/demo.py"],
+    "tool": "openmoc-runner",
+    "args": ["--input", "/tmp/metbench/source.in.json", "--output", "/tmp/metbench/source.out.json"],
     "timeout_seconds": 60
   }
 }
 ```
 
 The response contains a service-generated `run_id`.
+
+A Runtime MCP `run_id` identifies one backend command invocation. It is not a
+MetBench `job_id`, not a System MT `ExecutionId`, and not a workflow id.
 
 Read a stored run result:
 
@@ -83,6 +87,37 @@ Read a stored run result:
   }
 }
 ```
+
+Request a runtime kill:
+
+```json
+{
+  "tool": "kill_run",
+  "arguments": {
+    "run_id": "<runtime run id>"
+  }
+}
+```
+
+## Runtime Stop Semantics
+
+Runtime MCP is the execution plane. Its force-stop semantic is `kill`, and it
+targets a concrete runtime execution handle such as a `run_id`, process id, or
+container id. It does not target a MetBench job id and must not decide MR
+pass/fail, job terminal state, anomaly classification, or artifact visibility.
+
+The user-facing business stop semantic is `cancel`, exposed by REST API /
+Business MCP as `cancel_job(job_id)`. A job cancellation may propagate to a
+Runtime MCP kill only when the backend exposes an in-flight killable handle.
+
+Current implementation note: `run_sut_command` is synchronous. It returns a
+`run_id` after the requested command completes and stores the completed run
+record for `get_run_result`. That supports evidence correlation, but it is not
+yet an in-flight remote kill contract. The current `kill_run` tool therefore
+returns `not_found` for unknown run ids and `not_running` for completed
+synchronous run records; it does not claim to terminate a live backend process.
+A true Runtime MCP kill contract requires an async execution shape such as
+`start_run_command -> get_run_result -> kill_run`.
 
 `run_sut_command` deduplicates `[repo_root, *allowed_mount_roots]` and mounts
 each entry at its translated container target: Windows-style sources
@@ -101,6 +136,8 @@ rtk python3 tools/metbench-docker-runtime-mcp profile-uri \
   --runtime-key openmoc-docker \
   --endpoint http://192.168.1.20:8765 \
   --image metbench-sut:latest \
+  --tool openmoc-runner \
+  --local openmoc-runner \
   --python /opt/openmoc-venv/bin/python \
   --auth-token-env METBENCH_DOCKER_MCP_TOKEN
 ```
@@ -111,6 +148,8 @@ RuntimePythons = new Dictionary<string, string>
     ["openmoc-docker"] =
         "docker-mcp://openmoc-docker"
         + "?image=metbench-sut:latest"
+        + "&tool=openmoc-runner"
+        + "&local=openmoc-runner"
         + "&python=/opt/openmoc-venv/bin/python"
         + "&endpoint=http%3A%2F%2F192.168.1.20%3A8765"
         + "&authTokenEnv=METBENCH_DOCKER_MCP_TOKEN",
@@ -172,6 +211,10 @@ MetBench loads `appsettings.local.json` at startup and reads
   `openmoc-docker` or `docker-linux`.
 - Endpoint: `http://<LAN-IP>:8765`.
 - Image: an image allowlisted by the MCP server config.
+- Tool: a tool name allowlisted by the MCP server config, such as
+  `openmoc-runner`.
+- Local executable: the local tool proxy name stored in the runtime profile,
+  usually matching Tool.
 - Python executable: the interpreter path inside the container.
 - Auth token env: optional environment variable name that stores the Bearer
   token on the MetBench client machine.
@@ -182,7 +225,7 @@ Saving writes the generated `docker-mcp://` value to:
 {
   "LauncherOptions": {
     "RuntimePythons": {
-      "docker-linux": "docker-mcp://docker-linux?image=..."
+      "docker-linux": "docker-mcp://docker-linux?image=metbench-sut:latest&tool=openmoc-runner&local=openmoc-runner&python=/opt/openmoc-venv/bin/python&endpoint=http%3A%2F%2F192.168.1.20%3A8765"
     }
   }
 }

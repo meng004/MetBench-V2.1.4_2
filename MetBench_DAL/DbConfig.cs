@@ -60,7 +60,7 @@ namespace MetBench_DAL
                 // 优先级 1：显式 override（测试 / CI 热替换）
                 if (s_connectionStringOverride is { } ov)
                 {
-                    return ov;
+                    return EnsureSharedConnectionMode(ov);
                 }
 
                 // 优先级 2：METBENCH_DB_PATH 环境变量 — 跨平台首选
@@ -72,12 +72,24 @@ namespace MetBench_DAL
                     {
                         Directory.CreateDirectory(dir);
                     }
-                    return $"Filename={envPath}";
+                    return EnsureSharedConnectionMode($"Filename={envPath}");
                 }
 
                 // 优先级 3：legacy Windows app.config + .sln 走查（保留 WPF 现网行为）
-                return ResolveLegacyConnectionString();
+                return EnsureSharedConnectionMode(ResolveLegacyConnectionString());
             }
+        }
+
+        private static string EnsureSharedConnectionMode(string connectionString)
+        {
+            if (connectionString
+                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Any(part => part.StartsWith("Connection=", StringComparison.OrdinalIgnoreCase)))
+            {
+                return connectionString;
+            }
+
+            return connectionString.TrimEnd(';') + ";Connection=shared";
         }
 
         private static string ResolveLegacyConnectionString()

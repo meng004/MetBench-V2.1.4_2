@@ -25,9 +25,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\MetBench_BLL.Core\MetBench_BLL.Core.csproj" />
     <ProjectReference Include="..\MetBench_BLL\MetBench_BLL.csproj" />
     <ProjectReference Include="..\MetBench_DAL\MetBench_DAL.csproj" />
+    <ProjectReference Include="..\MetBench_Api\MetBench_Api.csproj" />
     <ProjectReference Include="..\MetBench_UI.Localization\MetBench_UI.Localization.csproj" />
   </ItemGroup>
 

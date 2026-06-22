@@ -14,7 +14,7 @@ public sealed class DockerMcpRuntimeProfileTests
         var options = Options(new Dictionary<string, string>
         {
             ["openmoc-docker"] =
-                "docker-mcp://openmoc-docker?image=metbench/openmoc:latest&python=/usr/local/bin/python&endpoint=http%3A%2F%2F127.0.0.1%3A8765&authTokenEnv=METBENCH_DOCKER_MCP_TOKEN",
+                "docker-mcp://openmoc-docker?image=metbench/openmoc:latest&tool=openmoc-runner&local=/host/openmoc-runner&python=/usr/local/bin/python&endpoint=http%3A%2F%2F127.0.0.1%3A8765&authTokenEnv=METBENCH_DOCKER_MCP_TOKEN",
         });
         IRuntimeProfileProvider provider = new LauncherOptionsRuntimeProfileProvider(options);
 
@@ -23,12 +23,36 @@ public sealed class DockerMcpRuntimeProfileTests
         Assert.Equal("openmoc-docker", profile.RuntimeKey);
         Assert.Equal(RuntimeKind.Docker, profile.Kind);
         Assert.True(profile.IsExecutableInV1);
-        Assert.Equal("/usr/local/bin/python", profile.ExecutablePath);
+        Assert.Equal("/host/openmoc-runner", profile.ExecutablePath);
         Assert.NotNull(profile.DockerMcp);
         Assert.Equal("http://127.0.0.1:8765", profile.DockerMcp.Endpoint);
         Assert.Equal("metbench/openmoc:latest", profile.DockerMcp.Image);
         Assert.Equal("/usr/local/bin/python", profile.DockerMcp.PythonExecutable);
+        Assert.Equal("openmoc-runner", profile.DockerMcp.ToolName);
+        Assert.Equal("/host/openmoc-runner", profile.DockerMcp.LocalExecutable);
         Assert.Equal("METBENCH_DOCKER_MCP_TOKEN", profile.DockerMcp.AuthTokenEnvironmentVariable);
+    }
+
+    [Fact]
+    public void Provider_parses_docker_mcp_structured_tool_boundary_fields()
+    {
+        var options = Options(new Dictionary<string, string>
+        {
+            ["openmoc"] =
+                "docker-mcp://openmoc?image=metbench-sut%3Alatest&tool=openmoc-runner&local=/host/openmoc-runner&python=/opt/metbench-tools/openmoc-runner&endpoint=http%3A%2F%2F127.0.0.1%3A8765",
+        });
+        IRuntimeProfileProvider provider = new LauncherOptionsRuntimeProfileProvider(options);
+
+        var profile = provider.GetProfile("openmoc");
+
+        Assert.Equal(RuntimeKind.Docker, profile.Kind);
+        Assert.Equal("/host/openmoc-runner", profile.ExecutablePath);
+        Assert.NotNull(profile.DockerMcp);
+        Assert.Equal("metbench-sut:latest", profile.DockerMcp!.Image);
+        Assert.Equal("openmoc-runner", profile.DockerMcp.ToolName);
+        Assert.Equal("/host/openmoc-runner", profile.DockerMcp.LocalExecutable);
+        Assert.Equal("/opt/metbench-tools/openmoc-runner", profile.DockerMcp.PythonExecutable);
+        Assert.Equal("http://127.0.0.1:8765", profile.DockerMcp.Endpoint);
     }
 
     [Fact]
@@ -50,6 +74,31 @@ public sealed class DockerMcpRuntimeProfileTests
     }
 
     [Fact]
+    public void Provider_parses_remote_tool_docker_mcp_runtime_without_python_tool_local_or_path_style()
+    {
+        var options = Options(new Dictionary<string, string>
+        {
+            ["system"] =
+                "docker-mcp://system?image=metbench-e2e%3Alatest&endpoint=http%3A%2F%2F127.0.0.1%3A8975&authTokenEnv=METBENCH_RUNTIME_MCP_TOKEN",
+        });
+        IRuntimeProfileProvider provider = new LauncherOptionsRuntimeProfileProvider(options);
+
+        var profile = provider.GetProfile("system");
+
+        Assert.Equal("system", profile.RuntimeKey);
+        Assert.Equal(RuntimeKind.Docker, profile.Kind);
+        Assert.Null(profile.ExecutablePath);
+        Assert.NotNull(profile.DockerMcp);
+        Assert.Equal("http://127.0.0.1:8975", profile.DockerMcp!.Endpoint);
+        Assert.Equal("metbench-e2e:latest", profile.DockerMcp.Image);
+        Assert.Equal("", profile.DockerMcp.PythonExecutable);
+        Assert.Equal("", profile.DockerMcp.ToolName);
+        Assert.Equal("", profile.DockerMcp.LocalExecutable);
+        Assert.Equal(DockerMcpPathStyle.None, profile.DockerMcp.PathStyle);
+        Assert.Equal("METBENCH_RUNTIME_MCP_TOKEN", profile.DockerMcp.AuthTokenEnvironmentVariable);
+    }
+
+    [Fact]
     public void Docker_placeholder_remains_non_executable()
     {
         var placeholder = RuntimeProfile.Placeholder(
@@ -68,19 +117,25 @@ public sealed class DockerMcpRuntimeProfileTests
         "docker-mcp://openmoc-docker?python=/usr/local/bin/python&endpoint=http%3A%2F%2F127.0.0.1%3A8765",
         "image")]
     [InlineData(
-        "docker-mcp://openmoc-docker?image=metbench/openmoc:latest&endpoint=http%3A%2F%2F127.0.0.1%3A8765",
+        "docker-mcp://openmoc-docker?image=metbench/openmoc:latest&tool=openmoc-runner&local=/host/openmoc-runner&endpoint=http%3A%2F%2F127.0.0.1%3A8765",
         "python")]
     [InlineData(
-        "docker-mcp://openmoc-docker?image=metbench/openmoc:latest&python=/usr/local/bin/python",
+        "docker-mcp://openmoc-docker?image=metbench/openmoc:latest&python=/usr/local/bin/python&local=/host/openmoc-runner&endpoint=http%3A%2F%2F127.0.0.1%3A8765",
+        "tool")]
+    [InlineData(
+        "docker-mcp://openmoc-docker?image=metbench/openmoc:latest&python=/usr/local/bin/python&tool=openmoc-runner&endpoint=http%3A%2F%2F127.0.0.1%3A8765",
+        "local")]
+    [InlineData(
+        "docker-mcp://openmoc-docker?image=metbench/openmoc:latest&tool=openmoc-runner&local=/host/openmoc-runner&python=/usr/local/bin/python",
         "endpoint")]
     [InlineData(
-        "docker-mcp://openmoc-docker?image=metbench/openmoc:latest&python=/usr/local/bin/python&endpoint=tcp%3A%2F%2F127.0.0.1%3A8765",
+        "docker-mcp://openmoc-docker?image=metbench/openmoc:latest&tool=openmoc-runner&local=/host/openmoc-runner&python=/usr/local/bin/python&endpoint=tcp%3A%2F%2F127.0.0.1%3A8765",
         "endpoint")]
     [InlineData(
-        "docker-mcp://openmoc-docker?image=metbench/openmoc:latest&python=/usr/local/bin/python&endpoint=http%ZZ",
+        "docker-mcp://openmoc-docker?image=metbench/openmoc:latest&tool=openmoc-runner&local=/host/openmoc-runner&python=/usr/local/bin/python&endpoint=http%ZZ",
         "endpoint")]
     [InlineData(
-        "docker-mcp://other-runtime?image=metbench/openmoc:latest&python=/usr/local/bin/python&endpoint=http%3A%2F%2F127.0.0.1%3A8765",
+        "docker-mcp://other-runtime?image=metbench/openmoc:latest&tool=openmoc-runner&local=/host/openmoc-runner&python=/usr/local/bin/python&endpoint=http%3A%2F%2F127.0.0.1%3A8765",
         "runtime key")]
     public void Malformed_docker_mcp_runtime_values_fail_closed(string runtimeValue, string expectedField)
     {
@@ -102,7 +157,7 @@ public sealed class DockerMcpRuntimeProfileTests
         var options = Options(new Dictionary<string, string>
         {
             ["openmc"] =
-                "docker-mcp://openmc?image=metbench-sut:latest&python=/opt/openmc-venv/bin/python&endpoint=http%3A%2F%2F192.168.1.20%3A8765&authTokenEnv=METBENCH_DOCKER_MCP_TOKEN&localPython=python&pathStyle=wsl",
+                "docker-mcp://openmc?image=metbench-sut:latest&tool=openmc-runner&local=openmc-runner&python=/opt/openmc-venv/bin/python&endpoint=http%3A%2F%2F192.168.1.20%3A8765&authTokenEnv=METBENCH_DOCKER_MCP_TOKEN&localPython=python&pathStyle=wsl",
         });
         IRuntimeProfileProvider provider = new LauncherOptionsRuntimeProfileProvider(options);
 
@@ -119,7 +174,7 @@ public sealed class DockerMcpRuntimeProfileTests
         var options = Options(new Dictionary<string, string>
         {
             ["openmc"] =
-                "docker-mcp://openmc?image=metbench-sut:latest&python=/opt/openmc-venv/bin/python&endpoint=http%3A%2F%2F192.168.1.20%3A8765",
+                "docker-mcp://openmc?image=metbench-sut:latest&tool=openmc-runner&local=openmc-runner&python=/opt/openmc-venv/bin/python&endpoint=http%3A%2F%2F192.168.1.20%3A8765",
         });
         IRuntimeProfileProvider provider = new LauncherOptionsRuntimeProfileProvider(options);
 
@@ -130,8 +185,8 @@ public sealed class DockerMcpRuntimeProfileTests
     }
 
     [Theory]
-    [InlineData("docker-mcp://openmc?image=i&python=p&endpoint=http%3A%2F%2F127.0.0.1%3A8765&pathStyle=windows")]
-    [InlineData("docker-mcp://openmc?image=i&python=p&endpoint=http%3A%2F%2F127.0.0.1%3A8765&pathStyle=")]
+    [InlineData("docker-mcp://openmc?image=i&tool=t&local=l&python=p&endpoint=http%3A%2F%2F127.0.0.1%3A8765&pathStyle=windows")]
+    [InlineData("docker-mcp://openmc?image=i&tool=t&local=l&python=p&endpoint=http%3A%2F%2F127.0.0.1%3A8765&pathStyle=")]
     public void Provider_fails_closed_on_invalid_path_style(string value)
     {
         var options = Options(new Dictionary<string, string> { ["openmc"] = value });
@@ -140,6 +195,21 @@ public sealed class DockerMcpRuntimeProfileTests
         var ex = Assert.Throws<RuntimeEnvironmentResolutionException>(() => provider.GetProfile("openmc"));
 
         Assert.Contains("pathStyle", ex.Message);
+    }
+
+    [Theory]
+    [InlineData("docker-mcp://system?image=i&endpoint=http%3A%2F%2F127.0.0.1%3A8765&pathStyle=wsl", "pathStyle")]
+    [InlineData("docker-mcp://system?image=i&endpoint=http%3A%2F%2F127.0.0.1%3A8765&localPython=python", "localPython")]
+    public void Provider_fails_closed_when_remote_tool_profile_contains_legacy_local_parameters(
+        string value,
+        string expectedField)
+    {
+        var options = Options(new Dictionary<string, string> { ["system"] = value });
+        IRuntimeProfileProvider provider = new LauncherOptionsRuntimeProfileProvider(options);
+
+        var ex = Assert.Throws<RuntimeEnvironmentResolutionException>(() => provider.GetProfile("system"));
+
+        Assert.Contains(expectedField, ex.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     private static LauncherOptions Options(IReadOnlyDictionary<string, string> runtimePythons) => new(

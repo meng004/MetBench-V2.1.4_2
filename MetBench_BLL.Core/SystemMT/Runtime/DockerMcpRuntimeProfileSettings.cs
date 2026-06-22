@@ -10,6 +10,8 @@ public sealed record DockerMcpRuntimeProfileDraft(
     string RuntimeKey,
     string Endpoint,
     string Image,
+    string ToolName,
+    string LocalExecutable,
     string PythonExecutable,
     string? AuthTokenEnvironmentVariable = null)
 {
@@ -22,6 +24,8 @@ public sealed record DockerMcpRuntimeProfileDraft(
         var query = new List<string>
         {
             $"image={Uri.EscapeDataString(Image.Trim())}",
+            $"tool={Uri.EscapeDataString(ToolName.Trim())}",
+            $"local={Uri.EscapeDataString(LocalExecutable.Trim())}",
             $"python={Uri.EscapeDataString(PythonExecutable.Trim())}",
             $"endpoint={Uri.EscapeDataString(Endpoint.Trim())}",
         };
@@ -44,6 +48,10 @@ public sealed record DockerMcpRuntimeProfileDraft(
 
         if (string.IsNullOrWhiteSpace(Image))
             throw new ArgumentException("Docker image is required.", nameof(Image));
+        if (string.IsNullOrWhiteSpace(ToolName))
+            throw new ArgumentException("Tool name is required.", nameof(ToolName));
+        if (string.IsNullOrWhiteSpace(LocalExecutable))
+            throw new ArgumentException("Local executable is required.", nameof(LocalExecutable));
         if (string.IsNullOrWhiteSpace(PythonExecutable))
             throw new ArgumentException("Python executable is required.", nameof(PythonExecutable));
     }

@@ -13,6 +13,11 @@
       "context": "."
     }
   },
+  "allowed_tools": {
+    "openmoc-runner": {
+      "executable": "/opt/metbench-tools/openmoc-runner"
+    }
+  },
   "allowed_mount_roots": [
     "/Users/limeng/Codes/MetBench-V2.1.4_2/.worktrees/docker-runtime-mcp",
     "/tmp"

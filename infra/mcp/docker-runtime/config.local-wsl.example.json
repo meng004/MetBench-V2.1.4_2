@@ -7,6 +7,11 @@
   "allowed_images": {
     "wsl-openmc": {}
   },
+  "allowed_tools": {
+    "openmc-runner": {
+      "executable": "/usr/local/bin/openmc-runner"
+    }
+  },
   "allowed_mount_roots": ["/mnt/d/Codes/MetBench-V2.1.4_2", "/tmp"],
   "default_timeout_seconds": 600,
   "max_output_bytes": 1048576

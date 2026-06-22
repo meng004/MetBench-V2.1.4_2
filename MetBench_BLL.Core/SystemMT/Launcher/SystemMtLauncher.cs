@@ -185,19 +185,48 @@ public sealed class SystemMtLauncher : ISystemMtLauncher, ISystemMtCatalogReader
         RuntimeProfile? resolvedRuntimeProfile = null;
         var runtimeProfileResolutionError = string.Empty;
         var pythonExecutable = blueprint.PythonExecutable;
-        var parserPythonExecutable = blueprint.PythonExecutable;
+        var inputParserExecutable = blueprint.PythonExecutable;
+        var outputParserExecutable = blueprint.PythonExecutable;
+        IReadOnlyList<string> inputParserBaseArguments = new[] { blueprint.InputParserScriptPath };
+        IReadOnlyList<string> outputParserBaseArguments = new[] { blueprint.OutputParserScriptPath };
+        var runnerExecutable = blueprint.PythonExecutable;
+        IReadOnlyList<string> runnerBaseArguments = new[] { blueprint.RunnerScriptPath };
         try
         {
             resolvedRuntimeProfile = CreateRuntimeProfile(blueprint);
             pythonExecutable = resolvedRuntimeProfile.DockerMcp?.PythonExecutable
                 ?? resolvedRuntimeProfile.ExecutablePath
                 ?? blueprint.PythonExecutable;
-            parserPythonExecutable = resolvedRuntimeProfile.DockerMcp?.LocalPythonExecutable
-                ?? pythonExecutable;
+            if (resolvedRuntimeProfile.DockerMcp is { } dockerMcp)
+            {
+                if (IsRemoteToolMode(dockerMcp))
+                {
+                    inputParserExecutable = "input-parser";
+                    outputParserExecutable = "output-parser";
+                    runnerExecutable = "sut-runner";
+                    inputParserBaseArguments = Array.Empty<string>();
+                    outputParserBaseArguments = Array.Empty<string>();
+                    runnerBaseArguments = Array.Empty<string>();
+                }
+                else
+                {
+                    inputParserExecutable = dockerMcp.LocalPythonExecutable ?? pythonExecutable;
+                    outputParserExecutable = inputParserExecutable;
+                    runnerExecutable = dockerMcp.LocalExecutable;
+                    runnerBaseArguments = Array.Empty<string>();
+                }
+            }
+            else
+            {
+                inputParserExecutable = pythonExecutable;
+                outputParserExecutable = pythonExecutable;
+                runnerExecutable = pythonExecutable;
+            }
         }
         catch (RuntimeEnvironmentResolutionException ex)
         {
             runtimeProfileResolutionError = ex.Message;
+            runnerExecutable = pythonExecutable;
         }
 
         var context = new PipelineContext(
@@ -214,14 +243,14 @@ public sealed class SystemMtLauncher : ISystemMtLauncher, ISystemMtCatalogReader
             SourceCasePath: sourceInputPath,
             WorkingDirectory: workRoot,
             InputParserInvocation: new ProcessInvocation(
-                parserPythonExecutable,
-                new[] { blueprint.InputParserScriptPath }),
+                inputParserExecutable,
+                inputParserBaseArguments),
             OutputParserInvocation: new ProcessInvocation(
-                parserPythonExecutable,
-                new[] { blueprint.OutputParserScriptPath }),
+                outputParserExecutable,
+                outputParserBaseArguments),
             RunnerInvocation: new ProcessInvocation(
-                pythonExecutable,
-                new[] { blueprint.RunnerScriptPath }),
+                runnerExecutable,
+                runnerBaseArguments),
             TimeoutSeconds: (int)blueprint.Timeout.TotalSeconds,
             CatalogVersionSha: string.Empty,
             SutVersionSnapshot: string.Empty,
@@ -309,6 +338,10 @@ public sealed class SystemMtLauncher : ISystemMtLauncher, ISystemMtCatalogReader
             SourceElapsed: outcome.SourceElapsed,
             FollowUpElapsed: outcome.FollowupElapsed);
     }
+
+    private static bool IsRemoteToolMode(DockerMcpRuntimeOptions dockerMcp) =>
+        string.IsNullOrWhiteSpace(dockerMcp.ToolName)
+        && string.IsNullOrWhiteSpace(dockerMcp.LocalExecutable);
 
     private RuntimeProfile CreateRuntimeProfile(MrBlueprint blueprint)
     {

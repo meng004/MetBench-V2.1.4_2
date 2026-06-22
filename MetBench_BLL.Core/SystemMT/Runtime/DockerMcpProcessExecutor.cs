@@ -28,17 +28,46 @@ public sealed class DockerMcpProcessExecutor
         ArgumentNullException.ThrowIfNull(invocation);
         if (string.IsNullOrWhiteSpace(invocation.FileName))
             throw new ArgumentException("Executable file name is required.", nameof(invocation));
+        var legacyToolMapping = !string.IsNullOrWhiteSpace(options.ToolName)
+            || !string.IsNullOrWhiteSpace(options.LocalExecutable);
+        if (legacyToolMapping && string.IsNullOrWhiteSpace(options.ToolName))
+            throw new ArgumentException("Docker MCP tool name is required.", nameof(options));
+        if (legacyToolMapping && string.IsNullOrWhiteSpace(options.LocalExecutable))
+            throw new ArgumentException("Docker MCP local executable is required.", nameof(options));
+        if (legacyToolMapping
+            && !string.Equals(invocation.FileName, options.LocalExecutable, StringComparison.Ordinal))
+        {
+            throw new ArgumentException(
+                "Docker MCP invocation executable must match the configured local executable.",
+                nameof(invocation));
+        }
 
-        IReadOnlyList<string> argv = new[] { invocation.FileName }
-            .Concat(invocation.Arguments)
-            .ToArray();
+        string[] args;
         if (options.PathStyle == DockerMcpPathStyle.Wsl)
         {
-            argv = argv.Select(TranslateWindowsPathToWsl).ToList();
+            args = (invocation.Arguments ?? Array.Empty<string>())
+                .Select(TranslateWindowsPathToWsl)
+                .ToArray();
+        }
+        else
+        {
+            args = invocation.Arguments?.ToArray() ?? Array.Empty<string>();
+        }
+        foreach (var arg in args)
+        {
+            ValidateToolArgument(arg);
         }
         var sw = Stopwatch.StartNew();
+        var toolName = legacyToolMapping ? options.ToolName : invocation.FileName;
         var result = await _client
-            .RunSutCommandAsync(options, argv, timeoutSeconds, cancellationToken)
+            .RunSutCommandAsync(
+                options,
+                new DockerMcpRunRequest(
+                    options.Image,
+                    toolName,
+                    args,
+                    timeoutSeconds),
+                cancellationToken)
             .ConfigureAwait(false);
         sw.Stop();
 
@@ -47,15 +76,43 @@ public sealed class DockerMcpProcessExecutor
             result.Stdout,
             result.Stderr,
             sw.Elapsed,
-            result.TimedOut);
+            result.TimedOut,
+            result.RunId);
     }
+
+    private static void ValidateToolArgument(string arg)
+    {
+        if (string.IsNullOrWhiteSpace(arg))
+            throw new ArgumentException("Docker MCP tool arguments must be non-blank strings.");
+        if (arg is "-c" or "/c" or "-m" or "/m")
+            throw new ArgumentException("Docker MCP tool arguments must not request shell or module execution.");
+        if (arg.EndsWith(".py", StringComparison.OrdinalIgnoreCase)
+            || arg.EndsWith(".pyc", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("Docker MCP tool arguments must not contain script path values.");
+        }
+        if (arg.Split(new[] { '/', '\\' }, StringSplitOptions.None).Any(part => part == ".."))
+            throw new ArgumentException("Docker MCP tool arguments must not contain path traversal.");
+        if (arg.Contains(';', StringComparison.Ordinal)
+            || arg.Contains("&&", StringComparison.Ordinal)
+            || arg.Contains("||", StringComparison.Ordinal)
+            || arg.Contains('|', StringComparison.Ordinal)
+            || arg.Contains("$(", StringComparison.Ordinal)
+            || arg.Contains('`', StringComparison.Ordinal))
+        {
+            throw new ArgumentException("Docker MCP tool arguments must not contain shell operators.");
+        }
+    }
+
+    private static bool IsWindowsAbsolutePath(string token) =>
+        token.Length >= 3
+        && char.IsAsciiLetter(token[0])
+        && token[1] == ':'
+        && (token[2] == '\\' || token[2] == '/');
 
     internal static string TranslateWindowsPathToWsl(string token)
     {
-        if (token.Length < 3
-            || !char.IsAsciiLetter(token[0])
-            || token[1] != ':'
-            || (token[2] != '\\' && token[2] != '/'))
+        if (!IsWindowsAbsolutePath(token))
         {
             return token;
         }

@@ -1,0 +1,8 @@
+{
+  "bind_host": "127.0.0.1",
+  "bind_port": 8790,
+  "auth_token": "change-me",
+  "api_base_url": "http://127.0.0.1:5080",
+  "api_token": "change-me-too",
+  "default_timeout_seconds": 30
+}

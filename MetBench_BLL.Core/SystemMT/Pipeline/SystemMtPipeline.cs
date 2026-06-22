@@ -64,6 +64,8 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
         TimeSpan flwElapsed = TimeSpan.Zero;
         int srcExitCode = 0;
         int flwExitCode = 0;
+        string sourceRuntimeRunId = string.Empty;
+        string followupRuntimeRunId = string.Empty;
 
         try
         {
@@ -71,8 +73,8 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
             progress?.Report(PipelineStatus.ParsingSource);
             var parseSourceInvocation =
                 ctx.InputParserInvocation.WithArguments("parse", "--input", ctx.SourceCasePath);
-            var psResult = await _processExecutor.RunAsync(
-                parseSourceInvocation, artifactsDir, ctx.TimeoutSeconds, cancellationToken)
+            var psResult = await RunToolAsync(
+                ctx, parseSourceInvocation, artifactsDir, cancellationToken)
                 .ConfigureAwait(false);
             if (psResult.ExitCode != 0)
                 return Fail(PipelineStatus.Error, "ParsingSource failed: " + psResult.Stderr);
@@ -97,8 +99,8 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
             File.WriteAllText(dictTempPath, JsonSerializer.Serialize(followupDict));
             var writeInvocation = ctx.InputParserInvocation.WithArguments(
                 "write", "--dict-file", dictTempPath, "--output", followupInputPath);
-            var wResult = await _processExecutor.RunAsync(
-                writeInvocation, artifactsDir, ctx.TimeoutSeconds, cancellationToken)
+            var wResult = await RunToolAsync(
+                ctx, writeInvocation, artifactsDir, cancellationToken)
                 .ConfigureAwait(false);
             if (wResult.ExitCode != 0)
                 return Fail(PipelineStatus.Error, "WritingFollowup failed: " + wResult.Stderr);
@@ -112,6 +114,7 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
                 .ConfigureAwait(false);
             srcExitCode = rsResult.ExitCode;
             srcElapsed = rsResult.Elapsed;
+            sourceRuntimeRunId = rsResult.RuntimeRunId;
             if (rsResult.TimedOut) return Fail(PipelineStatus.Timeout, "Source SUT timed out");
             if (rsResult.ExitCode != 0) return Fail(PipelineStatus.Error, "Source SUT failed: " + rsResult.Stderr);
 
@@ -123,6 +126,7 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
                 .ConfigureAwait(false);
             flwExitCode = rfResult.ExitCode;
             flwElapsed = rfResult.Elapsed;
+            followupRuntimeRunId = rfResult.RuntimeRunId;
             if (rfResult.TimedOut) return Fail(PipelineStatus.Timeout, "Followup SUT timed out");
             if (rfResult.ExitCode != 0) return Fail(PipelineStatus.Error, "Followup SUT failed: " + rfResult.Stderr);
 
@@ -167,6 +171,8 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
                 TypedSpec = typedSpec,
                 TypedPredicate = typedPredicate,
                 TypedVerification = typedVerification,
+                SourceRuntimeRunId = sourceRuntimeRunId,
+                FollowupRuntimeRunId = followupRuntimeRunId,
             };
         }
         catch (OperationCanceledException)
@@ -195,14 +201,18 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
             SourceElapsed: srcElapsed,
             FollowupElapsed: flwElapsed,
             SourceExitCode: srcExitCode,
-            FollowupExitCode: flwExitCode);
+            FollowupExitCode: flwExitCode)
+        {
+            SourceRuntimeRunId = sourceRuntimeRunId,
+            FollowupRuntimeRunId = followupRuntimeRunId,
+        };
     }
 
     private async Task<Dictionary<string, object?>> ParseOutputDict(
         PipelineContext ctx, string outputPath, string workDir, CancellationToken ct)
     {
         var invocation = ctx.OutputParserInvocation.WithArguments("parse", "--output-file", outputPath);
-        var result = await _processExecutor.RunAsync(invocation, workDir, ctx.TimeoutSeconds, ct)
+        var result = await RunToolAsync(ctx, invocation, workDir, ct)
             .ConfigureAwait(false);
         if (result.ExitCode != 0)
             throw new InvalidOperationException(
@@ -364,6 +374,8 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
         TimeSpan lastElapsed = TimeSpan.Zero;
         int firstExitCode = 0;
         int lastExitCode = 0;
+        string firstRuntimeRunId = string.Empty;
+        string lastRuntimeRunId = string.Empty;
         string firstInputPath = "";
         string lastInputPath = "";
         string firstOutputPath = "";
@@ -382,8 +394,8 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
             progress?.Report(PipelineStatus.ParsingSource);
             var parseSourceInvocation =
                 ctx.InputParserInvocation.WithArguments("parse", "--input", ctx.SourceCasePath);
-            var psResult = await _processExecutor.RunAsync(
-                parseSourceInvocation, artifactsDir, ctx.TimeoutSeconds, cancellationToken)
+            var psResult = await RunToolAsync(
+                ctx, parseSourceInvocation, artifactsDir, cancellationToken)
                 .ConfigureAwait(false);
             if (psResult.ExitCode != 0)
                 return Fail(PipelineStatus.Error, "ParsingSource failed: " + psResult.Stderr);
@@ -430,8 +442,8 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
                 File.WriteAllText(dictTempPath, JsonSerializer.Serialize(phaseDict));
                 var writeInvocation = ctx.InputParserInvocation.WithArguments(
                     "write", "--dict-file", dictTempPath, "--output", phaseInputPath);
-                var wResult = await _processExecutor.RunAsync(
-                    writeInvocation, artifactsDir, ctx.TimeoutSeconds, cancellationToken)
+                var wResult = await RunToolAsync(
+                    ctx, writeInvocation, artifactsDir, cancellationToken)
                     .ConfigureAwait(false);
                 if (wResult.ExitCode != 0)
                     return Fail(PipelineStatus.Error,
@@ -443,8 +455,18 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
                 var rResult = await RunSutCommandAsync(
                     ctx, runInvocation, artifactsDir, cancellationToken)
                     .ConfigureAwait(false);
-                if (i == 0) { firstElapsed = rResult.Elapsed; firstExitCode = rResult.ExitCode; }
-                if (i == mp.Phases.Count - 1) { lastElapsed = rResult.Elapsed; lastExitCode = rResult.ExitCode; }
+                if (i == 0)
+                {
+                    firstElapsed = rResult.Elapsed;
+                    firstExitCode = rResult.ExitCode;
+                    firstRuntimeRunId = rResult.RuntimeRunId;
+                }
+                if (i == mp.Phases.Count - 1)
+                {
+                    lastElapsed = rResult.Elapsed;
+                    lastExitCode = rResult.ExitCode;
+                    lastRuntimeRunId = rResult.RuntimeRunId;
+                }
                 if (rResult.TimedOut)
                     return Fail(PipelineStatus.Timeout, $"Phase '{phase.Role}' SUT timed out");
                 if (rResult.ExitCode != 0)
@@ -515,6 +537,8 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
                 TypedPredicate = typedPredicate,
                 TypedVerification = verification,
                 PhaseMetrics = phaseMetrics,
+                SourceRuntimeRunId = firstRuntimeRunId,
+                FollowupRuntimeRunId = lastRuntimeRunId,
             };
         }
         catch (OperationCanceledException)
@@ -542,7 +566,11 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
             SourceElapsed: firstElapsed,
             FollowupElapsed: lastElapsed,
             SourceExitCode: firstExitCode,
-            FollowupExitCode: lastExitCode);
+            FollowupExitCode: lastExitCode)
+        {
+            SourceRuntimeRunId = firstRuntimeRunId,
+            FollowupRuntimeRunId = lastRuntimeRunId,
+        };
     }
 
     private Task<ProcessResult> RunSutCommandAsync(
@@ -556,4 +584,27 @@ public sealed class SystemMtPipeline : ISystemMtPipeline, IMtPipeline<PipelineCo
             workingDirectory,
             ctx.TimeoutSeconds,
             cancellationToken);
+
+    private Task<ProcessResult> RunToolAsync(
+        PipelineContext ctx,
+        ProcessInvocation invocation,
+        string workingDirectory,
+        CancellationToken cancellationToken) =>
+        IsRemoteToolMode(ctx.RuntimeProfile)
+            ? _runtimeProcessExecutor.RunAsync(
+                ctx.RuntimeProfile,
+                invocation,
+                workingDirectory,
+                ctx.TimeoutSeconds,
+                cancellationToken)
+            : _processExecutor.RunAsync(
+                invocation,
+                workingDirectory,
+                ctx.TimeoutSeconds,
+                cancellationToken);
+
+    private static bool IsRemoteToolMode(RuntimeProfile? runtimeProfile) =>
+        runtimeProfile?.DockerMcp is { } dockerMcp
+        && string.IsNullOrWhiteSpace(dockerMcp.ToolName)
+        && string.IsNullOrWhiteSpace(dockerMcp.LocalExecutable);
 }

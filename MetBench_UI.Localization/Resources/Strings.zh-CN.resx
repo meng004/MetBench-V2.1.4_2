@@ -415,6 +415,12 @@
   <data name="RuntimeEnv_Image" xml:space="preserve">
     <value>镜像</value>
   </data>
+  <data name="RuntimeEnv_Tool" xml:space="preserve">
+    <value>工具</value>
+  </data>
+  <data name="RuntimeEnv_LocalExecutable" xml:space="preserve">
+    <value>本地可执行文件</value>
+  </data>
   <data name="RuntimeEnv_Python" xml:space="preserve">
     <value>Python 可执行文件</value>
   </data>
